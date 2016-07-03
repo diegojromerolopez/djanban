@@ -64,8 +64,8 @@ target/
 
 # Local configuration
 src/djangotrellostats/settings_local.py
-src/djangotrellostats/shell
-src/djangotrellostats/connector
+src/shell
+src/connector
 
 # Output directory
 results/*
