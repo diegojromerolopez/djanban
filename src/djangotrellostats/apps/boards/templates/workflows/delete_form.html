@@ -1,0 +1,4 @@
+<form action="{% url 'boards:delete_workflow' board.id workflow.id %}" method="post">
+    <input type="hidden" name="workflow_id" value="{{workflow.id}}"/>
+    <button type="submit">Delete</button>
+</form>

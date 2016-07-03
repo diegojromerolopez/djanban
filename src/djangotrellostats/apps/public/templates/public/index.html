@@ -1,0 +1,9 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Index{% endblock %}
+
+{% if user and user.is_authenticated %}
+    {% include "members/dashboard.html" %}
+{% else %}
+    Please log in the system or register
+{% endif %}

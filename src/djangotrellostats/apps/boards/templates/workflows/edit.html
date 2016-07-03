@@ -1,0 +1,8 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Edit workflow {{workflow.name}} for board {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>Edit workflow {{workflow.name}} for board {{board.name}}</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}

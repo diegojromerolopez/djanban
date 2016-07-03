@@ -1,0 +1,22 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Boards of {{member.trello_username}}{% endblock %}
+
+{% block content %}
+    <h1>Boards of {{member.trello_username}}</h1>
+    <div class="board_list">
+        {% if boards|length == 0 %}
+            {% include "members/no_boards_warning.html" %}
+        {% else %}
+            <ul>
+                {% for board in boards %}
+                    <li>
+                        {{board.name}}
+                        <a href="{% url 'boards:view_board_lists' board.id %}">View lists</a>
+                        <a href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endblock content %}

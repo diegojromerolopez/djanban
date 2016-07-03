@@ -1,0 +1,14 @@
+<div id="header">
+    {% if user and user.is_authenticated %}
+        <span>
+          <span>{{user.username}}</span>
+          <a href="{% url 'members:logout' %}" title="User logout">Logout</a>
+            <a href="{% url 'index' %}" title="Dashboard">Index</a>
+          <a href="{% url 'boards:view_boards' %}" title="View my boards">View my boards</a>
+        </span>
+    {% else %}
+        <span>
+            <a href="{% url 'members:login' %}" title="User login">Login</a> or <a href="{% url 'members:signup' %}" title="User registration">Sign up</a>
+        </span>
+    {% endif %}
+</div>

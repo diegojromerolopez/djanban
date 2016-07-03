@@ -1,0 +1,29 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Lists of board {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>Lists of board {{board.name}}</h1>
+    <div class="board_list_list">
+        {% if lists|length == 0 %}
+            This board has no lists
+        {% else %}
+            <ul>
+                {% for list in lists %}
+                    <li>
+                        {{list.name}}
+                        <form action="{% url 'boards:change_list_type' %}" method="post">
+                            <input type="hidden" name="list_id" value="{{list.id}}" />
+                            <select name="type">
+                                <option value="normal" {% if list.type == "normal" %}selected=selected{% endif %}>Normal</option>
+                                <option value="development" {% if list.type == "development" %}selected=selected{% endif %}>In development</option>
+                                <option value="done" {% if list.type == "done" %}selected=selected{% endif %}>Done</option>
+                            </select>
+                            <button type="submit">Change type</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endblock content %}

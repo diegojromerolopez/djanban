@@ -1,0 +1,12 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+    Dashboard
+    <div class="dashboard">
+        {% if boards|length == 0 %}
+            {% include "boards/no_boards_warning.html" %}
+        {% endif %}
+    </div>
+{% endblock content %}
