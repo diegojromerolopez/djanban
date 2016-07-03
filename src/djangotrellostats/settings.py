@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 try:
     settings_local = importlib.import_module('djangotrellostats.settings_local')
 except ImportError:
-    print("Please, create a local_settings.py in project directory with SECRET_KEY, DEBUG, DOMAIN, ALLOWED_HOSTS")
+    print("Please, create a local_settings.py in project directory with SECRET_KEY, DEBUG, DOMAIN, ALLOWED_HOSTS and DATABASES settings")
     exit(-1)
 
 # SECURITY WARNING: keep the secret key used in production secret!
