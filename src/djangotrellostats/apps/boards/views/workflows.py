@@ -64,9 +64,9 @@ def edit(request, board_id, workflow_id):
 def delete(request, board_id, workflow_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
-    workflow_id_param = request.POST.get("workflow_id")
-    if workflow_id_param and workflow_id_param == workflow_id:
-        workflow = board.workflows.get(id=workflow_id_param)
+    confirmed_workflow_id = request.POST.get("workflow_id")
+    if confirmed_workflow_id and confirmed_workflow_id == workflow_id:
+        workflow = board.workflows.get(id=confirmed_workflow_id)
         workflow.delete()
         return HttpResponseRedirect(reverse("boards:view_workflows", args=(board_id,)))
 

@@ -3,6 +3,14 @@ from __future__ import unicode_literals
 from django.db import models
 
 
+class Card(object):
+    pass
+
+
+class Label(object):
+    pass
+
+
 class List(models.Model):
     LIST_TYPES = ("normal", "development", "done")
     LIST_TYPE_CHOICES = (
@@ -24,6 +32,8 @@ class Board(models.Model):
     uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the board", unique=True)
     last_activity_date = models.DateTimeField(verbose_name=u"Last activity date", default=None, null=True)
 
+    def fetch_cards(self):
+        pass
 
 class Workflow(models.Model):
     name = models.CharField(max_length=128, verbose_name=u"Name of the workflow")

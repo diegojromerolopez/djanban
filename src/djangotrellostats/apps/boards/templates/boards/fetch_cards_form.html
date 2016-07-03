@@ -1,0 +1,4 @@
+<form action="{% url 'boards:fetch_cards' board.id %}" method="post">
+    <input type="hidden" name="board_id" value="{{board.id}}"/>
+    <button type="submit">Fetch board cards</button>
+</form>

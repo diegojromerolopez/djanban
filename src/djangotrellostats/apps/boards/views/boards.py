@@ -27,7 +27,7 @@ def view_list(request):
     return render(request, "boards/list.html", replacements)
 
 
-# View a single board
+# View lists of a board
 @login_required
 def view_lists(request, board_id):
     member = request.user.member
@@ -37,7 +37,31 @@ def view_lists(request, board_id):
     return render(request, "boards/board_lists.html", replacements)
 
 
-# Type of a list
+# Delete a board
+@login_required
+def delete(request, board_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id)
+    confirmed_board_id = request.POST.get("board_id")
+    if confirmed_board_id and confirmed_board_id == board_id:
+        board.delete()
+        return HttpResponseRedirect(reverse("boards:view_boards"))
+    raise Http404
+
+
+# Delete a board
+@login_required
+def fetch_cards(request, board_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id)
+    confirmed_board_id = request.POST.get("board_id")
+    if confirmed_board_id and confirmed_board_id == board_id:
+        board.fetch_cards()
+        return HttpResponseRedirect(reverse("boards:view_boards"))
+    raise Http404
+
+
+# Change list type. Remember a list can be "development" or "done" list
 @login_required
 def change_list_type(request):
     member = request.user.member

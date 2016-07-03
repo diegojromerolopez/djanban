@@ -11,9 +11,14 @@
             <ul>
                 {% for board in boards %}
                     <li>
-                        {{board.name}}
-                        <a href="{% url 'boards:view_board_lists' board.id %}">View lists</a>
-                        <a href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
+                        <span>{{board.name}}</span>
+                        <span>{{board.cards.count}} Cards</span>
+                        <div>
+                            <a href="{% url 'boards:view_board_lists' board.id %}">View lists</a>
+                            <a href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
+                            {% include "boards/delete_form.html" %}
+                            {% include "boards/fetch_cards_form.html" %}
+                        </div>
                     </li>
                 {% endfor %}
             </ul>
