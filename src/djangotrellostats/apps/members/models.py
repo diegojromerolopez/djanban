@@ -21,7 +21,6 @@ class Member(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(Member, self).__init__(*args, **kwargs)
-
         self.trello_client = self._get_trello_client()
 
     # Fetch basic information of boards and its lists

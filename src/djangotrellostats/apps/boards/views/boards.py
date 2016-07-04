@@ -49,7 +49,7 @@ def delete(request, board_id):
     raise Http404
 
 
-# Delete a board
+# Fetch cards of a board
 @login_required
 def fetch_cards(request, board_id):
     member = request.user.member
@@ -59,6 +59,15 @@ def fetch_cards(request, board_id):
         board.fetch_cards()
         return HttpResponseRedirect(reverse("boards:view_boards"))
     raise Http404
+
+
+# View card list
+def view_cards(request, board_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id)
+    cards = board.cards.all()
+    replacements = {"member": member, "board": board, "cards": cards}
+    return render(request, "cards/list.html", replacements)
 
 
 # Change list type. Remember a list can be "development" or "done" list

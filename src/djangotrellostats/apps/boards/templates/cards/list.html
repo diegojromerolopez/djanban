@@ -1,0 +1,27 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Cards of {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>Cards of {{board.name}}</h1>
+    {% if cards|length == 0 %}
+        There are no cards in this board. Have you tried to fetch the cards? {% include "boards/fetch_cards_form.html" %}
+    {% else %}
+        <table>
+            <tr>
+                <td>Name</td>
+                <td>List</td>
+                <td>Estimated time</td>
+                <td>Spent time</td>
+            </tr>
+            {% for card in cards %}
+                <tr>
+                    <td>{{card.name}}</td>
+                    <td>{{card.list.name}}</td>
+                    <td>{{card.estimated}}</td>
+                    <td>{{card.spent}}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+{% endblock content %}
