@@ -49,14 +49,26 @@ def delete(request, board_id):
     raise Http404
 
 
-# Fetch cards of a board
+# Fetch cards and labels of a board
 @login_required
-def fetch_cards(request, board_id):
+def fetch(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
     confirmed_board_id = request.POST.get("board_id")
     if confirmed_board_id and confirmed_board_id == board_id:
-        board.fetch_cards()
+        board.fetch()
+        return HttpResponseRedirect(reverse("boards:view_boards"))
+    raise Http404
+
+
+# Delete all cards of a board
+@login_required
+def delete_cards(request, board_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id)
+    confirmed_board_id = request.POST.get("board_id")
+    if confirmed_board_id and confirmed_board_id == board_id:
+        board.cards.all().delete()
         return HttpResponseRedirect(reverse("boards:view_boards"))
     raise Http404
 
@@ -70,16 +82,24 @@ def view_cards(request, board_id):
     return render(request, "cards/list.html", replacements)
 
 
+# View label list
+def view_labels(request, board_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id)
+    labels = board.labels.all()
+    replacements = {"member": member, "board": board, "labels": labels}
+    return render(request, "labels/list.html", replacements)
+
 # Change list type. Remember a list can be "development" or "done" list
 @login_required
 def change_list_type(request):
     member = request.user.member
     if request.method == "POST":
-        list_id = request.POST.get("list_id", board__member=member)
+        list_id = request.POST.get("list_id")
         type_ = request.POST.get("type")
         if type_ not in List.LIST_TYPES:
             raise Http404
-        list_ = List.objects.get(id=list_id)
+        list_ = List.objects.get(id=list_id, board__member=member)
         list_.type = type_
         list_.save()
         return HttpResponseRedirect(reverse("boards:view_board_lists", args=(list_.board_id,)))

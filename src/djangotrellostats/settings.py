@@ -13,6 +13,8 @@ import importlib
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from trello import Configuration
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -112,6 +114,7 @@ DATABASES = settings_local.DATABASES
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
+Configuration.TIMEZONE = "Europe/Madrid"
 
 USE_I18N = True
 

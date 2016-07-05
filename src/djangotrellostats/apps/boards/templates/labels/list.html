@@ -1,0 +1,33 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Cards of {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>Labels of {{board.name}}</h1>
+    {% if labels|length == 0 %}
+        There are no labels in this board. Have you tried to fetch the labels? {% include "boards/fetch_form.html" %}
+    {% else %}
+        <table>
+            <tr>
+                <td>Name</td>
+                <td>Color</td>
+                <td>Number of cards</td>
+                <td>Avg. estimated time</td>
+                <td>Avg. spent time</td>
+                <td>Avg. cycle time</td>
+                <td>Avg. lead time</td>
+            </tr>
+            {% for label in labels %}
+                <tr>
+                    <td>{{label.name}}</td>
+                    <td>{{label.color}}</td>
+                    <td>{{label.cards.all.count}}</td>
+                    <td>{{label.avg_estimated_time}}</td>
+                    <td>{{label.avg_spent_time}}</td>
+                    <td>{{label.avg_cycle_time}}</td>
+                    <td>{{label.avg_lead_time}}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+{% endblock content %}

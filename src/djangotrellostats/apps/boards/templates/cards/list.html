@@ -4,8 +4,11 @@
 
 {% block content %}
     <h1>Cards of {{board.name}}</h1>
+    <div>
+        {% include "cards/delete_all_form.html" %}
+    </div>
     {% if cards|length == 0 %}
-        There are no cards in this board. Have you tried to fetch the cards? {% include "boards/fetch_cards_form.html" %}
+        There are no cards in this board. Have you tried to fetch the cards? {% include "boards/fetch_form.html" %}
     {% else %}
         <table>
             <tr>
@@ -18,8 +21,8 @@
                 <tr>
                     <td>{{card.name}}</td>
                     <td>{{card.list.name}}</td>
-                    <td>{{card.estimated}}</td>
-                    <td>{{card.spent}}</td>
+                    <td>{{card.estimated_time}}</td>
+                    <td>{{card.spent_time}}</td>
                 </tr>
             {% endfor %}
         </table>
