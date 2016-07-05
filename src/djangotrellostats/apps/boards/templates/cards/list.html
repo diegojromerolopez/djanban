@@ -4,9 +4,7 @@
 
 {% block content %}
     <h1>Cards of {{board.name}}</h1>
-    <div>
-        {% include "cards/delete_all_form.html" %}
-    </div>
+    <div>Last updated: {{fetch.creation_datetime}}</div>
     {% if cards|length == 0 %}
         There are no cards in this board. Have you tried to fetch the cards? {% include "boards/fetch_form.html" %}
     {% else %}

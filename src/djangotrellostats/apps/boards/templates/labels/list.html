@@ -4,6 +4,7 @@
 
 {% block content %}
     <h1>Labels of {{board.name}}</h1>
+    <div>Last updated: {{fetch.creation_datetime}}</div>
     {% if labels|length == 0 %}
         There are no labels in this board. Have you tried to fetch the labels? {% include "boards/fetch_form.html" %}
     {% else %}

@@ -6,7 +6,7 @@
     <h1>Boards of {{member.trello_username}}</h1>
     <div class="board_list">
         {% if boards|length == 0 %}
-            {% include "members/no_boards_warning.html" %}
+            {% include "boards/no_boards_warning.html" %}
         {% else %}
             <ul>
                 {% for board in boards %}
@@ -15,11 +15,15 @@
                         <span>{{board.cards.count}} Cards</span>
                         <div>
                             <a href="{% url 'boards:view_board_lists' board.id %}">View lists</a>
-                            <a href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
-                            <a href="{% url 'boards:view_cards' board.id %}">View cards</a>
-                            <a href="{% url 'boards:view_labels' board.id %}">View labels</a>
-                            {% include "boards/fetch_form.html" %}
-                            {% include "boards/delete_form.html" %}
+                            {% if board.lists_are_configured %}
+                                <a href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
+                                <a href="{% url 'boards:view_cards' board.id %}">View cards</a>
+                                <a href="{% url 'boards:view_labels' board.id %}">View labels</a>
+                                {% include "boards/fetch_form.html" %}
+                                {% include "boards/delete_form.html" %}
+                            {% else %}
+                                You need a 'done list' and at least a 'in development' list
+                            {% endif %}
                         </div>
                     </li>
                 {% endfor %}

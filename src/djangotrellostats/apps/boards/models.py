@@ -6,9 +6,41 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Avg
 from django.db.models.query_utils import Q
+from django.utils import timezone
+import copy
+import numpy
 
 from trello import Board as TrelloBoard
 from collections import namedtuple
+
+
+# Abstract model that represents the immutable objects
+class ImmutableModel(models.Model):
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        if self.id is not None:
+            raise ValueError(u"This model does not allow edition")
+        super(ImmutableModel, self).save(*args, **kwargs)
+
+
+# Each fetch of data is independent of the others
+class Fetch(ImmutableModel):
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="fetches")
+    creation_datetime = models.DateTimeField(verbose_name=u"Date this object was created")
+
+    def save(self, *args, **kwargs):
+        self.creation_datetime = timezone.now()
+        super(ImmutableModel, self).save(*args, **kwargs)
+
+    @staticmethod
+    def new(board):
+        fetch = Fetch(board=board)
+        fetch.save()
+        return fetch
+
 
 # Task board
 class Board(models.Model):
@@ -17,59 +49,103 @@ class Board(models.Model):
     uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the board", unique=True)
     last_activity_date = models.DateTimeField(verbose_name=u"Last activity date", default=None, null=True)
 
-    def fetch(self):
-        self._fetch_labels()
-        self._fetch_cards()
+    @property
+    def last_fetch(self):
+        try:
+            last_fetch = Fetch.objects.all().order_by("-creation_datetime")[0]
+        except IndexError:
+            raise Fetch.DoesNotExist
+        return last_fetch
 
-    def _fetch_labels(self):
-        self.labels.all().delete()
+    def fetch(self):
+        fetch = Fetch.new(self)
+        self._fetch_labels(fetch)
+        self._fetch_cards(fetch)
+
+    # Fetch the labels of this board
+    def _fetch_labels(self, fetch):
+
         trello_board = self._get_trello_board()
         trello_labels = trello_board.get_labels()
         for trello_label in trello_labels:
             label = Label.factory_from_trello_label(trello_label, self)
+            label.fetch = fetch
             label.save()
 
-    def _fetch_cards(self):
-        self.cards.all().delete()
+    # Fetch the cards of this board
+    def _fetch_cards(self, fetch):
         trello_board = self._get_trello_board()
         trello_cards = trello_board.all_cards()
 
+        # Fake class used for passing a list of trello lists to the method of Card stats_by_list
         ListForStats = namedtuple('ListForStats', 'id django_id')
         trello_lists = [ListForStats(id=list_.uuid, django_id=list_.id) for list_ in self.lists.all()]
+
         trello_cycle_dict = {list_.uuid: True for list_ in self.lists.filter(Q(type="done") | Q(type="development"))}
-        done_list = self.lists.filter(type="done")[0]
+        done_list = self.lists.get(type="done")
         trello_list_done = ListForStats(id=done_list.uuid, django_id=done_list.id)
 
+        # Hash to obtain the order of a list given its uuid
+        trello_list_order_dict = {list_.uuid: list_.id for list_ in self.lists.all()}
+
+        # Comparator function
         def list_cmp(list_1, list_2):
-            if list_1.django_id < list_2.django_id:
+            list_1_order = trello_list_order_dict[list_1]
+            list_2_order = trello_list_order_dict[list_2]
+            if list_1_order < list_2_order:
                 return 1
-            if list_1.django_id > list_2.django_id:
+            if list_1_order > list_2_order:
                 return -1
             return 0
+
+        # For each list we create a report
+        list_report_dict = {list_.uuid: ListReport(fetch=fetch, list=list_, forward_movements=0, backward_movements=0) for list_ in self.lists.all()}
 
         # Card creation
         for trello_card in trello_cards:
             trello_card.fetch(eager=False)
             card = Card.factory_from_trello_card(trello_card, self)
 
+            card_stats_by_list = trello_card.get_stats_by_list(lists=trello_lists, list_cmp=list_cmp,
+                                                               done_list=trello_list_done,
+                                                               time_unit="hours", card_movements_filter=None)
+
+            # List reports. For each list compute the number of forward movements and backward movements
+            # being it its the source.
+            # Thus, compute the time the cards live in this list.
+            for list_ in trello_lists:
+                list_id = list_.id
+                card_stats_of_list = card_stats_by_list[list_id]
+                # Time the card lives in each list
+                if not hasattr(list_report_dict[list_id], "times"):
+                    list_report_dict[list_id].times = []
+                list_report_dict[list_id].times.append(card_stats_of_list["time"])
+                list_report_dict[list_id].forward_movements += card_stats_of_list["forward_moves"]
+                list_report_dict[list_id].backward_movements += card_stats_of_list["backward_moves"]
+
             # Cycle and Lead times
             if trello_card.idList == done_list.uuid:
-                card_stats_by_list = trello_card.get_stats_by_list(lists=trello_lists, list_cmp=list_cmp,
-                                                                   done_list=trello_list_done,
-                                                                   time_unit="hours", card_movements_filter=None)
                 card.lead_time = sum([list_stats["time"] for list_uuid, list_stats in card_stats_by_list.items()])
                 card.cycle_time = sum(
                     [list_stats["time"] if list_uuid in trello_cycle_dict else 0 for list_uuid, list_stats in
                      card_stats_by_list.items()])
 
+            card.fetch = fetch
             card.save()
 
             # Label assignment to each card
             label_uuids = trello_card.idLabels
-            card_labels = self.labels.filter(uuid__in=label_uuids)
+            card_labels = self.labels.filter(uuid__in=label_uuids, fetch=fetch)
             for card_label in card_labels:
                 card.labels.add(card_label)
 
+        # Average and std deviation of time cards live in this list
+        for list_uuid, list_report in list_report_dict.items():
+            list_report.avg_card_time = numpy.mean(list_report.times)
+            list_report.std_dev_card_time = numpy.std(list_report.times, axis=0)
+            list_report.save()
+
+    # Return the trello board, calling the Trello API.
     def _get_trello_board(self):
         trello_client = self.member.trello_client
         trello_board = TrelloBoard(client=trello_client, board_id=self.uuid)
@@ -78,10 +154,16 @@ class Board(models.Model):
 
 
 # Card of the task board
-class Card(models.Model):
+class Card(ImmutableModel):
     COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)"
+
+    class Meta:
+        unique_together = (
+            ("uuid", "fetch"),
+        )
+
     name = models.CharField(max_length=128, verbose_name=u"Name of the card")
-    uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the card", unique=True)
+    uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the card")
     url = models.CharField(max_length=128, verbose_name=u"URL of the card")
     short_url = models.CharField(max_length=128, verbose_name=u"Short URL of the card")
     description = models.TextField(verbose_name=u"Description of the card")
@@ -93,6 +175,8 @@ class Card(models.Model):
     cycle_time = models.DecimalField(verbose_name=u"Lead time", decimal_places=4, max_digits=12, default=None, null=True)
     lead_time = models.DecimalField(verbose_name=u"Cycle time", decimal_places=4, max_digits=12, default=None, null=True)
     labels = models.ManyToManyField("boards.Label", related_name="cards")
+
+    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="cards")
 
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
     list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")
@@ -138,11 +222,18 @@ class Card(models.Model):
 
 
 # Label of the task board
-class Label(models.Model):
+class Label(ImmutableModel):
+
+    class Meta:
+        unique_together = (
+            ("uuid", "fetch"),
+        )
+
     name = models.CharField(max_length=128, verbose_name=u"Name of the label")
-    uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the label", unique=True)
+    uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the label")
     color = models.CharField(max_length=128, verbose_name=u"Color of the label")
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="labels")
+    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="labels")
 
     @staticmethod
     def factory_from_trello_label(trello_label, board):
@@ -177,6 +268,15 @@ class List(models.Model):
     uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the list", unique=True)
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="lists")
     type = models.CharField(max_length=64, choices=LIST_TYPE_CHOICES, default="normal")
+
+
+class ListReport(models.Model):
+    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="list_reports")
+    list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="list_reports")
+    forward_movements = models.PositiveIntegerField(verbose_name=u"Forward movements")
+    backward_movements = models.PositiveIntegerField(verbose_name=u"Backward movements")
+    avg_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4, max_digits=12)
+    std_dev_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4, max_digits=12)
 
 
 class Workflow(models.Model):
