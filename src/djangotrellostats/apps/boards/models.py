@@ -17,7 +17,6 @@ from collections import namedtuple
 
 # Abstract model that represents the immutable objects
 class ImmutableModel(models.Model):
-
     class Meta:
         abstract = True
 
@@ -77,44 +76,32 @@ class Board(models.Model):
 
     # Fetch the cards of this board
     def _fetch_cards(self, fetch):
+
+        lists = self.lists.all()
+
+        workflows = self.workflows.all()
+
+        trello_cycle_dict = {list_.uuid: True for list_ in lists.filter(Q(type="done") | Q(type="development"))}
+        done_list = lists.get(type="done")
+
+        # List reports
+        list_report_dict = {list_.uuid: ListReport(fetch=fetch, list=list_, forward_movements=0, backward_movements=0)
+                            for list_ in lists}
+
+        # Member report
+        member_report_dict = {member.uuid: MemberReport(fetch=fetch, board=self, member=member) for member in
+                              self.members.all()}
+
+        # Fetch cards of this board
         trello_board = self._get_trello_board()
         trello_cards = trello_board.all_cards()
 
-        # Fake class used for passing a list of trello lists to the method of Card stats_by_list
-        ListForStats = namedtuple('ListForStats', 'id django_id')
-        trello_lists = [ListForStats(id=list_.uuid, django_id=list_.id) for list_ in self.lists.all()]
-
-        trello_cycle_dict = {list_.uuid: True for list_ in self.lists.filter(Q(type="done") | Q(type="development"))}
-        done_list = self.lists.get(type="done")
-        trello_list_done = ListForStats(id=done_list.uuid, django_id=done_list.id)
-
-        # Hash to obtain the order of a list given its uuid
-        trello_list_order_dict = {list_.uuid: list_.id for list_ in self.lists.all()}
-
-        # Comparator function
-        def list_cmp(list_1, list_2):
-            list_1_order = trello_list_order_dict[list_1]
-            list_2_order = trello_list_order_dict[list_2]
-            if list_1_order < list_2_order:
-                return 1
-            if list_1_order > list_2_order:
-                return -1
-            return 0
-
-        # List reports
-        list_report_dict = {list_.uuid: ListReport(fetch=fetch, list=list_, forward_movements=0, backward_movements=0) for list_ in self.lists.all()}
-
-        # Member report
-        member_report_dict = {member.uuid: MemberReport(fetch=fetch, board=self, member=member) for member in self.members.all()}
-
-        # Card creation
+        # Card stats computation
         for trello_card in trello_cards:
             trello_card.fetch(eager=False)
             card = Card.factory_from_trello_card(trello_card, self)
 
-            card_stats_by_list = trello_card.get_stats_by_list(lists=trello_lists, list_cmp=list_cmp,
-                                                               done_list=trello_list_done,
-                                                               time_unit="hours", card_movements_filter=None)
+            card.get_stats_by_list(lists, done_list)
 
             # Total forward and backward movements of a card
             card_forward_moves = 0
@@ -124,33 +111,33 @@ class Board(models.Model):
             # List reports. For each list compute the number of forward movements and backward movements
             # being it its the source.
             # Thus, compute the time the cards live in this list.
-            for list_ in trello_lists:
-                list_id = list_.id
-                card_stats_of_list = card_stats_by_list[list_id]
+            for list_ in lists:
+                list_uuid = list_.uuid
+                card_stats_by_list = card.stats_by_list[list_uuid]
 
                 # Time the card lives in each list
-                if not hasattr(list_report_dict[list_id], "times"):
-                    list_report_dict[list_id].times = []
+                if not hasattr(list_report_dict[list_uuid], "times"):
+                    list_report_dict[list_uuid].times = []
 
                 # Time a card lives in the list
-                list_report_dict[list_id].times.append(card_stats_of_list["time"])
+                list_report_dict[list_uuid].times.append(card_stats_by_list["time"])
 
                 # Forward and backward movements where the list is the source
-                list_report_dict[list_id].forward_movements += card_stats_of_list["forward_moves"]
-                list_report_dict[list_id].backward_movements += card_stats_of_list["backward_moves"]
+                list_report_dict[list_uuid].forward_movements += card_stats_by_list["forward_moves"]
+                list_report_dict[list_uuid].backward_movements += card_stats_by_list["backward_moves"]
 
-                card_time += card_stats_of_list["time"]
+                card_time += card_stats_by_list["time"]
 
                 # Update total forward and backward movements
-                card_forward_moves += card_stats_of_list["forward_moves"]
-                card_backward_moves += card_stats_of_list["backward_moves"]
+                card_forward_moves += card_stats_by_list["forward_moves"]
+                card_backward_moves += card_stats_by_list["backward_moves"]
 
             # Cycle and Lead times
             if trello_card.idList == done_list.uuid:
-                card.lead_time = sum([list_stats["time"] for list_uuid, list_stats in card_stats_by_list.items()])
+                card.lead_time = sum([list_stats["time"] for list_uuid, list_stats in card.stats_by_list.items()])
                 card.cycle_time = sum(
                     [list_stats["time"] if list_uuid in trello_cycle_dict else 0 for list_uuid, list_stats in
-                     card_stats_by_list.items()])
+                     card.stats_by_list.items()])
 
             card.fetch = fetch
             card.save()
@@ -200,6 +187,10 @@ class Board(models.Model):
                     member_report.card_estimated_times = []
                 if card.estimated_time_by_member.get(trello_member_uuid) is not None:
                     member_report.card_estimated_times.append(card.estimated_time_by_member.get(trello_member_uuid))
+
+                # Workflow card reports
+                for workflow in workflows:
+                    workflow.fetch(fetch, [card])
 
         # Average and std. deviation of time cards live in this list
         for list_uuid, list_report in list_report_dict.items():
@@ -252,10 +243,14 @@ class Card(ImmutableModel):
     is_closed = models.BooleanField(verbose_name=u"Is this card closed?", default=False)
     position = models.PositiveIntegerField(verbose_name=u"Position in the list")
     last_activity_date = models.DateTimeField(verbose_name=u"Last activity date")
-    spent_time = models.DecimalField(verbose_name=u"Actual card spent time", decimal_places=4, max_digits=12, default=None, null=True)
-    estimated_time = models.DecimalField(verbose_name=u"Estimated card completion time", decimal_places=4, max_digits=12, default=None, null=True)
-    cycle_time = models.DecimalField(verbose_name=u"Lead time", decimal_places=4, max_digits=12, default=None, null=True)
-    lead_time = models.DecimalField(verbose_name=u"Cycle time", decimal_places=4, max_digits=12, default=None, null=True)
+    spent_time = models.DecimalField(verbose_name=u"Actual card spent time", decimal_places=4, max_digits=12,
+                                     default=None, null=True)
+    estimated_time = models.DecimalField(verbose_name=u"Estimated card completion time", decimal_places=4,
+                                         max_digits=12, default=None, null=True)
+    cycle_time = models.DecimalField(verbose_name=u"Lead time", decimal_places=4, max_digits=12, default=None,
+                                     null=True)
+    lead_time = models.DecimalField(verbose_name=u"Cycle time", decimal_places=4, max_digits=12, default=None,
+                                    null=True)
     labels = models.ManyToManyField("boards.Label", related_name="cards")
 
     fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="cards")
@@ -271,7 +266,10 @@ class Card(ImmutableModel):
                     description=trello_card.desc, is_closed=trello_card.closed, position=trello_card.pos,
                     last_activity_date=trello_card.dateLastActivity,
                     board=board, list=list_
-                )
+                    )
+
+        # Store the trello card data for ease of use
+        card.trello_card = trello_card
 
         # Card spent and estimated times
         trello_card_comments = trello_card.fetch_comments()
@@ -288,11 +286,49 @@ class Card(ImmutableModel):
         card.estimated_time_by_member = comment_info["estimated"]["by_member"]
 
         # Members that play a role in this task
-        card_member_uuids = {member_uuid : True for member_uuid in trello_card.idMembers}
-        card_member_uuids.update({member_uuid : True for member_uuid in comment_info["member_uuids"]})
+        card_member_uuids = {member_uuid: True for member_uuid in trello_card.idMembers}
+        card_member_uuids.update({member_uuid: True for member_uuid in comment_info["member_uuids"]})
         card.member_uuids = card_member_uuids.keys()
 
         return card
+
+    # Compute the stats of this card
+    def get_stats_by_list(self, lists, done_list):
+        # Use cache to avoid recomputing this stats
+        if hasattr(self, "stats_by_list"):
+            return self.stats_by_list
+
+        # trello_card attribute of the Card object is needed to compute the stats
+        if not hasattr(self, "trello_card"):
+            raise ValueError(u"Something is wrong. Not 'trello_card' attribute found. Did you create the card without "
+                             u"calling Card.factory_from_trello_card?")
+
+        # Fake class used for passing a list of trello lists to the method of Card stats_by_list
+        ListForStats = namedtuple('ListForStats', 'id django_id')
+        fake_trello_lists = [ListForStats(id=list_.uuid, django_id=list_.id) for list_ in lists]
+        fake_trello_list_done = ListForStats(id=done_list.uuid, django_id=done_list.id)
+
+        # Hash to obtain the order of a list given its uuid
+        trello_list_order_dict = {list_.uuid: list_.id for list_ in lists}
+
+        # Comparator function
+        def list_cmp(list_1, list_2):
+            list_1_order = trello_list_order_dict[list_1]
+            list_2_order = trello_list_order_dict[list_2]
+            if list_1_order < list_2_order:
+                return 1
+            if list_1_order > list_2_order:
+                return -1
+            return 0
+
+        self.lists = lists
+        self.done_list = done_list
+        self.stats_by_list = self.trello_card.get_stats_by_list(lists=fake_trello_lists,
+                                                                     list_cmp=list_cmp,
+                                                                     done_list=fake_trello_list_done,
+                                                                     time_unit="hours", card_movements_filter=None)
+
+        return self.stats_by_list
 
     @staticmethod
     def _get_trello_comment_info(comments):
@@ -339,16 +375,15 @@ class Card(ImmutableModel):
                 total_estimated += estimated
 
         info = {
-                "member_uuids": member_uuids.keys(),
-                "spent": {"total": total_spent, "by_member": spent_by_member},
-                "estimated": {"total": total_estimated, "by_member": estimated_by_member}
-                }
+            "member_uuids": member_uuids.keys(),
+            "spent": {"total": total_spent, "by_member": spent_by_member},
+            "estimated": {"total": total_estimated, "by_member": estimated_by_member}
+        }
         return info
 
 
 # Label of the task board
 class Label(ImmutableModel):
-
     class Meta:
         unique_together = (
             ("uuid", "fetch"),
@@ -400,8 +435,10 @@ class ListReport(models.Model):
     list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="list_reports")
     forward_movements = models.PositiveIntegerField(verbose_name=u"Forward movements")
     backward_movements = models.PositiveIntegerField(verbose_name=u"Backward movements")
-    avg_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4, max_digits=12)
-    std_dev_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4, max_digits=12)
+    avg_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4,
+                                        max_digits=12)
+    std_dev_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4,
+                                            max_digits=12)
 
 
 class MemberReport(models.Model):
@@ -411,17 +448,21 @@ class MemberReport(models.Model):
     member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="member_reports")
     forward_movements = models.PositiveIntegerField(verbose_name=u"Forward movements")
     backward_movements = models.PositiveIntegerField(verbose_name=u"Backward movements")
-    avg_card_time = models.DecimalField(verbose_name=u"Average time a card lives in the board", decimal_places=4, max_digits=12, default=None, null=True)
-    std_dev_card_time = models.DecimalField(verbose_name=u"Std. Dev. time a card lives in the board", decimal_places=4, max_digits=12, default=None, null=True)
+    avg_card_time = models.DecimalField(verbose_name=u"Average time a card lives in the board", decimal_places=4,
+                                        max_digits=12, default=None, null=True)
+    std_dev_card_time = models.DecimalField(verbose_name=u"Std. Dev. time a card lives in the board", decimal_places=4,
+                                            max_digits=12, default=None, null=True)
     avg_card_spent_time = models.DecimalField(verbose_name=u"Average card spent time", decimal_places=4, max_digits=12,
-                                                default=None, null=True)
-    std_dev_card_spent_time = models.DecimalField(verbose_name=u"Std. Deviation card spent time", decimal_places=4, max_digits=12,
                                               default=None, null=True)
-    avg_card_estimated_time = models.DecimalField(verbose_name=u"Average task estimated card completion time", decimal_places=4,
-                                         max_digits=12, default=None, null=True)
-    std_dev_estimated_time = models.DecimalField(verbose_name=u"Std. Deviation of the estimated card completion time",
+    std_dev_card_spent_time = models.DecimalField(verbose_name=u"Std. Deviation card spent time", decimal_places=4,
+                                                  max_digits=12,
+                                                  default=None, null=True)
+    avg_card_estimated_time = models.DecimalField(verbose_name=u"Average task estimated card completion time",
                                                   decimal_places=4,
                                                   max_digits=12, default=None, null=True)
+    std_dev_estimated_time = models.DecimalField(verbose_name=u"Std. Deviation of the estimated card completion time",
+                                                 decimal_places=4,
+                                                 max_digits=12, default=None, null=True)
 
 
 class Workflow(models.Model):
@@ -429,10 +470,53 @@ class Workflow(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Workflow", related_name="workflows")
     lists = models.ManyToManyField("boards.List", through="WorkflowList", related_name="workflow")
 
+    # Fetch data for this workflow, creating a workflow report
+    def fetch(self, fetch, cards):
+        workflow_lists = self.workflow_lists.all()
+        development_lists = {workflow_list.list.uuid: workflow_list.list for workflow_list in self.workflow_lists.filter(is_done_list=False)}
+        done_lists = {workflow_list.list.uuid: workflow_list.list for workflow_list in self.workflow_lists.filter(is_done_list=True)}
+
+        workflow_card_reports = []
+
+        for card in cards:
+            trello_card = card.trello_card
+
+            lead_time = None
+            cycle_time = None
+
+            # Lead time and cycle time only should be computed when the card is done
+            if not card.is_closed and trello_card.idList in done_lists:
+                # Lead time in this workflow for this card
+                lead_time = sum([list_stats["time"] for list_uuid, list_stats in card.stats_by_list.items()])
+
+                # Cycle time in this workflow for this card
+                cycle_time = sum(
+                    [list_stats["time"] if list_uuid in development_lists else 0 for list_uuid, list_stats in
+                     card.stats_by_list.items()])
+
+                workflow_card_report = WorkflowCardReport(fetch=fetch, board=self.board, workflow=self,
+                                                          card=card, cycle_time=cycle_time, lead_time=lead_time)
+                workflow_card_report.save()
+
+                workflow_card_reports.append(workflow_card_report)
+
+        return workflow_card_reports
+
 
 class WorkflowList(models.Model):
     order = models.PositiveIntegerField(verbose_name=u"Order of the list")
     is_done_list = models.BooleanField(verbose_name=u"Informs if the list is a done list", default=False)
-    list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="workflowlist")
-    workflow = models.ForeignKey("boards.Workflow", verbose_name=u"Workflow", related_name="workflowlists")
+    list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="workflow_list")
+    workflow = models.ForeignKey("boards.Workflow", verbose_name=u"Workflow", related_name="workflow_lists")
 
+
+class WorkflowCardReport(models.Model):
+    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="workflow_card_reports")
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="workflow_card_reports")
+    workflow = models.ForeignKey("boards.Workflow", verbose_name=u"Workflow", related_name="workflow_card_reports")
+    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="workflow_card_reports")
+    lead_time = models.DecimalField(verbose_name=u"Card cycle card time", decimal_places=4,
+                                             max_digits=12, default=None, null=True)
+    cycle_time = models.DecimalField(verbose_name=u"Card lead time", decimal_places=4, max_digits=12,
+                                              default=None,
+                                              null=True)

@@ -14,10 +14,11 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/lists/?$', boards.view_lists, name="view_board_lists"),
     url(r'^(?P<board_id>\d+)/delete/?$', boards.delete, name="delete_board"),
 
-    url(r'^(?P<board_id>\d+)/cards/?$', boards.view_cards, name="view_cards"),
+    url(r'^(?P<board_id>\d+)/cards/?$', boards.view_card_report, name="view_card_report"),
+    url(r'^(?P<board_id>\d+)/workflow_card_report/(?P<workflow_id>\d+)/?$', boards.view_workflow_card_report, name="view_workflow_card_report"),
 
-    url(r'^(?P<board_id>\d+)/labels/?$', boards.view_labels, name="view_labels"),
-    url(r'^(?P<board_id>\d+)/members/?$', boards.view_members, name="view_members"),
+    url(r'^(?P<board_id>\d+)/labels/?$', boards.view_label_report, name="view_label_report"),
+    url(r'^(?P<board_id>\d+)/members/?$', boards.view_member_report, name="view_member_report"),
 
     url(r'^(?P<board_id>\d+)/fetch/?$', boards.fetch, name="fetch"),
 

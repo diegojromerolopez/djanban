@@ -46,6 +46,7 @@ class Member(models.Model):
     def _fetch_members(self, board, trello_board):
         trello_members = trello_board.all_members()
         for trello_member in trello_members:
+            # If the member does not exist, create it with empty Trello credentials
             try:
                 member = Member.objects.get(uuid=trello_member.id)
             except Member.DoesNotExist:

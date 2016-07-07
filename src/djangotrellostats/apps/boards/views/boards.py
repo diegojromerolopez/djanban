@@ -5,7 +5,9 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.http.response import Http404
 from django.shortcuts import render
+
 from djangotrellostats.apps.boards.models import List, Fetch
+from djangotrellostats.apps.boards.stats import avg, std_dev
 
 
 # Initialize boards with data fetched from trello
@@ -65,7 +67,7 @@ def fetch(request, board_id):
 
 # View card report
 @login_required
-def view_cards(request, board_id):
+def view_card_report(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
     try:
@@ -74,13 +76,40 @@ def view_cards(request, board_id):
         board.fetch()
         last_fetch = board.last_fetch
     cards = last_fetch.cards.all()
-    replacements = {"member": member, "fetch": last_fetch, "board": board, "cards": cards}
+    replacements = {
+        "member": member, "fetch": last_fetch, "board": board, "cards": cards,
+        "avg_lead_time": avg(cards, "lead_time"),
+        "std_dev_lead_time": std_dev(cards, "lead_time"),
+        "avg_cycle_time": avg(cards, "cycle_time"),
+        "std_dev_cycle_time": std_dev(cards, "cycle_time"),
+    }
     return render(request, "cards/list.html", replacements)
+
+
+# View card report
+@login_required
+def view_workflow_card_report(request, board_id, workflow_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id)
+    try:
+        last_fetch = board.last_fetch
+    except Fetch.DoesNotExist:
+        board.fetch()
+        last_fetch = board.last_fetch
+    workflow_card_reports = last_fetch.workflow_card_reports.filter(workflow_id=workflow_id)
+    replacements = {
+        "member": member, "fetch": last_fetch, "board": board, "workflow_card_reports": workflow_card_reports,
+        "avg_lead_time": avg(workflow_card_reports, "lead_time"),
+        "std_dev_lead_time": std_dev(workflow_card_reports, "lead_time"),
+        "avg_cycle_time": avg(workflow_card_reports, "cycle_time"),
+        "std_dev_cycle_time": std_dev(workflow_card_reports, "cycle_time"),
+    }
+    return render(request, "cards/workflow_card_report_list.html", replacements)
 
 
 # View label report
 @login_required
-def view_labels(request, board_id):
+def view_label_report(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
     try:
@@ -95,7 +124,7 @@ def view_labels(request, board_id):
 
 # View member report
 @login_required
-def view_members(request, board_id):
+def view_member_report(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
     try:
