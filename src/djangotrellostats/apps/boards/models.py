@@ -68,7 +68,6 @@ class Board(models.Model):
 
     # Fetch the labels of this board
     def _fetch_labels(self, fetch):
-
         trello_board = self._get_trello_board()
         trello_labels = trello_board.get_labels()
         for trello_label in trello_labels:
@@ -163,8 +162,9 @@ class Board(models.Model):
                 card.labels.add(card_label)
 
             # Member reports
-            for trello_member_uuid in trello_card.idMembers:
-                num_trello_card_members = len(trello_card.idMembers)
+            trello_card_member_uuids = card.member_uuids
+            num_trello_card_members = len(trello_card_member_uuids)
+            for trello_member_uuid in trello_card_member_uuids:
                 member_report = member_report_dict[trello_member_uuid]
 
                 # Increment the number of cards of the member report
@@ -192,14 +192,14 @@ class Board(models.Model):
                 # Card spent time
                 if not hasattr(member_report, "card_spent_times"):
                     member_report.card_spent_times = []
-                if card.spent_time is not None:
-                    member_report.card_spent_times.append(card.spent_time)
+                if card.spent_time_by_member.get(trello_member_uuid) is not None:
+                    member_report.card_spent_times.append(card.spent_time_by_member.get(trello_member_uuid))
 
                 # Card estimated time
                 if not hasattr(member_report, "card_estimated_times"):
                     member_report.card_estimated_times = []
-                if card.estimated_time is not None:
-                    member_report.card_estimated_times.append(card.estimated_time)
+                if card.estimated_time_by_member.get(trello_member_uuid) is not None:
+                    member_report.card_estimated_times.append(card.estimated_time_by_member.get(trello_member_uuid))
 
         # Average and std. deviation of time cards live in this list
         for list_uuid, list_report in list_report_dict.items():
@@ -275,32 +275,75 @@ class Card(ImmutableModel):
 
         # Card spent and estimated times
         trello_card_comments = trello_card.fetch_comments()
-        card_times = Card._get_times_from_trello_comments(trello_card_comments)
-        card.spent_time = card_times["spent"]
-        card.estimated_time = card_times["estimated"]
+        comment_info = Card._get_trello_comment_info(trello_card_comments)
+        card.spent_time = comment_info["spent"]["total"]
+        card.estimated_time = comment_info["estimated"]["total"]
+
+        # Dynamic attributes
+        # Summary of information obtained by fetching the comments
+        card.comment_info = comment_info
+
+        # Spent and estimated time by member
+        card.spent_time_by_member = comment_info["spent"]["by_member"]
+        card.estimated_time_by_member = comment_info["estimated"]["by_member"]
+
+        # Members that play a role in this task
+        card_member_uuids = {member_uuid : True for member_uuid in trello_card.idMembers}
+        card_member_uuids.update({member_uuid : True for member_uuid in comment_info["member_uuids"]})
+        card.member_uuids = card_member_uuids.keys()
+
         return card
 
     @staticmethod
-    def _get_times_from_trello_comments(comments):
+    def _get_trello_comment_info(comments):
         total_spent = None
         total_estimated = None
+        spent_by_member = {}
+        estimated_by_member = {}
+        member_uuids = {}
         # For each comment, find the desired pattern and extract the spent and estimated times
         for comment in comments:
             comment_content = comment["data"]["text"]
             matches = re.match(Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, comment_content)
             if matches:
+                # Member uuid that has made this Plus for Trello Comment
+                member_uuid = comment["idMemberCreator"]
+                member_uuids[member_uuid] = True
+
+                # Spent time when developing this task
+                spent = float(matches.group("spent"))
+
+                # Add to spent by member
+                if member_uuid not in spent_by_member:
+                    spent_by_member[member_uuid] = 0
+                spent_by_member[member_uuid] += spent
+
                 # Add to total spent
                 if total_spent is None:
                     total_spent = 0
-                spent = float(matches.group("spent"))
+
                 total_spent += spent
+
+                # Estimated time for developing this task
+                estimated = float(matches.group("estimated"))
+
+                # Add to estimated by member
+                if member_uuid not in estimated_by_member:
+                    estimated_by_member[member_uuid] = 0
+                estimated_by_member[member_uuid] += estimated
+
                 # Add to total estimated
                 if total_estimated is None:
                     total_estimated = 0
-                estimated = float(matches.group("estimated"))
+
                 total_estimated += estimated
 
-        return {"estimated": total_estimated, "spent": total_spent}
+        info = {
+                "member_uuids": member_uuids.keys(),
+                "spent": {"total": total_spent, "by_member": spent_by_member},
+                "estimated": {"total": total_estimated, "by_member": estimated_by_member}
+                }
+        return info
 
 
 # Label of the task board

@@ -12,7 +12,6 @@
                 {% for board in boards %}
                     <li>
                         <span>{{board.name}}</span>
-                        <span>{{board.cards.count}} Cards</span>
                         <div>
                             <a href="{% url 'boards:view_board_lists' board.id %}">View lists</a>
                             {% if board.lists_are_configured %}
