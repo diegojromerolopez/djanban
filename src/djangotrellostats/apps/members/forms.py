@@ -70,12 +70,19 @@ class SignUpForm(models.ModelForm):
 
         if commit:
             user.save()
-            member.id = None
+
+            # If there is a member with the same username and has not been reclaimed, reclaim it
+            if Member.objects.filter(trello_username=self.cleaned_data["username"], user=None).exists():
+                member = Member.objects.get(trello_username=self.cleaned_data["username"])
+
+            member.api_key = self.cleaned_data["api_key"]
+            member.api_secret = self.cleaned_data["api_secret"]
+            member.token = self.cleaned_data["token"]
+            member.token_secret = self.cleaned_data["token_secret"]
             member.uuid = self.cleaned_data["uuid"]
             member.trello_username = self.cleaned_data["trello_username"]
             member.initials = self.cleaned_data["initials"]
             member.user = user
-            print member.id
             member.save()
 
         return member

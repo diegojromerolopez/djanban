@@ -1,0 +1,38 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Members of {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>Members of {{board.name}}</h1>
+    <div>Last updated: {{fetch.creation_datetime}}</div>
+    {% if member_reports|length == 0 %}
+        There are no members in this board.
+    {% else %}
+        <table>
+            <tr>
+                <td>Initials</td>
+                <td>Name</td>
+                <td>Number of cards</td>
+                <td>Avg. card time</td>
+                <td>Std. Dev. card time</td>
+                <td>Avg. estimated card time</td>
+                <td>Std. Dev. estimated card time</td>
+                <td>Avg. spent card time</td>
+                <td>Std. Dev. spent card time</td>
+            </tr>
+            {% for member_report in member_reports %}
+                <tr>
+                    <td>{{member_report.member.initials}}</td>
+                    <td>{{member_report.member.trello_username}}</td>
+                    <td>{{member_report.number_of_cards}}</td>
+                    <td>{{member_report.avg_card_time}}</td>
+                    <td>{{member_report.std_dev_card_time}}</td>
+                    <td>{{member_report.avg_card_estimated_time}}</td>
+                    <td>{{member_report.std_dev_card_estimated_time}}</td>
+                    <td>{{member_report.avg_card_spent_time}}</td>
+                    <td>{{member_report.std_dev_card_spent_time}}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+{% endblock content %}

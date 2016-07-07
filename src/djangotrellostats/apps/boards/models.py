@@ -9,6 +9,7 @@ from django.db.models.query_utils import Q
 from django.utils import timezone
 import copy
 import numpy
+import math
 
 from trello import Board as TrelloBoard
 from collections import namedtuple
@@ -44,10 +45,12 @@ class Fetch(ImmutableModel):
 
 # Task board
 class Board(models.Model):
-    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="boards")
+    creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_boards")
     name = models.CharField(max_length=128, verbose_name=u"Name of the board")
     uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the board", unique=True)
     last_activity_date = models.DateTimeField(verbose_name=u"Last activity date", default=None, null=True)
+
+    members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="boards")
 
     @property
     def last_fetch(self):
@@ -57,6 +60,7 @@ class Board(models.Model):
             raise Fetch.DoesNotExist
         return last_fetch
 
+    # Fetch data of this board
     def fetch(self):
         fetch = Fetch.new(self)
         self._fetch_labels(fetch)
@@ -98,8 +102,11 @@ class Board(models.Model):
                 return -1
             return 0
 
-        # For each list we create a report
+        # List reports
         list_report_dict = {list_.uuid: ListReport(fetch=fetch, list=list_, forward_movements=0, backward_movements=0) for list_ in self.lists.all()}
+
+        # Member report
+        member_report_dict = {member.uuid: MemberReport(fetch=fetch, board=self, member=member) for member in self.members.all()}
 
         # Card creation
         for trello_card in trello_cards:
@@ -110,18 +117,34 @@ class Board(models.Model):
                                                                done_list=trello_list_done,
                                                                time_unit="hours", card_movements_filter=None)
 
+            # Total forward and backward movements of a card
+            card_forward_moves = 0
+            card_backward_moves = 0
+            card_time = 0
+
             # List reports. For each list compute the number of forward movements and backward movements
             # being it its the source.
             # Thus, compute the time the cards live in this list.
             for list_ in trello_lists:
                 list_id = list_.id
                 card_stats_of_list = card_stats_by_list[list_id]
+
                 # Time the card lives in each list
                 if not hasattr(list_report_dict[list_id], "times"):
                     list_report_dict[list_id].times = []
+
+                # Time a card lives in the list
                 list_report_dict[list_id].times.append(card_stats_of_list["time"])
+
+                # Forward and backward movements where the list is the source
                 list_report_dict[list_id].forward_movements += card_stats_of_list["forward_moves"]
                 list_report_dict[list_id].backward_movements += card_stats_of_list["backward_moves"]
+
+                card_time += card_stats_of_list["time"]
+
+                # Update total forward and backward movements
+                card_forward_moves += card_stats_of_list["forward_moves"]
+                card_backward_moves += card_stats_of_list["backward_moves"]
 
             # Cycle and Lead times
             if trello_card.idList == done_list.uuid:
@@ -139,15 +162,74 @@ class Board(models.Model):
             for card_label in card_labels:
                 card.labels.add(card_label)
 
-        # Average and std deviation of time cards live in this list
+            # Member reports
+            for trello_member_uuid in trello_card.idMembers:
+                num_trello_card_members = len(trello_card.idMembers)
+                member_report = member_report_dict[trello_member_uuid]
+
+                # Increment the number of cards of the member report
+                member_report.number_of_cards += 1
+
+                # Forward movements of the cards
+                if member_report.forward_movements is None:
+                    member_report.forward_movements = 0
+                member_report.forward_movements += math.ceil(1. * card_forward_moves / 1. * num_trello_card_members)
+
+                # Backward movements of the cards
+                if member_report.backward_movements is None:
+                    member_report.backward_movements = 0
+                member_report.backward_movements += math.ceil(1. * card_backward_moves / 1. * num_trello_card_members)
+
+                # Inform this member report has data and must be saved
+                member_report.present = True
+
+                # Card time
+                if not hasattr(member_report, "card_times"):
+                    member_report.card_times = []
+                if card_time is not None:
+                    member_report.card_times.append(card_time)
+
+                # Card spent time
+                if not hasattr(member_report, "card_spent_times"):
+                    member_report.card_spent_times = []
+                if card.spent_time is not None:
+                    member_report.card_spent_times.append(card.spent_time)
+
+                # Card estimated time
+                if not hasattr(member_report, "card_estimated_times"):
+                    member_report.card_estimated_times = []
+                if card.estimated_time is not None:
+                    member_report.card_estimated_times.append(card.estimated_time)
+
+        # Average and std. deviation of time cards live in this list
         for list_uuid, list_report in list_report_dict.items():
             list_report.avg_card_time = numpy.mean(list_report.times)
             list_report.std_dev_card_time = numpy.std(list_report.times, axis=0)
             list_report.save()
 
+        # Average and std. deviation of card times by member
+        for member_uuid, member_report in member_report_dict.items():
+            if hasattr(member_report, "present") and member_report.present:
+                # Average and std deviation of the time of member cards
+                if len(member_report.card_times) > 0:
+                    member_report.avg_card_time = numpy.mean(member_report.card_times)
+                    member_report.std_dev_card_time = numpy.std(member_report.card_times)
+
+                # Average and std deviation of the spent time of member cards
+                if len(member_report.card_spent_times) > 0:
+                    member_report.avg_card_spent_time = numpy.mean(member_report.card_spent_times)
+                    member_report.std_dev_card_spent_time = numpy.std(member_report.card_spent_times)
+
+                # Average and std deviation of the estimated time of member cards
+                if len(member_report.card_estimated_times) > 0:
+                    member_report.avg_card_estimated_time = numpy.mean(member_report.card_estimated_times)
+                    member_report.std_dev_card_estimated_time = numpy.std(member_report.card_estimated_times)
+
+                member_report.save()
+
     # Return the trello board, calling the Trello API.
     def _get_trello_board(self):
-        trello_client = self.member.trello_client
+        trello_client = self.creator.trello_client
         trello_board = TrelloBoard(client=trello_client, board_id=self.uuid)
         trello_board.fetch()
         return trello_board
@@ -277,6 +359,26 @@ class ListReport(models.Model):
     backward_movements = models.PositiveIntegerField(verbose_name=u"Backward movements")
     avg_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4, max_digits=12)
     std_dev_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4, max_digits=12)
+
+
+class MemberReport(models.Model):
+    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="member_reports")
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="member_reports")
+    number_of_cards = models.PositiveIntegerField(verbose_name=u"Number of assigned cards", default=0)
+    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="member_reports")
+    forward_movements = models.PositiveIntegerField(verbose_name=u"Forward movements")
+    backward_movements = models.PositiveIntegerField(verbose_name=u"Backward movements")
+    avg_card_time = models.DecimalField(verbose_name=u"Average time a card lives in the board", decimal_places=4, max_digits=12, default=None, null=True)
+    std_dev_card_time = models.DecimalField(verbose_name=u"Std. Dev. time a card lives in the board", decimal_places=4, max_digits=12, default=None, null=True)
+    avg_card_spent_time = models.DecimalField(verbose_name=u"Average card spent time", decimal_places=4, max_digits=12,
+                                                default=None, null=True)
+    std_dev_card_spent_time = models.DecimalField(verbose_name=u"Std. Deviation card spent time", decimal_places=4, max_digits=12,
+                                              default=None, null=True)
+    avg_card_estimated_time = models.DecimalField(verbose_name=u"Average task estimated card completion time", decimal_places=4,
+                                         max_digits=12, default=None, null=True)
+    std_dev_estimated_time = models.DecimalField(verbose_name=u"Std. Deviation of the estimated card completion time",
+                                                  decimal_places=4,
+                                                  max_digits=12, default=None, null=True)
 
 
 class Workflow(models.Model):

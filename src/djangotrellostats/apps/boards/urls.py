@@ -14,9 +14,10 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/lists/?$', boards.view_lists, name="view_board_lists"),
     url(r'^(?P<board_id>\d+)/delete/?$', boards.delete, name="delete_board"),
 
-    url(r'^(?P<board_id>\d+)/cards/view/?$', boards.view_cards, name="view_cards"),
+    url(r'^(?P<board_id>\d+)/cards/?$', boards.view_cards, name="view_cards"),
 
-    url(r'^(?P<board_id>\d+)/labels/view/?$', boards.view_labels, name="view_labels"),
+    url(r'^(?P<board_id>\d+)/labels/?$', boards.view_labels, name="view_labels"),
+    url(r'^(?P<board_id>\d+)/members/?$', boards.view_members, name="view_members"),
 
     url(r'^(?P<board_id>\d+)/fetch/?$', boards.fetch, name="fetch"),
 

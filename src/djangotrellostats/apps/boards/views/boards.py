@@ -63,7 +63,8 @@ def fetch(request, board_id):
     raise Http404
 
 
-# View card list
+# View card report
+@login_required
 def view_cards(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
@@ -71,13 +72,14 @@ def view_cards(request, board_id):
         last_fetch = board.last_fetch
     except Fetch.DoesNotExist:
         board.fetch()
-    last_fetch = board.last_fetch
+        last_fetch = board.last_fetch
     cards = last_fetch.cards.all()
     replacements = {"member": member, "fetch": last_fetch, "board": board, "cards": cards}
     return render(request, "cards/list.html", replacements)
 
 
-# View label list
+# View label report
+@login_required
 def view_labels(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
@@ -85,10 +87,25 @@ def view_labels(request, board_id):
         last_fetch = board.last_fetch
     except Fetch.DoesNotExist:
         board.fetch()
-    last_fetch = board.last_fetch
+        last_fetch = board.last_fetch
     labels = last_fetch.labels.all()
     replacements = {"member": member, "fetch": last_fetch, "board": board, "labels": labels}
     return render(request, "labels/list.html", replacements)
+
+
+# View member report
+@login_required
+def view_members(request, board_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id)
+    try:
+        last_fetch = board.last_fetch
+    except Fetch.DoesNotExist:
+        board.fetch()
+        last_fetch = board.last_fetch
+    member_reports = last_fetch.member_reports.all()
+    replacements = {"member": member, "fetch": last_fetch, "board": board, "member_reports": member_reports}
+    return render(request, "member_reports/list.html", replacements)
 
 
 # Change list type. Remember a list can be "development" or "done" list
@@ -105,7 +122,7 @@ def change_list_type(request):
         if type_ == "done" and List.objects.filter(type="done").exists():
             List.objects.filter(type="done").update(type="normal")
 
-        list_ = List.objects.get(id=list_id, board__member=member)
+        list_ = List.objects.get(id=list_id, board__members=member)
         list_.type = type_
         list_.save()
 
