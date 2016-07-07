@@ -11,16 +11,24 @@
         <table>
             <tr>
                 <td>Name</td>
+                <td>Closed?</td>
                 <td>List</td>
+                <td>Lead time</td>
+                <td>Cycle time</td>
                 <td>Estimated time</td>
                 <td>Spent time</td>
+                <td>Last activity date</td>
             </tr>
             {% for card in cards %}
                 <tr>
                     <td>{{card.name}}</td>
+                    <td>{% if card.is_closed %}Yes{% else %}No{% endif %}</td>
                     <td>{{card.list.name}}</td>
+                    <td>{{card.lead_time}}</td>
+                    <td>{{card.cycle_time}}</td>
                     <td>{{card.estimated_time}}</td>
                     <td>{{card.spent_time}}</td>
+                    <td>{{card.last_activity_date}}</td>
                 </tr>
             {% endfor %}
         </table>
