@@ -5,6 +5,7 @@
 {% block content %}
     <h1>Daily spent time of {{selected_member.trello_username}}</h1>
     <div>Last updated: {{fetch.creation_datetime}}</div>
+    {% include "daily_spent_times/choose_member_form.html" with selected_member=selected_member %}
     {% if daily_spent_times|length == 0 %}
         There are no times for this member.
     {% else %}
@@ -15,6 +16,8 @@
                 <td>Day of year</td>
                 <td>Date</td>
                 <td>Spent time</td>
+                <td>Estimated time</td>
+                <td>Difference</td>
             </tr>
             {% for daily_spent_time in daily_spent_times %}
                 <tr class="day_of_year_{{daily_spent_time.day_of_year}} week_of_year_{{daily_spent_time.week_of_year}}">
@@ -23,6 +26,8 @@
                     <td>{{daily_spent_time.day_of_year}}</td>
                     <td>{{daily_spent_time.date}}</td>
                     <td>{{daily_spent_time.spent_time}}</td>
+                    <td>{{daily_spent_time.estimated_time}}</td>
+                    <td>{{daily_spent_time.diff_time}}</td>
                 </tr>
             {% endfor %}
         </table>

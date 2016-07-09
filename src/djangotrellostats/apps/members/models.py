@@ -14,7 +14,7 @@ class Member(models.Model):
     api_secret = models.CharField(max_length=128, verbose_name=u"Trello API secret", null=True, default=None)
     token = models.CharField(max_length=128, verbose_name=u"Trello token", null=True, default=None)
     token_secret = models.CharField(max_length=128, verbose_name=u"Trello token secret", null=True, default=None)
-    uuid = models.CharField(max_length=128, verbose_name=u"Trello member uuid")
+    uuid = models.CharField(max_length=128, verbose_name=u"Trello member uuid", unique=True)
     trello_username = models.CharField(max_length=128, verbose_name=u"Trello username")
     initials = models.CharField(max_length=8, verbose_name=u"User initials in Trello")
     user = models.OneToOneField(User, verbose_name=u"Associated user", related_name="member", null=True, default=None)

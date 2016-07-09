@@ -48,7 +48,7 @@ class SignUpForm(models.ModelForm):
         try:
             trello_member.fetch()
         except Exception:
-            raise ValueError(u"Exception when dealing with Trello connection. Are your credentials right?")
+            raise ValidationError(u"Exception when dealing with Trello connection. Are your credentials right?")
 
         self.cleaned_data["uuid"] = trello_member.id
         self.cleaned_data["trello_username"] = trello_member.username

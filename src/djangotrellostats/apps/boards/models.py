@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import re
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -13,7 +14,6 @@ import numpy
 import datetime
 import math
 import pytz
-
 
 from trello import Board as TrelloBoard
 from collections import namedtuple
@@ -45,6 +45,13 @@ class Fetch(ImmutableModel):
         fetch.save()
         return fetch
 
+    @staticmethod
+    def last():
+        try:
+            return Fetch.objects.all().order_by("-creation_datetime")[0]
+        except IndexError:
+            raise Fetch.DoesNotExist
+
 
 # Task board
 class Board(models.Model):
@@ -55,13 +62,14 @@ class Board(models.Model):
 
     members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="boards")
 
-    @property
-    def last_fetch(self):
+    def last_fetch(self, create_if_not_exists=True):
         try:
-            last_fetch = Fetch.objects.all().order_by("-creation_datetime")[0]
-        except IndexError:
+            return Fetch.last()
+        except Fetch.DoesNotExist:
+            if create_if_not_exists:
+                self.fetch()
+                return Fetch.last()
             raise Fetch.DoesNotExist
-        return last_fetch
 
     # Fetch data of this board
     def fetch(self):
@@ -235,16 +243,16 @@ class Card(ImmutableModel):
 
     class Meta:
         unique_together = (
-            ("uuid", "fetch"),
+            ("fetch", "uuid"),
         )
 
     fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="cards")
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
     list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")
 
-    name = models.CharField(max_length=128, verbose_name=u"Name of the card")
+    name = models.TextField(verbose_name=u"Name of the card")
     uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the card")
-    url = models.CharField(max_length=128, verbose_name=u"URL of the card")
+    url = models.CharField(max_length=512, verbose_name=u"URL of the card")
     short_url = models.CharField(max_length=128, verbose_name=u"Short URL of the card")
     description = models.TextField(verbose_name=u"Description of the card")
     is_closed = models.BooleanField(verbose_name=u"Is this card closed?", default=False)
@@ -392,7 +400,9 @@ class Card(ImmutableModel):
                 local_timezone = pytz.timezone(settings.TIME_ZONE)
                 comment_date = local_timezone.localize(datetime.datetime.strptime(comment["date"],
                                                                                   '%Y-%m-%dT%H:%M:%S.%fZ')).date()
-                DailySpentTime.add(fetch=self.fetch, board=self.board, member=member_uuid, date=comment_date, spent_time_value=spent)
+
+                DailySpentTime.add(fetch=self.fetch, board=self.board, member=member_uuid, date=comment_date,
+                                   spent_time=spent, estimated_time=estimated)
 
         self.comment_summary = {
             "member_uuids": member_uuids.keys(),
@@ -406,7 +416,7 @@ class Card(ImmutableModel):
 class Label(ImmutableModel):
     class Meta:
         unique_together = (
-            ("uuid", "fetch"),
+            ("fetch", "uuid"),
         )
 
     name = models.CharField(max_length=128, verbose_name=u"Name of the label")
@@ -461,6 +471,12 @@ class ListReport(models.Model):
     std_dev_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4,
                                             max_digits=12)
 
+    class Meta:
+        unique_together = (
+            ("fetch", "list"),
+        )
+
+
 # Stat report by member
 class MemberReport(models.Model):
     fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="member_reports")
@@ -484,6 +500,7 @@ class MemberReport(models.Model):
     std_dev_estimated_time = models.DecimalField(verbose_name=u"Std. Deviation of the estimated card completion time",
                                                  decimal_places=4,
                                                  max_digits=12, default=None, null=True)
+
 
 # Stat report by workflow
 class Workflow(models.Model):
@@ -556,29 +573,41 @@ class DailySpentTime(models.Model):
     week_of_year = models.CharField(verbose_name="Week number of the time measurement", max_length=16)
     weekday = models.CharField(verbose_name="Week day of the time measurement", max_length=16)
 
-    spent_time = models.DecimalField(verbose_name=u"Card spent time for this card", decimal_places=4, max_digits=12,
+    spent_time = models.DecimalField(verbose_name=u"Spent time for this day", decimal_places=4, max_digits=12,
                                      default=None, null=True)
+
+    estimated_time = models.DecimalField(verbose_name=u"Estimated time for this day", decimal_places=4, max_digits=12,
+                                         default=None, null=True)
+
+    diff_time = models.DecimalField(verbose_name=u"Difference between the estimated time and the spent time",
+                                    decimal_places=4, max_digits=12,
+                                    default=None, null=True)
 
     # Add a new amount of spent time to a member
     @staticmethod
-    def add(fetch, board, member, date, spent_time_value):
+    def add(fetch, board, member, date, spent_time, estimated_time):
         # In case a uuid is passed, load the Member object
         if type(member) is str or type(member) is unicode:
             member = board.members.get(uuid=member)
 
-        # Add the spent time value to the total amout of time this member has spent
+        # Add the spent time value to the total amount of time this member has spent
         try:
-            spent_time = DailySpentTime.objects.get(fetch=fetch, board=board, member=member, date=date)
-            spent_time.spent_time += spent_time_value
+            daily_spent_time = DailySpentTime.objects.get(fetch=fetch, board=board, member=member, date=date)
+            daily_spent_time.spent_time += Decimal(spent_time)
+            daily_spent_time.estimated_time += Decimal(estimated_time)
+            daily_spent_time.diff_time += (Decimal(estimated_time) - Decimal(spent_time))
 
         except DailySpentTime.DoesNotExist:
             iso_calendar_date = date.isocalendar()
             weekday = date.strftime("%w")
             week_of_year = iso_calendar_date[1]
             day_of_year = date.strftime("%j")
-            spent_time = DailySpentTime(fetch=fetch, board=board, member=member, spent_time=spent_time_value,
-                                        date=date, day_of_year=day_of_year, week_of_year=week_of_year, weekday=weekday)
+            daily_spent_time = DailySpentTime(fetch=fetch, board=board, member=member,
+                                              spent_time=Decimal(spent_time),
+                                              estimated_time=Decimal(estimated_time),
+                                              diff_time=Decimal(estimated_time) - Decimal(spent_time),
+                                              date=date, day_of_year=day_of_year, week_of_year=week_of_year,
+                                              weekday=weekday)
 
-        spent_time.save()
+        daily_spent_time.save()
         return spent_time
-
