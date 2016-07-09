@@ -31,8 +31,8 @@ class NewWorkflowForm(models.ModelForm):
             self.fields[development_list_name_i] = models.ChoiceField(choices=list_choices, initial="empty",
                                                                       label=u"'Development' list in position {0}".format(list_i))
             # In case we are editing, get default value of the select of the lists
-            if workflow.workflowlists.filter(order=list_i, is_done_list=False).exists():
-                list_id_in_position_i = workflow.workflowlists.get(order=list_i, is_done_list=False).list_id
+            if workflow.workflow_lists.filter(order=list_i, is_done_list=False).exists():
+                list_id_in_position_i = workflow.workflow_lists.get(order=list_i, is_done_list=False).list_id
                 self.fields[development_list_name_i].initial = list_position[list_id_in_position_i]
 
         # Done lists
@@ -41,8 +41,8 @@ class NewWorkflowForm(models.ModelForm):
             self.fields[done_list_name_i] = models.ChoiceField(choices=list_choices, initial="empty",
                                                                label=u"'Done' list in position {0}".format(list_i))
 
-            if workflow.workflowlists.filter(order=list_i, is_done_list=True).exists():
-                list_id_in_position_i = workflow.workflowlists.get(order=list_i, is_done_list=True).list_id
+            if workflow.workflow_lists.filter(order=list_i, is_done_list=True).exists():
+                list_id_in_position_i = workflow.workflow_lists.get(order=list_i, is_done_list=True).list_id
                 self.fields[done_list_name_i].initial = list_position[list_id_in_position_i]
 
     def save(self, commit=True):
@@ -50,7 +50,7 @@ class NewWorkflowForm(models.ModelForm):
 
         if commit:
             # Clear existing relationships
-            workflow.workflowlists.all().delete()
+            workflow.workflow_lists.all().delete()
             for field in self.cleaned_data:
                 list_match = re.match("^(development_list|done_list)_(\d)+$", field)
                 if list_match and self.cleaned_data[field] != "empty":

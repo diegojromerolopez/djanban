@@ -17,7 +17,7 @@ def view_list(request, board_id):
     workflows = Workflow.objects.all().order_by("name")
     # Ordered workflow lists
     for workflow in workflows:
-        workflow.ordered_lists = workflow.workflowlists.all().order_by("order")
+        workflow.ordered_lists = workflow.workflow_lists.all().order_by("order")
     replacements = {"board": board, "workflows": workflows, "member": member}
     return render(request, "workflows/list.html", replacements)
 
