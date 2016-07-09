@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import re
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Avg
@@ -9,7 +10,10 @@ from django.db.models.query_utils import Q
 from django.utils import timezone
 import copy
 import numpy
+import datetime
 import math
+import pytz
+
 
 from trello import Board as TrelloBoard
 from collections import namedtuple
@@ -99,7 +103,7 @@ class Board(models.Model):
         # Card stats computation
         for trello_card in trello_cards:
             trello_card.fetch(eager=False)
-            card = Card.factory_from_trello_card(trello_card, self)
+            card = Card.factory_from_trello_card(trello_card, fetch, self)
 
             card.get_stats_by_list(lists, done_list)
 
@@ -139,7 +143,6 @@ class Board(models.Model):
                     [list_stats["time"] if list_uuid in trello_cycle_dict else 0 for list_uuid, list_stats in
                      card.stats_by_list.items()])
 
-            card.fetch = fetch
             card.save()
 
             # Label assignment to each card
@@ -235,6 +238,10 @@ class Card(ImmutableModel):
             ("uuid", "fetch"),
         )
 
+    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="cards")
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
+    list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")
+
     name = models.CharField(max_length=128, verbose_name=u"Name of the card")
     uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the card")
     url = models.CharField(max_length=128, verbose_name=u"URL of the card")
@@ -253,41 +260,35 @@ class Card(ImmutableModel):
                                     null=True)
     labels = models.ManyToManyField("boards.Label", related_name="cards")
 
-    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="cards")
-
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
-    list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")
-
     @staticmethod
-    def factory_from_trello_card(trello_card, board):
+    def factory_from_trello_card(trello_card, fetch, board):
         list_ = board.lists.get(uuid=trello_card.idList)
 
-        card = Card(uuid=trello_card.id, name=trello_card.name, url=trello_card.url, short_url=trello_card.short_url,
-                    description=trello_card.desc, is_closed=trello_card.closed, position=trello_card.pos,
-                    last_activity_date=trello_card.dateLastActivity,
+        card = Card(fetch=fetch, uuid=trello_card.id, name=trello_card.name, url=trello_card.url,
+                    short_url=trello_card.short_url, description=trello_card.desc, is_closed=trello_card.closed,
+                    position=trello_card.pos, last_activity_date=trello_card.dateLastActivity,
                     board=board, list=list_
                     )
 
         # Store the trello card data for ease of use
         card.trello_card = trello_card
 
+        # Card comments
+        comment_summary = card.fetch_comments()
+
         # Card spent and estimated times
-        trello_card_comments = trello_card.fetch_comments()
-        comment_info = Card._get_trello_comment_info(trello_card_comments)
-        card.spent_time = comment_info["spent"]["total"]
-        card.estimated_time = comment_info["estimated"]["total"]
+        card.spent_time = comment_summary["spent"]["total"]
+        card.estimated_time = comment_summary["estimated"]["total"]
 
         # Dynamic attributes
-        # Summary of information obtained by fetching the comments
-        card.comment_info = comment_info
 
         # Spent and estimated time by member
-        card.spent_time_by_member = comment_info["spent"]["by_member"]
-        card.estimated_time_by_member = comment_info["estimated"]["by_member"]
+        card.spent_time_by_member = comment_summary["spent"]["by_member"]
+        card.estimated_time_by_member = comment_summary["estimated"]["by_member"]
 
         # Members that play a role in this task
         card_member_uuids = {member_uuid: True for member_uuid in trello_card.idMembers}
-        card_member_uuids.update({member_uuid: True for member_uuid in comment_info["member_uuids"]})
+        card_member_uuids.update({member_uuid: True for member_uuid in comment_summary["member_uuids"]})
         card.member_uuids = card_member_uuids.keys()
 
         return card
@@ -324,21 +325,34 @@ class Card(ImmutableModel):
         self.lists = lists
         self.done_list = done_list
         self.stats_by_list = self.trello_card.get_stats_by_list(lists=fake_trello_lists,
-                                                                     list_cmp=list_cmp,
-                                                                     done_list=fake_trello_list_done,
-                                                                     time_unit="hours", card_movements_filter=None)
+                                                                list_cmp=list_cmp,
+                                                                done_list=fake_trello_list_done,
+                                                                time_unit="hours", card_movements_filter=None)
 
         return self.stats_by_list
 
-    @staticmethod
-    def _get_trello_comment_info(comments):
+    def fetch_comments(self):
+        trello_card_comments = self.trello_card.fetch_comments()
+        self.comments = trello_card_comments
+
         total_spent = None
         total_estimated = None
         spent_by_member = {}
         estimated_by_member = {}
         member_uuids = {}
+
+        # Comment format:
+        # {u'type': u'commentCard', u'idMemberCreator': u'56e2ac8e14e4eda06ac6b8fd',
+        #  u'memberCreator': {u'username': u'diegoj5', u'fullName': u'Diego J.', u'initials': u'DJ',
+        #                     u'id': u'56e2ac8e14e4eda06ac6b8fd', u'avatarHash': u'a3086f12908905354b15972cd67b64f8'},
+        #  u'date': u'2016-04-20T23:06:38.279Z',
+        #  u'data': {u'text': u'Un comentario', u'list': {u'name': u'En desarrollo', u'id': u'5717fb3fde6bdaed40201667'},
+        #            u'board': {u'id': u'5717fb368199521a139712f0', u'name': u'Test', u'shortLink': u'2CGPEnM2'},
+        #            u'card': {u'idShort': 6, u'id': u'57180ae1ed24b1cff7f8da7c', u'name': u'Por todas',
+        #                      u'shortLink': u'bnK3c1jF'}}, u'id': u'57180b7e25abc60313461aaf'}
+
         # For each comment, find the desired pattern and extract the spent and estimated times
-        for comment in comments:
+        for comment in self.comments:
             comment_content = comment["data"]["text"]
             matches = re.match(Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, comment_content)
             if matches:
@@ -374,12 +388,18 @@ class Card(ImmutableModel):
 
                 total_estimated += estimated
 
-        info = {
+                # Store spent time by member by day
+                local_timezone = pytz.timezone(settings.TIME_ZONE)
+                comment_date = local_timezone.localize(datetime.datetime.strptime(comment["date"],
+                                                                                  '%Y-%m-%dT%H:%M:%S.%fZ')).date()
+                DailySpentTime.add(fetch=self.fetch, board=self.board, member=member_uuid, date=comment_date, spent_time_value=spent)
+
+        self.comment_summary = {
             "member_uuids": member_uuids.keys(),
             "spent": {"total": total_spent, "by_member": spent_by_member},
             "estimated": {"total": total_estimated, "by_member": estimated_by_member}
         }
-        return info
+        return self.comment_summary
 
 
 # Label of the task board
@@ -430,6 +450,7 @@ class List(models.Model):
     type = models.CharField(max_length=64, choices=LIST_TYPE_CHOICES, default="normal")
 
 
+# Stat report by list
 class ListReport(models.Model):
     fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="list_reports")
     list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="list_reports")
@@ -440,7 +461,7 @@ class ListReport(models.Model):
     std_dev_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4,
                                             max_digits=12)
 
-
+# Stat report by member
 class MemberReport(models.Model):
     fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="member_reports")
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="member_reports")
@@ -464,7 +485,7 @@ class MemberReport(models.Model):
                                                  decimal_places=4,
                                                  max_digits=12, default=None, null=True)
 
-
+# Stat report by workflow
 class Workflow(models.Model):
     name = models.CharField(max_length=128, verbose_name=u"Name of the workflow")
     board = models.ForeignKey("boards.Board", verbose_name=u"Workflow", related_name="workflows")
@@ -473,8 +494,10 @@ class Workflow(models.Model):
     # Fetch data for this workflow, creating a workflow report
     def fetch(self, fetch, cards):
         workflow_lists = self.workflow_lists.all()
-        development_lists = {workflow_list.list.uuid: workflow_list.list for workflow_list in self.workflow_lists.filter(is_done_list=False)}
-        done_lists = {workflow_list.list.uuid: workflow_list.list for workflow_list in self.workflow_lists.filter(is_done_list=True)}
+        development_lists = {workflow_list.list.uuid: workflow_list.list for workflow_list in
+                             self.workflow_lists.filter(is_done_list=False)}
+        done_lists = {workflow_list.list.uuid: workflow_list.list for workflow_list in
+                      self.workflow_lists.filter(is_done_list=True)}
 
         workflow_card_reports = []
 
@@ -516,7 +539,46 @@ class WorkflowCardReport(models.Model):
     workflow = models.ForeignKey("boards.Workflow", verbose_name=u"Workflow", related_name="workflow_card_reports")
     card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="workflow_card_reports")
     lead_time = models.DecimalField(verbose_name=u"Card cycle card time", decimal_places=4,
-                                             max_digits=12, default=None, null=True)
+                                    max_digits=12, default=None, null=True)
     cycle_time = models.DecimalField(verbose_name=u"Card lead time", decimal_places=4, max_digits=12,
-                                              default=None,
-                                              null=True)
+                                     default=None,
+                                     null=True)
+
+
+# Daily spent time by member
+class DailySpentTime(models.Model):
+    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="daily_spent_times")
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="daily_spent_times")
+    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="daily_spent_times")
+
+    date = models.DateField(verbose_name="Date of the time measurement")
+    day_of_year = models.CharField(verbose_name="Day number of the time measurement", max_length=16)
+    week_of_year = models.CharField(verbose_name="Week number of the time measurement", max_length=16)
+    weekday = models.CharField(verbose_name="Week day of the time measurement", max_length=16)
+
+    spent_time = models.DecimalField(verbose_name=u"Card spent time for this card", decimal_places=4, max_digits=12,
+                                     default=None, null=True)
+
+    # Add a new amount of spent time to a member
+    @staticmethod
+    def add(fetch, board, member, date, spent_time_value):
+        # In case a uuid is passed, load the Member object
+        if type(member) is str or type(member) is unicode:
+            member = board.members.get(uuid=member)
+
+        # Add the spent time value to the total amout of time this member has spent
+        try:
+            spent_time = DailySpentTime.objects.get(fetch=fetch, board=board, member=member, date=date)
+            spent_time.spent_time += spent_time_value
+
+        except DailySpentTime.DoesNotExist:
+            iso_calendar_date = date.isocalendar()
+            weekday = date.strftime("%w")
+            week_of_year = iso_calendar_date[1]
+            day_of_year = date.strftime("%j")
+            spent_time = DailySpentTime(fetch=fetch, board=board, member=member, spent_time=spent_time_value,
+                                        date=date, day_of_year=day_of_year, week_of_year=week_of_year, weekday=weekday)
+
+        spent_time.save()
+        return spent_time
+

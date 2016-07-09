@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.http.response import Http404
 from django.shortcuts import render
 
-from djangotrellostats.apps.boards.models import List, Fetch
+from djangotrellostats.apps.boards.models import List, Fetch, DailySpentTime
 from djangotrellostats.apps.boards.stats import avg, std_dev
 
 
@@ -135,6 +135,32 @@ def view_member_report(request, board_id):
     member_reports = last_fetch.member_reports.all()
     replacements = {"member": member, "fetch": last_fetch, "board": board, "member_reports": member_reports}
     return render(request, "member_reports/list.html", replacements)
+
+
+# View spent time report
+@login_required
+def view_daily_spent_times(request, board_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id)
+    try:
+        last_fetch = board.last_fetch
+    except Fetch.DoesNotExist:
+        board.fetch()
+        last_fetch = board.last_fetch
+
+    member_id = request.GET.get("member_id")
+
+    replacements = {"board": board, "fetch": last_fetch}
+
+    if member_id is None or member_id == "":
+        return render(request, "daily_spent_times/choose_member.html", replacements)
+
+    selected_member = board.members.get(id=member_id)
+    replacements["daily_spent_times"] = DailySpentTime.objects.filter(fetch=last_fetch, board=board, member=selected_member).order_by("-date")
+    replacements["selected_member"] = selected_member
+    return render(request, "daily_spent_times/list.html", replacements)
+
+
 
 
 # Change list type. Remember a list can be "development" or "done" list

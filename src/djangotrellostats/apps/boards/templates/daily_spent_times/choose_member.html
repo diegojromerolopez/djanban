@@ -1,0 +1,17 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Choose member to list his/her daily spent times{% endblock %}
+
+{% block content %}
+    <form action="{% url 'boards:view_daily_spent_times' board.id %}" method="get">
+        <span>Please select a member</span>
+        <select name="member_id">
+            <option value="">Select the member you want to see his/her daily spent time</option>
+            {% for member in board.members.all %}
+                <option value="{{member.id}}">{{member.trello_username}}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Send</button>
+    </form>
+
+{% endblock %}

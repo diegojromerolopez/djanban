@@ -19,6 +19,7 @@ urlpatterns = [
 
     url(r'^(?P<board_id>\d+)/labels/?$', boards.view_label_report, name="view_label_report"),
     url(r'^(?P<board_id>\d+)/members/?$', boards.view_member_report, name="view_member_report"),
+    url(r'^(?P<board_id>\d+)/daily_spent_time/?$', boards.view_daily_spent_times, name="view_daily_spent_times"),
 
     url(r'^(?P<board_id>\d+)/fetch/?$', boards.fetch, name="fetch"),
 
