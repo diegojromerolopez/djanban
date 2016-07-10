@@ -9,5 +9,5 @@ from django.shortcuts import render
 def dashboard(request):
     member = request.user.member
     boards = member.boards.all()
-    replacements = {"member":member, "boards": boards}
+    replacements = {"member": member, "boards": boards}
     return render(request, "members/dashboard.html", replacements)

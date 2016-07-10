@@ -1,0 +1,48 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}
+    Daily spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}
+{% endblock %}
+
+{% block content %}
+    <h1>
+        Daily spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}
+    </h1>
+    <div>Last updated: {{fetch.creation_datetime}}</div>
+    {% include "daily_spent_times/filter_form.html" with selected_member=selected_member %}
+    {% if daily_spent_times|length == 0 %}
+            There are no times for this member.
+    {% else %}
+            <table>
+                <tr>
+                    {% if not selected_board %}<td>Board</td>{% endif %}
+                    {% if not selected_member %}<td>Member</td>{% endif %}
+                    <td>Week</td>
+                    <td>Weekday</td>
+                    <td>Day of year</td>
+                    <td>Date</td>
+                    <td>Spent time</td>
+                    <td>Estimated time</td>
+                    <td>Difference</td>
+                </tr>
+                {% for daily_spent_time in daily_spent_times %}
+                    <tr class="day_of_year_{{daily_spent_time.day_of_year}} week_of_year_{{daily_spent_time.week_of_year}}">
+                        {% if not selected_board %}<td>{{daily_spent_time.board.name}}</td>{% endif %}
+                        {% if not selected_member %}<td>{{daily_spent_time.member.trello_username}}</td>{% endif %}
+                        <td>{{daily_spent_time.week_of_year}}</td>
+                        <td>{{daily_spent_time.weekday}}</td>
+                        <td>{{daily_spent_time.day_of_year}}</td>
+                        <td>{{daily_spent_time.date}}</td>
+                        <td>{{daily_spent_time.spent_time}}</td>
+                        <td>{{daily_spent_time.estimated_time}}</td>
+                        <td>{{daily_spent_time.diff_time}}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <div>
+                <div>Sum of spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{spent_time_sum}}</div>
+                <div>Sum of estimated time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{estimated_time_sum}}</div>
+                <div>Difference {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{diff_time_sum}}</div>
+            </div>
+    {% endif %}
+{% endblock content %}

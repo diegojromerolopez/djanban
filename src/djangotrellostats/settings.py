@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'djangotrellostats.apps.members',
     'djangotrellostats.apps.public',
     'djangotrellostats.apps.boards',
+    'djangotrellostats.apps.dev_times',
 ]
 
 MIDDLEWARE_CLASSES = (

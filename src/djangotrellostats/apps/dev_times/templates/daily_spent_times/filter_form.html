@@ -1,0 +1,26 @@
+<form action="{% url 'dev_times:view_daily_spent_times' %}" method="get">
+    <div>
+        <span>Date interval</span>
+        <input type="date" name="start_date" {% if start_date %}value="{{start_date|date:'Y-m-d'}}"{% endif %}/>
+        <input type="date" name="end_date" {% if end_date %}value="{{end_date|date:'Y-m-d'}}"{% endif %}/>
+    </div>
+    <div>
+        <span>Member</span>
+        <select name="member_id">
+            <option value="">All members</option>
+            {% for member in members.all %}
+                <option value="{{member.id}}" {% if selected_member.id == member.id %}selected="selected"{% endif %}>{{member.trello_username}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <span>Board</span>
+        <select name="board_id">
+            <option value="">All</option>
+            {% for board in boards.all %}
+                <option value="{{board.id}}" {% if selected_board.id == board.id %}selected="selected"{% endif %}>{{board.name}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit">Send</button>
+</form>
