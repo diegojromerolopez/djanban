@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.db import models
 from django.db.models import Avg
 from django.db.models.query_utils import Q
@@ -73,6 +74,7 @@ class Board(models.Model):
             raise Fetch.DoesNotExist
 
     # Fetch data of this board
+    @transaction.atomic
     def fetch(self):
         fetch = Fetch.new(self)
         self._fetch_labels(fetch)
