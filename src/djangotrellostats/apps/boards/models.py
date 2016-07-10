@@ -54,6 +54,9 @@ class Fetch(ImmutableModel):
         except IndexError:
             raise Fetch.DoesNotExist
 
+    def get_human_creation_datetime(self):
+        return self.creation_datetime.strftime("%Y-%m-%d")
+
 
 # Task board
 class Board(models.Model):
@@ -500,7 +503,7 @@ class MemberReport(models.Model):
     avg_card_estimated_time = models.DecimalField(verbose_name=u"Average task estimated card completion time",
                                                   decimal_places=4,
                                                   max_digits=12, default=None, null=True)
-    std_dev_estimated_time = models.DecimalField(verbose_name=u"Std. Deviation of the estimated card completion time",
+    std_dev_card_estimated_time = models.DecimalField(verbose_name=u"Std. Deviation of the estimated card completion time",
                                                  decimal_places=4,
                                                  max_digits=12, default=None, null=True)
 

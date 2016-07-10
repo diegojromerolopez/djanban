@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
-import datetime
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.db.models import Sum
 from django.http import HttpResponseRedirect
 from django.http.response import Http404
 from django.shortcuts import render
 
-from djangotrellostats.apps.boards.models import List, Fetch, DailySpentTime, Board
+from djangotrellostats.apps.boards.models import List
 from djangotrellostats.apps.boards.stats import avg, std_dev
-from djangotrellostats.apps.members.models import Member
+
 
 # Initialize boards with data fetched from trello
 def init_boards(request):

@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^member/', include('djangotrellostats.apps.members.urls', namespace="members")),
     url(r'^boards/', include('djangotrellostats.apps.boards.urls', namespace="boards")),
     url(r'^times/', include('djangotrellostats.apps.dev_times.urls', namespace="dev_times")),
+    url(r'^charts/', include('djangotrellostats.apps.charts.urls', namespace="charts")),
     #url(r'^connector/', include('djangotrellostats.apps.connector.urls', namespace="connector")),
     #url(r'^taskboard/', include('djangotrellostats.apps.taskboard.urls', namespace="taskboard")),
 ]

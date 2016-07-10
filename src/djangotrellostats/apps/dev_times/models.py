@@ -41,9 +41,8 @@ class DailySpentTime(models.Model):
             daily_spent_time.diff_time += (Decimal(estimated_time) - Decimal(spent_time))
 
         except DailySpentTime.DoesNotExist:
-            iso_calendar_date = date.isocalendar()
             weekday = date.strftime("%w")
-            week_of_year = iso_calendar_date[1]
+            week_of_year = DailySpentTime.get_iso_week_of_year(date)
             day_of_year = date.strftime("%j")
             daily_spent_time = DailySpentTime(fetch=fetch, board=board, member=member,
                                               spent_time=Decimal(spent_time),
@@ -54,3 +53,9 @@ class DailySpentTime(models.Model):
 
         daily_spent_time.save()
         return spent_time
+
+    @staticmethod
+    def get_iso_week_of_year(date):
+        iso_calendar_date = date.isocalendar()
+        week_of_year = iso_calendar_date[1]
+        return week_of_year

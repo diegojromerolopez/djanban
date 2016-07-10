@@ -2,8 +2,10 @@
 
 {% block page_title %}Index{% endblock %}
 
+{% block content %}
 {% if user and user.is_authenticated %}
-    {% include "members/dashboard.html" %}
+    {% include "public/dashboard.html" %}
 {% else %}
     Please log in the system or register
 {% endif %}
+{% endblock content %}
