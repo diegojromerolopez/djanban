@@ -5,7 +5,7 @@ import pygal
 from django.db.models import Sum
 from django.utils import timezone
 
-from djangotrellostats.apps.boards.models import Fetch, MemberReport
+from djangotrellostats.apps.boards.models import Fetch, MemberReport, Board
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 
@@ -27,7 +27,10 @@ def _task_movements_by_member(request, movement_type="forward", board_id=None):
     if movement_type != "forward" and movement_type != "backward":
         raise ValueError("{0} is not recognized as a valid movement type".format(movement_type))
 
-    chart_title = "Task {0} movements as of {1}".format(movement_type, last_fetch.get_human_creation_datetime())
+    chart_title = u"Task {0} movements as of {1}".format(movement_type, last_fetch.get_human_creation_datetime())
+    if board_id:
+        board = Board.objects.get(id=board_id)
+        chart_title += u" for board {0}".format(board.name)
 
     member_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True)
 
@@ -57,6 +60,7 @@ def _task_movements_by_member(request, movement_type="forward", board_id=None):
     return member_chart.render_django_response()
 
 
+# Show a chart with the
 def spent_time_by_week(request, week_of_year=None, board_id=None):
     last_fetch = Fetch.last()
 
@@ -65,7 +69,10 @@ def spent_time_by_week(request, week_of_year=None, board_id=None):
         today = now.date()
         week_of_year = DailySpentTime.get_iso_week_of_year(today)
 
-    chart_title = "Spent time in week {0}".format(week_of_year)
+    chart_title = u"Spent time in week {0}".format(week_of_year)
+    if board_id:
+        board = Board.objects.get(id=board_id)
+        chart_title += u" for board {0}".format(board.name)
 
     spent_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True)
 
