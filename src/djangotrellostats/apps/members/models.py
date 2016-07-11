@@ -34,10 +34,17 @@ class Member(models.Model):
 
             # Fetch all lists of this board
             trello_lists = trello_board.all_lists()
+            _lists = []
             for trello_list in trello_lists:
                 list_name = trello_list.name.decode("utf-8")
                 _list = List(uuid=trello_list.id, name=list_name, board=board)
                 _list.save()
+                _lists.append(_list)
+
+            # By default, consider the last list as "done" list
+            last_list = _lists[-1]
+            last_list.type = "done"
+            last_list.save()
 
             # Fetch all members this board
             self._fetch_members(board, trello_board)

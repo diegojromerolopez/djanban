@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'djangotrellostats.apps.public',
     'djangotrellostats.apps.boards',
     'djangotrellostats.apps.dev_times',
+    'djangotrellostats.apps.fetch',
 ]
 
 MIDDLEWARE_CLASSES = (

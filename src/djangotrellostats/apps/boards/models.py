@@ -211,8 +211,9 @@ class Board(models.Model):
 
         # Average and std. deviation of time cards live in this list
         for list_uuid, list_report in list_report_dict.items():
-            list_report.avg_card_time = numpy.mean(list_report.times)
-            list_report.std_dev_card_time = numpy.std(list_report.times, axis=0)
+            if hasattr(list_report, "times"):
+                list_report.avg_card_time = numpy.mean(list_report.times)
+                list_report.std_dev_card_time = numpy.std(list_report.times, axis=0)
             list_report.save()
 
         # Average and std. deviation of card times by member
@@ -473,9 +474,9 @@ class ListReport(models.Model):
     forward_movements = models.PositiveIntegerField(verbose_name=u"Forward movements")
     backward_movements = models.PositiveIntegerField(verbose_name=u"Backward movements")
     avg_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4,
-                                        max_digits=12)
+                                        max_digits=12, default=None, null=True)
     std_dev_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4,
-                                            max_digits=12)
+                                            max_digits=12, default=None, null=True)
 
     class Meta:
         unique_together = (
