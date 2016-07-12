@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db import transaction
 from trello import TrelloClient
 
 from djangotrellostats.apps.boards.models import Board, List
@@ -23,31 +24,54 @@ class Member(models.Model):
         super(Member, self).__init__(*args, **kwargs)
         self.trello_client = self._get_trello_client()
 
+    def is_initialized(self):
+        return self.api_key and self.api_secret and self.token and self.token_secret
+
     # Fetch basic information of boards and its lists
-    def init_fetch(self):
-        self.boards.all().delete()
+    @transaction.atomic
+    def init_fetch(self, debug=False):
+        self.delete_current_data()
+
         trello_boards = self.trello_client.list_boards()
         for trello_board in trello_boards:
-            board_name = trello_board.name.decode("utf-8")
-            board = Board(uuid=trello_board.id, name=board_name, last_activity_date=trello_board.date_last_activity, creator=self)
-            board.save()
 
-            # Fetch all lists of this board
-            trello_lists = trello_board.all_lists()
-            _lists = []
-            for trello_list in trello_lists:
-                list_name = trello_list.name.decode("utf-8")
-                _list = List(uuid=trello_list.id, name=list_name, board=board)
-                _list.save()
-                _lists.append(_list)
+            board_already_exists = Board.objects.filter(uuid=trello_board.id).exists()
+            if not board_already_exists:
+                board_name = trello_board.name.decode("utf-8")
+                board = Board(uuid=trello_board.id, name=board_name, last_activity_date=trello_board.date_last_activity, creator=self)
+                board.save()
+                if debug:
+                    print("Board {0} successfully created".format(board_name))
 
-            # By default, consider the last list as "done" list
-            last_list = _lists[-1]
-            last_list.type = "done"
-            last_list.save()
+                # Fetch all lists of this board
+                trello_lists = trello_board.all_lists()
+                _lists = []
+                for trello_list in trello_lists:
+                    list_name = trello_list.name.decode("utf-8")
+                    _list = List(uuid=trello_list.id, name=list_name, board=board)
+                    if trello_list.closed:
+                        _list.type = "closed"
+                    _list.save()
+                    _lists.append(_list)
 
-            # Fetch all members this board
-            self._fetch_members(board, trello_board)
+                    if debug:
+                        print("- List {1} of board {0} successfully created".format(board_name, list_name))
+
+                # By default, consider the last list as "done" list
+                last_list = _lists[-1]
+                last_list.type = "done"
+                last_list.save()
+
+                # Fetch all members this board
+                self._fetch_members(board, trello_board)
+
+            else:
+                board = Board.objects.get(uuid=trello_board.id)
+                if not board.members.filter(id=self.id).exists():
+                    board.members.add(self)
+
+    def delete_current_data(self):
+        self.created_boards.all().delete()
 
     # Fetch members of this board
     def _fetch_members(self, board, trello_board):

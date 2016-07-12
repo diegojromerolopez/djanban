@@ -76,6 +76,17 @@ class Board(models.Model):
                 return Fetch.last()
             raise Fetch.DoesNotExist
 
+    def is_ready(self):
+        done_list_exists = self.lists.filter(type="done").exists()
+        development_list_exists = self.lists.filter(type="development").exists()
+        return done_list_exists and development_list_exists
+
+    def cycle_time_lists(self):
+        return self.lists.exclude(Q(type="before_development")|Q(type="ignored"))
+
+    def lead_time_lists(self):
+        return self.lists.exclude(Q(type="ignored"))
+
     # Fetch data of this board
     @transaction.atomic
     def fetch(self):
@@ -99,7 +110,8 @@ class Board(models.Model):
 
         workflows = self.workflows.all()
 
-        trello_cycle_dict = {list_.uuid: True for list_ in lists.filter(Q(type="done") | Q(type="development"))}
+        trello_cycle_dict = {list_.uuid: True for list_ in self.cycle_time_lists()}
+        trello_lead_dict = {list_.uuid: True for list_ in self.lead_time_lists()}
         done_list = lists.get(type="done")
 
         # List reports
@@ -152,7 +164,10 @@ class Board(models.Model):
 
             # Cycle and Lead times
             if trello_card.idList == done_list.uuid:
-                card.lead_time = sum([list_stats["time"] for list_uuid, list_stats in card.stats_by_list.items()])
+                card.lead_time = sum(
+                    [list_stats["time"] if list_uuid in trello_lead_dict else 0 for list_uuid, list_stats in
+                     card.stats_by_list.items()])
+
                 card.cycle_time = sum(
                     [list_stats["time"] if list_uuid in trello_cycle_dict else 0 for list_uuid, list_stats in
                      card.stats_by_list.items()])
@@ -455,16 +470,19 @@ class Label(ImmutableModel):
 
 # List of the task board
 class List(models.Model):
-    LIST_TYPES = ("normal", "development", "done")
+    LIST_TYPES = ("ignored", "before_development", "development", "after_development", "done", "closed")
     LIST_TYPE_CHOICES = (
-        ("normal", "Normal"),
+        ("ignored", "Ignored"),
+        ("before_development", "Before development"),
         ("development", "In development"),
-        ("done", "Done")
+        ("after_development", "After development"),
+        ("done", "Done"),
+        ("closed", "Closed"),
     )
     name = models.CharField(max_length=128, verbose_name=u"Name of the board")
     uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the list", unique=True)
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="lists")
-    type = models.CharField(max_length=64, choices=LIST_TYPE_CHOICES, default="normal")
+    type = models.CharField(max_length=64, choices=LIST_TYPE_CHOICES, default="before_development")
 
 
 # Stat report by list

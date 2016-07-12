@@ -36,7 +36,8 @@ def view_lists(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
     lists = board.lists.all()
-    replacements = {"member": member, "board": board, "lists": lists}
+    list_types = {list_type_par[0]:list_type_par[1] for list_type_par in List.LIST_TYPE_CHOICES}
+    replacements = {"member": member, "board": board, "lists": lists, "list_types":list_types}
     return render(request, "boards/board_lists.html", replacements)
 
 
@@ -129,10 +130,6 @@ def change_list_type(request):
         type_ = request.POST.get("type")
         if type_ not in List.LIST_TYPES:
             raise Http404
-
-        # If there are a done list, update it to "normal"
-        if type_ == "done" and List.objects.filter(type="done").exists():
-            List.objects.filter(type="done").update(type="normal")
 
         list_ = List.objects.get(id=list_id, board__members=member)
         list_.type = type_

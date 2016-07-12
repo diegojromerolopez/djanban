@@ -6,7 +6,7 @@ from djangotrellostats.apps.members.models import Member
 
 
 class Command(BaseCommand):
-    help = 'Fetch board data'
+    help = 'Initialize all boards'
 
     def add_arguments(self, parser):
         parser.add_argument('member_trello_username', nargs='+', type=str)
@@ -20,15 +20,6 @@ class Command(BaseCommand):
             return False
 
         member = Member.objects.get(trello_username=member_trello_username)
-        if not member.is_initialized():
-            self.stderr.write(self.style.SUCCESS(u"Member {0} is not initialized".format(member.trello_username)))
-            return True
+        member.init_fetch(debug=True)
 
-        for board in member.created_boards.all():
-            if board.is_ready():
-                board.fetch()
-                self.stdout.write(self.style.SUCCESS(u"Board {0} fetched successfully".format(board.name)))
-            else:
-                self.stdout.write(self.style.SUCCESS(u"Board {0} is not ready".format(board.name)))
-
-        self.stdout.write(self.style.SUCCESS(u"All boards fetched successfully"))
+        self.stdout.write(self.style.SUCCESS(u"Member {0} successfully initialized".format(member.trello_username)))
