@@ -70,10 +70,9 @@ def fetch(request, board_id):
 def view_card_report(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
-    last_fetch = board.last_fetch()
-    cards = last_fetch.cards.all()
+    cards = board.cards.all()
     replacements = {
-        "member": member, "fetch": last_fetch, "board": board, "cards": cards,
+        "member": member, "board": board, "cards": cards,
         "avg_lead_time": avg(cards, "lead_time"),
         "std_dev_lead_time": std_dev(cards, "lead_time"),
         "avg_cycle_time": avg(cards, "cycle_time"),
@@ -87,10 +86,9 @@ def view_card_report(request, board_id):
 def view_workflow_card_report(request, board_id, workflow_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
-    last_fetch = board.last_fetch()
-    workflow_card_reports = last_fetch.workflow_card_reports.filter(workflow_id=workflow_id)
+    workflow_card_reports = board.workflow_card_reports.filter(workflow_id=workflow_id)
     replacements = {
-        "member": member, "fetch": last_fetch, "board": board, "workflow_card_reports": workflow_card_reports,
+        "member": member, "board": board, "workflow_card_reports": workflow_card_reports,
         "avg_lead_time": avg(workflow_card_reports, "lead_time"),
         "std_dev_lead_time": std_dev(workflow_card_reports, "lead_time"),
         "avg_cycle_time": avg(workflow_card_reports, "cycle_time"),
@@ -104,9 +102,8 @@ def view_workflow_card_report(request, board_id, workflow_id):
 def view_label_report(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
-    last_fetch = board.last_fetch()
-    labels = last_fetch.labels.all()
-    replacements = {"member": member, "fetch": last_fetch, "board": board, "labels": labels}
+    labels = board.labels.all()
+    replacements = {"member": member, "board": board, "labels": labels}
     return render(request, "labels/list.html", replacements)
 
 
@@ -115,9 +112,8 @@ def view_label_report(request, board_id):
 def view_member_report(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
-    last_fetch = board.last_fetch()
-    member_reports = last_fetch.member_reports.all()
-    replacements = {"member": member, "fetch": last_fetch, "board": board, "member_reports": member_reports}
+    member_reports = board.member_reports.all()
+    replacements = {"member": member, "board": board, "member_reports": member_reports}
     return render(request, "member_reports/list.html", replacements)
 
 

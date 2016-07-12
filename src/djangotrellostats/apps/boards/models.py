@@ -32,49 +32,18 @@ class ImmutableModel(models.Model):
         super(ImmutableModel, self).save(*args, **kwargs)
 
 
-# Each fetch of data is independent of the others
-class Fetch(ImmutableModel):
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="fetches")
-    creation_datetime = models.DateTimeField(verbose_name=u"Date this object was created")
-
-    def save(self, *args, **kwargs):
-        self.creation_datetime = timezone.now()
-        super(ImmutableModel, self).save(*args, **kwargs)
-
-    @staticmethod
-    def new(board):
-        fetch = Fetch(board=board)
-        fetch.save()
-        return fetch
-
-    @staticmethod
-    def last():
-        try:
-            return Fetch.objects.all().order_by("-creation_datetime")[0]
-        except IndexError:
-            raise Fetch.DoesNotExist
-
-    def get_human_creation_datetime(self):
-        return self.creation_datetime.strftime("%Y-%m-%d")
-
-
 # Task board
 class Board(models.Model):
     creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_boards")
     name = models.CharField(max_length=128, verbose_name=u"Name of the board")
     uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the board", unique=True)
     last_activity_date = models.DateTimeField(verbose_name=u"Last activity date", default=None, null=True)
+    last_fetch_datetime = models.DateTimeField(verbose_name=u"Last fetch datetime", default=None, null=True)
 
     members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="boards")
 
-    def last_fetch(self, create_if_not_exists=True):
-        try:
-            return Fetch.last()
-        except Fetch.DoesNotExist:
-            if create_if_not_exists:
-                self.fetch()
-                return Fetch.last()
-            raise Fetch.DoesNotExist
+    def get_human_fetch_datetime(self):
+        return self.fetch_datetime.strftime("%Y-%m-%d")
 
     def is_ready(self):
         done_list_exists = self.lists.filter(type="done").exists()
@@ -90,21 +59,21 @@ class Board(models.Model):
     # Fetch data of this board
     @transaction.atomic
     def fetch(self):
-        fetch = Fetch.new(self)
-        self._fetch_labels(fetch)
-        self._fetch_cards(fetch)
+        self._fetch_labels()
+        self._fetch_cards()
+        self.last_fetch_datetime = timezone.now()
+        self.save()
 
     # Fetch the labels of this board
-    def _fetch_labels(self, fetch):
+    def _fetch_labels(self):
         trello_board = self._get_trello_board()
         trello_labels = trello_board.get_labels()
         for trello_label in trello_labels:
             label = Label.factory_from_trello_label(trello_label, self)
-            label.fetch = fetch
             label.save()
 
     # Fetch the cards of this board
-    def _fetch_cards(self, fetch):
+    def _fetch_cards(self):
 
         lists = self.lists.all()
 
@@ -115,11 +84,11 @@ class Board(models.Model):
         done_list = lists.get(type="done")
 
         # List reports
-        list_report_dict = {list_.uuid: ListReport(fetch=fetch, list=list_, forward_movements=0, backward_movements=0)
+        list_report_dict = {list_.uuid: ListReport(list=list_, forward_movements=0, backward_movements=0)
                             for list_ in lists}
 
         # Member report
-        member_report_dict = {member.uuid: MemberReport(fetch=fetch, board=self, member=member) for member in
+        member_report_dict = {member.uuid: MemberReport(board=self, member=member) for member in
                               self.members.all()}
 
         # Fetch cards of this board
@@ -129,7 +98,7 @@ class Board(models.Model):
         # Card stats computation
         for trello_card in trello_cards:
             trello_card.fetch(eager=False)
-            card = Card.factory_from_trello_card(trello_card, fetch, self)
+            card = Card.factory_from_trello_card(trello_card, self)
 
             card.get_stats_by_list(lists, done_list)
 
@@ -176,7 +145,7 @@ class Board(models.Model):
 
             # Label assignment to each card
             label_uuids = trello_card.idLabels
-            card_labels = self.labels.filter(uuid__in=label_uuids, fetch=fetch)
+            card_labels = self.labels.filter(uuid__in=label_uuids)
             for card_label in card_labels:
                 card.labels.add(card_label)
 
@@ -222,7 +191,7 @@ class Board(models.Model):
 
                 # Workflow card reports
                 for workflow in workflows:
-                    workflow.fetch(fetch, [card])
+                    workflow.fetch([card])
 
         # Average and std. deviation of time cards live in this list
         for list_uuid, list_report in list_report_dict.items():
@@ -263,17 +232,11 @@ class Board(models.Model):
 class Card(ImmutableModel):
     COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)"
 
-    class Meta:
-        unique_together = (
-            ("fetch", "uuid"),
-        )
-
-    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="cards")
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
     list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")
 
     name = models.TextField(verbose_name=u"Name of the card")
-    uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the card")
+    uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the card", unique=True)
     url = models.CharField(max_length=512, verbose_name=u"URL of the card")
     short_url = models.CharField(max_length=128, verbose_name=u"Short URL of the card")
     description = models.TextField(verbose_name=u"Description of the card")
@@ -291,10 +254,10 @@ class Card(ImmutableModel):
     labels = models.ManyToManyField("boards.Label", related_name="cards")
 
     @staticmethod
-    def factory_from_trello_card(trello_card, fetch, board):
+    def factory_from_trello_card(trello_card, board):
         list_ = board.lists.get(uuid=trello_card.idList)
 
-        card = Card(fetch=fetch, uuid=trello_card.id, name=trello_card.name, url=trello_card.url,
+        card = Card(uuid=trello_card.id, name=trello_card.name, url=trello_card.url,
                     short_url=trello_card.short_url, description=trello_card.desc, is_closed=trello_card.closed,
                     position=trello_card.pos, last_activity_date=trello_card.dateLastActivity,
                     board=board, list=list_
@@ -423,7 +386,7 @@ class Card(ImmutableModel):
                 comment_date = local_timezone.localize(datetime.datetime.strptime(comment["date"],
                                                                                   '%Y-%m-%dT%H:%M:%S.%fZ')).date()
 
-                DailySpentTime.add(fetch=self.fetch, board=self.board, member=member_uuid, date=comment_date,
+                DailySpentTime.add(board=self.board, member=member_uuid, date=comment_date,
                                    spent_time=spent, estimated_time=estimated)
 
         self.comment_summary = {
@@ -436,16 +399,11 @@ class Card(ImmutableModel):
 
 # Label of the task board
 class Label(ImmutableModel):
-    class Meta:
-        unique_together = (
-            ("fetch", "uuid"),
-        )
 
     name = models.CharField(max_length=128, verbose_name=u"Name of the label")
-    uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the label")
+    uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the label", unique=True)
     color = models.CharField(max_length=128, verbose_name=u"Color of the label")
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="labels")
-    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="labels")
 
     @staticmethod
     def factory_from_trello_label(trello_label, board):
@@ -487,8 +445,7 @@ class List(models.Model):
 
 # Stat report by list
 class ListReport(models.Model):
-    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="list_reports")
-    list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="list_reports")
+    list = models.OneToOneField("boards.List", verbose_name=u"List", related_name="list_reports", unique=True)
     forward_movements = models.PositiveIntegerField(verbose_name=u"Forward movements")
     backward_movements = models.PositiveIntegerField(verbose_name=u"Backward movements")
     avg_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4,
@@ -496,15 +453,9 @@ class ListReport(models.Model):
     std_dev_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4,
                                             max_digits=12, default=None, null=True)
 
-    class Meta:
-        unique_together = (
-            ("fetch", "list"),
-        )
-
 
 # Stat report by member
 class MemberReport(models.Model):
-    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="member_reports")
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="member_reports")
     number_of_cards = models.PositiveIntegerField(verbose_name=u"Number of assigned cards", default=0)
     member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="member_reports")
@@ -534,7 +485,7 @@ class Workflow(models.Model):
     lists = models.ManyToManyField("boards.List", through="WorkflowList", related_name="workflow")
 
     # Fetch data for this workflow, creating a workflow report
-    def fetch(self, fetch, cards):
+    def fetch(self, cards):
         workflow_lists = self.workflow_lists.all()
         development_lists = {workflow_list.list.uuid: workflow_list.list for workflow_list in
                              self.workflow_lists.filter(is_done_list=False)}
@@ -559,7 +510,7 @@ class Workflow(models.Model):
                     [list_stats["time"] if list_uuid in development_lists else 0 for list_uuid, list_stats in
                      card.stats_by_list.items()])
 
-                workflow_card_report = WorkflowCardReport(fetch=fetch, board=self.board, workflow=self,
+                workflow_card_report = WorkflowCardReport(board=self.board, workflow=self,
                                                           card=card, cycle_time=cycle_time, lead_time=lead_time)
                 workflow_card_report.save()
 
@@ -576,7 +527,6 @@ class WorkflowList(models.Model):
 
 
 class WorkflowCardReport(models.Model):
-    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="workflow_card_reports")
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="workflow_card_reports")
     workflow = models.ForeignKey("boards.Workflow", verbose_name=u"Workflow", related_name="workflow_card_reports")
     card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="workflow_card_reports")

@@ -7,7 +7,7 @@ from django.db.models import Sum
 from django.http.response import Http404
 from django.shortcuts import render
 
-from djangotrellostats.apps.boards.models import Fetch, DailySpentTime, Board
+from djangotrellostats.apps.boards.models import DailySpentTime, Board
 from djangotrellostats.apps.members.models import Member
 
 
@@ -15,14 +15,8 @@ from djangotrellostats.apps.members.models import Member
 @login_required
 def view_daily_spent_times(request):
     member = request.user.member
-
-    try:
-        last_fetch = Fetch.last()
-    except Fetch.DoesNotExist:
-        raise Http404
-
-    daily_spent_time_filter = {"fetch": last_fetch}
-    replacements = {"fetch": last_fetch, "boards": Board.objects.all(), "members": Member.objects.all()}
+    daily_spent_time_filter = {}
+    replacements = {"boards": Board.objects.all(), "members": Member.objects.all()}
 
     # Start date
     start_date_str = request.GET.get("start_date")

@@ -2,14 +2,13 @@
 
 import pygal
 from django.db.models import Avg
-from djangotrellostats.apps.boards.models import Fetch, Board, Card
+from djangotrellostats.apps.boards.models import Board, Card
+from django.utils import timezone
 
 
 # Average spent and estimated times
 def avg_times(request, board_id=None):
-    last_fetch = Fetch.last()
-
-    chart_title = u"Average spent and estimated time as of {0}".format(last_fetch.get_human_creation_datetime())
+    chart_title = u"Average spent and estimated time as of {0}".format(timezone.now())
     if board_id:
         board = Board.objects.get(id=board_id)
         chart_title += u" for board {0}".format(board.name)

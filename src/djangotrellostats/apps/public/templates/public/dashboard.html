@@ -1,12 +1,12 @@
 <h1>{{member.trello_username}}'s dashboard</h1>
 
 <div class="dashboard">
-    {% if not fetch or boards|length == 0 %}
+    {% if boards|length == 0 %}
         {% include "boards/no_boards_warning.html" %}
     {% endif %}
 </div>
 
-{% if fetch %}
+{% if  boards|length > 0 %}
     <img src="{% url 'charts:task_forward_movements_by_member' %}" alt="Task forward movements by member"/>
     <img src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
     <img src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>

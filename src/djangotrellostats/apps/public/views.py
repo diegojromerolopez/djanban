@@ -1,14 +1,9 @@
 from django.shortcuts import render
 
-from djangotrellostats.apps.boards.models import Fetch, Board
+from djangotrellostats.apps.boards.models import Board
 
 
 def index(request):
-    try:
-        last_fetch = Fetch.last()
-    except Fetch.DoesNotExist:
-        last_fetch = None
-
     member = None
     current_user = request.user
     if hasattr(current_user, "member") and current_user.member:
@@ -16,6 +11,6 @@ def index(request):
 
     boards = Board.objects.all()
 
-    replacements = {"fetch": last_fetch, "boards": boards, "member": member}
+    replacements = {"boards": boards, "member": member}
     return render(request, "public/index.html", replacements)
 

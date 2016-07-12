@@ -7,7 +7,6 @@ from decimal import Decimal
 # Create your models here.
 # Daily spent time by member
 class DailySpentTime(models.Model):
-    fetch = models.ForeignKey("boards.Fetch", verbose_name=u"Fetch", related_name="daily_spent_times")
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="daily_spent_times")
     member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="daily_spent_times")
 
@@ -28,14 +27,14 @@ class DailySpentTime(models.Model):
 
     # Add a new amount of spent time to a member
     @staticmethod
-    def add(fetch, board, member, date, spent_time, estimated_time):
+    def add(board, member, date, spent_time, estimated_time):
         # In case a uuid is passed, load the Member object
         if type(member) is str or type(member) is unicode:
             member = board.members.get(uuid=member)
 
         # Add the spent time value to the total amount of time this member has spent
         try:
-            daily_spent_time = DailySpentTime.objects.get(fetch=fetch, board=board, member=member, date=date)
+            daily_spent_time = DailySpentTime.objects.get(board=board, member=member, date=date)
             daily_spent_time.spent_time += Decimal(spent_time)
             daily_spent_time.estimated_time += Decimal(estimated_time)
             daily_spent_time.diff_time += (Decimal(estimated_time) - Decimal(spent_time))
@@ -44,7 +43,7 @@ class DailySpentTime(models.Model):
             weekday = date.strftime("%w")
             week_of_year = DailySpentTime.get_iso_week_of_year(date)
             day_of_year = date.strftime("%j")
-            daily_spent_time = DailySpentTime(fetch=fetch, board=board, member=member,
+            daily_spent_time = DailySpentTime(board=board, member=member,
                                               spent_time=Decimal(spent_time),
                                               estimated_time=Decimal(estimated_time),
                                               diff_time=Decimal(estimated_time) - Decimal(spent_time),

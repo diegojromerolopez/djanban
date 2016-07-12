@@ -5,15 +5,14 @@ import pygal
 from django.db.models import Sum, Avg
 from django.utils import timezone
 
-from djangotrellostats.apps.boards.models import Fetch, MemberReport, Board, Card
+from djangotrellostats.apps.boards.models import MemberReport, Board, Card
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 
 
 def avg_lead_time(request, board_id=None):
-    last_fetch = Fetch.last()
 
-    chart_title = u"Average lead time as of {0}".format(last_fetch.get_human_creation_datetime())
+    chart_title = u"Average lead time as of {0}".format(timezone.now())
     if board_id:
         board = Board.objects.get(id=board_id)
         chart_title += u" for board {0}".format(board.name)
@@ -38,9 +37,7 @@ def avg_lead_time(request, board_id=None):
 
 
 def avg_cycle_time(request, board_id=None):
-    last_fetch = Fetch.last()
-
-    chart_title = u"Average cycle time as of {0}".format(last_fetch.get_human_creation_datetime())
+    chart_title = u"Average cycle time as of {0}".format(timezone.now())
     if board_id:
         board = Board.objects.get(id=board_id)
         chart_title += u" for board {0}".format(board.name)
