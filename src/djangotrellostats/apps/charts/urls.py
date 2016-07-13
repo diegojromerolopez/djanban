@@ -13,5 +13,7 @@ urlpatterns = [
     url(r'^avg_lead_time/(?P<board_id>[\d]+)?$', cards.avg_lead_time, name="avg_lead_time"),
     url(r'^avg_cycle_time/(?P<board_id>[\d]+)?$', cards.avg_cycle_time, name="avg_cycle_time"),
 
-    url(r'^avg_times/(?P<board_id>[\d]+)?$', labels.avg_times, name="avg_times"),
+    url(r'^avg_spent_times/(?P<board_id>[\d]+)?$', labels.avg_spent_times, name="avg_spent_time"),
+    url(r'^avg_estimated_times/(?P<board_id>[\d]+)?$', labels.avg_estimated_times, name="avg_estimated_time"),
+    url(r'^avg_time_by_list/(?P<board_id>[\d]+)$', cards.avg_time_by_list, name="avg_time_by_list"),
 ]

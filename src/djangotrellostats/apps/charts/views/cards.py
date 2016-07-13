@@ -61,3 +61,14 @@ def avg_cycle_time(request, board_id=None):
     return cycle_time_chart.render_django_response()
 
 
+def avg_time_by_list(request, board_id):
+    board = Board.objects.get(id=board_id)
+    chart_title = u"Average time all cards live in each list for board {0} as of ".format(board.name, board.get_human_fetch_datetime())
+
+    avg_time_by_list_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True)
+
+    list_reports = board.list_report.all()
+    for list_report in list_reports:
+        avg_time_by_list_chart.add(u"{0}".format(list_report.list.name))
+
+    return avg_time_by_list_chart .render()

@@ -24,10 +24,16 @@ def init_boards(request):
 def view_list(request):
     member = request.user.member
     boards = member.boards.all()
-    for board in boards:
-        board.lists_are_configured = board.lists.filter(type="done").exists() and board.lists.filter(type="development").exists()
     replacements = {"member": member, "boards": boards}
     return render(request, "boards/list.html", replacements)
+
+
+# View board
+def view(request, board_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id)
+    replacements = {"board": board}
+    return render(request, "boards/view.html", replacements)
 
 
 # View lists of a board

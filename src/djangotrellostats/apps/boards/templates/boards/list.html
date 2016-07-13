@@ -13,8 +13,9 @@
                     <li>
                         <span>{{board.name}}</span>
                         <div>
-                            <a href="{% url 'boards:view_board_lists' board.id %}">View lists</a>
-                            {% if board.lists_are_configured %}
+                            <a href="{% url 'boards:view' board.id %}">View</a>
+                            <a href="{% url 'boards:view_lists' board.id %}">View lists</a>
+                            {% if board.is_ready %}
                                 <a href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
                                 <a href="{% url 'boards:view_card_report' board.id %}">View cards</a>
                                 {% for workflow in board.workflows.all %}
