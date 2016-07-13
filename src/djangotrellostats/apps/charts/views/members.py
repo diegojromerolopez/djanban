@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import copy
-
+import datetime
 import pygal
+from isoweek import Week
+
 from django.db.models import Sum
 from django.utils import timezone
 
@@ -65,16 +67,24 @@ def spent_time_by_week(request, week_of_year=None, board_id=None):
     if week_of_year is None:
         now = timezone.now()
         today = now.date()
-        week_of_year = DailySpentTime.get_iso_week_of_year(today)
+        week_of_year_ = DailySpentTime.get_iso_week_of_year(today)
+        week_of_year = "{0}W{1}".format(today.year, week_of_year_)
 
-    chart_title = u"Spent time in week {0}".format(week_of_year)
+    y,w = week_of_year.split("W")
+    week = Week(int(y), int(w))
+    start_of_week = week.monday()
+    end_of_week = week.sunday()
+
+    chart_title = u"Spent time in week {0} ({1} - {2})".format(week_of_year,
+                                                               start_of_week.strftime("%Y-%m-%d"),
+                                                               end_of_week.strftime("%Y-%m-%d") )
     if board_id:
         board = Board.objects.get(id=board_id)
         chart_title += u" for board {0}".format(board.name)
 
     spent_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True)
 
-    report_filter = {"week_of_year": week_of_year}
+    report_filter = {"date__year": y, "week_of_year": w}
     if board_id:
         report_filter["board_id"] = board_id
 
@@ -82,7 +92,6 @@ def spent_time_by_week(request, week_of_year=None, board_id=None):
 
     for member in members:
         member_name = member.trello_username
-
         daily_spent_times = member.daily_spent_times.filter(**report_filter)
         spent_time = daily_spent_times.aggregate(Sum("spent_time"))["spent_time__sum"]
         if spent_time is None:

@@ -1,14 +1,21 @@
 <div id="header">
-    {% if user and user.is_authenticated %}
-        <span>
-          <span>{{user.username}}</span>
-          <a href="{% url 'members:logout' %}" title="User logout">Logout</a>
-            <a href="{% url 'index' %}" title="Dashboard">Index</a>
-          <a href="{% url 'boards:view_boards' %}" title="View my boards">View my boards</a>
-        </span>
-    {% else %}
-        <span>
-            <a href="{% url 'members:login' %}" title="User login">Login</a> or <a href="{% url 'members:signup' %}" title="User registration">Sign up</a>
-        </span>
-    {% endif %}
+    {% with url_name=request.resolver_match.url_name %}
+        <ul class="nav nav-tabs">
+            <li role="presentation" {% if url_name == "index" %}class="active"{% endif %}>
+                <a href="{% url 'index' %}" title="Index">Index</a>
+            </li>
+            {% if user and user.is_authenticated %}
+                <li role="presentation">
+                    <a href="{% url 'members:logout' %}" title="User logout">Logout</a>
+                </li>
+                <li role="presentation" {% if url_name == "view_boards" %}class="active"{% endif %}>
+                   <a href="{% url 'boards:view_boards' %}" title="View my boards">View my boards</a>
+                </li>
+            {% else %}
+                <li role="presentation" {% if url_name == "login" %}class="active"{% endif %}>
+                    <a href="{% url 'members:login' %}" title="User login">Login</a>
+                </li>
+            {% endif %}
+        </ul>
+    {% endwith %}
 </div>

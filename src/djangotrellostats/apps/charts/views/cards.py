@@ -5,7 +5,7 @@ import pygal
 from django.db.models import Sum, Avg
 from django.utils import timezone
 
-from djangotrellostats.apps.boards.models import MemberReport, Board, Card
+from djangotrellostats.apps.boards.models import MemberReport, Board, Card, ListReport
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 
@@ -67,8 +67,8 @@ def avg_time_by_list(request, board_id):
 
     avg_time_by_list_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True)
 
-    list_reports = board.list_report.all()
+    list_reports = ListReport.objects.filter(list__board=board)
     for list_report in list_reports:
-        avg_time_by_list_chart.add(u"{0}".format(list_report.list.name))
+        avg_time_by_list_chart.add(u"{0}".format(list_report.list.name), list_report.avg_card_time)
 
-    return avg_time_by_list_chart .render()
+    return avg_time_by_list_chart.render_django_response()

@@ -4,12 +4,16 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.http.response import Http404
 from django.shortcuts import render
+from django.utils import timezone
 
 from djangotrellostats.apps.boards.models import List
 from djangotrellostats.apps.boards.stats import avg, std_dev
 
 
 # Initialize boards with data fetched from trello
+from djangotrellostats.apps.dev_times.models import DailySpentTime
+
+
 def init_boards(request):
     if request.method == "POST":
         member = request.user.member
@@ -32,7 +36,10 @@ def view_list(request):
 def view(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
-    replacements = {"board": board}
+    now = timezone.now()
+    year = now.year
+    week = DailySpentTime.get_iso_week_of_year(now)
+    replacements = {"board": board, "week_of_year": "{0}W{1}".format(year, week)}
     return render(request, "boards/view.html", replacements)
 
 

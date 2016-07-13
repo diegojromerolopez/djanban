@@ -7,11 +7,35 @@
 </div>
 
 {% if  boards|length > 0 %}
-    <img src="{% url 'charts:task_forward_movements_by_member' %}" alt="Task forward movements by member"/>
-    <img src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
-    <img src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
-    <img src="{% url 'charts:avg_lead_time' %}" alt="Average lead time"/>
-    <img src="{% url 'charts:avg_cycle_time' %}" alt="Average cycle time"/>
-    <img src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
-    <img src="{% url 'charts:avg_estimated_time' %}" alt="Average estimated time"/>
+    <div class="row">
+        <div class="col-md-8 center-block">
+            <img src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <img src="{% url 'charts:task_forward_movements_by_member' %}" alt="Task forward movements by member"/>
+        </div>
+        <div class="col-sm-6">
+            <img src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <img src="{% url 'charts:avg_lead_time' %}" alt="Average lead time"/>
+        </div>
+        <div class="col-sm-6">
+            <img src="{% url 'charts:avg_cycle_time' %}" alt="Average cycle time"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <img src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
+        </div>
+        <div class="col-sm-6">
+            <img src="{% url 'charts:avg_estimated_time' %}" alt="Average estimated time"/>
+        </div>
+    </div>
 {% endif %}

@@ -77,6 +77,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
+                'django.core.context_processors.request',
             ],
         },
     },
@@ -127,5 +128,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
+STATICFILES_DIRS = [
+    BASE_DIR + "/djangotrellostats/static/"
+]
 
 STATIC_URL = '/static/'

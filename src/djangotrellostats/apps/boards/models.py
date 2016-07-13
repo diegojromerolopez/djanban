@@ -43,7 +43,7 @@ class Board(models.Model):
     members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="boards")
 
     def get_human_fetch_datetime(self):
-        return self.fetch_datetime.strftime("%Y-%m-%d")
+        return self.last_fetch_datetime.strftime("%Y-%m-%d")
 
     def is_ready(self):
         done_list_exists = self.lists.filter(type="done").exists()
