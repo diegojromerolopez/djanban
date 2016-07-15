@@ -4,61 +4,86 @@
 
 {% block content %}
 
-<div>
-    <a href="{% url 'boards:view_boards' %}">Go back to the list of boards</a>
-    <a href="{% url 'boards:view_lists' board.id %}">View lists</a>
-    {% if board.is_ready %}
-        <a href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
-        <a href="{% url 'boards:view_card_report' board.id %}">View cards</a>
-        {% for workflow in board.workflows.all %}
-            <a href="{% url 'boards:view_workflow_card_report' board.id workflow.id %}">View {{workflow.name}} report</a>
-        {% endfor %}
-        <a href="{% url 'boards:view_label_report' board.id %}">View labels</a>
-        <a href="{% url 'boards:view_member_report' board.id %}">View members</a>
-        <a href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">View daily spent times</a>
-        {% include "boards/fetch_form.html" %}
-        {% include "boards/delete_form.html" %}
-    {% else %}
-        Please, configure the lists.
-    {% endif %}
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{% url 'boards:view' board.id %}">{{board.name}}</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li>
+                    <a href="{% url 'boards:view_boards' %}">Go back to the list of boards</a>
+                </li>
+                <li>
+                    <a href="{% url 'boards:view_lists' board.id %}">View lists</a>
+                </li>
+                {% if board.is_ready %}
+                    <li><a href="{% url 'boards:view_workflows' board.id %}">View workflows</a></li>
+                    <li><a href="{% url 'boards:view_card_report' board.id %}">View cards</a></li>
+                    <li><a href="{% url 'boards:view_label_report' board.id %}">View labels</a></li>
+                    <li><a href="{% url 'boards:view_member_report' board.id %}">View members</a></li>
+                    <li><a href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">View daily spent times</a></li>
+                    {% for workflow in board.workflows.all %}
+                        <li><a href="{% url 'boards:view_workflow_card_report' board.id workflow.id %}">View {{workflow.name}} report</a></li>
+                    {% endfor %}
+                    <li>{% include "boards/fetch_form.html" %}</li>
+                    <li>{% include "boards/delete_form.html" %}</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{% if board.is_ready %}
+    <div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <img src="{% url 'charts:spent_time_by_week' week_of_year board.id  %}" alt="Spent time by member"/>
+            </div>
+            <div class="col-sm-6">
+                <img src="{% url 'charts:avg_time_by_list' board.id %}" alt="Average time a card is in each list"/>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <img src="{% url 'charts:task_forward_movements_by_member' board.id %}" alt="Task forward movements by member"/>
+            </div>
+            <div class="col-sm-6">
+                <img src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <img src="{% url 'charts:avg_lead_time' board.id %}" alt="Average lead time"/>
+            </div>
+            <div class="col-sm-6">
+                <img src="{% url 'charts:avg_cycle_time' board.id %}" alt="Average cycle time"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <img src="{% url 'charts:avg_spent_time' board.id %}" alt="Average spent time"/>
+            </div>
+            <div class="col-sm-6">
+                <img src="{% url 'charts:avg_estimated_time' board.id %}" alt="Average estimated time"/>
+            </div>
+        </div>
+
+    </div>
+{% else %}
+<div class="row">
+    <div class="col-md-5 center-block">
+        <div class="panel panel-danger ">
+          <div class="panel-heading">Error when showing charts</div>
+          <div class="panel-body">
+            This board lists are not configured. Please <a href="{% url 'boards:view_lists' board.id %}">configure its lists</a>
+          </div>
+        </div>
+    </div>
 </div>
-
-<div>
-
-    <div class="row">
-        <div class="col-sm-6">
-            <img src="{% url 'charts:spent_time_by_week' week_of_year board.id  %}" alt="Spent time by member"/>
-        </div>
-        <div class="col-sm-6">
-            <img src="{% url 'charts:avg_time_by_list' board.id %}" alt="Average time a card is in each list"/>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-6">
-            <img src="{% url 'charts:task_forward_movements_by_member' board.id %}" alt="Task forward movements by member"/>
-        </div>
-        <div class="col-sm-6">
-            <img src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-6">
-            <img src="{% url 'charts:avg_lead_time' board.id %}" alt="Average lead time"/>
-        </div>
-        <div class="col-sm-6">
-            <img src="{% url 'charts:avg_cycle_time' board.id %}" alt="Average cycle time"/>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-6">
-            <img src="{% url 'charts:avg_spent_time' board.id %}" alt="Average spent time"/>
-        </div>
-        <div class="col-sm-6">
-            <img src="{% url 'charts:avg_estimated_time' board.id %}" alt="Average estimated time"/>
-        </div>
-    </div>
-
-</div>
+{% endif %}
 {% endblock content %}

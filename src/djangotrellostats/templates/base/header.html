@@ -5,11 +5,11 @@
                 <a href="{% url 'index' %}" title="Index">Index</a>
             </li>
             {% if user and user.is_authenticated %}
-                <li role="presentation">
-                    <a href="{% url 'members:logout' %}" title="User logout">Logout</a>
-                </li>
                 <li role="presentation" {% if url_name == "view_boards" %}class="active"{% endif %}>
                    <a href="{% url 'boards:view_boards' %}" title="View my boards">View my boards</a>
+                </li>
+                <li role="presentation">
+                    <a href="{% url 'members:logout' %}" title="User logout">Logout</a>
                 </li>
             {% else %}
                 <li role="presentation" {% if url_name == "login" %}class="active"{% endif %}>
