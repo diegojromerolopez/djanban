@@ -3,6 +3,42 @@
 
 Statistics and charts for Trello boards, now in a Django app.
 
+# Requirements
+
+Django, python-mysql and more packages specified in requirements.txt
+
+# Local settings
+
+Copy this code and create a settings_local.py file in your server in **src**.
+
+Write your database credentials and your domain. Switch off debug messages.
+
+I've used MySQL as a database but you can use whatever you want.
+
+```python
+# -*- coding: utf-8 -*-
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = '<whatever string you want>'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+DOMAIN = "<your domain>"
+ALLOWED_HOSTS = [DOMAIN]
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': '<database name>',
+        'USER': '<user>',
+        'PASSWORD': '<password>',
+        'HOST': '',
+        'PORT': ''
+    }
+}
+```
+
 # Sign up
 
 First you need to sign up with the api key, token and token secret.
@@ -36,8 +72,12 @@ One good idea is set this action in a cron action and call it each day.
 - Average time cards are in each list.
 - Spent time by member by week. 
 
+# Charts
+
+TODO: include charts showed in application. 
+
 # TODO
-  - Workflow stats
+  - Workflow stats are not completed. Only the definition of workflows is fully implemented but not their stats.
 
 
 # Questions? Suggestions?
