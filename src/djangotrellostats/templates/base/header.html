@@ -15,6 +15,9 @@
                 <li role="presentation" {% if url_name == "login" %}class="active"{% endif %}>
                     <a href="{% url 'members:login' %}" title="User login">Login</a>
                 </li>
+                <li role="presentation" {% if url_name == "signup" %}class="active"{% endif %}>
+                    <a href="{% url 'members:signup' %}" title="User signup">Signup</a>
+                </li>
             {% endif %}
         </ul>
     {% endwith %}
