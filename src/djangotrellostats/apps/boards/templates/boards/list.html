@@ -13,17 +13,28 @@
                     <li class="list-group-item">
                         <h2>{{board.name}}</h2>
                         <div>
-                            <a class="btn btn-primary" href="{% url 'boards:view' board.id %}">View</a>
-                            <a class="btn btn-primary" href="{% url 'boards:view_lists' board.id %}">View lists</a>
+                            <a class="btn btn-primary" href="{% url 'boards:view' board.id %}">
+                                <span class="fa fa-eye"></span> View
+                            </a>
+                            <a class="btn btn-primary" href="{% url 'boards:view_lists' board.id %}">
+                                <span class="fa fa-list"></span> View lists</a>
                             {% if board.is_ready %}
                                 <a class="btn btn-primary" href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
-                                <a class="btn btn-primary" href="{% url 'boards:view_card_report' board.id %}">View cards</a>
+                                <a class="btn btn-primary" href="{% url 'boards:view_card_report' board.id %}">
+                                    <span class="fa fa-sticky-note-o"></span> View cards
+                                </a>
                                 {% for workflow in board.workflows.all %}
                                     <a class="btn btn-primary" href="{% url 'boards:view_workflow_card_report' board.id workflow.id %}">View {{workflow.name}} report</a>
                                 {% endfor %}
-                                <a class="btn btn-primary" href="{% url 'boards:view_label_report' board.id %}">View labels</a>
-                                <a class="btn btn-primary" href="{% url 'boards:view_member_report' board.id %}">View members</a>
-                                <a class="btn btn-primary" href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">View daily spent times</a>
+                                <a class="btn btn-primary" href="{% url 'boards:view_label_report' board.id %}">
+                                    <span class="fa fa-tags"></span> View labels
+                                </a>
+                                <a class="btn btn-primary" href="{% url 'boards:view_member_report' board.id %}">
+                                    <span class="fa fa-users"></span> View members
+                                </a>
+                                <a class="btn btn-primary" href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">
+                                    <span class="fa fa-calendar-check-o"></span> View daily spent times
+                                </a>
                             {% else %}
                                 You need a 'done list' and at least a 'in development' list
                             {% endif %}

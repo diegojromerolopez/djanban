@@ -24,12 +24,14 @@
                                 {% endif %}
                                 <a class="btn btn-primary" href="{% url 'members:change_password' member.id %}"
                                        title="Change password to user {{member.trello_username}}">
+                                    <span class="fa fa-key "></span>
                                         Change password
                                 </a>
                             {% else %}
                                 No
                                 <a class="btn btn-primary" href="{% url 'members:give_access' member.id %}"
                                    title="Give access to {{member.trello_username}}">
+                                   <span class="fa fa-unlock"></span>
                                     Give access
                                 </a>
                             {% endif %}

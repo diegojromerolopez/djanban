@@ -6,20 +6,28 @@
             </li>
             {% if user and user.is_authenticated %}
                 <li role="presentation" {% if url_name == "view_boards" %}class="active"{% endif %}>
-                   <a href="{% url 'boards:view_boards' %}" title="View my boards">View my boards</a>
+                   <a href="{% url 'boards:view_boards' %}" title="View my boards">
+                       <span class="fa fa-tasks"></span> View my boards
+                   </a>
                 </li>
                 <li role="presentation" {% if url_name == "view_members" %}class="active"{% endif %}>
-                    <a href="{% url 'members:view_members' %}" title="View members">Members</a>
+                    <a href="{% url 'members:view_members' %}" title="View members">
+                        <span class="fa fa-users"></span> Members
+                    </a>
                 </li>
                 <li role="presentation">
                     <a href="{% url 'members:logout' %}" title="User logout">Logout</a>
                 </li>
             {% else %}
                 <li role="presentation" {% if url_name == "login" %}class="active"{% endif %}>
-                    <a href="{% url 'members:login' %}" title="User login">Login</a>
+                    <a href="{% url 'members:login' %}" title="User login">
+                        Login
+                    </a>
                 </li>
                 <li role="presentation" {% if url_name == "signup" %}class="active"{% endif %}>
-                    <a href="{% url 'members:signup' %}" title="User signup">Signup</a>
+                    <a href="{% url 'members:signup' %}" title="User signup">
+                        Signup
+                    </a>
                 </li>
             {% endif %}
         </ul>

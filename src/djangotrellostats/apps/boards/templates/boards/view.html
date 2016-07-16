@@ -13,23 +13,33 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li {% if url_name == "view_lists" %}class="active"{% endif %}>
-                        <a href="{% url 'boards:view_lists' board.id %}">View lists</a>
+                        <a href="{% url 'boards:view_lists' board.id %}">
+                            <span class="fa fa-list"></span> View lists
+                        </a>
                     </li>
                     {% if board.is_ready and board.is_fetched %}
                         <li {% if url_name == "view_workflows" %}class="active"{% endif %}>
                             <a href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
                         </li>
                         <li {% if url_name == "view_card_report" %}class="active"{% endif %}>
-                            <a href="{% url 'boards:view_card_report' board.id %}">View cards</a>
+                            <a href="{% url 'boards:view_card_report' board.id %}">
+                                <span class="fa fa-sticky-note-o"></span> View cards
+                            </a>
                         </li>
                         <li {% if url_name == "view_label_report" %}class="active"{% endif %}>
-                            <a href="{% url 'boards:view_label_report' board.id %}">View labels</a>
+                            <a href="{% url 'boards:view_label_report' board.id %}">
+                                <span class="fa fa-tags"></span> View labels
+                            </a>
                         </li>
                         <li {% if url_name == "view_member_report" %}class="active"{% endif %}>
-                            <a href="{% url 'boards:view_member_report' board.id %}">View members</a>
+                            <a href="{% url 'boards:view_member_report' board.id %}">
+                                <span class="fa fa-users"></span> View members
+                            </a>
                         </li>
                         <li {% if url_name == "view_daily_spent_times" %}class="active"{% endif %}>
-                            <a href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">View daily spent times</a>
+                            <a href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">
+                                <span class="fa fa-calendar-check-o"></span> View daily spent times
+                            </a>
                         </li>
                         {% for workflow in board.workflows.all %}
                             <li {% if url_name == "view_workflow_card_report" %}class="active"{% endif %}>
@@ -37,10 +47,14 @@
                             </li>
                         {% endfor %}
                         <li {% if url_name == "fetch" %}class="active"{% endif %}>
-                            <a href="{% url 'boards:fetch' board.id %}">Fetch</a>
+                            <a href="{% url 'boards:fetch' board.id %}">
+                                <span class="fa fa-download"></span> Fetch
+                            </a>
                         </li>
                         <li {% if url_name == "delete" %}class="active"{% endif %}>
-                            <a href="{% url 'boards:delete' board.id %}">Delete</a>
+                            <a href="{% url 'boards:delete' board.id %}">
+                                <span class="fa fa-trash"></span>  Delete
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
