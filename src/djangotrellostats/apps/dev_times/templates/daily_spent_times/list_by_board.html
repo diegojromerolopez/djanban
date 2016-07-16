@@ -1,0 +1,14 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}
+    Daily spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}
+{% endblock %}
+
+{% block content %}
+    <h1>
+        Daily spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}
+    </h1>
+    <div>Last updated: {{board.get_human_fetch_datetime}}</div>
+    {% include "daily_spent_times/components/filter_form.html" with selected_member=selected_member %}
+    {% include "daily_spent_times/components/list.html" %}
+{% endblock content %}

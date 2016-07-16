@@ -3,6 +3,7 @@
 {% block page_title %}Boards of {{member.trello_username}}{% endblock %}
 
 {% block content_menu %}
+    {% with url_name=request.resolver_match.url_name %}
     <nav class="navbar navbar-default">
         <div class="container-fluid">
             <div class="navbar-header">
@@ -11,28 +12,42 @@
 
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li>
-                        <a href="{% url 'boards:view_boards' %}">Go back to the list of boards</a>
-                    </li>
-                    <li>
+                    <li {% if url_name == "view_lists" %}class="active"{% endif %}>
                         <a href="{% url 'boards:view_lists' board.id %}">View lists</a>
                     </li>
                     {% if board.is_ready %}
-                        <li><a href="{% url 'boards:view_workflows' board.id %}">View workflows</a></li>
-                        <li><a href="{% url 'boards:view_card_report' board.id %}">View cards</a></li>
-                        <li><a href="{% url 'boards:view_label_report' board.id %}">View labels</a></li>
-                        <li><a href="{% url 'boards:view_member_report' board.id %}">View members</a></li>
-                        <li><a href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">View daily spent times</a></li>
+                        <li {% if url_name == "view_workflows" %}class="active"{% endif %}>
+                            <a href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
+                        </li>
+                        <li {% if url_name == "view_card_report" %}class="active"{% endif %}>
+                            <a href="{% url 'boards:view_card_report' board.id %}">View cards</a>
+                        </li>
+                        <li {% if url_name == "view_label_report" %}class="active"{% endif %}>
+                            <a href="{% url 'boards:view_label_report' board.id %}">View labels</a>
+                        </li>
+                        <li {% if url_name == "view_member_report" %}class="active"{% endif %}>
+                            <a href="{% url 'boards:view_member_report' board.id %}">View members</a>
+                        </li>
+                        <li {% if url_name == "view_daily_spent_times" %}class="active"{% endif %}>
+                            <a href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">View daily spent times</a>
+                        </li>
                         {% for workflow in board.workflows.all %}
-                            <li><a href="{% url 'boards:view_workflow_card_report' board.id workflow.id %}">View {{workflow.name}} report</a></li>
+                            <li {% if url_name == "view_workflow_card_report" %}class="active"{% endif %}>
+                                <a href="{% url 'boards:view_workflow_card_report' board.id workflow.id %}">View {{workflow.name}} report</a>
+                            </li>
                         {% endfor %}
-                        <li><a href="{% url 'boards:fetch' board.id %}">Fetch</a></li>
-                        <li><a href="{% url 'boards:delete' board.id %}">Delete</a></li>
+                        <li {% if url_name == "fetch" %}class="active"{% endif %}>
+                            <a href="{% url 'boards:fetch' board.id %}">Fetch</a>
+                        </li>
+                        <li {% if url_name == "delete" %}class="active"{% endif %}>
+                            <a href="{% url 'boards:delete' board.id %}">Delete</a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
+    {% endwith %}
 {% endblock %}
 
 {% block content %}

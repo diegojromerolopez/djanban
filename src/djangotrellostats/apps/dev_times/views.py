@@ -47,9 +47,11 @@ def view_daily_spent_times(request):
 
     # If we are filtering by board, filter by board_id
     board_id = request.GET.get("board_id")
+    board = None
     if board_id:
         board = member.boards.get(id=board_id)
         replacements["selected_board"] = board
+        replacements["board"] = board
         daily_spent_time_filter["board"] = board
 
     daily_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).order_by("-date")
@@ -58,4 +60,6 @@ def view_daily_spent_times(request):
     replacements["estimated_time_sum"] = daily_spent_times.aggregate(Sum("estimated_time"))["estimated_time__sum"]
     replacements["diff_time_sum"] = daily_spent_times.aggregate(Sum("diff_time"))["diff_time__sum"]
 
+    if board:
+        return render(request, "daily_spent_times/list_by_board.html", replacements)
     return render(request, "daily_spent_times/list.html", replacements)
