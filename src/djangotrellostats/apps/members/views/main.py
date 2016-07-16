@@ -7,8 +7,9 @@ from django.http import Http404
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 
-from djangotrellostats.apps.members.forms import GiveAccessToMemberForm
+from djangotrellostats.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm
 from djangotrellostats.apps.members.models import Member
+
 
 # User dashboard
 @login_required
@@ -37,8 +38,6 @@ def give_access_to_member(request, member_id):
         if form.is_valid():
             member_email = form.cleaned_data["email"]
             member_password = form.cleaned_data["password"]
-            print member_email
-            print member_password
 
             if member.user is None:
                 user = User(username=member_email, email=member_email)
@@ -60,3 +59,23 @@ def give_access_to_member(request, member_id):
     replacements = {"member": member, "form": form}
     return render(request, "members/give_access_to_member.html", replacements)
 
+
+# Change password to an user of a member
+@login_required
+def change_password_to_member(request, member_id):
+    member = Member.objects.get(id=member_id)
+    if request.method == "POST":
+
+        form = ChangePasswordToMemberForm(request.POST)
+        if form.is_valid():
+            member_password = form.cleaned_data["password1"]
+            user = member.user
+            user.set_password(member_password)
+            user.save()
+            return HttpResponseRedirect(reverse("members:view_members"))
+
+    else:
+        form = ChangePasswordToMemberForm()
+
+    replacements = {"member": member, "form": form}
+    return render(request, "members/give_access_to_member.html", replacements)

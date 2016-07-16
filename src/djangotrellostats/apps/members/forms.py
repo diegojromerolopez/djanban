@@ -109,3 +109,15 @@ class GiveAccessToMemberForm(forms.Form):
     email = forms.EmailField(label=u"Email and username")
     password = forms.CharField(label=u"Password", widget=forms.PasswordInput)
 
+
+# Change password to member user
+class ChangePasswordToMemberForm(forms.Form):
+    password1 = forms.CharField(label=u"Password", widget=forms.PasswordInput(), max_length=16, required=True)
+    password2 = forms.CharField(label=u"Repeat your password", widget=forms.PasswordInput(), max_length=16,
+                                required=True)
+
+    def clean(self):
+        cleaned_data = super(ChangePasswordToMemberForm, self).clean()
+        # Check if passwords are equal
+        if cleaned_data.get("password1") != cleaned_data.get("password2"):
+            raise ValidationError(u"Passwords don't match")

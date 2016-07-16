@@ -16,7 +16,24 @@
                         <td>{{member.initials}}</td>
                         <td>{{member.trello_username}}</td>
                         <td>{% if member.user %}{{member.user.username}}{% endif %}</td>
-                        <td>{% if member.user %}Yes {% if member.id == request.user.member.id %}(That's you){% endif %}{% else %} No <a class="btn btn-primary" href="{% url 'members:give_access' member.id %}" title="Give access to {{member.trello_username}}">Give access</a>{% endif %}</td>
+                        <td>
+                            {% if member.user %}
+                                Yes
+                                {% if member.id == request.user.member.id %}
+                                    (That's you)
+                                {% endif %}
+                                <a class="btn btn-primary" href="{% url 'members:change_password' member.id %}"
+                                       title="Change password to user {{member.trello_username}}">
+                                        Change password
+                                </a>
+                            {% else %}
+                                No
+                                <a class="btn btn-primary" href="{% url 'members:give_access' member.id %}"
+                                   title="Give access to {{member.trello_username}}">
+                                    Give access
+                                </a>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
             </table>

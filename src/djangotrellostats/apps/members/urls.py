@@ -9,4 +9,5 @@ urlpatterns = [
     url(r'^logout/?$', auth.logout, name="logout"),
     url(r'^view_members/?$', main.view_members, name="view_members"),
     url(r'^give_access/(?P<member_id>\d+)?$', main.give_access_to_member, name="give_access"),
+    url(r'^change_password/(?P<member_id>\d+)?$', main.change_password_to_member, name="change_password"),
 ]
