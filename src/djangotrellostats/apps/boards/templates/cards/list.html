@@ -10,6 +10,9 @@
     {% else %}
         <div class="row">
             <div class="panel col-md-8">
+                <div>
+                    <a href="{% url 'boards:export_card_report' board.id %}" class="btn btn-primary">Export as CSV</a>
+                </div>
                 <table class="table">
                     <tr>
                         <td>Name</td>

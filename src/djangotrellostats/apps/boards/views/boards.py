@@ -2,8 +2,10 @@
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.http.response import Http404
+from django.http.response import Http404, HttpResponse
 from django.shortcuts import render
+from django.template import loader
+from django.template.context import Context
 from django.utils import timezone
 
 from djangotrellostats.apps.boards.models import List
@@ -110,7 +112,31 @@ def view_card_report(request, board_id):
     return render(request, "cards/list.html", replacements)
 
 
-# View card report
+# Export daily spent report in CSV format
+@login_required
+def export_card_report(request, board_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id)
+    cards = board.cards.all()
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = u'attachment; filename="{0}-cards.csv"'.format(board.name)
+
+    csv_template = loader.get_template('cards/csv.txt')
+    replacements = Context({
+        "member": member,
+        "board": board,
+        "cards": cards,
+        "avg_lead_time": avg(cards, "lead_time"),
+        "std_dev_lead_time": std_dev(cards, "lead_time"),
+        "avg_cycle_time": avg(cards, "cycle_time"),
+        "std_dev_cycle_time": std_dev(cards, "cycle_time"),
+    })
+    response.write(csv_template.render(replacements))
+    return response
+
+
+# View workflow card report
 @login_required
 def view_workflow_card_report(request, board_id, workflow_id):
     member = request.user.member
