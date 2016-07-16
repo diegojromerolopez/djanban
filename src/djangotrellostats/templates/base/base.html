@@ -21,15 +21,20 @@
 
         {% include "base/header.html" %}
 
-        <div id="content">
-            {% block content_menu %}
-            {% endblock content_menu %}
+        <div id="content_wrapper">
 
-            {% block content %}
-            {% endblock %}
-
-            {% block content_footer %}
-            {% endblock content_footer %}
+            <div id="content_menu">
+                {% block content_menu %}
+                {% endblock content_menu %}
+            </div>
+            <div id="content">
+                {% block content %}
+                {% endblock %}
+            </div>
+            <div id="content_footer">
+                {% block content_footer %}
+                {% endblock content_footer %}
+            </div>
         </div>
 
         {% include "base/footer.html" %}
