@@ -1,0 +1,24 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}Fetch data from {{Board.name}}{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-5 center-block">
+        <div class="panel panel-danger ">
+          <div class="panel-heading">Danger! This action cannot be undone</div>
+          <div class="panel-body">
+            This board will be deleted and fetched again. Are you sure?
+
+              <form action="{% url 'boards:fetch' board.id %}" method="post">
+                <input type="hidden" name="board_id" value="{{board.id}}"/>
+                <button type="submit">I am sure, delete board and fetch again its content</button>
+              </form>
+
+          </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

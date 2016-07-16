@@ -13,7 +13,7 @@ urlpatterns = [
     url(r'^my-boards$', boards.view_list, name="view_boards"),
     url(r'^(?P<board_id>\d+)/view/?$', boards.view, name="view"),
     url(r'^(?P<board_id>\d+)/lists/?$', boards.view_lists, name="view_lists"),
-    url(r'^(?P<board_id>\d+)/delete/?$', boards.delete, name="delete_board"),
+    url(r'^(?P<board_id>\d+)/delete/?$', boards.delete, name="delete"),
 
     url(r'^(?P<board_id>\d+)/cards/?$', boards.view_card_report, name="view_card_report"),
     url(r'^(?P<board_id>\d+)/workflow_card_report/(?P<workflow_id>\d+)/?$', boards.view_workflow_card_report, name="view_workflow_card_report"),

@@ -22,10 +22,14 @@
         {% include "base/header.html" %}
 
         <div id="content">
+            {% block content_menu %}
+            {% endblock content_menu %}
+
             {% block content %}
-
-
             {% endblock %}
+
+            {% block content_footer %}
+            {% endblock content_footer %}
         </div>
 
         {% include "base/footer.html" %}

@@ -59,10 +59,18 @@ def view_lists(request, board_id):
 def delete(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
+
+    # Show delete form
+    if request.method == "GET":
+        replacements = {"member": member, "board": board}
+        return render(request, "boards/delete.html", replacements)
+
+    # Delete action by post
     confirmed_board_id = request.POST.get("board_id")
     if confirmed_board_id and confirmed_board_id == board_id:
         board.delete()
         return HttpResponseRedirect(reverse("boards:view_boards"))
+
     raise Http404
 
 
@@ -71,10 +79,18 @@ def delete(request, board_id):
 def fetch(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
+
+    # Show fetch form
+    if request.method == "GET":
+        replacements = {"member": member, "board": board}
+        return render(request, "boards/fetch.html", replacements)
+
+    # Confirm fetch form
     confirmed_board_id = request.POST.get("board_id")
     if confirmed_board_id and confirmed_board_id == board_id:
         board.fetch()
         return HttpResponseRedirect(reverse("boards:view_boards"))
+
     raise Http404
 
 

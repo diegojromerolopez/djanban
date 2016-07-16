@@ -24,8 +24,6 @@
                                 <a href="{% url 'boards:view_label_report' board.id %}">View labels</a>
                                 <a href="{% url 'boards:view_member_report' board.id %}">View members</a>
                                 <a href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">View daily spent times</a>
-                                {% include "boards/fetch_form.html" %}
-                                {% include "boards/delete_form.html" %}
                             {% else %}
                                 You need a 'done list' and at least a 'in development' list
                             {% endif %}
