@@ -8,22 +8,22 @@
         {% if boards|length == 0 %}
             {% include "boards/no_boards_warning.html" %}
         {% else %}
-            <ul>
+            <ul class="list-group">
                 {% for board in boards %}
-                    <li>
-                        <span>{{board.name}}</span>
+                    <li class="list-group-item">
+                        <h2>{{board.name}}</h2>
                         <div>
-                            <a href="{% url 'boards:view' board.id %}">View</a>
-                            <a href="{% url 'boards:view_lists' board.id %}">View lists</a>
+                            <a class="btn btn-primary" href="{% url 'boards:view' board.id %}">View</a>
+                            <a class="btn btn-primary" href="{% url 'boards:view_lists' board.id %}">View lists</a>
                             {% if board.is_ready %}
-                                <a href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
-                                <a href="{% url 'boards:view_card_report' board.id %}">View cards</a>
+                                <a class="btn btn-primary" href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
+                                <a class="btn btn-primary" href="{% url 'boards:view_card_report' board.id %}">View cards</a>
                                 {% for workflow in board.workflows.all %}
-                                    <a href="{% url 'boards:view_workflow_card_report' board.id workflow.id %}">View {{workflow.name}} report</a>
+                                    <a class="btn btn-primary" href="{% url 'boards:view_workflow_card_report' board.id workflow.id %}">View {{workflow.name}} report</a>
                                 {% endfor %}
-                                <a href="{% url 'boards:view_label_report' board.id %}">View labels</a>
-                                <a href="{% url 'boards:view_member_report' board.id %}">View members</a>
-                                <a href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">View daily spent times</a>
+                                <a class="btn btn-primary" href="{% url 'boards:view_label_report' board.id %}">View labels</a>
+                                <a class="btn btn-primary" href="{% url 'boards:view_member_report' board.id %}">View members</a>
+                                <a class="btn btn-primary" href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">View daily spent times</a>
                             {% else %}
                                 You need a 'done list' and at least a 'in development' list
                             {% endif %}
