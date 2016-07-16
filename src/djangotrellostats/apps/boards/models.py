@@ -46,9 +46,22 @@ class Board(models.Model):
         return self.last_fetch_datetime.strftime("%Y-%m-%d")
 
     def is_ready(self):
+        """
+        Informs if this board is ready to be fetched.
+        Returns: True if this board's data can be fetched.
+
+        """
         done_list_exists = self.lists.filter(type="done").exists()
         development_list_exists = self.lists.filter(type="development").exists()
         return done_list_exists and development_list_exists
+
+    def is_fetched(self):
+        """
+        Inform if this board has fetched data.
+        Returns: True if the board has data (cards, times...). False otherwise.
+
+        """
+        return self.last_fetch_datetime is not None
 
     def cycle_time_lists(self):
         return self.lists.exclude(Q(type="before_development")|Q(type="ignored"))
@@ -59,13 +72,23 @@ class Board(models.Model):
     # Fetch data of this board
     @transaction.atomic
     def fetch(self):
+        self._truncate()
         self._fetch_labels()
         self._fetch_cards()
         self.last_fetch_datetime = timezone.now()
         self.save()
 
+    # Delete all children entities but lists and workflows
+    def _truncate(self):
+        self.labels.all().delete()
+        self.cards.all().delete()
+        self.daily_spent_times.all().delete()
+        ListReport.objects.filter(list__board=self).delete()
+        self.member_reports.all().delete()
+
     # Fetch the labels of this board
     def _fetch_labels(self):
+
         trello_board = self._get_trello_board()
         trello_labels = trello_board.get_labels()
         for trello_label in trello_labels:
@@ -402,7 +425,7 @@ class Label(ImmutableModel):
 
     name = models.CharField(max_length=128, verbose_name=u"Name of the label")
     uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the label", unique=True)
-    color = models.CharField(max_length=128, verbose_name=u"Color of the label")
+    color = models.CharField(max_length=128, verbose_name=u"Color of the label", default=None, null=True)
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="labels")
 
     @staticmethod

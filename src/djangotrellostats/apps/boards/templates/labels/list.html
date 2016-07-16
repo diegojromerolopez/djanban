@@ -6,7 +6,7 @@
     <h1>Labels of {{board.name}}</h1>
     <div>Last updated: {{board.get_human_fetch_datetime}}</div>
     {% if labels|length == 0 %}
-        There are no labels in this board. Have you tried to fetch the labels? {% include "boards/fetch_form.html" %}
+        There are no labels in this board. Have you tried to fetch the labels?
     {% else %}
         <div class="panel">
             <table class="table">

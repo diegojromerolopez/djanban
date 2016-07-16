@@ -160,5 +160,5 @@ def change_list_type(request):
         list_.type = type_
         list_.save()
 
-        return HttpResponseRedirect(reverse("boards:view_board_lists", args=(list_.board_id,)))
+        return HttpResponseRedirect(reverse("boards:view_lists", args=(list_.board_id,)))
     raise Http404

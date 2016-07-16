@@ -7,7 +7,7 @@
     <div>Last updated: {{fetch.creation_datetime}}</div>
     <div>Workflow: {{workflow.name}}</div>
     {% if workflow_card_reports|length == 0 %}
-        There are no cards in this board. Have you tried to fetch the cards? {% include "boards/fetch_form.html" %}
+        There are no cards in this board. Have you tried to fetch the cards?
     {% else %}
         <table>
             <tr>

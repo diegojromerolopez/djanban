@@ -15,7 +15,7 @@
                     <li {% if url_name == "view_lists" %}class="active"{% endif %}>
                         <a href="{% url 'boards:view_lists' board.id %}">View lists</a>
                     </li>
-                    {% if board.is_ready %}
+                    {% if board.is_ready and board.is_fetched %}
                         <li {% if url_name == "view_workflows" %}class="active"{% endif %}>
                             <a href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
                         </li>
@@ -51,7 +51,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if board.is_ready %}
+    {% if board.is_ready and board.is_fetched %}
         <div>
 
             <div class="row">
@@ -96,7 +96,11 @@
                 <div class="panel panel-danger ">
                   <div class="panel-heading">Error when showing charts</div>
                   <div class="panel-body">
-                    This board lists are not configured. Please <a href="{% url 'boards:view_lists' board.id %}">configure its lists</a>
+                      {% if not board.is_ready %}
+                            This board lists are not configured. Please <a href="{% url 'boards:view_lists' board.id %}">configure its lists</a>
+                      {% elif not board.is_fetched %}
+                            This board has no data. Please wait one day until data is fetched.
+                      {% endif %}
                   </div>
                 </div>
             </div>
