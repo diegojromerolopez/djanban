@@ -8,37 +8,39 @@
     {% if cards|length == 0 %}
         There are no cards in this board. Have you tried to fetch the cards?
     {% else %}
-        <div class="panel">
-            <table class="table">
-                <tr>
-                    <td>Name</td>
-                    <td>Closed?</td>
-                    <td>List</td>
-                    <td>Lead time</td>
-                    <td>Cycle time</td>
-                    <td>Estimated time</td>
-                    <td>Spent time</td>
-                    <td>Last activity date</td>
-                </tr>
-                {% for card in cards %}
+        <div class="row">
+            <div class="panel col-md-8">
+                <table class="table">
                     <tr>
-                        <td>{{card.name}}</td>
-                        <td>{% if card.is_closed %}Yes{% else %}No{% endif %}</td>
-                        <td>{{card.list.name}}</td>
-                        <td>{{card.lead_time}}</td>
-                        <td>{{card.cycle_time}}</td>
-                        <td>{{card.estimated_time}}</td>
-                        <td>{{card.spent_time}}</td>
-                        <td>{{card.last_activity_date}}</td>
+                        <td>Name</td>
+                        <td>Closed?</td>
+                        <td>List</td>
+                        <td>Lead time</td>
+                        <td>Cycle time</td>
+                        <td>Estimated time</td>
+                        <td>Spent time</td>
+                        <td>Last activity date</td>
                     </tr>
-                {% endfor %}
-                <tr>
-                    <td colspan="6">Cycle time (avg. & std. dev.)</td><td>{{avg_cycle_time}}</td><td>{{std_dev_cycle_time}}</td>
-                </tr>
-                <tr>
-                    <td colspan="6">Lead time (avg. & std. dev.)</td><td>{{avg_lead_time}}</td><td>{{std_dev_lead_time}}</td>
-                </tr>
-            </table>
+                    {% for card in cards %}
+                        <tr>
+                            <td>{{card.name}}</td>
+                            <td>{% if card.is_closed %}Yes{% else %}No{% endif %}</td>
+                            <td>{{card.list.name}}</td>
+                            <td>{{card.lead_time}}</td>
+                            <td>{{card.cycle_time}}</td>
+                            <td>{{card.estimated_time}}</td>
+                            <td>{{card.spent_time}}</td>
+                            <td>{{card.last_activity_date}}</td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="6">Cycle time (avg. & std. dev.)</td><td>{{avg_cycle_time}}</td><td>{{std_dev_cycle_time}}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="6">Lead time (avg. & std. dev.)</td><td>{{avg_lead_time}}</td><td>{{std_dev_lead_time}}</td>
+                    </tr>
+                </table>
+            </div>
         </div>
     {% endif %}
 {% endblock content %}

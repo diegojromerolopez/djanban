@@ -102,3 +102,10 @@ class LoginForm(forms.Form):
 
         cleaned_data["user"] = user
         return cleaned_data
+
+
+# Give access to member form
+class GiveAccessToMemberForm(forms.Form):
+    email = forms.EmailField(label=u"Email and username")
+    password = forms.CharField(label=u"Password", widget=forms.PasswordInput)
+

@@ -1,0 +1,8 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Give access to {{member.trello_username}}{% endblock %}
+
+{% block content %}
+    <h1>Give access to {{member.trello_username}}</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}

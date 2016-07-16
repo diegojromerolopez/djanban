@@ -38,7 +38,7 @@ def login(request):
         if form.is_valid():
             user = form.cleaned_data["user"]
             django_login(request, user)
-            return HttpResponseRedirect(reverse("members:dashboard"))
+            return HttpResponseRedirect(reverse("index"))
     else:
         form = LoginForm()
 

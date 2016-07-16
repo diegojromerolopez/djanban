@@ -1,0 +1,24 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Members{% endblock %}
+
+{% block content %}
+        <div class="panel">
+            <table class="table">
+                <tr>
+                    <td>Initials</td>
+                    <td>Trello username</td>
+                    <td>Email and this site's username</td>
+                    <td>Has access?</td>
+                </tr>
+                {% for member in members %}
+                    <tr>
+                        <td>{{member.initials}}</td>
+                        <td>{{member.trello_username}}</td>
+                        <td>{% if member.user %}{{member.user.username}}{% endif %}</td>
+                        <td>{% if member.user %}Yes {% if member.id == request.user.member.id %}(That's you){% endif %}{% else %} No <a class="btn btn-primary" href="{% url 'members:give_access' member.id %}" title="Give access to {{member.trello_username}}">Give access</a>{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+{% endblock content %}

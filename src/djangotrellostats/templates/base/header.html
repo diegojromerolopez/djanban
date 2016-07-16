@@ -8,6 +8,9 @@
                 <li role="presentation" {% if url_name == "view_boards" %}class="active"{% endif %}>
                    <a href="{% url 'boards:view_boards' %}" title="View my boards">View my boards</a>
                 </li>
+                <li role="presentation" {% if url_name == "view_members" %}class="active"{% endif %}>
+                    <a href="{% url 'members:view_members' %}" title="View members">Members</a>
+                </li>
                 <li role="presentation">
                     <a href="{% url 'members:logout' %}" title="User logout">Logout</a>
                 </li>
