@@ -1,0 +1,3 @@
+Board;Member;Week;Weekday;Day of year;Date;Spent time;Estimated time;Difference
+{% for spent_time in spent_times %}{{spent_time.board.name}};{{spent_time.member.trello_username}};{{spent_time.week_of_year}};{{spent_time.weekday}};{{spent_time.day_of_year}};{{spent_time.date|date:"Y-m-d"}};"{{spent_time.spent_time}}";"{{spent_time.estimated_time}}";"{{spent_time.diff_time}}"
+{% endfor %}

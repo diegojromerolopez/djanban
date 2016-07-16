@@ -4,16 +4,42 @@ import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
-from django.http.response import Http404
+from django.http.response import Http404, HttpResponse
 from django.shortcuts import render
 
 from djangotrellostats.apps.boards.models import DailySpentTime, Board
 from djangotrellostats.apps.members.models import Member
+from django.template import loader, Context
 
 
 # View spent time report
 @login_required
 def view_daily_spent_times(request):
+    parameters = _get_daily_spent_times_queryset(request)
+
+    if "board" in parameters["replacements"] and parameters["replacements"]["board"]:
+        return render(request, "daily_spent_times/list_by_board.html", parameters["replacements"])
+    return render(request, "daily_spent_times/list.html", parameters["replacements"])
+
+
+# Export daily spent report
+@login_required
+def export_daily_spent_times(request):
+    parameters = _get_daily_spent_times_queryset(request)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="export-daily-spent-times.csv"'
+
+    t = loader.get_template('daily_spent_times/csv.txt')
+    c = Context({
+        'spent_times': parameters["queryset"],
+    })
+    response.write(t.render(c))
+    return response
+
+
+# Return the fitered queryset and the replacements given the GET parameters
+def _get_daily_spent_times_queryset(request):
     member = request.user.member
     daily_spent_time_filter = {}
     replacements = {"boards": Board.objects.all(), "members": Member.objects.all()}
@@ -60,6 +86,4 @@ def view_daily_spent_times(request):
     replacements["estimated_time_sum"] = daily_spent_times.aggregate(Sum("estimated_time"))["estimated_time__sum"]
     replacements["diff_time_sum"] = daily_spent_times.aggregate(Sum("diff_time"))["diff_time__sum"]
 
-    if board:
-        return render(request, "daily_spent_times/list_by_board.html", replacements)
-    return render(request, "daily_spent_times/list.html", replacements)
+    return {"queryset": daily_spent_times, "replacements": replacements}

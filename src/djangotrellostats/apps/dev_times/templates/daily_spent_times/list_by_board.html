@@ -10,5 +10,8 @@
     </h1>
     <div>Last updated: {{board.get_human_fetch_datetime}}</div>
     {% include "daily_spent_times/components/filter_form.html" with selected_member=selected_member %}
+    <div class="text-right">
+        <a href="{% url 'dev_times:export_daily_spent_times' %}?board_id={{board.id}}" class="btn btn-primary">Export as CSV</a>
+    </div>
     {% include "daily_spent_times/components/list.html" %}
 {% endblock content %}
