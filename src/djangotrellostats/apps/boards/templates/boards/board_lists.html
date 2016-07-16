@@ -12,14 +12,14 @@
                 {% for list in lists %}
                     <li>
                         {{list.name}}
-                        <form action="{% url 'boards:change_list_type' %}" method="post">
+                        <form action="{% url 'boards:change_list_type' %}" method="post" class="form-inline">
                             <input type="hidden" name="list_id" value="{{list.id}}" />
-                            <select name="type">
+                            <select name="type" class="form-control">
                                 {% for list_type, list_type_name in list_types.items %}
                                     <option value="{{list_type}}" {% if list.type == list_type %}selected=selected{% endif %}>{{list_type_name}}</option>
                                 {% endfor %}
                             </select>
-                            <button type="submit">Change type</button>
+                            <button type="submit" class="btn btn-primary">Change type</button>
                         </form>
                     </li>
                 {% endfor %}
