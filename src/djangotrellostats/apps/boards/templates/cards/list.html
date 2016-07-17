@@ -37,10 +37,10 @@
                         </tr>
                     {% endfor %}
                     <tr>
-                        <td colspan="6">Cycle time (avg. & std. dev.)</td><td>{{avg_cycle_time}}</td><td>{{std_dev_cycle_time}}</td>
+                        <td colspan="6">Cycle time (avg. & std. dev.)</td><td>{{avg_cycle_time|floatformat:"-3"}}</td><td>{{std_dev_cycle_time|floatformat:"-3"}}</td>
                     </tr>
                     <tr>
-                        <td colspan="6">Lead time (avg. & std. dev.)</td><td>{{avg_lead_time}}</td><td>{{std_dev_lead_time}}</td>
+                        <td colspan="6">Lead time (avg. & std. dev.)</td><td>{{avg_lead_time|floatformat:"-3"}}</td><td>{{std_dev_lead_time|floatformat:"-3"}}</td>
                     </tr>
                 </table>
             </div>
