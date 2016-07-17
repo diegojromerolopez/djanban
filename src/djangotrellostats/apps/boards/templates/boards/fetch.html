@@ -9,11 +9,11 @@
         <div class="panel panel-danger ">
           <div class="panel-heading">Danger! This action cannot be undone</div>
           <div class="panel-body">
-            This board will be deleted and fetched again. Are you sure?
+            This board data will be deleted and fetched again. Are you sure?
 
               <form action="{% url 'boards:fetch' board.id %}" method="post">
                 <input type="hidden" name="board_id" value="{{board.id}}"/>
-                <button type="submit" class="btn btn-danger">I am sure, delete board and fetch again its content</button>
+                <button type="submit" class="btn btn-danger">I am sure, delete board contents and fetch again its data</button>
               </form>
 
           </div>

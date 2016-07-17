@@ -30,11 +30,8 @@ class Member(models.Model):
     # Fetch basic information of boards and its lists
     @transaction.atomic
     def init_fetch(self, debug=False):
-        self.delete_current_data()
-
         trello_boards = self.trello_client.list_boards()
         for trello_board in trello_boards:
-
             board_already_exists = Board.objects.filter(uuid=trello_board.id).exists()
             if not board_already_exists:
                 board_name = trello_board.name.decode("utf-8")

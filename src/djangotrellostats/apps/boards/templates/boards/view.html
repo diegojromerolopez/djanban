@@ -113,7 +113,8 @@
                       {% if not board.is_ready %}
                             This board lists are not configured. Please <a href="{% url 'boards:view_lists' board.id %}">configure its lists</a>
                       {% elif not board.is_fetched %}
-                            This board has no data. Please wait one day until data is fetched.
+                            <div>This board has no data. Please wait one day until data is fetched or fetch its data.</div>
+                            <a href="{% url 'boards:fetch' board.id %}" class="btn btn-danger">Fetch board {{board.name}} data</a>
                       {% endif %}
                   </div>
                 </div>
