@@ -8,3 +8,8 @@
     overflow: hidden;
     width: 80%;
 }
+
+#footer{
+    margin-bottom: 0px;
+    padding-bottom: 60px;
+}
