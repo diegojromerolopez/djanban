@@ -126,7 +126,7 @@ And that's all, then you have several interfaces with data about members, labels
 
 ## Giving access to his/her boards in this platform
 
-![Giving access to members](resources/images/screencaptures/members-giving-access.png)
+![Giving access to members](resources/images/screencaptures/members-give-access.png)
 
 # TODO
 
