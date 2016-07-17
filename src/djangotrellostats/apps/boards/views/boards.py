@@ -157,7 +157,7 @@ def view_workflow_card_report(request, board_id, workflow_id):
 def view_label_report(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
-    labels = board.labels.all()
+    labels = board.labels.exclude(name="")
     replacements = {"member": member, "board": board, "labels": labels}
     return render(request, "labels/list.html", replacements)
 
