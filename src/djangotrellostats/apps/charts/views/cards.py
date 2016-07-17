@@ -31,7 +31,8 @@ def avg_lead_time(request, board_id=None):
         lead_time_chart.add(u"Card average lead time", card_avg_lead_time)
 
         for label in labels:
-            lead_time_chart.add(u"{0} average lead time".format(label.name), label.avg_lead_time())
+            if label.name:
+                lead_time_chart.add(u"{0} average lead time".format(label.name), label.avg_lead_time())
 
     return lead_time_chart.render_django_response()
 
@@ -56,7 +57,8 @@ def avg_cycle_time(request, board_id=None):
         cycle_time_chart.add(u"Card average cycle time", card_avg_lead_time)
 
         for label in labels:
-            cycle_time_chart.add(u"{0} average cycle time".format(label.name), label.avg_lead_time())
+            if label.name:
+                cycle_time_chart.add(u"{0} average cycle time".format(label.name), label.avg_lead_time())
 
     return cycle_time_chart.render_django_response()
 

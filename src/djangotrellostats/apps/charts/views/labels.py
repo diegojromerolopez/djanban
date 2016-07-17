@@ -29,7 +29,8 @@ def avg_spent_times(request, board_id=None):
         labels = board.labels.all()
 
         for label in labels:
-            avg_times_chart.add(u"{0} average spent time".format(label.name), label.avg_spent_time())
+            if label.name:
+                avg_times_chart.add(u"{0} average spent time".format(label.name), label.avg_spent_time())
 
     return avg_times_chart.render_django_response()
 
@@ -57,6 +58,7 @@ def avg_estimated_times(request, board_id=None):
         labels = board.labels.all()
 
         for label in labels:
-            avg_times_chart.add(u"{0} average estimated time".format(label.name), label.avg_estimated_time())
+            if label.name:
+                avg_times_chart.add(u"{0} average estimated time".format(label.name), label.avg_estimated_time())
 
     return avg_times_chart.render_django_response()
