@@ -1,5 +1,5 @@
 
-# Django Trello stats
+# Django Trello Stats
 
 Statistics and charts for Trello boards, now in a Django app.
 
