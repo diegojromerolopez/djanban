@@ -11,5 +11,14 @@
 
 #footer{
     margin-bottom: 0px;
+    margin-top: 50px;
     padding-bottom: 60px;
+    overflow: hidden;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+#footer .row{
+    margin-bottom: 10px;
 }

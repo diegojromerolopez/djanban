@@ -96,7 +96,7 @@ If you want to call this action, there is a button that allows you to fetch all 
 
 And that's all, then you have several interfaces with data about members, labels, cards and daily spent times
 
-# Interfaces
+# Board interfaces
 
 ## Board view
 
@@ -117,6 +117,16 @@ And that's all, then you have several interfaces with data about members, labels
 ## Board spent times
 
 ![Board spent times](resources/images/screencaptures/board-spent-times.png)
+
+# Member interfaces
+
+## What members have access to at least one board
+
+![Members](resources/images/screencaptures/members.png)
+
+## Giving access to his/her boards in this platform
+
+![Giving access to members](resources/images/screencaptures/members-giving-access.png)
 
 # TODO
 
