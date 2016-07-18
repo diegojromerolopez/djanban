@@ -253,7 +253,7 @@ class Board(models.Model):
 
 # Card of the task board
 class Card(ImmutableModel):
-    COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)"
+    COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s+(\-(?P<days_before>(\d+))d\s+)?(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)"
 
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
     list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")
@@ -406,10 +406,15 @@ class Card(ImmutableModel):
 
                 # Store spent time by member by day
                 local_timezone = pytz.timezone(settings.TIME_ZONE)
-                comment_date = local_timezone.localize(datetime.datetime.strptime(comment["date"],
+                date = local_timezone.localize(datetime.datetime.strptime(comment["date"],
                                                                                   '%Y-%m-%dT%H:%M:%S.%fZ')).date()
 
-                DailySpentTime.add(board=self.board, member=member_uuid, date=comment_date,
+                # If Plus for Trello comment informs that the time was spent several days ago, we have to substract
+                # the days to the date of the comment
+                if matches.group("days_before"):
+                    date -= datetime.timedelta(days=int(matches.group("days_before")))
+
+                DailySpentTime.add(board=self.board, member=member_uuid, date=date,
                                    spent_time=spent, estimated_time=estimated)
 
         self.comment_summary = {
