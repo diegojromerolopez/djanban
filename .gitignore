@@ -64,6 +64,7 @@ target/
 
 # Local configuration
 src/djangotrellostats/settings_local.py
+src/public_html
 src/shell
 src/connector
 

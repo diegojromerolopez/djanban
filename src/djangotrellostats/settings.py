@@ -16,6 +16,7 @@ import os
 from trello import Configuration
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+print BASE_DIR
 
 
 # Quick-start development settings - unsuitable for production
@@ -83,7 +84,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'djangotrellostats.wsgi.application'
+WSGI_APPLICATION = 'wsgi.wsgi.application'
 
 
 # Database
@@ -133,3 +134,5 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = BASE_DIR + "/public_html/collectedstatic"
