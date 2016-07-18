@@ -27,6 +27,13 @@
                                     <span class="fa fa-key "></span>
                                         Change password
                                 </a>
+                                {% if member.id == request.user.member.id %}
+                                    <a class="btn btn-primary" href="{% url 'members:edit_profile' %}"
+                                               title="Edit personal details">
+                                            <span class="fa fa-user"></span>
+                                                Edit profile
+                                    </a>
+                                {% endif %}
                             {% else %}
                                 No
                                 <a class="btn btn-primary" href="{% url 'members:give_access' member.id %}"

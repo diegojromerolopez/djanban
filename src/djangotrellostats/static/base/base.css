@@ -9,6 +9,11 @@
     width: 80%;
 }
 
+.large-form form input,
+.large-form form textarea{
+    width: 80%;
+}
+
 #footer{
     margin-bottom: 0px;
     margin-top: 50px;

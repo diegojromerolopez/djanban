@@ -3,11 +3,10 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.http import Http404
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 
-from djangotrellostats.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm
+from djangotrellostats.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm, EditProfileForm
 from djangotrellostats.apps.members.models import Member
 
 
@@ -79,3 +78,21 @@ def change_password_to_member(request, member_id):
 
     replacements = {"member": member, "form": form}
     return render(request, "members/give_access_to_member.html", replacements)
+
+
+# Change your user profile data
+@login_required
+def edit_profile(request):
+    member = request.user.member
+    if request.method == "POST":
+
+        form = EditProfileForm(request.POST, instance=member)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse("members:view_members"))
+
+    else:
+        form = EditProfileForm(instance=member)
+
+    replacements = {"member": member, "form": form}
+    return render(request, "members/edit_profile.html", replacements)
