@@ -16,6 +16,9 @@
                             <a class="btn btn-primary" href="{% url 'boards:view' board.id %}">
                                 <span class="fa fa-eye"></span> View
                             </a>
+                            <a class="btn btn-primary" href="{% url 'boards:edit' board.id %}">
+                                <span class="fa fa-pencil"></span> Edit
+                            </a>
                             <a class="btn btn-primary" href="{% url 'boards:view_lists' board.id %}">
                                 <span class="fa fa-list"></span> View lists</a>
                             {% if board.is_ready %}

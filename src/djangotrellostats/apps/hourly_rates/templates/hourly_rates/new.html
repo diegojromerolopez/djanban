@@ -1,0 +1,18 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}New hourly rate{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#id_start_date").datepicker({ dateFormat: 'yy/mm/dd' });
+            $("#id_end_date").datepicker({ dateFormat: 'yy/mm/dd' });
+        });
+    </script>
+{% endblock js %}
+
+{% block content %}
+    <h1>New hourly rate</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}

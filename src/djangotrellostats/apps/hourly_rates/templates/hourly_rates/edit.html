@@ -1,0 +1,8 @@
+{% extends "hourly_rates/new.html" %}
+
+{% block page_title %}Edit {{hourly_rate.name}} hourly rate{% endblock %}
+
+{% block content %}
+    <h1>Edit {{hourly_rate.name}}</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}

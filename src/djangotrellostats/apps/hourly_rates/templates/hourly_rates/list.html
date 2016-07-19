@@ -1,0 +1,40 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Hourly rates{% endblock %}
+
+{% block content %}
+        <h1>Hourly rates</h1>
+        {% if hourly_rates|length == 0 %}
+        <div class="panel panel-warning ">
+          <div class="panel-heading">No hourly rates</div>
+          <div class="panel-body">
+            It seems you don't have hourly rates. <a href="{% url 'hourly_rates:new' %}" title="New hourly rate" class="btn btn-primary">Create a new hourly rate</a>
+          </div>
+        </div>
+        {% else %}
+            <a href="{% url 'hourly_rates:new' %}" title="New hourly rate" class="btn btn-primary">New</a>
+            <div class="panel">
+                <table class="table">
+                    <tr>
+                        <td>Name</td>
+                        <td>Start date</td>
+                        <td>End date</td>
+                        <td>Is active?</td>
+                        <td>Actions</td>
+                    </tr>
+                    {% for hourly_rate in hourly_rates %}
+                        <tr>
+                            <td>{{hourly_rate.name}}</td>
+                            <td>{{hourly_rate.start_date}}</td>
+                            <td>{% if hourly_rate.end_date %}{{hourly_rate.end_date}}{% else %}Until now{% endif %}</td>
+                            <td>{% if hourly_rate.is_active %}Yes{% else %}No{% endif %}</td>
+                            <td>
+                                <a href="{% url 'hourly_rates:edit' hourly_rate.id %}"  class="btn btn-primary">Edit</a>
+                                <a href="{% url 'hourly_rates:delete' hourly_rate.id %}" class="btn btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endif %}
+{% endblock %}

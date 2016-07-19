@@ -36,14 +36,34 @@ class ImmutableModel(models.Model):
 class Board(models.Model):
     creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_boards")
     name = models.CharField(max_length=128, verbose_name=u"Name of the board")
+    comments = models.TextField(max_length=128, verbose_name=u"Comments for this board", default="", blank=True)
     uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the board", unique=True)
     last_activity_date = models.DateTimeField(verbose_name=u"Last activity date", default=None, null=True)
     last_fetch_datetime = models.DateTimeField(verbose_name=u"Last fetch datetime", default=None, null=True)
 
     members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="boards")
+    hourly_rates = models.ManyToManyField("hourly_rates.HourlyRate", verbose_name=u"Hourly rates",
+                                          related_name="boards")
 
     def get_human_fetch_datetime(self):
         return self.last_fetch_datetime.strftime("%Y-%m-%d")
+
+    # Returns an hourly rate or None if this doesn't exist
+    def get_date_hourly_rate(self, date):
+        # Get all hourly rates
+        hourly_rates = self.hourly_rates.all()
+
+        # IF there are no hourly rates, return None
+        if hourly_rates.count() == 0:
+            return None
+
+        for hourly_rate in hourly_rates:
+            # If date is inside the interval defined by the dates of the hourly rate
+            # this hourly rate will be applied in this day
+            if hourly_rate.end_date and hourly_rate.start_date <= date <= hourly_rate.end_date or date >= hourly_rate.start_date:
+                return hourly_rate
+
+        return None
 
     def is_ready(self):
         """

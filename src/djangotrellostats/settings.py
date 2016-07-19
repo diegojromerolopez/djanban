@@ -37,6 +37,7 @@ DEBUG = settings_local.DEBUG
 DOMAIN = settings_local.DOMAIN
 ALLOWED_HOSTS = settings_local.ALLOWED_HOSTS
 
+DATE_INPUT_FORMATS = ('%Y-%m-%d', '%Y/%m/%d', '%d-%m-%Y', '%d/%m/%Y')
 
 # Application definition
 
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     'djangotrellostats.apps.members',
     'djangotrellostats.apps.public',
     'djangotrellostats.apps.boards',
+    'djangotrellostats.apps.hourly_rates',
     'djangotrellostats.apps.dev_times',
     'djangotrellostats.apps.fetch',
 ]

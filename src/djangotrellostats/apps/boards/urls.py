@@ -12,6 +12,7 @@ urlpatterns = [
     # Board URLs
     url(r'^my-boards$', boards.view_list, name="view_boards"),
     url(r'^(?P<board_id>\d+)/view/?$', boards.view, name="view"),
+    url(r'^(?P<board_id>\d+)/edit/?$', boards.edit, name="edit"),
     url(r'^(?P<board_id>\d+)/lists/?$', boards.view_lists, name="view_lists"),
     url(r'^(?P<board_id>\d+)/delete/?$', boards.delete, name="delete"),
 

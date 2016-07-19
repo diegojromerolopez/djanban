@@ -18,6 +18,9 @@ class DailySpentTime(models.Model):
     spent_time = models.DecimalField(verbose_name=u"Spent time for this day", decimal_places=4, max_digits=12,
                                      default=None, null=True)
 
+    rate_amount = models.DecimalField(verbose_name=u"Rate amount for this spent time", decimal_places=4, max_digits=12,
+                                      default=None, null=True)
+
     estimated_time = models.DecimalField(verbose_name=u"Estimated time for this day", decimal_places=4, max_digits=12,
                                          default=None, null=True)
 
@@ -50,6 +53,14 @@ class DailySpentTime(models.Model):
                                               date=date, day_of_year=day_of_year, week_of_year=week_of_year,
                                               weekday=weekday)
 
+        # Rate amount computation
+        hourly_rate = board.get_date_hourly_rate(date)
+        if hourly_rate:
+            if daily_spent_time.rate_amount is None:
+                daily_spent_time.rate_amount = 0
+            daily_spent_time.rate_amount += hourly_rate.amount
+
+        # Saving the daily spent time
         daily_spent_time.save()
         return spent_time
 

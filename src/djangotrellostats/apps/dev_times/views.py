@@ -83,6 +83,7 @@ def _get_daily_spent_times_queryset(request):
     daily_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).order_by("-date")
     replacements["daily_spent_times"] = daily_spent_times
     replacements["spent_time_sum"] = daily_spent_times.aggregate(Sum("spent_time"))["spent_time__sum"]
+    replacements["spent_time_amount_sum"] = daily_spent_times.aggregate(Sum("rate_amount"))["rate_amount__sum"]
     replacements["estimated_time_sum"] = daily_spent_times.aggregate(Sum("estimated_time"))["estimated_time__sum"]
     replacements["diff_time_sum"] = daily_spent_times.aggregate(Sum("diff_time"))["diff_time__sum"]
 

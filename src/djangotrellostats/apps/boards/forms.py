@@ -1,13 +1,23 @@
 # -*- coding: utf-8 -*-
 
-from django import forms
-from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
-from django.forms import models
-from trello import TrelloClient
-from djangotrellostats.apps.boards.models import Workflow, List, WorkflowList
 import re
+from django.forms import models
+from djangotrellostats.apps.boards.models import Workflow, List, WorkflowList, Board
+
+
+# Board edition form
+class EditBoardForm(models.ModelForm):
+    class Meta:
+        model = Board
+        fields = ["comments", "hourly_rates"]
+
+    def __init__(self, *args, **kwargs):
+        super(EditBoardForm, self).__init__(*args, **kwargs)
+        self.fields["hourly_rates"].help_text = u"Please, select the hourly rates this board uses. System does not check if there is overlapping, so take care."
+
+    def clean(self):
+        cleaned_data = super(EditBoardForm, self).clean()
+        return cleaned_data
 
 
 # Workflow creation form

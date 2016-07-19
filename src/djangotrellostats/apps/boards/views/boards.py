@@ -8,6 +8,7 @@ from django.template import loader
 from django.template.context import Context
 from django.utils import timezone
 
+from djangotrellostats.apps.boards.forms import EditBoardForm
 from djangotrellostats.apps.boards.models import List
 from djangotrellostats.apps.boards.stats import avg, std_dev
 
@@ -43,6 +44,24 @@ def view(request, board_id):
     week = DailySpentTime.get_iso_week_of_year(now)
     replacements = {"board": board, "week_of_year": "{0}W{1}".format(year, week)}
     return render(request, "boards/view.html", replacements)
+
+
+# Edit board
+def edit(request, board_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id)
+
+    if request.method == "POST":
+        form = EditBoardForm(request.POST, instance=board)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse("boards:view", args=(board_id,)))
+
+    else:
+        form = EditBoardForm(instance=board)
+
+    replacements = {"board": board, "member": member, "form": form}
+    return render(request, "boards/edit.html", replacements)
 
 
 # View lists of a board
