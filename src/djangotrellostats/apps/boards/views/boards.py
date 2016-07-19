@@ -11,12 +11,11 @@ from django.utils import timezone
 from djangotrellostats.apps.boards.forms import EditBoardForm
 from djangotrellostats.apps.boards.models import List
 from djangotrellostats.apps.boards.stats import avg, std_dev
-
-
-# Initialize boards with data fetched from trello
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 
 
+# Initialize boards with data fetched from trello
+@login_required
 def init_boards(request):
     if request.method == "POST":
         member = request.user.member
@@ -36,6 +35,7 @@ def view_list(request):
 
 
 # View board
+@login_required
 def view(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
@@ -47,6 +47,7 @@ def view(request, board_id):
 
 
 # Edit board
+@login_required
 def edit(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
