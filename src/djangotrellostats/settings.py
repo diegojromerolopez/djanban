@@ -16,7 +16,6 @@ import os
 from trello import Configuration
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print BASE_DIR
 
 
 # Quick-start development settings - unsuitable for production
@@ -80,7 +79,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
-                'django.core.context_processors.request',
+                'django.template.context_processors.request',
             ],
         },
     },
@@ -117,16 +116,24 @@ DATABASES = settings_local.DATABASES
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = settings_local.LANGUAGE_CODE
 
-TIME_ZONE = "Europe/Madrid"
-Configuration.TIMEZONE = "Europe/Madrid"
+TIME_ZONE = settings_local.TIME_ZONE
+Configuration.TIMEZONE = TIME_ZONE
 
 USE_I18N = True
 
 USE_L10N = True
 
 USE_TZ = True
+
+
+EMAIL_USE_TLS = settings_local.EMAIL_USE_TLS
+EMAIL_HOST = settings_local.EMAIL_HOST
+EMAIL_PORT = settings_local.EMAIL_PORT
+EMAIL_HOST_USER = settings_local.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = settings_local.EMAIL_HOST_PASSWORD
+DEFAULT_FROM_EMAIL = settings_local.DEFAULT_FROM_EMAIL
 
 
 # Static files (CSS, JavaScript, Images)

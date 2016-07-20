@@ -153,3 +153,19 @@ class EditProfileForm(ModelForm):
                 user.email = self.cleaned_data["email"]
                 user.save()
 
+
+# Assigns a new password to one user that has forgotten it
+class ResetPasswordForm(forms.Form):
+    trello_username = forms.CharField(label=u"Trello username")
+    email = forms.EmailField(label=u"Email and username")
+
+    def clean(self):
+        cleaned_data = super(ResetPasswordForm, self).clean()
+        try:
+            member = Member.objects.get(trello_username=cleaned_data.get("trello_username"),
+                                        user__username=cleaned_data.get("email"), user__email=cleaned_data.get("email"))
+            cleaned_data["member"] = member
+        except Member.DoesNotExist:
+            raise ValidationError(u"Member does not exist, the Trello username or email is wrong")
+
+        return cleaned_data

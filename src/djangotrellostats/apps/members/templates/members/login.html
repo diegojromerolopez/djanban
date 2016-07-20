@@ -4,18 +4,14 @@
 
 {% block content %}
     {% if request.user and request.user.is_authenticated %}
-    <div class="row">
-        <div class="col-md-5 center-block">
-            <div class="panel panel-warning">
-              <div class="panel-heading">Already logged</div>
-              <div class="panel-body">
-                You are already logged. Want to <a href="{url 'members:logout'}" title="Log out">log out</a>?
-              </div>
-            </div>
-        </div>
-    </div>
+        {% include "members/components/already_logged_warning.html" %}
     {% else %}
         <h1>Login</h1>
         {% include "forms/form.html" %}
+        <div class="row">
+            <div class="col-md-5">
+                Have you forgotten your password? <a href="{% url 'members:reset_password' %}" title="Reset password">Reset password</a>
+            </div>
+        </div>
     {% endif %}
 {% endblock content %}

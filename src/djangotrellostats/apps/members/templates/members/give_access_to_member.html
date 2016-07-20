@@ -1,8 +1,18 @@
 {% extends "base/base.html" %}
 
-{% block page_title %}Give access to {{member.trello_username}}{% endblock %}
+{% block page_title %}
+    {% if member.user %}
+        Change password of {{member.trello_username}}
+    {% else %}
+        Give access to {{member.trello_username}}
+    {% endif %}
+{% endblock %}
 
 {% block content %}
-    <h1>Give access to {{member.trello_username}}</h1>
+    {% if member.user %}
+        <h1>Change password of {{member.trello_username}}</h1>
+    {% else %}
+        <h1>Give access to {{member.trello_username}}</h1>
+    {% endif %}
     {% include "forms/form.html" %}
 {% endblock content %}

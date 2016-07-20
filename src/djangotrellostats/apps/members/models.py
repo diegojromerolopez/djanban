@@ -24,6 +24,20 @@ class Member(models.Model):
         super(Member, self).__init__(*args, **kwargs)
         self.trello_client = self._get_trello_client()
 
+    # Resets the password of the associated user of this member
+    def reset_password(self, new_password=None):
+        # A member without an user cannot be his/her password changed
+        if not self.user:
+            raise ValueError(u"This member has not an associated user")
+        # Create automatically a new password if None is passed
+        if new_password is None:
+            new_password = User.objects.make_random_password()
+        # Setting up the new password
+        self.user.set_password(new_password)
+        self.user.save()
+        return new_password
+
+    # Informs if this member is initialized, that is, it has the credentials needed for connecting to trello.com
     def is_initialized(self):
         return self.api_key and self.api_secret and self.token and self.token_secret
 
