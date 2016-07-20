@@ -24,10 +24,10 @@
                         <td>{{label.name}}</td>
                         <td>{{label.color}}</td>
                         <td>{{label.cards.all.count}}</td>
-                        <td>{{label.avg_estimated_time}}</td>
-                        <td>{{label.avg_spent_time}}</td>
-                        <td>{{label.avg_cycle_time}}</td>
-                        <td>{{label.avg_lead_time}}</td>
+                        <td>{{label.avg_estimated_time|floatformat:"-2"}}</td>
+                        <td>{{label.avg_spent_time|floatformat:"-2"}}</td>
+                        <td>{{label.avg_cycle_time|floatformat:"-2"}}</td>
+                        <td>{{label.avg_lead_time|floatformat:"-2"}}</td>
                     </tr>
                 {% endfor %}
             </table>

@@ -26,12 +26,12 @@
                         <td>{{member_report.member.initials}}</td>
                         <td>{{member_report.member.trello_username}}</td>
                         <td>{{member_report.number_of_cards}}</td>
-                        <td>{{member_report.avg_card_time}}</td>
-                        <td>{{member_report.std_dev_card_time}}</td>
-                        <td>{{member_report.avg_card_estimated_time}}</td>
-                        <td>{{member_report.std_dev_card_estimated_time}}</td>
-                        <td>{{member_report.avg_card_spent_time}}</td>
-                        <td>{{member_report.std_dev_card_spent_time}}</td>
+                        <td>{{member_report.avg_card_time|floatformat:"-2"}}</td>
+                        <td>{{member_report.std_dev_card_time|floatformat:"-2"}}</td>
+                        <td>{{member_report.avg_card_estimated_time|floatformat:"-2"}}</td>
+                        <td>{{member_report.std_dev_card_estimated_time|floatformat:"-2"}}</td>
+                        <td>{{member_report.avg_card_spent_time|floatformat:"-2"}}</td>
+                        <td>{{member_report.std_dev_card_spent_time|floatformat:"-2"}}</td>
                     </tr>
                 {% endfor %}
             </table>
