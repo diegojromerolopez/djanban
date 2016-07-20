@@ -73,14 +73,13 @@ class Member(models.Model):
                 last_list.type = "done"
                 last_list.save()
 
-                # Fetch all members this board
-                self._fetch_members(board, trello_board)
-
             else:
                 board = Board.objects.get(uuid=trello_board.id)
-                if not board.members.filter(id=self.id).exists():
-                    board.members.add(self)
 
+            # Fetch all members this board and associate to this board
+            self._fetch_members(board, trello_board)
+
+    # Destroy boards created by this member
     def delete_current_data(self):
         self.created_boards.all().delete()
 
