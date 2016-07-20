@@ -1,0 +1,61 @@
+
+
+tr.month_1{
+    background-color: #F0FFF0;
+    color: black;
+}
+
+tr.month_2{
+    background-color: #87CEFA;
+    color: black;
+}
+
+tr.month_3{
+    background-color: #7FFF00;
+    color: black;
+}
+
+tr.month_4{
+	background-color: #00FFFF;
+    color: black;
+}
+
+tr.month_5{
+    background-color: #ADFF2F;
+    color: black;
+}
+
+tr.month_6{
+    background-color: orange;
+    color: black;
+}
+
+tr.month_7 td{
+    background-color: red;
+    color: white;
+}
+
+tr.month_8{
+    background-color: #FF1493;
+    color: black;
+}
+
+tr.month_9{
+    background-color: #A9A9A9;
+    color: black;
+}
+
+tr.month_10{
+    background-color: #DAA520;
+    color: black;
+}
+
+tr.month_11{
+    background-color: #ADD8E6;
+    color: black;
+}
+
+tr.month_12{
+    background-color: #E0FFFF;
+    color: black;
+}

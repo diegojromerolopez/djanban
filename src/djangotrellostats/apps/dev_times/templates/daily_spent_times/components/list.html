@@ -16,7 +16,7 @@
                 <td>Rate amount</td>
             </tr>
             {% for daily_spent_time in daily_spent_times %}
-                <tr class="day_of_year_{{daily_spent_time.day_of_year}} week_of_year_{{daily_spent_time.week_of_year}}">
+                <tr class="day_of_year_{{daily_spent_time.day_of_year}} week_of_year_{{daily_spent_time.week_of_year}} month_{{daily_spent_time.date.month}}">
                     {% if not selected_board %}<td>{{daily_spent_time.board.name}}</td>{% endif %}
                     {% if not selected_member %}<td>{{daily_spent_time.member.trello_username}}</td>{% endif %}
                     <td>{{daily_spent_time.week_of_year}}</td>
@@ -38,7 +38,7 @@
                 <div class="panel-heading">Summary for this period of time</div>
                 <div class="panel-body">
                     <div>Sum of spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{spent_time_sum|floatformat:"-2"}} hours</div>
-                    <div>Sum of amount {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{spent_time_amount_sum|floatformat:"2"}}¤</div>
+                    <div>Sum of amount {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{spent_time_amount_sum|floatformat:"2"}} ¤</div>
                     <div>Sum of estimated time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{estimated_time_sum|floatformat:"-2"}} hours</div>
                     <div>Difference {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{diff_time_sum|floatformat:"-2"}} hours</div>
                 </div>

@@ -1,8 +1,14 @@
 {% extends "base/base.html" %}
+{% load staticfiles %}
 
 {% block page_title %}
     Daily spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %}
 {% endblock %}
+
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'css/dev_times/daily_spent_times.css' %}" rel="stylesheet" />
+{% endblock css %}
 
 {% block content %}
     <h1>
