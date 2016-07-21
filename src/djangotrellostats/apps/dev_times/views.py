@@ -3,19 +3,20 @@
 import datetime
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.http.response import Http404, HttpResponse
 from django.shortcuts import render
 
 from djangotrellostats.apps.boards.models import DailySpentTime, Board
 from djangotrellostats.apps.members.models import Member
 from django.template import loader, Context
+import calendar
 
 
 # View spent time report
 @login_required
 def view_daily_spent_times(request):
-    parameters = _get_daily_spent_times_queryset(request)
+    parameters = _get_daily_spent_times(request)
 
     if "board" in parameters["replacements"] and parameters["replacements"]["board"]:
         return render(request, "daily_spent_times/list_by_board.html", parameters["replacements"])
@@ -25,7 +26,7 @@ def view_daily_spent_times(request):
 # Export daily spent report in CSV format
 @login_required
 def export_daily_spent_times(request):
-    parameters = _get_daily_spent_times_queryset(request)
+    parameters = _get_daily_spent_times(request)
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="export-daily-spent-times.csv"'
@@ -39,9 +40,18 @@ def export_daily_spent_times(request):
 
 
 # Return the fitered queryset and the replacements given the GET parameters
-def _get_daily_spent_times_queryset(request):
+def _get_daily_spent_times(request):
     member = request.user.member
-    daily_spent_time_filter = {}
+
+    selected_member_id = request.GET.get("member_id")
+    selected_member = None
+    if selected_member_id:
+        selected_member = Member.objects.get(id=selected_member_id)
+
+    spent_times = _get_daily_spent_times_queryset(member, selected_member,
+                                                  request.GET.get("start_date"), request.GET.get("end_date"),
+                                                  request.GET.get("board_id"))
+
     replacements = {"boards": Board.objects.all(), "members": Member.objects.all()}
 
     # Start date
@@ -50,7 +60,6 @@ def _get_daily_spent_times_queryset(request):
         try:
             start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d")
             replacements["start_date"] = start_date
-            daily_spent_time_filter["date__gte"] = start_date
         except ValueError:
             start_date = None
 
@@ -60,16 +69,10 @@ def _get_daily_spent_times_queryset(request):
         try:
             end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d")
             replacements["end_date"] = end_date
-            daily_spent_time_filter["date__lte"] = end_date
         except ValueError:
             end_date = None
 
-    # Member whose time report we want to see
-    member_id = request.GET.get("member_id")
-    if member_id:
-        selected_member = Member.objects.get(id=member_id)
-        replacements["selected_member"] = selected_member
-        daily_spent_time_filter["member"] = selected_member
+    replacements["member"] = selected_member
 
     # If we are filtering by board, filter by board_id
     board_id = request.GET.get("board_id")
@@ -78,13 +81,79 @@ def _get_daily_spent_times_queryset(request):
         board = member.boards.get(id=board_id)
         replacements["selected_board"] = board
         replacements["board"] = board
-        daily_spent_time_filter["board"] = board
 
-    daily_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).order_by("-date")
-    replacements["daily_spent_times"] = daily_spent_times
+    daily_spent_times = spent_times["all"]
+    replacements["months"] = spent_times["per_month"]
     replacements["spent_time_sum"] = daily_spent_times.aggregate(Sum("spent_time"))["spent_time__sum"]
     replacements["spent_time_amount_sum"] = daily_spent_times.aggregate(Sum("rate_amount"))["rate_amount__sum"]
     replacements["estimated_time_sum"] = daily_spent_times.aggregate(Sum("estimated_time"))["estimated_time__sum"]
     replacements["diff_time_sum"] = daily_spent_times.aggregate(Sum("diff_time"))["diff_time__sum"]
 
     return {"queryset": daily_spent_times, "replacements": replacements}
+
+
+# Return the filtered queryset and the replacements given the GET parameters
+def _get_daily_spent_times_queryset(member, selected_member, start_date_, end_date_, board_id):
+    daily_spent_time_filter = {}
+
+    # Start date
+    start_date = None
+    if start_date_:
+        try:
+            start_date = datetime.datetime.strptime(start_date_, "%Y-%m-%d")
+            daily_spent_time_filter["date__gte"] = start_date
+        except ValueError:
+            start_date = None
+
+    # End date
+    end_date = None
+    if end_date_:
+        try:
+            end_date = datetime.datetime.strptime(end_date_, "%Y-%m-%d")
+            daily_spent_time_filter["date__lte"] = end_date
+        except ValueError:
+            end_date = None
+
+    # Board
+    if board_id and member.boards.filter(id=board_id).exists():
+        daily_spent_time_filter["board_id"] = board_id
+
+    # Daily Spent Times
+    daily_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).order_by("-date")
+    months = []
+
+    # Grouped by months
+    if daily_spent_times.exists():
+        if start_date is None:
+            start_date = daily_spent_times.order_by("date")[0].date
+
+        if end_date is None:
+            end_date = daily_spent_times[0].date
+
+        num_months = absolute_difference_between_months(start_date, end_date)
+        months = []
+        year = start_date.year
+        for i in range(0, num_months):
+            month_index = start_date.month + i
+            month_name = calendar.month_name[month_index]
+            daily_spent_times_in_month_i = daily_spent_times.filter(date__month=month_index)
+            month = {
+                "name": month_name,
+                "number": month_index,
+                "year": year,
+                "i": month_index,
+                "daily_spent_times": daily_spent_times_in_month_i,
+                "rate_amount_sum": daily_spent_times_in_month_i.aggregate(sum=Sum("rate_amount"))["sum"],
+                "spent_time_sum": daily_spent_times_in_month_i.aggregate(sum=Sum("spent_time"))["sum"],
+                "estimated_time_sum": daily_spent_times_in_month_i.aggregate(sum=Sum("estimated_time"))["sum"],
+                "diff_time_sum": daily_spent_times_in_month_i.aggregate(sum=Sum("diff_time"))["sum"]
+            }
+            months.append(month)
+            if month == 12:
+                year += 1
+
+    return {"all": daily_spent_times, "per_month": months}
+
+
+def absolute_difference_between_months(d1, d2):
+    return abs((d1.year - d2.year) * 12 + d1.month - d2.month)

@@ -1,4 +1,14 @@
+tr.header td{
+    font-weight: bold;
+}
 
+tr.main_header td{
+    font-size: 2em;
+}
+
+tr.last td{
+    border-bottom: 5px solid grey;
+}
 
 tr.month_1{
     background-color: #F0FFF0;
