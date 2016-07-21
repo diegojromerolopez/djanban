@@ -1,4 +1,13 @@
-<div>
-    Currently you have no boards loaded, do you want to load your boards?
-    <form action="{% url 'boards:init_boards' %}" method="post"><button type="submit">load boards</button></form>
+<div class="row">
+    <div class="col-md-5 center-block">
+        <div class="panel panel-warning">
+          <div class="panel-heading">You don't have boards yet</div>
+          <div class="panel-body">
+            <p>Currently you have no boards loaded, do you want to load your boards?</p>
+            <form action="{% url 'boards:init_boards' %}" method="post">
+                <button type="submit" class="btn btn-primary">load boards</button>
+            </form>
+          </div>
+        </div>
+    </div>
 </div>
