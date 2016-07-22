@@ -36,6 +36,9 @@ DEBUG = settings_local.DEBUG
 DOMAIN = settings_local.DOMAIN
 ALLOWED_HOSTS = settings_local.ALLOWED_HOSTS
 
+# Administrator group
+ADMINISTRATOR_GROUP = "Administrators"
+
 DATE_INPUT_FORMATS = ('%Y-%m-%d', '%Y/%m/%d', '%d-%m-%Y', '%d/%m/%Y')
 
 # Application definition

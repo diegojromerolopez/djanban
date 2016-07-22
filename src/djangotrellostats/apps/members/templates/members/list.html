@@ -1,4 +1,5 @@
 {% extends "base/base.html" %}
+{% load member_auth %}
 
 {% block page_title %}Members{% endblock %}
 
@@ -22,13 +23,13 @@
                                 {% if member.id == request.user.member.id %}
                                     (That's you)
                                 {% endif %}
-                                <a class="btn btn-primary" href="{% url 'members:change_password' member.id %}"
-                                       title="Change password to user {{member.trello_username}}">
-                                    <span class="fa fa-key "></span>
-                                        Change password
-                                </a>
-                                {% if member.id == request.user.member.id %}
-                                    <a class="btn btn-primary" href="{% url 'members:edit_profile' %}"
+                                {% if member.id == request.user.member.id or request.user|user_is_administrator %}
+                                    <a class="btn btn-primary" href="{% url 'members:change_password' member.id %}"
+                                           title="Change password to user {{member.trello_username}}">
+                                        <span class="fa fa-key "></span>
+                                            Change password
+                                    </a>
+                                    <a class="btn btn-primary" href="{% url 'members:edit_profile' member.id %}"
                                                title="Edit personal details">
                                             <span class="fa fa-user"></span>
                                                 Edit profile
@@ -36,11 +37,13 @@
                                 {% endif %}
                             {% else %}
                                 No
-                                <a class="btn btn-primary" href="{% url 'members:give_access' member.id %}"
-                                   title="Give access to {{member.trello_username}}">
-                                   <span class="fa fa-unlock"></span>
-                                    Give access
-                                </a>
+                                {% if request.user|user_is_administrator %}
+                                    <a class="btn btn-primary" href="{% url 'members:give_access' member.id %}"
+                                       title="Give access to {{member.trello_username}}">
+                                       <span class="fa fa-unlock"></span>
+                                        Give access
+                                    </a>
+                                {% endif %}
                             {% endif %}
                         </td>
                     </tr>

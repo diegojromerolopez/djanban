@@ -19,6 +19,13 @@ class Member(models.Model):
     trello_username = models.CharField(max_length=128, verbose_name=u"Trello username")
     initials = models.CharField(max_length=8, verbose_name=u"User initials in Trello")
     user = models.OneToOneField(User, verbose_name=u"Associated user", related_name="member", null=True, default=None)
+    is_developer = models.BooleanField(verbose_name=u"Is this member a developer?",
+                                       help_text=u"Informs if this member is a developer and hence will receive reports"
+                                                 u"and other information", default=False)
+    on_holidays = models.BooleanField(verbose_name=u"Is this developer on holidays?",
+                                      help_text=u"If the developer is on holidays will stop receiving reports"
+                                                 u"and other emails", default=False)
+
 
     def __init__(self, *args, **kwargs):
         super(Member, self).__init__(*args, **kwargs)
