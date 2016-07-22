@@ -129,7 +129,7 @@ class EditProfileForm(ModelForm):
 
     class Meta:
         model = Member
-        fields = ["api_key", "api_secret", "token", "token_secret"]
+        fields = ["api_key", "api_secret", "token", "token_secret", "is_developer", "on_holidays"]
 
     def __init__(self, *args, **kwargs):
         super(EditProfileForm, self).__init__(*args, **kwargs)
