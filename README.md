@@ -118,6 +118,7 @@ And that's all, then you have several interfaces with data about members, labels
 
 ![Board spent times](resources/images/screencaptures/board-spent-times.png)
 
+
 # Member interfaces
 
 ## What members have access to at least one board
@@ -127,6 +128,16 @@ And that's all, then you have several interfaces with data about members, labels
 ## Giving access to his/her boards in this platform
 
 ![Giving access to members](resources/images/screencaptures/members-give-access.png)
+
+# Permissions
+
+There is a group called 'Administrators' that can manage the passwords and the access of other members.
+
+The name of this group can be changed by modifying **ADMINISTRATOR_GROUP** setting in **djangotrellostats/settings.py**.
+
+This group will be automatically created and you have to populate it with the administrator member users.
+
+There is no use of django permissions yet.
 
 # TODO
 
