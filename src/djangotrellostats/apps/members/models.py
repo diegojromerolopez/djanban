@@ -12,19 +12,31 @@ from djangotrellostats.apps.boards.models import Board, List
 
 class Member(models.Model):
     api_key = models.CharField(max_length=128, verbose_name=u"Trello API key", null=True, default=None)
+
     api_secret = models.CharField(max_length=128, verbose_name=u"Trello API secret", null=True, default=None)
+
     token = models.CharField(max_length=128, verbose_name=u"Trello token", null=True, default=None)
+
     token_secret = models.CharField(max_length=128, verbose_name=u"Trello token secret", null=True, default=None)
+
     uuid = models.CharField(max_length=128, verbose_name=u"Trello member uuid", unique=True)
+
     trello_username = models.CharField(max_length=128, verbose_name=u"Trello username")
+
     initials = models.CharField(max_length=8, verbose_name=u"User initials in Trello")
+
     user = models.OneToOneField(User, verbose_name=u"Associated user", related_name="member", null=True, default=None)
+
     is_developer = models.BooleanField(verbose_name=u"Is this member a developer?",
                                        help_text=u"Informs if this member is a developer and hence will receive reports"
                                                  u"and other information", default=False)
+
     on_holidays = models.BooleanField(verbose_name=u"Is this developer on holidays?",
                                       help_text=u"If the developer is on holidays will stop receiving reports"
-                                                 u"and other emails", default=False)
+                                      u"and other emails", default=False)
+
+    real_working_hours_per_week = models.PositiveIntegerField(u"Number of hours this developer should achieve each"
+                                                              u"week", default=None, null=True, blank=True)
 
 
     def __init__(self, *args, **kwargs):

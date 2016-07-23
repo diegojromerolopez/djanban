@@ -10,8 +10,8 @@
                     </td>
                 </tr>
                 <tr class="header month_{{month.i}}">
-                    {% if not selected_board %}<td>Board</td>{% endif %}
-                    {% if not selected_member %}<td>Member</td>{% endif %}
+                    <td>Board</td>
+                    <td>Member</td>
                     <td>Week</td>
                     <td>Weekday</td>
                     <td>Day of year</td>
@@ -23,8 +23,8 @@
                 </tr>
                 {% for daily_spent_time in month.daily_spent_times %}
                     <tr class="day_of_year_{{daily_spent_time.day_of_year}} week_of_year_{{daily_spent_time.week_of_year}} month_{{daily_spent_time.date.month}}">
-                        {% if not selected_board %}<td>{{daily_spent_time.board.name}}</td>{% endif %}
-                        {% if not selected_member %}<td>{{daily_spent_time.member.trello_username}}</td>{% endif %}
+                        <td>{{daily_spent_time.board.name}}</td>
+                        <td>{{daily_spent_time.member.trello_username}}</td>
                         <td>{{daily_spent_time.week_of_year}}</td>
                         <td>{{daily_spent_time.weekday}}</td>
                         <td>{{daily_spent_time.day_of_year}}</td>
@@ -36,21 +36,24 @@
                     </tr>
                 {% endfor %}
                 <tr class="header month_{{month.i}}">
-                    <td colspan="{% if selected_board and selected_member %}9{% elif selected_board or selected_member %}8{% else %}7{% endif %}">Number of measurements</td>
+                    <td colspan="9">Number of measurements</td>
                     <td>{{month.daily_spent_times|length}}</td>
                 </tr>
                 <tr class="header month_{{month.i}}">
-                    <td colspan="{% if selected_board and selected_member %}9{% elif selected_board or selected_member %}8{% else %}7{% endif %}">Sum of amount</td>
+                    <td colspan="9">Sum of amount</td>
                     <td> {{month.rate_amount_sum|floatformat:"-2"}} ¤</td>
                 </tr>
                 <tr class="header month_{{month.i}}">
-                    <td colspan="{% if selected_board and selected_member %}9{% elif selected_board or selected_member %}8{% else %}7{% endif %}">Sum of spent time</td> <td> {{month.spent_time_sum|floatformat:"-2"}} hours</td>
+                    <td colspan="9">Sum of spent time</td>
+                    <td> {{month.spent_time_sum|floatformat:"-2"}} hours</td>
                 </tr>
                 <tr class="header month_{{month.i}}">
-                    <td colspan="{% if selected_board and selected_member %}9{% elif selected_board or selected_member %}8{% else %}7{% endif %}">Sum of estimated time</td> <td> {{month.estimated_time_sum|floatformat:"-2"}} hours</td>
+                    <td colspan="9">Sum of estimated time</td>
+                    <td> {{month.estimated_time_sum|floatformat:"-2"}} hours</td>
                 </tr>
                 <tr class="header month_{{month.i}} last">
-                    <td colspan="{% if selected_board and selected_member %}9{% elif selected_board or selected_member %}8{% else %}7{% endif %}">Diff between spent and estimated time</td> <td> {{month.diff_time_sum|floatformat:"-2"}} hours</td>
+                    <td colspan="9">Diff between spent and estimated time</td>
+                    <td> {{month.diff_time_sum|floatformat:"-2"}} hours</td>
                 </tr>
             {% endfor %}
         </table>

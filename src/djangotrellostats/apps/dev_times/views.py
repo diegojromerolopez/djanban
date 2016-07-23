@@ -11,6 +11,7 @@ from djangotrellostats.apps.boards.models import DailySpentTime, Board
 from djangotrellostats.apps.members.models import Member
 from django.template import loader, Context
 import calendar
+from collections import OrderedDict
 
 
 # View spent time report
@@ -72,7 +73,7 @@ def _get_daily_spent_times(request):
         except ValueError:
             end_date = None
 
-    replacements["member"] = selected_member
+    replacements["selected_member"] = selected_member
 
     # If we are filtering by board, filter by board_id
     board_id = request.GET.get("board_id")
@@ -136,7 +137,8 @@ def _get_daily_spent_times_queryset(member, selected_member, start_date_, end_da
         for i in range(0, num_months):
             month_index = start_date.month + i
             month_name = calendar.month_name[month_index]
-            daily_spent_times_in_month_i = daily_spent_times.filter(date__month=month_index)
+            daily_spent_times_in_month_i = daily_spent_times.filter(date__month=month_index).order_by("date")
+
             month = {
                 "name": month_name,
                 "number": month_index,
