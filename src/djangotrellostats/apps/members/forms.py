@@ -144,19 +144,6 @@ class EditProfileForm(ModelForm):
         self.initial["last_name"] = user.last_name
         self.initial["email"] = user.email
 
-        # Attributes that are only editable if the current user is administrator
-        user = CuserMiddleware.get_user()
-        if user_is_administrator(user):
-            self.fields["is_developer"] = forms.BooleanField(label=u"Is this user a developer?",
-                                                             help_text=u"This user will be part of the developers team",
-                                                             required=False)
-            self.fields["on_holidays"] =  forms.BooleanField(label=u"Is this developer on holidays?",
-                                                             help_text=u"This developer will not be notified until"
-                                                                       u"his/her vacations end", required=False)
-            self.fields["real_working_hours_per_week"] = forms.IntegerField(label=u"Number of hours this developer"
-                                                                                       u"should achieve per week",
-                                                                                 help_text=u"", required=False)
-
     def save(self, commit=True):
         super(EditProfileForm, self).save(commit=commit)
 
@@ -167,6 +154,14 @@ class EditProfileForm(ModelForm):
                 user.last_name = self.cleaned_data["last_name"]
                 user.email = self.cleaned_data["email"]
                 user.save()
+
+
+# Administrator edits a member profile
+class AdminEditProfileForm(EditProfileForm):
+    class Meta:
+        model = Member
+        fields = ["api_key", "api_secret", "token", "token_secret", "is_developer", "on_holidays",
+                  "real_working_hours_per_week"]
 
 
 # Assigns a new password to one user that has forgotten it

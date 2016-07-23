@@ -11,7 +11,6 @@ from djangotrellostats.apps.boards.models import DailySpentTime, Board
 from djangotrellostats.apps.members.models import Member
 from django.template import loader, Context
 import calendar
-from collections import OrderedDict
 
 
 # View spent time report
@@ -51,6 +50,7 @@ def _get_daily_spent_times(request):
 
     spent_times = _get_daily_spent_times_queryset(member, selected_member,
                                                   request.GET.get("start_date"), request.GET.get("end_date"),
+                                                  request.GET.get('week'),
                                                   request.GET.get("board_id"))
 
     replacements = {"boards": Board.objects.all(), "members": Member.objects.all()}
@@ -84,6 +84,7 @@ def _get_daily_spent_times(request):
         replacements["board"] = board
 
     daily_spent_times = spent_times["all"]
+    replacements["week"] = request.GET.get('week') if request.GET.get('week') and request.GET.get('week') > 0 else None
     replacements["months"] = spent_times["per_month"]
     replacements["spent_time_sum"] = daily_spent_times.aggregate(Sum("spent_time"))["spent_time__sum"]
     replacements["spent_time_amount_sum"] = daily_spent_times.aggregate(Sum("rate_amount"))["rate_amount__sum"]
@@ -94,7 +95,7 @@ def _get_daily_spent_times(request):
 
 
 # Return the filtered queryset and the replacements given the GET parameters
-def _get_daily_spent_times_queryset(member, selected_member, start_date_, end_date_, board_id):
+def _get_daily_spent_times_queryset(member, selected_member, start_date_, end_date_, week, board_id):
     daily_spent_time_filter = {}
 
     # Start date
@@ -115,6 +116,10 @@ def _get_daily_spent_times_queryset(member, selected_member, start_date_, end_da
         except ValueError:
             end_date = None
 
+    # Week
+    if week and week > 0:
+        daily_spent_time_filter["week_of_year"] = week
+
     # Board
     if board_id and member.boards.filter(id=board_id).exists():
         daily_spent_time_filter["board_id"] = board_id
@@ -132,6 +137,9 @@ def _get_daily_spent_times_queryset(member, selected_member, start_date_, end_da
             end_date = daily_spent_times[0].date
 
         num_months = absolute_difference_between_months(start_date, end_date)
+        # Fix in the case the dates are in the same month
+        if num_months == 0:
+            num_months = 1
         months = []
         year = start_date.year
         for i in range(0, num_months):

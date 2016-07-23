@@ -8,7 +8,7 @@ from django.shortcuts import render
 
 from djangotrellostats.apps.members.auth import user_is_administrator
 from djangotrellostats.apps.members.decorators import administrator_required
-from djangotrellostats.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm, EditProfileForm
+from djangotrellostats.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm, EditProfileForm, AdminEditProfileForm
 from djangotrellostats.apps.members.models import Member
 
 
@@ -93,16 +93,21 @@ def edit_profile(request, member_id):
     if current_member.id != int(member_id) and not user_is_administrator(user):
         return HttpResponseForbidden()
 
+    # Only the administrator has permission of a full change of member attributes
+    Form = EditProfileForm
+    if user_is_administrator(user):
+        Form = AdminEditProfileForm
+
     member = Member.objects.get(id=member_id)
     if request.method == "POST":
 
-        form = EditProfileForm(request.POST, instance=member)
+        form = Form(request.POST, instance=member)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse("members:view_members"))
 
     else:
-        form = EditProfileForm(instance=member)
+        form = Form(instance=member)
 
     replacements = {"member": member, "form": form}
     return render(request, "members/edit_profile.html", replacements)

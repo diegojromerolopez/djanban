@@ -7,6 +7,10 @@
                 <input type="date" name="end_date" class="form-control" {% if end_date %}value="{{end_date|date:'Y-m-d'}}"{% endif %}/>
             </div>
             <div class="form-group">
+                <span>Week</span>
+                <input type="number" name="week" class="form-control" {% if week %}value="{{week}}"{% endif %}/>
+            </div>
+            <div class="form-group">
                 <label for="select_member">Member</label>
                 <select id="select_member" name="member_id" class="form-control">
                     <option value="">All members</option>

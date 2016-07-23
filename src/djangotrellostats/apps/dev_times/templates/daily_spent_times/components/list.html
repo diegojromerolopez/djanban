@@ -5,7 +5,7 @@
         <table class="table">
             {% for month in months %}
                 <tr class="header main_header month_{{month.i}}">
-                    <td colspan="{% if selected_board and selected_member %}10{% elif selected_board or selected_member %}9{% else %}8{% endif %}">
+                    <td colspan="10">
                         <strong>{{month.year}}/{{month.name}}</strong> ({{month.daily_spent_times|length}} measurements)
                     </td>
                 </tr>
@@ -45,7 +45,13 @@
                 </tr>
                 <tr class="header month_{{month.i}}">
                     <td colspan="9">Sum of spent time</td>
-                    <td> {{month.spent_time_sum|floatformat:"-2"}} hours</td>
+                    <td> {{month.spent_time_sum|floatformat:"-2"}}
+                        {% if selected_member and week and selected_member.real_working_hours_per_week %}
+                        /
+                        {{selected_member.real_working_hours_per_week}}
+                        {% endif %}
+                        hours
+                    </td>
                 </tr>
                 <tr class="header month_{{month.i}}">
                     <td colspan="9">Sum of estimated time</td>
@@ -64,7 +70,14 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Summary for this period of time</div>
                 <div class="panel-body">
-                    <div>Sum of spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{spent_time_sum|floatformat:"-2"}} hours</div>
+                    <div>Sum of spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}:
+                        {{spent_time_sum|floatformat:"-2"}}
+                        {% if selected_member and week and selected_member.real_working_hours_per_week %}
+                        /
+                        {{selected_member.real_working_hours_per_week}}
+                        {% endif %}
+                        hours
+                    </div>
                     <div>Sum of amount {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{spent_time_amount_sum|floatformat:"2"}} ¤</div>
                     <div>Sum of estimated time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{estimated_time_sum|floatformat:"-2"}} hours</div>
                     <div>Difference {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{diff_time_sum|floatformat:"-2"}} hours</div>
