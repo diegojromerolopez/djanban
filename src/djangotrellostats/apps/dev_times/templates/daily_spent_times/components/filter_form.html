@@ -1,34 +1,36 @@
-<div class="row">
-    <div class="col-md-10 center-block">
-        <form action="{% url 'dev_times:view_daily_spent_times' %}" method="get" class="form-inline">
-            <div class="form-group">
-                <span>Date interval</span>
-                <input type="date" name="start_date" class="form-control" {% if start_date %}value="{{start_date|date:'Y-m-d'}}"{% endif %}/>
-                <input type="date" name="end_date" class="form-control" {% if end_date %}value="{{end_date|date:'Y-m-d'}}"{% endif %}/>
-            </div>
-            <div class="form-group">
-                <span>Week</span>
-                <input type="number" name="week" class="form-control" {% if week %}value="{{week}}"{% endif %}/>
-            </div>
-            <div class="form-group">
-                <label for="select_member">Member</label>
-                <select id="select_member" name="member_id" class="form-control">
-                    <option value="">All members</option>
-                    {% for member in members.all %}
-                        <option value="{{member.id}}" {% if selected_member.id == member.id %}selected="selected"{% endif %}>{{member.trello_username}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="select_board">Board</label>
-                <select id="select_board" name="board_id" class="form-control">
-                    <option value="">All</option>
-                    {% for board in boards.all %}
-                        <option value="{{board.id}}" {% if selected_board.id == board.id %}selected="selected"{% endif %}>{{board.name}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Send</button>
-        </form>
+<div class="panel">
+    <div class="row">
+        <div class="col-md-10 center-block">
+            <form action="{% url 'dev_times:view_daily_spent_times' %}" method="get" class="form-inline">
+                <div class="form-group">
+                    <span>Date interval</span>
+                    <input type="date" name="start_date" class="form-control" {% if start_date %}value="{{start_date|date:'Y-m-d'}}"{% endif %}/>
+                    <input type="date" name="end_date" class="form-control" {% if end_date %}value="{{end_date|date:'Y-m-d'}}"{% endif %}/>
+                </div>
+                <div class="form-group">
+                    <span>Week</span>
+                    <input type="number" name="week" class="form-control" {% if week %}value="{{week}}"{% endif %}/>
+                </div>
+                <div class="form-group">
+                    <label for="select_member">Member</label>
+                    <select id="select_member" name="member_id" class="form-control">
+                        <option value="">All members</option>
+                        {% for member in members.all %}
+                            <option value="{{member.id}}" {% if selected_member.id == member.id %}selected="selected"{% endif %}>{{member.trello_username}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="select_board">Board</label>
+                    <select id="select_board" name="board_id" class="form-control">
+                        <option value="">All</option>
+                        {% for board in boards.all %}
+                            <option value="{{board.id}}" {% if selected_board.id == board.id %}selected="selected"{% endif %}>{{board.name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+        </div>
     </div>
 </div>
