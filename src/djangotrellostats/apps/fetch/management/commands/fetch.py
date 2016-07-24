@@ -2,7 +2,6 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from multiprocessing import Process
 
-from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.members.models import Member
 import time
 
@@ -13,7 +12,6 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('member_trello_username', nargs='+', type=str)
 
-    @transaction.atomic
     def handle(self, *args, **options):
         try:
             member_trello_username = options['member_trello_username'][0]
@@ -27,19 +25,17 @@ class Command(BaseCommand):
             return True
 
         start = time.time()
+        board_fetchers = []
         for board in member.created_boards.all():
 
-            def fetch_board_i():
-                board.fetch()
-                self.stdout.write(self.style.SUCCESS(u"Board {0} fetched successfully".format(board.name)))
-
             if board.is_ready():
-                board_fetcher = Process(target=fetch_board_i)
-                board_fetcher.start()
-                board_fetcher.join()
+                board.fetch(debug=True)
 
             else:
                 self.stdout.write(self.style.SUCCESS(u"Board {0} is not ready".format(board.name)))
+
+        for board_fetcher in board_fetchers:
+            board_fetcher.join()
 
         end = time.time()
         elapsed_time = end-start

@@ -105,10 +105,10 @@ class Board(models.Model):
 
     # Fetch data of this board
     @transaction.atomic
-    def fetch(self):
+    def fetch(self, debug=False):
         self._truncate()
         self._fetch_labels()
-        self._fetch_cards()
+        self._fetch_cards(debug=debug)
         self.last_fetch_datetime = timezone.now()
         self.save()
 
@@ -130,7 +130,7 @@ class Board(models.Model):
             label.save()
 
     # Fetch the cards of this board
-    def _fetch_cards(self):
+    def _fetch_cards(self, debug=False):
 
         lists = self.lists.all()
 
@@ -152,53 +152,35 @@ class Board(models.Model):
         trello_board = self._get_trello_board()
         trello_cards = trello_board.all_cards()
 
-        # Card stats computation
+        card_dict = {}
+
+        # Card fetch
+        num_cards = len(trello_cards)
+        i = 1
         for trello_card in trello_cards:
-            trello_card.fetch(eager=False)
-            card = Card.factory_from_trello_card(trello_card, self)
 
-            card.get_stats_by_list(lists, done_list)
+            card_i = self._fetch_card(trello_card, lists, done_list, trello_lead_dict, trello_cycle_dict)
+            card_dict[card_i.uuid] = card_i
+            if debug:
+                print(u"Board {0} {1}/{2} cards fetched ({3})".format(self.name, i, num_cards, card_i.uuid))
 
-            # Total forward and backward movements of a card
-            card_forward_moves = 0
-            card_backward_moves = 0
-            card_time = 0
+            i += 1
 
-            # List reports. For each list compute the number of forward movements and backward movements
-            # being it its the source.
-            # Thus, compute the time the cards live in this list.
+        # Card stats computation
+        cards = card_dict.values()
+        for card in cards:
+
             for list_ in lists:
                 list_uuid = list_.uuid
                 card_stats_by_list = card.stats_by_list[list_uuid]
 
-                # Time the card lives in each list
                 if not hasattr(list_report_dict[list_uuid], "times"):
                     list_report_dict[list_uuid].times = []
-
-                # Time a card lives in the list
                 list_report_dict[list_uuid].times.append(card_stats_by_list["time"])
 
-                # Forward and backward movements where the list is the source
+                # Update total forward and backward movements
                 list_report_dict[list_uuid].forward_movements += card_stats_by_list["forward_moves"]
                 list_report_dict[list_uuid].backward_movements += card_stats_by_list["backward_moves"]
-
-                card_time += card_stats_by_list["time"]
-
-                # Update total forward and backward movements
-                card_forward_moves += card_stats_by_list["forward_moves"]
-                card_backward_moves += card_stats_by_list["backward_moves"]
-
-            # Cycle and Lead times
-            if trello_card.idList == done_list.uuid:
-                card.lead_time = sum(
-                    [list_stats["time"] if list_uuid in trello_lead_dict else 0 for list_uuid, list_stats in
-                     card.stats_by_list.items()])
-
-                card.cycle_time = sum(
-                    [list_stats["time"] if list_uuid in trello_cycle_dict else 0 for list_uuid, list_stats in
-                     card.stats_by_list.items()])
-
-            card.save()
 
             # Label assignment to each card
             label_uuids = trello_card.idLabels
@@ -218,12 +200,12 @@ class Board(models.Model):
                 # Forward movements of the cards
                 if member_report.forward_movements is None:
                     member_report.forward_movements = 0
-                member_report.forward_movements += math.ceil(1. * card_forward_moves / 1. * num_trello_card_members)
+                member_report.forward_movements += math.ceil(1. * card.forward_movements / 1. * num_trello_card_members)
 
                 # Backward movements of the cards
                 if member_report.backward_movements is None:
                     member_report.backward_movements = 0
-                member_report.backward_movements += math.ceil(1. * card_backward_moves / 1. * num_trello_card_members)
+                member_report.backward_movements += math.ceil(1. * card.backward_movements / 1. * num_trello_card_members)
 
                 # Inform this member report has data and must be saved
                 member_report.present = True
@@ -231,8 +213,8 @@ class Board(models.Model):
                 # Card time
                 if not hasattr(member_report, "card_times"):
                     member_report.card_times = []
-                if card_time is not None:
-                    member_report.card_times.append(card_time)
+                if card.time is not None:
+                    member_report.card_times.append(card.time)
 
                 # Card spent time
                 if not hasattr(member_report, "card_spent_times"):
@@ -277,6 +259,43 @@ class Board(models.Model):
 
                 member_report.save()
 
+    def _fetch_card(self, trello_card, lists, done_list, trello_lead_dict, trello_cycle_dict):
+        trello_card.fetch(eager=False)
+        card = Card.factory_from_trello_card(trello_card, self)
+        card.get_stats_by_list(lists, done_list)
+
+        # Total forward and backward movements of a card
+        card.forward_movements = 0
+        card.backward_movements = 0
+        card.time = 0
+
+        # List reports. For each list compute the number of forward movements and backward movements
+        # being it its the source.
+        # Thus, compute the time the cards live in this list.
+        for list_ in lists:
+            list_uuid = list_.uuid
+            card_stats_by_list = card.stats_by_list[list_uuid]
+
+            card.time += card_stats_by_list["time"]
+
+            # Update total forward and backward movements
+            card.forward_movements += card_stats_by_list["forward_moves"]
+            card.backward_movements += card_stats_by_list["backward_moves"]
+
+        # Cycle and Lead times
+        if trello_card.idList == done_list.uuid:
+            card.lead_time = sum(
+                [list_stats["time"] if list_uuid in trello_lead_dict else 0 for list_uuid, list_stats in
+                 card.stats_by_list.items()])
+
+            card.cycle_time = sum(
+                [list_stats["time"] if list_uuid in trello_cycle_dict else 0 for list_uuid, list_stats in
+                 card.stats_by_list.items()])
+
+        card.save()
+        return card
+
+
     # Return the trello board, calling the Trello API.
     def _get_trello_board(self):
         trello_client = self.creator.trello_client
@@ -300,6 +319,14 @@ class Card(ImmutableModel):
     is_closed = models.BooleanField(verbose_name=u"Is this card closed?", default=False)
     position = models.PositiveIntegerField(verbose_name=u"Position in the list")
     last_activity_date = models.DateTimeField(verbose_name=u"Last activity date")
+
+    forward_movements = models.PositiveIntegerField(verbose_name=u"Forward movements of this card", default=0)
+    backward_movements = models.PositiveIntegerField(verbose_name=u"Backward movements of this card", default=0)
+    time = models.DecimalField(verbose_name=u"Time this card is alive in the board",
+                               help_text=u"Time this card is alive in the board in seconds.",
+                               decimal_places=4, max_digits=12,
+                               default=0)
+
     spent_time = models.DecimalField(verbose_name=u"Actual card spent time", decimal_places=4, max_digits=12,
                                      default=None, null=True)
     estimated_time = models.DecimalField(verbose_name=u"Estimated card completion time", decimal_places=4,

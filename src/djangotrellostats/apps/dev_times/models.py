@@ -1,10 +1,10 @@
 from __future__ import unicode_literals
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from decimal import Decimal
 
 
-# Create your models here.
 # Daily spent time by member
 class DailySpentTime(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="daily_spent_times")
@@ -33,7 +33,12 @@ class DailySpentTime(models.Model):
     def add(board, member, date, spent_time, estimated_time):
         # In case a uuid is passed, load the Member object
         if type(member) is str or type(member) is unicode:
-            member = board.members.get(uuid=member)
+            try:
+                member = board.members.get(uuid=member)
+            except ObjectDoesNotExist:
+                print member
+                exit(-1)
+                return False
 
         # Add the spent time value to the total amount of time this member has spent
         try:
