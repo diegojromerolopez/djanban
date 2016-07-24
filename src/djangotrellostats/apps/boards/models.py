@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db import models
-from django.db.models import Avg
+from django.db.models import Avg, Sum
 from django.db.models.query_utils import Q
 from django.utils import timezone
 import copy
@@ -45,6 +45,7 @@ class Board(models.Model):
     hourly_rates = models.ManyToManyField("hourly_rates.HourlyRate", verbose_name=u"Hourly rates",
                                           related_name="boards")
 
+    # Returns the date of the last fetch in an ISO format
     def get_human_fetch_datetime(self):
         return self.last_fetch_datetime.strftime("%Y-%m-%d")
 
@@ -88,6 +89,19 @@ class Board(models.Model):
 
     def lead_time_lists(self):
         return self.lists.exclude(Q(type="ignored"))
+
+    # Returns the spent time today for this board
+    def get_today_spent_time(self):
+        now = timezone.now()
+        today = now.date()
+        return self.get_spent_time(date=today)
+
+    # Returns the spent time on a given date for this board
+    def get_spent_time(self, date):
+        spent_time = self.daily_spent_times.filter(date=date).aggregate(sum=Sum("spent_time"))["sum"]
+        if spent_time is None:
+            return 0
+        return spent_time
 
     # Fetch data of this board
     @transaction.atomic

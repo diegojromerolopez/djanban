@@ -5,19 +5,21 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from django.db import models
 from django.db import transaction
+from django.db.models import Sum
+from django.utils import timezone
 from trello import TrelloClient
 
 from djangotrellostats.apps.boards.models import Board, List
 
 
 class Member(models.Model):
-    api_key = models.CharField(max_length=128, verbose_name=u"Trello API key", null=True, default=None)
+    api_key = models.CharField(max_length=128, verbose_name=u"Trello API key", null=True, default=None, blank=True)
 
-    api_secret = models.CharField(max_length=128, verbose_name=u"Trello API secret", null=True, default=None)
+    api_secret = models.CharField(max_length=128, verbose_name=u"Trello API secret", null=True, default=None, blank=True)
 
-    token = models.CharField(max_length=128, verbose_name=u"Trello token", null=True, default=None)
+    token = models.CharField(max_length=128, verbose_name=u"Trello token", null=True, default=None, blank=True)
 
-    token_secret = models.CharField(max_length=128, verbose_name=u"Trello token secret", null=True, default=None)
+    token_secret = models.CharField(max_length=128, verbose_name=u"Trello token secret", null=True, default=None, blank=True)
 
     uuid = models.CharField(max_length=128, verbose_name=u"Trello member uuid", unique=True)
 
@@ -33,11 +35,10 @@ class Member(models.Model):
 
     on_holidays = models.BooleanField(verbose_name=u"Is this developer on holidays?",
                                       help_text=u"If the developer is on holidays will stop receiving reports"
-                                      u"and other emails", default=False)
+                                                u"and other emails", default=False)
 
     real_working_hours_per_week = models.PositiveIntegerField(u"Number of hours this developer should achieve each"
                                                               u"week", default=None, null=True, blank=True)
-
 
     def __init__(self, *args, **kwargs):
         super(Member, self).__init__(*args, **kwargs)
@@ -60,6 +61,34 @@ class Member(models.Model):
     def is_initialized(self):
         return self.api_key and self.api_secret and self.token and self.token_secret
 
+    # Returns the number of hours this member has develop today
+    def get_today_spent_time(self, board=None):
+        # Note that only if the member is a developer can his/her spent time computed
+        if not self.is_developer:
+            raise AssertionError(u"This member is not a developer")
+        # We assume that we will not be working on holidays ever
+        if self.on_holidays:
+            return 0
+        # Getting the spent time for today
+        now = timezone.now()
+        today = now.date()
+        return self.get_spent_time(today, board)
+
+    # Returns the number of hours this member has develop on a given date
+    def get_spent_time(self, date, board=None):
+        spent_time_on_date_filter = {"date": date}
+
+        # If we pass the board, only this board spent times will be given
+        if board is not None:
+            spent_time_on_date_filter["board"] = board
+
+        spent_time_on_date = self.daily_spent_times.filter(**spent_time_on_date_filter). \
+            aggregate(sum=Sum("spent_time"))["sum"]
+
+        if spent_time_on_date is None:
+            return 0
+        return spent_time_on_date
+
     # Fetch basic information of boards and its lists
     @transaction.atomic
     def init_fetch(self, debug=False):
@@ -68,7 +97,8 @@ class Member(models.Model):
             board_already_exists = Board.objects.filter(uuid=trello_board.id).exists()
             if not board_already_exists:
                 board_name = trello_board.name.decode("utf-8")
-                board = Board(uuid=trello_board.id, name=board_name, last_activity_date=trello_board.date_last_activity, creator=self)
+                board = Board(uuid=trello_board.id, name=board_name, last_activity_date=trello_board.date_last_activity,
+                              creator=self)
                 board.save()
                 if debug:
                     print("Board {0} successfully created".format(board_name))

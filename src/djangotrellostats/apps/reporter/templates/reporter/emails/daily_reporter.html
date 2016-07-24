@@ -1,0 +1,67 @@
+{% load template_extensions %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Daily report {{administrator_user.username}}</title>
+    </head>
+    <body>
+        <div>
+            <div>
+                <h1>Spent times in day {{date|date:"Y-m-d"}} by developer</h1>
+                {% for member in developer_members %}
+                    <p>
+                        <span><strong>{{member.trello_username}}</strong></span>
+                        <span>{{member|call:'get_spent_time'|arg:date|end_call|floatformat:"-2"}} hours</span>
+                    </p>
+                {% endfor %}
+            </div>
+
+            <div>
+                <h1>Spent times in day {{date|date:"Y-m-d"}} by board</h1>
+                {% for board in boards %}
+                    {% if board.is_fetched %}
+                        <div>
+                            <h2>{{board.name}}</h2>
+                            {% for member in board.members.all %}
+                                {% if member.is_developer %}
+                                    <p>
+                                        <span><strong>{{member.trello_username}}</strong></span>
+                                        <span>{{member|call:'get_spent_time'|arg:date|arg:board|floatformat:"-2"}} hours</span>
+                                    </p>
+                                {% endif %}
+                            {% endfor %}
+                            <p>
+                                <span>Total spent time for {{board.name}}</span>
+                                <span> {{board|call:'get_spent_time'|arg:date|floatformat:"-2"}} hours</span>
+                            </p>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div>
+                <h1>Daily spent times in day {{date|date:"Y-m-d"}}</h1>
+                <table>
+                    <tr>
+                        <td>Week day</td>
+                        <td>Member</td>
+                        <td>Board</td>
+                        <td>Spent time (h.)</td>
+                        <td>Estimated time (h.)</td>
+                    </tr>
+                    {% for daily_spent_time in daily_spent_times %}
+                        <tr>
+                            <td>{{daily_spent_time.weekday}}</td>
+                            <td>{{daily_spent_time.member.trello_username}}</td>
+                            <td>{{daily_spent_time.board.name}}</td>
+                            <td>{{daily_spent_time.spent_time|floatformat:"-2"}}</td>
+                            <td>{{daily_spent_time.estimated_time|floatformat:"-2"}}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </body>
+</html>

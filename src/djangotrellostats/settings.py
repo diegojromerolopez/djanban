@@ -52,12 +52,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'djangotrellostats.apps.base',
     'djangotrellostats.apps.members',
     'djangotrellostats.apps.public',
     'djangotrellostats.apps.boards',
     'djangotrellostats.apps.hourly_rates',
     'djangotrellostats.apps.dev_times',
     'djangotrellostats.apps.fetch',
+    'djangotrellostats.apps.reporter',
 ]
 
 MIDDLEWARE_CLASSES = (
