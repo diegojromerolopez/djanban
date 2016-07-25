@@ -468,7 +468,7 @@ class Card(ImmutableModel):
                 # Store spent time by member by day
                 local_timezone = pytz.timezone(settings.TIME_ZONE)
                 date = local_timezone.localize(datetime.datetime.strptime(comment["date"],
-                                                                                  '%Y-%m-%dT%H:%M:%S.%fZ')).date()
+                                                                          '%Y-%m-%dT%H:%M:%S.%fZ')).date()
 
                 # If Plus for Trello comment informs that the time was spent several days ago, we have to substract
                 # the days to the date of the comment
