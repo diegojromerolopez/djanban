@@ -14,7 +14,7 @@ def administrator_required(the_func):
     def _decorated(request, *args, **kwargs):
         user = request.user
         if user_is_administrator(user):
-            return the_func(*args, **kwargs)
+            return the_func(request, *args, **kwargs)
         return HttpResponseForbidden()
 
     return _decorated
