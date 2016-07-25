@@ -99,8 +99,7 @@ def spent_time_by_week(request, week_of_year=None, board_id=None):
     if board_id:
         report_filter["board_id"] = board_id
 
-    members = Member.objects.all()
-
+    members = Member.objects.filter(is_developer=True)
     for member in members:
         member_name = member.trello_username
         daily_spent_times = member.daily_spent_times.filter(**report_filter)
