@@ -36,14 +36,16 @@ class DailySpentTime(models.Model):
             try:
                 member = board.members.get(uuid=member)
             except ObjectDoesNotExist:
-                print member
-                exit(-1)
                 return False
 
         # Add the spent time value to the total amount of time this member has spent
         try:
             daily_spent_time = DailySpentTime.objects.get(board=board, member=member, date=date)
+            if daily_spent_time.spent_time is None:
+                daily_spent_time.spent_time = Decimal("0.0")
             daily_spent_time.spent_time += Decimal(spent_time)
+            if daily_spent_time.estimated_time is None:
+                daily_spent_time.estimated_time = Decimal("0.0")
             daily_spent_time.estimated_time += Decimal(estimated_time)
             daily_spent_time.diff_time += (Decimal(estimated_time) - Decimal(spent_time))
 
