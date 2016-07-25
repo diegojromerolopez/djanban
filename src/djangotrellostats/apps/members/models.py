@@ -10,6 +10,7 @@ from django.utils import timezone
 from trello import TrelloClient
 
 from djangotrellostats.apps.boards.models import Board, List
+from isoweek import Week
 
 
 class Member(models.Model):
@@ -82,7 +83,23 @@ class Member(models.Model):
         if board is not None:
             spent_time_on_date_filter["board"] = board
 
-        spent_time_on_date = self.daily_spent_times.filter(**spent_time_on_date_filter). \
+        return self._get_spent_time_sum_from_filter(spent_time_on_date_filter)
+
+    # Returns the number of hours this member has develop on a given week
+    def get_weekly_spent_time(self, week, year, board=None):
+        start_date = Week(year, week).monday()
+        end_date = Week(year, week).friday()
+        spent_time_on_week_filter = {"date__gte": start_date, "date__lte": end_date}
+
+        # If we pass the board, only this board spent times will be given
+        if board is not None:
+            spent_time_on_week_filter["board"] = board
+
+        return self._get_spent_time_sum_from_filter(spent_time_on_week_filter)
+
+    # Returns the number of hours this member has develop given a filter
+    def _get_spent_time_sum_from_filter(self, spent_time_filter):
+        spent_time_on_date = self.daily_spent_times.filter(**spent_time_filter). \
             aggregate(sum=Sum("spent_time"))["sum"]
 
         if spent_time_on_date is None:

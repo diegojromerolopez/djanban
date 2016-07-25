@@ -1,0 +1,5 @@
+Spent times in week {{week}}W-{{year}}
+
+"Week day"; "Member"; "Board"; "Spent time"; "Estimated time";
+{% for daily_spent_time in daily_spent_times %}{{daily_spent_time.weekday}};{{daily_spent_time.member.trello_username}};{{daily_spent_time.board.name}};{{daily_spent_time.spent_time|floatformat:"-2"}};{{daily_spent_time.estimated_time|floatformat:"-2"}};
+{% endfor %}
