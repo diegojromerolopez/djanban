@@ -6,6 +6,9 @@ from decimal import Decimal
 
 
 # Daily spent time by member
+from djangotrellostats.apps.week import get_iso_week_of_year
+
+
 class DailySpentTime(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="daily_spent_times")
     member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="daily_spent_times")
@@ -82,6 +85,4 @@ class DailySpentTime(models.Model):
 
     @staticmethod
     def get_iso_week_of_year(date):
-        iso_calendar_date = date.isocalendar()
-        week_of_year = iso_calendar_date[1]
-        return week_of_year
+        get_iso_week_of_year(date)

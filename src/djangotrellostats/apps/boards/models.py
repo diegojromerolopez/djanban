@@ -15,6 +15,7 @@ import numpy
 import datetime
 import math
 import pytz
+from isoweek import Week
 
 from trello import Board as TrelloBoard, ResourceUnavailable
 from collections import namedtuple
@@ -99,6 +100,16 @@ class Board(models.Model):
     # Returns the spent time on a given date for this board
     def get_spent_time(self, date):
         spent_time = self.daily_spent_times.filter(date=date).aggregate(sum=Sum("spent_time"))["sum"]
+        if spent_time is None:
+            return 0
+        return spent_time
+
+    # Return the spent time on a given week of a year
+    def get_weekly_spent_time(self, week, year):
+        start_date = Week(year, week).monday()
+        end_date = Week(year, week).friday()
+        spent_time_on_week_filter = {"date__gte": start_date, "date__lte": end_date}
+        spent_time = self.daily_spent_times.filter(**spent_time_on_week_filter).aggregate(sum=Sum("spent_time"))["sum"]
         if spent_time is None:
             return 0
         return spent_time
