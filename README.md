@@ -139,9 +139,28 @@ This group will be automatically created and you have to populate it with the ad
 
 There is no use of django permissions yet.
 
+# Reports
+
+## Daily report
+
+Send a daily report with the spent times to each administrator user:
+
+```python
+python src/manage.py reporter daily_report
+```
+
 # TODO
 
-There are some features that are not completed. For example, workflows.
+## Parallelization
+
+Nowadays, requests are not parallelized in spite of being independent.
+
+There is a branch called Parallelization that contains an experimental parallelization version of the software.
+
+Use it at your own risk.
+
+
+## Workflows
 
 Workflows are a feature that will allow you to define what lists have to be
 considered to measure spent, estimated and card living times.
