@@ -146,18 +146,16 @@ There is no use of django permissions yet.
 Send a daily report with the spent times to each administrator user:
 
 ```python
-python src/manage.py reporter daily_report
+python src/manage.py reporter daily_report [date of the report]
 ```
 
-# TODO
+## Weekly report
 
-## Parallelization
+Send a weekly report with the spent times to each administrator user:
 
-Nowadays, requests are not parallelized in spite of being independent.
-
-There is a branch called Parallelization that contains an experimental parallelization version of the software.
-
-Use it at your own risk.
+```python
+python src/manage.py reporter weekly_report [date whose week we want to get the report]
+```
 
 
 ## Workflows
