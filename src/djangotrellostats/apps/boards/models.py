@@ -116,7 +116,7 @@ class Board(models.Model):
 
     # Fetch data of this board
     def fetch(self, debug=False):
-        cards = self._fetch_cards()
+        cards = self._fetch_cards(debug=debug)
         with transaction.atomic():
             self._truncate()
             self._fetch_labels()
@@ -141,7 +141,7 @@ class Board(models.Model):
             label.save()
 
     # Return the Trello Cards in a multithreaded way
-    def _fetch_cards(self, num_threads=10):
+    def _fetch_cards(self, num_threads=10, debug=False):
         trello_board = self._get_trello_board()
         trello_cards = trello_board.all_cards()
 
@@ -163,7 +163,8 @@ class Board(models.Model):
                         my_trello_card.fetch(eager=False)
                         my_trello_card.fetch_comments()
                         card_i = self._fetch_card(my_trello_card, lists, done_list, trello_lead_dict, trello_cycle_dict)
-                        print u"{0} done".format(card_i.uuid)
+                        if debug:
+                            print(u"{0} done".format(card_i.uuid))
                         must_retry = False
                         card_dict[card_i.uuid] = card_i
                     except ResourceUnavailable:

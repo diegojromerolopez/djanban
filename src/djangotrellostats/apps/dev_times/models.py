@@ -83,6 +83,7 @@ class DailySpentTime(models.Model):
         daily_spent_time.save()
         return spent_time
 
+    # Return the number of the week of a date
     @staticmethod
     def get_iso_week_of_year(date):
-        get_iso_week_of_year(date)
+        return get_iso_week_of_year(date)
