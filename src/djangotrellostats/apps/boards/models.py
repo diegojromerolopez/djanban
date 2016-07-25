@@ -10,13 +10,11 @@ from django.db import models
 from django.db.models import Avg, Sum
 from django.db.models.query_utils import Q
 from django.utils import timezone
-import copy
 import threading
 import numpy
 import datetime
 import math
 import pytz
-from time import sleep
 
 from trello import Board as TrelloBoard, ResourceUnavailable
 from collections import namedtuple
@@ -144,6 +142,8 @@ class Board(models.Model):
 
         card_dict = {}
 
+        # Definition of the work each thread must do
+        # that is the fetch of some cards
         def fetch_card_worker(my_trello_cards):
             for my_trello_card in my_trello_cards:
                 must_retry = True
@@ -158,6 +158,7 @@ class Board(models.Model):
                     except ResourceUnavailable:
                         must_retry = True
 
+        # Work assignement for each thread
         threads = []
         trello_card_chunks = numpy.array_split(trello_cards, num_threads)
         for i in range(0, num_threads):
@@ -313,7 +314,6 @@ class Board(models.Model):
 
         return card
 
-
     # Return the trello board, calling the Trello API.
     def _get_trello_board(self):
         trello_client = self.creator.trello_client
@@ -426,6 +426,7 @@ class Card(ImmutableModel):
 
         return self.stats_by_list
 
+    # Fetch comments of this card
     def fetch_comments(self):
         self.comments = self.trello_card.comments
 
@@ -447,6 +448,7 @@ class Card(ImmutableModel):
 
         # For each comment, find the desired pattern and extract the spent and estimated times
         self.daily_spent_times = []
+        member_dict = {}
         for comment in self.comments:
             comment_content = comment["data"]["text"]
             matches = re.match(Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, comment_content)
@@ -492,24 +494,31 @@ class Card(ImmutableModel):
                 if matches.group("days_before"):
                     date -= datetime.timedelta(days=int(matches.group("days_before")))
 
-                member = self.board.members.get(uuid=member_uuid)
-                daily_spent_time = DailySpentTime(board=self.board, member=member, date=date,
+                # Use of memoization to achieve a better performance when loading members
+                if member_uuid not in member_dict:
+                    member_dict[member_uuid] = self.board.members.get(uuid=member_uuid)
+
+                # Creation of daily spent times for this card
+                daily_spent_time = DailySpentTime(board=self.board, member=member_dict[member_uuid], date=date,
                                                   spent_time=spent, estimated_time=estimated)
                 self.daily_spent_times.append(daily_spent_time)
 
         self.comment_summary = {
+            "daily_spent_times": self.daily_spent_times,
             "member_uuids": member_uuids.keys(),
             "spent": {"total": total_spent, "by_member": spent_by_member},
             "estimated": {"total": total_estimated, "by_member": estimated_by_member}
         }
         return self.comment_summary
 
+    # Create associated daily spent times
     def create_daily_spent_times(self):
         if not hasattr(self, "daily_spent_times"):
             self.fetch_comments()
 
         for daily_spent_time in self.daily_spent_times:
             DailySpentTime.add_daily_spent_time(daily_spent_time)
+
 
 # Label of the task board
 class Label(ImmutableModel):
