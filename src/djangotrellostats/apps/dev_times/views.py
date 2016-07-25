@@ -136,14 +136,16 @@ def _get_daily_spent_times_queryset(member, selected_member, start_date_, end_da
         if end_date is None:
             end_date = daily_spent_times[0].date
 
-        num_months = absolute_difference_between_months(start_date, end_date)
-        # Fix in the case the dates are in the same month
-        if num_months == 0:
-            num_months = 1
+        num_months = absolute_difference_between_months(start_date, end_date) + 1
         months = []
         year = start_date.year
         for i in range(0, num_months):
             month_index = start_date.month + i
+
+            # TODO: delete this condition if is not needed
+            if month_index > 12:
+                break
+
             month_name = calendar.month_name[month_index]
             daily_spent_times_in_month_i = daily_spent_times.filter(date__month=month_index).order_by("date")
 
