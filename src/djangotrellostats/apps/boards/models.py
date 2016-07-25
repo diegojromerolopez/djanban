@@ -11,12 +11,14 @@ from django.db.models import Avg, Sum
 from django.db.models.query_utils import Q
 from django.utils import timezone
 import copy
+import threading
 import numpy
 import datetime
 import math
 import pytz
+from time import sleep
 
-from trello import Board as TrelloBoard
+from trello import Board as TrelloBoard, ResourceUnavailable
 from collections import namedtuple
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 
@@ -104,13 +106,14 @@ class Board(models.Model):
         return spent_time
 
     # Fetch data of this board
-    @transaction.atomic
     def fetch(self, debug=False):
-        self._truncate()
-        self._fetch_labels()
-        self._fetch_cards(debug=debug)
-        self.last_fetch_datetime = timezone.now()
-        self.save()
+        cards = self._fetch_cards()
+        with transaction.atomic():
+            self._truncate()
+            self._fetch_labels()
+            self._create_cards(cards)
+            self.last_fetch_datetime = timezone.now()
+            self.save()
 
     # Delete all children entities but lists and workflows
     def _truncate(self):
@@ -122,23 +125,57 @@ class Board(models.Model):
 
     # Fetch the labels of this board
     def _fetch_labels(self):
-
         trello_board = self._get_trello_board()
         trello_labels = trello_board.get_labels()
         for trello_label in trello_labels:
             label = Label.factory_from_trello_label(trello_label, self)
             label.save()
 
-    # Fetch the cards of this board
-    def _fetch_cards(self, debug=False):
+    # Return the Trello Cards in a multithreaded way
+    def _fetch_cards(self, num_threads=10):
+        trello_board = self._get_trello_board()
+        trello_cards = trello_board.all_cards()
 
         lists = self.lists.all()
-
-        workflows = self.workflows.all()
 
         trello_cycle_dict = {list_.uuid: True for list_ in self.cycle_time_lists()}
         trello_lead_dict = {list_.uuid: True for list_ in self.lead_time_lists()}
         done_list = lists.get(type="done")
+
+        card_dict = {}
+
+        def fetch_card_worker(my_trello_cards):
+            for my_trello_card in my_trello_cards:
+                must_retry = True
+                while must_retry:
+                    try:
+                        my_trello_card.fetch(eager=False)
+                        my_trello_card.fetch_comments()
+                        card_i = self._fetch_card(my_trello_card, lists, done_list, trello_lead_dict, trello_cycle_dict)
+                        print u"{0} done".format(card_i.uuid)
+                        must_retry = False
+                        card_dict[card_i.uuid] = card_i
+                    except ResourceUnavailable:
+                        must_retry = True
+
+        threads = []
+        trello_card_chunks = numpy.array_split(trello_cards, num_threads)
+        for i in range(0, num_threads):
+            fetcher = threading.Thread(target=fetch_card_worker, args=(trello_card_chunks[i],))
+            threads.append(fetcher)
+            fetcher.start()
+
+        for thread in threads:
+            thread.join()
+
+        return card_dict.values()
+
+    # Fetch the cards of this board
+    def _create_cards(self, cards, debug=False):
+
+        lists = self.lists.all()
+
+        workflows = self.workflows.all()
 
         # List reports
         list_report_dict = {list_.uuid: ListReport(list=list_, forward_movements=0, backward_movements=0)
@@ -148,28 +185,11 @@ class Board(models.Model):
         member_report_dict = {member.uuid: MemberReport(board=self, member=member) for member in
                               self.members.all()}
 
-        # Fetch cards of this board
-        trello_board = self._get_trello_board()
-        trello_cards = trello_board.all_cards()
-
-        card_dict = {}
-
-        # Card fetch
-        num_cards = len(trello_cards)
-        i = 1
-        for trello_card in trello_cards:
-
-            card_i = self._fetch_card(trello_card, lists, done_list, trello_lead_dict, trello_cycle_dict)
-            card_dict[card_i.uuid] = card_i
-            if debug:
-                print(u"Board {0} {1}/{2} cards fetched ({3})".format(self.name, i, num_cards, card_i.uuid))
-
-            i += 1
-
         # Card stats computation
-        cards = card_dict.values()
         for card in cards:
-
+            card.create_daily_spent_times()
+            card.save()
+            trello_card = card.trello_card
             for list_ in lists:
                 list_uuid = list_.uuid
                 card_stats_by_list = card.stats_by_list[list_uuid]
@@ -260,7 +280,6 @@ class Board(models.Model):
                 member_report.save()
 
     def _fetch_card(self, trello_card, lists, done_list, trello_lead_dict, trello_cycle_dict):
-        trello_card.fetch(eager=False)
         card = Card.factory_from_trello_card(trello_card, self)
         card.get_stats_by_list(lists, done_list)
 
@@ -292,7 +311,6 @@ class Board(models.Model):
                 [list_stats["time"] if list_uuid in trello_cycle_dict else 0 for list_uuid, list_stats in
                  card.stats_by_list.items()])
 
-        card.save()
         return card
 
 
@@ -409,8 +427,7 @@ class Card(ImmutableModel):
         return self.stats_by_list
 
     def fetch_comments(self):
-        trello_card_comments = self.trello_card.fetch_comments()
-        self.comments = trello_card_comments
+        self.comments = self.trello_card.comments
 
         total_spent = None
         total_estimated = None
@@ -429,6 +446,7 @@ class Card(ImmutableModel):
         #                      u'shortLink': u'bnK3c1jF'}}, u'id': u'57180b7e25abc60313461aaf'}
 
         # For each comment, find the desired pattern and extract the spent and estimated times
+        self.daily_spent_times = []
         for comment in self.comments:
             comment_content = comment["data"]["text"]
             matches = re.match(Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, comment_content)
@@ -469,14 +487,15 @@ class Card(ImmutableModel):
                 local_timezone = pytz.timezone(settings.TIME_ZONE)
                 date = local_timezone.localize(datetime.datetime.strptime(comment["date"],
                                                                           '%Y-%m-%dT%H:%M:%S.%fZ')).date()
-
                 # If Plus for Trello comment informs that the time was spent several days ago, we have to substract
                 # the days to the date of the comment
                 if matches.group("days_before"):
                     date -= datetime.timedelta(days=int(matches.group("days_before")))
 
-                DailySpentTime.add(board=self.board, member=member_uuid, date=date,
-                                   spent_time=spent, estimated_time=estimated)
+                member = self.board.members.get(uuid=member_uuid)
+                daily_spent_time = DailySpentTime(board=self.board, member=member, date=date,
+                                                  spent_time=spent, estimated_time=estimated)
+                self.daily_spent_times.append(daily_spent_time)
 
         self.comment_summary = {
             "member_uuids": member_uuids.keys(),
@@ -485,6 +504,12 @@ class Card(ImmutableModel):
         }
         return self.comment_summary
 
+    def create_daily_spent_times(self):
+        if not hasattr(self, "daily_spent_times"):
+            self.fetch_comments()
+
+        for daily_spent_time in self.daily_spent_times:
+            DailySpentTime.add_daily_spent_time(daily_spent_time)
 
 # Label of the task board
 class Label(ImmutableModel):

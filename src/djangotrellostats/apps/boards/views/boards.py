@@ -12,6 +12,7 @@ from djangotrellostats.apps.boards.forms import EditBoardForm
 from djangotrellostats.apps.boards.models import List
 from djangotrellostats.apps.boards.stats import avg, std_dev
 from djangotrellostats.apps.dev_times.models import DailySpentTime
+import time
 
 
 # Initialize boards with data fetched from trello
@@ -110,7 +111,10 @@ def fetch(request, board_id):
     # Confirm fetch form
     confirmed_board_id = request.POST.get("board_id")
     if confirmed_board_id and confirmed_board_id == board_id:
+        start_time = time.time()
         board.fetch(debug=True)
+        end_time = time.time()
+        print("Elapsed time {0} s".format(end_time-start_time))
         return HttpResponseRedirect(reverse("boards:view", args=(board_id,)))
 
     raise Http404

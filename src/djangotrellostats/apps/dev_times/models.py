@@ -30,6 +30,15 @@ class DailySpentTime(models.Model):
 
     # Add a new amount of spent time to a member
     @staticmethod
+    def add_daily_spent_time(daily_spent_time):
+        DailySpentTime.add(board=daily_spent_time.board,
+                           member=daily_spent_time.member,
+                           date=daily_spent_time.date,
+                           spent_time=daily_spent_time.spent_time,
+                           estimated_time=daily_spent_time.estimated_time)
+
+    # Add a new amount of spent time to a member
+    @staticmethod
     def add(board, member, date, spent_time, estimated_time):
         # In case a uuid is passed, load the Member object
         if type(member) is str or type(member) is unicode:
