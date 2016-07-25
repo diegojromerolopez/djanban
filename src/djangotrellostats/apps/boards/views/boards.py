@@ -110,7 +110,7 @@ def fetch(request, board_id):
     # Confirm fetch form
     confirmed_board_id = request.POST.get("board_id")
     if confirmed_board_id and confirmed_board_id == board_id:
-        board.fetch()
+        board.fetch(debug=True)
         return HttpResponseRedirect(reverse("boards:view", args=(board_id,)))
 
     raise Http404
