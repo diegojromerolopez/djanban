@@ -10,6 +10,8 @@ from django.db import models
 from django.db.models import Avg, Sum
 from django.db.models.query_utils import Q
 from django.utils import timezone
+from multiprocessing import Manager, Process
+from time import sleep
 import copy
 import numpy
 import datetime
@@ -152,19 +154,28 @@ class Board(models.Model):
         trello_board = self._get_trello_board()
         trello_cards = trello_board.all_cards()
 
-        card_dict = {}
+        manager = Manager()
+        card_dict = manager.dict()
 
         # Card fetch
+        card_fetchers = []
         num_cards = len(trello_cards)
         i = 1
         for trello_card in trello_cards:
+            sleep(0.3)
+            def fetch_card_i(trello_card):
+                card_i = self._fetch_card(trello_card, lists, done_list, trello_lead_dict, trello_cycle_dict)
+                card_dict[card_i.uuid] = card_i
+                if debug:
+                    print(u"Board {0} {1}/{2} cards fetched ({3})".format(self.name, i, num_cards, card_i.uuid))
 
-            card_i = self._fetch_card(trello_card, lists, done_list, trello_lead_dict, trello_cycle_dict)
-            card_dict[card_i.uuid] = card_i
-            if debug:
-                print(u"Board {0} {1}/{2} cards fetched ({3})".format(self.name, i, num_cards, card_i.uuid))
-
+            card_fetcher = Process(target=fetch_card_i, args=(trello_card,))
+            card_fetchers.append(card_fetcher)
+            card_fetcher.start()
             i += 1
+
+        for card_fetcher in card_fetchers:
+            card_fetcher.join()
 
         # Card stats computation
         cards = card_dict.values()
