@@ -146,7 +146,15 @@ There is no use of django permissions yet.
 Send a daily report with the spent times to each administrator user:
 
 ```python
-python src/manage.py reporter daily_report [date of the report]
+python src/manage.py reporter daily_report [date of the report, by default today]
+```
+
+## Daily development report
+
+Send a daily report with the spent times of each developer.
+
+```python
+python src/manage.py reporter daily_development_report [date of the report, by default today]
 ```
 
 ## Weekly report
@@ -154,7 +162,7 @@ python src/manage.py reporter daily_report [date of the report]
 Send a weekly report with the spent times to each administrator user:
 
 ```python
-python src/manage.py reporter weekly_report [date whose week we want to get the report]
+python src/manage.py reporter weekly_report [date whose week we want to get the report, by default this week]
 ```
 
 
