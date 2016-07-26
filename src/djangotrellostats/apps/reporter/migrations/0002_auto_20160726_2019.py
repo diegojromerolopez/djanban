@@ -10,7 +10,8 @@ videos = (
     "https://www.youtube.com/watch?v=9V6BDnu35qs",
     "https://www.youtube.com/watch?v=R1JBQMXbN2k",
     "https://www.youtube.com/watch?v=41Zjh3AirjU",
-    "https://www.youtube.com/watch?v=lsSC2vx7zFQ"
+    "https://www.youtube.com/watch?v=lsSC2vx7zFQ",
+    "https://www.youtube.com/watch?v=vIq07-f2aqc",
 )
 
 
