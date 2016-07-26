@@ -36,6 +36,8 @@ DEBUG = settings_local.DEBUG
 DOMAIN = settings_local.DOMAIN
 ALLOWED_HOSTS = settings_local.ALLOWED_HOSTS
 
+SITE_ID = 1
+
 # Administrator group
 ADMINISTRATOR_GROUP = "Administrators"
 
