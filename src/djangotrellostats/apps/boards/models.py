@@ -10,9 +10,11 @@ from django.db import models
 from django.db.models import Avg, Sum
 from django.db.models.query_utils import Q
 from django.utils import timezone
+import requests
 import threading
 import numpy
 import datetime
+import time
 import math
 import pytz
 from isoweek import Week
@@ -145,6 +147,8 @@ class Board(models.Model):
         trello_board = self._get_trello_board()
         trello_cards = trello_board.all_cards()
 
+        trello_comments_by_card = self._fetch_trello_comments_by_card()
+
         lists = self.lists.all()
 
         trello_cycle_dict = {list_.uuid: True for list_ in self.cycle_time_lists()}
@@ -161,7 +165,8 @@ class Board(models.Model):
                 while must_retry:
                     try:
                         my_trello_card.fetch(eager=False)
-                        my_trello_card.fetch_comments()
+                        #my_trello_card.fetch_comments()
+                        my_trello_card._comments = trello_comments_by_card.get(my_trello_card.id, [])
                         card_i = self._fetch_card(my_trello_card, lists, done_list, trello_lead_dict, trello_cycle_dict)
                         if debug:
                             print(u"{0} done".format(card_i.uuid))
@@ -333,6 +338,34 @@ class Board(models.Model):
         trello_board.fetch()
         return trello_board
 
+    # Return the comments of the board grouped by the uuid of each card
+    def _fetch_trello_comments_by_card(self, limit=300, page=0):
+        # Fetch as long as there is a result
+        comments = []
+        retry = True
+        while retry:
+            comments += self._fetch_trello_comments(limit, page)
+            retry = len(comments) == limit
+            page += 1
+
+        # Group comments by card
+        comments_by_card = {}
+        for comment in comments:
+            card_uuid = comment[u"data"][u"card"][u"id"]
+            if card_uuid not in comments_by_card:
+                comments_by_card[card_uuid] = []
+            comments_by_card[card_uuid].append(comment)
+        # Return the comments group by card
+        return comments_by_card
+
+    # Return trello comments for this board, calling Trello API
+    def _fetch_trello_comments(self, limit=300, page=0):
+        trello_client = self.creator.trello_client
+        comments = trello_client.fetch_json(
+            '/boards/{0}/actions'.format(self.uuid), query_params={'filter': 'commentCard', "limit": limit, "page": page}
+        )
+        return comments
+
 
 # Card of the task board
 class Card(ImmutableModel):
@@ -381,7 +414,7 @@ class Card(ImmutableModel):
         card.trello_card = trello_card
 
         # Card comments
-        comment_summary = card.fetch_comments()
+        comment_summary = card.comment_stats()
 
         # Card spent and estimated times
         card.spent_time = comment_summary["spent"]["total"]
@@ -439,7 +472,7 @@ class Card(ImmutableModel):
         return self.stats_by_list
 
     # Fetch comments of this card
-    def fetch_comments(self):
+    def comment_stats(self):
         self.comments = self.trello_card.comments
 
         total_spent = None
