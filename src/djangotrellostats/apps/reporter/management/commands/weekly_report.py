@@ -80,8 +80,8 @@ class Command(BaseCommand):
             "daily_spent_times": daily_spent_times,
         }
 
-        txt_message = get_template('reporter/emails/weekly_reporter.txt').render(replacements)
-        html_message = get_template('reporter/emails/weekly_reporter.html').render(replacements)
+        txt_message = get_template('reporter/emails/weekly_report.txt').render(replacements)
+        html_message = get_template('reporter/emails/weekly_report.html').render(replacements)
 
         subject = "[DjangoTrelloStats][Reports] Weekly report of {0}W-{1}".format(week, year)
 

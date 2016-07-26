@@ -74,8 +74,8 @@ class Command(BaseCommand):
             "daily_spent_times": daily_spent_times,
         }
 
-        txt_message = get_template('reporter/emails/daily_reporter.txt').render(replacements)
-        html_message = get_template('reporter/emails/daily_reporter.html').render(replacements)
+        txt_message = get_template('reporter/emails/daily_report.txt').render(replacements)
+        html_message = get_template('reporter/emails/daily_report.html').render(replacements)
 
         subject = "[DjangoTrelloStats][Reports] Daily report of {0}".format(date.strftime("%Y-%m-%d"))
 

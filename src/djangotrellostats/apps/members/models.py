@@ -32,15 +32,21 @@ class Member(models.Model):
 
     is_developer = models.BooleanField(verbose_name=u"Is this member a developer?",
                                        help_text=u"Informs if this member is a developer and hence will receive reports"
-                                                 u"and other information", default=False)
+                                                 u" and other information", default=False)
 
     on_holidays = models.BooleanField(verbose_name=u"Is this developer on holidays?",
-                                      help_text=u"If the developer is on holidays will stop receiving reports"
+                                      help_text=u"If the developer is on holidays will stop receiving reports "
                                                 u"and other emails", default=False)
 
-    real_working_hours_per_week = models.PositiveIntegerField(u"Number of hours this developer should achieve each"
-                                                              u"week", default=None, null=True, blank=True)
+    minimum_working_hours_per_day = models.PositiveIntegerField(
+        verbose_name=u"Minimum number hours this developer should complete each day",
+        default=None, null=True, blank=True)
 
+    minimum_working_hours_per_week = models.PositiveIntegerField(
+        verbose_name=u"Minimum number of hours this developer should complete per week",
+        default=None, null=True, blank=True)
+
+    # Constructor for Member
     def __init__(self, *args, **kwargs):
         super(Member, self).__init__(*args, **kwargs)
         self.trello_client = self._get_trello_client()

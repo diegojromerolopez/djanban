@@ -46,9 +46,9 @@
                 <tr class="header month_{{month.i}}">
                     <td colspan="9">Sum of spent time</td>
                     <td> {{month.spent_time_sum|floatformat:"-2"}}
-                        {% if selected_member and week and selected_member.real_working_hours_per_week %}
+                        {% if selected_member and week and selected_member.minimum_working_hours_per_week %}
                         /
-                        {{selected_member.real_working_hours_per_week}}
+                        {{selected_member.minimum_working_hours_per_week}}
                         {% endif %}
                         hours
                     </td>
@@ -72,9 +72,9 @@
                 <div class="panel-body">
                     <div>Sum of spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}:
                         {{spent_time_sum|floatformat:"-2"}}
-                        {% if selected_member and week and selected_member.real_working_hours_per_week %}
+                        {% if selected_member and week and selected_member.minimum_working_hours_per_week %}
                         /
-                        {{selected_member.real_working_hours_per_week}}
+                        {{selected_member.minimum_working_hours_per_week}}
                         {% endif %}
                         hours
                     </div>
