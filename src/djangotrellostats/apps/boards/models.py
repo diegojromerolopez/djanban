@@ -175,7 +175,7 @@ class Board(models.Model):
                     except ResourceUnavailable:
                         must_retry = True
 
-        # Work assignement for each thread
+        # Work assignment for each thread
         threads = []
         trello_card_chunks = numpy.array_split(trello_cards, num_threads)
         for i in range(0, num_threads):
