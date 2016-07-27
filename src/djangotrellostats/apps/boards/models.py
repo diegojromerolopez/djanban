@@ -147,6 +147,7 @@ class Board(models.Model):
         trello_board = self._get_trello_board()
         trello_cards = trello_board.all_cards()
 
+        trello_movements_by_card = self._fetch_trello_actions_by_card("updateCard:idList")
         trello_comments_by_card = self._fetch_trello_comments_by_card()
 
         lists = self.lists.all()
@@ -165,7 +166,7 @@ class Board(models.Model):
                 while must_retry:
                     try:
                         my_trello_card.fetch(eager=False)
-                        #my_trello_card.fetch_comments()
+                        my_trello_card.actions = trello_movements_by_card.get(my_trello_card.id, [])
                         my_trello_card._comments = trello_comments_by_card.get(my_trello_card.id, [])
                         card_i = self._fetch_card(my_trello_card, lists, done_list, trello_lead_dict, trello_cycle_dict)
                         if debug:
@@ -365,6 +366,34 @@ class Board(models.Model):
             '/boards/{0}/actions'.format(self.uuid), query_params={'filter': 'commentCard', "limit": limit, "page": page}
         )
         return comments
+
+    # Return the comments of the board grouped by the uuid of each card
+    def _fetch_trello_actions_by_card(self, action_filter, limit=300, page=0):
+        # Fetch as long as there is a result
+        actions = []
+        retry = True
+        while retry:
+            actions += self._fetch_trello_actions(action_filter, limit, page)
+            retry = len(actions) == limit
+            page += 1
+
+        # Group comments by card
+        actions_by_card = {}
+        for action in actions:
+            card_uuid = action[u"data"][u"card"][u"id"]
+            if card_uuid not in actions_by_card:
+                actions_by_card[card_uuid] = []
+            actions_by_card[card_uuid].append(action)
+        # Return the comments group by card
+        return actions_by_card
+
+    # Return trello actions for this board, calling Trello API
+    def _fetch_trello_actions(self, action_filter, limit=300, page=0):
+        trello_client = self.creator.trello_client
+        actions = trello_client.fetch_json(
+            '/boards/{0}/actions'.format(self.uuid), query_params={'filter': action_filter, "limit": limit, "page": page}
+        )
+        return actions
 
 
 # Card of the task board
