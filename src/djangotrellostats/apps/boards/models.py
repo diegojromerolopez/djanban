@@ -118,6 +118,7 @@ class Board(models.Model):
 
     # Fetch data of this board
     def fetch(self, debug=False):
+        self.trello_board = self._get_trello_board()
         cards = self._fetch_cards(debug=debug)
         with transaction.atomic():
             self._truncate()
@@ -136,18 +137,16 @@ class Board(models.Model):
 
     # Fetch the labels of this board
     def _fetch_labels(self):
-        trello_board = self._get_trello_board()
-        trello_labels = trello_board.get_labels()
+        trello_labels = self.trello_board.get_labels()
         for trello_label in trello_labels:
             label = Label.factory_from_trello_label(trello_label, self)
             label.save()
 
     # Return the Trello Cards in a multithreaded way
     def _fetch_cards(self, num_threads=10, debug=False):
-        trello_board = self._get_trello_board()
-        trello_cards = trello_board.all_cards()
+        trello_cards = self.trello_board.all_cards()
 
-        trello_movements_by_card = self._fetch_trello_actions_by_card("updateCard:idList")
+        trello_movements_by_card = self._fetch_trello_card_movements_by_card()
         trello_comments_by_card = self._fetch_trello_comments_by_card()
 
         lists = self.lists.all()
@@ -340,60 +339,37 @@ class Board(models.Model):
         return trello_board
 
     # Return the comments of the board grouped by the uuid of each card
-    def _fetch_trello_comments_by_card(self, limit=300, page=0):
-        # Fetch as long as there is a result
-        comments = []
-        retry = True
-        while retry:
-            comments += self._fetch_trello_comments(limit, page)
-            retry = len(comments) == limit
-            page += 1
-
-        # Group comments by card
-        comments_by_card = {}
-        for comment in comments:
-            card_uuid = comment[u"data"][u"card"][u"id"]
-            if card_uuid not in comments_by_card:
-                comments_by_card[card_uuid] = []
-            comments_by_card[card_uuid].append(comment)
-        # Return the comments group by card
+    def _fetch_trello_comments_by_card(self):
+        comments_by_card = self._fetch_trello_actions_by_card(action_filter="commentCard")
         return comments_by_card
 
-    # Return trello comments for this board, calling Trello API
-    def _fetch_trello_comments(self, limit=300, page=0):
-        trello_client = self.creator.trello_client
-        comments = trello_client.fetch_json(
-            '/boards/{0}/actions'.format(self.uuid), query_params={'filter': 'commentCard', "limit": limit, "page": page}
-        )
-        return comments
+    # Return the card movements of the board grouped by the uuid of each card
+    def _fetch_trello_card_movements_by_card(self):
+        comments_by_card = self._fetch_trello_actions_by_card(action_filter="updateCard:idList")
+        return comments_by_card
 
-    # Return the comments of the board grouped by the uuid of each card
-    def _fetch_trello_actions_by_card(self, action_filter, limit=300, page=0):
+    # Return the actions of the board grouped by the uuid of each card
+    def _fetch_trello_actions_by_card(self, action_filter, limit=1000):
         # Fetch as long as there is a result
         actions = []
         retry = True
+        since = None
         while retry:
-            actions += self._fetch_trello_actions(action_filter, limit, page)
+            actions += self.trello_board.fetch_actions(action_filter, limit, since)
             retry = len(actions) == limit
-            page += 1
+            # Dangerous assumption: we are assuming the cards are sorted by date (in descendant order) and thus,
+            # we can get the greatest date to ask for more actions since that date.
+            since = actions[0]["date"]
 
-        # Group comments by card
+        # Group actions by card
         actions_by_card = {}
         for action in actions:
             card_uuid = action[u"data"][u"card"][u"id"]
             if card_uuid not in actions_by_card:
                 actions_by_card[card_uuid] = []
             actions_by_card[card_uuid].append(action)
-        # Return the comments group by card
+        # Return the actions grouped by card
         return actions_by_card
-
-    # Return trello actions for this board, calling Trello API
-    def _fetch_trello_actions(self, action_filter, limit=300, page=0):
-        trello_client = self.creator.trello_client
-        actions = trello_client.fetch_json(
-            '/boards/{0}/actions'.format(self.uuid), query_params={'filter': action_filter, "limit": limit, "page": page}
-        )
-        return actions
 
 
 # Card of the task board
