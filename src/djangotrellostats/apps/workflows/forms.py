@@ -6,7 +6,6 @@ from djangotrellostats.apps.boards.models import List
 from djangotrellostats.apps.workflows.models import Workflow, WorkflowList
 
 
-
 # Workflow creation form
 class NewWorkflowForm(models.ModelForm):
     class Meta:
