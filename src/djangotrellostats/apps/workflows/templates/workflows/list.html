@@ -6,7 +6,7 @@
     <h1>Workflows of board {{board.name}}</h1>
     <div>
         <a href="{% url 'boards:view_boards' %}" title="Go back to list of boards">Go back to list of boards</a>
-        <a href="{% url 'boards:new_workflow' board.id %}" title="New workflow">New workflow</a>
+        <a href="{% url 'boards:workflows:new' board.id %}" title="New workflow">New workflow</a>
     </div>
     <div class="workflow_list">
         {% if workflows|length == 0 %}
@@ -35,7 +35,7 @@
                         </div>
 
                         <div class="actions">
-                            <a href="{% url 'boards:edit_workflow' board.id workflow.id %}">Edit</a>
+                            <a href="{% url 'boards:workflows:edit' board.id workflow.id %}">Edit</a>
                             {% include "workflows/delete_form.html" %}
                         </div>
 

@@ -6,8 +6,8 @@ from django.http import HttpResponseRedirect
 from django.http.response import Http404
 from django.shortcuts import render
 
-from djangotrellostats.apps.boards.forms import NewWorkflowForm, EditWorkflowForm
-from djangotrellostats.apps.boards.models import List, Workflow
+from djangotrellostats.apps.workflows.forms import NewWorkflowForm, EditWorkflowForm
+from djangotrellostats.apps.workflows.models import Workflow
 
 
 # View list of workflows of a board

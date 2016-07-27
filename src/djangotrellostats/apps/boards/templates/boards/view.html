@@ -19,7 +19,7 @@
                     </li>
                     {% if board.is_ready and board.is_fetched %}
                         <li {% if url_name == "view_workflows" %}class="active"{% endif %}>
-                            <a href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
+                            <a href="{% url 'boards:workflows:view_list' board.id %}">View workflows</a>
                         </li>
                         <li {% if url_name == "view_card_report" %}class="active"{% endif %}>
                             <a href="{% url 'boards:view_card_report' board.id %}">

@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url
+from django.conf.urls import url, include
 
 from djangotrellostats.apps.boards.views import boards
-from djangotrellostats.apps.boards.views import workflows
-
 
 urlpatterns = [
     url(r'^init-boards$', boards.init_boards, name="init_boards"),
@@ -26,10 +24,9 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/fetch/?$', boards.fetch, name="fetch"),
 
     # Workflow URLs
-    url(r'^(?P<board_id>\d+)/workflows/?$', workflows.view_list, name="view_workflows"),
-    url(r'^(?P<board_id>\d+)/workflows/new/?$', workflows.new, name="new_workflow"),
-    url(r'^(?P<board_id>\d+)/workflows/(?P<workflow_id>\d+)/edit/?$', workflows.edit, name="edit_workflow"),
-    url(r'^(?P<board_id>\d+)/workflows/(?P<workflow_id>\d+)/delete/?$', workflows.delete, name="delete_workflow"),
+
+    url(r'^(?P<board_id>\d+)/workflows/', include('djangotrellostats.apps.workflows.urls', namespace="workflows")),
+
 
     # Change list type
     url(r'^change-list-type/?$', boards.change_list_type, name="change_list_type"),

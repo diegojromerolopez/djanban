@@ -22,12 +22,12 @@
                             <a class="btn btn-primary" href="{% url 'boards:view_lists' board.id %}">
                                 <span class="fa fa-list"></span> View lists</a>
                             {% if board.is_ready %}
-                                <a class="btn btn-primary" href="{% url 'boards:view_workflows' board.id %}">View workflows</a>
+                                <a class="btn btn-primary" href="{% url 'boards:workflows:view_list' board.id %}">View workflows</a>
                                 <a class="btn btn-primary" href="{% url 'boards:view_card_report' board.id %}">
                                     <span class="fa fa-sticky-note-o"></span> View cards
                                 </a>
                                 {% for workflow in board.workflows.all %}
-                                    <a class="btn btn-primary" href="{% url 'boards:view_workflow_card_report' board.id workflow.id %}">View {{workflow.name}} report</a>
+                                    <a class="btn btn-primary" href="{% url 'boards:workflows:view_workflow_card_report' board.id workflow.id %}">View {{workflow.name}} report</a>
                                 {% endfor %}
                                 <a class="btn btn-primary" href="{% url 'boards:view_label_report' board.id %}">
                                     <span class="fa fa-tags"></span> View labels
