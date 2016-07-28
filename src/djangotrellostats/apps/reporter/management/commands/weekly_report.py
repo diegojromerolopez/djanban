@@ -15,6 +15,8 @@ from djangotrellostats.apps.members.models import Member
 import datetime
 
 from djangotrellostats.apps.week import get_iso_week_of_year
+from django.core.mail import EmailMultiAlternatives
+
 
 
 class Command(BaseCommand):
@@ -83,7 +85,11 @@ class Command(BaseCommand):
         txt_message = get_template('reporter/emails/weekly_report.txt').render(replacements)
         html_message = get_template('reporter/emails/weekly_report.html').render(replacements)
 
+        csv_report = get_template('daily_spent_times/csv.txt').render({"spent_times": daily_spent_times})
+
         subject = "[DjangoTrelloStats][Reports] Weekly report of {0}W-{1}".format(week, year)
 
-        return send_mail(subject, txt_message, settings.EMAIL_HOST_USER, recipient_list=[administrator_user.email],
-                         fail_silently=False, html_message=html_message)
+        message = EmailMultiAlternatives(subject, txt_message, settings.EMAIL_HOST_USER, [administrator_user.email])
+        message.attach_alternative(html_message, "text/html")
+        message.attach('spent_times-for-week-{0}W-{1}.csv'.format(week, year), csv_report, 'text/csv')
+        message.send()

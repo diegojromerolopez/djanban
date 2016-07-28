@@ -11,6 +11,7 @@ from djangotrellostats.apps.week import get_iso_week_of_year
 
 class DailySpentTime(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="daily_spent_times")
+    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="daily_spent_times", null=True)
     member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="daily_spent_times")
     description = models.TextField(verbose_name="Description of the task")
     date = models.DateField(verbose_name="Date of the time measurement")
@@ -35,6 +36,7 @@ class DailySpentTime(models.Model):
     @staticmethod
     def add_daily_spent_time(daily_spent_time):
         DailySpentTime.add(board=daily_spent_time.board,
+                           card=daily_spent_time.card,
                            description=daily_spent_time.description,
                            member=daily_spent_time.member,
                            date=daily_spent_time.date,
@@ -43,7 +45,7 @@ class DailySpentTime(models.Model):
 
     # Add a new amount of spent time to a member
     @staticmethod
-    def add(board, member, date, description, spent_time, estimated_time):
+    def add(board, member, date, card, description, spent_time, estimated_time):
         # In case a uuid is passed, load the Member object
         if type(member) is str or type(member) is unicode:
             try:
@@ -54,7 +56,7 @@ class DailySpentTime(models.Model):
         weekday = date.strftime("%w")
         week_of_year = DailySpentTime.get_iso_week_of_year(date)
         day_of_year = date.strftime("%j")
-        daily_spent_time = DailySpentTime(board=board, member=member,
+        daily_spent_time = DailySpentTime(board=board, member=member, card=card,
                                           description=description,
                                           spent_time=Decimal(spent_time),
                                           estimated_time=Decimal(estimated_time),

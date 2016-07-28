@@ -9,6 +9,7 @@ from django.utils import timezone
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.reporter.management.commands import daily_report
+from django.core.mail import EmailMultiAlternatives
 
 
 class Command(daily_report.Command):
@@ -29,11 +30,10 @@ class Command(daily_report.Command):
 
         start = time.time()
 
-        daily_spent_times = DailySpentTime.objects.filter(date=date).order_by("date", "member")
-
         developers = Member.objects.filter(is_developer=True, on_holidays=False)
         for member in developers:
-            if member.daily_spent_times.filter(date=date).count() > 0 and member.user:
+            if member.daily_spent_times.filter(date=date).count() > 0 and member.user and member.user.username == "diego@intelligenia.com":
+                daily_spent_times = member.daily_spent_times.filter(date=date).order_by("date", "member")
                 Command.send_daily_development_report(date, member, daily_spent_times)
                 self.stdout.write(self.style.SUCCESS(u"Daily report sent to developer {0}".format(member.user.email)))
 
@@ -61,5 +61,9 @@ class Command(daily_report.Command):
 
         subject = "[DjangoTrelloStats][DevReports] Daily development report of {0}".format(date.strftime("%Y-%m-%d"))
 
-        return send_mail(subject, txt_message, settings.EMAIL_HOST_USER, recipient_list=[developer_member.user.email],
-                         fail_silently=False, html_message=html_message)
+        csv_report = get_template('daily_spent_times/csv.txt').render({"spent_times": daily_spent_times})
+
+        message = EmailMultiAlternatives(subject, txt_message, settings.EMAIL_HOST_USER, [developer_member.user.email])
+        message.attach_alternative(html_message, "text/html")
+        message.attach('spent_times-for-day-{0}.csv'.format(date.strftime("%Y-%m-%d")), csv_report, 'text/csv')
+        message.send()

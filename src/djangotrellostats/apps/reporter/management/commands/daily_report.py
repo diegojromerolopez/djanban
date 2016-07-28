@@ -6,6 +6,8 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.shortcuts import render
 from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
+
 from django.template.loader import get_template
 
 from djangotrellostats.apps.boards.models import Board
@@ -77,7 +79,10 @@ class Command(BaseCommand):
         txt_message = get_template('reporter/emails/daily_report.txt').render(replacements)
         html_message = get_template('reporter/emails/daily_report.html').render(replacements)
 
+        csv_report = get_template('daily_spent_times/csv.txt').render({"spent_times": daily_spent_times})
         subject = "[DjangoTrelloStats][Reports] Daily report of {0}".format(date.strftime("%Y-%m-%d"))
 
-        return send_mail(subject, txt_message, settings.EMAIL_HOST_USER, recipient_list=[administrator_user.email],
-                         fail_silently=False, html_message=html_message)
+        message = EmailMultiAlternatives(subject, txt_message, settings.EMAIL_HOST_USER, [administrator_user.email])
+        message.attach_alternative(html_message, "text/html")
+        message.attach('spent_times-for-day-{0}.csv'.format(date.strftime("%Y-%m-%d")), csv_report, 'text/csv')
+        message.send()

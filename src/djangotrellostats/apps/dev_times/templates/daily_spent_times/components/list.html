@@ -30,7 +30,11 @@
                         <td>{{daily_spent_time.weekday}}</td>
                         <td>{{daily_spent_time.day_of_year}}</td>
                         <td>{{daily_spent_time.date}}</td>
-                        <td>{{daily_spent_time.description}}</td>
+                        <td>
+                            <a href="{{daily_spent_time.card.short_url}}" title="{{daily_spent_time.card.name}}">
+                                {{daily_spent_time.description|truncatechars:40}}
+                            </a>
+                        </td>
                         <td>{{daily_spent_time.spent_time|floatformat:"-2"}}</td>
                         <td>{{daily_spent_time.estimated_time|floatformat:"-2"}}</td>
                         <td>{{daily_spent_time.diff_time|floatformat:"-2"}}</td>

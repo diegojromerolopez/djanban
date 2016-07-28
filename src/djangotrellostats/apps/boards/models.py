@@ -211,8 +211,9 @@ class Board(models.Model):
 
         # Card stats computation
         for card in cards:
-            card.create_daily_spent_times()
             card.save()
+            card.create_daily_spent_times()
+
             trello_card = card.trello_card
             for list_ in lists:
                 list_uuid = list_.uuid
@@ -503,7 +504,7 @@ class Card(ImmutableModel):
         #                      u'shortLink': u'bnK3c1jF'}}, u'id': u'57180b7e25abc60313461aaf'}
 
         # For each comment, find the desired pattern and extract the spent and estimated times
-        self.daily_spent_times = []
+        self._daily_spent_times = []
         member_dict = {}
         for comment in self.comments:
             comment_content = comment["data"]["text"]
@@ -560,9 +561,9 @@ class Card(ImmutableModel):
                     member_dict[member_uuid] = self.board.members.get(uuid=member_uuid)
 
                 # Creation of daily spent times for this card
-                daily_spent_time = DailySpentTime(board=self.board, description=description, member=member_dict[member_uuid], date=date,
+                daily_spent_time = DailySpentTime(board=self.board, card=self, description=description, member=member_dict[member_uuid], date=date,
                                                   spent_time=spent, estimated_time=estimated)
-                self.daily_spent_times.append(daily_spent_time)
+                self._daily_spent_times.append(daily_spent_time)
 
         self.comment_summary = {
             "daily_spent_times": self.daily_spent_times,
@@ -577,7 +578,7 @@ class Card(ImmutableModel):
         if not hasattr(self, "daily_spent_times"):
             self.fetch_comments()
 
-        for daily_spent_time in self.daily_spent_times:
+        for daily_spent_time in self._daily_spent_times:
             DailySpentTime.add_daily_spent_time(daily_spent_time)
 
 
