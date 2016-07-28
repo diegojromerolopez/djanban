@@ -175,6 +175,16 @@ considered to measure spent, estimated and card living times.
 
 Workflow stats are not completed. Only the definition of workflows is fully implemented but not their stats.
 
+# Legal notice
+
+This project is not afilliated, endorsed or supported in any way by [Trello Inc.](http://trello.com)
+
+Trello is a registered trademark in USA and other countries.
+
+This project aims to help users of Trello to get some useful charts, lists and stats.
+
+This project is [BSD-licensed](LICENSE) and the logos have been created with [Mark Maker](http://emblemmatic.org/markmaker)
+
 
 # Questions? Suggestions?
 
