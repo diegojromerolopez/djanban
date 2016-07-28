@@ -116,6 +116,14 @@ class Board(models.Model):
             return 0
         return spent_time
 
+    # Return the spent time on a given month of a year
+    def get_monthly_spent_time(self, month, year):
+        spent_time_on_week_filter = {"date__month": month, "date__year": year}
+        spent_time = self.daily_spent_times.filter(**spent_time_on_week_filter).aggregate(sum=Sum("spent_time"))["sum"]
+        if spent_time is None:
+            return 0
+        return spent_time
+
     # Fetch data of this board
     def fetch(self, debug=False):
         self.trello_board = self._get_trello_board()

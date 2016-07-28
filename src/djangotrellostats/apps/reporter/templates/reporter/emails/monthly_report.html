@@ -4,22 +4,22 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Weekly report for {{administrator_user.username}}</title>
+        <title>Monthly report for {{administrator_user.username}}</title>
     </head>
     <body>
         <div>
             <div>
-                <h1>Spent times in week {{week}}W-{{year}} by developer</h1>
+                <h1>Spent times in month {{year}}/{{month}} by developer</h1>
                 {% for member in developer_members %}
                     <p>
                         <span><strong>{{member.trello_username}}</strong></span>
-                        <span>{{member|call:'get_weekly_spent_time'|arg:week|arg:year|end_call|floatformat:"-2"}} hours</span>
+                        <span>{{member|call:'get_monthly_spent_time'|arg:month|arg:year|end_call|floatformat:"-2"}} hours</span>
                     </p>
                 {% endfor %}
             </div>
 
             <div>
-                <h1>Spent times in week {{week}}W-{{year}} by board</h1>
+                <h1>Spent times in month {{year}}/{{month}} by board</h1>
                 {% for board in boards %}
                     {% if board.is_fetched %}
                         <div>
@@ -28,13 +28,13 @@
                                 {% if member.is_developer %}
                                     <p>
                                         <span><strong>{{member.trello_username}}</strong></span>
-                                        <span>{{member|call:'get_weekly_spent_time'|arg:week|arg:year|arg:board|floatformat:"-2"}} hours</span>
+                                        <span>{{member|call:'get_monthly_spent_time'|arg:month|arg:year|arg:board|floatformat:"-2"}} hours</span>
                                     </p>
                                 {% endif %}
                             {% endfor %}
                             <p>
                                 <span>Total spent time for {{board.name}}</span>
-                                <span> {{board|call:'get_weekly_spent_time'|arg:week|arg:year|floatformat:"-2"}} hours</span>
+                                <span> {{board|call:'get_monthly_spent_time'|arg:month|arg:year|floatformat:"-2"}} hours</span>
                             </p>
                         </div>
                     {% endif %}
@@ -42,7 +42,7 @@
             </div>
 
             <div>
-                <h1>Spent times in week {{week}}W-{{year}}</h1>
+                <h1>Spent times in month {{year}}/{{month}}</h1>
                 <table>
                     <tr>
                         <td>Week day</td>

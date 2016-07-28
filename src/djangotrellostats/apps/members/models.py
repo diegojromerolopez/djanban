@@ -103,6 +103,16 @@ class Member(models.Model):
 
         return self._get_spent_time_sum_from_filter(spent_time_on_week_filter)
 
+    # Returns the number of hours this member has develop on a given month
+    def get_monthly_spent_time(self, month, year, board=None):
+        spent_time_on_week_filter = {"date__month": month, "date__year": year}
+
+        # If we pass the board, only this board spent times will be given
+        if board is not None:
+            spent_time_on_week_filter["board"] = board
+
+        return self._get_spent_time_sum_from_filter(spent_time_on_week_filter)
+
     # Returns the number of hours this member has develop given a filter
     def _get_spent_time_sum_from_filter(self, spent_time_filter):
         spent_time_on_date = self.daily_spent_times.filter(**spent_time_filter). \
