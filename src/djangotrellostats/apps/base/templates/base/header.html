@@ -1,4 +1,9 @@
+{% load staticfiles %}
+
 <div id="header">
+    <div id="header_logo">
+        <img id="header_image" src="{% static 'img/logo.png' %}" alt="Trello Stats Logo" />
+    </div>
     {% with url_name=request.resolver_match.url_name %}
         <ul class="nav nav-tabs">
             <li role="presentation" {% if url_name == "index" %}class="active"{% endif %}>
