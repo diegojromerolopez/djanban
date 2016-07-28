@@ -177,13 +177,13 @@ Workflow stats are not completed. Only the definition of workflows is fully impl
 
 # Legal notice
 
-This project is not afilliated, endorsed or supported in any way by [Trello Inc.](http://trello.com)
+This project is not affiliated, endorsed or supported in any way by [Trello Inc.](http://trello.com)
 
 Trello is a registered trademark in USA and other countries.
 
-This project aims to help users of Trello to get some useful charts, lists and stats.
+This project uses [Trello API](https://developers.trello.com/) to help users of Trello to get some useful charts, lists and stats.
 
-This project is [BSD-licensed](LICENSE) and the logos have been created with [Mark Maker](http://emblemmatic.org/markmaker)
+The license of this project is [BSD](LICENSE) and the logos have been created with [Mark Maker](http://emblemmatic.org/markmaker).
 
 
 # Questions? Suggestions?
