@@ -1,26 +1,24 @@
 from __future__ import unicode_literals
 
+import math
 import re
-from decimal import Decimal
+import threading
+from collections import namedtuple
+from datetime import datetime
+from datetime import timedelta
 
+import numpy
+import pytz
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.db import transaction
 from django.db import models
+from django.db import transaction
 from django.db.models import Avg, Sum
 from django.db.models.query_utils import Q
 from django.utils import timezone
-import requests
-import threading
-import numpy
-import datetime
-import time
-import math
-import pytz
 from isoweek import Week
 from trello import ResourceUnavailable
 from trello.board import Board as TrelloBoard
-from collections import namedtuple
+
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 
 
@@ -382,7 +380,7 @@ class Board(models.Model):
 
 # Card of the task board
 class Card(ImmutableModel):
-    COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s+(\-(?P<days_before>(\d+))d\s+)?(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)"
+    COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s+(\-(?P<days_before>(\d+))d\s+)?(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)(\s*(?P<description>.+))?"
 
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
     list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")
@@ -545,19 +543,24 @@ class Card(ImmutableModel):
 
                 # Store spent time by member by day
                 local_timezone = pytz.timezone(settings.TIME_ZONE)
-                date = local_timezone.localize(datetime.datetime.strptime(comment["date"],
+                date = local_timezone.localize(datetime.strptime(comment["date"],
                                                                           '%Y-%m-%dT%H:%M:%S.%fZ')).date()
                 # If Plus for Trello comment informs that the time was spent several days ago, we have to substract
                 # the days to the date of the comment
                 if matches.group("days_before"):
-                    date -= datetime.timedelta(days=int(matches.group("days_before")))
+                    date -= timedelta(days=int(matches.group("days_before")))
+
+                if matches.group("description") and matches.group("description").strip():
+                    description = matches.group("description")
+                else:
+                    description = self.name
 
                 # Use of memoization to achieve a better performance when loading members
                 if member_uuid not in member_dict:
                     member_dict[member_uuid] = self.board.members.get(uuid=member_uuid)
 
                 # Creation of daily spent times for this card
-                daily_spent_time = DailySpentTime(board=self.board, member=member_dict[member_uuid], date=date,
+                daily_spent_time = DailySpentTime(board=self.board, description=description, member=member_dict[member_uuid], date=date,
                                                   spent_time=spent, estimated_time=estimated)
                 self.daily_spent_times.append(daily_spent_time)
 

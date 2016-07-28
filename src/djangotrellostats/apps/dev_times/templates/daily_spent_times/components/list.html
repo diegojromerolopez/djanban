@@ -5,7 +5,7 @@
         <table class="table">
             {% for month in months %}
                 <tr class="header main_header month_{{month.i}}">
-                    <td colspan="10">
+                    <td colspan="11">
                         <strong>{{month.year}}/{{month.name}}</strong> ({{month.daily_spent_times|length}} measurements)
                     </td>
                 </tr>
@@ -16,6 +16,7 @@
                     <td>Weekday</td>
                     <td>Day of year</td>
                     <td>Date</td>
+                    <td>Description</td>
                     <td>Spent time</td>
                     <td>Estimated time</td>
                     <td>Difference</td>
@@ -29,6 +30,7 @@
                         <td>{{daily_spent_time.weekday}}</td>
                         <td>{{daily_spent_time.day_of_year}}</td>
                         <td>{{daily_spent_time.date}}</td>
+                        <td>{{daily_spent_time.description}}</td>
                         <td>{{daily_spent_time.spent_time|floatformat:"-2"}}</td>
                         <td>{{daily_spent_time.estimated_time|floatformat:"-2"}}</td>
                         <td>{{daily_spent_time.diff_time|floatformat:"-2"}}</td>
@@ -36,15 +38,15 @@
                     </tr>
                 {% endfor %}
                 <tr class="header month_{{month.i}}">
-                    <td colspan="9">Number of measurements</td>
+                    <td colspan="10">Number of measurements</td>
                     <td>{{month.daily_spent_times|length}}</td>
                 </tr>
                 <tr class="header month_{{month.i}}">
-                    <td colspan="9">Sum of amount</td>
+                    <td colspan="10">Sum of amount</td>
                     <td> {{month.rate_amount_sum|floatformat:"-2"}} ¤</td>
                 </tr>
                 <tr class="header month_{{month.i}}">
-                    <td colspan="9">Sum of spent time</td>
+                    <td colspan="10">Sum of spent time</td>
                     <td> {{month.spent_time_sum|floatformat:"-2"}}
                         {% if selected_member and week and selected_member.minimum_working_hours_per_week %}
                         /
@@ -54,11 +56,11 @@
                     </td>
                 </tr>
                 <tr class="header month_{{month.i}}">
-                    <td colspan="9">Sum of estimated time</td>
+                    <td colspan="10">Sum of estimated time</td>
                     <td> {{month.estimated_time_sum|floatformat:"-2"}} hours</td>
                 </tr>
                 <tr class="header month_{{month.i}} last">
-                    <td colspan="9">Diff between spent and estimated time</td>
+                    <td colspan="10">Diff between spent and estimated time</td>
                     <td> {{month.diff_time_sum|floatformat:"-2"}} hours</td>
                 </tr>
             {% endfor %}

@@ -58,6 +58,7 @@
                         <td>Week day</td>
                         <td>Member</td>
                         <td>Board</td>
+                        <td>Description</td>
                         <td>Spent time (h.)</td>
                         <td>Estimated time (h.)</td>
                     </tr>
@@ -65,6 +66,7 @@
                         <tr>
                             <td>{{daily_spent_time.weekday}}</td>
                             <td>{{daily_spent_time.board.name}}</td>
+                            <td>{{daily_spent_time.description}}</td>
                             <td>{{daily_spent_time.spent_time|floatformat:"-2"}}</td>
                             <td>{{daily_spent_time.estimated_time|floatformat:"-2"}}</td>
                         </tr>
