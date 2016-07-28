@@ -1,5 +1,7 @@
 
-# Django Trello Stats
+
+![Djanto Trello Stats](resources/images/logos/logo.png)
+
 
 Statistics and charts for Trello boards, now in a Django app.
 
