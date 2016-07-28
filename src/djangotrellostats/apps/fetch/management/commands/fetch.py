@@ -25,17 +25,12 @@ class Command(BaseCommand):
             return True
 
         start = time.time()
-        board_fetchers = []
         for board in member.created_boards.all():
 
             if board.is_ready():
                 board.fetch(debug=True)
-
             else:
                 self.stdout.write(self.style.SUCCESS(u"Board {0} is not ready".format(board.name)))
-
-        for board_fetcher in board_fetchers:
-            board_fetcher.join()
 
         end = time.time()
         elapsed_time = end-start
