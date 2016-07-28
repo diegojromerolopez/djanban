@@ -3,10 +3,10 @@
 from django.conf.urls import url, include
 from django.contrib import admin
 
-from djangotrellostats.apps.public import views as public_views
+from djangotrellostats.apps.index import views as index_views
 
 urlpatterns = [
-    url(r'^$', public_views.index, name="index"),
+    url(r'^$', index_views.index, name="index"),
     url(r'^admin/', admin.site.urls),
     url(r'^member/', include('djangotrellostats.apps.members.urls', namespace="members")),
     url(r'^boards/', include('djangotrellostats.apps.boards.urls', namespace="boards")),

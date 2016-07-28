@@ -4,6 +4,9 @@
 {% block page_title %}Members{% endblock %}
 
 {% block content %}
+        {% if developers|length == 0 %}
+            {% include "members/components/no_developers_warning.html" %}
+        {% endif %}
         <div class="panel">
             <table class="table">
                 <tr>

@@ -1,6 +1,7 @@
 from django.shortcuts import render
 
 from djangotrellostats.apps.boards.models import Board
+from djangotrellostats.apps.members.models import Member
 
 
 def index(request):
@@ -11,6 +12,6 @@ def index(request):
 
     boards = Board.objects.all()
 
-    replacements = {"boards": boards, "member": member}
-    return render(request, "public/index.html", replacements)
+    replacements = {"boards": boards, "member": member, "developers": Member.objects.filter(is_developer=True)}
+    return render(request, "index/index.html", replacements)
 
