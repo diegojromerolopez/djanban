@@ -119,7 +119,7 @@ class Member(models.Model):
         for trello_board in trello_boards:
             board_already_exists = Board.objects.filter(uuid=trello_board.id).exists()
             if not board_already_exists:
-                board_name = trello_board.name.decode("utf-8")
+                board_name = trello_board.name
                 board = Board(uuid=trello_board.id, name=board_name, last_activity_date=trello_board.date_last_activity,
                               creator=self)
                 board.save()
@@ -130,7 +130,7 @@ class Member(models.Model):
                 trello_lists = trello_board.all_lists()
                 _lists = []
                 for trello_list in trello_lists:
-                    list_name = trello_list.name.decode("utf-8")
+                    list_name = trello_list.name
                     _list = List(uuid=trello_list.id, name=list_name, board=board)
                     if trello_list.closed:
                         _list.type = "closed"
