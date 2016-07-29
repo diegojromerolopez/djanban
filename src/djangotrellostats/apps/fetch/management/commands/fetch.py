@@ -1,11 +1,14 @@
-from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
-from multiprocessing import Process
+import os
+import sys
+import time
+import traceback
+
+from django.conf import settings
+from django.contrib.auth.models import Group
+from django.core.mail import EmailMultiAlternatives
+from django.core.management.base import BaseCommand
 
 from djangotrellostats.apps.members.models import Member
-import time
-import os
-from django.utils import timezone
 
 
 class Command(BaseCommand):
@@ -65,15 +68,35 @@ class Command(BaseCommand):
 
         if not self.start():
             self.stdout.write(self.style.ERROR("Unable to fetch"))
+            self.warn_administrators(subject=u"Unable to fetch boards", message=u"Unable to fetch boards. Is the lock file present?")
             return False
 
-        for board in member.created_boards.all():
-            if board.is_ready():
-                self.stdout.write(self.style.SUCCESS(u"Board {0} is ready".format(board.name)))
-                board.fetch(debug=False)
-            else:
-                self.stdout.write(self.style.ERROR(u"Board {0} is not ready".format(board.name)))
+        try:
+            # For each board that is ready, fetch it
+            for board in member.created_boards.all():
+                if board.is_ready():
+                    self.stdout.write(self.style.SUCCESS(u"Board {0} is ready".format(board.name)))
+                    board.fetch(debug=False)
+                    self.stdout.write(self.style.SUCCESS(u"Board {0} fetched successfully".format(board.name)))
+                else:
+                    self.stdout.write(self.style.ERROR(u"Board {0} is not ready".format(board.name)))
+            self.stdout.write(self.style.SUCCESS(u"All boards fetched successfully {0}".format(self.elapsed_time())))
 
-        self.end()
+        # If there is any exception, warn the administrators
+        except Exception as e:
+            self.warn_administrators(subject=u"Error when fetching boards", message=traceback.format_exc())
+            self.stdout.write(self.style.ERROR(u"Error when fetching boards"))
 
-        self.stdout.write(self.style.SUCCESS(u"All boards fetched successfully {0}".format(self.elapsed_time())))
+        # Always delete the lock file
+        finally:
+            self.end()
+
+    # Warn administrators of an error
+    def warn_administrators(self, subject, message):
+        email_subject = u"[DjangoTrelloStats] [Warning] {0}".format(subject)
+
+        administrator_group = Group.objects.get(name=settings.ADMINISTRATOR_GROUP)
+        administrator_users = administrator_group.user_set.all()
+        for administrator_user in administrator_users:
+            email_message = EmailMultiAlternatives(email_subject, message, settings.EMAIL_HOST_USER, [administrator_user.email])
+            email_message.send()
