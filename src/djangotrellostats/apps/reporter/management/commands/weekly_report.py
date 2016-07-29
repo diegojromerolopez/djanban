@@ -1,95 +1,45 @@
 import time
 
-from django.conf import settings
-from django.contrib.auth.models import Group
-from django.core.management.base import BaseCommand
-from django.utils import timezone
-from django.shortcuts import render
-from django.core.mail import send_mail
-from django.template.loader import get_template
+from isoweek import Week
 
-from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.dev_times.models import DailySpentTime
-from djangotrellostats.apps.members.models import Member
-
-import datetime
-
+from djangotrellostats.apps.reporter.management.report_command import ReportCommand
 from djangotrellostats.apps.week import get_iso_week_of_year
-from django.core.mail import EmailMultiAlternatives
 
 
-
-class Command(BaseCommand):
+class Command(ReportCommand):
     help = 'Weekly report for administrators'
 
-    def add_arguments(self, parser):
-        now = timezone.now()
-        today = now.today()
-
-        # Named (optional) arguments
-        parser.add_argument(
-            '--date',
-            default=today.strftime("%Y-%m-%d"),
-            help='Send the weekly report of the week of this date to the administrators',
-        )
-
     def handle(self, *args, **options):
-        now = timezone.now()
-
-        # Calling this management action without parameteres assume that date is today
-        date = now.today()
-
-        if options['date']:
-            try:
-                date = datetime.datetime.strptime(options["date"], "%Y-%m-%d")
-            except ValueError:
-                self.stderr.write(self.style.ERROR(u"Date {0} format is not valid".format(options["date"])))
-                return None
-
-        week = get_iso_week_of_year(date)
-        year = date.year
+        self.date = super(Command, self).handle(*args, **options)
+        date_help_text = 'Send the weekly report to the administrators for the week this date belongs to'
 
         start = time.time()
 
-        daily_spent_times = DailySpentTime.objects.filter(week_of_year=week).order_by("date", "member")
+        week = get_iso_week_of_year(self.date)
+        year = self.date.year
 
-        # This daily report will be sent to each one of the administrators
-        administrator_group = Group.objects.get(name=settings.ADMINISTRATOR_GROUP)
-        administrator_users = administrator_group.user_set.all()
-        for administrator_user in administrator_users:
-            Command.send_weekly_report(week, year, administrator_user, daily_spent_times)
-            self.stdout.write(self.style.SUCCESS(u"Weekly report sent to {0}".format(administrator_user.email)))
+        week_start_date = Week(year, week).monday()
+        week_end_date = Week(year, week).friday()
+
+        daily_spent_times = DailySpentTime.objects.filter(date__gte=week_start_date, date__lte=week_end_date).\
+            order_by("date", "member")
+
+        subject = "[DjangoTrelloStats][Reports] Weekly report of {0}/W{1}".format(year, week)
+        txt_template_path = 'reporter/emails/weekly_report.txt'
+        html_template_path = 'reporter/emails/weekly_report.html'
+        csv_file_name = 'spent_times-for-month-{0}-W{1}.csv'.format(year, week)
+
+        administrator_users = self.send_reports(daily_spent_times, subject,
+                                                txt_template_path, html_template_path, csv_file_name)
+        self.stdout.write(
+            self.style.SUCCESS(u"Weekly reports sent to {0} administrators".format(administrator_users.count())))
 
         end = time.time()
-        elapsed_time = end-start
+        elapsed_time = end - start
 
         self.stdout.write(
-            self.style.SUCCESS(u"Weekly reports for week {0}W-{1} sent successfully to {2} in {3} s".format(
-                week, year, administrator_users.count(), elapsed_time)
+            self.style.SUCCESS(u"Weekly reports for week {0}/W{1} sent successfully to {2} in {3} s".format(
+                year, week, administrator_users.count(), elapsed_time)
             )
         )
-
-    # Send a weekly report to one administrator user
-    @staticmethod
-    def send_weekly_report(week, year, administrator_user, daily_spent_times):
-
-        replacements = {
-            "week": week,
-            "year": year,
-            "administrator": administrator_user,
-            "boards": Board.objects.all(),
-            "developer_members": Member.objects.filter(is_developer=True, on_holidays=False).order_by("trello_username"),
-            "daily_spent_times": daily_spent_times,
-        }
-
-        txt_message = get_template('reporter/emails/weekly_report.txt').render(replacements)
-        html_message = get_template('reporter/emails/weekly_report.html').render(replacements)
-
-        csv_report = get_template('daily_spent_times/csv.txt').render({"spent_times": daily_spent_times})
-
-        subject = "[DjangoTrelloStats][Reports] Weekly report of {0}W-{1}".format(week, year)
-
-        message = EmailMultiAlternatives(subject, txt_message, settings.EMAIL_HOST_USER, [administrator_user.email])
-        message.attach_alternative(html_message, "text/html")
-        message.attach('spent_times-for-week-{0}W-{1}.csv'.format(week, year), csv_report, 'text/csv')
-        message.send()

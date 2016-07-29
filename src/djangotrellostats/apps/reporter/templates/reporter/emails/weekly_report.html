@@ -9,7 +9,7 @@
     <body>
         <div>
             <div>
-                <h1>Spent times in week {{week}}W-{{year}} by developer</h1>
+                <h1>Spent times in week {{year}}-W{{week}} by developer</h1>
                 {% for member in developer_members %}
                     <p>
                         <span><strong>{{member.trello_username}}</strong></span>
@@ -19,7 +19,7 @@
             </div>
 
             <div>
-                <h1>Spent times in week {{week}}W-{{year}} by board</h1>
+                <h1>Spent times in week {{year}}-W{{week}} by board</h1>
                 {% for board in boards %}
                     {% if board.is_fetched %}
                         <div>
@@ -42,7 +42,7 @@
             </div>
 
             <div>
-                <h1>Spent times in week {{week}}W-{{year}}</h1>
+                <h1>Spent times in week {{year}}-W{{week}}</h1>
                 <table>
                     <tr>
                         <td>Week day</td>
