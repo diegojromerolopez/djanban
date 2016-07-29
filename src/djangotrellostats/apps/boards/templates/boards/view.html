@@ -66,6 +66,13 @@
 
 {% block content %}
     {% if board.is_ready and board.is_fetched %}
+        <h1>{{board.name}}</h1>
+
+        {% if member.is_developer %}
+            {% include "members/components/tasks_in_development_board.html" %}
+        {% endif %}
+
+        <h2>Charts</h2>
         <div>
 
             <div class="row">

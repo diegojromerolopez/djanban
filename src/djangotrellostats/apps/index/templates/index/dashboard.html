@@ -7,7 +7,7 @@
 </div>
 
 {% if member.is_developer %}
-        {% include "members/components/tasks_under_development.html" %}
+    {% include "members/components/tasks_in_development_boards.html" %}
 {% endif %}
 
 {% if  boards|length > 0 %}

@@ -43,7 +43,7 @@ def view(request, board_id):
     now = timezone.now()
     year = now.year
     week = DailySpentTime.get_iso_week_of_year(now)
-    replacements = {"board": board, "week_of_year": "{0}W{1}".format(year, week)}
+    replacements = {"board": board, "week_of_year": "{0}W{1}".format(year, week), "member": member}
     return render(request, "boards/view.html", replacements)
 
 

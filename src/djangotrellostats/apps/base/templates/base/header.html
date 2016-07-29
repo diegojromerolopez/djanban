@@ -25,6 +25,15 @@
                         <span class="fa fa-users"></span> Members
                     </a>
                 </li>
+                {% if request.user.member.is_developer %}
+                    <li role="presentation">
+                        {% with num_cards_in_development=request.user.member.get_current_development_cards|length %}
+                            <a href="{% url 'index' %}" title="You have {{num_cards_in_development}} cards in development. See them in index">
+                                <span class="fa fa-clone"></span> {{num_cards_in_development}}
+                            </a>
+                        {% endwith %}
+                    </li>
+                {% endif %}
                 <li role="presentation">
                     <a href="{% url 'members:logout' %}" title="User logout">Logout</a>
                 </li>
