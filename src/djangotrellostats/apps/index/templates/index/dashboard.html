@@ -6,7 +6,12 @@
     {% endif %}
 </div>
 
+{% if member.is_developer %}
+        {% include "members/components/tasks_under_development.html" %}
+{% endif %}
+
 {% if  boards|length > 0 %}
+    <h2>Charts</h2>
     {% if developers|length > 0 %}
         <div class="row">
             <div class="col-md-8 center-block">

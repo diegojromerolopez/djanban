@@ -233,10 +233,17 @@ class Board(models.Model):
             for card_label in card_labels:
                 card.labels.add(card_label)
 
-            # Member reports
+            # Associate members to this card
+            members = self.members.filter(uuid__in=card.member_uuids)
+            for member in members:
+                card.members.add(member)
+
+
             trello_card_member_uuids = card.member_uuids
             num_trello_card_members = len(trello_card_member_uuids)
             for trello_member_uuid in trello_card_member_uuids:
+
+                # Member reports
                 member_report = member_report_dict[trello_member_uuid]
 
                 # Increment the number of cards of the member report
@@ -411,6 +418,8 @@ class Card(ImmutableModel):
     lead_time = models.DecimalField(verbose_name=u"Cycle time", decimal_places=4, max_digits=12, default=None,
                                     null=True)
     labels = models.ManyToManyField("boards.Label", related_name="cards")
+    members = models.ManyToManyField("members.Member", related_name="cards")
+
 
     @staticmethod
     def factory_from_trello_card(trello_card, board):

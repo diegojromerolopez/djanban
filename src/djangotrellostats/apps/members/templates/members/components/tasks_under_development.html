@@ -1,0 +1,38 @@
+{% with development_cards=member.get_current_development_cards %}
+    {% with num_development_cards=development_cards|length %}
+        <h2>Your tasks</h2>
+        <div>
+            {% if num_development_cards == 0 %}
+                You are not working in anything at the moment.
+            {% else %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-{% if num_development_cards > 2 %}danger{% else %}warning{% endif %}">
+                              <div class="panel-heading">Tasks in development</div>
+                              <div class="panel-body">
+                                You are working in <strong>{{num_development_cards}}</strong> tasks.
+                                  {% if num_development_cards > 2 %}
+                                    You are <strong>multitasking too much</strong>. Try to end your tasks before you start anything else.
+                                  {% else %}
+                                    <strong>Congratulations</strong>. You have a good equilibrium and are not multitasking. Keep the good work!
+                                  {% endif %}
+                              </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    {% for card in development_cards %}
+                        <div class="col-md-3">
+                            <div class="panel panel-info">
+                              <div class="panel-heading">{{card.board.name}}</div>
+                              <div class="panel-body">
+                                {{card.name}}. <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}}" class="btn btn-primary">View</a>
+                              </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endwith %}
+{% endwith %}

@@ -68,6 +68,14 @@ class Member(models.Model):
     def is_initialized(self):
         return self.api_key and self.api_secret and self.token and self.token_secret
 
+    # Returns cards that belongs to this member and are currently under development
+    def get_current_development_cards(self, board=None):
+        development_cards = self.cards.filter(is_closed=False, list__type="development")
+        # Filtering development cards by board
+        if board:
+            return development_cards.filter(board=board)
+        return development_cards
+
     # Returns the number of hours this member has develop today
     def get_today_spent_time(self, board=None):
         # Note that only if the member is a developer can his/her spent time computed
