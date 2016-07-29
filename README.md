@@ -164,7 +164,15 @@ python src/manage.py reporter daily_development_report [date of the report, by d
 Send a weekly report with the spent times to each administrator user:
 
 ```python
-python src/manage.py reporter weekly_report [date whose week we want to get the report, by default this week]
+python src/manage.py reporter weekly_report [date whose week we want to get the report, by default current week]
+```
+
+## Monthly report
+
+Send a monthly report with the spent times to each administrator user:
+
+```python
+python src/manage.py reporter monthly_report [date whose month we want to get the report, by default current month]
 ```
 
 
