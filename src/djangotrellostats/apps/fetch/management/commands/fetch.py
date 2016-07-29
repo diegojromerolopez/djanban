@@ -71,6 +71,7 @@ class Command(BaseCommand):
             self.warn_administrators(subject=u"Unable to fetch boards", message=u"Unable to fetch boards. Is the lock file present?")
             return False
 
+        fetch_ok = True
         try:
             # For each board that is ready, fetch it
             for board in member.created_boards.all():
@@ -80,16 +81,19 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS(u"Board {0} fetched successfully".format(board.name)))
                 else:
                     self.stdout.write(self.style.ERROR(u"Board {0} is not ready".format(board.name)))
-            self.stdout.write(self.style.SUCCESS(u"All boards fetched successfully {0}".format(self.elapsed_time())))
 
         # If there is any exception, warn the administrators
         except Exception as e:
+            fetch_ok = False
             self.warn_administrators(subject=u"Error when fetching boards", message=traceback.format_exc())
             self.stdout.write(self.style.ERROR(u"Error when fetching boards"))
 
         # Always delete the lock file
         finally:
             self.end()
+
+        if fetch_ok:
+            self.stdout.write(self.style.SUCCESS(u"All boards fetched successfully {0}".format(self.elapsed_time())))
 
     # Warn administrators of an error
     def warn_administrators(self, subject, message):
