@@ -136,12 +136,12 @@ class EditProfileForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(EditProfileForm, self).__init__(*args, **kwargs)
 
-        self.fields["first_name"] = forms.CharField(label=u"First name", max_length=64, required=False)
-        self.fields["last_name"] = forms.CharField(label=u"Last name", max_length=64, required=False)
-        self.fields["email"] = forms.EmailField(label=u"Email and username", max_length=64, required=False, disabled=True)
-
         user = self.instance.user
         if user:
+            self.fields["first_name"] = forms.CharField(label=u"First name", max_length=64, required=False)
+            self.fields["last_name"] = forms.CharField(label=u"Last name", max_length=64, required=False)
+            self.fields["email"] = forms.EmailField(label=u"Email and username", max_length=64, required=False, disabled=True)
+            # Default values
             self.initial["first_name"] = user.first_name
             self.initial["last_name"] = user.last_name
             self.initial["email"] = user.email
