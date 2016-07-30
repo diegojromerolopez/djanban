@@ -8,6 +8,7 @@ import time
 from collections import namedtuple
 from datetime import datetime
 from datetime import timedelta
+import dateutil.parser
 from io import open
 
 import numpy
@@ -39,6 +40,7 @@ class ImmutableModel(models.Model):
 # Task board
 class Board(models.Model):
     FETCH_LOCK_FILE_PATH = "/tmp/django-trello-stats-fetch-board-{0}-lock.txt"
+    DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 
     creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_boards")
     name = models.CharField(max_length=128, verbose_name=u"Name of the board")
@@ -406,14 +408,15 @@ class Board(models.Model):
     def _fetch_trello_actions_by_card(self, action_filter, limit=1000):
         # Fetch as long as there is a result
         actions = []
-        retry = True
+        must_retry = True
         since = None
-        while retry:
+        while must_retry:
             actions += self.trello_board.fetch_actions(action_filter, limit, since)
-            retry = len(actions) == limit
-            # Dangerous assumption: we are assuming the cards are sorted by date (in descendant order) and thus,
-            # we can get the greatest date to ask for more actions since that date.
-            since = actions[0]["date"]
+            must_retry = len(actions) == limit
+            if must_retry:
+                # We get the maximum date of these actions and use it to paginate,
+                # asking Trello to give us the actions since that date
+                since = Board._get_since_str_from_actions(actions)
 
         # Group actions by card
         actions_by_card = {}
@@ -424,6 +427,29 @@ class Board(models.Model):
             actions_by_card[card_uuid].append(action)
         # Return the actions grouped by card
         return actions_by_card
+
+    # Get the since parameter based on the actions we've got. That is, get the max date of the actions and prepare
+    # the since parameter adding one microsecond to that date
+    @staticmethod
+    def _get_since_str_from_actions(actions):
+        # Get max date and parse it from ISO format
+        max_date_str = Board._get_max_date_from_actions(actions)
+        max_date = dateutil.parser.parse(max_date_str)
+        # Get next possible date (max_date + 1 millisecond)
+        since_date = max_date + timedelta(microseconds=1000)
+        since_date_str = since_date.strftime(Board.DATE_FORMAT)[:-3]+"Z"
+        return since_date_str
+
+    # Get the max date of a list of actions
+    # We are not sure about the actions order, so each time we make a fetch of the actions of this board, we have to get
+    # the max date to make other fetch since that max date
+    @staticmethod
+    def _get_max_date_from_actions(actions):
+        max_date = None
+        for action in actions:
+            if max_date is None or max_date < action["date"]:
+                max_date = action["date"]
+        return max_date
 
 
 # Card of the task board
