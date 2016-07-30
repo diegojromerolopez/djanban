@@ -1,11 +1,14 @@
 from __future__ import unicode_literals
 
 import math
+import os
 import re
 import threading
+import time
 from collections import namedtuple
 from datetime import datetime
 from datetime import timedelta
+from io import open
 
 import numpy
 import pytz
@@ -35,6 +38,8 @@ class ImmutableModel(models.Model):
 
 # Task board
 class Board(models.Model):
+    FETCH_LOCK_FILE_PATH = "/tmp/django-trello-stats-fetch-board-{0}-lock.txt"
+
     creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_boards")
     name = models.CharField(max_length=128, verbose_name=u"Name of the board")
     comments = models.TextField(max_length=128, verbose_name=u"Comments for this board", default="", blank=True)
@@ -124,14 +129,49 @@ class Board(models.Model):
 
     # Fetch data of this board
     def fetch(self, debug=False):
-        self.trello_board = self._get_trello_board()
-        cards = self._fetch_cards(debug=debug)
-        with transaction.atomic():
-            self._truncate()
-            self._fetch_labels()
-            self._create_cards(cards)
-            self.last_fetch_datetime = timezone.now()
-            self.save()
+        if not self._start_fetch():
+            return False
+
+        try:
+            self.trello_board = self._get_trello_board()
+            cards = self._fetch_cards(debug=debug)
+            with transaction.atomic():
+                self._truncate()
+                self._fetch_labels()
+                self._create_cards(cards)
+                self.last_fetch_datetime = timezone.now()
+                self.save()
+
+        except Exception as e:
+            raise
+
+        finally:
+            self._end_fetch()
+
+    # Prepare the fetch process
+    def _start_fetch(self):
+        self.fetch_start_time = time.time()
+        fetch_lock_file_path = Board.FETCH_LOCK_FILE_PATH.format(self.id)
+        # Check if lock file exists. If it exists, warn the fetch method
+        if os.path.isfile(fetch_lock_file_path):
+            return False
+
+        # Creates a new lock file
+        with open(fetch_lock_file_path, 'w', encoding="utf-8") as lock_file:
+            lock_file.write("Fetching data for board {0}".format(self.name))
+
+        return True
+
+    # Ends the fetch process
+    def _end_fetch(self):
+        self.fetch_end_time = time.time()
+        fetch_lock_file_path = Board.FETCH_LOCK_FILE_PATH.format(self.id)
+        # Lock file must exist
+        if not os.path.isfile(fetch_lock_file_path):
+            return False
+
+        # Deleting the lock file
+        os.remove(fetch_lock_file_path)
 
     # Delete all children entities but lists and workflows
     def _truncate(self):

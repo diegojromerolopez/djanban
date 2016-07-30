@@ -1,5 +1,8 @@
+from __future__ import unicode_literals
+
 import os
 import sys
+from io import open
 import time
 import traceback
 
@@ -12,9 +15,9 @@ from djangotrellostats.apps.members.models import Member
 
 
 class Command(BaseCommand):
-    help = 'Fetch board data'
+    help = u'Fetch board data'
 
-    FETCH_LOCK_FILE_PATH = "/tmp/django-trello-stats-fetch-lock.txt"
+    FETCH_LOCK_FILE_PATH = u"/tmp/django-trello-stats-fetch-lock.txt"
 
     def __init__(self, stdout=None, stderr=None, no_color=False):
         super(Command, self).__init__(stdout=None, stderr=None, no_color=False)
@@ -33,9 +36,9 @@ class Command(BaseCommand):
 
         # Creates a new lock file
         self.stdout.write(self.style.SUCCESS(u"Lock does not exist. Creating..."))
-        lock_file = open(Command.FETCH_LOCK_FILE_PATH, 'w')
-        lock_file.write("Fetching data...")
-        lock_file.close()
+        with open(Command.FETCH_LOCK_FILE_PATH, 'w', encoding="utf-8") as lock_file:
+            lock_file.write(u"Fetching data for boards")
+
         self.stdout.write(self.style.SUCCESS(u"Lock file created"))
         return True
 
