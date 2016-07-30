@@ -1,6 +1,6 @@
 {% extends "boards/view.html" %}
 
-{% block page_title %}Fetch data from {{Board.name}}{% endblock %}
+{% block page_title %}Fetch data from {{board.name}}{% endblock %}
 
 {% block content %}
 
@@ -9,7 +9,17 @@
         <div class="panel panel-danger ">
           <div class="panel-heading">Danger! This action cannot be undone</div>
           <div class="panel-body">
-            This board data will be deleted and fetched again. Are you sure?
+              <p>
+                {{board.name}}'s data will be deleted and fetched again.
+              </p>
+              {% if board.last_fetch_datetime %}
+                  <p>
+                    <strong>Last fetch</strong> was on {{board.last_fetch_datetime|date:"Y-m-d H:i"}} (<strong>{{board.last_fetch_datetime|timesince}} ago</strong>)
+                  </p>
+              {% endif %}
+              <p>
+                Are you sure?
+              </p>
 
               <form action="{% url 'boards:fetch' board.id %}" method="post">
                 <input type="hidden" name="board_id" value="{{board.id}}"/>
