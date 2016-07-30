@@ -411,12 +411,13 @@ class Board(models.Model):
         must_retry = True
         since = None
         while must_retry:
-            actions += self.trello_board.fetch_actions(action_filter, limit, since)
-            must_retry = len(actions) == limit
+            actions_i = self.trello_board.fetch_actions(action_filter, limit, since)
+            actions += actions_i
+            must_retry = len(actions_i) == limit
             if must_retry:
                 # We get the maximum date of these actions and use it to paginate,
                 # asking Trello to give us the actions since that date
-                since = Board._get_since_str_from_actions(actions)
+                since = Board._get_since_str_from_actions(actions_i)
 
         # Group actions by card
         actions_by_card = {}
