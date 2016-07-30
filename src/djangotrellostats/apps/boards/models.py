@@ -420,7 +420,6 @@ class Card(ImmutableModel):
     labels = models.ManyToManyField("boards.Label", related_name="cards")
     members = models.ManyToManyField("members.Member", related_name="cards")
 
-
     @staticmethod
     def factory_from_trello_card(trello_card, board):
         list_ = board.lists.get(uuid=trello_card.idList)
