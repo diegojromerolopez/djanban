@@ -12,12 +12,12 @@
             {% if user and user.is_authenticated %}
                 <li role="presentation" {% if url_name == "view_hourly_rates" %}class="active"{% endif %}>
                    <a href="{% url 'hourly_rates:view_hourly_rates' %}" title="View available hourly rates">
-                       <span class="fa fa-usd"></span> View hourly rates
+                       <span class="fa fa-usd"></span> Hourly rates
                    </a>
                 </li>
                 <li role="presentation" {% if url_name == "view_boards" %}class="active"{% endif %}>
                    <a href="{% url 'boards:view_boards' %}" title="View my boards">
-                       <span class="fa fa-tasks"></span> View my boards
+                       <span class="fa fa-tasks"></span> My boards
                    </a>
                 </li>
                 <li role="presentation" {% if url_name == "view_members" %}class="active"{% endif %}>

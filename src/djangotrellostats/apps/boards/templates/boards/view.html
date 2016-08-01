@@ -12,6 +12,11 @@
 
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
+                    <li {% if url_name == "edit" %}class="active"{% endif %}>
+                        <a href="{% url 'boards:edit' board.id %}">
+                            <span class="fa fa-pencil"></span> Edit
+                        </a>
+                    </li>
                     <li {% if url_name == "view_lists" %}class="active"{% endif %}>
                         <a href="{% url 'boards:view_lists' board.id %}">
                             <span class="fa fa-list"></span> View lists
@@ -19,21 +24,21 @@
                     </li>
                     {% if board.is_ready and board.is_fetched %}
                         <li {% if url_name == "view_workflows" %}class="active"{% endif %}>
-                            <a href="{% url 'boards:workflows:view_list' board.id %}">View workflows</a>
+                            <a href="{% url 'boards:workflows:view_list' board.id %}">Workflows</a>
                         </li>
                         <li {% if url_name == "view_card_report" %}class="active"{% endif %}>
                             <a href="{% url 'boards:view_card_report' board.id %}">
-                                <span class="fa fa-sticky-note-o"></span> View cards
+                                <span class="fa fa-sticky-note-o"></span> Cards
                             </a>
                         </li>
                         <li {% if url_name == "view_label_report" %}class="active"{% endif %}>
                             <a href="{% url 'boards:view_label_report' board.id %}">
-                                <span class="fa fa-tags"></span> View labels
+                                <span class="fa fa-tags"></span> Labels
                             </a>
                         </li>
                         <li {% if url_name == "view_member_report" %}class="active"{% endif %}>
                             <a href="{% url 'boards:view_member_report' board.id %}">
-                                <span class="fa fa-users"></span> View members
+                                <span class="fa fa-users"></span> Members
                             </a>
                         </li>
                         <li {% if url_name == "view_daily_spent_times" %}class="active"{% endif %}>
@@ -46,11 +51,13 @@
                                 <a href="{% url 'boards:view_workflow_card_report' board.id workflow.id %}">View {{workflow.name}} report</a>
                             </li>
                         {% endfor %}
-                        <li {% if url_name == "fetch" %}class="active"{% endif %}>
-                            <a href="{% url 'boards:fetch' board.id %}">
-                                <span class="fa fa-download"></span> Fetch
-                            </a>
-                        </li>
+                        {% if board.has_to_be_fetched %}
+                            <li {% if url_name == "fetch" %}class="active"{% endif %}>
+                                <a href="{% url 'boards:fetch' board.id %}">
+                                    <span class="fa fa-download"></span> Fetch
+                                </a>
+                            </li>
+                        {%  endif %}
                         <li {% if url_name == "delete" %}class="active"{% endif %}>
                             <a href="{% url 'boards:delete' board.id %}">
                                 <span class="fa fa-trash"></span>  Delete
@@ -70,7 +77,12 @@
 
         {% if board.last_fetch_datetime %}
             <div>
-                Last fetched on {{board.last_fetch_datetime|date:"Y-m-d H:i"}} ({{board.last_fetch_datetime|timesince}} ago)
+                <p>
+                Last fetched on {{board.last_fetch_datetime|date:"Y-m-d H:i"}} ({{board.last_fetch_datetime|timesince}} ago).
+                </p>
+                <p>
+                 {% if not board.has_to_be_fetched %}This board is not goind to be fetched anymore unless you edit <a href="{% url 'boards:edit' board.id %}">its preferences</a>{% endif %}
+                </p>
             </div>
         {% endif %}
 

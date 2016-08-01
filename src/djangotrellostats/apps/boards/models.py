@@ -47,11 +47,14 @@ class Board(models.Model):
     comments = models.TextField(max_length=128, verbose_name=u"Comments for this board", default="", blank=True)
     uuid = models.CharField(max_length=128, verbose_name=u"Trello id of the board", unique=True)
     last_activity_date = models.DateTimeField(verbose_name=u"Last activity date", default=None, null=True)
+    has_to_be_fetched = models.BooleanField(verbose_name=u"Has to be this board fetched?",
+                                            help_text="Select this option if you want to fetch data for this board.",
+                                            default=True)
     last_fetch_datetime = models.DateTimeField(verbose_name=u"Last fetch datetime", default=None, null=True)
 
     members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="boards")
     hourly_rates = models.ManyToManyField("hourly_rates.HourlyRate", verbose_name=u"Hourly rates",
-                                          related_name="boards")
+                                          related_name="boards", blank=True)
 
     # Returns the date of the last fetch in an ISO format
     def get_human_fetch_datetime(self):

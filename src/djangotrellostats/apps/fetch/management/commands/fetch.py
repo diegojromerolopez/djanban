@@ -77,7 +77,7 @@ class Command(BaseCommand):
         fetch_ok = True
         try:
             # For each board that is ready, fetch it
-            for board in member.created_boards.all():
+            for board in member.created_boards.filter(has_to_be_fetched=True):
                 if board.is_ready():
                     self.stdout.write(self.style.SUCCESS(u"Board {0} is ready".format(board.name)))
                     board.fetch(debug=False)

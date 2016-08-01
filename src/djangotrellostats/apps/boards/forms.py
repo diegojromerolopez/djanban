@@ -9,11 +9,12 @@ from djangotrellostats.apps.boards.models import Board
 class EditBoardForm(models.ModelForm):
     class Meta:
         model = Board
-        fields = ["comments", "hourly_rates"]
+        fields = ["has_to_be_fetched", "comments", "hourly_rates"]
 
     def __init__(self, *args, **kwargs):
         super(EditBoardForm, self).__init__(*args, **kwargs)
-        self.fields["hourly_rates"].help_text = u"Please, select the hourly rates this board uses. System does not check if there is overlapping, so take care."
+        self.fields["hourly_rates"].help_text = u"Please, select the hourly rates this board uses. System does not " \
+                                                u"check if there is overlapping, so take care."
 
     def clean(self):
         cleaned_data = super(EditBoardForm, self).clean()
