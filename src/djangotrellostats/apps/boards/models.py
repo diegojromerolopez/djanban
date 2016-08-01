@@ -215,7 +215,6 @@ class Board(models.Model):
                 must_retry = True
                 while must_retry:
                     try:
-                        my_trello_card.fetch(eager=False)
                         my_trello_card.actions = trello_movements_by_card.get(my_trello_card.id, [])
                         my_trello_card._comments = trello_comments_by_card.get(my_trello_card.id, [])
                         card_i = self._fetch_card(my_trello_card, lists, done_list, trello_lead_dict, trello_cycle_dict)
