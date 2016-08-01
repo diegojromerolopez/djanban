@@ -194,7 +194,7 @@ class Board(models.Model):
             label.save()
 
     # Return the Trello Cards in a multithreaded way
-    def _fetch_cards(self, num_threads=10, debug=False):
+    def _fetch_cards(self, num_threads=1, debug=False):
         trello_cards = self.trello_board.all_cards()
 
         trello_movements_by_card = self._fetch_trello_card_movements_by_card()
