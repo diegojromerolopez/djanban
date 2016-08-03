@@ -11,6 +11,7 @@ from django.contrib.auth.models import Group
 from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand
 
+from djangotrellostats.apps.fetch.fetchers.trello import BoardFetcher
 from djangotrellostats.apps.members.models import Member
 
 
@@ -80,7 +81,8 @@ class Command(BaseCommand):
             for board in member.created_boards.filter(has_to_be_fetched=True):
                 if board.is_ready():
                     self.stdout.write(self.style.SUCCESS(u"Board {0} is ready".format(board.name)))
-                    board.fetch(debug=False)
+                    board_fetcher = BoardFetcher(board)
+                    board_fetcher.fetch(debug=False)
                     self.stdout.write(self.style.SUCCESS(u"Board {0} fetched successfully".format(board.name)))
                 else:
                     self.stdout.write(self.style.ERROR(u"Board {0} is not ready".format(board.name)))

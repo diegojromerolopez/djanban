@@ -7,7 +7,8 @@ from django.db.models import Sum, Count
 from django.http.response import Http404, HttpResponse
 from django.shortcuts import render
 
-from djangotrellostats.apps.boards.models import DailySpentTime, Board
+from djangotrellostats.apps.boards.models import Board
+from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 from django.template import loader, Context
 import calendar
