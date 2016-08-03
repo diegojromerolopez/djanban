@@ -278,8 +278,10 @@ class BoardFetcher(Fetcher):
         return max_date
 
 
+# Fetch a card
 class CardFetcher(object):
 
+    # Create the card fetcher
     def __init__(self, board_fetcher, trello_cards, trello_movements_by_card, trello_comments_by_card, debug=False):
         self.board_fetcher = board_fetcher
         self.board = board_fetcher.board
@@ -293,6 +295,7 @@ class CardFetcher(object):
         self.debug = debug
         self.cards = []
 
+    # Fech and create a card
     def fetch(self):
 
         card_dict = {}
@@ -303,7 +306,7 @@ class CardFetcher(object):
             must_retry = True
             while must_retry:
                 try:
-                    card_i = self.create(trello_card)
+                    card_i = self._create(trello_card)
                     if self.debug:
                         print(u"{0} done".format(card_i.uuid))
                     must_retry = False
@@ -314,18 +317,22 @@ class CardFetcher(object):
         self.cards = card_dict.values()
         return self.cards
 
-    def create(self, trello_card):
+    # Create a card from a Trello Card
+    def _create(self, trello_card):
         card = self._factory(trello_card)
         card.save()
+        # Creation of the daily spent times
         CardFetcher._create_daily_spent_times(card)
         return card
 
+    # Creation of the daily spent times
     @staticmethod
     def _create_daily_spent_times(card):
         for daily_spent_time in card.trello_card.daily_spent_times:
             daily_spent_time.card = card
             DailySpentTime.add_daily_spent_time(daily_spent_time)
 
+    # Constructs a Card from a Trello Card
     def _factory(self, trello_card):
         trello_card.actions = self.trello_movements_by_card.get(trello_card.id, [])
         trello_card._comments = self.trello_comments_by_card.get(trello_card.id, [])
@@ -343,6 +350,7 @@ class CardFetcher(object):
 
         return card
 
+    # Card creation
     def _factory_from_trello_card(self, trello_card):
         list_ = self.board.lists.get(uuid=trello_card.idList)
 
@@ -536,12 +544,15 @@ class CardFetcher(object):
         return trello_card.comment_summary
 
 
+# Label creator
 class LabelCreator(object):
 
+    # Constructs a label
     @staticmethod
     def factory(trello_label, board):
         return Label(uuid=trello_label.id, name=trello_label.name, color=trello_label.color, board=board)
 
+    # Creates a label
     @staticmethod
     def create(trello_label, board):
         label = LabelCreator.factory(trello_label, board)
