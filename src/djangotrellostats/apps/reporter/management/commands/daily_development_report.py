@@ -32,7 +32,7 @@ class Command(daily_report.Command):
 
         developers = Member.objects.filter(is_developer=True, on_holidays=False)
         for member in developers:
-            if member.daily_spent_times.filter(date=date).count() > 0 and member.user and member.user.username == "diego@intelligenia.com":
+            if member.daily_spent_times.filter(date=date).count() > 0 and member.user:
                 daily_spent_times = member.daily_spent_times.filter(date=date).order_by("date", "member")
                 Command.send_daily_development_report(date, member, daily_spent_times)
                 self.stdout.write(self.style.SUCCESS(u"Daily report sent to developer {0}".format(member.user.email)))
