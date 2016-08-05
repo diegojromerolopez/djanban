@@ -28,7 +28,7 @@ class Command(ReportCommand):
         subject = "[DjangoTrelloStats][Reports] Weekly report of {0}/W{1}".format(year, week)
         txt_template_path = 'reporter/emails/weekly_report.txt'
         html_template_path = 'reporter/emails/weekly_report.html'
-        csv_file_name = 'spent_times-for-month-{0}-W{1}.csv'.format(year, week)
+        csv_file_name = 'spent_times-for-month-{0}W{1}.csv'.format(year, week)
 
         administrator_users = self.send_reports(daily_spent_times, subject,
                                                 txt_template_path, html_template_path, csv_file_name)
