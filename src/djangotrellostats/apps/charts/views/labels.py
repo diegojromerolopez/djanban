@@ -13,7 +13,8 @@ def avg_spent_times(request, board_id=None):
         board = Board.objects.get(id=board_id)
         chart_title += u" for board {0}".format(board.name)
 
-    avg_times_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True)
+    avg_times_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
+                                          print_zeroes=False, human_readable=True)
 
     board = None
     if board_id:
@@ -42,7 +43,8 @@ def avg_estimated_times(request, board_id=None):
         board = Board.objects.get(id=board_id)
         chart_title += u" for board {0}".format(board.name)
 
-    avg_times_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True)
+    avg_times_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
+                                          print_zeroes=False, human_readable=True)
 
     board = None
     if board_id:

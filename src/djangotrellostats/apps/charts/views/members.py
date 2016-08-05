@@ -32,7 +32,8 @@ def _task_movements_by_member(request, movement_type="forward", board_id=None):
         board = Board.objects.get(id=board_id)
         chart_title += u" for board {0}".format(board.name)
 
-    member_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True)
+    member_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True, print_zeroes=False,
+                                       human_readable=True)
 
     report_filter = {}
     if board_id:
@@ -73,7 +74,7 @@ def _task_movements_by_member(request, movement_type="forward", board_id=None):
     return member_chart.render_django_response()
 
 
-# Show a chart with the
+# Show a chart with the spent time by week by member and by board
 def spent_time_by_week(request, week_of_year=None, board_id=None):
     if week_of_year is None:
         now = timezone.now()
@@ -93,7 +94,8 @@ def spent_time_by_week(request, week_of_year=None, board_id=None):
         board = Board.objects.get(id=board_id)
         chart_title += u" for board {0}".format(board.name)
 
-    spent_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True)
+    spent_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
+                                           print_zeroes=False, human_readable=True)
 
     report_filter = {"date__year": y, "week_of_year": w}
     if board_id:
@@ -109,5 +111,43 @@ def spent_time_by_week(request, week_of_year=None, board_id=None):
 
         if spent_time > 0:
             spent_time_chart.add(u"{0}'s spent time".format(member_name), spent_time)
+
+    return spent_time_chart.render_django_response()
+
+
+# Show a chart with the spent time by week by member and by board
+def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, board_id=None):
+    if member_id is None:
+        member = request.user.member
+    else:
+        member = Member.objects.get(id=member_id)
+
+    if week_of_year is None:
+        now = timezone.now()
+        today = now.date()
+        week_of_year_ = DailySpentTime.get_iso_week_of_year(today)
+        week_of_year = "{0}W{1}".format(today.year, week_of_year_)
+
+    y, w = week_of_year.split("W")
+    week = Week(int(y), int(w))
+    start_of_week = week.monday()
+    end_of_week = week.sunday()
+
+    chart_title = u"{0}'s spent time in week {1} ({2} - {3})".format(member.trello_username, week_of_year,
+                                                                     start_of_week.strftime("%Y-%m-%d"),
+                                                                     end_of_week.strftime("%Y-%m-%d"))
+    board = None
+    if board_id:
+        board = Board.objects.get(id=board_id)
+        chart_title += u" for board {0}".format(board.name)
+
+    spent_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
+                                           print_zeroes=False,
+                                           human_readable=True)
+
+    day = start_of_week
+    while day <= end_of_week:
+        spent_time_chart.add(u"{0}".format(day.strftime("%A")), member.get_spent_time(day, board))
+        day += datetime.timedelta(days=1)
 
     return spent_time_chart.render_django_response()

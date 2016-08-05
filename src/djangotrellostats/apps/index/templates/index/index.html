@@ -1,6 +1,18 @@
 {% extends "base/base.html" %}
 
+{% load staticfiles %}
+
+
 {% block page_title %}Index{% endblock %}
+
+{% block js %}
+    {{block.super}}
+    <script type="text/javascript">
+        WEEK_OF_YEAR = "{{week_of_year}}";
+        SPENT_TIME_BY_DAY_OF_THE_WEEK_CHART_URL = "{% url 'charts:spent_time_by_day_of_the_week' %}/MEMBER/WEEK_OF_YEAR/BOARD";
+    </script>
+    <script type="text/javascript" src="{% static 'js/index/spent_time_by_day_of_the_week.js' %}"></script>
+{% endblock %}
 
 {% block content %}
     {% if user and user.is_authenticated %}

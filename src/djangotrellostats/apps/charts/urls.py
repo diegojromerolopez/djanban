@@ -13,6 +13,11 @@ urlpatterns = [
     url(r'^spent_time_by_week/(?P<week_of_year>\d{4}W\d{2})/?$', members.spent_time_by_week, name="spent_time_by_week"),
     url(r'^spent_time_by_week/(?P<week_of_year>\d{4}W\d{2})/(?P<board_id>[\d]+)/?$', members.spent_time_by_week, name="spent_time_by_week"),
 
+    url(r'^spent_time_by_day_of_the_week/?$', members.spent_time_by_day_of_the_week, name="spent_time_by_day_of_the_week"),
+    url(r'^spent_time_by_day_of_the_week(/(?P<member_id>\d+))?/?$', members.spent_time_by_day_of_the_week, name="spent_time_by_day_of_the_week"),
+    url(r'^spent_time_by_day_of_the_week/(?P<member_id>\d+)/(?P<week_of_year>\d{4}W\d{2})/?$', members.spent_time_by_day_of_the_week, name="spent_time_by_day_of_the_week"),
+    url(r'^spent_time_by_day_of_the_week/(?P<member_id>\d+)/(?P<week_of_year>\d{4}W\d{2})/(?P<board_id>[\d]+)/?$', members.spent_time_by_day_of_the_week, name="spent_time_by_day_of_the_week"),
+
     url(r'^avg_lead_time/(?P<board_id>[\d]+)?$', cards.avg_lead_time, name="avg_lead_time"),
     url(r'^avg_cycle_time/(?P<board_id>[\d]+)?$', cards.avg_cycle_time, name="avg_cycle_time"),
 

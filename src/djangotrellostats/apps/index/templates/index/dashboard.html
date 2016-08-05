@@ -12,15 +12,39 @@
 
 {% if  boards|length > 0 %}
     <h2>Charts</h2>
-    {% if developers|length > 0 %}
+
         <div class="row">
-            <div class="col-md-8 center-block">
-                <img src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
-            </div>
+            {% if developers|length > 0 %}
+                <div class="col-md-6">
+                    <div>Spent time filter:</div>
+                    <div>
+                        <select id="select_member_in_spent_time_by_day_of_the_week" class="select_parameter_in_spent_time_by_day_of_the_week">
+                            {% for member_i in developers %}
+                                <option value="{{member_i.id}}" {% if member_i.id == member.id %}selected="selected"{% endif %}>{{member_i.trello_username}}</option>
+                            {% endfor %}
+                        </select>
+                        <select id="select_week_of_year_in_spent_time_by_day_of_the_week" class="select_parameter_in_spent_time_by_day_of_the_week">
+                            {% for week_i in weeks_of_year %}
+                                <option value="{{week_i}}" {% if week_i == week_of_year %}selected="selected"{% endif %}>{{week_i}}</option>
+                            {% endfor %}
+                        </select>
+                        <select id="select_board_in_spent_time_by_day_of_the_week" class="select_parameter_in_spent_time_by_day_of_the_week">
+                            <option value="">All boards</option>
+                            {% for board in boards %}
+                                <option value="{{board.id}}">{{board.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <img id="spent_time_by_day_of_the_week" src="{% url 'charts:spent_time_by_day_of_the_week' %}" alt="Spent time by {{request.user.member.trello_username}}"/>
+                </div>
+                <div class="col-md-6">
+                    <img src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
+                </div>
+            {% else %}
+                {% include "members/components/no_developers_warning.html" %}
+            {% endif %}
         </div>
-    {% else %}
-        {% include "members/components/no_developers_warning.html" %}
-    {% endif %}
+
 
     <div class="row">
         <div class="col-sm-6">

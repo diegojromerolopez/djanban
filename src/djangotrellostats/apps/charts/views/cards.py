@@ -17,7 +17,9 @@ def avg_lead_time(request, board_id=None):
         board = Board.objects.get(id=board_id)
         chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
 
-    lead_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True)
+    lead_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
+                                          print_zeroes=False,
+                                          human_readable=True)
 
     if not board_id:
         card_avg_lead_time = Card.objects.all().aggregate(Avg("lead_time"))["lead_time__avg"]
@@ -43,7 +45,9 @@ def avg_cycle_time(request, board_id=None):
         board = Board.objects.get(id=board_id)
         chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
 
-    cycle_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True)
+    cycle_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
+                                           print_zeroes=False,
+                                           human_readable=True)
 
     if not board_id:
         card_avg_cycle_time = Card.objects.all().aggregate(Avg("cycle_time"))["cycle_time__avg"]
@@ -67,7 +71,9 @@ def avg_time_by_list(request, board_id):
     board = Board.objects.get(id=board_id)
     chart_title = u"Average time all cards live in each list for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
 
-    avg_time_by_list_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True)
+    avg_time_by_list_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
+                                                 print_zeroes=False,
+                                                 human_readable=True)
 
     list_reports = ListReport.objects.filter(list__board=board)
     for list_report in list_reports:
