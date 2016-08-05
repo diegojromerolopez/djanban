@@ -1,13 +1,10 @@
 from __future__ import unicode_literals, absolute_import
 
 import math
-import os
 import re
-import time
 from collections import namedtuple
 from datetime import datetime
 from datetime import timedelta
-from io import open
 
 import dateutil.parser
 import numpy
@@ -56,39 +53,6 @@ class BoardFetcher(Fetcher):
 
         finally:
             self._end_fetch()
-
-    # Prepare the fetch process
-    def _start_fetch(self):
-        self.fetch_start_time = time.time()
-        fetch_lock_file_path = BoardFetcher.FETCH_LOCK_FILE_PATH.format(self.board.id)
-        # Check if lock file exists. If it exists, warn the fetch method
-        if os.path.isfile(fetch_lock_file_path):
-            return False
-
-        # Creates a new lock file
-        with open(fetch_lock_file_path, 'w', encoding="utf-8") as lock_file:
-            lock_file.write("Fetching data for board {0}".format(self.board.name))
-
-        return True
-
-    # Ends the fetch process
-    def _end_fetch(self):
-        self.fetch_end_time = time.time()
-        fetch_lock_file_path = BoardFetcher.FETCH_LOCK_FILE_PATH.format(self.board.id)
-        # Lock file must exist
-        if not os.path.isfile(fetch_lock_file_path):
-            return False
-
-        # Deleting the lock file
-        os.remove(fetch_lock_file_path)
-
-    # Delete all children entities but lists and workflows
-    def _truncate(self):
-        self.board.labels.all().delete()
-        self.board.cards.all().delete()
-        self.board.daily_spent_times.all().delete()
-        self.board.list_reports.all().delete()
-        self.board.member_reports.all().delete()
 
     # Fetch the labels of this board
     def _fetch_labels(self):
@@ -295,7 +259,7 @@ class CardFetcher(object):
         self.debug = debug
         self.cards = []
 
-    # Fech and create a card
+    # Fetch and create a card
     def fetch(self):
 
         card_dict = {}
