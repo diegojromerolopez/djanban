@@ -7,9 +7,10 @@ from isoweek import Week
 from django.db.models import Sum
 from django.utils import timezone
 
-from djangotrellostats.apps.boards.models import MemberReport, Board
+from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
+from djangotrellostats.apps.reports.models import MemberReport
 
 
 # Show a chart with the task forward movements by member

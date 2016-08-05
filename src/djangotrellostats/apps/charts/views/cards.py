@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-import copy
 
 import pygal
-from django.db.models import Sum, Avg
+from django.db.models import Avg
 from django.utils import timezone
 
-from djangotrellostats.apps.boards.models import MemberReport, Board, Card, ListReport
-from djangotrellostats.apps.dev_times.models import DailySpentTime
-from djangotrellostats.apps.members.models import Member
+from djangotrellostats.apps.boards.models import Board, Card
+from djangotrellostats.apps.reports.models import ListReport
 
 
 def avg_lead_time(request, board_id=None):

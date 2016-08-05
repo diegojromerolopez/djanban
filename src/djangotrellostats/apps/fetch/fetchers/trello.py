@@ -15,9 +15,10 @@ from django.utils import timezone
 from trello import ResourceUnavailable
 from trello.board import Board as TrelloBoard
 
-from djangotrellostats.apps.boards.models import Label, Card, ListReport, MemberReport
+from djangotrellostats.apps.boards.models import Label, Card
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.fetch.fetchers.base import Fetcher
+from djangotrellostats.apps.reports.models import ListReport, MemberReport
 
 
 # Fetches a board from Trello
