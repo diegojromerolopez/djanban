@@ -1,10 +1,9 @@
-from datetime import timedelta
 from django.shortcuts import render
 from django.utils import timezone
 
 from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.members.models import Member
-from djangotrellostats.apps.week import get_iso_week_of_year, get_week_of_year
+from djangotrellostats.apps.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
 
 
 def index(request):
@@ -19,9 +18,7 @@ def index(request):
     today = now.date()
     week_of_year = get_week_of_year(today)
 
-    weeks_of_year = [week_of_year]
-    for i in range(1, 53):
-        weeks_of_year.append(get_week_of_year(today-timedelta(days=7)*i))
+    weeks_of_year = get_weeks_of_year_since_one_year_ago()
 
     replacements = {
         "weeks_of_year": weeks_of_year,

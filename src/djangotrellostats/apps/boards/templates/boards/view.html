@@ -1,6 +1,17 @@
 {% extends "base/base.html" %}
 
+{% load staticfiles %}
+
 {% block page_title %}Boards of {{member.trello_username}}{% endblock %}
+
+{% block js %}
+    {{block.super}}
+    <script type="text/javascript">
+        WEEK_OF_YEAR = "{{week_of_year}}";
+        SPENT_TIME_BY_WEEK_CHART_URL = "{% url 'charts:spent_time_by_week' %}/WEEK_OF_YEAR/{{board.id}}";
+    </script>
+    <script type="text/javascript" src="{% static 'js/boards/spent_time_by_week.js' %}"></script>
+{% endblock js %}
 
 {% block content_menu %}
     {% with url_name=request.resolver_match.url_name %}
@@ -97,7 +108,14 @@
 
             <div class="row">
                 <div class="col-sm-6">
-                    <img src="{% url 'charts:spent_time_by_week' week_of_year board.id  %}" alt="Spent time by member"/>
+                    <div>
+                        <select id="select_week_of_year_in_spent_time_by_week" class="select_parameter_in_spent_time_by_week">
+                            {% for week_i in weeks_of_year %}
+                                <option value="{{week_i}}" {% if week_i == week_of_year %}selected="selected"{% endif %}>{{week_i}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' week_of_year board.id  %}" alt="Spent time by member"/>
                 </div>
                 <div class="col-sm-6">
                     <img src="{% url 'charts:avg_time_by_list' board.id %}" alt="Average time a card is in each list"/>

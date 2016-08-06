@@ -17,6 +17,7 @@ import time
 
 # Initialize boards with data fetched from trello
 from djangotrellostats.apps.fetch.fetchers.trello import BoardFetcher
+from djangotrellostats.apps.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
 
 
 @login_required
@@ -43,10 +44,9 @@ def view_list(request):
 def view(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
-    now = timezone.now()
-    year = now.year
-    week = DailySpentTime.get_iso_week_of_year(now)
-    replacements = {"board": board, "week_of_year": "{0}W{1}".format(year, week), "member": member}
+    week_of_year = get_week_of_year()
+    replacements = {"board": board, "week_of_year": week_of_year,
+                    "member": member, "weeks_of_year": get_weeks_of_year_since_one_year_ago()}
     return render(request, "boards/view.html", replacements)
 
 

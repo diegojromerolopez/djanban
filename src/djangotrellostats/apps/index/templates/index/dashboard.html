@@ -16,7 +16,6 @@
         <div class="row">
             {% if developers|length > 0 %}
                 <div class="col-md-6">
-                    <div>Spent time filter:</div>
                     <div>
                         <select id="select_member_in_spent_time_by_day_of_the_week" class="select_parameter_in_spent_time_by_day_of_the_week">
                             {% for member_i in developers %}
@@ -38,7 +37,14 @@
                     <img id="spent_time_by_day_of_the_week" src="{% url 'charts:spent_time_by_day_of_the_week' %}" alt="Spent time by {{request.user.member.trello_username}}"/>
                 </div>
                 <div class="col-md-6">
-                    <img src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
+                    <div>
+                        <select id="select_week_of_year_in_spent_time_by_week" class="select_parameter_in_spent_time_by_week">
+                            {% for week_i in weeks_of_year %}
+                                <option value="{{week_i}}" {% if week_i == week_of_year %}selected="selected"{% endif %}>{{week_i}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
                 </div>
             {% else %}
                 {% include "members/components/no_developers_warning.html" %}
