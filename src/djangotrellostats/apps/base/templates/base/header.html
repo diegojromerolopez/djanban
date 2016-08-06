@@ -7,7 +7,9 @@
     {% with url_name=request.resolver_match.url_name %}
         <ul class="nav nav-tabs">
             <li role="presentation" {% if url_name == "index" %}class="active"{% endif %}>
-                <a href="{% url 'index' %}" title="Index">Index</a>
+                <a href="{% url 'index' %}" title="Index">
+                    <span class="fa fa-home"></span>
+                </a>
             </li>
             {% if user and user.is_authenticated %}
                 <li role="presentation" {% if url_name == "view_hourly_rates" %}class="active"{% endif %}>
