@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+from datetime import timedelta
 from django.contrib.auth.models import User
 from django.db import models
 from django.db import transaction
@@ -94,8 +95,19 @@ class Member(models.Model):
         today = now.date()
         return self.get_spent_time(today, board)
 
+    # Returns the number of hours this member developed yesterday
+    def get_yesterday_spent_time(self, board=None):
+        now = timezone.now()
+        today = now.date()
+        yesterday = today - timedelta(days=1)
+        return self.get_spent_time(yesterday, board)
+
     # Returns the number of hours this member has develop on a given date
     def get_spent_time(self, date, board=None):
+        # Note that only if the member is a developer can his/her spent time computed
+        if not self.is_developer:
+            raise AssertionError(u"This member is not a developer")
+
         spent_time_on_date_filter = {"date": date}
 
         # If we pass the board, only this board spent times will be given

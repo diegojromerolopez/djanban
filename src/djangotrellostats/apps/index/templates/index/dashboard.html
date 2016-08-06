@@ -7,6 +7,27 @@
 </div>
 
 {% if member.is_developer %}
+    <div>
+        <h2>Work</h2>
+        <div class="row">
+            <div class="col-md-12">
+                {% with today_member_spent_time=member.get_today_spent_time %}
+                    Today you've worked <strong>{{today_member_spent_time|floatformat:-2}} hours</strong>.
+                    {% if today_member_spent_time >= 7 %}
+                        <strong>Congratulations. That's a great success.</strong>
+                    {% endif %}
+                {% endwith %}
+            </div>
+            <div class="col-md-12">
+                {% with yesterday_member_spent_time=member.get_yesterday_spent_time %}
+                    Yesterday you worked <strong>{{yesterday_member_spent_time|floatformat:-2}} hours</strong>.
+                    {% if yesterday_member_spent_time >= 7 %}
+                        <strong>Congratulations. That's a great success. Keep the good work on!</strong>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
     {% include "members/components/tasks_in_development_boards.html" %}
 {% endif %}
 
