@@ -26,13 +26,31 @@
                     </a>
                 </li>
                 {% if request.user.member.is_developer %}
-                    <li role="presentation">
-                        {% with num_cards_in_development=request.user.member.get_current_development_cards|length %}
-                            <a href="{% url 'index' %}" title="You have {{num_cards_in_development}} cards in development. See them in index">
-                                <span class="fa fa-clone"></span> {{num_cards_in_development}}
-                            </a>
-                        {% endwith %}
-                    </li>
+                    {% with member=request.user.member %}
+                        <li role="presentation">
+                            {% with num_cards_in_development=member.get_current_development_cards|length %}
+                                <a href="{% url 'index' %}" title="You have {{num_cards_in_development}} cards in development. See them in index">
+                                    <span class="fa fa-clone"></span> {{num_cards_in_development}}
+                                </a>
+                            {% endwith %}
+                        </li>
+                        <li role="presentation">
+                            {% with last_cards_in_development=member.get_last_development_cards %}
+                                {% if last_cards_in_development|length > 0 %}
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Last cards worked on<span class="caret"></span></a>
+                                    <ul class="dropdown-menu">
+                                        {% for last_card_in_development in last_cards_in_development %}
+                                            <li>
+                                                <a href="{{last_card_in_development.short_url}}" title="{{last_card_in_development.name}}">
+                                                    {{last_card_in_development.board.name}} - {{last_card_in_development.name|truncatechars:30}} is the last task worked on
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            {% endwith %}
+                        </li>
+                    {% endwith %}
                 {% endif %}
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Logout <span class="caret"></span></a>
