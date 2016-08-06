@@ -12,6 +12,14 @@ Statistics and charts for Trello boards, now in a Django app.
 Use [Plus for Trello](https://chrome.google.com/webstore/detail/plus-for-trello-time-trac/gjjpophepkbhejnglcmkdnncmaanojkf?hl=en)
 in your boards to allow this application to get card spent and estimated times.
 
+Don't use the feature of assigning times to other members of the team because it is not implemented yet.
+
+## Py-Trello
+
+[This library](https://github.com/sarumont/py-trello) is free software and I've collaborated with Py-Trello team to include all features required for Django-Trello-Stats.
+
+My pull request are not merged so you'll have to use the version in [my local repository](https://github.com/diegojromerolopez/py-trello) included in requirements.txt file.
+
 ## Installation
 
 Django, python-mysql and more packages specified in **requirements.txt**.
@@ -24,7 +32,7 @@ Copy this code and create a settings_local.py file in your server in **src**.
 
 Write your database credentials and your domain. Switch off debug messages.
 
-I've used MySQL as a database but you can use whatever you want.
+I've used MySQL as the DBMS but you can use whatever you want.
 
 ```python
 # -*- coding: utf-8 -*-
@@ -90,7 +98,9 @@ And of course, you have to fetch the cards.
 python src/manage.py fetch <trello_username>
 ```
 
-One good idea is set this action in a cron action and call it each day.
+One good idea is set this action in a cron action and call it each hour or half-hour.
+
+This process takes several seconds for each board (only three requests are needed per board).
 
 If you want to call this action, there is a button that allows you to fetch all the board data:
 
@@ -98,7 +108,12 @@ If you want to call this action, there is a button that allows you to fetch all 
 
 And that's all, then you have several interfaces with data about members, labels, cards and daily spent times
 
+
 # Board interfaces
+
+## Board header
+
+![Board header](resources/images/screencaptures/board-header.png)
 
 ## Board view
 
