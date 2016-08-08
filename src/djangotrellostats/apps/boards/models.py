@@ -22,16 +22,31 @@ class ImmutableModel(models.Model):
 class Board(models.Model):
 
     creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_boards")
+
     name = models.CharField(max_length=128, verbose_name=u"Name of the board")
+
     comments = models.TextField(max_length=128, verbose_name=u"Comments for this board", default="", blank=True)
+
     uuid = models.CharField(max_length=128, verbose_name=u"External id of the board", unique=True)
+
     last_activity_date = models.DateTimeField(verbose_name=u"Last activity date", default=None, null=True)
+
     has_to_be_fetched = models.BooleanField(verbose_name=u"Has to be this board fetched?",
                                             help_text="Select this option if you want to fetch data for this board.",
                                             default=True)
+
     last_fetch_datetime = models.DateTimeField(verbose_name=u"Last fetch datetime", default=None, null=True)
 
     members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="boards")
+
+    percentage_of_completion = models.DecimalField(verbose_name=u"Percentage of completion",
+                                                   decimal_places=2, max_digits=10,
+                                                   blank=True, default=None, null=True)
+
+    estimated_number_of_hours = models.PositiveIntegerField(verbose_name=u"Estimated number of hours to be completed",
+                                                            help_text=u"Number of hours in the budget",
+                                                            blank=True, default=None, null=True)
+
     hourly_rates = models.ManyToManyField("hourly_rates.HourlyRate", verbose_name=u"Hourly rates",
                                           related_name="boards", blank=True)
 
@@ -80,15 +95,37 @@ class Board(models.Model):
     def lead_time_lists(self):
         return self.lists.exclude(Q(type="ignored"))
 
+    # Informs if the project is on time or it is delayed.
+    def on_time(self):
+        if self.estimated_number_of_hours is None:
+            return True
+
+        total_spent_time = self.get_spent_time()
+        return total_spent_time < self.estimated_number_of_hours
+
+    # Compute the percentage of completion according to the number of spent hours in this project and the estimated
+    # number of hours in the budget
+    def current_percentage_of_completion(self):
+        if self.estimated_number_of_hours is None:
+            return 0
+
+        return 100.0 * self.get_spent_time() / self.estimated_number_of_hours
+
     # Returns the spent time today for this board
     def get_today_spent_time(self):
         now = timezone.now()
         today = now.date()
         return self.get_spent_time(date=today)
 
-    # Returns the spent time on a given date for this board
-    def get_spent_time(self, date):
-        spent_time = self.daily_spent_times.filter(date=date).aggregate(sum=Sum("spent_time"))["sum"]
+    # Returns the spent time.
+    # If date parameter is present, computes the spent time on a given date for this board
+    # Otherwise, computes the total spent time for this board
+    def get_spent_time(self, date=None):
+        daily_spent_times_filter = {}
+        if date:
+            daily_spent_times_filter["date"] = date
+
+        spent_time = self.daily_spent_times.filter(**daily_spent_times_filter).aggregate(sum=Sum("spent_time"))["sum"]
         if spent_time is None:
             return 0
         return spent_time
