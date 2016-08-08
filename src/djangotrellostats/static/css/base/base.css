@@ -19,7 +19,7 @@
     margin-right: auto;
     margin-top: 50px;
     overflow: hidden;
-    width: 80%;
+    width: 85%;
 }
 
 .large-form form input,
@@ -39,4 +39,8 @@
 
 #footer .row{
     margin-bottom: 10px;
+}
+
+.cursor-help {
+    cursor: help
 }

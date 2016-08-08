@@ -4,6 +4,11 @@
 
 {% block page_title %}Boards of {{member.trello_username}}{% endblock %}
 
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'css/boards/main.css' %}" rel="stylesheet" />
+{% endblock css %}
+
 {% block js %}
     {{block.super}}
     <script type="text/javascript">
@@ -18,10 +23,10 @@
     <nav class="navbar navbar-default">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="{% url 'boards:view' board.id %}">{{board.name}}</a>
+                <a class="navbar-brand" href="{% url 'boards:view' board.id %}">{{board.name|truncatechars:20}}</a>
             </div>
 
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <div class="" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li {% if url_name == "edit" %}class="active"{% endif %}>
                         <a href="{% url 'boards:edit' board.id %}">
@@ -30,7 +35,7 @@
                     </li>
                     <li {% if url_name == "view_lists" %}class="active"{% endif %}>
                         <a href="{% url 'boards:view_lists' board.id %}">
-                            <span class="fa fa-list"></span> View lists
+                            <span class="fa fa-list"></span> Lists
                         </a>
                     </li>
                     {% if board.is_ready and board.is_fetched %}
@@ -54,7 +59,7 @@
                         </li>
                         <li {% if url_name == "view_daily_spent_times" %}class="active"{% endif %}>
                             <a href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">
-                                <span class="fa fa-calendar-check-o"></span> View daily spent times
+                                <span class="fa fa-calendar-check-o"></span> Spent times
                             </a>
                         </li>
                         {% for workflow in board.workflows.all %}
@@ -76,6 +81,16 @@
                         </li>
                     {% endif %}
                 </ul>
+
+                {% if board.estimated_number_of_hours %}
+                    {% with board_spent_time=board.get_spent_time %}
+                        <div id="board_spent_time">
+                            <span class="navbar-text label {% if board_spent_time < board.estimated_number_of_hours %}label-success{% elif board_spent_time == board.estimated_number_of_hours %}label-warning{% else %}label-danger{% endif %}">
+                                <span class="cursor-help" title="Actual spent time until now">{{board_spent_time|floatformat:-2}}</span> / <span class="cursor-help" title="Maximum spent time allowed by budget">{{board.estimated_number_of_hours|floatformat:-2}}</span> hours
+                            </span>
+                        </div>
+                    {% endwith %}
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -96,6 +111,51 @@
                 </p>
             </div>
         {% endif %}
+
+        {% if board.estimated_number_of_hours %}
+
+            {% with board_spent_time=board.get_spent_time%}
+                <div class="panel panel-{% if board_spent_time == board.estimated_number_of_hours %}warning{% elif board_spent_time < board.estimated_number_of_hours %}success{% else %}danger{% endif %}">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Number of spent hours</h3>
+                    </div>
+                    <div class="panel-body">
+                        This project has spent <strong> {{board_spent_time|floatformat:-2}} hours</strong> of <strong>{{board.estimated_number_of_hours}} estimated hours</strong>.
+                        {% if board_spent_time == board.estimated_number_of_hours %}
+                            <span>Congratulations.</span>
+                        {% elif board_spent_time < board.estimated_number_of_hours %}
+                            <span>Congratulations.</span>
+                        {% else %}
+                            <span>Be careful. You are in overbudget.</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endwith %}
+
+            {% with current_percentage_of_completion=board.current_percentage_of_completion %}
+                <div class="panel panel-{% if current_percentage_of_completion == board.percentage_of_completion %}warning{% elif current_percentage_of_completion < board.percentage_of_completion %}success{% else %}danger{% endif %}">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Percentage of completion</h3>
+                    </div>
+                    <div class="panel-body">
+                        This project should be at least at <strong>{{current_percentage_of_completion|floatformat:-2}} %</strong>.
+                        {% if board.percentage_of_completion %}
+                            According to this board data, it is at <strong>{{board.percentage_of_completion|floatformat:2}} %</strong>.
+                            {% if current_percentage_of_completion == board.percentage_of_completion %}
+                                <span>Congratulations.</span>
+                            {% elif current_percentage_of_completion < board.percentage_of_completion %}
+                                <span>Congratulations.</span>
+                            {% else %}
+                                <span>Be careful. You are behind the expected estimations.</span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endwith %}
+
+        {% endif %}
+
+        {% if board.estimated_number_of_hours %}{% endif %}
 
         {% if member.is_developer %}
             {% include "members/components/tasks_in_development_board.html" %}

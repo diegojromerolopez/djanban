@@ -29,24 +29,40 @@
                                 <span class="fa fa-pencil"></span> Edit
                             </a>
                             <a class="btn btn-primary" href="{% url 'boards:view_lists' board.id %}">
-                                <span class="fa fa-list"></span> View lists</a>
+                                <span class="fa fa-list"></span> Lists</a>
                             {% if board.is_ready %}
-                                <a class="btn btn-primary" href="{% url 'boards:workflows:view_list' board.id %}">View workflows</a>
+                                <a class="btn btn-primary" href="{% url 'boards:workflows:view_list' board.id %}">Workflows</a>
                                 <a class="btn btn-primary" href="{% url 'boards:view_card_report' board.id %}">
-                                    <span class="fa fa-sticky-note-o"></span> View cards
+                                    <span class="fa fa-sticky-note-o"></span> Cards
                                 </a>
                                 {% for workflow in board.workflows.all %}
                                     <a class="btn btn-primary" href="{% url 'boards:workflows:view_workflow_card_report' board.id workflow.id %}">View {{workflow.name}} report</a>
                                 {% endfor %}
                                 <a class="btn btn-primary" href="{% url 'boards:view_label_report' board.id %}">
-                                    <span class="fa fa-tags"></span> View labels
+                                    <span class="fa fa-tags"></span> Labels
                                 </a>
                                 <a class="btn btn-primary" href="{% url 'boards:view_member_report' board.id %}">
-                                    <span class="fa fa-users"></span> View members
+                                    <span class="fa fa-users"></span> Members
                                 </a>
                                 <a class="btn btn-primary" href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">
-                                    <span class="fa fa-calendar-check-o"></span> View daily spent times
+                                    <span class="fa fa-calendar-check-o"></span> Spent times
                                 </a>
+                                {% if board.estimated_number_of_hours %}
+                                    {% with board_spent_time=board.get_spent_time%}
+                                        <span class="cursor-help btn btn-{% if board_spent_time < board.estimated_number_of_hours %}success{% elif board_spent_time == board.estimated_number_of_hours %}warning{% else %}danger{% endif %}"
+                                        title="Team has developed {{board_spent_time|floatformat:-2}} of {{board.estimated_number_of_hours}} hours of the budget">
+                                            {{board_spent_time|floatformat:-2}} / {{board.estimated_number_of_hours}} hours
+                                        </span>
+                                    {% endwith %}
+
+                                    {% with board_current_percentage_of_completion=board.current_percentage_of_completion %}
+                                        <span class="cursor-help btn {% if not board.percentage_of_completion %}btn-primary{% else %}btn-{% if board_current_percentage_of_completion < board.percentage_of_completion %}success{% elif board_current_percentage_of_completion == board.percentage_of_completion %}warning{% else %}danger{% endif %}{% endif %}"
+                                        title="Actual percentage of completion should be {{board_current_percentage_of_completion|floatformat:-2}}, while the team has assigned a percentage of completion of {{board.percentage_of_completion|floatformat:-2}} % to this project.">
+                                            {{board_current_percentage_of_completion|floatformat:-2}} % {% if board.percentage_of_completion %}/ {{board.percentage_of_completion|floatformat:-2}} %{% endif %}
+                                        </span>
+                                    {% endwith %}
+
+                                {% endif %}
                             {% else %}
                                 You need a 'done list' and at least a 'in development' list
                             {% endif %}

@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from decimal import Decimal
 from django.db import models
 from django.db.models import Avg, Sum
 from django.db.models.query_utils import Q
@@ -109,7 +110,7 @@ class Board(models.Model):
         if self.estimated_number_of_hours is None:
             return 0
 
-        return 100.0 * self.get_spent_time() / self.estimated_number_of_hours
+        return Decimal(100.0) * self.get_spent_time() / self.estimated_number_of_hours
 
     # Returns the spent time today for this board
     def get_today_spent_time(self):
