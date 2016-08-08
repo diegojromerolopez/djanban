@@ -28,10 +28,19 @@
             </div>
         </div>
     </div>
+
+    <h2>Projects summary</h2>
+    {% for board in member.boards.all %}
+        {% if board.is_ready and board.is_fetched %}
+            {% include "index/components/board.html" %}
+        {% endif %}
+    {% endfor %}
+
     {% include "members/components/tasks_in_development_boards.html" %}
 {% endif %}
 
 {% if  boards|length > 0 %}
+
     <h2>Charts</h2>
 
         <div class="row">

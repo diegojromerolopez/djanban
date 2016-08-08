@@ -7,3 +7,12 @@
     font-size: 1em;
     font-weight: normal;
 }
+
+
+@media (max-width: 770px) {
+    .nav > li {
+        position: relative;
+        display: inline-block;
+        width: 45%;
+    }
+}

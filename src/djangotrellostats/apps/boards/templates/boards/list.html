@@ -48,7 +48,7 @@
                                     <span class="fa fa-calendar-check-o"></span> Spent times
                                 </a>
                                 {% if board.estimated_number_of_hours %}
-                                    {% with board_spent_time=board.get_spent_time%}
+                                    {% with board_spent_time=board.get_spent_time %}
                                         <span class="cursor-help btn btn-{% if board_spent_time < board.estimated_number_of_hours %}success{% elif board_spent_time == board.estimated_number_of_hours %}warning{% else %}danger{% endif %}"
                                         title="Team has developed {{board_spent_time|floatformat:-2}} of {{board.estimated_number_of_hours}} hours of the budget">
                                             {{board_spent_time|floatformat:-2}} / {{board.estimated_number_of_hours}} hours

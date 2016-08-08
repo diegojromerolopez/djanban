@@ -18,7 +18,7 @@
 
 {% block content %}
     {% if user and user.is_authenticated %}
-        {% include "index/dashboard.html" %}
+        {% include "index/components/dashboard.html" %}
     {% else %}
         <div class="row">
             <div class="col-md-5 center-block">
