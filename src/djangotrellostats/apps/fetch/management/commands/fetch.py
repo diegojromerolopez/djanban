@@ -76,10 +76,12 @@ class Command(BaseCommand):
             return False
 
         fetch_ok = True
+        last_board = None
         try:
             # For each board that is ready, fetch it
             for board in member.created_boards.filter(has_to_be_fetched=True):
                 if board.is_ready():
+                    last_board = board
                     self.stdout.write(self.style.SUCCESS(u"Board {0} is ready".format(board.name)))
                     board_fetcher = BoardFetcher(board)
                     board_fetcher.fetch(debug=False)
@@ -90,8 +92,9 @@ class Command(BaseCommand):
         # If there is any exception, warn the administrators
         except Exception as e:
             fetch_ok = False
-            self.warn_administrators(subject=u"Error when fetching boards", message=traceback.format_exc())
-            self.stdout.write(self.style.ERROR(u"Error when fetching boards"))
+            self.warn_administrators(subject=u"Error when fetching boards. Board {0} fetch failed".format(last_board.name),
+                                     message=traceback.format_exc())
+            self.stdout.write(self.style.ERROR(u"Error when fetching boards. Board {0} fetch failed".format(last_board.name)))
 
         # Always delete the lock file
         finally:
