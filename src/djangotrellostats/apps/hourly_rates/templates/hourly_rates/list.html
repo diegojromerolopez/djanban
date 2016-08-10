@@ -19,6 +19,8 @@
                         <td>Name</td>
                         <td>Start date</td>
                         <td>End date</td>
+                        <td>Rate</td>
+                        <td>Number of boards</td>
                         <td>Is active?</td>
                         <td>Actions</td>
                     </tr>
@@ -27,6 +29,8 @@
                             <td>{{hourly_rate.name}}</td>
                             <td>{{hourly_rate.start_date}}</td>
                             <td>{% if hourly_rate.end_date %}{{hourly_rate.end_date}}{% else %}Until now{% endif %}</td>
+                            <td>{{hourly_rate.amount|floatformat:-2}}</td>
+                            <td>{{hourly_rate.boards.all.count}}</td>
                             <td>{% if hourly_rate.is_active %}Yes{% else %}No{% endif %}</td>
                             <td>
                                 <a href="{% url 'hourly_rates:edit' hourly_rate.id %}"  class="btn btn-primary">Edit</a>
