@@ -5,17 +5,16 @@
         <table class="table">
             {% for month in months %}
                 <tr class="header main_header month_{{month.i}}">
-                    <td colspan="11">
+                    <td colspan="10">
                         <strong>{{month.year}}/{{month.name}}</strong> ({{month.daily_spent_times|length}} measurements)
                     </td>
                 </tr>
                 <tr class="header month_{{month.i}}">
                     <td>Board</td>
                     <td>Member</td>
-                    <td>Week</td>
                     <td>Weekday</td>
                     <td>Day of year</td>
-                    <td>Date</td>
+                    <td class="date">Date</td>
                     <td>Description</td>
                     <td>Spent time</td>
                     <td>Estimated time</td>
@@ -23,15 +22,14 @@
                     <td>Rate amount</td>
                 </tr>
                 {% for daily_spent_time in month.daily_spent_times %}
-                    <tr class="day_of_year_{{daily_spent_time.day_of_year}} week_of_year_{{daily_spent_time.week_of_year}} month_{{daily_spent_time.date.month}}">
+                    <tr class="day_of_year_{{daily_spent_time.day_of_year}} week_of_year_{{daily_spent_time.week_of_year}} month_{{daily_spent_time.date.month}} {% if daily_spent_time.day_of_year|divisibleby:2 %}even{% else %}odd{% endif %}">
                         <td>{{daily_spent_time.board.name}}</td>
                         <td>{{daily_spent_time.member.trello_username}}</td>
-                        <td>{{daily_spent_time.week_of_year}}</td>
-                        <td>{{daily_spent_time.weekday}}</td>
+                        <td>{{daily_spent_time.date|date:"Y"}}/W{{daily_spent_time.week_of_year}}/{{daily_spent_time.date|date:"D"}}</td>
                         <td>{{daily_spent_time.day_of_year}}</td>
-                        <td>{{daily_spent_time.date|date:"Y-m-d"}}</td>
+                        <td class="date">{{daily_spent_time.date|date:"Y-m-d"}}</td>
                         <td>
-                            <a href="{{daily_spent_time.card.short_url}}" title="{{daily_spent_time.card.name}}">
+                            <a href="{{daily_spent_time.card.short_url}}" title="{{daily_spent_time.card.name}}" class="source_card_link">
                                 {{daily_spent_time.description|truncatechars:40}}
                             </a>
                         </td>
@@ -42,15 +40,15 @@
                     </tr>
                 {% endfor %}
                 <tr class="header month_{{month.i}}">
-                    <td colspan="10">Number of measurements</td>
+                    <td colspan="9">Number of measurements</td>
                     <td>{{month.daily_spent_times|length}}</td>
                 </tr>
                 <tr class="header month_{{month.i}}">
-                    <td colspan="10">Sum of amount</td>
+                    <td colspan="9">Sum of amount</td>
                     <td> {{month.rate_amount_sum|floatformat:"-2"}} ¤</td>
                 </tr>
                 <tr class="header month_{{month.i}}">
-                    <td colspan="10">Sum of spent time</td>
+                    <td colspan="9">Sum of spent time</td>
                     <td> {{month.spent_time_sum|floatformat:"-2"}}
                         {% if selected_member and week and selected_member.minimum_working_hours_per_week %}
                         /
@@ -60,11 +58,11 @@
                     </td>
                 </tr>
                 <tr class="header month_{{month.i}}">
-                    <td colspan="10">Sum of estimated time</td>
+                    <td colspan="9">Sum of estimated time</td>
                     <td> {{month.estimated_time_sum|floatformat:"-2"}} hours</td>
                 </tr>
                 <tr class="header month_{{month.i}} last">
-                    <td colspan="10">Diff between spent and estimated time</td>
+                    <td colspan="9">Diff between spent and estimated time</td>
                     <td> {{month.diff_time_sum|floatformat:"-2"}} hours</td>
                 </tr>
             {% endfor %}
