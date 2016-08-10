@@ -11,7 +11,7 @@ from django.contrib.auth.models import Group
 from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand
 
-from djangotrellostats.apps.fetch.fetchers.trello import BoardFetcher
+from djangotrellostats.apps.fetch.fetchers.trello import BoardFetcher, Initializer
 from djangotrellostats.apps.members.models import Member
 
 
@@ -74,6 +74,11 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR("Unable to fetch"))
             self.warn_administrators(subject=u"Unable to fetch boards", message=u"Unable to fetch boards. Is the lock file present?")
             return False
+
+        # Initialize boards if needed
+        initializer = Initializer(member)
+        initializer.init()
+        self.stdout.write(self.style.SUCCESS(u"Boards initialized successfully"))
 
         fetch_ok = True
         last_board = None

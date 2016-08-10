@@ -15,10 +15,106 @@ from django.utils import timezone
 from trello import ResourceUnavailable
 from trello.board import Board as TrelloBoard
 
-from djangotrellostats.apps.boards.models import Label, Card
+from djangotrellostats.apps.boards.models import Label, Card, Board, List
+from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.fetch.fetchers.base import Fetcher
 from djangotrellostats.apps.reports.models import ListReport, MemberReport
+from trello import TrelloClient
+
+
+# Initialize boards
+class Initializer(object):
+
+    def __init__(self, member, debug=True):
+        self.member = member
+        self.trello_client = self._get_trello_client()
+        self.debug = debug
+
+    # Get a trello client for this user
+    def _get_trello_client(self):
+        client = TrelloClient(
+            api_key=self.member.api_key,
+            api_secret=self.member.api_secret,
+            token=self.member.token,
+            token_secret=self.member.token_secret
+        )
+        return client
+
+    # Fetch basic information of boards and its lists
+    @transaction.atomic
+    def init(self):
+        trello_boards = self.trello_client.list_boards()
+        for trello_board in trello_boards:
+            board_already_exists = Board.objects.filter(uuid=trello_board.id).exists()
+            if not board_already_exists:
+                board_name = trello_board.name
+                board = Board(uuid=trello_board.id, name=board_name,
+                              last_activity_date=trello_board.date_last_activity,
+                              creator=self.member)
+                board.save()
+                if self.debug:
+                    print("Board {0} successfully created".format(board_name))
+            else:
+                board = Board.objects.get(uuid=trello_board.id)
+                board_name = board.name
+
+            # Fetch all lists of this board
+            trello_lists = trello_board.all_lists()
+            _lists = []
+            last_created_list = None
+            for trello_list in trello_lists:
+
+                if not board.lists.filter(uuid=trello_list.id).exists():
+                    _list = List(uuid=trello_list.id, name=trello_list.name, board=board)
+
+                    if trello_list.closed:
+                        _list.type = "closed"
+
+                    _list.save()
+                    last_created_list = _list
+
+                    if self.debug:
+                        print("- List {1} of board {0} successfully created".format(board_name, _list.name))
+
+                else:
+                    _list = board.lists.get(uuid=trello_list.id)
+
+                    if self.debug:
+                        print("- List {1} of board {0} was already created".format(board_name, _list.name))
+
+                _lists.append(_list)
+
+            # By default, consider the last list as "done" list
+            if last_created_list and last_created_list.type != "closed":
+                last_created_list.type = "done"
+                last_created_list.save()
+
+            # Fetch all members this board and associate to this board
+            self._fetch_members(board, trello_board)
+
+    # Fetch members of this board
+    def _fetch_members(self, board, trello_board):
+        trello_members = trello_board.all_members()
+
+        # For each member, check if he/she doesn't exist. In that case, create him/her
+        for trello_member in trello_members:
+
+            # If the member does not exist, create it with empty Trello credentials
+            try:
+                member = Member.objects.get(uuid=trello_member.id)
+                if self.debug:
+                    print(u"Member {0} already existed ".format(member.trello_username))
+            except Member.DoesNotExist:
+                member = Member(uuid=trello_member.id, trello_username=trello_member.username,
+                                initials=trello_member.initials)
+                member.save()
+                if self.debug:
+                    print(u"Member {0} created".format(member.trello_username))
+
+            # Only add the board to the member if he/she has not it yet
+            if not member.boards.filter(uuid=board.uuid).exists():
+                member.boards.add(board)
 
 
 # Fetches a board from Trello
@@ -28,11 +124,13 @@ class BoardFetcher(Fetcher):
     DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 
     # Create a fetcher from a board
-    def __init__(self, board):
+    def __init__(self, board, debug=True):
         super(BoardFetcher, self).__init__(board)
-        self.trello_client = self.creator.trello_client
+        self.initializer = Initializer(self.creator)
+        self.trello_client = self.initializer.trello_client
         self.trello_board = TrelloBoard(client=self.trello_client, board_id=self.board.uuid)
         self.trello_board.fetch()
+        self.debug = debug
 
     # Fetch data of this board
     def fetch(self, debug=False):

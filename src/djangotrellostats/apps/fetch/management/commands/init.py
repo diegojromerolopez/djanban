@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from djangotrellostats.apps.boards.models import Board
+from djangotrellostats.apps.fetch.fetchers.trello import Initializer
 from djangotrellostats.apps.members.models import Member
 
 
@@ -20,6 +21,8 @@ class Command(BaseCommand):
             return False
 
         member = Member.objects.get(trello_username=member_trello_username)
-        member.init_fetch(debug=True)
+
+        initializer = Initializer(member)
+        initializer.init()
 
         self.stdout.write(self.style.SUCCESS(u"Member {0} successfully initialized".format(member.trello_username)))
