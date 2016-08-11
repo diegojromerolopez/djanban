@@ -28,6 +28,16 @@ class Command(daily_report.Command):
                 self.stderr.write(self.style.ERROR(u"Date {0} format is not valid".format(options["date"])))
                 return None
 
+        # If this day is holiday, don't send anything
+        iso_weekday = date.isoweekday()
+        if iso_weekday == 6 or iso_weekday == 7:
+            self.stdout.write(
+                self.style.SUCCESS(u"Daily development reports for day {0} are not sent because that day is holiday".format(
+                    date.strftime("%Y-%m-%d"))
+                )
+            )
+            return False
+
         start = time.time()
 
         developers = Member.objects.filter(is_developer=True, on_holidays=False)
@@ -41,7 +51,7 @@ class Command(daily_report.Command):
         elapsed_time = end-start
 
         self.stdout.write(
-            self.style.SUCCESS(u"Daily reports for day {0} sent successfully to {1} developers in {2} s".format(
+            self.style.SUCCESS(u"Daily development reports for day {0} sent successfully to {1} developers in {2} s".format(
                 date.strftime("%Y-%m-%d"), developers.count(), elapsed_time)
             )
         )
