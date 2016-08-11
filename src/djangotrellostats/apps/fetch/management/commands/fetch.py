@@ -75,14 +75,15 @@ class Command(BaseCommand):
             self.warn_administrators(subject=u"Unable to fetch boards", message=u"Unable to fetch boards. Is the lock file present?")
             return False
 
-        # Initialize boards if needed
-        initializer = Initializer(member)
-        initializer.init()
-        self.stdout.write(self.style.SUCCESS(u"Boards initialized successfully"))
-
-        fetch_ok = True
-        last_board = None
         try:
+            # Initialize boards if needed
+            initializer = Initializer(member)
+            initializer.init()
+            self.stdout.write(self.style.SUCCESS(u"Boards initialized successfully"))
+
+            fetch_ok = True
+            last_board = None
+
             # For each board that is ready, fetch it
             for board in member.created_boards.filter(has_to_be_fetched=True):
                 if board.is_ready():
