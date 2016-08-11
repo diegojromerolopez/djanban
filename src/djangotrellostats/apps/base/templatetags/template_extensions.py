@@ -68,3 +68,13 @@ def call(_object, method_name):
     return {"callable": callable_method, "num_arguments": num_arguments, "args": []}
 
 
+# Subtract two values
+@register.filter
+def subtract(value, argument):
+    return value - argument
+
+
+# Multiply two values
+@register.filter
+def multiply(value, argument):
+    return value * argument

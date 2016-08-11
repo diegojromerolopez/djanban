@@ -1,5 +1,6 @@
 {% extends "base/base.html" %}
 
+{% load template_extensions %}
 {% load staticfiles %}
 
 {% block page_title %}Boards of {{member.trello_username}}{% endblock %}
@@ -120,14 +121,17 @@
                         <h3 class="panel-title">Number of spent hours</h3>
                     </div>
                     <div class="panel-body">
-                        This project has spent <strong> {{board_spent_time|floatformat:-2}} hours</strong> of <strong>{{board.estimated_number_of_hours}} estimated hours</strong>.
-                        {% if board_spent_time == board.estimated_number_of_hours %}
-                            <span>Congratulations.</span>
-                        {% elif board_spent_time < board.estimated_number_of_hours %}
-                            <span>Congratulations.</span>
-                        {% else %}
-                            <span>Be careful. You are in overbudget.</span>
-                        {% endif %}
+                        <p>
+                            This project has spent <strong> {{board_spent_time|floatformat:-2}} hours</strong> of <strong>{{board.estimated_number_of_hours}} estimated hours</strong>.
+                            {% if board_spent_time == board.estimated_number_of_hours %}
+                                <span>Congratulations.</span>
+                            {% elif board_spent_time < board.estimated_number_of_hours %}
+                                <span>Congratulations.</span>
+                            {% else %}
+                                <span>Be careful. You are in overbudget.</span>
+                            {% endif %}
+                        </p>
+                        <p>Developed value in this project is <strong>{{board.get_developed_value|floatformat:-2}} ¤</strong></p>
                     </div>
                 </div>
             {% endwith %}
@@ -140,11 +144,11 @@
                     <div class="panel-body">
                         This project should be at least at <strong>{{current_percentage_of_completion|floatformat:-2}} %</strong>.
                         {% if board.percentage_of_completion %}
-                            According to this board data, it is at <strong>{{board.percentage_of_completion|floatformat:2}} %</strong>.
+                            According to <a href="{% url 'boards:edit' board.id %}">this board settings</a>, it is at <strong>{{board.percentage_of_completion|floatformat:2}} %</strong>.
                             {% if current_percentage_of_completion == board.percentage_of_completion %}
                                 <span>Congratulations.</span>
                             {% elif current_percentage_of_completion < board.percentage_of_completion %}
-                                <span>Congratulations.</span>
+                                <span>Congratulations. That's <strong>{{board.percentage_of_completion|subtract:current_percentage_of_completion|floatformat:-2}} % ahead of estimated hours</strong>.</span>
                             {% else %}
                                 <span>Be careful. You are behind the expected estimations.</span>
                             {% endif %}
@@ -155,7 +159,7 @@
 
         {% endif %}
 
-        {% if board.estimated_number_of_hours %}{% endif %}
+
 
         {% if member.is_developer %}
             {% include "members/components/tasks_in_development_board.html" %}

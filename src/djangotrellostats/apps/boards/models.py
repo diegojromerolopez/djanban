@@ -149,6 +149,18 @@ class Board(models.Model):
             return 0
         return spent_time
 
+    # Returns the spent time.
+    # If date parameter is present, computes the spent time on a given date for this board
+    # Otherwise, computes the total spent time for this board
+    def get_developed_value(self, date=None):
+        daily_spent_times_filter = {}
+        if date:
+            daily_spent_times_filter["date"] = date
+
+        developed_value = self.daily_spent_times.filter(**daily_spent_times_filter).aggregate(sum=Sum("rate_amount"))["sum"]
+        if developed_value is None:
+            return 0
+        return developed_value
 
 # Card of the task board
 class Card(ImmutableModel):
