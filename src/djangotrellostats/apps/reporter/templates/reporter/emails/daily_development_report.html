@@ -40,13 +40,17 @@
                 <h1>{{developer.trello_username}}'s spent time in day {{date|date:"Y-m-d"}} by board</h1>
                 {% for board in developer.boards.all %}
                     {% if board.is_fetched %}
-                        <div>
-                            <h2>{{board.name}}</h2>
-                            <p>
-                                <span><strong>{{developer.trello_username}}</strong></span>
-                                <span>{{developer|call:'get_spent_time'|arg:date|arg:board|floatformat:"-2"}} hours</span>
-                            </p>
-                        </div>
+                        {% with developer_spent_time=developer|call:'get_spent_time'|arg:date|arg:board %}
+                            {% if developer_spent_time > 0 %}
+                                <div>
+                                    <h2>{{board.name}}</h2>
+                                    <p>
+                                        <span><strong>{{developer.trello_username}}</strong></span>
+                                        <span>{{developer_spent_time|floatformat:"-2"}} hours</span>
+                                    </p>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
                     {% endif %}
                 {% endfor %}
             </div>
