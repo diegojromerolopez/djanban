@@ -105,7 +105,7 @@
         {% if board.last_fetch_datetime %}
             <div>
                 <p>
-                Last fetched on {{board.last_fetch_datetime|date:"Y-m-d H:i"}} ({{board.last_fetch_datetime|timesince}} ago).
+                Last fetched on {{board.last_fetch_datetime}} ({{board.last_fetch_datetime|timesince}} ago).
                 </p>
                 <p>
                  {% if not board.has_to_be_fetched %}This board is not goind to be fetched anymore unless you edit <a href="{% url 'boards:edit' board.id %}">its preferences</a>{% endif %}

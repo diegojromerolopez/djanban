@@ -56,7 +56,7 @@
                     {% for daily_spent_time in daily_spent_times %}
                         <tr>
                             <td>{{daily_spent_time.weekday}}</td>
-                            <td>{{daily_spent_time.date|date:"Y-m-d"}}</td>
+                            <td>{{daily_spent_time.date}}</td>
                             <td>{{daily_spent_time.member.trello_username}}</td>
                             <td>{{daily_spent_time.board.name}}</td>
                             <td>

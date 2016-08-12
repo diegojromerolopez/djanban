@@ -56,6 +56,13 @@ DATABASES = {
         'PORT': ''
     }
 }
+
+# Date format that will be used in templates, by default is Y-m-d. Optional.
+DATE_FORMAT = "<LOCAL DATE FORMAT IN TEMPLATES>"
+
+# Datetime format that will be used in templates, by default is Y-m-d H:i. Optional.
+DATETIME_FORMAT = "<LOCAL DATETIME FORMAT IN TEMPLATES>"
+
 ```
 
 ## Sign up

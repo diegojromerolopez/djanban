@@ -14,7 +14,7 @@
                         <h2>{{board.name}}</h2>
                         {% if board.last_fetch_datetime %}
                             <div>
-                                Last fetched on {{board.last_fetch_datetime|date:"Y-m-d H:i"}} ({{board.last_fetch_datetime|timesince}} ago)
+                                Last fetched on {{board.last_fetch_datetime}} ({{board.last_fetch_datetime|timesince}} ago)
                             </div>
                         {% else %}
                             <div>

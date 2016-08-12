@@ -14,7 +14,7 @@
     <h1>
         Daily spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}
     </h1>
-    <div>Last updated: {{board.get_human_fetch_datetime}}</div>
+    <div>Last updated: {{board.last_fetch_datetime|timesince}}</div>
     {% include "daily_spent_times/components/filter_form.html" with selected_member=selected_member %}
     <div class="text-right">
         <a href="{% url 'dev_times:export_daily_spent_times' %}?board_id={{board.id}}" class="btn btn-primary">Export as CSV</a>

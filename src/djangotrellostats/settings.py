@@ -132,9 +132,21 @@ LANGUAGE_CODE = settings_local.LANGUAGE_CODE
 TIME_ZONE = settings_local.TIME_ZONE
 Organization.TIMEZONE = TIME_ZONE
 
-USE_I18N = True
+if hasattr(settings_local, "DATE_FORMAT"):
+    DATE_FORMAT = settings_local.DATE_FORMAT
+else:
+    DATE_FORMAT = "Y-m-d"
 
-USE_L10N = True
+if hasattr(settings_local, "DATETIME_FORMAT"):
+    DATETIME_FORMAT = settings_local.DATETIME_FORMAT
+else:
+    DATETIME_FORMAT = "Y-m-d H:i"
+
+
+
+USE_I18N = False
+
+USE_L10N = False
 
 USE_TZ = True
 

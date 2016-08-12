@@ -14,7 +14,7 @@
               </p>
               {% if board.last_fetch_datetime %}
                   <p>
-                    <strong>Last fetch</strong> was on {{board.last_fetch_datetime|date:"Y-m-d H:i"}} (<strong>{{board.last_fetch_datetime|timesince}} ago</strong>)
+                    <strong>Last fetch</strong> was on {{board.last_fetch_datetime}} (<strong>{{board.last_fetch_datetime|timesince}} ago</strong>)
                   </p>
               {% endif %}
               <p>

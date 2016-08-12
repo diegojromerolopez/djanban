@@ -27,7 +27,7 @@
                         <td>{{daily_spent_time.member.trello_username}}</td>
                         <td>{{daily_spent_time.date|date:"Y"}}/W{{daily_spent_time.week_of_year}}/{{daily_spent_time.date|date:"D"}}</td>
                         <td>{{daily_spent_time.day_of_year}}</td>
-                        <td class="date">{{daily_spent_time.date|date:"Y-m-d"}}</td>
+                        <td class="date">{{daily_spent_time.date}}</td>
                         <td>
                             <a href="{{daily_spent_time.card.short_url}}" title="{{daily_spent_time.card.name}}" class="source_card_link">
                                 {{daily_spent_time.description|truncatechars:40}}
