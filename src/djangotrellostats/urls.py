@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^times/', include('djangotrellostats.apps.dev_times.urls', namespace="dev_times")),
     url(r'^charts/', include('djangotrellostats.apps.charts.urls', namespace="charts")),
     url(r'^hourly_rates/', include('djangotrellostats.apps.hourly_rates.urls', namespace="hourly_rates")),
+    url(r'^fetch/', include('djangotrellostats.apps.fetch.urls', namespace="fetch")),
 ]

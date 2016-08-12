@@ -1,0 +1,20 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Fetch data of all boards{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-7 center-block">
+        <div class="panel panel-danger ">
+          <div class="panel-heading">There was an error when fetching board contents</div>
+          <div class="panel-body">
+              <p>
+                {{exception_message}}
+              </p>
+          </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

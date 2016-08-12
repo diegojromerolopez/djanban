@@ -1,0 +1,35 @@
+{% extends "base/base.html" %}
+
+{% load staticfiles %}
+
+{% block page_title %}Fetch data of all boards{% endblock %}
+
+{% block js %}
+    {{block.super}}
+    <script src="{% static 'js/fetch/fetch.js' %}"></script>
+{% endblock js %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-7 center-block">
+        <div class="panel panel-danger ">
+          <div class="panel-heading">Danger! This action cannot be undone</div>
+          <div class="panel-body">
+              <p>
+                All boards data will be deleted and fetched again. This process should be slow, so wait a minute or so.
+              </p>
+              <p>
+                Are you sure?
+              </p>
+
+              <form id="fetch_form" action="{% url 'fetch:fetch_boards' %}" method="post">
+                <button id="fetch_button" type="submit" class="btn btn-danger">I am sure, delete all board contents and fetch again their data</button>
+              </form>
+
+          </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

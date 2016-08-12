@@ -29,6 +29,13 @@
                         <span class="fa fa-users"></span> Members
                     </a>
                 </li>
+                {% if request.user.member.is_initialized %}
+                    <li role="presentation" {% if url_name == "fetch_boards" %}class="active"{% endif %}>
+                        <a href="{% url 'fetch:fetch_boards' %}" title="View members">
+                            <span class="fa fa-download"></span> Fetch
+                        </a>
+                    </li>
+                {% endif %}
                 {% if request.user.member.is_developer %}
                     {% with member=request.user.member %}
                         <li role="presentation">
