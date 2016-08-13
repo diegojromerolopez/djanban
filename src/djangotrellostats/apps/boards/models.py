@@ -162,6 +162,7 @@ class Board(models.Model):
             return 0
         return developed_value
 
+
 # Card of the task board
 class Card(ImmutableModel):
     COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s+(\-(?P<days_before>(\d+))d\s+)?(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)(\s*(?P<description>.+))?"
