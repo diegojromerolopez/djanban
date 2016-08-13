@@ -130,6 +130,10 @@ And that's all, then you have several interfaces with data about members, labels
 
 ![Board cards](resources/images/screencaptures/board-cards.png)
 
+## Board blocked cards
+
+![Board blocked cards](resources/images/screencaptures/board-blocked-cards.png)
+
 ## Board labels
 
 ![Board labels](resources/images/screencaptures/board-labels.png)
