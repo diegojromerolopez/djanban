@@ -23,9 +23,7 @@ def fetch(request):
 
     try:
         fetch_command = Command()
-        ok = fetch_command.handle(member_trello_username=[member.trello_username])
-        if not ok:
-            raise ValueError(u"The lock file is in place and is not possible to fetch data until it is removed")
+        fetch_command.handle(member_trello_username=[member.trello_username])
     except Exception as e:
         return render(request, "fetch/fetch_error.html", context={"exception_message": e})
 

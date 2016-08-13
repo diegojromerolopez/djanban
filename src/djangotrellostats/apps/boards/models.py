@@ -171,8 +171,8 @@ class Card(ImmutableModel):
 
     name = models.TextField(verbose_name=u"Name of the card")
     uuid = models.CharField(max_length=128, verbose_name=u"External id of the card", unique=True)
-    url = models.CharField(max_length=512, verbose_name=u"URL of the card")
-    short_url = models.CharField(max_length=128, verbose_name=u"Short URL of the card")
+    url = models.CharField(max_length=255, verbose_name=u"URL of the card", unique=True)
+    short_url = models.CharField(max_length=128, verbose_name=u"Short URL of the card", unique=True)
     description = models.TextField(verbose_name=u"Description of the card")
     is_closed = models.BooleanField(verbose_name=u"Is this card closed?", default=False)
     position = models.PositiveIntegerField(verbose_name=u"Position in the list")

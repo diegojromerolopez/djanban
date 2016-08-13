@@ -64,17 +64,20 @@ class Command(BaseCommand):
             member_trello_username = options['member_trello_username'][0]
         except (IndexError, KeyError)as e:
             self.stdout.write(self.style.ERROR("member_username is mandatory"))
-            return False
+            raise AssertionError("member_username is mandatory")
 
         self.member = Member.objects.get(trello_username=member_trello_username)
         if not self.member.is_initialized():
-            self.stderr.write(self.style.SUCCESS(u"Member {0} is not initialized".format(member.trello_username)))
-            return True
+            error_message = u"Member {0} is not initialized".format(self.member.trello_username)
+            self.stderr.write(self.style.SUCCESS(error_message))
+            raise AssertionError(error_message)
 
         if not self.start():
             self.stdout.write(self.style.ERROR("Unable to fetch"))
-            self.warn_administrators(subject=u"Unable to fetch boards", message=u"Unable to fetch boards. Is the lock file present?")
-            return False
+            error_message = u"Unable to fetch boards. Is the lock file present?"
+            self.warn_administrators(subject=u"Unable to fetch boards",
+                                     message=error_message)
+            raise AssertionError(error_message)
 
         fetch_ok = False
 
@@ -93,8 +96,6 @@ class Command(BaseCommand):
 
         if fetch_ok:
             self.stdout.write(self.style.SUCCESS(u"All boards fetched successfully {0}".format(self.elapsed_time())))
-
-        return fetch_ok
 
     # Fetch boards
     def fetch(self):
