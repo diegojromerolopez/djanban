@@ -199,6 +199,14 @@ class Card(ImmutableModel):
     members = models.ManyToManyField("members.Member", related_name="cards")
     blocking_cards = models.ManyToManyField("boards.card", related_name="blocked_cards")
 
+    @property
+    def is_blocked(self):
+        return self.blocking_cards.exclude(list__type="done").exists()
+
+    @property
+    def pending_blocking_cards(self):
+        return self.blocking_cards.exclude(list__type="done")
+
 
 # Label of the task board
 class Label(ImmutableModel):

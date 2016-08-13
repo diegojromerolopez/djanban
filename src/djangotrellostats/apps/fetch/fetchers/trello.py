@@ -386,8 +386,8 @@ class CardFetcher(object):
             # For each one of this card's blocking cards, check if it exists and if that's the case,
             # add the blocking card to its blocking cards
             for blocking_card_url in blocking_card_urls:
-                if Card.objects.filter(url=blocking_card_url).exists():
-                    blocking_card = Card.objects.get(url=blocking_card_url)
+                if self.board.cards.filter(url=blocking_card_url).exists():
+                    blocking_card = self.board.cards.get(url=blocking_card_url)
                     card.blocking_cards.add(blocking_card)
 
         return self.cards

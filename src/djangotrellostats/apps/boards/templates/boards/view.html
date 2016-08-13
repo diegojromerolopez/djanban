@@ -165,7 +165,14 @@
             {% include "members/components/tasks_in_development_board.html" %}
         {% endif %}
 
-
+        <h2>Blocked cards</h2>
+        <div class="row">
+        {% for card in board.cards.all %}
+            {% if card.is_blocked %}
+                {% include "cards/components/card.html" %}
+            {% endif %}
+        {% endfor %}
+        </div>
 
         <h2>Charts</h2>
         <div>

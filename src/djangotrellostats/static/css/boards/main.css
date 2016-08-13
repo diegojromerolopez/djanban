@@ -9,6 +9,10 @@
 }
 
 
+.card-info {
+    margin-bottom: 1em;
+}
+
 @media (max-width: 770px) {
     .nav > li {
         position: relative;
