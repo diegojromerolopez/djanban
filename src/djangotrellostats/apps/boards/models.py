@@ -166,6 +166,7 @@ class Board(models.Model):
 # Card of the task board
 class Card(ImmutableModel):
     COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s+(\-(?P<days_before>(\d+))d\s+)?(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)(\s*(?P<description>.+))?"
+    COMMENT_BLOCKED_CARD_REGEX = r"^blocked\s+by\s+(?P<card_url>.+)"
 
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
     list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")
@@ -196,6 +197,7 @@ class Card(ImmutableModel):
                                     null=True)
     labels = models.ManyToManyField("boards.Label", related_name="cards")
     members = models.ManyToManyField("members.Member", related_name="cards")
+    blocking_cards = models.ManyToManyField("boards.card", related_name="blocked_cards")
 
 
 # Label of the task board

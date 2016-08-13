@@ -379,6 +379,17 @@ class CardFetcher(object):
                     must_retry = True
 
         self.cards = card_dict.values()
+
+        # Blocking cards
+        for card in self.cards:
+            blocking_card_urls = card.trello_card.comment_summary.get("blocking_card_urls")
+            # For each one of this card's blocking cards, check if it exists and if that's the case,
+            # add the blocking card to its blocking cards
+            for blocking_card_url in blocking_card_urls:
+                if Card.objects.filter(url=blocking_card_url).exists():
+                    blocking_card = Card.objects.get(url=blocking_card_url)
+                    card.blocking_cards.add(blocking_card)
+
         return self.cards
 
     # Create a card from a Trello Card
@@ -452,6 +463,8 @@ class CardFetcher(object):
         card_member_uuids.update({member_uuid: True for member_uuid in comment_summary["member_uuids"]})
         card.member_uuids = card_member_uuids.keys()
 
+        # Blocking cards
+
         return card
 
     # Initialize this card stats
@@ -519,6 +532,7 @@ class CardFetcher(object):
         total_spent = None
         total_estimated = None
         spent_by_member = {}
+        blocking_card_urls = []
         estimated_by_member = {}
         member_uuids = {}
 
@@ -537,6 +551,8 @@ class CardFetcher(object):
         member_dict = {}
         for comment in trello_card.comments:
             comment_content = comment["data"]["text"]
+
+            # Spent and estimated time calculation
             matches = re.match(Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, comment_content)
             if matches:
                 # Member uuid that has made this Plus for Trello Comment
@@ -599,11 +615,19 @@ class CardFetcher(object):
 
                 trello_card.daily_spent_times.append(daily_spent_time)
 
+            else:
+                # Blocking cards
+                matches = re.match(Card.COMMENT_BLOCKED_CARD_REGEX, comment_content, re.IGNORECASE)
+                if matches:
+                    card_url = matches.group("card_url")
+                    blocking_card_urls.append(card_url)
+
         trello_card.comment_summary = {
             "daily_spent_times": trello_card.daily_spent_times,
             "member_uuids": member_uuids.keys(),
             "spent": {"total": total_spent, "by_member": spent_by_member},
-            "estimated": {"total": total_estimated, "by_member": estimated_by_member}
+            "estimated": {"total": total_estimated, "by_member": estimated_by_member},
+            "blocking_card_urls": blocking_card_urls
         }
         return trello_card.comment_summary
 
