@@ -9,19 +9,18 @@
             <div>{% if card.description %}{{card.description}}.{% endif %} <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}}" class="btn btn-primary btn-sm">View in Trello</a></div>
           </div>
           {% if card.is_blocked %}
-
-          <div class="panel panel-default">
-              <div class="panel-heading">Blocking cards</div>
-              <div class="panel-body">
-                  <div class="list-group">
-                      {% for blocking_card in card.pending_blocking_cards %}
-                        <p class="list-group-item">
-                            <a href="{{blocking_card.short_url}}" title="View card {{blocking_card.name}} in board {{blocking_card.board.name}}">{{blocking_card.name}}</a>
-                        </p>
-                      {% endfor %}
+              <div class="panel panel-default cursor-help" title="This card is blocked by {{card.pending_blocking_cards|length}} card(s). End them before developing this one.">
+                  <div class="panel-heading">Blocking cards</div>
+                  <div class="panel-body">
+                      <div class="list-group">
+                          {% for blocking_card in card.pending_blocking_cards %}
+                            <p class="list-group-item">
+                                <a href="{{blocking_card.short_url}}" title="View card {{blocking_card.name}} in board {{blocking_card.board.name}}">{{blocking_card.name}}</a>
+                            </p>
+                          {% endfor %}
+                      </div>
                   </div>
               </div>
-          </div>
           {% endif %}
       </div>
     </div>
