@@ -31,7 +31,7 @@
                 </li>
                 {% if request.user.member.is_initialized %}
                     <li role="presentation" {% if url_name == "fetch_boards" %}class="active"{% endif %}>
-                        <a href="{% url 'fetch:fetch_boards' %}" title="View members">
+                        <a href="{% url 'fetch:fetch_boards' %}" title="Fetch all boards">
                             <span class="fa fa-download"></span> Fetch
                         </a>
                     </li>
