@@ -17,7 +17,7 @@ import calendar
 # View spent time report
 @login_required
 def view_daily_spent_times(request):
-    parameters = _get_daily_spent_times(request)
+    parameters = _get_daily_spent_times_replacements(request)
 
     if "board" in parameters["replacements"] and parameters["replacements"]["board"]:
         return render(request, "daily_spent_times/list_by_board.html", parameters["replacements"])
@@ -27,7 +27,7 @@ def view_daily_spent_times(request):
 # Export daily spent report in CSV format
 @login_required
 def export_daily_spent_times(request):
-    parameters = _get_daily_spent_times(request)
+    parameters = _get_daily_spent_times_from_request(request)
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="export-daily-spent-times.csv"'
@@ -40,19 +40,16 @@ def export_daily_spent_times(request):
     return response
 
 
-# Return the fitered queryset and the replacements given the GET parameters
-def _get_daily_spent_times(request):
-    member = request.user.member
+# Return the filtered queryset and the replacements given the GET parameters
+def _get_daily_spent_times_replacements(request):
+    current_member = request.user.member
 
     selected_member_id = request.GET.get("member_id")
     selected_member = None
     if selected_member_id:
         selected_member = Member.objects.get(id=selected_member_id)
 
-    spent_times = _get_daily_spent_times_queryset(member, selected_member,
-                                                  request.GET.get("start_date"), request.GET.get("end_date"),
-                                                  request.GET.get('week'),
-                                                  request.GET.get("board_id"))
+    spent_times = _get_daily_spent_times_from_request(request)
 
     replacements = {"boards": Board.objects.all(), "members": Member.objects.all()}
 
@@ -80,7 +77,7 @@ def _get_daily_spent_times(request):
     board_id = request.GET.get("board_id")
     board = None
     if board_id:
-        board = member.boards.get(id=board_id)
+        board = current_member.boards.get(id=board_id)
         replacements["selected_board"] = board
         replacements["board"] = board
 
@@ -95,9 +92,28 @@ def _get_daily_spent_times(request):
     return {"queryset": daily_spent_times, "replacements": replacements}
 
 
+# Return the daily spent times from a request
+def _get_daily_spent_times_from_request(request):
+    current_member = request.user.member
+    selected_member = None
+    if request.GET.get("member_id"):
+        selected_member = Member.objects.get(id=request.GET.get("member_id"))
+
+    spent_times = _get_daily_spent_times_queryset(current_member, selected_member,
+                                                  request.GET.get("start_date"), request.GET.get("end_date"),
+                                                  request.GET.get('week'),
+                                                  request.GET.get("board_id"))
+
+    return spent_times
+
+
 # Return the filtered queryset and the replacements given the GET parameters
-def _get_daily_spent_times_queryset(member, selected_member, start_date_, end_date_, week, board_id):
+def _get_daily_spent_times_queryset(current_member, selected_member, start_date_, end_date_, week, board_id):
     daily_spent_time_filter = {}
+
+    # Member filter
+    if selected_member:
+        daily_spent_time_filter["member_id"] = selected_member.id
 
     # Start date
     start_date = None
@@ -122,7 +138,7 @@ def _get_daily_spent_times_queryset(member, selected_member, start_date_, end_da
         daily_spent_time_filter["week_of_year"] = week
 
     # Board
-    if board_id and member.boards.filter(id=board_id).exists():
+    if board_id and current_member.boards.filter(id=board_id).exists():
         daily_spent_time_filter["board_id"] = board_id
 
     # Daily Spent Times
