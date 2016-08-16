@@ -6,13 +6,16 @@ from io import open
 import time
 import traceback
 
+import pytz
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 
 from djangotrellostats.apps.fetch.fetchers.trello import BoardFetcher, Initializer
 from djangotrellostats.apps.members.models import Member
+from datetime import datetime, timedelta
 
 
 class Command(BaseCommand):
@@ -31,10 +34,13 @@ class Command(BaseCommand):
 
     def start(self):
         self.start_time = time.time()
-        # Check if lock file exists. If it exists, thrown an error
+        # Check if lock file exists. If it exists and has been there for less than 30 minutes, return an error code
         if os.path.isfile(Command.FETCH_LOCK_FILE_PATH):
-            self.stdout.write(self.style.ERROR(u"Lock is in place. Unable to fetch"))
-            return False
+            # If the file is not old (has been there for less than 30 minutes), return an error code
+            if not Command._lock_file_is_old():
+                self.stdout.write(self.style.ERROR(u"Lock is in place. Unable to fetch"))
+                return False
+            os.remove(Command.FETCH_LOCK_FILE_PATH)
 
         # Creates a new lock file
         self.stdout.write(self.style.SUCCESS(u"Lock does not exist. Creating..."))
@@ -43,6 +49,19 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(u"Lock file created"))
         return True
+
+    # We consider a lock file is old when has been there 30 minutes or more
+    @staticmethod
+    def _lock_file_is_old():
+        lock_file_modification_datetime = Command._get_lock_file_last_modification_datetime()
+        return lock_file_modification_datetime > timezone.now() - timedelta(minutes=30)
+
+    # Gets last modification datetime of the lock file
+    @staticmethod
+    def _get_lock_file_last_modification_datetime():
+        t = os.path.getmtime(Command.FETCH_LOCK_FILE_PATH)
+        local_timezone = pytz.timezone(settings.TIME_ZONE)
+        return local_timezone.localize(datetime.fromtimestamp(t))
 
     def end(self):
         self.end_time = time.time()
