@@ -40,7 +40,14 @@ class Command(BaseCommand):
             if not Command._lock_file_is_old():
                 self.stdout.write(self.style.ERROR(u"Lock is in place. Unable to fetch"))
                 return False
+            # Warn administrators that lock file is too old and remove it
+            lock_last_modification_date_str = Command._get_lock_file_last_modification_datetime().isoformat()
+            self.warn_administrators(
+                subject=u"Lock file removed",
+                message=u"Lock file was last modified on {0} and was removed".format(lock_last_modification_date_str)
+            )
             os.remove(Command.FETCH_LOCK_FILE_PATH)
+            self.stdout.write(self.style.SUCCESS(u"Old lock created on {0} removed.".format(lock_last_modification_date_str)))
 
         # Creates a new lock file
         self.stdout.write(self.style.SUCCESS(u"Lock does not exist. Creating..."))
