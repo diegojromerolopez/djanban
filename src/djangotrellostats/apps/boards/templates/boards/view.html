@@ -16,7 +16,8 @@
         WEEK_OF_YEAR = "{{week_of_year}}";
         SPENT_TIME_BY_WEEK_CHART_URL = "{% url 'charts:spent_time_by_week' %}/WEEK_OF_YEAR/{{board.id}}";
     </script>
-    <script type="text/javascript" src="{% static 'js/boards/spent_time_by_week.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/boards/view/spent_time_by_week.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/boards/view/full_task_board.js' %}"></script>
 {% endblock js %}
 
 {% block content_menu %}

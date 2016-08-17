@@ -6,8 +6,13 @@
           </div>
           <div class="panel-body">
               <div class="card-info">
-                <div>Last activity: {{card.last_activity_date}}</div>
-                <div>{% if card.description %}{{card.description|truncatechars:30}}.{% endif %} <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}}" class="btn btn-primary btn-sm">View in Trello</a></div>
+                  <div>Last activity: {{card.last_activity_date}}</div>
+                  {% if card.description %}
+                    <div class="description cursor-pointer">
+                        <div class="short_description">{{card.description|truncatechars:50}}</div>
+                        <div class="long_description">{{card.description}}</div>
+                    </div>
+                  {% endif %}
               </div>
               {% if card.is_blocked %}
                   <div class="panel panel-default cursor-help" title="This card is blocked by {{card.pending_blocking_cards|length}} card(s). End them before developing this one.">

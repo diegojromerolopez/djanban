@@ -1,19 +1,23 @@
 {% load template_extensions %}
 
-<div id="full_board_container">
+<div id="full_task_board">
     <h2>Full task board</h2>
     <div class="row">
         {% with num_lists=lists|length %}
             {% if num_lists <= 12 %}
                 {% for list in lists %}
-                    <div class="{% if num_lists <= 6 %}col-md-2{% elif num_list <= 12 %}col-md-1{% endif %}">
+                    <div class="list {% if num_lists <= 6 %}col-md-2{% elif num_list <= 12 %}col-md-1{% endif %}">
                         <div class="panel {% if list.type == 'done' %}panel-success{% elif list.type == 'development' %}panel-primary{% else %}panel-default{% endif %}">
-                          <div class="panel-heading">{{list.name}}</div>
-                          <div class="panel-body">
-                              {% for card in list.active_cards %}
-                                {% include "boards/components/view/full_board_card.html" %}
-                              {% endfor %}
-                          </div>
+                            {% with list_active_cards=list.active_cards %}
+                                <div class="panel-heading cursor-pointer">
+                                    <strong>{{list.name}}</strong> ({{list_active_cards|length}} tasks)
+                                </div>
+                                <div class="panel-body cards" data-num_cards="{{list_active_cards|length}}">
+                                    {% for card in list_active_cards %}
+                                        {% include "boards/components/view/full_board_card.html" %}
+                                    {% endfor %}
+                                </div>
+                            {% endwith %}
                         </div>
                     </div>
                 {% endfor %}
