@@ -6,7 +6,7 @@
     <h1>Boards of {{member.trello_username}}</h1>
     <div class="board_list">
         {% if boards|length == 0 %}
-            {% include "boards/no_boards_warning.html" %}
+            {% include "boards/components/list/no_boards_warning.html" %}
         {% else %}
             <ul class="list-group">
                 {% for board in boards %}

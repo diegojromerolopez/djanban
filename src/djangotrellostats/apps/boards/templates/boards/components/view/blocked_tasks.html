@@ -1,0 +1,12 @@
+{% if board.pending_blocking_cards|length > 0 %}
+    <div id="blocked_cards_container" class="">
+        <h2>Blocked tasks</h2>
+        <div class="row">
+        {% for card in board.pending_blocking_cards %}
+            {% if card.is_blocked %}
+                {% include "cards/components/card.html" %}
+            {% endif %}
+        {% endfor %}
+        </div>
+    </div>
+{% endif %}

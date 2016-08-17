@@ -45,8 +45,14 @@ def view(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
     week_of_year = get_week_of_year()
-    replacements = {"board": board, "week_of_year": week_of_year,
-                    "member": member, "weeks_of_year": get_weeks_of_year_since_one_year_ago()}
+    lists = board.lists.exclude(type="ignored").order_by("position")
+    replacements = {
+        "board": board,
+        "lists": lists,
+        "week_of_year": week_of_year,
+        "member": member,
+        "weeks_of_year": get_weeks_of_year_since_one_year_ago()
+    }
     return render(request, "boards/view.html", replacements)
 
 

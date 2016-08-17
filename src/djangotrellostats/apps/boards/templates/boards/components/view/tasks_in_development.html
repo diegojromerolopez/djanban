@@ -1,0 +1,44 @@
+{% load template_extensions %}
+
+
+{% with development_cards=member|call:"get_current_development_cards"|arg:board %}
+    {% with num_development_cards=development_cards|length %}
+        <h2>Your tasks under development</h2>
+        <div>
+            {% if num_development_cards == 0 %}
+                You are not working in anything at the moment.
+            {% else %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-{% if num_development_cards > 2 %}danger{% else %}success{% endif %}">
+                              <div class="panel-heading">Tasks in development</div>
+                              <div class="panel-body">
+                                You are working in <strong>{{num_development_cards}}</strong> tasks in board {{board.name}}.
+                                  {% if num_development_cards > 2 %}
+                                    You are <strong>multitasking too much</strong>. Try to end your tasks before you start anything else.
+                                  {% else %}
+                                    <strong>Congratulations</strong>. You have a good equilibrium and are not multitasking (at least in this board). Keep the good work!
+                                  {% endif %}
+                              </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    {% for card in development_cards %}
+                        <div class="col-md-3">
+                            <div class="panel panel-info">
+                              <div class="panel-heading">
+                                  <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}}">{{card.name}}</a>
+                              </div>
+                              <div class="panel-body">
+                                  <div>Last activity: {{card.last_activity_date}}</div>
+                                  <div>{% if card.description %}{{card.description}}.{% endif %} <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}}" class="btn btn-primary btn-sm">View in Trello</a></div>
+                              </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endwith %}
+{% endwith %}

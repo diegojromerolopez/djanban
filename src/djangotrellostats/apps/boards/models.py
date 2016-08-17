@@ -199,10 +199,12 @@ class Card(ImmutableModel):
     members = models.ManyToManyField("members.Member", related_name="cards")
     blocking_cards = models.ManyToManyField("boards.card", related_name="blocked_cards")
 
+    # Is there any other card that blocks this card?
     @property
     def is_blocked(self):
         return self.blocking_cards.exclude(list__type="done").exists()
 
+    # Cards that are blocking this card and are not done
     @property
     def pending_blocking_cards(self):
         return self.blocking_cards.exclude(list__type="done")
@@ -248,8 +250,12 @@ class List(models.Model):
     uuid = models.CharField(max_length=128, verbose_name=u"External id of the list", unique=True)
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="lists")
     type = models.CharField(max_length=64, choices=LIST_TYPE_CHOICES, default="before_development")
+    position = models.PositiveIntegerField(verbose_name=u"Position of this list in the board", default=0)
 
-
+    # Return all cards that are not archived (closed)
+    @property
+    def active_cards(self):
+        return self.cards.filter(is_closed=False).order_by("position")
 
 
 

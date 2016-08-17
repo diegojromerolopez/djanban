@@ -80,6 +80,9 @@ class Initializer(object):
 
                     else:
                         _list = board.lists.get(uuid=trello_list.id)
+                        if _list.position != trello_list.pos:
+                            _list.position = trello_list.pos
+                            _list.save()
 
                         if self.debug:
                             print("- List {1} of board {0} was already created".format(board_name, _list.name))
