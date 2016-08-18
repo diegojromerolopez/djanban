@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'djangotrellostats.apps.fetch',
     'djangotrellostats.apps.reports',
     'djangotrellostats.apps.reporter',
+    'djangotrellostats.apps.requirements',
     'djangotrellostats.apps.workflows',
 ]
 

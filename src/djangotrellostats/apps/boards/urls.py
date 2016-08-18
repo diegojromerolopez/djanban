@@ -23,13 +23,13 @@ urlpatterns = [
 
     url(r'^(?P<board_id>\d+)/fetch/?$', boards.fetch, name="fetch"),
 
-    # Workflow URLs
-
-    url(r'^(?P<board_id>\d+)/workflows/', include('djangotrellostats.apps.workflows.urls', namespace="workflows")),
-
-
     # Change list type
     url(r'^change-list-type/?$', boards.change_list_type, name="change_list_type"),
 
+    # Workflow URLs
+    url(r'^(?P<board_id>\d+)/workflows/', include('djangotrellostats.apps.workflows.urls', namespace="workflows")),
+
+    # Requirement URLs
+    url(r'^(?P<board_id>\d+)/requirements/', include('djangotrellostats.apps.requirements.urls', namespace="requirements")),
 
 ]

@@ -1,0 +1,44 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}Requirements of board {{board.name}}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 card">
+            <div class="panel panel-info">
+              <div class="panel-heading">
+                  Requirement {{requirement.code}}
+              </div>
+              <div class="panel-body">
+                  <div class="actions">
+                        <a href="{% url 'boards:requirements:edit_requirement' board.id requirement.code %}" title="Edit requirement {{requirement.code}}">
+                            <span class="fa fa-pencil"></span>
+                        </a>
+                        <a href="{% url 'boards:requirements:delete_requirement' board.id requirement.code %}" title="Delete requirement {{requirement.code}}">
+                            <span class="fa fa-trash"></span>
+                        </a>
+                  </div>
+                  <div>
+                      {{requirement.name}}
+                  </div>
+                  <div>
+                      {{requirement.description}}
+                  </div>
+                  <div class="row">
+                      <p><strong>Tasks</strong></p>
+                      {% if pending_cards|length == 0 and done_cards|length == 0 %}
+                      There are no cards assigned to this requirement.
+                      {% else %}
+                          {% for card in pending_cards %}
+                            {% include "cards/component/card.html" %}
+                          {% endfor %}
+                          {% for card in done_cards %}
+                            {% include "cards/component/card.html" %}
+                          {% endfor %}
+                      {% endif %}
+                  </div>
+              </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
