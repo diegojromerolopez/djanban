@@ -29,9 +29,7 @@ def view(request, board_id, requirement_code):
     requirement = get_object_or_404(Requirement, code=requirement_code, board=board)
     replacements = {
         "board": board,
-        "requirement": requirement,
-        "done_cards": requirement.cards.filter(list__type="done"),
-        "pending_cards": requirement.cards.exclude(list__type="done")
+        "requirement": requirement
     }
     return render(request, "requirements/view.html", replacements)
 

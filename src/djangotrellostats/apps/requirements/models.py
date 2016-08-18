@@ -19,4 +19,10 @@ class Requirement(models.Model):
                                    verbose_name=u"Tasks that depend on this requirement",
                                    related_name="requirements")
 
+    @property
+    def done_cards(self):
+        return self.cards.filter(list__type="done")
 
+    @property
+    def pending_cards(self):
+        return self.cards.exclude(list__type="done")

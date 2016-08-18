@@ -18,7 +18,7 @@
                             <td>Code</td>
                             <td>Name</td>
                             <td>Description</td>
-                            <td>Cards</td>
+                            <td>Cards (pending/total)</td>
                             <td>Actions</td>
                         </tr>
                         {% for requirement in requirements %}
@@ -26,7 +26,7 @@
                                 <td>{{requirement.code}}</td>
                                 <td>{{requirement.name}}</td>
                                 <td>{{requirement.description|truncatechars:30}}</td>
-                                <td>{{requirement.cards.all|length}}</td>
+                                <td>{{requirement.pending_cards|length}}/{{requirement.cards.all|length}}</td>
                                 <td>
                                     <a href="{% url 'boards:requirements:view_requirement' board.id requirement.code %}" title="View requirement {{requirement.code}}">
                                         <span class="fa fa-eye"></span>

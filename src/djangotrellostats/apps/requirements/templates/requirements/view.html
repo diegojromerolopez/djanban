@@ -27,17 +27,21 @@
                       </div>
                       <div class="row">
                           <div class="col-md-12">
-                              {% if pending_cards|length == 0 and done_cards|length == 0 %}
+                              {% if requirement.pending_cards|length == 0 and requirement.done_cards|length == 0 %}
                                 There are no cards assigned to this requirement.
                               {% else %}
+                                <div class="row">
                                     <p>Pending cards</p>
-                                  {% for card in pending_cards %}
+                                  {% for card in requirement.pending_cards %}
                                     {% include "cards/components/card.html" %}
                                   {% endfor %}
+                                    </div>
+                                <div class="row">
                                     <p>Done cards</p>
-                                  {% for card in done_cards %}
+                                  {% for card in requirement.done_cards %}
                                     {% include "cards/components/card.html" %}
                                   {% endfor %}
+                                </div>
                               {% endif %}
                           </div>
                       </div>
