@@ -166,7 +166,8 @@ class Board(models.Model):
 # Card of the task board
 class Card(ImmutableModel):
     COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s+(\-(?P<days_before>(\d+))d\s+)?(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)(\s*(?P<description>.+))?"
-    COMMENT_BLOCKED_CARD_REGEX = r"^blocked\s+by\s+(?P<card_url>.+)"
+    COMMENT_BLOCKED_CARD_REGEX = r"^blocked\s+by\s+(?P<card_url>.+)$"
+    COMMENT_REQUIREMENT_CARD_REGEX = r"^task\s+of\s+requirement\s+(?P<requirement_code>.+)$"
 
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
     list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")

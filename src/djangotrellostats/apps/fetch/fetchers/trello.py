@@ -393,6 +393,16 @@ class CardFetcher(object):
                     blocking_card = self.board.cards.get(url=blocking_card_url)
                     card.blocking_cards.add(blocking_card)
 
+        # Requirements
+        for card in self.cards:
+            requirement_codes = card.trello_card.comment_summary.get("requirement_codes")
+            # For each one of this card's requirements, check if it exists and if that's the case,
+            # add this requirement to this card's requirements
+            for requirement_code in requirement_codes:
+                if self.board.requirements.filter(code=requirement_code).exists():
+                    requirement = self.board.requirements.get(code=requirement_code)
+                    card.requirements.add(requirement)
+
         return self.cards
 
     # Create a card from a Trello Card
@@ -536,6 +546,7 @@ class CardFetcher(object):
         total_estimated = None
         spent_by_member = {}
         blocking_card_urls = []
+        requirement_codes = []
         estimated_by_member = {}
         member_uuids = {}
 
@@ -625,12 +636,20 @@ class CardFetcher(object):
                     card_url = matches.group("card_url")
                     blocking_card_urls.append(card_url)
 
+                # Dependencie on requirement
+                else:
+                    matches = re.match(Card.COMMENT_REQUIREMENT_CARD_REGEX, comment_content, re.IGNORECASE)
+                    if matches:
+                        requirement_code = matches.group("requirement_code")
+                        requirement_codes.append(requirement_code)
+
         trello_card.comment_summary = {
             "daily_spent_times": trello_card.daily_spent_times,
             "member_uuids": member_uuids.keys(),
             "spent": {"total": total_spent, "by_member": spent_by_member},
             "estimated": {"total": total_estimated, "by_member": estimated_by_member},
-            "blocking_card_urls": blocking_card_urls
+            "blocking_card_urls": blocking_card_urls,
+            "requirement_codes": requirement_codes
         }
         return trello_card.comment_summary
 
