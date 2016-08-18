@@ -1,11 +1,15 @@
+# -*- coding: utf-8 -*-
+
 import datetime
 import time
+import traceback
 
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from django.utils import timezone
 
+from djangotrellostats.apps.base.email import warn_administrators
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.reporter.management.commands import daily_report
@@ -41,11 +45,16 @@ class Command(daily_report.Command):
         start = time.time()
 
         developers = Member.objects.filter(is_developer=True, on_holidays=False)
-        for member in developers:
-            if member.daily_spent_times.filter(date=date).count() > 0 and member.user:
-                daily_spent_times = member.daily_spent_times.filter(date=date).order_by("date", "member")
-                Command.send_daily_development_report(date, member, daily_spent_times)
-                self.stdout.write(self.style.SUCCESS(u"Daily report sent to developer {0}".format(member.user.email)))
+        try:
+            for member in developers:
+                if member.daily_spent_times.filter(date=date).count() > 0 and member.user:
+                    daily_spent_times = member.daily_spent_times.filter(date=date).order_by("date", "member")
+                    Command.send_daily_development_report(date, member, daily_spent_times)
+                    self.stdout.write(self.style.SUCCESS(u"Daily report sent to developer {0}".format(member.user.email)))
+        except Exception as e:
+            warn_administrators(subject=u"Error in Daily development report",
+                                message=traceback.format_exc())
+            self.stdout.write(self.style.ERROR(u"Error en el daily development report "))
 
         end = time.time()
         elapsed_time = end-start

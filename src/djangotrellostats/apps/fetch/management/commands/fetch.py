@@ -1,21 +1,21 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 
 import os
-import sys
-from io import open
 import time
 import traceback
+from datetime import datetime, timedelta
+from io import open
 
 import pytz
 from django.conf import settings
-from django.contrib.auth.models import Group
-from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
+from djangotrellostats.apps.base.email import warn_administrators
 from djangotrellostats.apps.fetch.fetchers.trello import BoardFetcher, Initializer
 from djangotrellostats.apps.members.models import Member
-from datetime import datetime, timedelta
 
 
 class Command(BaseCommand):
@@ -42,7 +42,7 @@ class Command(BaseCommand):
                 return False
             # Warn administrators that lock file is too old and remove it
             lock_last_modification_date_str = Command._get_lock_file_last_modification_datetime().isoformat()
-            self.warn_administrators(
+            warn_administrators(
                 subject=u"Lock file removed",
                 message=u"Lock file was last modified on {0} and was removed".format(lock_last_modification_date_str)
             )
@@ -101,7 +101,7 @@ class Command(BaseCommand):
         if not self.start():
             self.stdout.write(self.style.ERROR("Unable to fetch"))
             error_message = u"Unable to fetch boards. Is the lock file present?"
-            self.warn_administrators(subject=u"Unable to fetch boards",
+            warn_administrators(subject=u"Unable to fetch boards",
                                      message=error_message)
             raise AssertionError(error_message)
 
@@ -114,7 +114,7 @@ class Command(BaseCommand):
         # If after two retries the exception persists, warn the administrators
         except Exception as e:
             fetch_ok = False
-            self.warn_administrators(subject=u"Unable to fetch boards",
+            warn_administrators(subject=u"Unable to fetch boards",
                                      message=u"We tried initializing the boards but it didn't work out. {0}".format(traceback.format_exc()))
         # Always delete the lock file
         finally:
@@ -143,7 +143,8 @@ class Command(BaseCommand):
                 error_message = u"Error when fetching boards. Board {0} fetch failed.".format(last_board.name)
             else:
                 error_message = u"Error when fetching boards."
-            self.warn_administrators(subject=error_message, message=traceback.format_exc())
+            # Warn the administrators messaging them the traceback and show the error on stdout
+            warn_administrators(subject=error_message, message=traceback.format_exc())
             self.stdout.write(self.style.ERROR(error_message))
 
     # Fetch one board
@@ -162,12 +163,3 @@ class Command(BaseCommand):
                 else:
                     raise e
 
-    # Warn administrators of an error
-    def warn_administrators(self, subject, message):
-        email_subject = u"[DjangoTrelloStats] [Warning] {0}".format(subject)
-
-        administrator_group = Group.objects.get(name=settings.ADMINISTRATOR_GROUP)
-        administrator_users = administrator_group.user_set.all()
-        for administrator_user in administrator_users:
-            email_message = EmailMultiAlternatives(email_subject, message, settings.EMAIL_HOST_USER, [administrator_user.email])
-            email_message.send()
