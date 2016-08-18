@@ -22,26 +22,28 @@
                             </div>
                         {% endif %}
                         <div>
-                            <a class="btn btn-primary" href="{% url 'boards:view' board.id %}">
+                            <a class="btn btn-primary" href="{% url 'boards:view' board.id %}" title="View board {{board.name}}">
                                 <span class="fa fa-eye"></span> View
                             </a>
-                            <a class="btn btn-primary" href="{% url 'boards:edit' board.id %}">
+                            <a class="btn btn-primary" href="{% url 'boards:edit' board.id %}" title="Edit board {{board.name}}">
                                 <span class="fa fa-pencil"></span> Edit
                             </a>
-                            <a class="btn btn-primary" href="{% url 'boards:view_lists' board.id %}">
+                            <a class="btn btn-primary" href="{% url 'boards:view_lists' board.id %}" title="View lists of board {{board.name}}">
                                 <span class="fa fa-list"></span> Lists</a>
                             {% if board.is_ready %}
-                                <a class="btn btn-primary" href="{% url 'boards:workflows:view_list' board.id %}">Workflows</a>
-                                <a class="btn btn-primary" href="{% url 'boards:view_card_report' board.id %}">
+                                <a class="btn btn-primary" href="{% url 'boards:workflows:view_list' board.id %}" title="View workflows of board {{board.name}}">Workflows</a>
+                                <a class="btn btn-primary" href="{% url 'boards:view_card_report' board.id %}" title="View cards of board {{board.name}}">
                                     <span class="fa fa-sticky-note-o"></span> Cards
                                 </a>
                                 {% for workflow in board.workflows.all %}
-                                    <a class="btn btn-primary" href="{% url 'boards:workflows:view_workflow_card_report' board.id workflow.id %}">View {{workflow.name}} report</a>
+                                    <a class="btn btn-primary" href="{% url 'boards:workflows:view_workflow_card_report' board.id workflow.id %}" title="View workflow {{workflow.name}} report for board {{board.name}}">
+                                        View {{workflow.name}} report
+                                    </a>
                                 {% endfor %}
-                                <a class="btn btn-primary" href="{% url 'boards:view_label_report' board.id %}">
+                                <a class="btn btn-primary" href="{% url 'boards:view_label_report' board.id %}" title="View label report of board {{board.name}}">
                                     <span class="fa fa-tags"></span> Labels
                                 </a>
-                                <a class="btn btn-primary" href="{% url 'boards:view_member_report' board.id %}">
+                                <a class="btn btn-primary" href="{% url 'boards:view_member_report' board.id %}" title="View members of board {{board.name}}">
                                     <span class="fa fa-users"></span> Members
                                 </a>
                                 <a class="btn btn-primary" href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">
