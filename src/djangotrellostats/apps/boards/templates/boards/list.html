@@ -46,7 +46,7 @@
                                 <a class="btn btn-primary" href="{% url 'boards:view_member_report' board.id %}" title="View members of board {{board.name}}">
                                     <span class="fa fa-users"></span> Members
                                 </a>
-                                <a class="btn btn-primary" href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}">
+                                <a class="btn btn-primary" href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}" title="View spent times of board {{board.name}}">
                                     <span class="fa fa-calendar-check-o"></span> Spent times
                                 </a>
                                 {% if board.estimated_number_of_hours %}
