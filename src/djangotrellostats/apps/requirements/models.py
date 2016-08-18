@@ -24,5 +24,9 @@ class Requirement(models.Model):
         return self.cards.filter(list__type="done")
 
     @property
+    def done_cards_percentage(self):
+        return  self.done_cards.count() * 100.0 / self.cards.all().count()
+
+    @property
     def pending_cards(self):
         return self.cards.exclude(list__type="done")

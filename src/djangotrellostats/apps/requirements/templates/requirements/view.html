@@ -30,7 +30,18 @@
                               {% if requirement.pending_cards|length == 0 and requirement.done_cards|length == 0 %}
                                 There are no cards assigned to this requirement.
                               {% else %}
-                                <div class="row">
+                                {% with done_cards_percentage=requirement.done_cards_percentage %}
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                          <div class="progress">
+                                              <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{done_cards_percentage}}%;">
+                                                {{done_cards_percentage}}%
+                                              </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endwith %}
+                                    <div class="row">
                                     <p>Pending cards</p>
                                   {% for card in requirement.pending_cards %}
                                     {% include "cards/components/card.html" %}
