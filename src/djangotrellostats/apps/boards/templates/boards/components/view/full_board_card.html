@@ -7,6 +7,7 @@
           <div class="panel-body">
               <div class="card-info">
                   <div>Last activity: {{card.last_activity_date}}</div>
+                  {% if card.spent_time %}<div>Spent time: {{card.spent_time|floatformat:-2}} hours</div>{% else %}{% endif %}
                   {% if card.description %}
                     <div class="description cursor-pointer">
                         <div class="short_description">{{card.description|truncatechars:50}}</div>

@@ -4,6 +4,9 @@ from django.db import models
 
 
 # A requirement for a project
+from django.db.models import Sum
+
+
 class Requirement(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="requirements")
 
@@ -21,6 +24,10 @@ class Requirement(models.Model):
 
     value = models.PositiveIntegerField(verbose_name=u"Value of this requirement", default=0)
 
+    estimated_number_of_hours = models.PositiveIntegerField(verbose_name=u"Estimated number of hours to be completed",
+                                                            help_text=u"Cost in hours to complete this requirement.",
+                                                            blank=True, default=None, null=True)
+
     @property
     def done_cards(self):
         return self.cards.filter(list__type="done")
@@ -31,6 +38,13 @@ class Requirement(models.Model):
         if num_cards == 0:
             return 0
         return self.done_cards.count() * 100.0 / num_cards
+
+    @property
+    def done_cards_spent_time(self):
+        done_cards_spent_time = self.done_cards.aggregate(sum=Sum("spent_time"))["sum"]
+        if done_cards_spent_time is None:
+            return 0
+        return done_cards_spent_time
 
     @property
     def pending_cards(self):

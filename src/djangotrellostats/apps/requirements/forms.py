@@ -9,7 +9,7 @@ from ckeditor.widgets import CKEditorWidget
 class RequirementForm(forms.ModelForm):
     class Meta:
         model = Requirement
-        fields = ["code", "name", "description", "value"]
+        fields = ["code", "name", "description", "value", "estimated_number_of_hours"]
 
     def __init__(self, *args, **kwargs):
         super(RequirementForm, self).__init__(*args, **kwargs)
@@ -20,7 +20,7 @@ class RequirementForm(forms.ModelForm):
 class NewRequirementForm(RequirementForm):
     class Meta:
         model = Requirement
-        fields = ["code", "name", "description", "value"]
+        fields = ["code", "name", "description", "value", "estimated_number_of_hours"]
 
     def __init__(self, *args, **kwargs):
         super(NewRequirementForm, self).__init__(*args, **kwargs)
@@ -32,7 +32,7 @@ class NewRequirementForm(RequirementForm):
 class EditRequirementForm(RequirementForm):
     class Meta:
         model = Requirement
-        fields = ["name", "description", "value"]
+        fields = ["name", "description", "value", "estimated_number_of_hours"]
 
 
 # Requirement form
