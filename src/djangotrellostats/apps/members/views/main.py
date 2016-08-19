@@ -74,6 +74,8 @@ def change_password_to_member(request, member_id):
             user = member.user
             user.set_password(member_password)
             user.save()
+            if request.user.id == member.user_id:
+                return HttpResponseRedirect(reverse("index"))
             return HttpResponseRedirect(reverse("members:view_members"))
 
     else:
