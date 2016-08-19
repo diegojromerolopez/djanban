@@ -27,14 +27,14 @@ def view_daily_spent_times(request):
 # Export daily spent report in CSV format
 @login_required
 def export_daily_spent_times(request):
-    parameters = _get_daily_spent_times_from_request(request)
+    spent_times = _get_daily_spent_times_from_request(request)
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="export-daily-spent-times.csv"'
 
     csv_template = loader.get_template('daily_spent_times/csv.txt')
     replacements = Context({
-        'spent_times': parameters["queryset"],
+        'spent_times': spent_times["all"],
     })
     response.write(csv_template.render(replacements))
     return response
