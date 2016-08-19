@@ -19,7 +19,8 @@
                             <td>Name</td>
                             <td>Value</td>
                             <td>Description</td>
-                            <td>Cards (pending/total)</td>
+                            <td>Percentage of completion</td>
+                            <td>Cards (done/total)</td>
                             <td>Actions</td>
                         </tr>
                         {% for requirement in requirements %}
@@ -27,8 +28,9 @@
                                 <td>{{requirement.code}}</td>
                                 <td>{{requirement.name}}</td>
                                 <td>{{requirement.value}}</td>
-                                <td>{{requirement.description|truncatechars:30}}</td>
-                                <td>{{requirement.pending_cards|length}}/{{requirement.cards.all|length}}</td>
+                                <td>{{requirement.description|safe|truncatechars_html:30}}</td>
+                                <td>{{requirement.done_cards_percentage}}%</td>
+                                <td>{{requirement.done_cards|length}}/{{requirement.cards.all|length}}</td>
                                 <td>
                                     <a href="{% url 'boards:requirements:view_requirement' board.id requirement.code %}" title="View requirement {{requirement.code}}">
                                         <span class="fa fa-eye"></span>

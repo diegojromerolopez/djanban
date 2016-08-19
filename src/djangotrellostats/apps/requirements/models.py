@@ -27,7 +27,10 @@ class Requirement(models.Model):
 
     @property
     def done_cards_percentage(self):
-        return  self.done_cards.count() * 100.0 / self.cards.all().count()
+        num_cards = self.cards.all().count()
+        if num_cards == 0:
+            return 0
+        return self.done_cards.count() * 100.0 / num_cards
 
     @property
     def pending_cards(self):

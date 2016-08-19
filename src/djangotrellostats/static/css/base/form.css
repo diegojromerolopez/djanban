@@ -13,3 +13,8 @@ form input {
 form textarea {
     width: 100%;
 }
+
+form .django-ckeditor-widget,
+form .cke_chrome{
+    width: 100% !important;
+}

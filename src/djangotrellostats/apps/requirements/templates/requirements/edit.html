@@ -1,8 +1,8 @@
-{% extends "boards/view.html" %}
+{% extends "requirements/form.html" %}
 
 {% block page_title %}Edit requirement {{requirement.code}} for {{board.name}}{% endblock %}
 
 {% block content %}
-    <h1>Requirement {{requirement.code}} of {{board.name}}</h1>
+    <h1>Edit requirement {{requirement.code}} of {{board.name}}</h1>
     {% include "forms/form.html" %}
 {% endblock content %}

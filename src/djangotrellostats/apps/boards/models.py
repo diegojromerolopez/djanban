@@ -40,9 +40,11 @@ class Board(models.Model):
 
     members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="boards")
 
-    percentage_of_completion = models.DecimalField(verbose_name=u"Percentage of completion",
-                                                   decimal_places=2, max_digits=10,
-                                                   blank=True, default=None, null=True)
+    percentage_of_completion = models.DecimalField(
+        verbose_name=u"Percentage of completion",
+        help_text=u"Percentage of completion of project. Mind the porcentage of completion of each requirement",
+        decimal_places=2, max_digits=10, blank=True, default=None, null=True
+    )
 
     estimated_number_of_hours = models.PositiveIntegerField(verbose_name=u"Estimated number of hours to be completed",
                                                             help_text=u"Number of hours in the budget",

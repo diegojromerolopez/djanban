@@ -2,6 +2,7 @@ import shortuuid
 
 from djangotrellostats.apps.requirements.models import Requirement
 from django import forms
+from ckeditor.widgets import CKEditorWidget
 
 
 # Requirement form
@@ -9,6 +10,10 @@ class RequirementForm(forms.ModelForm):
     class Meta:
         model = Requirement
         fields = ["code", "name", "description", "value"]
+
+    def __init__(self, *args, **kwargs):
+        super(RequirementForm, self).__init__(*args, **kwargs)
+        self.fields["description"].widget = CKEditorWidget()
 
 
 # Requirement form
@@ -21,7 +26,6 @@ class NewRequirementForm(RequirementForm):
         super(NewRequirementForm, self).__init__(*args, **kwargs)
         self.initial["code"] = u"{0}{1}".format(self.instance.board.name[0].upper(),
                                                 shortuuid.ShortUUID().random(length=4).upper())
-        #self.fields["descritpion"].widget =
 
 
 # Requirement form
