@@ -7,7 +7,7 @@
         <div class="col-md-12 card">
             <div class="panel panel-info">
               <div class="panel-heading">
-                  Requirement {{requirement.code}}
+                  <h1>Requirement {{requirement.code}}: {{requirement.name}}</h1>
               </div>
               <div class="panel-body row">
                   <div class="col-md-12">
@@ -19,11 +19,21 @@
                                 <span class="fa fa-trash"></span>
                             </a>
                       </div>
-                      <div>
-                          {{requirement.name}}
+                      <div class="alert alert-info" role="alert">
+                          <span class="fa fa-info-circle fa-2x"></span>
+                          Write '<strong>Task of requirement {{requirement.code}}</strong>' in a card comment to associate that card to this requirement.
                       </div>
-                      <div>
-                          {{requirement.description}}
+                       <div class="row">
+                           <div class="col-md-12 description">
+                            <div class="panel panel-info">
+                                  <div class="panel-heading">
+                                      Description
+                                  </div>
+                                <div class="panel-body">
+                                    {{requirement.description}}
+                                </div>
+                           </div>
+                        </div>
                       </div>
                       <div class="row">
                           <div class="col-md-12">
@@ -42,17 +52,42 @@
                                     </div>
                                 {% endwith %}
                                     <div class="row">
-                                    <p>Pending cards</p>
-                                  {% for card in requirement.pending_cards %}
-                                    {% include "cards/components/card.html" %}
-                                  {% endfor %}
+                                        <div class="col-md-12">
+                                            <div class="panel panel-default">
+                                              <div class="panel-heading">Pending cards</div>
+                                              <div class="panel-body">
+                                                  {% with pending_cards=requirement.pending_cards %}
+                                                        {% if pending_cards|length > 0 %}
+                                                          {% for card in pending_cards %}
+                                                            {% include "cards/components/card.html" %}
+                                                          {% endfor %}
+                                                        {% else %}
+                                                            Congratulations! You have no pending cards.
+                                                        {% endif %}
+                                                  {% endwith %}
+                                              </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                <div class="row">
-                                    <p>Done cards</p>
-                                  {% for card in requirement.done_cards %}
-                                    {% include "cards/components/card.html" %}
-                                  {% endfor %}
-                                </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="panel panel-success">
+                                              <div class="panel-heading">Done cards</div>
+                                              <div class="panel-body">
+                                                  {% with done_cards=requirement.done_cards %}
+                                                    {% if done_cards|length > 0 %}
+                                                        {% for card in done_cards %}
+                                                            {% include "cards/components/card.html" %}
+                                                          {% endfor %}
+                                                    {% else %}
+                                                        Sorry there are no done cards.
+                                                    {% endif %}
+                                                  {% endwith %}
+                                              </div>
+                                            </div>
+                                        </div>
+                                    </div>
                               {% endif %}
                           </div>
                       </div>
