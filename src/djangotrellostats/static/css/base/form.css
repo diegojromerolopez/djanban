@@ -1,0 +1,15 @@
+form {
+    width: 80%;
+}
+
+form .field.input-group{
+    width: 100%
+}
+
+form input {
+    width: 100%;
+}
+
+form textarea {
+    width: 100%;
+}

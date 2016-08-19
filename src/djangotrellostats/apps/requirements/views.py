@@ -14,7 +14,7 @@ from djangotrellostats.apps.requirements.models import Requirement
 @login_required
 def view_list(request, board_id):
     board = get_object_or_404(Board, id=board_id)
-    requirements = board.requirements.all()
+    requirements = board.requirements.all().order_by("value")
     replacements = {
         "board": board,
         "requirements": requirements
@@ -34,6 +34,7 @@ def view(request, board_id, requirement_code):
     return render(request, "requirements/view.html", replacements)
 
 
+# New requirement
 @login_required
 def new(request, board_id):
     member = request.user.member
@@ -56,6 +57,7 @@ def new(request, board_id):
     return render(request, "requirements/new.html", {"form": form, "board": board, "member": member})
 
 
+# Edition of requirement
 @login_required
 def edit(request, board_id, requirement_code):
     member = request.user.member
@@ -78,6 +80,7 @@ def edit(request, board_id, requirement_code):
     return render(request, "requirements/edit.html", {"form": form, "board": board, "member": member})
 
 
+# Delete a requirement
 @login_required
 def delete(request, board_id, requirement_code):
     member = request.user.member

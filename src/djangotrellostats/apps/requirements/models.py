@@ -19,6 +19,8 @@ class Requirement(models.Model):
                                    verbose_name=u"Tasks that depend on this requirement",
                                    related_name="requirements")
 
+    value = models.PositiveIntegerField(verbose_name=u"Value of this requirement", default=0)
+
     @property
     def done_cards(self):
         return self.cards.filter(list__type="done")
