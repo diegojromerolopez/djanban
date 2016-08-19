@@ -132,7 +132,18 @@ And that's all, then you have several interfaces with data about members, labels
 
 ## Board blocked cards
 
+To block a card, make a comment in the blocked card with the following text:
+**Blocked by CARD_URL** where CARD_URL is the URL of the blocking card in this board.
+
 ![Board blocked cards](resources/images/screencaptures/board-blocked-cards.png)
+
+## Board requirements
+
+To associate a card to a requirement make a comment in that card with the following text:
+**Task of requirement REQUIREMENT_CODE** where REQUIREMENT_CODE is the unique requirement code
+of this requirement.
+
+![Board blocked cards](resources/images/screencaptures/board-requirements.png)
 
 ## Board labels
 
