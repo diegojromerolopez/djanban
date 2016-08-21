@@ -5,12 +5,38 @@
 
 Statistics and charts for Trello boards, now in a Django app.
 
+# What's this?
+
+Django Trello Stats is a web site that allows you to connect to your Trello user and fetch data from your boards.
+
+The fetched data is processed and you are presented with several stats for each project that help you take
+strategic decisions like:
+
+- Is the maximum *work in progress* for each state/list being followed?
+- Is there some tasks that are going back to earlier states too much?
+- How many hours are your team working and in what projects?
+- What's the lead and cycle time of each project tasks?
+- Is the project on time according to its percentage of completion?
+
+# How doest it work?
+
+First you have to sign up with your Trello API credentials. Initialize your boards and customize the type of each board list.
+
+Once you have your boards ready, fetch the data.
+
+You can also give other board members access to the dashboard. Each member will be able to access to his/her own boards, so it is perfect for a multi-project team.
+
+![How it works](resources/images/diagrams/how-it-works.png)
+
+
 # Requirements
 
 ## Plus for Trello
 
 Use [Plus for Trello](https://chrome.google.com/webstore/detail/plus-for-trello-time-trac/gjjpophepkbhejnglcmkdnncmaanojkf?hl=en)
 in your boards to allow this application to get card spent and estimated times.
+
+Configure Plus for Trello to use **time storage in comments**. Otherwise, Django Trello Stats will be unable to trak spend and estimated time.
 
 Don't use the feature of assigning times to other members of the team because it is not implemented yet.
 
@@ -105,9 +131,10 @@ And of course, you have to fetch the cards.
 python src/manage.py fetch <trello_username>
 ```
 
-One good idea is set this action in a cron action and call it each hour or half-hour.
+You'll need to set this action in a cron action and call it each hour or half-hour.
 
 This process takes several seconds for each board (only three requests are needed per board).
+In my tests, for 4 boards, the process takes 1 minute.
 
 If you want to call this action, there is a button that allows you to fetch all the board data:
 
