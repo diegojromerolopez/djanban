@@ -7,6 +7,7 @@
                 <tr class="header main_header month_{{month.i}}">
                     <td colspan="10">
                         <strong>{{month.year}}/{{month.name}}</strong> ({{month.daily_spent_times|length}} measurements)
+                        <a href="{% url 'dev_times:export_daily_spent_times' %}?start_date={{month.first_day|date:'Y-m-d'}}&end_date={{month.last_day|date:'Y-m-d'}}&member_id={{selected_member.id}}&board_id={{board.id}}" class="btn btn-primary">Export {{month.year}}/{{month.name}} as CSV</a>
                     </td>
                 </tr>
                 <tr class="header month_{{month.i}}">

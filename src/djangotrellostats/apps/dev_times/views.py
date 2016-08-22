@@ -166,7 +166,11 @@ def _get_daily_spent_times_queryset(current_member, selected_member, start_date_
             month_name = calendar.month_name[month_index]
             daily_spent_times_in_month_i = daily_spent_times.filter(date__month=month_index).order_by("date")
 
+            first_weekday, number_of_days_in_month = calendar.monthrange(year, month_index)
+
             month = {
+                "first_day": datetime.date(year, month_index, 1),
+                "last_day": datetime.date(year, month_index, number_of_days_in_month),
                 "name": month_name,
                 "number": month_index,
                 "year": year,

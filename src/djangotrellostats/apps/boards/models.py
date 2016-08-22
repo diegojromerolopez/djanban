@@ -42,7 +42,7 @@ class Board(models.Model):
 
     percentage_of_completion = models.DecimalField(
         verbose_name=u"Percentage of completion",
-        help_text=u"Percentage of completion of project. Mind the porcentage of completion of each requirement",
+        help_text=u"Percentage of completion of project. Mind the percentage of completion of each requirement.",
         decimal_places=2, max_digits=10, blank=True, default=None, null=True
     )
 
