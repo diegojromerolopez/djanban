@@ -21,7 +21,7 @@ from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.fetch.fetchers.base import Fetcher
 from djangotrellostats.apps.reports.models import ListReport, MemberReport
 from trello import TrelloClient
-
+import shortuuid
 
 # Initialize boards
 class Initializer(object):
@@ -52,6 +52,7 @@ class Initializer(object):
                     board_name = trello_board.name
                     board = Board(uuid=trello_board.id, name=board_name,
                                   last_activity_date=trello_board.date_last_activity,
+                                  public_access_code=shortuuid.ShortUUID().random(length=20).lower(),
                                   creator=self.member)
                     board.save()
                     if self.debug:

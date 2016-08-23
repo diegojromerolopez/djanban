@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
 
+from decimal import Decimal
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from decimal import Decimal
 
 
 # Daily spent time by member
-from djangotrellostats.apps.week import get_iso_week_of_year
+from djangotrellostats.utils.week import get_iso_week_of_year
 
 
 class DailySpentTime(models.Model):

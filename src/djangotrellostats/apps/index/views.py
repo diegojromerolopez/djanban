@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.members.models import Member
-from djangotrellostats.apps.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
+from djangotrellostats.utils.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
 
 
 def index(request):

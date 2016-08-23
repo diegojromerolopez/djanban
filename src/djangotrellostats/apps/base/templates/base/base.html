@@ -27,7 +27,9 @@
 
     <body>
 
-        {% include "base/header.html" %}
+        {% block header %}
+            {% include "base/header.html" %}
+        {% endblock header %}
 
         <div id="content_wrapper">
 
@@ -45,7 +47,9 @@
             </div>
         </div>
 
-        {% include "base/footer.html" %}
+        {% block footer  %}
+            {% include "base/footer.html" %}
+        {% endblock footer %}
 
     </body>
 

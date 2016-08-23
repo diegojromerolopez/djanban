@@ -4,7 +4,7 @@ from isoweek import Week
 
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.reporter.management.report_command import ReportCommand
-from djangotrellostats.apps.week import get_iso_week_of_year
+from djangotrellostats.utils.week import get_iso_week_of_year
 
 
 class Command(ReportCommand):

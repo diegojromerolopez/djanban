@@ -8,6 +8,11 @@
     font-weight: normal;
 }
 
+#public_access textarea{
+    height: 40px;
+    padding: 10px;
+    width: 100%;
+}
 
 .card-info {
     margin-bottom: 1em;

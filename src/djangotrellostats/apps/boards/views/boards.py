@@ -1,30 +1,33 @@
 # -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
+import time
+
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.http.response import Http404, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.template import loader
 from django.template.context import Context
-from django.utils import timezone
+from django.conf import settings
 
 from djangotrellostats.apps.boards.forms import EditBoardForm
-from djangotrellostats.apps.boards.models import List
+from djangotrellostats.apps.boards.models import List, Board
 from djangotrellostats.apps.boards.stats import avg, std_dev
-from djangotrellostats.apps.dev_times.models import DailySpentTime
-import time
+
+from djangotrellostats.apps.fetch.fetchers.trello import BoardFetcher, Initializer
+from djangotrellostats.utils.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
 
 
 # Initialize boards with data fetched from trello
-from djangotrellostats.apps.fetch.fetchers.trello import BoardFetcher
-from djangotrellostats.apps.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
-
-
 @login_required
 def init_boards(request):
     if request.method == "POST":
         member = request.user.member
-        member.init_fetch()
+        initializer = Initializer(member)
+        initializer.init()
         return HttpResponseRedirect(reverse("boards:view_boards"))
 
     raise Http404
@@ -47,6 +50,7 @@ def view(request, board_id):
     week_of_year = get_week_of_year()
     lists = board.lists.exclude(type="ignored").order_by("position")
     replacements = {
+        "url_prefix": "http://{0}".format(settings.DOMAIN),
         "board": board,
         "lists": lists,
         "week_of_year": week_of_year,
@@ -54,6 +58,20 @@ def view(request, board_id):
         "weeks_of_year": get_weeks_of_year_since_one_year_ago()
     }
     return render(request, "boards/view.html", replacements)
+
+
+# Public view for other stakeholders that do not have access to the board
+def public_view(request, board_public_access_code):
+    board = get_object_or_404(Board, enable_public_access=True, public_access_code=board_public_access_code)
+    week_of_year = get_week_of_year()
+    lists = board.lists.exclude(type="ignored").order_by("position")
+    replacements = {
+        "board": board,
+        "lists": lists,
+        "week_of_year": week_of_year,
+        "weeks_of_year": get_weeks_of_year_since_one_year_ago()
+    }
+    return render(request, "boards/public_view.html", replacements)
 
 
 # Edit board
@@ -81,8 +99,8 @@ def view_lists(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
     lists = board.lists.all()
-    list_types = {list_type_par[0]:list_type_par[1] for list_type_par in List.LIST_TYPE_CHOICES}
-    replacements = {"member": member, "board": board, "lists": lists, "list_types":list_types}
+    list_types = {list_type_par[0]: list_type_par[1] for list_type_par in List.LIST_TYPE_CHOICES}
+    replacements = {"member": member, "board": board, "lists": lists, "list_types": list_types}
     return render(request, "boards/board_lists.html", replacements)
 
 

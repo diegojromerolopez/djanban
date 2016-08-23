@@ -36,6 +36,16 @@ class Board(models.Model):
                                             help_text="Select this option if you want to fetch data for this board.",
                                             default=True)
 
+    enable_public_access = models.BooleanField(verbose_name=u"Enable public access to this board",
+                                               help_text=u"Only when enabled the users will be able to access",
+                                               default=False)
+
+    # Public access code to the board
+    public_access_code = models.CharField(max_length=32,
+                                          verbose_name=u"External code of the board",
+                                          help_text=u"With this code it is possible to access to a view with stats "
+                                                    u"of this board", unique=True)
+
     last_fetch_datetime = models.DateTimeField(verbose_name=u"Last fetch datetime", default=None, null=True)
 
     members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="boards")

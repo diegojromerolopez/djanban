@@ -1,21 +1,15 @@
-import time
+import datetime
 
 from django.conf import settings
 from django.contrib.auth.models import Group
+from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand
-from django.utils import timezone
-from django.shortcuts import render
-from django.core.mail import send_mail
 from django.template.loader import get_template
+from django.utils import timezone
 
 from djangotrellostats.apps.boards.models import Board
-from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
-
-import datetime
-
-from djangotrellostats.apps.week import get_iso_week_of_year
-from django.core.mail import EmailMultiAlternatives
+from djangotrellostats.utils.week import get_iso_week_of_year
 
 
 class ReportCommand(BaseCommand):

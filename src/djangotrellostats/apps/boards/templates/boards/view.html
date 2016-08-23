@@ -3,7 +3,7 @@
 {% load template_extensions %}
 {% load staticfiles %}
 
-{% block page_title %}Boards of {{member.trello_username}}{% endblock %}
+{% block page_title %}{{board.name}}{% endblock %}
 
 {% block css %}
     {{block.super}}
@@ -18,6 +18,7 @@
     </script>
     <script type="text/javascript" src="{% static 'js/boards/view/spent_time_by_week.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/boards/view/full_task_board.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/boards/view/public_access_url.js' %}"></script>
 {% endblock js %}
 
 {% block content_menu %}
@@ -28,13 +29,35 @@
     {% if board.is_ready and board.is_fetched %}
         <h1>{{board.name}}</h1>
 
+        {% block public_view %}
+            <div id="public_access" class="row">
+                {% if board.enable_public_access %}
+                    <div class="col-md-2">
+                        <strong>Public access url:</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <textarea readonly>{{url_prefix}}{% url 'boards:public_view' board.public_access_code %}</textarea>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="{% url 'boards:public_view' board.public_access_code %}" class="btn btn-info" title="View public view of board {{board.name}}">View public view</a>
+                    </div>
+                {% else %}
+                    <div class="col-md-12">
+                        <p>
+                            Public access is not enabled.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        {% endblock public_view %}
+
         {% if board.last_fetch_datetime %}
             <div>
                 <p>
                 Last fetched on {{board.last_fetch_datetime}} ({{board.last_fetch_datetime|timesince}} ago).
                 </p>
                 <p>
-                 {% if not board.has_to_be_fetched %}This board is not goind to be fetched anymore unless you edit <a href="{% url 'boards:edit' board.id %}">its preferences</a>{% endif %}
+                 {% if not board.has_to_be_fetched %}This board is not going to be fetched anymore unless you edit <a href="{% url 'boards:edit' board.id %}">its preferences</a>{% endif %}
                 </p>
             </div>
         {% endif %}
@@ -70,7 +93,7 @@
                     <div class="panel-body">
                         This project should be at least at <strong>{{current_percentage_of_completion|floatformat:-2}} %</strong>.
                         {% if board.percentage_of_completion %}
-                            According to <a href="{% url 'boards:edit' board.id %}">this board settings</a>, it is at <strong>{{board.percentage_of_completion|floatformat:2}} %</strong>.
+                            According to {% if member %}<a href="{% url 'boards:edit' board.id %}">this board settings</a>{% else %}this board settings{% endif %}, it is at <strong>{{board.percentage_of_completion|floatformat:2}} %</strong>.
                             {% if current_percentage_of_completion == board.percentage_of_completion %}
                                 <span>Congratulations.</span>
                             {% elif current_percentage_of_completion < board.percentage_of_completion %}
@@ -85,11 +108,13 @@
 
         {% endif %}
 
-        {% if member.is_developer %}
-            {% include "boards/components/view/tasks_in_development.html" %}
-        {% endif %}
+        {% if member %}
+            {% if member.is_developer %}
+                {% include "boards/components/view/tasks_in_development.html" %}
+            {% endif %}
 
-        {% include "boards/components/view/blocked_tasks.html" %}
+            {% include "boards/components/view/blocked_tasks.html" %}
+        {% endif %}
 
         {% include "boards/components/view/full_board.html" %}
 
