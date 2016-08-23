@@ -153,6 +153,10 @@ And that's all, then you have several interfaces with data about members, labels
 
 ![Board index](resources/images/screencaptures/board-index.png)
 
+## Board public view
+
+A subset of board view, this view allows sharing stats with stakeholders that are not members of each Trello board.
+
 ## Board cards
 
 ![Board cards](resources/images/screencaptures/board-cards.png)
