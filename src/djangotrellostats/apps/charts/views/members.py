@@ -2,6 +2,7 @@
 import copy
 import datetime
 import pygal
+from django.contrib.auth.decorators import login_required
 from isoweek import Week
 
 from django.db.models import Sum
@@ -14,31 +15,38 @@ from djangotrellostats.apps.reports.models import MemberReport
 
 
 # Show a chart with the task forward movements by member
+@login_required
 def task_forward_movements_by_member(request, board_id=None):
-    return _task_movements_by_member(request, "forward", board_id)
+    board = None
+    if board_id:
+        board = request.user.member.boards.get(id=board_id)
+    return _task_movements_by_member("forward", board)
 
 
 # Show a chart with the task backward movements by member
+@login_required
 def task_backward_movements_by_member(request, board_id=None):
-    return _task_movements_by_member(request, "backward", board_id)
+    board = None
+    if board_id:
+        board = request.user.member.boards.get(id=board_id)
+    return _task_movements_by_member("backward", board)
 
 
 # Show a chart with the task movements (backward or forward) by member
-def _task_movements_by_member(request, movement_type="forward", board_id=None):
+def _task_movements_by_member(movement_type="forward", board=None):
     if movement_type != "forward" and movement_type != "backward":
         raise ValueError("{0} is not recognized as a valid movement type".format(movement_type))
 
     chart_title = u"Task {0} movements as of {1}".format(movement_type, timezone.now())
-    if board_id:
-        board = Board.objects.get(id=board_id)
+    if board:
         chart_title += u" for board {0}".format(board.name)
 
     member_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True, print_zeroes=False,
                                        human_readable=True)
 
     report_filter = {}
-    if board_id:
-        report_filter["board_id"] = board_id
+    if board:
+        report_filter["board_id"] = board.id
 
     members = Member.objects.all()
 
@@ -51,7 +59,7 @@ def _task_movements_by_member(request, movement_type="forward", board_id=None):
         try:
             # Depending on if the member report is filtered by board or not we only have to get the forward and
             # backward movements of a report or sum all the members report of this user
-            if board_id:
+            if board:
                 member_report = MemberReport.objects.get(**member_report_filter)
                 forward_movements = member_report.forward_movements
                 backward_movements = member_report.backward_movements
@@ -76,7 +84,15 @@ def _task_movements_by_member(request, movement_type="forward", board_id=None):
 
 
 # Show a chart with the spent time by week by member and by board
+@login_required
 def spent_time_by_week(request, week_of_year=None, board_id=None):
+    board = None
+    if board_id:
+        board = request.user.member.boards.get(id=board_id)
+    return _spent_time_by_week(week_of_year=week_of_year, board=board)
+
+
+def _spent_time_by_week(week_of_year=None, board=None):
     if week_of_year is None:
         now = timezone.now()
         today = now.date()
@@ -91,16 +107,15 @@ def spent_time_by_week(request, week_of_year=None, board_id=None):
     chart_title = u"Spent time in week {0} ({1} - {2})".format(week_of_year,
                                                                start_of_week.strftime("%Y-%m-%d"),
                                                                end_of_week.strftime("%Y-%m-%d"))
-    if board_id:
-        board = Board.objects.get(id=board_id)
+    if board:
         chart_title += u" for board {0}".format(board.name)
 
     spent_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                            print_zeroes=False, human_readable=True)
 
     report_filter = {"date__year": y, "week_of_year": w}
-    if board_id:
-        report_filter["board_id"] = board_id
+    if board:
+        report_filter["board_id"] = board.id
 
     members = Member.objects.filter(is_developer=True)
     for member in members:

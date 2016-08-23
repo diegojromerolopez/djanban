@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pygal
+from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
 from django.utils import timezone
 
@@ -8,25 +9,30 @@ from djangotrellostats.apps.boards.models import Board, Card
 from djangotrellostats.apps.reports.models import ListReport
 
 
+@login_required
 def avg_lead_time(request, board_id=None):
+    board = request.user.member.boards.get(id=board_id)
+    return _avg_lead_time(request, board)
+
+
+def _avg_lead_time(request, board=None):
 
     chart_title = u"Task average lead time as of {0}".format(timezone.now())
-    if board_id:
-        board = Board.objects.get(id=board_id)
+    if board:
         chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
 
     lead_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                           print_zeroes=False,
                                           human_readable=True)
 
-    if not board_id:
+    if not board:
         card_avg_lead_time = Card.objects.all().aggregate(Avg("lead_time"))["lead_time__avg"]
         lead_time_chart.add(u"All boards", card_avg_lead_time)
-        for board in request.user.member.boards.all():
-            card_avg_lead_time = board.cards.all().aggregate(Avg("lead_time"))["lead_time__avg"]
-            lead_time_chart.add(u"{0}".format(board.name), card_avg_lead_time)
+        if request.user.is_authenticated and hasattr(request.user, "member"):
+            for board_i in request.user.member.boards.all():
+                card_avg_lead_time = board_i.cards.all().aggregate(Avg("lead_time"))["lead_time__avg"]
+                lead_time_chart.add(u"{0}".format(board_i.name), card_avg_lead_time)
     else:
-        board = Board.objects.get(id=board_id)
         labels = board.labels.all()
 
         card_avg_lead_time = board.cards.all().aggregate(Avg("lead_time"))["lead_time__avg"]
@@ -39,25 +45,30 @@ def avg_lead_time(request, board_id=None):
     return lead_time_chart.render_django_response()
 
 
+@login_required
 def avg_cycle_time(request, board_id=None):
+    board = request.user.member.boards.get(id=board_id)
+    return _avg_cycle_time(request, board)
+
+
+def _avg_cycle_time(request, board=None):
     chart_title = u"Task average cycle time as of {0}".format(timezone.now())
-    if board_id:
-        board = Board.objects.get(id=board_id)
+    if board:
         chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
 
     cycle_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                            print_zeroes=False,
                                            human_readable=True)
 
-    if not board_id:
+    if not board:
         card_avg_cycle_time = Card.objects.all().aggregate(Avg("cycle_time"))["cycle_time__avg"]
         cycle_time_chart.add(u"All boards", card_avg_cycle_time)
-        for board in request.user.member.boards.all():
-            card_avg_cycle_time = board.cards.all().aggregate(Avg("cycle_time"))["cycle_time__avg"]
-            cycle_time_chart.add(u"{0}".format(board.name), card_avg_cycle_time)
+        if request.user.is_authenticated and hasattr(request.user, "member"):
+            for board_i in request.user.member.boards.all():
+                card_avg_cycle_time = board_i.cards.all().aggregate(Avg("cycle_time"))["cycle_time__avg"]
+                cycle_time_chart.add(u"{0}".format(board_i.name), card_avg_cycle_time)
 
     else:
-        board = Board.objects.get(id=board_id)
         labels = board.labels.all()
 
         card_avg_lead_time = board.cards.all().aggregate(Avg("cycle_time"))["cycle_time__avg"]
@@ -70,8 +81,14 @@ def avg_cycle_time(request, board_id=None):
     return cycle_time_chart.render_django_response()
 
 
+# Average time by board list
+@login_required
 def avg_time_by_list(request, board_id):
-    board = Board.objects.get(id=board_id)
+    board = request.user.member.boards.get(id=board_id)
+    return _avg_time_by_list(board)
+
+
+def _avg_time_by_list(board):
     chart_title = u"Average time of all task living in each list for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
 
     avg_time_by_list_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,

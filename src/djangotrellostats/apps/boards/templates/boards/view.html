@@ -121,47 +121,53 @@
         <h2>Charts</h2>
         <div>
 
-            <div class="row">
-                <div class="col-sm-6">
-                    <div>
-                        <select id="select_week_of_year_in_spent_time_by_week" class="select_parameter_in_spent_time_by_week">
-                            {% for week_i in weeks_of_year %}
-                                <option value="{{week_i}}" {% if week_i == week_of_year %}selected="selected"{% endif %}>{{week_i}}</option>
-                            {% endfor %}
-                        </select>
+            {% block task_times_charts %}
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div>
+                            <select id="select_week_of_year_in_spent_time_by_week" class="select_parameter_in_spent_time_by_week">
+                                {% for week_i in weeks_of_year %}
+                                    <option value="{{week_i}}" {% if week_i == week_of_year %}selected="selected"{% endif %}>{{week_i}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' week_of_year board.id  %}" alt="Spent time by member"/>
                     </div>
-                    <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' week_of_year board.id  %}" alt="Spent time by member"/>
+                    <div class="col-sm-6">
+                        <img src="{% url 'charts:avg_time_by_list' board.id %}" alt="Average time a card is in each list"/>
+                    </div>
                 </div>
-                <div class="col-sm-6">
-                    <img src="{% url 'charts:avg_time_by_list' board.id %}" alt="Average time a card is in each list"/>
-                </div>
-            </div>
+            {% endblock task_times_charts %}
 
-            <div class="row">
-                <div class="col-sm-6">
-                    <img src="{% url 'charts:task_forward_movements_by_member' board.id %}" alt="Task forward movements by member"/>
+            {% block task_movement_charts %}
+                <div class="row">
+                    <div class="col-sm-6">
+                        <img src="{% url 'charts:task_forward_movements_by_member' board.id %}" alt="Task forward movements by member"/>
+                    </div>
+                    <div class="col-sm-6">
+                        <img src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
+                    </div>
                 </div>
-                <div class="col-sm-6">
-                    <img src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
-                </div>
-            </div>
+            {% endblock task_movement_charts %}
 
-            <div class="row">
-                <div class="col-sm-6">
-                    <img src="{% url 'charts:avg_lead_time' board.id %}" alt="Average lead time"/>
+            {% block card_stats_charts %}
+                <div class="row">
+                    <div class="col-sm-6">
+                        <img src="{% url 'charts:avg_lead_time' board.id %}" alt="Average lead time"/>
+                    </div>
+                    <div class="col-sm-6">
+                        <img src="{% url 'charts:avg_cycle_time' board.id %}" alt="Average cycle time"/>
+                    </div>
                 </div>
-                <div class="col-sm-6">
-                    <img src="{% url 'charts:avg_cycle_time' board.id %}" alt="Average cycle time"/>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <img src="{% url 'charts:avg_spent_time' board.id %}" alt="Average spent time"/>
+                    </div>
+                    <div class="col-sm-6">
+                        <img src="{% url 'charts:avg_estimated_time' board.id %}" alt="Average estimated time"/>
+                    </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-6">
-                    <img src="{% url 'charts:avg_spent_time' board.id %}" alt="Average spent time"/>
-                </div>
-                <div class="col-sm-6">
-                    <img src="{% url 'charts:avg_estimated_time' board.id %}" alt="Average estimated time"/>
-                </div>
-            </div>
+            {% endblock card_stats_charts %}
 
         </div>
     {% else %}

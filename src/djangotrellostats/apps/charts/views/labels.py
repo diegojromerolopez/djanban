@@ -1,24 +1,33 @@
 # -*- coding: utf-8 -*-
 
 import pygal
+from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
-from djangotrellostats.apps.boards.models import Board, Card
 from django.utils import timezone
 
+from djangotrellostats.apps.boards.models import Card
 
-# Average spent and estimated times
+
+# Average spent times
+@login_required
 def avg_spent_times(request, board_id=None):
-    chart_title = u"Average task spent as of {0}".format(timezone.now())
+    board = None
     if board_id:
-        board = Board.objects.get(id=board_id)
+        board = request.user.member.boards.get(id=board_id)
+    return _avg_spent_times(request, board)
+
+
+# Average spent times
+def _avg_spent_times(request, board=None):
+    chart_title = u"Average task spent as of {0}".format(timezone.now())
+    if board:
         chart_title += u" for board {0}".format(board.name)
 
     avg_times_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                           print_zeroes=False, human_readable=True)
 
     board = None
-    if board_id:
-        board = Board.objects.get(id=board_id)
+    if board:
         cards = board.cards.all()
         avg_spent_time = cards.aggregate(Avg("spent_time"))["spent_time__avg"]
         avg_times_chart.add(u"Average spent time", avg_spent_time)
@@ -30,7 +39,7 @@ def avg_spent_times(request, board_id=None):
             board_avg_spent_time = board.cards.aggregate(Avg("spent_time"))["spent_time__avg"]
             avg_times_chart.add(u"{0}".format(board.name), board_avg_spent_time)
 
-    if board_id:
+    if board:
         labels = board.labels.all()
 
         for label in labels:
@@ -40,19 +49,26 @@ def avg_spent_times(request, board_id=None):
     return avg_times_chart.render_django_response()
 
 
-# Average spent and estimated times
+# Average estimated times
+@login_required
 def avg_estimated_times(request, board_id=None):
-    chart_title = u"Average task estimated time as of {0}".format(timezone.now())
+    board = None
     if board_id:
-        board = Board.objects.get(id=board_id)
+        board = request.user.member.boards.get(id=board_id)
+    return _avg_estimated_times(request, board)
+
+
+# Average estimated times
+def _avg_estimated_times(request, board=None):
+    chart_title = u"Average task estimated time as of {0}".format(timezone.now())
+    if board:
         chart_title += u" for board {0}".format(board.name)
 
     avg_times_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                           print_zeroes=False, human_readable=True)
 
     board = None
-    if board_id:
-        board = Board.objects.get(id=board_id)
+    if board:
         cards = board.cards.all()
         total_avg_estimated_time = cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
         avg_times_chart.add(u"Average estimated time", total_avg_estimated_time)
@@ -64,7 +80,7 @@ def avg_estimated_times(request, board_id=None):
             board_avg_estimated_time = board.cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
             avg_times_chart.add(u"{0}".format(board.name), board_avg_estimated_time)
 
-    if board_id:
+    if board:
         labels = board.labels.all()
 
         for label in labels:

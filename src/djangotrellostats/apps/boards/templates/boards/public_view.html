@@ -3,8 +3,65 @@
 {% load template_extensions %}
 {% load staticfiles %}
 
+{% block js %}
+    {{block.super}}
+    <script type="text/javascript">
+        SPENT_TIME_BY_WEEK_CHART_URL = "{% url 'charts:public_spent_time_by_week' '0000W00' board.public_access_code %}";
+    </script>
+{% endblock js %}
 
 {% block content_menu %}
 {% endblock %}
 
 {% block public_view %}{% endblock public_view %}
+
+{% block spent_time_chart %}
+{% endblock %}
+
+{% block task_times_charts %}
+    <div class="row">
+        <div class="col-sm-6">
+            <div>
+                <select id="select_week_of_year_in_spent_time_by_week" class="select_parameter_in_spent_time_by_week">
+                    {% for week_i in weeks_of_year %}
+                        <option value="{{week_i}}" {% if week_i == week_of_year %}selected="selected"{% endif %}>{{week_i}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <img id="spent_time_by_week" src="{% url 'charts:public_spent_time_by_week' week_of_year board.public_access_code %}" alt="Spent time by member"/>
+        </div>
+        <div class="col-sm-6">
+            <img src="{% url 'charts:public_avg_time_by_list' board.public_access_code %}" alt="Average time a card is in each list"/>
+        </div>
+    </div>
+{% endblock task_times_charts %}
+
+{% block task_movement_charts %}
+    <div class="row">
+        <div class="col-sm-6">
+            <img src="{% url 'charts:public_task_forward_movements_by_member' board.public_access_code %}" alt="Task forward movements by member"/>
+        </div>
+        <div class="col-sm-6">
+            <img src="{% url 'charts:public_task_backward_movements_by_member' board.public_access_code %}" alt="Task backward movements by member"/>
+        </div>
+    </div>
+{% endblock task_movement_charts %}
+
+{% block card_stats_charts %}
+    <div class="row">
+        <div class="col-sm-6">
+            <img src="{% url 'charts:public_avg_lead_time' board.public_access_code %}" alt="Average lead time"/>
+        </div>
+        <div class="col-sm-6">
+            <img src="{% url 'charts:public_avg_cycle_time' board.public_access_code %}" alt="Average cycle time"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <img src="{% url 'charts:public_avg_spent_time' board.public_access_code %}" alt="Average spent time"/>
+        </div>
+        <div class="col-sm-6">
+            <img src="{% url 'charts:public_avg_estimated_time' board.public_access_code %}" alt="Average estimated time"/>
+        </div>
+    </div>
+{% endblock card_stats_charts %}
