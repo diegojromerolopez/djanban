@@ -12,7 +12,10 @@ from djangotrellostats.apps.hourly_rates.models import HourlyRate
 @login_required
 def view_list(request):
     hourly_rates = HourlyRate.objects.all()
-    replacements = {"hourly_rates": hourly_rates}
+    replacements = {
+        "member": request.user.member,
+        "hourly_rates": hourly_rates
+    }
     return render(request, "hourly_rates/list.html", replacements)
 
 

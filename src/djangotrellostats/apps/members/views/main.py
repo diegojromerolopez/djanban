@@ -25,7 +25,12 @@ def dashboard(request):
 @login_required
 def view_members(request):
     members = Member.objects.all()
-    replacements = {"members": members, "developers": Member.objects.filter(is_developer=True)}
+    member = request.user.member
+    replacements = {
+        "member": member,
+        "members": members,
+        "developers": Member.objects.filter(is_developer=True)
+    }
     return render(request, "members/list.html", replacements)
 
 

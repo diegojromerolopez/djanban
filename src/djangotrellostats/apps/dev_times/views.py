@@ -51,7 +51,11 @@ def _get_daily_spent_times_replacements(request):
 
     spent_times = _get_daily_spent_times_from_request(request)
 
-    replacements = {"boards": Board.objects.all(), "members": Member.objects.all()}
+    replacements = {
+        "member": request.user.member,
+        "boards": Board.objects.all(),
+        "members": Member.objects.all()
+    }
 
     # Start date
     start_date_str = request.GET.get("start_date")
