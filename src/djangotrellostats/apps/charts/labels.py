@@ -9,16 +9,7 @@ from djangotrellostats.apps.boards.models import Card
 
 
 # Average spent times
-@login_required
-def avg_spent_times(request, board_id=None):
-    board = None
-    if board_id:
-        board = request.user.member.boards.get(id=board_id)
-    return _avg_spent_times(request, board)
-
-
-# Average spent times
-def _avg_spent_times(request, board=None):
+def avg_spent_times(request, board=None):
     chart_title = u"Average task spent as of {0}".format(timezone.now())
     if board:
         chart_title += u" for board {0}".format(board.name)
@@ -50,16 +41,7 @@ def _avg_spent_times(request, board=None):
 
 
 # Average estimated times
-@login_required
-def avg_estimated_times(request, board_id=None):
-    board = None
-    if board_id:
-        board = request.user.member.boards.get(id=board_id)
-    return _avg_estimated_times(request, board)
-
-
-# Average estimated times
-def _avg_estimated_times(request, board=None):
+def avg_estimated_times(request, board=None):
     chart_title = u"Average task estimated time as of {0}".format(timezone.now())
     if board:
         chart_title += u" for board {0}".format(board.name)

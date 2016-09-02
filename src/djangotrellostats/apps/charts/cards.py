@@ -9,13 +9,8 @@ from djangotrellostats.apps.boards.models import Board, Card
 from djangotrellostats.apps.reports.models import ListReport
 
 
-@login_required
-def avg_lead_time(request, board_id=None):
-    board = request.user.member.boards.get(id=board_id)
-    return _avg_lead_time(request, board)
-
-
-def _avg_lead_time(request, board=None):
+# Average card lead time
+def avg_lead_time(request, board=None):
 
     chart_title = u"Task average lead time as of {0}".format(timezone.now())
     if board:
@@ -45,13 +40,8 @@ def _avg_lead_time(request, board=None):
     return lead_time_chart.render_django_response()
 
 
-@login_required
-def avg_cycle_time(request, board_id=None):
-    board = request.user.member.boards.get(id=board_id)
-    return _avg_cycle_time(request, board)
-
-
-def _avg_cycle_time(request, board=None):
+# Average card cycle time
+def avg_cycle_time(request, board=None):
     chart_title = u"Task average cycle time as of {0}".format(timezone.now())
     if board:
         chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
@@ -81,14 +71,8 @@ def _avg_cycle_time(request, board=None):
     return cycle_time_chart.render_django_response()
 
 
-# Average time by board list
-@login_required
-def avg_time_by_list(request, board_id):
-    board = request.user.member.boards.get(id=board_id)
-    return _avg_time_by_list(board)
-
-
-def _avg_time_by_list(board):
+# Average card time in each list
+def avg_time_by_list(board):
     chart_title = u"Average time of all task living in each list for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
 
     avg_time_by_list_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
