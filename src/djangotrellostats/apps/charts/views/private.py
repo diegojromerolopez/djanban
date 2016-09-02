@@ -47,6 +47,15 @@ def avg_spent_times(request, board_id=None):
     return labels.avg_spent_times(request, board)
 
 
+# Average spent time by month
+@login_required
+def avg_spent_time_by_month(request, board_id):
+    board = None
+    if board_id:
+        board = request.user.member.boards.get(id=board_id)
+    return labels.avg_spent_time_by_month(board)
+
+
 # Average estimated times
 @login_required
 def avg_estimated_times(request, board_id=None):
@@ -54,6 +63,15 @@ def avg_estimated_times(request, board_id=None):
     if board_id:
         board = request.user.member.boards.get(id=board_id)
     return labels.avg_estimated_times(request, board)
+
+
+# Average estimated time by month
+@login_required
+def avg_estimated_time_by_month(request, board_id):
+    board = None
+    if board_id:
+        board = request.user.member.boards.get(id=board_id)
+    return labels.avg_estimated_time_by_month(board)
 
 
 # Show a chart with the task forward movements by member

@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import copy
+from datetime import timedelta
 import pygal
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg
+from django.db.models import Avg, Min
 from django.utils import timezone
 
 from djangotrellostats.apps.boards.models import Board, Card
+from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.reports.models import ListReport
 
 

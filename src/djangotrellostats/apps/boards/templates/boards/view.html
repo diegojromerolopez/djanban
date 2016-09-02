@@ -164,7 +164,16 @@
                         <img src="{% url 'charts:avg_spent_time' board.id %}" alt="Average spent time"/>
                     </div>
                     <div class="col-sm-6">
+                        <img src="{% url 'charts:avg_spent_time_by_month' board.id %}" alt="Average spent time by month"/>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-6">
                         <img src="{% url 'charts:avg_estimated_time' board.id %}" alt="Average estimated time"/>
+                    </div>
+                    <div class="col-sm-6">
+                        <img src="{% url 'charts:avg_estimated_time_by_month' board.id %}" alt="Average estimated time by month"/>
                     </div>
                 </div>
             {% endblock card_stats_charts %}
