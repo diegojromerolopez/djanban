@@ -23,6 +23,7 @@ from djangotrellostats.apps.reports.models import ListReport, MemberReport
 from trello import TrelloClient
 import shortuuid
 
+
 # Initialize boards
 class Initializer(object):
 
