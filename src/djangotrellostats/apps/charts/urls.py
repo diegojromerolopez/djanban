@@ -33,6 +33,8 @@ urlpatterns = [
     url(r'^avg_estimated_times/(?P<board_id>[\d]+)?$', private.avg_estimated_times, name="avg_estimated_time"),
     url(r'^avg_estimated_time_by_month/(?P<board_id>[\d]+)?$', private.avg_estimated_time_by_month,
         name="avg_estimated_time_by_month"),
+    url(r'^number_of_cards_worked_on_by_month/(?P<board_id>[\d]+)?$', private.number_of_cards_worked_on_by_month,
+        name="number_of_cards_worked_on_by_month"),
 
     url(r'^avg_time_by_list/(?P<board_id>[\d]+)$', private.avg_time_by_list, name="avg_time_by_list"),
 

@@ -74,6 +74,14 @@ def avg_estimated_time_by_month(request, board_id):
     return labels.avg_estimated_time_by_month(board)
 
 
+# Number of tasks by month
+@login_required
+def number_of_cards_worked_on_by_month(request, board_id):
+    board = None
+    if board_id:
+        board = request.user.member.boards.get(id=board_id)
+    return labels.number_of_cards_worked_on_by_month(board)
+
 # Show a chart with the task forward movements by member
 @login_required
 def task_forward_movements_by_member(request, board_id=None):

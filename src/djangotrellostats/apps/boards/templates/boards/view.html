@@ -139,6 +139,14 @@
                 </div>
             {% endblock task_times_charts %}
 
+            {% block task_number %}
+                <div class="row">
+                    <div class="col-sm-12">
+                        <img src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" alt="Tasks worked on by month"/>
+                    </div>
+                </div>
+            {% endblock task_number %}
+
             {% block task_movement_charts %}
                 <div class="row">
                     <div class="col-sm-6">
