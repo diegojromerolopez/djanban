@@ -82,6 +82,7 @@ def number_of_cards_worked_on_by_month(request, board_id):
         board = request.user.member.boards.get(id=board_id)
     return labels.number_of_cards_worked_on_by_month(board)
 
+
 # Show a chart with the task forward movements by member
 @login_required
 def task_forward_movements_by_member(request, board_id=None):
@@ -146,3 +147,12 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
         day += datetime.timedelta(days=1)
 
     return spent_time_chart.render_django_response()
+
+
+@login_required
+def cumulative_list_evolution(request, board_id, day_step=5):
+    board = request.user.member.boards.get(id=board_id)
+    if day_step is None:
+        day_step = 5
+    day_step = min(int(day_step), 30)
+    return cards.cumulative_list_evolution(board, day_step)

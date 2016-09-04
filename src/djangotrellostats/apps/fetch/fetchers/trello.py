@@ -19,7 +19,7 @@ from djangotrellostats.apps.boards.models import Label, Card, Board, List
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.fetch.fetchers.base import Fetcher
-from djangotrellostats.apps.reports.models import ListReport, MemberReport
+from djangotrellostats.apps.reports.models import ListReport, MemberReport, CardMovement
 from trello import TrelloClient
 import shortuuid
 
@@ -52,7 +52,7 @@ class Initializer(object):
                 if not board_already_exists:
                     board_name = trello_board.name
                     board = Board(uuid=trello_board.id, name=board_name,
-                                  last_activity_date=trello_board.date_last_activity,
+                                  last_activity_datetime=trello_board.date_last_activity,
                                   public_access_code=shortuuid.ShortUUID().random(length=20).lower(),
                                   creator=self.member)
                     board.save()
@@ -405,6 +405,25 @@ class CardFetcher(object):
                     requirement = self.board.requirements.get(code=requirement_code)
                     card.requirements.add(requirement)
 
+        # Card movements
+        for card in self.cards:
+            movements = self.trello_movements_by_card.get(card.uuid)
+            if movements:
+                local_timezone = pytz.timezone(settings.TIME_ZONE)
+                for movement in movements:
+                    source_list = self.board.lists.get(uuid=movement["data"]["listBefore"]["id"])
+                    destination_list = self.board.lists.get(uuid=movement["data"]["listAfter"]["id"])
+                    movement_type = "forward"
+                    if destination_list.position < source_list.position:
+                        movement_type = "backward"
+
+                    movement_naive_datetime = datetime.strptime(movement["date"], '%Y-%m-%dT%H:%M:%S.%fZ')
+                    movement_datetime = local_timezone.localize(movement_naive_datetime)
+                    card_movement = CardMovement(board=self.board, card=card, type=movement_type,
+                                                 source_list=source_list, destination_list=destination_list,
+                                                 datetime=movement_datetime)
+                    card_movement.save()
+
         return self.cards
 
     # Create a card from a Trello Card
@@ -435,7 +454,7 @@ class CardFetcher(object):
 
         self._init_trello_card_stats(trello_card)
 
-        # Creates the Card
+        # Creates the Card object
         card = self._factory_from_trello_card(trello_card)
 
         return card
@@ -444,10 +463,17 @@ class CardFetcher(object):
     def _factory_from_trello_card(self, trello_card):
         list_ = self.board.lists.get(uuid=trello_card.idList)
 
+        local_timezone = pytz.timezone(settings.TIME_ZONE)
+        if trello_card.created_date.tzinfo is None or\
+                        trello_card.created_date.tzinfo.utcoffset(trello_card.created_date) is None:
+            card_creation_datetime = local_timezone.localize(trello_card.created_date)
+        else:
+            card_creation_datetime = trello_card.created_date
+
         card = Card(uuid=trello_card.id, name=trello_card.name, url=trello_card.url,
                     short_url=trello_card.short_url, description=trello_card.desc, is_closed=trello_card.closed,
-                    position=trello_card.pos, last_activity_date=trello_card.dateLastActivity,
-                    board=self.board, list=list_
+                    position=trello_card.pos, last_activity_datetime=trello_card.dateLastActivity,
+                    board=self.board, list=list_, creation_datetime=card_creation_datetime
                     )
 
         # Store the trello card data for ease of use
@@ -638,7 +664,7 @@ class CardFetcher(object):
                     card_url = matches.group("card_url")
                     blocking_card_urls.append(card_url)
 
-                # Dependencie on requirement
+                # Depends on requirement
                 else:
                     matches = re.match(Card.COMMENT_REQUIREMENT_CARD_REGEX, comment_content, re.IGNORECASE)
                     if matches:

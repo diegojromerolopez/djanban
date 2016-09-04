@@ -31,7 +31,7 @@
                                   <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}}">{{card.name}}</a>
                               </div>
                               <div class="panel-body">
-                                  <div>Last activity: {{card.last_activity_date}}</div>
+                                  <div>Last activity: {{card.last_activity_datetime}}</div>
                                   <div>{% if card.description %}{{card.description}}.{% endif %} <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}}" class="btn btn-primary btn-sm">View in Trello</a></div>
                               </div>
                             </div>

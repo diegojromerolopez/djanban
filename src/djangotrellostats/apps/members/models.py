@@ -76,7 +76,7 @@ class Member(models.Model):
     # Returns cards that are in development ordered by descending order according to when were worked on.
     def get_last_development_cards(self, board=None):
         development_cards = self.get_current_development_cards(board=board)
-        return development_cards.order_by("-last_activity_date")
+        return development_cards.order_by("-last_activity_datetime")
 
     # Returns the number of hours this member has develop today
     def get_today_spent_time(self, board=None):

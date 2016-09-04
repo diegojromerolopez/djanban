@@ -3,6 +3,28 @@ from __future__ import unicode_literals
 from django.db import models
 
 
+# Movements the cards suffer
+class CardMovement(models.Model):
+
+    CARD_MOVEMENT_TYPES = (
+        ("forward", "Forward"),
+        ("backward", "Backward"),
+    )
+
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="card_movements")
+
+    card = models.ForeignKey("boards.Card", verbose_name=u"Board", related_name="movements")
+
+    type = models.CharField(verbose_name="Movement type", choices=CARD_MOVEMENT_TYPES, max_length=32)
+
+    source_list = models.ForeignKey("boards.List", verbose_name=u"Source list", related_name="source_lists", null=True)
+
+    destination_list = models.ForeignKey("boards.List", verbose_name=u"Destination list",
+                                         related_name="destination_lists")
+
+    datetime = models.DateTimeField(verbose_name="Date and time this card has been moved")
+
+
 # Stat report by list
 class ListReport(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="list_reports", null=True)

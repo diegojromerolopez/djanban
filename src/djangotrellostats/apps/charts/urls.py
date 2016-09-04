@@ -36,6 +36,9 @@ urlpatterns = [
     url(r'^number_of_cards_worked_on_by_month/(?P<board_id>[\d]+)?$', private.number_of_cards_worked_on_by_month,
         name="number_of_cards_worked_on_by_month"),
 
+    url(r'^cumulative_list_evolution/(?P<board_id>[\d]+)(/(?P<day_step>[\d]+))?$', private.cumulative_list_evolution,
+        name="cumulative_list_evolution"),
+
     url(r'^avg_time_by_list/(?P<board_id>[\d]+)$', private.avg_time_by_list, name="avg_time_by_list"),
 
     url(r'^public_avg_spent_times/(?P<board_public_access_code>.+)/?$', public.avg_spent_times, name="public_avg_spent_time"),

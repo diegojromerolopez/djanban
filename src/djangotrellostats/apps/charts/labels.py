@@ -59,17 +59,17 @@ def number_of_cards_worked_on_by_month(board=None):
 # Average spent/estimated time by month
 def _daily_spent_times_by_month(board=None, time_measurement="spent_time", operation="Avg"):
     daily_spent_time_filter = {"{0}__gt".format(time_measurement): 0}
-    last_activity_date = timezone.now()
+    last_activity_datetime = timezone.now()
     if board:
-        last_activity_date = board.last_activity_date
+        last_activity_datetime = board.last_activity_datetime
         daily_spent_time_filter["board"] = board
 
     if operation == "Avg":
-        chart_title = u"Task average {1} as of {0}".format(last_activity_date, time_measurement.replace("_", " "))
+        chart_title = u"Task average {1} as of {0}".format(last_activity_datetime, time_measurement.replace("_", " "))
         if board:
             chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
     elif operation == "Count":
-        chart_title = u"Tasks worked on as of {0}".format(last_activity_date)
+        chart_title = u"Tasks worked on as of {0}".format(last_activity_datetime)
         if board:
             chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
     else:

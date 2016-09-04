@@ -141,8 +141,11 @@
 
             {% block task_number %}
                 <div class="row">
-                    <div class="col-sm-12">
+                    <div class="col-sm-6">
                         <img src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" alt="Tasks worked on by month"/>
+                    </div>
+                    <div class="col-sm-6">
+                        <img src="{% url 'charts:cumulative_list_evolution' board.id %}" alt="Evolution of number of tasks by list"/>
                     </div>
                 </div>
             {% endblock task_number %}

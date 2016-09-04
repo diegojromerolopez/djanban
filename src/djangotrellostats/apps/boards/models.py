@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from decimal import Decimal
 from django.db import models
-from django.db.models import Avg, Sum
+from django.db.models import Avg, Sum, Min, Max
 from django.db.models.query_utils import Q
 from django.utils import timezone
 from isoweek import Week
@@ -30,7 +30,7 @@ class Board(models.Model):
 
     uuid = models.CharField(max_length=128, verbose_name=u"External id of the board", unique=True)
 
-    last_activity_date = models.DateTimeField(verbose_name=u"Last activity date", default=None, null=True)
+    last_activity_datetime = models.DateTimeField(verbose_name=u"Last activity date", default=None, null=True)
 
     has_to_be_fetched = models.BooleanField(verbose_name=u"Has to be this board fetched?",
                                             help_text="Select this option if you want to fetch data for this board.",
@@ -174,6 +174,22 @@ class Board(models.Model):
             return 0
         return developed_value
 
+    # Informs what is the first day the team started working in this project
+    def get_working_start_date(self):
+        first_spent_time_date = self.daily_spent_times.all().aggregate(min_date=Min("date"))["min_date"]
+        first_card_movement = self.card_movements.all().aggregate(min_datetime=Min("datetime"))["min_datetime"]
+        if first_spent_time_date and first_card_movement:
+            if first_spent_time_date < first_card_movement.date():
+                return first_spent_time_date
+            return first_card_movement.date()
+        elif first_spent_time_date:
+            return first_spent_time_date
+        return first_card_movement
+
+    # Informs what is the first day the team started working in this project
+    def get_working_end_date(self):
+        return self.daily_spent_times.all().aggregate(max_date=Max("date"))["max_date"]
+
 
 # Card of the task board
 class Card(ImmutableModel):
@@ -191,7 +207,8 @@ class Card(ImmutableModel):
     description = models.TextField(verbose_name=u"Description of the card")
     is_closed = models.BooleanField(verbose_name=u"Is this card closed?", default=False)
     position = models.PositiveIntegerField(verbose_name=u"Position in the list")
-    last_activity_date = models.DateTimeField(verbose_name=u"Last activity date")
+    creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
+    last_activity_datetime = models.DateTimeField(verbose_name=u"Last activity datetime")
 
     forward_movements = models.PositiveIntegerField(verbose_name=u"Forward movements of this card", default=0)
     backward_movements = models.PositiveIntegerField(verbose_name=u"Backward movements of this card", default=0)
