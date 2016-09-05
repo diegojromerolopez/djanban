@@ -30,6 +30,7 @@ pyOpenSSL==16.0.0
 pyasn1==0.1.9
 pycparser==2.14
 pygal==2.1.1
+pylint==1.6.4
 python-dateutil==2.5.2
 python-gitlab==0.15
 python-slugify==1.2.0

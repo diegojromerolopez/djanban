@@ -1,0 +1,20 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}Python code assessment of commit {{commit.commit}} of {{repository.name}} for {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>
+        Python code assessment of commit {{commit.commit}} of {{repository.name}} for {{board.name}}
+    </h1>
+    {% for pylinter_result in pylinter_results %}
+        <div>
+            <h2>{{pylinter_result.file_path}}</h2>
+            <pre>
+                {{pylinter_result.stdout}}
+            </pre>
+            <pre>
+                {{pylinter_result.stderr}}
+            </pre>
+        </div>
+    {% endfor %}
+{% endblock content %}

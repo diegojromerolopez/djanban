@@ -62,6 +62,9 @@ target/
 #Ipython Notebook
 .ipynb_checkpoints
 
+# Media directory
+src/djangotrellostats/media/*
+
 # Local configuration
 src/djangotrellostats/settings_local.py
 src/public_html

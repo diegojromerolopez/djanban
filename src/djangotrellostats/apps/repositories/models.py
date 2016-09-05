@@ -72,8 +72,8 @@ class GitLabRepository(Repository):
         gl = gitlab.Gitlab(self.url, self.access_token)
         project = gl.projects.get(self.project_name)
         commit_response = project.commits.get(commit)
-        commit_code = project.repository_archive(commit=commit)
-        return {"code": commit_code, "creation_datetime": commit_response.created_at}
+        #commit_code = project.repository_archive(commit=commit)
+        return {"code": None, "creation_datetime": commit_response.created_at}
 
 
 # Each one of the commits fetched from the repository

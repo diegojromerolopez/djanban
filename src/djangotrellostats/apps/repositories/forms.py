@@ -37,13 +37,12 @@ class DeleteRepositoryForm(forms.Form):
 class CommitForm(forms.ModelForm):
     class Meta:
         model = Commit
-        fields = ["commit", "comments"]
+        fields = ["commit", "comments", "code"]
 
     def save(self, commit=True):
         super(CommitForm, self).save(commit=False)
         if commit:
             commit_info = self.instance.repository.fetch_commit(self.cleaned_data["commit"])
-            self.instance.code = commit_info["code"]
             self.instance.creation_datetime = commit_info["creation_datetime"]
             self.instance.save()
         return self.instance

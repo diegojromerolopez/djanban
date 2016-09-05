@@ -90,18 +90,23 @@
                                   </div>
                                 <div class="panel-body">
                                     <a href="{% url 'boards:repositories:add_commit' board.id repository.id %}">
-                                        <span class="fa fa-plus"></span>
+                                        <span class="fa fa-plus"></span> Add new commit
                                     </a>
                                     {% with commits=repository.commits.all %}
                                         {% if commits|length > 0 %}
                                             {% for commit in commits %}
                                                 <div>
-                                                    <strong>
-                                                        {{commit.commit}} on {{commit.creation_datetime}}
-                                                    </strong>
-                                                    <a href="{% url 'boards:repositories:delete_commit' board.id repository.id commit.id %}">
-                                                        <span class="fa fa-trash"></span>
-                                                    </a>
+                                                    <strong>{{commit.commit}}</strong> on {{commit.creation_datetime}}
+                                                    <span>
+                                                        <a href="{% url 'boards:repositories:assess_python_code_quality' board.id repository.id commit.id %}" title="Assess quality of Python code on {{commit.commit}}">
+                                                            <span class="fa fa-star-half-full"></span>
+                                                            Assess Python code quality
+                                                        </a>
+                                                        <a href="{% url 'boards:repositories:delete_commit' board.id repository.id commit.id %}" title="Delete commit {{commit.commit}}">
+                                                            <span class="fa fa-trash"></span>
+                                                            Delete
+                                                        </a>
+                                                    </span>
                                                 </div>
                                             {% endfor %}
                                         {% else %}
