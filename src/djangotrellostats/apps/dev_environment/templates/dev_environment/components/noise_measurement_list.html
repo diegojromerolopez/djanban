@@ -1,0 +1,45 @@
+
+<h1>Noise measurements</h1>
+{% if noise_measurements|length < num_noise_measurements %}
+    Showing only {{summary_size}} first noise measurements.
+    <a href="{% url 'dev_environment:view_noise_measurements' %}" title="View noise measurements" class="btn btn-primary">
+        View all
+    </a>
+{% endif %}
+{% if noise_measurements|length == 0 %}
+    <div class="panel panel-default">
+      <div class="panel-heading">Noise measurements</div>
+      <div class="panel-body">
+        It seems there hasn't been any interruption.
+          <a href="{% url 'dev_environment:new_noise_measurement' %}" title="New noise measurement" class="btn btn-primary">
+              Do you want to create a noise measurement for this moment?
+          </a>
+      </div>
+    </div>
+{% else %}
+    <a href="{% url 'dev_environment:new_noise_measurement' %}" title="New noise measurement" class="btn btn-primary">New</a>
+    <div class="panel">
+        <table class="table">
+            <tr>
+                <td>Date</td>
+                <td>Member</td>
+                <td>Noise level</td>
+                <td>Subjective noise level</td>
+                <td>Comments</td>
+                <td>Actions</td>
+            </tr>
+            {% for noise_measurement in noise_measurements %}
+                <tr>
+                    <td>{{noise_measurement.datetime}}</td>
+                    <td>{{noise_measurement.member.user.username}}</td>
+                    <td>{{noise_measurement.noise_level}}</td>
+                    <td>{{noise_measurement.get_subjective_noise_level_display}}</td>
+                    <td>{{noise_measurement.comments|truncatechars_html:50}}</td>
+                    <td>
+                        <a href="{% url 'dev_environment:delete_noise_measurement' noise_measurement.id %}" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endif %}

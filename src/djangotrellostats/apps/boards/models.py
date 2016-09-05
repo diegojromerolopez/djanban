@@ -63,6 +63,12 @@ class Board(models.Model):
     hourly_rates = models.ManyToManyField("hourly_rates.HourlyRate", verbose_name=u"Hourly rates",
                                           related_name="boards", blank=True)
 
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.name
+
     # Returns the date of the last fetch in an ISO format
     def get_human_fetch_datetime(self):
         return self.last_fetch_datetime.strftime("%Y-%m-%d")

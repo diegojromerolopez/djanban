@@ -7,7 +7,7 @@
         </a>
     </div>
     {% if member %}
-        {% with url_name=request.resolver_match.url_name %}
+        {% with url_name=request.resolver_match.url_name url_namespace=request.resolver_match.namespace %}
             <ul class="nav nav-tabs">
                 <li role="presentation" {% if url_name == "index" %}class="active"{% endif %}>
                     <a href="{% url 'index' %}" title="Go to index">
@@ -28,6 +28,11 @@
                     <li role="presentation" {% if url_name == "view_members" %}class="active"{% endif %}>
                         <a href="{% url 'members:view_members' %}" title="View members">
                             <span class="fa fa-users"></span> Members
+                        </a>
+                    </li>
+                    <li role="presentation" {% if url_namespace == "dev_environment" and url_name == "index" %}class="active"{% endif %}>
+                        <a href="{% url 'dev_environment:index' %}" title="View software development environment">
+                            <span class="fa fa-building-o"></span> Dev. environment
                         </a>
                     </li>
                     {% if request.user.member.is_initialized %}

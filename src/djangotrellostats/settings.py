@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'djangotrellostats.apps.boards',
     'djangotrellostats.apps.hourly_rates',
     'djangotrellostats.apps.dev_times',
+    'djangotrellostats.apps.dev_environment',
     'djangotrellostats.apps.fetch',
     'djangotrellostats.apps.reports',
     'djangotrellostats.apps.reporter',

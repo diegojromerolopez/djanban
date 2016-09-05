@@ -7,7 +7,7 @@ from djangotrellostats.apps.repositories.views.commits import add as add_commit,
     assess_python_code_quality
 
 urlpatterns = [
-    # List of requirements
+    # List of repositories
     url(r'^$', view_list, name="view_repositories"),
     url(r'^new$', new, name="new_repository"),
     url(r'^(?P<repository_id>\d+)/view/?$', view, name="view_repository"),

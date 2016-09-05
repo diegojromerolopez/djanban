@@ -17,9 +17,7 @@ class DirPylinter(object):
         results = []
         for root, subdirs, files in os.walk(self.dir_path):
             for filename in files:
-                print filename
                 if DirPylinter.is_python_file(filename):
-                    print filename
                     file_path = u"{0}/{1}".format(root, filename)
                     pylinter = Pylinter(file_path)
                     pylinter_result = pylinter.run()

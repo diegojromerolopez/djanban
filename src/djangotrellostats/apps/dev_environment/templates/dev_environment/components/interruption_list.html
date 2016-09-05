@@ -1,0 +1,45 @@
+
+<h1>Interruptions</h1>
+{% if interruptions|length < num_interruptions %}
+    Showing only {{summary_size}} first interruptions.
+    <a href="{% url 'dev_environment:view_interruptions' %}" title="View interruptions" class="btn btn-primary">
+        View all
+    </a>
+{% endif %}
+{% if interruptions|length == 0 %}
+    <div class="panel panel-default">
+      <div class="panel-heading">Interruptions</div>
+      <div class="panel-body">
+        It seems there hasn't been any interruption.
+          <a href="{% url 'dev_environment:new_interruption' %}" title="New hourly rate" class="btn btn-primary">
+              Do you want to create an interruption for this moment
+          </a>
+      </div>
+    </div>
+{% else %}
+    <a href="{% url 'dev_environment:new_interruption' %}" title="New interruption" class="btn btn-primary">New</a>
+    <div class="panel">
+        <table class="table">
+            <tr>
+                <td>Date</td>
+                <td>Board</td>
+                <td>Member</td>
+                <td>Cause</td>
+                <td>Comments</td>
+                <td>Actions</td>
+            </tr>
+            {% for interruption in interruptions %}
+                <tr>
+                    <td>{{interruption.datetime}}</td>
+                    <td>{{interruption.board.name}}</td>
+                    <td>{{interruption.member.user.username}}</td>
+                    <td>{{interruption.cause|truncatechars_html:50}}</td>
+                    <td>{{interruption.comments|truncatechars_html:50}}</td>
+                    <td>
+                        <a href="{% url 'dev_environment:delete_interruption' interruption.id %}" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endif %}
