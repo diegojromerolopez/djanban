@@ -1,0 +1,8 @@
+{% extends "requirements/form.html" %}
+
+{% block page_title %}New repository for {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>New repository for board {{board.name}}</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}

@@ -25,9 +25,15 @@ def view_list(request, board_id):
 # View a requirement
 @login_required
 def view(request, board_id, requirement_code):
-    board = get_object_or_404(Board, id=board_id)
+    member = request.user.member
+    try:
+        board = member.boards.get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
+
     requirement = get_object_or_404(Requirement, code=requirement_code, board=board)
     replacements = {
+        "member": member,
         "board": board,
         "requirement": requirement
     }

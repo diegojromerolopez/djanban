@@ -1,12 +1,12 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 
 from django.db import models
-
-
-# A requirement for a project
 from django.db.models import Sum
 
 
+# A requirement for a project
 class Requirement(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="requirements")
 

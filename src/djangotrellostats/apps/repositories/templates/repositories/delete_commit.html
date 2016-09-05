@@ -1,0 +1,8 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}Delete commit {{commit.commit}} from repository {{repository.name}} of project {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>Delete commit {{commit.commit}} from repository {{repository.name}} of project {{board.name}}</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}

@@ -1,0 +1,48 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}Repositories of {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>Repositories of board {{board.name}}</h1>
+    <div class="board_list_list">
+        <div class="row">
+            <div class="panel col-md-12">
+                <div>
+                    <a href="{% url 'boards:repositories:new_repository' board.id %}" class="btn btn-primary">New repository</a>
+                </div>
+                {% if repositories|length == 0 %}
+                    This board has no repositories.
+                {% else %}
+                    <table class="table">
+                        <tr>
+                            <td>Name</td>
+                            <td>Description</td>
+                            <td>Type</td>
+                            <td>URL</td>
+                            <td>Actions</td>
+                        </tr>
+                        {% for repository in repositories %}
+                            <tr>
+                                <td>{{repository.name}}</td>
+                                <td>{{repository.description|truncatechars_html:20}}</td>
+                                <td>{{repository.url}}</td>
+                                <td>{{repository.type}}</td>
+                                <td>
+                                    <a href="{% url 'boards:repositories:view_repository' board.id repository.id %}" title="View repository {{repository.name}}">
+                                        <span class="fa fa-eye"></span>
+                                    </a>
+                                    <a href="{% url 'boards:repositories:edit_repository' board.id repository.id %}" title="Edit repository {{repository.name}}">
+                                        <span class="fa fa-pencil"></span>
+                                    </a>
+                                    <a href="{% url 'boards:repositories:delete_repository' board.id repository.id %}" title="Delete repository {{repository.name}}">
+                                        <span class="fa fa-trash"></span>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import shortuuid
 
 from djangotrellostats.apps.requirements.models import Requirement
