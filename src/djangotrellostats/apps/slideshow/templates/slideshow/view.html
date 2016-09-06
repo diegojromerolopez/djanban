@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 
-{% block page_title %}Learn about our team{% endblock %}
+{% block page_title %}Team summary{% endblock %}
 
 {% block css %}
     {{block.super}}
@@ -21,7 +21,7 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-          $("#slideshow-carousel").owlCarousel({
+          $("#board-carousel, #member-carousel").owlCarousel({
             singleItem: true,
             autoPlay: 7000
           });
@@ -34,26 +34,33 @@
 {% block content %}
     <h1>Learn about our team</h1>
 
-    <div id="slideshow-carousel" class="owl-carousel">
-        {% for board in boards %}
-            {% if board.last_fetch_datetime and board.is_fetched and board.is_ready %}
-                {% include "boards/components/view/number_of_spent_hours.html" %}
-                {% include "boards/components/view/current_percentage_of_completion.html" %}
-                <img src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" alt="Tasks worked on by month"/>
-                <img src="{% url 'charts:cumulative_list_evolution' board.id %}" alt="Evolution of number of tasks by list"/>
-                <img src="{% url 'charts:avg_spent_time_by_month' board.id %}" alt="Average spent time by month"/>
-                <img src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
-                {% if board.interruptions.all.exist %}
-                    <img src="{% url 'charts:interruptions_by_month' board.id %}" alt="Interruptions by month"/>
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-        {% for member_i in members %}
-            <img id="spent_time_by_day_of_the_week" src="{% url 'charts:spent_time_by_day_of_the_week' member_i.id %}" alt="Spent time by {{member_i.trello_username}}"/>
-        {% endfor %}
-        <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
-        <img src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
-        <img src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
-    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div id="member-carousel" class="owl-carousel">
+                {% for member_i in members %}
+                    <img id="spent_time_by_day_of_the_week" src="{% url 'charts:spent_time_by_day_of_the_week' member_i.id %}" alt="Spent time by {{member_i.trello_username}}"/>
+                {% endfor %}
+                <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
+                <img src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div id="board-carousel" class="owl-carousel">
+                {% for board in boards %}
+                    {% if board.last_fetch_datetime and board.is_fetched and board.is_ready %}
+                        {% include "boards/components/view/number_of_spent_hours.html" %}
+                        {% include "boards/components/view/current_percentage_of_completion.html" %}
+                        <img src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" alt="Tasks worked on by month"/>
+                        <img src="{% url 'charts:cumulative_list_evolution' board.id %}" alt="Evolution of number of tasks by list"/>
+                        <img src="{% url 'charts:avg_spent_time_by_month' board.id %}" alt="Average spent time by month"/>
+                        <img src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
+                        {% if board.interruptions.all.exist %}
+                            <img src="{% url 'charts:interruptions_by_month' board.id %}" alt="Interruptions by month"/>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                <img src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
+            </div>
+        </div>
 
 {% endblock %}
