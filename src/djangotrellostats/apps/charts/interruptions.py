@@ -67,7 +67,6 @@ def number_of_interruptions_by_month(board):
     date_i = datetime_i.date()
     month_i = date_i.month
     year_i = date_i.year
-    print [interruption.datetime for interruption in interruptions]
     first_loop = True
     monthly_measurement = None
     while first_loop or (monthly_measurement is not None and monthly_measurement > 0):
