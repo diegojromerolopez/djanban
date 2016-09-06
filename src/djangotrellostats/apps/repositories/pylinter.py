@@ -26,7 +26,7 @@ class DirPylinter(object):
 
     @staticmethod
     def is_python_file(filename):
-        return re.match(r"^[^\.]+\.py$", filename)
+        return filename != "__init__.py" and re.match(r"^[^\.]+\.py$", filename)
 
 
 # Runs pylint on a file
@@ -38,7 +38,8 @@ class Pylinter(object):
         self.stderr = None
 
     def run(self):
-        (stdout, stderr) = lint.py_run(self.file_path, return_std=True)
+        command_options = u"{0} --output-format=json --reports=y".format(self.file_path)
+        (stdout, stderr) = lint.py_run(command_options, return_std=True)
         return PylinterResult(self.file_path, stdout, stderr)
 
 
