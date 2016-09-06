@@ -18,7 +18,7 @@ urlpatterns = [
     url(r'^public_spent_time_by_week/(?P<week_of_year>\d{4}W\d{2})/(?P<board_public_access_code>.+)/?$', public.spent_time_by_week, name="public_spent_time_by_week"),
 
     url(r'^spent_time_by_day_of_the_week/?$', private.spent_time_by_day_of_the_week, name="spent_time_by_day_of_the_week"),
-    url(r'^spent_time_by_day_of_the_week(/(?P<member_id>\d+))?/?$', private.spent_time_by_day_of_the_week, name="spent_time_by_day_of_the_week"),
+    url(r'^spent_time_by_day_of_the_week/(?P<member_id>\d+)/?$', private.spent_time_by_day_of_the_week, name="spent_time_by_day_of_the_week"),
     url(r'^spent_time_by_day_of_the_week/(?P<member_id>\d+)/(?P<week_of_year>\d{4}W\d{2})/?$', private.spent_time_by_day_of_the_week, name="spent_time_by_day_of_the_week"),
     url(r'^spent_time_by_day_of_the_week/(?P<member_id>\d+)/(?P<week_of_year>\d{4}W\d{2})/(?P<board_id>[\d]+)/?$', private.spent_time_by_day_of_the_week, name="spent_time_by_day_of_the_week"),
 

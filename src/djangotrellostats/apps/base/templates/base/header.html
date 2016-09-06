@@ -35,6 +35,11 @@
                             <span class="fa fa-building-o"></span> Dev. environment
                         </a>
                     </li>
+                    <li role="presentation" {% if url_namespace == "sideshow" %}class="active"{% endif %}>
+                        <a href="{% url 'slideshow:view' %}" title="Slideshow">
+                            <span class="fa fa-area-chart"></span> Slideshow
+                        </a>
+                    </li>
                     {% if request.user.member.is_initialized %}
                         <li role="presentation" {% if url_name == "fetch_boards" %}class="active"{% endif %}>
                             <a href="{% url 'fetch:fetch_boards' %}" title="Fetch all boards">

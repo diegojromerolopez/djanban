@@ -64,47 +64,9 @@
 
         {% if board.estimated_number_of_hours %}
 
-            {% with board_spent_time=board.get_spent_time%}
-                <div class="panel panel-{% if board_spent_time == board.estimated_number_of_hours %}warning{% elif board_spent_time < board.estimated_number_of_hours %}success{% else %}danger{% endif %}">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Number of spent hours</h3>
-                    </div>
-                    <div class="panel-body">
-                        <p>
-                            This project has spent <strong> {{board_spent_time|floatformat:-2}} hours</strong> of <strong>{{board.estimated_number_of_hours}} estimated hours</strong>.
-                            {% if board_spent_time == board.estimated_number_of_hours %}
-                                <span>Congratulations.</span>
-                            {% elif board_spent_time < board.estimated_number_of_hours %}
-                                <span>Congratulations.</span>
-                            {% else %}
-                                <span>Be careful. You are in overbudget.</span>
-                            {% endif %}
-                        </p>
-                        <p>Developed value in this project is <strong>{{board.get_developed_value|floatformat:-2}} ¤</strong></p>
-                    </div>
-                </div>
-            {% endwith %}
+            {% include "boards/components/view/number_of_spent_hours.html" %}
 
-            {% with current_percentage_of_completion=board.current_percentage_of_completion %}
-                <div class="panel panel-{% if current_percentage_of_completion == board.percentage_of_completion %}warning{% elif current_percentage_of_completion < board.percentage_of_completion %}success{% else %}danger{% endif %}">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Percentage of completion</h3>
-                    </div>
-                    <div class="panel-body">
-                        This project should be at least at <strong>{{current_percentage_of_completion|floatformat:-2}} %</strong>.
-                        {% if board.percentage_of_completion %}
-                            According to {% if member %}<a href="{% url 'boards:edit' board.id %}">this board settings</a>{% else %}this board settings{% endif %}, it is at <strong>{{board.percentage_of_completion|floatformat:2}} %</strong>.
-                            {% if current_percentage_of_completion == board.percentage_of_completion %}
-                                <span>Congratulations.</span>
-                            {% elif current_percentage_of_completion < board.percentage_of_completion %}
-                                <span>Congratulations. That's <strong>{{board.percentage_of_completion|subtract:current_percentage_of_completion|floatformat:-2}} % ahead of estimated hours</strong>.</span>
-                            {% else %}
-                                <span>Be careful. You are behind the expected estimations.</span>
-                            {% endif %}
-                        {% endif %}
-                    </div>
-                </div>
-            {% endwith %}
+            {% include "boards/components/view/current_percentage_of_completion.html" %}
 
         {% endif %}
 

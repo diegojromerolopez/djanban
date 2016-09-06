@@ -110,7 +110,7 @@ def _daily_spent_times_by_month(board=None, time_measurement="spent_time", opera
             monthly_measurement_chart.add(u"All tasks on {0}-{1}".format(year_i, month_i), monthly_measurement)
             for label in labels:
                 if label.name:
-                    label_measurement = month_spent_times.filters(labels=label).\
+                    label_measurement = month_spent_times.filter(card__labels=label).\
                                             aggregate(measurement=aggregation(time_measurement))["measurement"]
                     if label_measurement:
                         monthly_measurement_chart.add(u"{0} {1}-{2}".format(label.name, year_i, month_i), monthly_measurement)

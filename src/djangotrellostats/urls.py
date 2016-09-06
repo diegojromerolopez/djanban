@@ -15,6 +15,7 @@ urlpatterns = [
     url(r'^hourly_rates/', include('djangotrellostats.apps.hourly_rates.urls', namespace="hourly_rates")),
     url(r'^fetch/', include('djangotrellostats.apps.fetch.urls', namespace="fetch")),
     url(r'^environment/', include('djangotrellostats.apps.dev_environment.urls', namespace="dev_environment")),
+    url(r'^slideshow/', include('djangotrellostats.apps.slideshow.urls', namespace="slideshow")),
 
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
 ]
