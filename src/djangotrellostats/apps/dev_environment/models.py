@@ -18,7 +18,7 @@ class Interruption(models.Model):
 # A noise measurement
 class NoiseMeasurement(models.Model):
     # Based on https://www.acoustics.asn.au/conference_proceedings/AAS2011/papers/p140.pdf
-    SUBJECTIVE_NOISE_LEVEL = (
+    SUBJECTIVE_NOISE_LEVELS = (
         ("none", "I don't feel any noise"),
         ("library like", "A whisper is heard perfectly (library like environment)"),
         ("distracting", "The noise level is distracting and earphones or earplugs are needed"),
@@ -29,7 +29,7 @@ class NoiseMeasurement(models.Model):
     member = models.ForeignKey("members.Member", verbose_name=u"Who did take the measure?")
     datetime = models.DateTimeField(verbose_name=u"When the measure was taken?")
     noise_level = models.DecimalField(verbose_name=u"Noise level in decibeles", decimal_places=4, max_digits=12)
-    subjective_noise_level = models.CharField(verbose_name=u"Subjective noisel level", choices=SUBJECTIVE_NOISE_LEVEL,
+    subjective_noise_level = models.CharField(verbose_name=u"Subjective noisel level", choices=SUBJECTIVE_NOISE_LEVELS,
                                               max_length=32, default="none")
     comments = models.TextField(verbose_name=u"Other comments about the interruption", default="", blank=True)
 

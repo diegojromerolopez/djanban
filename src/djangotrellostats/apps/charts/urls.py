@@ -44,4 +44,9 @@ urlpatterns = [
     url(r'^public_avg_spent_times/(?P<board_public_access_code>.+)/?$', public.avg_spent_times, name="public_avg_spent_time"),
     url(r'^public_avg_estimated_times/(?P<board_public_access_code>.+)/?$', public.avg_estimated_times, name="public_avg_estimated_time"),
     url(r'^public_avg_time_by_list/(?P<board_public_access_code>.+)/?$', public.avg_time_by_list, name="public_avg_time_by_list"),
+
+    url(r'^interruptions/(?P<board_id>\d+)?/?$', private.number_of_interruptions, name="interruptions"),
+    url(r'^interruptions_by_month/(?P<board_id>\d+)?/?$', private.number_of_interruptions_by_month, name="interruptions_by_month"),
+    url(r'^noise_levels/?$', private.noise_level, name="noise_level"),
+    url(r'^subjective_noise_levels/?$', private.subjective_noise_level, name="subjective_noise_level"),
 ]

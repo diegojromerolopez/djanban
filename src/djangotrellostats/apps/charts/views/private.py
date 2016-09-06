@@ -8,7 +8,7 @@ from django.utils import timezone
 from isoweek import Week
 
 from djangotrellostats.apps.boards.models import Board
-from djangotrellostats.apps.charts import cards, labels, members
+from djangotrellostats.apps.charts import cards, labels, members, interruptions, noise_measurements
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 
@@ -156,3 +156,32 @@ def cumulative_list_evolution(request, board_id, day_step=5):
         day_step = 5
     day_step = min(int(day_step), 30)
     return cards.cumulative_list_evolution(board, day_step)
+
+
+# Interruptions
+@login_required
+def number_of_interruptions(request, board_id=None):
+    board = None
+    if board_id:
+        board = request.user.member.boards.get(id=board_id)
+    return interruptions.number_of_interruptions(board)
+
+
+# Interruptions
+@login_required
+def number_of_interruptions_by_month(request, board_id=None):
+    board = None
+    if board_id:
+        board = request.user.member.boards.get(id=board_id)
+    return interruptions.number_of_interruptions_by_month(board)
+
+
+# Noise measurements
+@login_required
+def noise_level(request):
+    return noise_measurements.noise_level()
+
+
+@login_required
+def subjective_noise_level(request):
+    return noise_measurements.subjective_noise_level()

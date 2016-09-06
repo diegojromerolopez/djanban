@@ -30,7 +30,7 @@
                             <span class="fa fa-users"></span> Members
                         </a>
                     </li>
-                    <li role="presentation" {% if url_namespace == "dev_environment" and url_name == "index" %}class="active"{% endif %}>
+                    <li role="presentation" {% if url_namespace == "dev_environment"  %}class="active"{% endif %}>
                         <a href="{% url 'dev_environment:index' %}" title="View software development environment">
                             <span class="fa fa-building-o"></span> Dev. environment
                         </a>
