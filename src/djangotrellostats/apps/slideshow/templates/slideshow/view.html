@@ -21,7 +21,7 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-          $("#board-carousel, #member-carousel").owlCarousel({
+          $("#board-carousel, #member-carousel, #interruptions-carousel, #noise_measurements-carousel").owlCarousel({
             singleItem: true,
             autoPlay: 7000
           });
@@ -36,6 +36,7 @@
 
     <div class="row">
         <div class="col-md-6">
+            <h2>Member information</h2>
             <div id="member-carousel" class="owl-carousel">
                 {% for member_i in members %}
                     {% if member_i.is_developer %}
@@ -47,6 +48,7 @@
             </div>
         </div>
         <div class="col-md-6">
+            <h2>Project information</h2>
             <div id="board-carousel" class="owl-carousel">
                 {% for board in boards %}
                     {% if board.last_fetch_datetime and board.is_fetched and board.is_ready %}
@@ -56,13 +58,38 @@
                         <img src="{% url 'charts:cumulative_list_evolution' board.id %}" alt="Evolution of number of tasks by list"/>
                         <img src="{% url 'charts:avg_spent_time_by_month' board.id %}" alt="Average spent time by month"/>
                         <img src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
-                        {% if board.interruptions.all.exist %}
-                            <img src="{% url 'charts:interruptions_by_month' board.id %}" alt="Interruptions by month"/>
-                        {% endif %}
                     {% endif %}
                 {% endfor %}
                 <img src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
             </div>
         </div>
+    </div>
+
+    <div class="row">
+        {% if interruptions|length > 0 %}
+            <div class="col-md-6">
+                <h2>Interruptions</h2>
+                <div id="interruptions-carousel" class="owl-carousel">
+                    <img src="{% url 'charts:interruptions_by_month' %}" alt="Task backward movements by member"/>
+                    {% for board in boards %}
+                        {% if board.last_fetch_datetime and board.is_fetched and board.is_ready %}
+                            {% if board.interruptions.all.exist %}
+                                <img src="{% url 'charts:interruptions_by_month' board.id %}" alt="Interruptions by month"/>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        {% if noise_measurements|length > 0 %}
+            <div class="col-md-6">
+                <h2>Noise levels</h2>
+                <div id="noise_measurements-carousel" class="owl-carousel">
+                    <img src="{% url 'charts:noise_level' %}" alt="Average spent time"/>
+                    <img src="{% url 'charts:subjective_noise_level' %}" alt="Average spent time"/>
+                </div>
+            </div>
+        {% endif %}
+    </div>
 
 {% endblock %}
