@@ -8,7 +8,7 @@ from django.utils import timezone
 from isoweek import Week
 
 from djangotrellostats.apps.boards.models import Board
-from djangotrellostats.apps.charts import cards, labels, members, interruptions, noise_measurements
+from djangotrellostats.apps.charts import cards, labels, members, interruptions, noise_measurements, repositories
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 
@@ -185,3 +185,11 @@ def noise_level(request):
 @login_required
 def subjective_noise_level(request):
     return noise_measurements.subjective_noise_level()
+
+
+# Code quality
+def number_of_code_errors_by_month(request, board_id):
+    board = None
+    if board_id:
+        board = request.user.member.boards.get(id=board_id)
+    return repositories.number_of_code_errors_by_month(board)
