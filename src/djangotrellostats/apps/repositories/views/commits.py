@@ -16,8 +16,9 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from djangotrellostats.apps.repositories.forms import CommitForm, DeleteCommitForm, MakeAssessmentForm
-from djangotrellostats.apps.repositories.models import Commit, PyLintMessage
-from djangotrellostats.apps.repositories.pylinter import DirPylinter
+from djangotrellostats.apps.repositories.models import Commit, PylintMessage, PhpMdMessage
+from djangotrellostats.apps.repositories.phpmd import PhpMdAnalyzer
+from djangotrellostats.apps.repositories.pylinter import PythonDirectoryAnalyzer
 
 
 @login_required
@@ -80,11 +81,10 @@ def view_assessment_report(request, board_id, repository_id, commit_id):
     except ObjectDoesNotExist:
         raise Http404
 
-    pylint_messages = commit.pylint_messages.all()
-
     replacements = {
         "board": board, "member": member, "repository": repository, "commit": commit,
-        "pylint_messages": pylint_messages
+        "pylint_messages": commit.pylint_messages.all(),
+        "phpmd_messages": commit.phpmd_messages.all()
     }
     return render(request, "repositories/commits/assessment/view_report.html", replacements)
 
@@ -119,27 +119,53 @@ def assess_code_quality(request, board_id, repository_id, commit_id):
 # Assess quality of the PHP code of this commit
 @transaction.atomic
 def _assess_php_code_quality(request, member, board, repository, commit):
-    pass
+
+    # Deletion of current PHP-md messages
+    commit.phpmd_messages.all().delete()
+
+    output_file_path = _extract_repository_files(commit)
+
+    dir_phpmd_analyzer = PhpMdAnalyzer(output_file_path)
+    phpmd_result = dir_phpmd_analyzer.run()
+    PhpMdMessage.create_all(commit, phpmd_result)
+
+    _delete_extracted_repository(output_file_path)
+
+    replacements = {
+        "board": board, "member": member, "repository": repository, "commit": commit, "phpmd_results": phpmd_result.messages,
+    }
+    return render(request, "repositories/commits/assessment/php/assess_code.html", replacements)
 
 
 # Assess quality of the Python code of this commit
 @transaction.atomic
 def _assess_python_code_quality(request, member, board, repository, commit):
+    # Deletion of current Pylint messages
+    commit.pylint_messages.all().delete()
 
-    code_file_path = settings.MEDIA_ROOT+"/"+commit.code.name
-    output_file_path = u"/tmp/{0}-{1}".format(commit.commit, shortuuid.uuid())
+    output_file_path = _extract_repository_files(commit)
 
-    zip_ref = zipfile.ZipFile(code_file_path, 'r')
-    zip_ref.extractall(output_file_path)
-    zip_ref.close()
-
-    dir_pylinter = DirPylinter(output_file_path)
+    dir_pylinter = PythonDirectoryAnalyzer(output_file_path)
     pylinter_results = dir_pylinter.run()
-    PyLintMessage.create_all(commit, pylinter_results)
+    PylintMessage.create_all(commit, pylinter_results)
 
-    shutil.rmtree(output_file_path, ignore_errors=True)
+    _delete_extracted_repository(output_file_path)
 
     replacements = {
         "board": board, "member": member, "repository": repository, "commit": commit, "pylinter_results": pylinter_results,
     }
     return render(request, "repositories/commits/assessment/python/assess_code.html", replacements)
+
+
+def _extract_repository_files(commit):
+    code_file_path = settings.MEDIA_ROOT + "/" + commit.code.name
+    output_file_path = u"/tmp/{0}-{1}".format(commit.commit, shortuuid.uuid())
+
+    zip_ref = zipfile.ZipFile(code_file_path, 'r')
+    zip_ref.extractall(output_file_path)
+    zip_ref.close()
+    return output_file_path
+
+
+def _delete_extracted_repository(output_file_path):
+    shutil.rmtree(output_file_path, ignore_errors=True)

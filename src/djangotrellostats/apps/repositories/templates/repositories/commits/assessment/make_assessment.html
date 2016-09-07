@@ -8,13 +8,13 @@
         <div class="row">
             <div class="col-md-6 center-block">
                 <div class="panel panel-danger ">
-                  <div class="panel-heading">Danger! This action cannot be undone</div>
+                  <div class="panel-heading">Danger! This action cannot be undone!</div>
                   <div class="panel-body">
                       <p>
-                        {{commit.commit}} has already a <a href="{% url 'boards:repositories:view_assessment_report' board.id repository.id commit.id %}" title="Assessment report of commit {{commit.commit}}">report</a>
+                        Commit {{commit.commit}} has already a <a href="{% url 'boards:repositories:view_assessment_report' board.id repository.id commit.id %}" title="Assessment report of commit {{commit.commit}}">report</a>
                       </p>
                       <p>
-                        Are you sure you want to delete it and create a new one?
+                        Are you sure you want to delete it and create a new one? Note this action takes some time.
                       </p>
 
                       {% include "forms/form.html" %}
@@ -23,7 +23,23 @@
                 </div>
             </div>
         </div>
-
+    {% else %}
+        <div class="row">
+            <div class="col-md-6 center-block">
+                <div class="panel panel-warning ">
+                  <div class="panel-heading">Warning! This action takes some time!</div>
+                  <div class="panel-body">
+                      <p>
+                        Commit {{commit.commit}} has no code quality report.
+                      </p>
+                      <p>
+                        Are you sure you want to create one?
+                      </p>
+                      {% include "forms/form.html" %}
+                  </div>
+                </div>
+            </div>
+        </div>
     {% endif %}
 
 {% endblock content %}

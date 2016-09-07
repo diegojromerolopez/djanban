@@ -89,11 +89,49 @@ class Commit(models.Model):
 
     @property
     def has_assessment_report(self):
-        return self.pylint_messages.all().exists()
+        return self.pylint_messages.all().exists() or self.phpmd_messages.all().exists()
+
+
+# PHP-md messages
+class PhpMdMessage(models.Model):
+    board = models.ForeignKey("boards.Board", verbose_name=u"Project this linting message depends on",
+                              related_name="phpmd_messages")
+
+    commit = models.ForeignKey("repositories.Commit", verbose_name=u"Commit this linting message depends on",
+                               related_name="phpmd_messages")
+
+    repository = models.ForeignKey("repositories.Repository", verbose_name=u"Repository this linting message depends on",
+                                   related_name="phpmd_messages")
+
+    path = models.CharField(verbose_name=u"File", max_length=512)
+
+    rule = models.CharField(verbose_name=u"Violated rule", max_length=64, default=None, null=True)
+
+    ruleset = models.CharField(verbose_name=u"Rule set", max_length=64, default=None, null=True)
+
+    message = models.TextField(verbose_name=u"Violation message content")
+
+    begin_line = models.IntegerField(verbose_name=u"Begin line where the error happens", default=None, null=True)
+
+    end_line = models.IntegerField(verbose_name=u"End line where the error happens", default=None, null=True)
+
+    @staticmethod
+    def create_all(commit, phpmd_result):
+        repository = commit.repository
+        board = commit.board
+        for phpmd_result_message in phpmd_result.messages:
+            phpmd_message = PhpMdMessage(board=board, repository=repository, commit=commit,
+                                         rule=phpmd_result_message["rule"],
+                                         ruleset=phpmd_result_message["ruleset"],
+                                         message=phpmd_result_message["message"],
+                                         path=phpmd_result_message["path"],
+                                         begin_line=phpmd_result_message["begin_line"],
+                                         end_line=phpmd_result_message["end_line"])
+            phpmd_message.save()
 
 
 # Pylint messages
-class PyLintMessage(models.Model):
+class PylintMessage(models.Model):
 
     TYPE_CHOICES = (
         ("convention", "Coding standard violation"),
@@ -139,7 +177,7 @@ class PyLintMessage(models.Model):
         for pylinter_result_message in pylinter_result_messages:
             if pylinter_result_message:
                 dict_message = pylinter_result_message
-                linting_message = PyLintMessage(
+                linting_message = PylintMessage(
                     board=board, repository=repository, commit=commit,
                     path=dict_message["path"], type=dict_message["type"], message=dict_message["message"],
                     message_symbolic_name=dict_message["symbol"], line=dict_message["line"], column=dict_message["column"],
@@ -152,5 +190,5 @@ class PyLintMessage(models.Model):
         repository = commit.repository
         board = commit.board
         for pylinter_result in pylinter_results:
-            PyLintMessage.create_from_dict(board, repository, commit, pylinter_result.messages)
+            PylintMessage.create_from_dict(board, repository, commit, pylinter_result.messages)
 

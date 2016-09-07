@@ -1,0 +1,18 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}PHP code assessment of commit {{commit.commit}} of {{repository.name}} for {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>
+        Success! PHP code of commit {{commit.commit}} of {{repository.name}} in project {{board.name}} has been assessed
+    </h1>
+
+    {% for phpmd_result in phpmd_results %}
+        <div>
+            <h2>{{phpmd_result.path}}</h2>
+            <pre>
+                {{phpmd_result.message}}
+            </pre>
+        </div>
+    {% endfor %}
+{% endblock content %}

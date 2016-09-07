@@ -1,4 +1,4 @@
-{% with url_name=request.resolver_match.url_name %}
+{% with url_name=request.resolver_match.url_name url_namespace=request.resolver_match.namespace %}
     <nav class="navbar navbar-default">
         <div class="container-fluid">
             <div class="navbar-header">
@@ -48,7 +48,7 @@
                                 <span class="fa fa-calendar-check-o"></span> Spent times
                             </a>
                         </li>
-                        <li {% if url_name == "view_repositories" %}class="active"{% endif %}>
+                        <li {% if url_namespace == "boards:repositories" %}class="active"{% endif %}>
                             <a href="{% url 'boards:repositories:view_repositories' board.id %}" title="View code repositories of project {{board.name}}">
                                 <span class="fa fa-code-fork"></span> Repositories
                             </a>

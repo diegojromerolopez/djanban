@@ -9,7 +9,7 @@ from pylint import epylint as lint
 
 
 # Pylinter for directories
-class DirPylinter(object):
+class PythonDirectoryAnalyzer(object):
 
     def __init__(self, dir_path):
         self.dir_path = dir_path
@@ -18,7 +18,7 @@ class DirPylinter(object):
         results = []
         for root, subdirs, files in os.walk(self.dir_path):
             for filename in files:
-                if DirPylinter.is_python_file(filename):
+                if PythonDirectoryAnalyzer.is_python_file(filename):
                     file_path = u"{0}/{1}".format(root, filename)
                     pylinter = Pylinter(file_path)
                     pylinter_result = pylinter.run()
