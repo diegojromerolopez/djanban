@@ -3,6 +3,7 @@
 {% block page_title %}Add new commit to repository {{repository.name}} for {{board.name}}{% endblock %}
 
 {% block content %}
+    {% include "repositories/commits/components/breadcrumbs.html" %}
     <h1>Add new commit to repository {{repository.name}} of {{board.name}}</h1>
     {% include "forms/form.html" %}
 {% endblock content %}

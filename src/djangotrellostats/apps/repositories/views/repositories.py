@@ -42,6 +42,7 @@ def view(request, board_id, repository_id):
         raise Http404
 
     replacements = {
+        "member": member,
         "board": board,
         "repository": repository
     }
