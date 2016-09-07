@@ -78,6 +78,8 @@ class GitLabRepository(Repository):
 
 # Each one of the commits fetched from the repository
 class Commit(models.Model):
+    board = models.ForeignKey("boards.Board", verbose_name=u"Project this commit depends on",
+                               related_name="commits")
     repository = models.ForeignKey("repositories.Repository", verbose_name=u"Repository this commit depends on",
                                    related_name="commits")
     commit = models.CharField(verbose_name=u"Commit repository", max_length=64)
@@ -85,12 +87,24 @@ class Commit(models.Model):
     creation_datetime = models.DateTimeField(verbose_name=u"Datetime of this commit")
     code = models.FileField(verbose_name=u"Code for this commit")
 
+    @property
+    def has_assessment_report(self):
+        return self.pylint_messages.all().exists()
 
-class LintingMessage(models.Model):
+
+# Pylint messages
+class PyLintMessage(models.Model):
+
+    TYPE_CHOICES = (
+        ("convention", "Coding standard violation"),
+        ("error", "Standard programming error"),
+        ("refactor", "Needs refactoring"),
+        ("warning", "Warning")
+    )
 
     class Meta:
-        verbose_name = u"linting message"
-        verbose_name_plural = u"linting messages"
+        verbose_name = u"pylint message"
+        verbose_name_plural = u"pylint messages"
         index_together = (
             ("commit", "type"),
             ("board", "commit", "type"),
@@ -98,17 +112,17 @@ class LintingMessage(models.Model):
         )
 
     board = models.ForeignKey("boards.Board", verbose_name=u"Project this linting message depends on",
-                              related_name="linting_messages")
+                              related_name="pylint_messages")
 
     commit = models.ForeignKey("repositories.Commit", verbose_name=u"Commit this linting message depends on",
-                               related_name="linting_messages")
+                               related_name="pylint_messages")
 
     repository = models.ForeignKey("repositories.Repository", verbose_name=u"Repository this linting message depends on",
-                                   related_name="linting_messages")
+                                   related_name="pylint_messages")
 
     path = models.CharField(verbose_name=u"File where the message", max_length=256)
 
-    type = models.CharField(verbose_name=u"Linting type", max_length=256)
+    type = models.CharField(verbose_name=u"Message type", max_length=256)
 
     message = models.TextField(verbose_name=u"Message content")
 
@@ -125,7 +139,7 @@ class LintingMessage(models.Model):
         for pylinter_result_message in pylinter_result_messages:
             if pylinter_result_message:
                 dict_message = pylinter_result_message
-                linting_message = LintingMessage(
+                linting_message = PyLintMessage(
                     board=board, repository=repository, commit=commit,
                     path=dict_message["path"], type=dict_message["type"], message=dict_message["message"],
                     message_symbolic_name=dict_message["symbol"], line=dict_message["line"], column=dict_message["column"],
@@ -136,7 +150,7 @@ class LintingMessage(models.Model):
     @staticmethod
     def create_all(commit, pylinter_results):
         repository = commit.repository
-        board = repository.board
+        board = commit.board
         for pylinter_result in pylinter_results:
-            LintingMessage.create_from_dict(board, repository, commit, pylinter_result.messages)
+            PyLintMessage.create_from_dict(board, repository, commit, pylinter_result.messages)
 

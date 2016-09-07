@@ -16,7 +16,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from djangotrellostats.apps.repositories.forms import CommitForm, DeleteCommitForm
-from djangotrellostats.apps.repositories.models import Commit, LintingMessage
+from djangotrellostats.apps.repositories.models import Commit, PyLintMessage
 from djangotrellostats.apps.repositories.pylinter import DirPylinter
 
 
@@ -29,7 +29,7 @@ def add(request, board_id, repository_id):
     except ObjectDoesNotExist:
         raise Http404
 
-    commit = Commit(repository=repository)
+    commit = Commit(board=board, repository=repository)
 
     if request.method == "POST":
         form = CommitForm(request.POST, request.FILES, instance=commit)
@@ -42,38 +42,7 @@ def add(request, board_id, repository_id):
         form = CommitForm(instance=commit)
 
     replacements = {"form": form, "board": board, "member": member, "repository": repository}
-    return render(request, "repositories/add_commit.html", replacements)
-
-
-# Assess quality of the code of this commit
-@transaction.atomic
-def assess_python_code_quality(request, board_id, repository_id, commit_id):
-    member = request.user.member
-    try:
-        board = member.boards.get(id=board_id)
-        repository = board.repositories.get(id=repository_id)
-        commit = repository.commits.get(id=commit_id)
-        commit.linting_messages.all().delete()
-    except ObjectDoesNotExist:
-        raise Http404
-
-    code_file_path = settings.MEDIA_ROOT+"/"+commit.code.name
-    output_file_path = u"/tmp/{0}-{1}".format(commit.commit, shortuuid.uuid())
-
-    zip_ref = zipfile.ZipFile(code_file_path, 'r')
-    zip_ref.extractall(output_file_path)
-    zip_ref.close()
-
-    dir_pylinter = DirPylinter(output_file_path)
-    pylinter_results = dir_pylinter.run()
-    LintingMessage.create_all(commit, pylinter_results)
-
-    shutil.rmtree(output_file_path, ignore_errors=True)
-
-    replacements = {
-        "board": board, "member": member, "repository": repository, "commit": commit, "pylinter_results": pylinter_results,
-    }
-    return render(request, "repositories/assess_python_code.html", replacements)
+    return render(request, "repositories/commits/add.html", replacements)
 
 
 # Delete a commit
@@ -98,4 +67,66 @@ def delete(request, board_id, repository_id, commit_id):
         form = DeleteCommitForm()
 
     replacements = {"form": form, "board": board, "member": member, "repository": repository, "commit": commit}
-    return render(request, "repositories/delete_commit.html", replacements)
+    return render(request, "repositories/commits/delete.html", replacements)
+
+
+# View assessment report
+def view_assessment_report(request, board_id, repository_id, commit_id):
+    member = request.user.member
+    try:
+        board = member.boards.get(id=board_id)
+        repository = board.repositories.get(id=repository_id)
+        commit = repository.commits.get(id=commit_id)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    pylint_messages = commit.pylint_messages.all()
+
+    replacements = {
+        "board": board, "member": member, "repository": repository, "commit": commit,
+        "pylint_messages": pylint_messages
+    }
+    return render(request, "repositories/commits/assessment/view_report.html", replacements)
+
+
+# Assess quality of the PHP code of this commit
+@transaction.atomic
+def assess_php_code_quality(request, board_id, repository_id, commit_id):
+    member = request.user.member
+    try:
+        board = member.boards.get(id=board_id)
+        repository = board.repositories.get(id=repository_id)
+        commit = repository.commits.get(id=commit_id)
+    except ObjectDoesNotExist:
+        raise Http404
+
+
+# Assess quality of the Python code of this commit
+@transaction.atomic
+def assess_python_code_quality(request, board_id, repository_id, commit_id):
+    member = request.user.member
+    try:
+        board = member.boards.get(id=board_id)
+        repository = board.repositories.get(id=repository_id)
+        commit = repository.commits.get(id=commit_id)
+        commit.pylint_messages.all().delete()
+    except ObjectDoesNotExist:
+        raise Http404
+
+    code_file_path = settings.MEDIA_ROOT+"/"+commit.code.name
+    output_file_path = u"/tmp/{0}-{1}".format(commit.commit, shortuuid.uuid())
+
+    zip_ref = zipfile.ZipFile(code_file_path, 'r')
+    zip_ref.extractall(output_file_path)
+    zip_ref.close()
+
+    dir_pylinter = DirPylinter(output_file_path)
+    pylinter_results = dir_pylinter.run()
+    PyLintMessage.create_all(commit, pylinter_results)
+
+    shutil.rmtree(output_file_path, ignore_errors=True)
+
+    replacements = {
+        "board": board, "member": member, "repository": repository, "commit": commit, "pylinter_results": pylinter_results,
+    }
+    return render(request, "repositories/commits/assessment/python/assess_code.html", replacements)

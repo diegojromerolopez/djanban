@@ -89,26 +89,56 @@
                                       Commits
                                   </div>
                                 <div class="panel-body">
-                                    <a href="{% url 'boards:repositories:add_commit' board.id repository.id %}">
-                                        <span class="fa fa-plus"></span> Add new commit
-                                    </a>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <p>
+                                                <a href="{% url 'boards:repositories:add_commit' board.id repository.id %}" class="btn btn-default"
+                                                   title="Add new commit to repository {{repository.name}} of project {{board.name}}">
+                                                    <span class="fa fa-plus"></span> Add new commit
+                                                </a>
+                                            </p>
+                                        </div>
+                                    </div>
                                     {% with commits=repository.commits.all %}
                                         {% if commits|length > 0 %}
-                                            {% for commit in commits %}
-                                                <div>
-                                                    <strong>{{commit.commit}}</strong> on {{commit.creation_datetime}}
-                                                    <span>
-                                                        <a href="{% url 'boards:repositories:assess_python_code_quality' board.id repository.id commit.id %}" title="Assess quality of Python code on {{commit.commit}}">
-                                                            <span class="fa fa-star-half-full"></span>
-                                                            Assess Python code quality
-                                                        </a>
-                                                        <a href="{% url 'boards:repositories:delete_commit' board.id repository.id commit.id %}" title="Delete commit {{commit.commit}}">
-                                                            <span class="fa fa-trash"></span>
-                                                            Delete
-                                                        </a>
-                                                    </span>
-                                                </div>
-                                            {% endfor %}
+                                            <table class="table">
+                                                <tr>
+                                                    <th>Commit</th>
+                                                    <th>Date</th>
+                                                    <th>Actions</th>
+                                                    <th>Assessment</th>
+                                                </tr>
+                                                {% for commit in commits %}
+                                                    <tr>
+                                                        <td>
+                                                            <strong>{{commit.commit}}</strong>
+                                                        </td>
+                                                        <td>
+                                                            {{commit.creation_datetime}}
+                                                        </td>
+                                                        <td>
+                                                            {% if commit.has_assessment_report %}
+                                                                <a href="{% url 'boards:repositories:view_assessment_report' board.id repository.id commit.id %}" title="Assessment report of commit {{commit.commit}}">
+                                                                    View report
+                                                                </a>
+                                                            {% endif %}
+
+                                                            <a href="{% url 'boards:repositories:delete_commit' board.id repository.id commit.id %}" title="Delete commit {{commit.commit}}">
+                                                                <span class="fa fa-trash"></span>
+                                                                Delete
+                                                            </a>
+                                                        </td>
+                                                        <td>
+                                                            <a href="{% url 'boards:repositories:assess_php_code_quality' board.id repository.id commit.id %}" title="Assess quality of PHP code on {{commit.commit}}">
+                                                                <span class="devicon-php-plain"></span>
+                                                            </a>
+                                                            <a href="{% url 'boards:repositories:assess_python_code_quality' board.id repository.id commit.id %}" title="Assess quality of Python code on {{commit.commit}}">
+                                                                <span class="devicon-python-plain"></span>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
                                         {% else %}
                                             There are no commits for this repository
                                         {% endif %}

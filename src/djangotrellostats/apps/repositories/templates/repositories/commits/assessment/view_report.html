@@ -1,0 +1,46 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}Repository {{repository.name}} of project {{board.name}}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 card">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                  <h1>Repository {{repository.name}} of project {{board.name}}</h1>
+                </div>
+                {% if phpmd_messages|length > 0 %}
+                    <div class="panel-body row">
+                        <div class="col-md-12">
+                            <h2>PHP-MD messages</h2>
+                            NOT IMPLEMENTED.
+                        </div>
+                    </div>
+                {% endif %}
+                {% if pylint_messages|length > 0 %}
+                    <div class="panel-body row">
+                        <div class="col-md-12">
+                            <h2>Pylint messages</h2>
+                            {% for pylint_message in pylint_messages %}
+                                <div class="panel panel-default">
+                                  <div class="panel-heading">{{pylint_message.type}} on {{pylint_message.path}}</div>
+                                  <div class="panel-body">
+                                      <p>
+                                          <strong>Message:</strong> ({{pylint_message.message_symbolic_name}}) {{pylint_message.message}}
+                                      </p>
+                                      <p>
+                                          <strong>File:</strong> {{pylint_message.path}}
+                                      </p>
+                                      <p>
+                                          <strong>Location:</strong> {{pylint_message.line}}:{{pylint_message.column}} {% if pylint_message.object %}on {{pylint_message.object}} {% endif %}
+                                      </p>
+                                  </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

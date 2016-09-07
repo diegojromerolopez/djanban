@@ -4,8 +4,9 @@
 
 {% block content %}
     <h1>
-        Python code assessment of commit {{commit.commit}} of {{repository.name}} for {{board.name}}
+        Success! Python code of commit {{commit.commit}} of {{repository.name}} in project {{board.name}} has been assessed
     </h1>
+
     {% for pylinter_result in pylinter_results %}
         <div>
             <h2>{{pylinter_result.file_path}}</h2>
