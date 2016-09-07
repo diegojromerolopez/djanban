@@ -10,12 +10,13 @@ import shutil
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
 from djangotrellostats.apps.repositories.forms import CommitForm, DeleteCommitForm
-from djangotrellostats.apps.repositories.models import Commit
+from djangotrellostats.apps.repositories.models import Commit, LintingMessage
 from djangotrellostats.apps.repositories.pylinter import DirPylinter
 
 
@@ -45,12 +46,14 @@ def add(request, board_id, repository_id):
 
 
 # Assess quality of the code of this commit
+@transaction.atomic
 def assess_python_code_quality(request, board_id, repository_id, commit_id):
     member = request.user.member
     try:
         board = member.boards.get(id=board_id)
         repository = board.repositories.get(id=repository_id)
         commit = repository.commits.get(id=commit_id)
+        commit.linting_messages.all().delete()
     except ObjectDoesNotExist:
         raise Http404
 
@@ -63,6 +66,7 @@ def assess_python_code_quality(request, board_id, repository_id, commit_id):
 
     dir_pylinter = DirPylinter(output_file_path)
     pylinter_results = dir_pylinter.run()
+    LintingMessage.create_all(commit, pylinter_results)
 
     shutil.rmtree(output_file_path, ignore_errors=True)
 

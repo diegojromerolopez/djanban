@@ -85,3 +85,58 @@ class Commit(models.Model):
     creation_datetime = models.DateTimeField(verbose_name=u"Datetime of this commit")
     code = models.FileField(verbose_name=u"Code for this commit")
 
+
+class LintingMessage(models.Model):
+
+    class Meta:
+        verbose_name = u"linting message"
+        verbose_name_plural = u"linting messages"
+        index_together = (
+            ("commit", "type"),
+            ("board", "commit", "type"),
+            ("board", "type")
+        )
+
+    board = models.ForeignKey("boards.Board", verbose_name=u"Project this linting message depends on",
+                              related_name="linting_messages")
+
+    commit = models.ForeignKey("repositories.Commit", verbose_name=u"Commit this linting message depends on",
+                               related_name="linting_messages")
+
+    repository = models.ForeignKey("repositories.Repository", verbose_name=u"Repository this linting message depends on",
+                                   related_name="linting_messages")
+
+    path = models.CharField(verbose_name=u"File where the message", max_length=256)
+
+    type = models.CharField(verbose_name=u"Linting type", max_length=256)
+
+    message = models.TextField(verbose_name=u"Message content")
+
+    message_symbolic_name = models.CharField(verbose_name=u"Message content", max_length=64, default="", blank=True)
+
+    line = models.IntegerField(verbose_name=u"Line where the error happens")
+
+    column = models.IntegerField(verbose_name=u"Column where the error happens")
+
+    object = models.CharField(verbose_name=u"Object", max_length=256)
+
+    @staticmethod
+    def create_from_dict(board, repository, commit, pylinter_result_messages):
+        for pylinter_result_message in pylinter_result_messages:
+            if pylinter_result_message:
+                dict_message = pylinter_result_message
+                linting_message = LintingMessage(
+                    board=board, repository=repository, commit=commit,
+                    path=dict_message["path"], type=dict_message["type"], message=dict_message["message"],
+                    message_symbolic_name=dict_message["symbol"], line=dict_message["line"], column=dict_message["column"],
+                    object=dict_message["obj"]
+                )
+                linting_message.save()
+
+    @staticmethod
+    def create_all(commit, pylinter_results):
+        repository = commit.repository
+        board = repository.board
+        for pylinter_result in pylinter_results:
+            LintingMessage.create_from_dict(board, repository, commit, pylinter_result.messages)
+

@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+import json
 import os
 import re
 from pylint import epylint as lint
@@ -50,3 +51,12 @@ class PylinterResult(object):
         self.file_path = file_path
         self.stdout = stdout.getvalue()
         self.stderr = stderr.getvalue()
+
+        self._init_results()
+
+    # Initialize results
+    def _init_results(self):
+        self.messages = []
+        if self.stdout != "":
+            self.messages = json.loads(self.stdout)
+
