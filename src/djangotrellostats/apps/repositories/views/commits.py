@@ -103,12 +103,17 @@ def assess_code_quality(request, board_id, repository_id, commit_id):
 
         if form.is_valid() and form.cleaned_data.get("confirmed"):
             language = form.cleaned_data["language"]
-            if language == "python":
-                return _assess_python_code_quality(request, member, board, repository, commit)
-            elif language == "php":
-                return _assess_php_code_quality(request, member, board, repository, commit)
-            else:
-                raise Http404
+            try:
+                if language == "python":
+                    return _assess_python_code_quality(request, member, board, repository, commit)
+                elif language == "php":
+                    return _assess_php_code_quality(request, member, board, repository, commit)
+                else:
+                    raise Http404
+            except (AssertionError, ValueError) as e:
+                replacements = {"form": form, "board": board, "member": member, "repository": repository,
+                                "commit": commit, "error_message": e.message}
+                return render(request, "repositories/commits/assessment/error.html", replacements)
     else:
         form = MakeAssessmentForm()
 

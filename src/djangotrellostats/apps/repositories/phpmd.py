@@ -39,14 +39,27 @@ class PhpMdAnalyzer(object):
         self.stderr = None
 
     def run(self):
+        PhpMdAnalyzer.assert_phpmd_exists()
+
         php_md_command = "phpmd {0} xml cleancode,codesize,controversial,design,naming,unusedcode".format(self.file_path)
         phpmd_call_results = subprocess.Popen(php_md_command, shell=True, stdout=subprocess.PIPE)
+
         self.stdout = phpmd_call_results.stdout.read()
         self.stderr = ""
+
         if phpmd_call_results.stderr:
             self.stderr = phpmd_call_results.stderr.read()
 
         return PhpMdAnalysisResult(self.file_path, self.stdout, self.stderr)
+
+    # Asserts that phpmd is installed in this system
+    @staticmethod
+    def assert_phpmd_exists():
+        try:
+            subprocess.call(["phpmd", "--version"])
+        except OSError as e:
+            if e.errno == os.errno.ENOENT:
+                raise AssertionError(u"PHPMD was not found in your system. Please you have the last version of PHPMD installed in your system.")
 
 
 # Stores php-md result

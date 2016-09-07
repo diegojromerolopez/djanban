@@ -3,6 +3,8 @@
 {% block page_title %}Make assessment for commit {{commit.commit}} of repository {{repository.name}} of project {{board.name}}{% endblock %}
 
 {% block content %}
+    {% include "repositories/commits/components/breadcrumbs.html" %}
+
     <h1>Make assessment for commit {{commit.commit|truncatechars:10}} of repository {{repository.name}} of project {{board.name}}</h1>
     {% if commit.has_assessment_report %}
         <div class="row">

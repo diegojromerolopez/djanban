@@ -1,0 +1,27 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}Error when making the assessment for commit {{commit.commit|truncatechars:10}} of repository {{repository.name}} of project {{board.name}}{% endblock %}
+
+{% block content %}
+    {% include "repositories/commits/components/breadcrumbs.html" %}
+
+    <h1>Error when making the assessment for commit {{commit.commit|truncatechars:10}} of repository {{repository.name}} of project {{board.name}}</h1>
+
+        <div class="row">
+            <div class="col-md-6 center-block">
+                <div class="panel panel-danger ">
+                  <div class="panel-heading">Error! Couldn't make the assesment</div>
+                  <div class="panel-body">
+                      <p>
+                        There was an error when trying to make the assessment of commit {{commit.commit}}.
+                      </p>
+                      <p>
+                        {{error_message}}
+                      </p>
+
+                  </div>
+                </div>
+            </div>
+        </div>
+
+{% endblock content %}

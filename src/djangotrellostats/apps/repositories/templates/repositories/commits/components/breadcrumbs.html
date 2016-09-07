@@ -8,8 +8,8 @@
               </a>
           </li>
           <li role="presentation"><a href="{% url 'boards:repositories:view_repository' board.id repository.id %}#commits">Commits</a></li>
-            {% if commit %}
-                <li role="presentation"><a href="{% url 'boards:repositories:view_assessment_report' board.id repository.id commit.id %}">Commit {{commit.commit}}</a></li>
+            {% if commit and commit.has_assessment_report %}
+                <li role="presentation"><a href="{% url 'boards:repositories:view_assessment_report' board.id repository.id commit.id %}">Assessment of commit {{commit.commit}}</a></li>
             {% endif %}
         </ul>
     </div>
