@@ -129,11 +129,8 @@
                                                             </a>
                                                         </td>
                                                         <td>
-                                                            <a href="{% url 'boards:repositories:assess_php_code_quality' board.id repository.id commit.id %}" title="Assess quality of PHP code on {{commit.commit}}">
-                                                                <span class="devicon-php-plain"></span>
-                                                            </a>
-                                                            <a href="{% url 'boards:repositories:assess_python_code_quality' board.id repository.id commit.id %}" title="Assess quality of Python code on {{commit.commit}}">
-                                                                <span class="devicon-python-plain"></span>
+                                                            <a href="{% url 'boards:repositories:assess_code_quality' board.id repository.id commit.id %}" title="Assess quality code of {{commit.commit}}">
+                                                                Assess code quality
                                                             </a>
                                                         </td>
                                                     </tr>

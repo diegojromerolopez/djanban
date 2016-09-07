@@ -28,8 +28,6 @@ class GitLabRepositoryForm(forms.ModelForm):
         return self.instance
 
 
-
-
 class DeleteRepositoryForm(forms.Form):
     confirmed = forms.BooleanField(label=u"Confirm you want to delete this repository")
 
@@ -48,7 +46,15 @@ class CommitForm(forms.ModelForm):
         return self.instance
 
 
-
-
 class DeleteCommitForm(forms.Form):
     confirmed = forms.BooleanField(label=u"Confirm you want to delete this commit")
+
+
+class MakeAssessmentForm(forms.Form):
+    LANGUAGE_CHOICES = (
+        ("python", "Python"),
+        ("php", "PHP"),
+    )
+    confirmed = forms.BooleanField(label=u"Confirm you want to make an assessment of this commit")
+    language = forms.ChoiceField(choices=LANGUAGE_CHOICES)
+

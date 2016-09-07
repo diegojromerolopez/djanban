@@ -1,0 +1,29 @@
+{% extends "requirements/form.html" %}
+
+{% block page_title %}Make assessment for commit {{commit.commit}} of repository {{repository.name}} of project {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>Make assessment for commit {{commit.commit|truncatechars:10}} of repository {{repository.name}} of project {{board.name}}</h1>
+    {% if commit.has_assessment_report %}
+        <div class="row">
+            <div class="col-md-6 center-block">
+                <div class="panel panel-danger ">
+                  <div class="panel-heading">Danger! This action cannot be undone</div>
+                  <div class="panel-body">
+                      <p>
+                        {{commit.commit}} has already a <a href="{% url 'boards:repositories:view_assessment_report' board.id repository.id commit.id %}" title="Assessment report of commit {{commit.commit}}">report</a>
+                      </p>
+                      <p>
+                        Are you sure you want to delete it and create a new one?
+                      </p>
+
+                      {% include "forms/form.html" %}
+
+                  </div>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
+{% endblock content %}

@@ -15,7 +15,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from djangotrellostats.apps.repositories.forms import CommitForm, DeleteCommitForm
+from djangotrellostats.apps.repositories.forms import CommitForm, DeleteCommitForm, MakeAssessmentForm
 from djangotrellostats.apps.repositories.models import Commit, PyLintMessage
 from djangotrellostats.apps.repositories.pylinter import DirPylinter
 
@@ -89,9 +89,7 @@ def view_assessment_report(request, board_id, repository_id, commit_id):
     return render(request, "repositories/commits/assessment/view_report.html", replacements)
 
 
-# Assess quality of the PHP code of this commit
-@transaction.atomic
-def assess_php_code_quality(request, board_id, repository_id, commit_id):
+def assess_code_quality(request, board_id, repository_id, commit_id):
     member = request.user.member
     try:
         board = member.boards.get(id=board_id)
@@ -99,19 +97,34 @@ def assess_php_code_quality(request, board_id, repository_id, commit_id):
         commit = repository.commits.get(id=commit_id)
     except ObjectDoesNotExist:
         raise Http404
+
+    if request.method == "POST":
+        form = MakeAssessmentForm(request.POST)
+
+        if form.is_valid() and form.cleaned_data.get("confirmed"):
+            language = form.cleaned_data["language"]
+            if language == "python":
+                return _assess_python_code_quality(request, member, board, repository, commit)
+            elif language == "php":
+                return _assess_php_code_quality(request, member, board, repository, commit)
+            else:
+                raise Http404
+    else:
+        form = MakeAssessmentForm()
+
+    replacements = {"form": form, "board": board, "member": member, "repository": repository, "commit": commit}
+    return render(request, "repositories/commits/assessment/make_assessment.html", replacements)
+
+
+# Assess quality of the PHP code of this commit
+@transaction.atomic
+def _assess_php_code_quality(request, member, board, repository, commit):
+    pass
 
 
 # Assess quality of the Python code of this commit
 @transaction.atomic
-def assess_python_code_quality(request, board_id, repository_id, commit_id):
-    member = request.user.member
-    try:
-        board = member.boards.get(id=board_id)
-        repository = board.repositories.get(id=repository_id)
-        commit = repository.commits.get(id=commit_id)
-        commit.pylint_messages.all().delete()
-    except ObjectDoesNotExist:
-        raise Http404
+def _assess_python_code_quality(request, member, board, repository, commit):
 
     code_file_path = settings.MEDIA_ROOT+"/"+commit.code.name
     output_file_path = u"/tmp/{0}-{1}".format(commit.commit, shortuuid.uuid())
