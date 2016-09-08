@@ -195,3 +195,12 @@ def number_of_code_errors_by_month(request, board_id, language="python"):
     if language is None:
         language = "python"
     return repositories.number_of_code_errors_by_month(board, language)
+
+
+def number_of_code_errors_per_loc_by_month(request, board_id, language="python"):
+    board = None
+    if board_id:
+        board = request.user.member.boards.get(id=board_id)
+    if language is None:
+        language = "python"
+    return repositories.number_of_code_errors_per_loc_by_month(board, language)

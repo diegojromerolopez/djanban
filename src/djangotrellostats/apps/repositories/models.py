@@ -85,7 +85,10 @@ class Commit(models.Model):
     commit = models.CharField(verbose_name=u"Commit repository", max_length=64)
     comments = models.TextField(verbose_name=u"Comments about this commit", blank=True, default="")
     creation_datetime = models.DateTimeField(verbose_name=u"Datetime of this commit")
-    code = models.FileField(verbose_name=u"Code for this commit")
+    code = models.FileField(
+        verbose_name=u"Code for this commit",
+        help_text=u"Upload a zip file with the directory that contains code that you want the system to assess"
+    )
 
     class Meta:
         verbose_name = "commit"
