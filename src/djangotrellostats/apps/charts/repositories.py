@@ -5,7 +5,7 @@ from django.utils import timezone
 from djangotrellostats.apps.repositories.models import PylintMessage
 
 
-# Number of code errors
+# Number of code errors by month
 def number_of_code_errors_by_month(board):
     chart_title = u"Errors by month in project {0} {1}".format(board.name, timezone.now())
 
