@@ -9,7 +9,7 @@ from djangotrellostats.apps.repositories.models import PylintMessage
 def number_of_code_errors_by_month(board):
     chart_title = u"Errors by month in project {0} {1}".format(board.name, timezone.now())
 
-    chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
+    chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
                                           print_zeroes=False,
                                           human_readable=True)
 
@@ -30,18 +30,21 @@ def number_of_code_errors_by_month(board):
         month_i = min_creation_datetime.month
         year_i = min_creation_datetime.year
         number_of_pylint_messages_by_month = []
+        chart.x_labels = []
         while year_i <= max_year_i or (year_i == max_year_i and month_i < max_month_i):
             month_i_pylint_messages = board.pylint_messages.filter(type=pylint_message_type,
                                                                    commit__creation_datetime__year=year_i,
                                                                    commit__creation_datetime__month=month_i)
 
             number_of_pylint_messages_by_month.append(month_i_pylint_messages.count())
-
+            chart.x_labels.append(u"{0}-{1}".format(year_i, month_i))
             month_i += 1
             if month_i > 12:
                 month_i = 1
                 year_i += 1
 
         chart.add(dict(PylintMessage.TYPE_CHOICES)[pylint_message_type], number_of_pylint_messages_by_month)
+
+
 
     return chart.render_django_response()
