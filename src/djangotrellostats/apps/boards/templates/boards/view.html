@@ -152,11 +152,22 @@
             {% endblock card_stats_charts %}
 
             {% block quality_charts %}
-                <div class="row">
-                    <div class="col-sm-12">
-                        <img src="{% url 'charts:number_of_code_errors_by_month' board.id %}" alt="Code quality by month"/>
-                    </div>
-                </div>
+                {% with has_php_report=board.has_php_assessment_report %}
+                    {% with has_python_report=board.has_python_assessment_report %}
+                        {% if has_python_report %}
+                            <div class="row">
+                                <div class="col-sm-{% if has_python_report and has_php_report%}6{% else %}12{% endif %}">
+                                    <img src="{% url 'charts:number_of_code_errors_by_month' board.id 'python' %}" alt="Code quality by month"/>
+                                </div>
+                        {% endif %}
+                        {% if has_php_report %}
+                                <div class="col-sm-{% if has_python_report and has_php_report%}6{% else %}12{% endif %}">
+                                    <img src="{% url 'charts:number_of_code_errors_by_month' board.id 'php' %}" alt="Code quality by month"/>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% endwith %}
             {% endblock quality_charts %}
 
             {% block interruption_charts %}

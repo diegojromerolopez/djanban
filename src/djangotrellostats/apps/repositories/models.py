@@ -88,12 +88,27 @@ class Commit(models.Model):
     code = models.FileField(verbose_name=u"Code for this commit")
 
     @property
+    def has_python_assessment_report(self):
+        return self.pylint_messages.all().exists()
+
+    @property
+    def has_php_assessment_report(self):
+        return self.phpmd_messages.all().exists()
+
+    @property
     def has_assessment_report(self):
-        return self.pylint_messages.all().exists() or self.phpmd_messages.all().exists()
+        return self.has_python_assessment_report or self.has_php_assessment_report
 
 
 # PHP-md messages
 class PhpMdMessage(models.Model):
+    RULESETS = ("Clean Code Rules",
+                "Code Size Rules",
+                "Controversial Rules",
+                "Design Rules",
+                "Naming Rules",
+                "Unused Code Rules")
+
     board = models.ForeignKey("boards.Board", verbose_name=u"Project this linting message depends on",
                               related_name="phpmd_messages")
 

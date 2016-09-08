@@ -188,8 +188,10 @@ def subjective_noise_level(request):
 
 
 # Code quality
-def number_of_code_errors_by_month(request, board_id):
+def number_of_code_errors_by_month(request, board_id, language="python"):
     board = None
     if board_id:
         board = request.user.member.boards.get(id=board_id)
-    return repositories.number_of_code_errors_by_month(board)
+    if language is None:
+        language = "python"
+    return repositories.number_of_code_errors_by_month(board, language)

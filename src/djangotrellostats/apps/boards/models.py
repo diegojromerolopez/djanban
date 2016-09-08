@@ -196,6 +196,16 @@ class Board(models.Model):
     def get_working_end_date(self):
         return self.daily_spent_times.all().aggregate(max_date=Max("date"))["max_date"]
 
+    # Has this project assessed Python code?
+    @property
+    def has_python_assessment_report(self):
+        return self.pylint_messages.all().exists()
+
+    # Has this project assessed PHP code?
+    @property
+    def has_php_assessment_report(self):
+        return self.phpmd_messages.all().exists()
+
 
 # Card of the task board
 class Card(ImmutableModel):

@@ -58,6 +58,12 @@
                         <img src="{% url 'charts:cumulative_list_evolution' board.id %}" alt="Evolution of number of tasks by list"/>
                         <img src="{% url 'charts:avg_spent_time_by_month' board.id %}" alt="Average spent time by month"/>
                         <img src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
+                        {% if board.has_python_assessment_report %}
+                            <img src="{% url 'charts:number_of_code_errors_by_month' board.id 'python' %}" alt="Code quality by month"/>
+                        {% endif %}
+                        {% if board.has_php_assessment_report %}
+                            <img src="{% url 'charts:number_of_code_errors_by_month' board.id 'php' %}" alt="Code quality by month"/>
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
                 <img src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
