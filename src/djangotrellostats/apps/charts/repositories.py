@@ -24,7 +24,7 @@ def _number_of_code_errors_by_month(board, language, per_loc=False):
 
     chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
                        print_zeroes=False,
-                       human_readable=True)
+                       human_readable=False)
 
     if language.lower() == "php":
         error_messages = board.phpmd_messages.all()
