@@ -10,6 +10,11 @@
     <link href="{% static 'css/dev_times/daily_spent_times.css' %}" rel="stylesheet" />
 {% endblock css %}
 
+{% block js %}
+    {{block.super}}
+    <script type="text/javascript" src="{% static 'js/dev_times/daily_spent_times.js' %}" ></script>
+{% endblock js %}
+
 {% block content %}
     <h1>
         Daily spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}
