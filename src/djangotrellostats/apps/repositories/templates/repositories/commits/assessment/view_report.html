@@ -25,7 +25,7 @@
                 {% if phpmd_messages|length > 0 %}
                     <div class="panel-body row">
                         <div class="col-md-12">
-                            <h2>PHP-MD messages</h2>
+                            <h2>PHP-MD messages for {{commit_files.count}} file/s </h2>
                             {% for file in commit_files %}
                                 <div class="">
                                     <h3>{{file.path}}</h3>
@@ -62,7 +62,7 @@
                 {% if pylint_messages|length > 0 %}
                     <div class="panel-body row">
                         <div class="col-md-12">
-                            <h2>Pylint messages</h2>
+                            <h2>Pylint messages for {{commit_files.count}} file/s</h2>
                             {% for file in commit_files %}
                                 <div class="">
                                     <h3>{{file.path}}</h3>
