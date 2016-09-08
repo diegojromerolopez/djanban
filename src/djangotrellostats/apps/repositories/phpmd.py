@@ -48,6 +48,7 @@ class PhpDirectoryAnalyzer(object):
     def file_is_empty(file_path):
         return os.path.getsize(file_path) == 0
 
+
 # Runs PHP-md on a file
 class PhpMdAnalyzer(object):
 

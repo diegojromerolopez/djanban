@@ -26,20 +26,34 @@
                     <div class="panel-body row">
                         <div class="col-md-12">
                             <h2>PHP-MD messages</h2>
-                            {% for phpmd_message in phpmd_messages %}
-                                <div class="panel panel-default">
-                                  <div class="panel-heading">{{phpmd_message.ruleset}} on {{phpmd_message.path}}</div>
-                                  <div class="panel-body">
-                                      <p>
-                                          <strong>Message:</strong> ({{phpmd_message.rule}}) {{phpmd_message.message}}
-                                      </p>
-                                      <p>
-                                          <strong>File:</strong> {{phpmd_message.path}}
-                                      </p>
-                                      <p>
-                                          <strong>Location:</strong> lines {{phpmd_message.begin_line}} to {{phpmd_message.end_line}} of {{phpmd_message.path}}
-                                      </p>
-                                  </div>
+                            {% for file in commit_files %}
+                                <div class="">
+                                    <h3>{{file.path}}</h3>
+                                    <div class="panel panel-info">
+                                          <div class="panel-heading">Code size</div>
+                                          <div class="panel-body">
+                                              <p>Programming language: {{file.language}}</p>
+                                              <p>Blank lines: {{file.blank_lines}}</p>
+                                              <p>Commented lines: {{file.commented_lines}}</p>
+                                              <p>Lines of code: {{file.lines_of_code}}</p>
+                                          </div>
+                                    </div>
+                                    {% for phpmd_message in file.phpmd_messages.all %}
+                                        <div class="panel panel-default">
+                                          <div class="panel-heading">{{phpmd_message.ruleset}} on {{phpmd_message.path}}</div>
+                                          <div class="panel-body">
+                                              <p>
+                                                  <strong>Message:</strong> ({{phpmd_message.rule}}) {{phpmd_message.message}}
+                                              </p>
+                                              <p>
+                                                  <strong>File:</strong> {{phpmd_message.path}}
+                                              </p>
+                                              <p>
+                                                  <strong>Location:</strong> lines {{phpmd_message.begin_line}} to {{phpmd_message.end_line}} of {{phpmd_message.path}}
+                                              </p>
+                                          </div>
+                                        </div>
+                                    {% endfor %}
                                 </div>
                             {% endfor %}
                         </div>
@@ -49,20 +63,34 @@
                     <div class="panel-body row">
                         <div class="col-md-12">
                             <h2>Pylint messages</h2>
-                            {% for pylint_message in pylint_messages %}
-                                <div class="panel panel-default">
-                                  <div class="panel-heading">{{pylint_message.type}} on {{pylint_message.path}}</div>
-                                  <div class="panel-body">
-                                      <p>
-                                          <strong>Message:</strong> ({{pylint_message.message_symbolic_name}}) {{pylint_message.message}}
-                                      </p>
-                                      <p>
-                                          <strong>File:</strong> {{pylint_message.path}}
-                                      </p>
-                                      <p>
-                                          <strong>Location:</strong> {{pylint_message.line}}:{{pylint_message.column}} {% if pylint_message.object %}on {{pylint_message.object}} {% endif %}
-                                      </p>
-                                  </div>
+                            {% for file in commit_files %}
+                                <div class="">
+                                    <h3>{{file.path}}</h3>
+                                    <div class="panel panel-info">
+                                          <div class="panel-heading">Code size</div>
+                                          <div class="panel-body">
+                                              <p>Programming language: {{file.language}}</p>
+                                              <p>Blank lines: {{file.blank_lines}}</p>
+                                              <p>Commented lines: {{file.commented_lines}}</p>
+                                              <p>Lines of code: {{file.lines_of_code}}</p>
+                                          </div>
+                                    </div>
+                                    {% for pylint_message in file.pylint_messages.all %}
+                                        <div class="panel panel-default">
+                                          <div class="panel-heading">{{pylint_message.type}} on {{pylint_message.path}}</div>
+                                          <div class="panel-body">
+                                              <p>
+                                                  <strong>Message:</strong> ({{pylint_message.message_symbolic_name}}) {{pylint_message.message}}
+                                              </p>
+                                              <p>
+                                                  <strong>File:</strong> {{pylint_message.path}}
+                                              </p>
+                                              <p>
+                                                  <strong>Location:</strong> {{pylint_message.line}}:{{pylint_message.column}} {% if pylint_message.object %}on {{pylint_message.object}} {% endif %}
+                                              </p>
+                                          </div>
+                                        </div>
+                                    {% endfor %}
                                 </div>
                             {% endfor %}
                         </div>

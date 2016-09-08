@@ -82,6 +82,7 @@ def view_assessment_report(request, board_id, repository_id, commit_id):
 
     replacements = {
         "board": board, "member": member, "repository": repository, "commit": commit,
+        "commit_files": commit.files.all(),
         "pylint_messages": commit.pylint_messages.all(),
         "phpmd_messages": commit.phpmd_messages.all()
     }
