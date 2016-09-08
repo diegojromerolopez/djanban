@@ -5,6 +5,9 @@ from datetime import datetime, time, timedelta
 import pygal
 import calendar
 from datetime import date
+
+import pytz
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Min, Q, Count
 from django.utils import timezone
@@ -116,8 +119,9 @@ def cumulative_list_evolution(board, day_step=5):
     x_labels = []
 
     date_i = copy.deepcopy(start_working_date)
+    local_timezone = pytz.timezone(settings.TIME_ZONE)
     while date_i <= end_working_date:
-        datetime_i = datetime.combine(date_i, time.min)
+        datetime_i = local_timezone.localize(datetime.combine(date_i, time.min))
         num_total_cards = 0
         for list_ in lists:
             list_id = list_.id
