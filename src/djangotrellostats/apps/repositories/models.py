@@ -87,6 +87,13 @@ class Commit(models.Model):
     creation_datetime = models.DateTimeField(verbose_name=u"Datetime of this commit")
     code = models.FileField(verbose_name=u"Code for this commit")
 
+    class Meta:
+        verbose_name = "commit"
+        verbose_name_plural = "commits"
+        index_together = (
+            ("board", "repository", "commit"),
+        )
+
     @property
     def has_python_assessment_report(self):
         return self.pylint_messages.all().exists()
@@ -98,6 +105,50 @@ class Commit(models.Model):
     @property
     def has_assessment_report(self):
         return self.has_python_assessment_report or self.has_php_assessment_report
+
+
+class CommitFile(models.Model):
+    board = models.ForeignKey("boards.Board", verbose_name=u"Project this linting message depends on",
+                              related_name="commit_files")
+
+    repository = models.ForeignKey("repositories.Repository",
+                                   verbose_name=u"Repository this linting message depends on",
+                                   related_name="commit_files")
+
+    commit = models.ForeignKey("repositories.Commit",
+                               verbose_name=u"Commit this source code file depends on",
+                               related_name="files")
+
+    language = models.CharField(verbose_name=u"Language of the file", max_length=64)
+
+    path = models.CharField(verbose_name=u"File", max_length=512)
+
+    blank_lines = models.PositiveIntegerField(verbose_name=u"Number of blank lines in this file")
+
+    commented_lines = models.PositiveIntegerField(verbose_name=u"Number of commented lines")
+
+    lines_of_code = models.PositiveIntegerField(verbose_name=u"Lines of code")
+
+    class Meta:
+        verbose_name = "commit file"
+        verbose_name_plural = "commit files"
+        index_together = (
+            ("board", "repository", "commit", "language"),
+        )
+
+    @staticmethod
+    def create_from_cloc_result(commit, cloc_result):
+        repository = commit.repository
+        commit_file = CommitFile(
+            commit=commit, repository=repository, board=repository.board,
+            language=cloc_result["language"],
+            path=cloc_result["path"],
+            blank_lines=cloc_result["blank_lines"],
+            commented_lines=cloc_result["commented_lines"],
+            lines_of_code=cloc_result["lines_of_code"],
+        )
+        commit_file.save()
+        return commit_file
 
 
 # PHP-md messages
@@ -112,37 +163,55 @@ class PhpMdMessage(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Project this linting message depends on",
                               related_name="phpmd_messages")
 
+    repository = models.ForeignKey("repositories.Repository",
+                                   verbose_name=u"Repository this linting message depends on",
+                                   related_name="phpmd_messages")
+
     commit = models.ForeignKey("repositories.Commit", verbose_name=u"Commit this linting message depends on",
                                related_name="phpmd_messages")
 
-    repository = models.ForeignKey("repositories.Repository", verbose_name=u"Repository this linting message depends on",
-                                   related_name="phpmd_messages")
+    commit_file = models.ForeignKey("repositories.CommitFile",
+                                    verbose_name=u"Commit file this linting message depends on",
+                                    related_name="phpmd_messages")
 
     path = models.CharField(verbose_name=u"File", max_length=512)
+
+    message = models.TextField(verbose_name=u"Assessment message content")
 
     rule = models.CharField(verbose_name=u"Violated rule", max_length=64, default=None, null=True)
 
     ruleset = models.CharField(verbose_name=u"Rule set", max_length=64, default=None, null=True)
 
-    message = models.TextField(verbose_name=u"Violation message content")
-
     begin_line = models.IntegerField(verbose_name=u"Begin line where the error happens", default=None, null=True)
 
     end_line = models.IntegerField(verbose_name=u"End line where the error happens", default=None, null=True)
 
+    class Meta:
+        verbose_name = u"phpmd message"
+        verbose_name_plural = u"phpmd messages"
+        index_together = (
+            ("board", "repository", "commit", "commit_file", "ruleset"),
+            ("commit", "commit_file", "ruleset"),
+            ("board", "commit", "ruleset"),
+            ("board", "commit", "commit_file", "ruleset"),
+            ("board", "ruleset")
+        )
+
     @staticmethod
-    def create_all(commit, phpmd_result):
+    def create_all(commit, phpmd_results):
         repository = commit.repository
         board = commit.board
-        for phpmd_result_message in phpmd_result.messages:
-            phpmd_message = PhpMdMessage(board=board, repository=repository, commit=commit,
-                                         rule=phpmd_result_message["rule"],
-                                         ruleset=phpmd_result_message["ruleset"],
-                                         message=phpmd_result_message["message"],
-                                         path=phpmd_result_message["path"],
-                                         begin_line=phpmd_result_message["begin_line"],
-                                         end_line=phpmd_result_message["end_line"])
-            phpmd_message.save()
+        for phpmd_result in phpmd_results:
+            commit_file = CommitFile.create_from_cloc_result(commit, phpmd_result.cloc_result)
+            for phpmd_result_message in phpmd_result.messages:
+                phpmd_message = PhpMdMessage(board=board, repository=repository, commit=commit, commit_file=commit_file,
+                                             rule=phpmd_result_message["rule"],
+                                             ruleset=phpmd_result_message["ruleset"],
+                                             message=phpmd_result_message["message"],
+                                             path=phpmd_result_message["path"],
+                                             begin_line=phpmd_result_message["begin_line"],
+                                             end_line=phpmd_result_message["end_line"])
+                phpmd_message.save()
 
 
 # Pylint messages
@@ -159,6 +228,7 @@ class PylintMessage(models.Model):
         verbose_name = u"pylint message"
         verbose_name_plural = u"pylint messages"
         index_together = (
+            ("board", "repository", "commit", "commit_file", "type"),
             ("commit", "type"),
             ("board", "commit", "type"),
             ("board", "type")
@@ -173,11 +243,15 @@ class PylintMessage(models.Model):
     repository = models.ForeignKey("repositories.Repository", verbose_name=u"Repository this linting message depends on",
                                    related_name="pylint_messages")
 
-    path = models.CharField(verbose_name=u"File where the message", max_length=256)
+    commit_file = models.ForeignKey("repositories.CommitFile",
+                                    verbose_name=u"Commit file this linting message depends on",
+                                    related_name="pylint_messages")
 
     type = models.CharField(verbose_name=u"Message type", max_length=256)
 
-    message = models.TextField(verbose_name=u"Message content")
+    path = models.CharField(verbose_name=u"File", max_length=512)
+
+    message = models.TextField(verbose_name=u"Assessment message content")
 
     message_symbolic_name = models.CharField(verbose_name=u"Message content", max_length=64, default="", blank=True)
 
@@ -188,12 +262,13 @@ class PylintMessage(models.Model):
     object = models.CharField(verbose_name=u"Object", max_length=256)
 
     @staticmethod
-    def create_from_dict(board, repository, commit, pylinter_result_messages):
-        for pylinter_result_message in pylinter_result_messages:
+    def create_from_dict(board, repository, commit, pylinter_result):
+        commit_file = CommitFile.create_from_cloc_result(commit, pylinter_result.cloc_result)
+        for pylinter_result_message in pylinter_result.messages:
             if pylinter_result_message:
                 dict_message = pylinter_result_message
                 linting_message = PylintMessage(
-                    board=board, repository=repository, commit=commit,
+                    board=board, repository=repository, commit=commit, commit_file=commit_file,
                     path=dict_message["path"], type=dict_message["type"], message=dict_message["message"],
                     message_symbolic_name=dict_message["symbol"], line=dict_message["line"], column=dict_message["column"],
                     object=dict_message["obj"]
@@ -205,5 +280,5 @@ class PylintMessage(models.Model):
         repository = commit.repository
         board = commit.board
         for pylinter_result in pylinter_results:
-            PylintMessage.create_from_dict(board, repository, commit, pylinter_result.messages)
+            PylintMessage.create_from_dict(board, repository, commit, pylinter_result)
 

@@ -9,6 +9,9 @@ from pylint import epylint as lint
 
 
 # Pylinter for directories
+from djangotrellostats.apps.repositories.cloc import Cloc
+
+
 class PythonDirectoryAnalyzer(object):
 
     def __init__(self, dir_path):
@@ -20,15 +23,24 @@ class PythonDirectoryAnalyzer(object):
             for filename in files:
                 if PythonDirectoryAnalyzer.is_python_file(filename):
                     file_path = u"{0}/{1}".format(root, filename)
-                    pylinter = Pylinter(file_path)
-                    pylinter_result = pylinter.run()
-                    results.append(pylinter_result)
+                    if not PythonDirectoryAnalyzer.file_is_empty(file_path):
+                        # Count of lines of code
+                        cloc = Cloc(file_path)
+                        cloc_result = cloc.run()
+                        pylinter = Pylinter(file_path)
+                        pylinter_result = pylinter.run()
+                        pylinter_result.cloc_result = cloc_result
+                        results.append(pylinter_result)
         return results
 
     @staticmethod
     def is_python_file(filename):
         return filename != "__init__.py" and re.match(r"^[^\.]+\.py$", filename)
 
+    @staticmethod
+    def file_is_empty(file_path):
+        file_size = os.path.getsize(file_path)
+        return file_size == 0
 
 # Runs pylint on a file
 class Pylinter(object):

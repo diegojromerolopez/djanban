@@ -3,6 +3,8 @@
 {% block page_title %}Python code assessment of commit {{commit.commit}} of {{repository.name}} for {{board.name}}{% endblock %}
 
 {% block content %}
+    {% include "repositories/commits/components/breadcrumbs.html" %}
+
     <h1>
         Success! Python code of commit {{commit.commit}} of {{repository.name}} in project {{board.name}} has been assessed
     </h1>

@@ -50,6 +50,30 @@ My pull request are not merged so you'll have to use the version in [my local re
 
 Django, python-mysql and more packages specified in **requirements.txt**.
 
+## External requirements
+
+### cloc
+
+[cloc](https://github.com/AlDanial/cloc) is a tool to count lines of code.
+
+It is used to compute the errors per LOC when assessing code quality.
+
+### PHPMD
+
+[PHP Mess Detector](https://phpmd.org/) is needed in you want to assess PHP code.
+
+Install it by typing in Linux:
+
+```sh
+sudo apt-get install phpmd
+```
+
+Or in MacOS (using brew):
+
+```sh
+brew install homebrew/php/phpmd
+```
+
 # Configuration
 
 ## Local settings

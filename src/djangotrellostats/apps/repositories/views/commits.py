@@ -2,13 +2,12 @@
 
 from __future__ import unicode_literals
 
-import zipfile
-import os
-import shortuuid
 import shutil
+import zipfile
 
-from django.contrib.auth.decorators import login_required
+import shortuuid
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import Http404, HttpResponseRedirect
@@ -17,7 +16,7 @@ from django.urls import reverse
 
 from djangotrellostats.apps.repositories.forms import CommitForm, DeleteCommitForm, MakeAssessmentForm
 from djangotrellostats.apps.repositories.models import Commit, PylintMessage, PhpMdMessage
-from djangotrellostats.apps.repositories.phpmd import PhpMdAnalyzer
+from djangotrellostats.apps.repositories.phpmd import PhpDirectoryAnalyzer
 from djangotrellostats.apps.repositories.pylinter import PythonDirectoryAnalyzer
 
 
@@ -125,19 +124,19 @@ def assess_code_quality(request, board_id, repository_id, commit_id):
 @transaction.atomic
 def _assess_php_code_quality(request, member, board, repository, commit):
 
-    # Deletion of current PHP-md messages
-    commit.phpmd_messages.all().delete()
+    # Deletion of current commit files and PHP-md messages
+    commit.files.all().delete()
 
     output_file_path = _extract_repository_files(commit)
 
-    dir_phpmd_analyzer = PhpMdAnalyzer(output_file_path)
-    phpmd_result = dir_phpmd_analyzer.run()
-    PhpMdMessage.create_all(commit, phpmd_result)
+    dir_phpmd_analyzer = PhpDirectoryAnalyzer(output_file_path)
+    results = dir_phpmd_analyzer.run()
+    PhpMdMessage.create_all(commit, results)
 
     _delete_extracted_repository(output_file_path)
 
     replacements = {
-        "board": board, "member": member, "repository": repository, "commit": commit, "phpmd_results": phpmd_result.messages,
+        "board": board, "member": member, "repository": repository, "commit": commit, "phpmd_results": results,
     }
     return render(request, "repositories/commits/assessment/php/assess_code.html", replacements)
 
@@ -145,8 +144,8 @@ def _assess_php_code_quality(request, member, board, repository, commit):
 # Assess quality of the Python code of this commit
 @transaction.atomic
 def _assess_python_code_quality(request, member, board, repository, commit):
-    # Deletion of current Pylint messages
-    commit.pylint_messages.all().delete()
+    # Deletion of current commit files and all Pylint messages
+    commit.files.all().delete()
 
     output_file_path = _extract_repository_files(commit)
 

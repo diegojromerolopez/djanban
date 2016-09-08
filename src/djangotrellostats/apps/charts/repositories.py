@@ -60,7 +60,7 @@ def _number_of_php_code_errors_by_month(board):
 
 # Return the number of Python code errors by month
 def _number_of_python_code_errors_by_month(board):
-    chart_title = u"Errors in Pytho code by month in project {0} {1}".format(board.name, timezone.now())
+    chart_title = u"Errors in Python code by month in project {0} {1}".format(board.name, timezone.now())
 
     chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
                                           print_zeroes=False,

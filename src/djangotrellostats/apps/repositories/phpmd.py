@@ -9,6 +9,9 @@ import subprocess
 
 
 # PHP-md for directories
+from djangotrellostats.apps.repositories.cloc import Cloc
+
+
 class PhpDirectoryAnalyzer(object):
 
     def __init__(self, dir_path):
@@ -20,15 +23,30 @@ class PhpDirectoryAnalyzer(object):
             for filename in files:
                 if PhpDirectoryAnalyzer.is_php_file(filename):
                     file_path = u"{0}/{1}".format(root, filename)
-                    phpmd_analyzer = PhpMdAnalyzer(file_path)
-                    phpmd_result = phpmd_analyzer.run()
-                    results.append(phpmd_result)
+                    # Check if file is not empty
+                    if not PhpDirectoryAnalyzer.file_is_empty(file_path):
+                        # Count of lines of code
+                        cloc = Cloc(file_path)
+                        cloc_result = cloc.run()
+
+                        # Assessment of code quality
+                        phpmd_analyzer = PhpMdAnalyzer(file_path)
+                        phpmd_result = phpmd_analyzer.run()
+
+                        # Add cloc results
+                        phpmd_result.cloc_result = cloc_result
+
+                        results.append(phpmd_result)
+
         return results
 
     @staticmethod
     def is_php_file(filename):
         return re.match(r"^[^\.]+\.php$", filename)
 
+    @staticmethod
+    def file_is_empty(file_path):
+        return os.path.getsize(file_path) == 0
 
 # Runs PHP-md on a file
 class PhpMdAnalyzer(object):
@@ -59,7 +77,9 @@ class PhpMdAnalyzer(object):
             subprocess.call(["phpmd", "--version"])
         except OSError as e:
             if e.errno == os.errno.ENOENT:
-                raise AssertionError(u"PHPMD was not found in your system. Please you have the last version of PHPMD installed in your system.")
+                raise AssertionError(
+                    u"PHPMD was not found in your system. Please install it to assess PHP code (https://phpmd.org/)."
+                )
 
 
 # Stores php-md result
