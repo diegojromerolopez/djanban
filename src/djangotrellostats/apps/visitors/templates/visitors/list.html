@@ -1,0 +1,59 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Visitors{% endblock %}
+
+{% block content %}
+    <h1>Visitors</h1>
+    <div class="board_list_list">
+        <div class="row">
+            <div class="panel col-md-12">
+                <div>
+                    <a href="{% url 'visitors:new' %}" class="btn btn-primary">New visitor</a>
+                </div>
+                {% if visitors|length == 0 %}
+                    There are no visitors in this platform.
+                {% else %}
+                    <table class="table">
+                        <tr>
+                            <td>Username</td>
+                            <td>First name</td>
+                            <td>Last name</td>
+                            <td>Email</td>
+                            <td>Boards</td>
+                            <td>Actions</td>
+                        </tr>
+                        {% for visitor in visitors%}
+                            <tr>
+                                <td>{{visitor.username}}</td>
+                                <td>{{visitor.first_name}}</td>
+                                <td>{{visitor.last_name}}</td>
+                                <td>{{visitor.email}}</td>
+                                <td>
+                                    {% with visitor_boards=visitor.boards.all %}
+                                        {% if visitor_boards|length == 1 %}
+                                            {{visitor_boards.0}}
+                                        {% elif visitor_boards|length == 2 %}
+                                            {{visitor_boards.0}} and {{visitor_boards.1}}
+                                        {% else %}
+                                            {% for board in visitor_boards %}
+                                                {{board.name}}{% if forloop.revcounter > 2 %}, {% elif forloop.revcounter == 2 %} and {% else  %}{% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'visitors:edit' visitor.id %}" title="Edit visitor {{visitor.username}}">
+                                        <span class="fa fa-pencil"></span>
+                                    </a>
+                                    <a href="{% url 'visitors:delete' visitor.id %}" title="Delete visitor {{visitor.username}}">
+                                        <span class="fa fa-trash"></span>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

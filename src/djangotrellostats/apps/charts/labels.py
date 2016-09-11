@@ -10,6 +10,10 @@ from djangotrellostats.apps.boards.models import Card
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 
 
+
+from djangotrellostats.apps.base.auth import user_is_member, user_is_visitor, get_user_boards
+
+
 # Average spent times
 def avg_spent_times(request, board=None):
     chart_title = u"Average task spent as of {0}".format(timezone.now())
@@ -24,10 +28,11 @@ def avg_spent_times(request, board=None):
         avg_spent_time = cards.aggregate(Avg("spent_time"))["spent_time__avg"]
         avg_times_chart.add(u"Average spent time", avg_spent_time)
     else:
-        cards = Card.objects.all()
+        boards = get_user_boards(request.user)
+        cards = Card.objects.filter(board__in=boards)
         avg_spent_time = cards.aggregate(Avg("spent_time"))["spent_time__avg"]
         avg_times_chart.add(u"All boards", avg_spent_time)
-        for board in request.user.member.boards.all():
+        for board in boards:
             board_avg_spent_time = board.cards.aggregate(Avg("spent_time"))["spent_time__avg"]
             avg_times_chart.add(u"{0}".format(board.name), board_avg_spent_time)
 
@@ -137,10 +142,11 @@ def avg_estimated_times(request, board=None):
         total_avg_estimated_time = cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
         avg_times_chart.add(u"Average estimated time", total_avg_estimated_time)
     else:
-        cards = Card.objects.all()
+        boards = get_user_boards(request.user)
+        cards = Card.objects.filter(board__in=boards)
         total_avg_estimated_time = cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
         avg_times_chart.add(u"All boards", total_avg_estimated_time)
-        for board in request.user.member.boards.all():
+        for board in boards:
             board_avg_estimated_time = board.cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
             avg_times_chart.add(u"{0}".format(board.name), board_avg_estimated_time)
 

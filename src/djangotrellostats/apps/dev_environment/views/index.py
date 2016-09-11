@@ -1,10 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
+from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.dev_environment.models import NoiseMeasurement, Interruption
 
 
-@login_required
+@member_required
 def index(request):
     member = request.user.member
     interruptions = Interruption.objects.all().order_by("-datetime")

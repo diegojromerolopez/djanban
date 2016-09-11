@@ -6,14 +6,15 @@ from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render
 
-from djangotrellostats.apps.members.auth import user_is_administrator
+from djangotrellostats.apps.base.auth import user_is_administrator, get_user_boards
+from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.members.decorators import administrator_required
 from djangotrellostats.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm, EditProfileForm, AdminEditProfileForm
 from djangotrellostats.apps.members.models import Member
 
 
 # User dashboard
-@login_required
+@member_required
 def dashboard(request):
     member = request.user.member
     boards = member.boards.all()
@@ -24,7 +25,8 @@ def dashboard(request):
 # List of members
 @login_required
 def view_members(request):
-    members = Member.objects.all()
+    boards = get_user_boards(request.user)
+    members = Member.objects.filter(boards__in=boards)
     member = request.user.member
     replacements = {
         "member": member,
@@ -35,7 +37,7 @@ def view_members(request):
 
 
 # Give a password an create an user for a member if this member does not have an user yet
-@login_required
+@member_required
 @administrator_required
 def give_access_to_member(request, member_id):
     member = Member.objects.get(id=member_id)
@@ -68,7 +70,7 @@ def give_access_to_member(request, member_id):
 
 
 # Change password to an user of a member
-@login_required
+@member_required
 def change_password_to_member(request, member_id):
     member = Member.objects.get(id=member_id)
     if request.method == "POST":
@@ -91,7 +93,7 @@ def change_password_to_member(request, member_id):
 
 
 # Change your user profile data
-@login_required
+@member_required
 def edit_profile(request, member_id):
     user = request.user
     current_member = user.member

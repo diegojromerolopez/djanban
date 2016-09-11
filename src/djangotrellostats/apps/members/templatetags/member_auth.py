@@ -1,7 +1,6 @@
-from django.conf import settings
-
 from django import template
-from djangotrellostats.apps.members import auth
+
+from djangotrellostats.apps.base import auth
 
 register = template.Library()
 

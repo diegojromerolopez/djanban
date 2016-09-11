@@ -7,6 +7,7 @@ from django.db.models import Sum, Count
 from django.http.response import Http404, HttpResponse
 from django.shortcuts import render
 
+from djangotrellostats.apps.base.auth import get_user_boards, user_is_member
 from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
@@ -42,7 +43,6 @@ def export_daily_spent_times(request):
 
 # Return the filtered queryset and the replacements given the GET parameters
 def _get_daily_spent_times_replacements(request):
-    current_member = request.user.member
 
     selected_member_id = request.GET.get("member_id")
     selected_member = None
@@ -52,7 +52,7 @@ def _get_daily_spent_times_replacements(request):
     spent_times = _get_daily_spent_times_from_request(request)
 
     replacements = {
-        "member": request.user.member,
+        "member": request.user.member if user_is_member(request.user) else None,
         "boards": Board.objects.all(),
         "members": Member.objects.all()
     }
@@ -81,7 +81,7 @@ def _get_daily_spent_times_replacements(request):
     board_id = request.GET.get("board_id")
     board = None
     if board_id:
-        board = current_member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
         replacements["selected_board"] = board
         replacements["board"] = board
 
@@ -98,12 +98,12 @@ def _get_daily_spent_times_replacements(request):
 
 # Return the daily spent times from a request
 def _get_daily_spent_times_from_request(request):
-    current_member = request.user.member
+    current_user = request.user
     selected_member = None
     if request.GET.get("member_id"):
         selected_member = Member.objects.get(id=request.GET.get("member_id"))
 
-    spent_times = _get_daily_spent_times_queryset(current_member, selected_member,
+    spent_times = _get_daily_spent_times_queryset(current_user, selected_member,
                                                   request.GET.get("start_date"), request.GET.get("end_date"),
                                                   request.GET.get('week'),
                                                   request.GET.get("board_id"))
@@ -112,7 +112,7 @@ def _get_daily_spent_times_from_request(request):
 
 
 # Return the filtered queryset and the replacements given the GET parameters
-def _get_daily_spent_times_queryset(current_member, selected_member, start_date_, end_date_, week, board_id):
+def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, end_date_, week, board_id):
     daily_spent_time_filter = {}
 
     # Member filter
@@ -142,7 +142,7 @@ def _get_daily_spent_times_queryset(current_member, selected_member, start_date_
         daily_spent_time_filter["week_of_year"] = week
 
     # Board
-    if board_id and current_member.boards.filter(id=board_id).exists():
+    if board_id and get_user_boards(current_user).filter(id=board_id).exists():
         daily_spent_time_filter["board_id"] = board_id
 
     # Daily Spent Times

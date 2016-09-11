@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from isoweek import Week
 
+from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.charts import cards, labels, members, interruptions, noise_measurements, repositories
 from djangotrellostats.apps.dev_times.models import DailySpentTime
@@ -18,7 +19,7 @@ from djangotrellostats.apps.members.models import Member
 def avg_lead_time(request, board_id=None):
     board = None
     if board_id is not None:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     return cards.avg_lead_time(request, board)
 
 
@@ -27,14 +28,14 @@ def avg_lead_time(request, board_id=None):
 def avg_cycle_time(request, board_id=None):
     board = None
     if board_id is not None:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     return cards.avg_cycle_time(request, board)
 
 
 # Average time by board list
 @login_required
 def avg_time_by_list(request, board_id):
-    board = request.user.member.boards.get(id=board_id)
+    board = get_user_boards(request.user).get(id=board_id)
     return cards.avg_time_by_list(board)
 
 
@@ -43,7 +44,7 @@ def avg_time_by_list(request, board_id):
 def avg_spent_times(request, board_id=None):
     board = None
     if board_id:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     return labels.avg_spent_times(request, board)
 
 
@@ -52,7 +53,7 @@ def avg_spent_times(request, board_id=None):
 def avg_spent_time_by_month(request, board_id):
     board = None
     if board_id:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     return labels.avg_spent_time_by_month(board)
 
 
@@ -61,7 +62,7 @@ def avg_spent_time_by_month(request, board_id):
 def avg_estimated_times(request, board_id=None):
     board = None
     if board_id:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     return labels.avg_estimated_times(request, board)
 
 
@@ -70,7 +71,7 @@ def avg_estimated_times(request, board_id=None):
 def avg_estimated_time_by_month(request, board_id):
     board = None
     if board_id:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     return labels.avg_estimated_time_by_month(board)
 
 
@@ -79,7 +80,7 @@ def avg_estimated_time_by_month(request, board_id):
 def number_of_cards_worked_on_by_month(request, board_id):
     board = None
     if board_id:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     return labels.number_of_cards_worked_on_by_month(board)
 
 
@@ -88,7 +89,7 @@ def number_of_cards_worked_on_by_month(request, board_id):
 def task_forward_movements_by_member(request, board_id=None):
     board = None
     if board_id:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     return members.task_movements_by_member("forward", board)
 
 
@@ -97,7 +98,7 @@ def task_forward_movements_by_member(request, board_id=None):
 def task_backward_movements_by_member(request, board_id=None):
     board = None
     if board_id:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     return members.task_movements_by_member("backward", board)
 
 
@@ -106,7 +107,7 @@ def task_backward_movements_by_member(request, board_id=None):
 def spent_time_by_week(request, week_of_year=None, board_id=None):
     board = None
     if board_id:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     return members.spent_time_by_week(week_of_year=week_of_year, board=board)
 
 
@@ -114,7 +115,11 @@ def spent_time_by_week(request, week_of_year=None, board_id=None):
 @login_required
 def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, board_id=None):
     if member_id is None:
-        member = request.user.member
+        if hasattr(request.user, "member") and request.user.member:
+            member = request.user.member
+        else:
+            boards = get_user_boards(request.user)
+            member = Member.objects.filter(boards__in=boards)[0]
     else:
         member = Member.objects.get(id=member_id)
 
@@ -151,7 +156,7 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
 
 @login_required
 def cumulative_list_evolution(request, board_id, day_step=5):
-    board = request.user.member.boards.get(id=board_id)
+    board = get_user_boards(request.user).get(id=board_id)
     if day_step is None:
         day_step = 5
     day_step = min(int(day_step), 30)
@@ -163,7 +168,7 @@ def cumulative_list_evolution(request, board_id, day_step=5):
 def number_of_interruptions(request, board_id=None):
     board = None
     if board_id:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     return interruptions.number_of_interruptions(board)
 
 
@@ -172,7 +177,7 @@ def number_of_interruptions(request, board_id=None):
 def number_of_interruptions_by_month(request, board_id=None):
     board = None
     if board_id:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     return interruptions.number_of_interruptions_by_month(board)
 
 
@@ -188,19 +193,21 @@ def subjective_noise_level(request):
 
 
 # Code quality
+@login_required
 def number_of_code_errors_by_month(request, board_id, language="python"):
     board = None
     if board_id:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     if language is None:
         language = "python"
     return repositories.number_of_code_errors_by_month(board, language)
 
 
+@login_required
 def number_of_code_errors_per_loc_by_month(request, board_id, language="python"):
     board = None
     if board_id:
-        board = request.user.member.boards.get(id=board_id)
+        board = get_user_boards(request.user).get(id=board_id)
     if language is None:
         language = "python"
     return repositories.number_of_code_errors_per_loc_by_month(board, language)

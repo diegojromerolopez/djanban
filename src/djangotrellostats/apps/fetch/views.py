@@ -4,11 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+
+from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.fetch.management.commands.fetch import Command
 
 
 # Fetch all boards, its cards and its labels
-@login_required
+@member_required
 def fetch(request):
     member = request.user.member
 

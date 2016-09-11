@@ -7,9 +7,11 @@
     <div class="board_list_list">
         <div class="row">
             <div class="panel col-md-12">
-                <div>
-                    <a href="{% url 'boards:requirements:new_requirement' board.id %}" class="btn btn-primary">New requirement</a>
-                </div>
+                {% if member %}
+                    <div>
+                        <a href="{% url 'boards:requirements:new_requirement' board.id %}" class="btn btn-primary">New requirement</a>
+                    </div>
+                {% endif %}
                 {% if requirements|length == 0 %}
                     This board has no requirements.
                 {% else %}
@@ -35,12 +37,14 @@
                                     <a href="{% url 'boards:requirements:view_requirement' board.id requirement.code %}" title="View requirement {{requirement.code}}">
                                         <span class="fa fa-eye"></span>
                                     </a>
-                                    <a href="{% url 'boards:requirements:edit_requirement' board.id requirement.code %}" title="Edit requirement {{requirement.code}}">
-                                        <span class="fa fa-pencil"></span>
-                                    </a>
-                                    <a href="{% url 'boards:requirements:delete_requirement' board.id requirement.code %}" title="Delete requirement {{requirement.code}}">
-                                        <span class="fa fa-trash"></span>
-                                    </a>
+                                    {% if member %}
+                                        <a href="{% url 'boards:requirements:edit_requirement' board.id requirement.code %}" title="Edit requirement {{requirement.code}}">
+                                            <span class="fa fa-pencil"></span>
+                                        </a>
+                                        <a href="{% url 'boards:requirements:delete_requirement' board.id requirement.code %}" title="Delete requirement {{requirement.code}}">
+                                            <span class="fa fa-trash"></span>
+                                        </a>
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% endfor %}

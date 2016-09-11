@@ -13,6 +13,8 @@ from django.template import loader
 from django.template.context import Context
 from django.conf import settings
 
+from djangotrellostats.apps.base.auth import user_is_member, get_user_boards
+from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.forms import EditBoardForm
 from djangotrellostats.apps.boards.models import List, Board
 from djangotrellostats.apps.boards.stats import avg, std_dev
@@ -22,7 +24,7 @@ from djangotrellostats.utils.week import get_week_of_year, get_weeks_of_year_sin
 
 
 # Initialize boards with data fetched from trello
-@login_required
+@member_required
 def init_boards(request):
     if request.method == "POST":
         member = request.user.member
@@ -36,8 +38,10 @@ def init_boards(request):
 # View boards of current user
 @login_required
 def view_list(request):
-    member = request.user.member
-    boards = member.boards.all()
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+    boards = get_user_boards(request.user).order_by("name")
     replacements = {"member": member, "boards": boards}
     return render(request, "boards/list.html", replacements)
 
@@ -45,8 +49,13 @@ def view_list(request):
 # View board
 @login_required
 def view(request, board_id):
-    member = request.user.member
-    board = member.boards.get(id=board_id)
+    try:
+        member = None
+        if user_is_member(request.user):
+            member = request.user.member
+        board = get_user_boards(request.user).get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
     week_of_year = get_week_of_year()
     lists = board.lists.exclude(type="ignored").order_by("position")
     replacements = {
@@ -75,7 +84,7 @@ def public_view(request, board_public_access_code):
 
 
 # Edit board
-@login_required
+@member_required
 def edit(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
@@ -94,7 +103,7 @@ def edit(request, board_id):
 
 
 # View lists of a board
-@login_required
+@member_required
 def view_lists(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
@@ -105,7 +114,7 @@ def view_lists(request, board_id):
 
 
 # Delete a board
-@login_required
+@member_required
 def delete(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
@@ -125,7 +134,7 @@ def delete(request, board_id):
 
 
 # Fetch cards and labels of a board
-@login_required
+@member_required
 def fetch(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
@@ -151,8 +160,13 @@ def fetch(request, board_id):
 # View card report
 @login_required
 def view_card_report(request, board_id):
-    member = request.user.member
-    board = member.boards.get(id=board_id)
+    try:
+        member = None
+        if user_is_member(request.user):
+            member = request.user.member
+        board = get_user_boards(request.user).get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
     cards = board.cards.all()
     replacements = {
         "member": member, "board": board, "cards": cards,
@@ -167,8 +181,13 @@ def view_card_report(request, board_id):
 # Export daily spent report in CSV format
 @login_required
 def export_card_report(request, board_id):
-    member = request.user.member
-    board = member.boards.get(id=board_id)
+    try:
+        member = None
+        if user_is_member(request.user):
+            member = request.user.member
+        board = get_user_boards(request.user).get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
     cards = board.cards.all()
 
     response = HttpResponse(content_type='text/csv')
@@ -191,8 +210,13 @@ def export_card_report(request, board_id):
 # View workflow card report
 @login_required
 def view_workflow_card_report(request, board_id, workflow_id):
-    member = request.user.member
-    board = member.boards.get(id=board_id)
+    try:
+        member = None
+        if user_is_member(request.user):
+            member = request.user.member
+        board = get_user_boards(request.user).get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
     workflow_card_reports = board.workflow_card_reports.filter(workflow_id=workflow_id)
     replacements = {
         "member": member, "board": board, "workflow_card_reports": workflow_card_reports,
@@ -207,8 +231,13 @@ def view_workflow_card_report(request, board_id, workflow_id):
 # View label report
 @login_required
 def view_label_report(request, board_id):
-    member = request.user.member
-    board = member.boards.get(id=board_id)
+    try:
+        member = None
+        if user_is_member(request.user):
+            member = request.user.member
+        board = get_user_boards(request.user).get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
     labels = board.labels.exclude(name="")
     replacements = {"member": member, "board": board, "labels": labels}
     return render(request, "labels/list.html", replacements)
@@ -217,15 +246,20 @@ def view_label_report(request, board_id):
 # View member report
 @login_required
 def view_member_report(request, board_id):
-    member = request.user.member
-    board = member.boards.get(id=board_id)
+    try:
+        member = None
+        if user_is_member(request.user):
+            member = request.user.member
+        board = get_user_boards(request.user).get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
     member_reports = board.member_reports.all()
     replacements = {"member": member, "board": board, "member_reports": member_reports}
     return render(request, "member_reports/list.html", replacements)
 
 
 # Change list type. Remember a list can be "development" or "done" list
-@login_required
+@member_required
 def change_list_type(request):
     member = request.user.member
     if request.method == "POST":

@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
 from decimal import Decimal
+
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Avg, Sum, Min, Max
 from django.db.models.query_utils import Q
@@ -62,6 +64,8 @@ class Board(models.Model):
 
     hourly_rates = models.ManyToManyField("hourly_rates.HourlyRate", verbose_name=u"Hourly rates",
                                           related_name="boards", blank=True)
+
+    visitors = models.ManyToManyField(User, verbose_name=u"Visitors of this board", related_name="boards", blank=True)
 
     def __unicode__(self):
         return self.name

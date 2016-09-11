@@ -1,0 +1,8 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Delete visitor {{visitor.username}}{% endblock %}
+
+{% block content %}
+    <h1>Delete {{visitor.username}}</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}

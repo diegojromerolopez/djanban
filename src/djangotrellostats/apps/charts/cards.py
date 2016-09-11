@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Min, Q, Count
 from django.utils import timezone
 
+from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.boards.models import Board, Card
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.reports.models import ListReport, CardMovement
@@ -28,10 +29,11 @@ def avg_lead_time(request, board=None):
                                           human_readable=True)
 
     if not board:
-        card_avg_lead_time = Card.objects.all().aggregate(Avg("lead_time"))["lead_time__avg"]
+        boards = get_user_boards(request.user)
+        card_avg_lead_time = Card.objects.filter(board__in=boards).aggregate(Avg("lead_time"))["lead_time__avg"]
         lead_time_chart.add(u"All boards", card_avg_lead_time)
         if request.user.is_authenticated and hasattr(request.user, "member"):
-            for board_i in request.user.member.boards.all():
+            for board_i in boards:
                 card_avg_lead_time = board_i.cards.all().aggregate(Avg("lead_time"))["lead_time__avg"]
                 lead_time_chart.add(u"{0}".format(board_i.name), card_avg_lead_time)
     else:
@@ -58,10 +60,11 @@ def avg_cycle_time(request, board=None):
                                            human_readable=True)
 
     if not board:
-        card_avg_cycle_time = Card.objects.all().aggregate(Avg("cycle_time"))["cycle_time__avg"]
+        boards = get_user_boards(request.user)
+        card_avg_cycle_time = Card.objects.filter(board__in=boards).aggregate(Avg("cycle_time"))["cycle_time__avg"]
         cycle_time_chart.add(u"All boards", card_avg_cycle_time)
         if request.user.is_authenticated and hasattr(request.user, "member"):
-            for board_i in request.user.member.boards.all():
+            for board_i in boards:
                 card_avg_cycle_time = board_i.cards.all().aggregate(Avg("cycle_time"))["cycle_time__avg"]
                 cycle_time_chart.add(u"{0}".format(board_i.name), card_avg_cycle_time)
 

@@ -25,9 +25,11 @@
                             <a class="btn btn-primary" href="{% url 'boards:view' board.id %}" title="View board {{board.name}}">
                                 <span class="fa fa-eye"></span> View
                             </a>
-                            <a class="btn btn-primary" href="{% url 'boards:edit' board.id %}" title="Edit board {{board.name}}">
-                                <span class="fa fa-pencil"></span> Edit
-                            </a>
+                            {% if member %}
+                                <a class="btn btn-primary" href="{% url 'boards:edit' board.id %}" title="Edit board {{board.name}}">
+                                    <span class="fa fa-pencil"></span> Edit
+                                </a>
+                            {% endif %}
                             <a class="btn btn-primary" href="{% url 'boards:view_lists' board.id %}" title="View lists of board {{board.name}}">
                                 <span class="fa fa-list"></span> Lists</a>
                             {% if board.is_ready %}

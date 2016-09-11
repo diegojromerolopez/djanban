@@ -4,12 +4,13 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
+from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.hourly_rates.forms import HourlyRateForm, DeleteHourlyRateForm
 from djangotrellostats.apps.hourly_rates.models import HourlyRate
 
 
 # View list of hourly rates
-@login_required
+@member_required
 def view_list(request):
     hourly_rates = HourlyRate.objects.all()
     replacements = {
@@ -20,7 +21,7 @@ def view_list(request):
 
 
 # Create a new hourly rate
-@login_required
+@member_required
 def new(request):
     member = request.user.member
     hourly_rate = HourlyRate(creator=member)
@@ -39,7 +40,7 @@ def new(request):
 
 
 # Edit one hourly rate
-@login_required
+@member_required
 def edit(request, hourly_rate_id):
     member = request.user.member
     hourly_rate = HourlyRate.objects.get(id=hourly_rate_id)
@@ -58,7 +59,7 @@ def edit(request, hourly_rate_id):
 
 
 # Delete one hourly rate
-@login_required
+@member_required
 def delete(request, hourly_rate_id):
     member = request.user.member
     hourly_rate = HourlyRate.objects.get(id=hourly_rate_id)

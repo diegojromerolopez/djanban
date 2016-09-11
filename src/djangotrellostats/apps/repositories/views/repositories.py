@@ -9,13 +9,14 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic import DeleteView
 
+from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.repositories.forms import GitLabRepositoryForm, get_form_class, DeleteRepositoryForm
 from djangotrellostats.apps.repositories.models import Repository, GitLabRepository
 
 
 # List of repositories
-@login_required
+@member_required
 def view_list(request, board_id):
     member = request.user.member
     try:
@@ -32,7 +33,7 @@ def view_list(request, board_id):
 
 
 # View a repository
-@login_required
+@member_required
 def view(request, board_id, repository_id):
     member = request.user.member
     try:
@@ -50,7 +51,7 @@ def view(request, board_id, repository_id):
 
 
 # New repository
-@login_required
+@member_required
 def new(request, board_id):
     member = request.user.member
     try:
@@ -73,7 +74,7 @@ def new(request, board_id):
 
 
 # Edition of a repository
-@login_required
+@member_required
 def edit(request, board_id, repository_id):
     member = request.user.member
     try:
@@ -100,7 +101,7 @@ def edit(request, board_id, repository_id):
 
 
 # Delete a repository
-@login_required
+@member_required
 def delete(request, board_id, repository_id):
     member = request.user.member
     try:

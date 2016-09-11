@@ -14,13 +14,14 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
+from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.repositories.forms import CommitForm, DeleteCommitForm, MakeAssessmentForm
 from djangotrellostats.apps.repositories.models import Commit, PylintMessage, PhpMdMessage
 from djangotrellostats.apps.repositories.phpmd import PhpDirectoryAnalyzer
 from djangotrellostats.apps.repositories.pylinter import PythonDirectoryAnalyzer
 
 
-@login_required
+@member_required
 def add(request, board_id, repository_id):
     member = request.user.member
     try:
@@ -46,7 +47,7 @@ def add(request, board_id, repository_id):
 
 
 # Delete a commit
-@login_required
+@member_required
 def delete(request, board_id, repository_id, commit_id):
     member = request.user.member
     try:
@@ -71,6 +72,7 @@ def delete(request, board_id, repository_id, commit_id):
 
 
 # View assessment report
+@member_required
 def view_assessment_report(request, board_id, repository_id, commit_id):
     member = request.user.member
     try:
@@ -89,6 +91,7 @@ def view_assessment_report(request, board_id, repository_id, commit_id):
     return render(request, "repositories/commits/assessment/view_report.html", replacements)
 
 
+@member_required
 def assess_code_quality(request, board_id, repository_id, commit_id):
     member = request.user.member
     try:

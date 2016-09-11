@@ -1,0 +1,17 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Login{% endblock %}
+
+{% block content %}
+    {% if request.user and request.user.is_authenticated %}
+        {% include "base/auth/components/already_logged_warning.html" %}
+    {% else %}
+        <h1>Login</h1>
+        {% include "forms/form.html" %}
+        <div class="row">
+            <div class="col-md-5">
+                Have you forgotten your password? Write administrator to ask for another one.
+            </div>
+        </div>
+    {% endif %}
+{% endblock content %}

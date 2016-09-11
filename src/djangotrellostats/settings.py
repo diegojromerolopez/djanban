@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'djangotrellostats.apps.repositories',
     'djangotrellostats.apps.requirements',
     'djangotrellostats.apps.slideshow',
+    'djangotrellostats.apps.visitors',
     'djangotrellostats.apps.workflows',
 ]
 

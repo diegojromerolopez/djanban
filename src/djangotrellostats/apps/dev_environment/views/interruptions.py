@@ -7,12 +7,13 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
+from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.dev_environment.forms import NewInterruptionForm, DeleteInterruptionForm
 from djangotrellostats.apps.dev_environment.models import Interruption
 
 
 # View list of interruptions
-@login_required
+@member_required
 def view_list(request):
     member = request.user.member
     interruptions = Interruption.objects.all().order_by("-datetime")
@@ -21,7 +22,7 @@ def view_list(request):
 
 
 # Create a new interruption
-@login_required
+@member_required
 def new(request):
     member = request.user.member
 
@@ -40,7 +41,7 @@ def new(request):
 
 
 # Delete an interruption
-@login_required
+@member_required
 def delete(request, interruption_id):
     member = request.user.member
     interruption = Interruption.objects.get(id=interruption_id)

@@ -12,12 +12,14 @@
               <div class="panel-body row">
                   <div class="col-md-12">
                       <div class="actions">
-                            <a href="{% url 'boards:requirements:edit_requirement' board.id requirement.code %}" title="Edit requirement {{requirement.code}}">
-                                <span class="fa fa-pencil"></span>
-                            </a>
-                            <a href="{% url 'boards:requirements:delete_requirement' board.id requirement.code %}" title="Delete requirement {{requirement.code}}">
-                                <span class="fa fa-trash"></span>
-                            </a>
+                            {% if member %}
+                                <a href="{% url 'boards:requirements:edit_requirement' board.id requirement.code %}" title="Edit requirement {{requirement.code}}">
+                                    <span class="fa fa-pencil"></span>
+                                </a>
+                                <a href="{% url 'boards:requirements:delete_requirement' board.id requirement.code %}" title="Delete requirement {{requirement.code}}">
+                                    <span class="fa fa-trash"></span>
+                                </a>
+                          {% endif %}
                       </div>
                       <div class="alert alert-info" role="alert">
                           <span class="fa fa-info-circle fa-2x"></span>

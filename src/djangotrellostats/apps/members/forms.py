@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from django import forms
-from django.forms import ModelForm
-from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.forms import ModelForm
 from django.forms import models
 from trello import TrelloClient
-
-from djangotrellostats.apps.members.auth import user_is_administrator
-from djangotrellostats.apps.members.models import Member
-
 from trello.member import Member as TrelloMember
-from cuser.middleware import CuserMiddleware
+
+from djangotrellostats.apps.members.models import Member
 
 
 # Register form
@@ -89,22 +85,6 @@ class SignUpForm(models.ModelForm):
             member.save()
 
         return member
-
-
-# Login form
-class LoginForm(forms.Form):
-    username = forms.EmailField(label=u"Email and username")
-    password = forms.CharField(label=u"Password", widget=forms.PasswordInput)
-
-    def clean(self):
-        cleaned_data = super(LoginForm, self).clean()
-        user = authenticate(username=cleaned_data.get("username"), password=cleaned_data.get("password"))
-
-        if not user or not user.is_active:
-            raise ValidationError(u"Your authentication data is invalid. Please check your username and password")
-
-        cleaned_data["user"] = user
-        return cleaned_data
 
 
 # Give access to member form

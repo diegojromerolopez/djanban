@@ -1,4 +1,10 @@
-<h1>{{member.trello_username}}'s dashboard</h1>
+<h1>
+    {% if member %}
+        {{member.trello_username}}'s dashboard
+    {% else %}
+        Visitor {{user.username}}'s dashboard
+    {% endif %}
+</h1>
 
 <div class="dashboard">
     {% if boards|length == 0 %}

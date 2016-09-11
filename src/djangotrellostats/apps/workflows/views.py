@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.http.response import Http404
 from django.shortcuts import render
 
+from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.workflows.forms import NewWorkflowForm, EditWorkflowForm
 from djangotrellostats.apps.workflows.models import Workflow
 
 
 # View list of workflows of a board
+@login_required
 def view_list(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
@@ -23,6 +27,7 @@ def view_list(request, board_id):
 
 
 # New workflow of a board
+@member_required
 def new(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
@@ -42,6 +47,7 @@ def new(request, board_id):
 
 
 # Edit workflow of a board
+@member_required
 def edit(request, board_id, workflow_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
@@ -61,6 +67,7 @@ def edit(request, board_id, workflow_id):
 
 
 # Edit workflow of a board
+@member_required
 def delete(request, board_id, workflow_id):
     member = request.user.member
     board = member.boards.get(id=board_id)

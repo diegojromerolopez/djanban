@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from django.conf import settings
 from django.http import HttpResponseForbidden
 
-from djangotrellostats.apps.members.auth import user_is_administrator
+from djangotrellostats.apps.base.auth import user_is_administrator
 
 
 def administrator_required(the_func):

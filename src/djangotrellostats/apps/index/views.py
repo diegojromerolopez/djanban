@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.utils import timezone
 
+from djangotrellostats.apps.base.auth import user_is_member
 from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.utils.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
@@ -9,7 +10,7 @@ from djangotrellostats.utils.week import get_week_of_year, get_weeks_of_year_sin
 def index(request):
     member = None
     current_user = request.user
-    if hasattr(current_user, "member") and current_user.member:
+    if user_is_member(current_user):
         member = current_user.member
 
     boards = Board.objects.all()

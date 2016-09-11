@@ -7,12 +7,13 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
+from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.dev_environment.forms import NewNoiseMeasurementForm, DeleteNoiseMeasurementForm
 from djangotrellostats.apps.dev_environment.models import NoiseMeasurement
 
 
 # View list of noise measurements
-@login_required
+@member_required
 def view_list(request):
     member = request.user.member
     noise_measurements = NoiseMeasurement.objects.all().order_by("-datetime")
@@ -21,7 +22,7 @@ def view_list(request):
 
 
 # Create a new noise measurement
-@login_required
+@member_required
 def new(request):
     member = request.user.member
 
@@ -40,7 +41,7 @@ def new(request):
 
 
 # Delete an noise_measurement
-@login_required
+@member_required
 def delete(request, noise_measurement_id):
     member = request.user.member
     noise_measurement = NoiseMeasurement.objects.get(id=noise_measurement_id)

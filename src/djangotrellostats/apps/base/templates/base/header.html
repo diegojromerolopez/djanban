@@ -6,49 +6,60 @@
             <img id="header_image" src="{% static 'img/logo.png' %}" alt="Trello Stats Logo" />
         </a>
     </div>
-    {% if member %}
+    {% if user %}
         {% with url_name=request.resolver_match.url_name url_namespace=request.resolver_match.namespace %}
             <ul class="nav nav-tabs">
-                <li role="presentation" {% if url_name == "index" %}class="active"{% endif %}>
+                <li role="presentation" {% if url_name == "index" and url_namespace == "" %}class="active"{% endif %}>
                     <a href="{% url 'index' %}" title="Go to index">
                         <span class="fa fa-home"></span>
                     </a>
                 </li>
                 {% if user and user.is_authenticated %}
-                    <li role="presentation" {% if url_name == "view_hourly_rates" %}class="active"{% endif %}>
-                       <a href="{% url 'hourly_rates:view_hourly_rates' %}" title="View available hourly rates">
-                           <span class="fa fa-usd"></span> Hourly rates
-                       </a>
-                    </li>
+                    {% if member %}
+                        <li role="presentation" {% if url_name == "view_hourly_rates" %}class="active"{% endif %}>
+                           <a href="{% url 'hourly_rates:view_hourly_rates' %}" title="View available hourly rates">
+                               <span class="fa fa-usd"></span> Hourly rates
+                           </a>
+                        </li>
+                    {% endif %}
                     <li role="presentation" {% if url_name == "view_boards" %}class="active"{% endif %}>
                        <a href="{% url 'boards:view_boards' %}" title="View my boards">
                            <span class="fa fa-tasks"></span> My boards
                        </a>
                     </li>
-                    <li role="presentation" {% if url_name == "view_members" %}class="active"{% endif %}>
-                        <a href="{% url 'members:view_members' %}" title="View members">
-                            <span class="fa fa-users"></span> Members
-                        </a>
-                    </li>
-                    <li role="presentation" {% if url_namespace == "dev_environment"  %}class="active"{% endif %}>
-                        <a href="{% url 'dev_environment:index' %}" title="View software development environment">
-                            <span class="fa fa-building-o"></span> Dev. environment
-                        </a>
-                    </li>
-                    <li role="presentation" {% if url_namespace == "sideshow" %}class="active"{% endif %}>
+                    {% if member %}
+                        <li role="presentation" {% if url_name == "view_members" %}class="active"{% endif %}>
+                            <a href="{% url 'members:view_members' %}" title="View members">
+                                <span class="fa fa-users"></span> Members
+                            </a>
+                        </li>
+                        <li role="presentation" {% if url_namespace == "dev_environment"  %}class="active"{% endif %}>
+                            <a href="{% url 'dev_environment:index' %}" title="View software development environment">
+                                <span class="fa fa-building-o"></span> Dev. environment
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li role="presentation" {% if url_namespace == "slideshow" %}class="active"{% endif %}>
                         <a href="{% url 'slideshow:view' %}" title="Slideshow">
                             <span class="fa fa-area-chart"></span> Slideshow
                         </a>
                     </li>
-                    {% if request.user.member.is_initialized %}
-                        <li role="presentation" {% if url_name == "fetch_boards" %}class="active"{% endif %}>
-                            <a href="{% url 'fetch:fetch_boards' %}" title="Fetch all boards">
-                                <span class="fa fa-download"></span> Fetch
+                    {% if member %}
+                        <li role="presentation" {% if url_namespace == "visitors" %}class="active"{% endif %}>
+                            <a href="{% url 'visitors:view_list' %}" title="Visitors">
+                                <span class="fa fa-smile-o"></span> Visitors
                             </a>
                         </li>
+                        {% if request.user.member.is_initialized %}
+                            <li role="presentation" {% if url_name == "fetch_boards" %}class="active"{% endif %}>
+                                <a href="{% url 'fetch:fetch_boards' %}" title="Fetch all boards">
+                                    <span class="fa fa-download"></span> Fetch
+                                </a>
+                            </li>
+                        {% endif %}
                     {% endif %}
-                    {% if request.user.member.is_developer %}
-                        {% with member=request.user.member %}
+                    {% with member=request.user.member %}
+                        {% if member.is_developer %}
                             <li role="presentation">
                                 {% with num_cards_in_development=member.get_current_development_cards|length %}
                                     <a href="{% url 'index' %}" title="You have {{num_cards_in_development}} cards in development. See them in index">
@@ -74,23 +85,23 @@
                                     {% endif %}
                                 {% endwith %}
                             </li>
-                        {% endwith %}
-                    {% endif %}
+                        {% endif %}
+                    {% endwith %}
                     <li class="dropdown">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Logout">Logout <span class="caret"></span></a>
                       <ul class="dropdown-menu">
-                          <li><a href="{% url 'members:logout' %}" title="Confirm logout">Confirm logout</a></li>
+                          <li><a href="{% url 'base:logout' %}" title="Confirm logout">Confirm logout</a></li>
                       </ul>
                     </li>
                 {% else %}
                     <li role="presentation" {% if url_name == "login" %}class="active"{% endif %}>
-                        <a href="{% url 'members:login' %}" title="User login">
+                        <a href="{% url 'base:login' %}" title="User login">
                             Login
                         </a>
                     </li>
                     <li role="presentation" {% if url_name == "signup" %}class="active"{% endif %}>
                         <a href="{% url 'members:signup' %}" title="User signup">
-                            Signup
+                            Signup as member
                         </a>
                     </li>
                 {% endif %}
