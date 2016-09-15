@@ -17,7 +17,7 @@ def view(request):
     replacements = {
         "member": member,
         "boards": boards,
-        "members": Member.objects.filter(boards__in=boards),
+        "members": Member.objects.filter(boards__in=boards).distinct(),
         "interruptions": Interruption.objects.all(),
         "noise_measurements": NoiseMeasurement.objects.all()
     }

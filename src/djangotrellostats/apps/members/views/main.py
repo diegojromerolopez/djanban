@@ -26,7 +26,7 @@ def dashboard(request):
 @login_required
 def view_members(request):
     boards = get_user_boards(request.user)
-    members = Member.objects.filter(boards__in=boards)
+    members = Member.objects.filter(boards__in=boards).distinct()
     member = request.user.member
     replacements = {
         "member": member,
