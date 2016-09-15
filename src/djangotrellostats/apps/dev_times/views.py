@@ -30,8 +30,21 @@ def view_daily_spent_times(request):
 def export_daily_spent_times(request):
     spent_times = _get_daily_spent_times_from_request(request)
 
+    # Start and end date of the interval of the spent times that will be exported
+    start_date = spent_times["start_date"]
+    end_date = spent_times["end_date"]
+    board = spent_times["board"]
+
+    # Board string that will be placed in the filename
+    board_str = ""
+    if board:
+        board_str = (u"{0}-".format(board.name)).lower()
+
+    # Creation of the HTTP response
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="export-daily-spent-times.csv"'
+    response['Content-Disposition'] = 'attachment; filename="{0}export-daily-spent-times-from-{1}-to-{2}.csv"'.format(
+        board_str, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")
+    )
 
     csv_template = loader.get_template('daily_spent_times/csv.txt')
     replacements = Context({
@@ -142,8 +155,10 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
         daily_spent_time_filter["week_of_year"] = week
 
     # Board
+    board = None
     if board_id and get_user_boards(current_user).filter(id=board_id).exists():
         daily_spent_time_filter["board_id"] = board_id
+        board = get_user_boards(current_user).get(id=board_id)
 
     # Daily Spent Times
     daily_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).order_by("-date")
@@ -189,7 +204,9 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
             if month == 12:
                 year += 1
 
-    return {"all": daily_spent_times, "per_month": months}
+    return {
+        "all": daily_spent_times, "per_month": months, "start_date": start_date, "end_date": end_date, "board": board
+    }
 
 
 def absolute_difference_between_months(d1, d2):
