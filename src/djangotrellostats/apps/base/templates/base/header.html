@@ -15,13 +15,6 @@
                     </a>
                 </li>
                 {% if user and user.is_authenticated %}
-                    {% if member %}
-                        <li role="presentation" {% if url_name == "view_hourly_rates" %}class="active"{% endif %}>
-                           <a href="{% url 'hourly_rates:view_hourly_rates' %}" title="View available hourly rates">
-                               <span class="fa fa-usd"></span> Hourly rates
-                           </a>
-                        </li>
-                    {% endif %}
                     <li role="presentation" {% if url_name == "view_boards" %}class="active"{% endif %}>
                        <a href="{% url 'boards:view_boards' %}" title="View my boards">
                            <span class="fa fa-tasks"></span> My boards
@@ -49,6 +42,11 @@
                             <a href="{% url 'visitors:view_list' %}" title="Visitors">
                                 <span class="fa fa-smile-o"></span> Visitors
                             </a>
+                        </li>
+                        <li role="presentation" {% if url_name == "view_hourly_rates" %}class="active"{% endif %}>
+                           <a href="{% url 'hourly_rates:view_hourly_rates' %}" title="View available hourly rates">
+                               <span class="fa fa-usd"></span> Hourly rates
+                           </a>
                         </li>
                         {% if request.user.member.is_initialized %}
                             <li role="presentation" {% if url_name == "fetch_boards" %}class="active"{% endif %}>
