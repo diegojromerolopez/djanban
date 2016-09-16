@@ -8,6 +8,7 @@ from isoweek import Week
 from django.db.models import Sum
 from django.utils import timezone
 
+from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
@@ -65,7 +66,7 @@ def task_movements_by_member(movement_type="forward", board=None):
     return member_chart.render_django_response()
 
 
-def spent_time_by_week(week_of_year=None, board=None):
+def spent_time_by_week(current_user, week_of_year=None, board=None):
     if week_of_year is None:
         now = timezone.now()
         today = now.date()
@@ -90,16 +91,22 @@ def spent_time_by_week(week_of_year=None, board=None):
     if board:
         report_filter["board_id"] = board.id
 
-    members = Member.objects.filter(is_developer=True)
+    team_spent_time = 0
+
+    boards = get_user_boards(current_user)
+    members = Member.objects.filter(boards__in=boards, is_developer=True).distinct()
     for member in members:
         member_name = member.trello_username
         daily_spent_times = member.daily_spent_times.filter(**report_filter)
         spent_time = daily_spent_times.aggregate(Sum("spent_time"))["spent_time__sum"]
         if spent_time is None:
             spent_time = 0
+        team_spent_time += spent_time
 
         if spent_time > 0:
             spent_time_chart.add(u"{0}'s spent time".format(member_name), spent_time)
+
+    spent_time_chart.add(u"Team spent time", team_spent_time)
 
     return spent_time_chart.render_django_response()
 

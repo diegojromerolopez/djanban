@@ -108,7 +108,7 @@ def spent_time_by_week(request, week_of_year=None, board_id=None):
     board = None
     if board_id:
         board = get_user_boards(request.user).get(id=board_id)
-    return members.spent_time_by_week(week_of_year=week_of_year, board=board)
+    return members.spent_time_by_week(request.user, week_of_year=week_of_year, board=board)
 
 
 # Show a chart with the spent time by week by member and by board

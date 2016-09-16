@@ -6,7 +6,7 @@ from djangotrellostats.apps.charts import cards, labels, members
 
 def spent_time_by_week(request, week_of_year, board_public_access_code):
     board = Board.objects.get(enable_public_access=True, public_access_code=board_public_access_code)
-    return members.spent_time_by_week(week_of_year=week_of_year, board=board)
+    return members.spent_time_by_week(request.user, week_of_year=week_of_year, board=board)
 
 
 # Show a chart with the task forward movements by member
