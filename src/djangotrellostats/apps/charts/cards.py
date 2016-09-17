@@ -85,7 +85,7 @@ def avg_cycle_time(request, board=None):
 
 # Average card time in each list
 def avg_time_by_list(board):
-    chart_title = u"Average time of all task living in each list for board {0} as of {1}".format(board.name,
+    chart_title = u"Average time of all tasks living in each list for board {0} as of {1}".format(board.name,
                                                                                                  board.get_human_fetch_datetime())
 
     avg_time_by_list_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,

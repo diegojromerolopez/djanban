@@ -17,7 +17,7 @@ from datetime import date
 
 # Average spent times
 def avg_spent_times(request, board=None):
-    chart_title = u"Average task spent as of {0}".format(timezone.now())
+    chart_title = u"Average task spent time as of {0}".format(timezone.now())
     if board:
         chart_title += u" for board {0}".format(board.name)
 
