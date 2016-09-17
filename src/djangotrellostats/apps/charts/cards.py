@@ -99,6 +99,22 @@ def avg_time_by_list(board):
     return avg_time_by_list_chart.render_django_response()
 
 
+# Average card estimated time in each list
+def avg_estimated_time_by_list(board):
+    chart_title = u"Average estimated time of all tasks living in each list for board {0} as of {1}".format(board.name,
+                                                                                                 board.get_human_fetch_datetime())
+
+    avg_time_by_list_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
+                                                 print_zeroes=False,
+                                                 human_readable=True)
+
+    list_reports = ListReport.objects.filter(list__board=board)
+    for list_report in list_reports:
+        avg_time_by_list_chart.add(u"{0}".format(list_report.list.name), list_report.std_dev_card_time)
+
+    return avg_time_by_list_chart.render_django_response()
+
+
 # Cumulative list evolution by month
 def cumulative_list_evolution(board, day_step=5):
 

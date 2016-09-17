@@ -16,6 +16,9 @@ from djangotrellostats.apps.reports.models import MemberReport
 
 
 # Show a chart with the task movements (backward or forward) by member
+from djangotrellostats.utils.week import number_of_weeks_of_year
+
+
 def task_movements_by_member(movement_type="forward", board=None):
     if movement_type != "forward" and movement_type != "backward":
         raise ValueError("{0} is not recognized as a valid movement type".format(movement_type))
@@ -66,6 +69,7 @@ def task_movements_by_member(movement_type="forward", board=None):
     return member_chart.render_django_response()
 
 
+# Spent time by week by member
 def spent_time_by_week(current_user, week_of_year=None, board=None):
     if week_of_year is None:
         now = timezone.now()
@@ -110,3 +114,64 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
 
     return spent_time_chart.render_django_response()
 
+
+# Evolution of spent time by member
+def spent_time_by_week_evolution(board):
+    chart_title = u"Evolution of each member's spent time by week"
+    chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
+
+    evolution_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
+                                  print_zeroes=False, fill=False,
+                                  human_readable=True, x_label_rotation=45)
+
+    start_working_date = board.get_working_start_date()
+    if start_working_date is None:
+        return evolution_chart.render_django_response()
+
+    end_working_date = board.get_working_end_date()
+    if end_working_date is None:
+        return evolution_chart.render_django_response()
+
+    start_week = DailySpentTime.get_iso_week_of_year(start_working_date)
+    end_week = DailySpentTime.get_iso_week_of_year(end_working_date)
+
+    members = board.members.filter(is_developer=True)
+
+    member_values = {member.id:[] for member in members}
+    member_values["all"] = []
+
+    x_labels = []
+
+    week_i = copy.deepcopy(start_week)
+    year_i = start_working_date.year
+    while year_i < end_working_date.year or (year_i == end_working_date.year and week_i < end_week):
+
+        there_is_data = board.daily_spent_times.filter(date__year=year_i, week_of_year=week_i).exists()
+        if there_is_data:
+            x_labels.append(u"{0}W{1}".format(year_i, week_i))
+
+            team_spent_time = 0
+            for member in members:
+                daily_spent_times = member.daily_spent_times.filter(date__year=year_i, week_of_year=week_i)
+                spent_time = daily_spent_times.aggregate(Sum("spent_time"))["spent_time__sum"]
+                if spent_time is None:
+                    spent_time = 0
+                team_spent_time += spent_time
+
+                if spent_time > 0:
+                    member_values[member.id].append(spent_time)
+
+            member_values["all"].append(team_spent_time)
+
+        week_i += 1
+        if week_i > number_of_weeks_of_year(year_i):
+            week_i = 1
+            year_i += 1
+
+    evolution_chart.x_labels = x_labels
+    for member in members:
+        evolution_chart.add(member.trello_username, member_values[member.id])
+
+    evolution_chart.add("All", member_values["all"])
+
+    return evolution_chart.render_django_response()

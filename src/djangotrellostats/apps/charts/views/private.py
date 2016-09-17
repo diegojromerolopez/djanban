@@ -39,6 +39,13 @@ def avg_time_by_list(request, board_id):
     return cards.avg_time_by_list(board)
 
 
+# Average estimated time by list
+@login_required
+def avg_estimated_time_by_list(request, board_id):
+    board = get_user_boards(request.user).get(id=board_id)
+    return cards.avg_estimated_time_by_list(board)
+
+
 # Average spent time by label
 @login_required
 def avg_spent_times(request, board_id=None):
@@ -161,6 +168,14 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
         day += datetime.timedelta(days=1)
 
     return spent_time_chart.render_django_response()
+
+
+@login_required
+def spent_time_by_week_evolution(request, board_id):
+    board = get_user_boards(request.user).get(id=board_id)
+    if board_id:
+        board = get_user_boards(request.user).get(id=board_id)
+    return members.spent_time_by_week_evolution(board=board)
 
 
 @login_required

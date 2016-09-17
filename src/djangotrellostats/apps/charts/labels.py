@@ -16,6 +16,9 @@ from datetime import date
 
 
 # Average spent times
+from djangotrellostats.utils.week import number_of_weeks_of_year
+
+
 def avg_spent_times(request, board=None):
     chart_title = u"Average task spent time as of {0}".format(timezone.now())
     if board:
@@ -99,9 +102,6 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
     if date_i is None:
         return period_measurement_chart.render_django_response()
 
-    def number_of_weeks_per_year(year_):
-        return int(date(year_, 12, 31).strftime("%W"))
-
     month_i = date_i.month
     week_i = DailySpentTime.get_iso_week_of_year(date_i)
     year_i = date_i.year
@@ -151,7 +151,7 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
 
             elif period == "week":
                 week_i += 1
-                if week_i > number_of_weeks_per_year(year_i):
+                if week_i > number_of_weeks_of_year(year_i):
                     week_i = 1
                     year_i += 1
 

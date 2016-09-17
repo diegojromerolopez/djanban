@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, date
 from django.utils import timezone
 
 
@@ -27,3 +27,8 @@ def get_weeks_of_year_since_one_year_ago(date=None):
     for i in range(1, 53):
         weeks_of_year.append(get_week_of_year(date - timedelta(days=7) * i))
     return weeks_of_year
+
+
+# Number of weeks for a given year
+def number_of_weeks_of_year(year):
+    return int(date(year, 12, 31).strftime("%W"))

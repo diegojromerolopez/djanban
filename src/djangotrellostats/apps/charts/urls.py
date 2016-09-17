@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^public/task_forward_movements_by_member/(?P<board_public_access_code>.+)?$', public.task_forward_movements_by_member, name="public_task_forward_movements_by_member"),
     url(r'^public/task_backward_movements_by_member/(?P<board_public_access_code>.+)?$', public.task_backward_movements_by_member, name="public_task_backward_movements_by_member"),
 
+    url(r'^spent_time_by_week_evolution/(?P<board_id>[\d]+)/?$', private.spent_time_by_week_evolution, name="spent_time_by_week_evolution"),
     url(r'^spent_time_by_week/?$', private.spent_time_by_week, name="spent_time_by_week"),
     url(r'^spent_time_by_week/(?P<week_of_year>\d{4}W\d{2})/?$', private.spent_time_by_week, name="spent_time_by_week"),
     url(r'^spent_time_by_week/(?P<week_of_year>\d{4}W\d{2})/(?P<board_id>[\d]+)/?$', private.spent_time_by_week, name="spent_time_by_week"),
@@ -45,6 +46,7 @@ urlpatterns = [
         name="cumulative_card_evolution"),
 
     url(r'^avg_time_by_list/(?P<board_id>[\d]+)$', private.avg_time_by_list, name="avg_time_by_list"),
+    url(r'^avg_estimated_time_by_list/(?P<board_id>[\d]+)$', private.avg_estimated_time_by_list, name="avg_estimated_time_by_list"),
 
     url(r'^public_avg_spent_times/(?P<board_public_access_code>.+)/?$', public.avg_spent_times, name="public_avg_spent_time"),
     url(r'^public_avg_estimated_times/(?P<board_public_access_code>.+)/?$', public.avg_estimated_times, name="public_avg_estimated_time"),

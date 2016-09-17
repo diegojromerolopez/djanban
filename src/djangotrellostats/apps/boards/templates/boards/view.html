@@ -96,7 +96,15 @@
                         <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' week_of_year board.id  %}" alt="Spent time by member"/>
                     </div>
                     <div class="col-sm-6">
+                        <img src="{% url 'charts:spent_time_by_week_evolution' board.id %}" alt="Evolution of spent time"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
                         <img src="{% url 'charts:avg_time_by_list' board.id %}" alt="Average time a card is in each list"/>
+                    </div>
+                    <div class="col-sm-6">
+                        <img src="{% url 'charts:avg_estimated_time_by_list' board.id %}" alt="Average estimated time a card is in each list"/>
                     </div>
                 </div>
             {% endblock task_times_charts %}
