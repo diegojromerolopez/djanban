@@ -84,6 +84,15 @@ def number_of_cards_worked_on_by_month(request, board_id):
     return labels.number_of_cards_worked_on_by_month(board)
 
 
+# Number of tasks by week
+@login_required
+def number_of_cards_worked_on_by_week(request, board_id):
+    board = None
+    if board_id:
+        board = get_user_boards(request.user).get(id=board_id)
+    return labels.number_of_cards_worked_on_by_week(board)
+
+
 # Show a chart with the task forward movements by member
 @login_required
 def task_forward_movements_by_member(request, board_id=None):
@@ -161,6 +170,15 @@ def cumulative_list_evolution(request, board_id, day_step=5):
         day_step = 5
     day_step = min(int(day_step), 30)
     return cards.cumulative_list_evolution(board, day_step)
+
+
+@login_required
+def cumulative_card_evolution(request, board_id, day_step=5):
+    board = get_user_boards(request.user).get(id=board_id)
+    if day_step is None:
+        day_step = 5
+    day_step = min(int(day_step), 30)
+    return cards.cumulative_card_evolution(board, day_step)
 
 
 # Interruptions

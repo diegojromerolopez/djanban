@@ -12,6 +12,7 @@ from djangotrellostats.apps.dev_times.models import DailySpentTime
 
 
 from djangotrellostats.apps.base.auth import user_is_member, user_is_visitor, get_user_boards
+from datetime import date
 
 
 # Average spent times
@@ -48,21 +49,26 @@ def avg_spent_times(request, board=None):
 
 # Average spent time by month
 def avg_estimated_time_by_month(board=None):
-    return _daily_spent_times_by_month(board, "estimated_time")
+    return _daily_spent_times_by_period(board, "estimated_time")
 
 
 # Average estimated time by month
 def avg_spent_time_by_month(board=None):
-    return _daily_spent_times_by_month(board, "spent_time")
+    return _daily_spent_times_by_period(board, "spent_time")
 
 
 # Number of cards worked on by month
 def number_of_cards_worked_on_by_month(board=None):
-    return _daily_spent_times_by_month(board, "spent_time", operation="Count")
+    return _daily_spent_times_by_period(board, "spent_time", operation="Count")
 
 
-# Average spent/estimated time by month
-def _daily_spent_times_by_month(board=None, time_measurement="spent_time", operation="Avg"):
+# Number of cards worked on by week
+def number_of_cards_worked_on_by_week(board=None):
+    return _daily_spent_times_by_period(board, "spent_time", operation="Count", period="week")
+
+
+# Average spent/estimated time by week/month
+def _daily_spent_times_by_period(board=None, time_measurement="spent_time", operation="Avg", period="month"):
     daily_spent_time_filter = {"{0}__gt".format(time_measurement): 0}
     last_activity_datetime = timezone.now()
     if board:
@@ -80,7 +86,7 @@ def _daily_spent_times_by_month(board=None, time_measurement="spent_time", opera
     else:
         ValueError(u"Operation not valid only Avg and Count values are valid")
 
-    monthly_measurement_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
+    period_measurement_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                                print_zeroes=False,
                                                human_readable=True)
     labels = []
@@ -91,9 +97,13 @@ def _daily_spent_times_by_month(board=None, time_measurement="spent_time", opera
         DailySpentTime.objects.filter(**daily_spent_time_filter).aggregate(min_date=Min("date"))["min_date"]
     )
     if date_i is None:
-        return monthly_measurement_chart.render_django_response()
+        return period_measurement_chart.render_django_response()
+
+    def number_of_weeks_per_year(year_):
+        return int(date(year_, 12, 31).strftime("%W"))
 
     month_i = date_i.month
+    week_i = DailySpentTime.get_iso_week_of_year(date_i)
     year_i = date_i.year
 
     if operation == "Avg":
@@ -104,28 +114,48 @@ def _daily_spent_times_by_month(board=None, time_measurement="spent_time", opera
         ValueError(u"Operation not valid only Avg and Count values are valid")
 
     first_loop = True
-    monthly_measurement = None
-    while first_loop or (monthly_measurement is not None and monthly_measurement > 0):
+    period_measurement = None
+    while first_loop or (period_measurement is not None and period_measurement > 0):
+        if period == "month":
+            period_filter = {"date__month": month_i, "date__year": year_i}
+            measurement_title =u"All tasks on {0}-{1}".format(year_i, month_i)
+            label_measurement_title_suffix = u"{0}-{1}".format(year_i, month_i)
+        elif period == "week":
+            period_filter = {"week_of_year": week_i, "date__year": year_i}
+            measurement_title = u"All tasks on {0}W{1}".format(year_i, week_i)
+            label_measurement_title_suffix = u"{0}W{1}".format(year_i, week_i)
+        else:
+            raise ValueError(u"Period {0} not valid. Only 'month' or 'week' is valid".format(period))
+
         first_loop = False
         month_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).\
-            filter(date__month=month_i, date__year=year_i)
-        monthly_measurement = month_spent_times.aggregate(measurement=aggregation(time_measurement))["measurement"]
+            filter(**period_filter)
+        period_measurement = month_spent_times.aggregate(measurement=aggregation(time_measurement))["measurement"]
         # For each month that have some data, add it to the chart
-        if monthly_measurement is not None and monthly_measurement > 0:
-            monthly_measurement_chart.add(u"All tasks on {0}-{1}".format(year_i, month_i), monthly_measurement)
+        if period_measurement is not None and period_measurement > 0:
+            period_measurement_chart.add(measurement_title, period_measurement)
             for label in labels:
                 if label.name:
                     label_measurement = month_spent_times.filter(card__labels=label).\
                                             aggregate(measurement=aggregation(time_measurement))["measurement"]
                     if label_measurement:
-                        monthly_measurement_chart.add(u"{0} {1}-{2}".format(label.name, year_i, month_i), monthly_measurement)
+                        period_measurement_chart.add(
+                            u"{0} {1}".format(label.name, label_measurement_title_suffix), period_measurement
+                        )
 
-            month_i += 1
-            if month_i > 12:
-                month_i = 1
-                year_i += 1
+            if period == "month":
+                month_i += 1
+                if month_i > 12:
+                    month_i = 1
+                    year_i += 1
 
-    return monthly_measurement_chart.render_django_response()
+            elif period == "week":
+                week_i += 1
+                if week_i > number_of_weeks_per_year(year_i):
+                    week_i = 1
+                    year_i += 1
+
+    return period_measurement_chart.render_django_response()
 
 
 # Average estimated times

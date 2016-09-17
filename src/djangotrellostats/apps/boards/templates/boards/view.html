@@ -107,7 +107,15 @@
                         <img src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" alt="Tasks worked on by month"/>
                     </div>
                     <div class="col-sm-6">
+                        <img src="{% url 'charts:number_of_cards_worked_on_by_week' board.id %}" alt="Tasks worked on by week"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
                         <img src="{% url 'charts:cumulative_list_evolution' board.id %}" alt="Evolution of number of tasks by list"/>
+                    </div>
+                     <div class="col-sm-6">
+                        <img src="{% url 'charts:cumulative_card_evolution' board.id %}" alt="Evolution of number of tasks thru time"/>
                     </div>
                 </div>
             {% endblock task_number %}

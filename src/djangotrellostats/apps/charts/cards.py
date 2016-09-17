@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import copy
 from datetime import datetime, time, timedelta
 import pygal
@@ -151,3 +153,79 @@ def cumulative_list_evolution(board, day_step=5):
 
     return cumulative_chart.render_django_response()
 
+
+# Cards-in cards-out
+# Number of cards that are created vs number of cards that are completed along the live of the project
+def cumulative_card_evolution(board, day_step=5):
+    chart_title = u"Number of created cards vs completed cards as of {0}".format(timezone.now())
+    chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
+
+    cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
+                                  print_zeroes=False, fill=False,
+                                  human_readable=True, x_label_rotation=45)
+
+    start_working_date = board.get_working_start_date()
+    if start_working_date is None:
+        return cumulative_chart.render_django_response()
+
+    end_working_date = board.get_working_end_date()
+    if end_working_date is None:
+        return cumulative_chart.render_django_response()
+
+    # Labels of the board
+    labels = board.labels.exclude(name="").order_by("name")
+
+    # Number of created cards by label
+    created_card_values_by_label = {label.id: [] for label in labels}
+
+    # Number of done cards by label
+    done_card_values_by_label = {label.id: [] for label in labels}
+
+    # Done list
+    done_list = board.lists.get(type="done")
+
+    num_created_card_values = []
+    num_done_card_values = []
+
+    x_labels = []
+
+    date_i = copy.deepcopy(start_working_date)
+    local_timezone = pytz.timezone(settings.TIME_ZONE)
+    while date_i <= end_working_date:
+        datetime_i = local_timezone.localize(datetime.combine(date_i, time.min))
+
+        # Created cards that were created in this list before the date
+        created_cards = board.cards.filter(creation_datetime__lte=datetime_i)
+
+        # Number of created cards that were created in this list before the date
+        num_created_cards = created_cards.count()
+
+        # Cards that were moved to this list before the date
+        done_cards = board.card_movements.filter(destination_list=done_list,
+                                                 datetime__lte=datetime_i)
+
+        # Number of cards that were moved to this list before the date
+        num_done_cards = done_cards.count()
+
+        # When there has been created or terminated any card
+        if num_created_cards > 0 or num_done_cards > 0:
+            num_created_card_values.append(num_created_cards)
+            num_done_card_values.append(num_done_cards)
+            x_labels.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
+
+            # Each category filtered by label
+            for label in labels:
+                created_card_values_by_label[label.id].append(created_cards.filter(labels=label).count())
+                done_card_values_by_label[label.id].append(done_cards.filter(labels=label).count())
+
+        date_i += timedelta(days=day_step)
+
+    # Setting up chart values
+    cumulative_chart.x_labels = x_labels
+    cumulative_chart.add("Created cards", num_created_card_values)
+    cumulative_chart.add("Done", num_done_card_values)
+    for label in labels:
+        cumulative_chart.add("Created {0} cards".format(label.name), created_card_values_by_label[label.id])
+        cumulative_chart.add("Done {0} cards".format(label.name), done_card_values_by_label[label.id])
+
+    return cumulative_chart.render_django_response()
