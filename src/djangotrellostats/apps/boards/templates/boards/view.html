@@ -93,18 +93,26 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' week_of_year board.id  %}" alt="Spent time by member"/>
+                        <a href="{% url 'charts:spent_time_by_week' week_of_year board.id  %}" title="Spent time by member">
+                            <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' week_of_year board.id  %}" alt="Spent time by member"/>
+                        </a>
                     </div>
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:spent_time_by_week_evolution' board.id %}" alt="Evolution of spent time"/>
+                        <a href="{% url 'charts:spent_time_by_week_evolution' board.id %}" title="Evolution of spent time">
+                            <img src="{% url 'charts:spent_time_by_week_evolution' board.id %}" alt="Evolution of spent time"/>
+                        </a>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:avg_time_by_list' board.id %}" alt="Average time a card is in each list"/>
+                        <a href="{% url 'charts:avg_time_by_list' board.id %}" title="Average time a card is in each list">
+                            <img src="{% url 'charts:avg_time_by_list' board.id %}" alt="Average time a card is in each list"/>
+                        </a>
                     </div>
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:avg_estimated_time_by_list' board.id %}" alt="Average estimated time a card is in each list"/>
+                        <a href="{% url 'charts:avg_estimated_time_by_list' board.id %}" title="Average estimated time a card is in each list">
+                            <img src="{% url 'charts:avg_estimated_time_by_list' board.id %}" alt="Average estimated time a card is in each list"/>
+                        </a>
                     </div>
                 </div>
             {% endblock task_times_charts %}
@@ -112,18 +120,26 @@
             {% block task_number %}
                 <div class="row">
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" alt="Tasks worked on by month"/>
+                        <a href="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" title="Tasks worked on by month">
+                            <img src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" alt="Tasks worked on by month"/>
+                        </a>
                     </div>
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:number_of_cards_worked_on_by_week' board.id %}" alt="Tasks worked on by week"/>
+                        <a href="{% url 'charts:number_of_cards_worked_on_by_week' board.id %}" title="Tasks worked on by week">
+                            <img src="{% url 'charts:number_of_cards_worked_on_by_week' board.id %}" alt="Tasks worked on by week"/>
+                        </a>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:cumulative_list_evolution' board.id %}" alt="Evolution of number of tasks by list"/>
+                        <a href="{% url 'charts:cumulative_list_evolution' board.id %}" title="Evolution of number of tasks by list">
+                            <img src="{% url 'charts:cumulative_list_evolution' board.id %}" alt="Evolution of number of tasks by list"/>
+                        </a>
                     </div>
                      <div class="col-sm-6">
-                        <img src="{% url 'charts:cumulative_card_evolution' board.id %}" alt="Evolution of number of tasks thru time"/>
+                        <a href="{% url 'charts:cumulative_card_evolution' board.id %}" title="Evolution of number of tasks thru time">
+                            <img src="{% url 'charts:cumulative_card_evolution' board.id %}" alt="Evolution of number of tasks thru time"/>
+                        </a>
                     </div>
                 </div>
             {% endblock task_number %}
@@ -131,10 +147,14 @@
             {% block task_movement_charts %}
                 <div class="row">
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:task_forward_movements_by_member' board.id %}" alt="Task forward movements by member"/>
+                        <a href="{% url 'charts:task_forward_movements_by_member' board.id %}" title="Task forward movements by member">
+                            <img src="{% url 'charts:task_forward_movements_by_member' board.id %}" alt="Task forward movements by member"/>
+                        </a>
                     </div>
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
+                        <a href="{% url 'charts:task_backward_movements_by_member' board.id %}" title="Task backward movements by member">
+                            <img src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
+                        </a>
                     </div>
                 </div>
             {% endblock task_movement_charts %}
@@ -142,27 +162,39 @@
             {% block card_stats_charts %}
                 <div class="row">
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:avg_lead_time' board.id %}" alt="Average lead time"/>
+                        <a href="{% url 'charts:avg_lead_time' board.id %}" title="Average lead time">
+                            <img src="{% url 'charts:avg_lead_time' board.id %}" alt="Average lead time"/>
+                        </a>
                     </div>
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:avg_cycle_time' board.id %}" alt="Average cycle time"/>
+                        <a href="{% url 'charts:avg_cycle_time' board.id %}" title="Average cycle time">
+                            <img src="{% url 'charts:avg_cycle_time' board.id %}" alt="Average cycle time"/>
+                        </a>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:avg_spent_time' board.id %}" alt="Average spent time"/>
+                        <a href="{% url 'charts:avg_spent_time' board.id %}" title="Average spent time">
+                            <img src="{% url 'charts:avg_spent_time' board.id %}" alt="Average spent time"/>
+                        </a>
                     </div>
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:avg_spent_time_by_month' board.id %}" alt="Average spent time by month"/>
+                        <a href="{% url 'charts:avg_spent_time_by_month' board.id %}" title="Average spent time by month">
+                            <img src="{% url 'charts:avg_spent_time_by_month' board.id %}" alt="Average spent time by month"/>
+                        </a>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:avg_estimated_time' board.id %}" alt="Average estimated time"/>
+                        <a href="{% url 'charts:avg_estimated_time' board.id %}" title="Average estimated time">
+                            <img src="{% url 'charts:avg_estimated_time' board.id %}" alt="Average estimated time"/>
+                        </a>
                     </div>
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:avg_estimated_time_by_month' board.id %}" alt="Average estimated time by month"/>
+                        <a href="{% url 'charts:avg_estimated_time_by_month' board.id %}" title="Average estimated time by month">
+                            <img src="{% url 'charts:avg_estimated_time_by_month' board.id %}" alt="Average estimated time by month"/>
+                        </a>
                     </div>
                 </div>
             {% endblock card_stats_charts %}
@@ -173,20 +205,28 @@
                         {% if has_python_report %}
                             <div class="row">
                                 <div class="col-sm-6">
-                                    <img src="{% url 'charts:number_of_code_errors_by_month' board.id 'python' %}" alt="Code quality by month"/>
+                                    <a href="{% url 'charts:number_of_code_errors_by_month' board.id 'python' %}" title="Python code quality by month">
+                                        <img src="{% url 'charts:number_of_code_errors_by_month' board.id 'python' %}" alt="Python code quality by month"/>
+                                    </a>
                                 </div>
                                 <div class="col-sm-6">
-                                    <img src="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id 'python' %}" alt="Code quality per LOC by month"/>
+                                    <a href="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id 'python' %}" title="Number of errors of Python code per LOC by month">
+                                        <img src="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id 'python' %}" alt="Number of errors of Python code per LOC by month"/>
+                                    </a>
                                 </div>
                             </div>
                         {% endif %}
                         {% if has_php_report %}
                             <div class="row">
                                 <div class="col-sm-6">
-                                    <img src="{% url 'charts:number_of_code_errors_by_month' board.id 'php' %}" alt="Code quality by month"/>
+                                    <a href="{% url 'charts:number_of_code_errors_by_month' board.id 'php' %}" title="PHP code quality by month">
+                                        <img src="{% url 'charts:number_of_code_errors_by_month' board.id 'php' %}" alt="PHP code quality by month"/>
+                                    </a>
                                 </div>
                                 <div class="col-sm-6">
-                                    <img src="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id 'php' %}" alt="Code quality per LOC by month"/>
+                                    <a href="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id 'php' %}" title="Number of errors of PHP code per LOC by month">
+                                        <img src="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id 'php' %}" alt="Number of errors of PHP code per LOC by month"/>
+                                    </a>
                                 </div>
                             </div>
                         {% endif %}
@@ -197,10 +237,14 @@
             {% block interruption_charts %}
                 <div class="row">
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:interruptions' board.id %}" alt="Interruptions"/>
+                        <a href="{% url 'charts:interruptions' board.id %}" title="Interruptions">
+                            <img src="{% url 'charts:interruptions' board.id %}" alt="Interruptions"/>
+                        </a>
                     </div>
                     <div class="col-sm-6">
-                        <img src="{% url 'charts:interruptions_by_month' board.id %}" alt="Interruptions by month"/>
+                        <a href="{% url 'charts:interruptions_by_month' board.id %}" title="Interruptions by month">
+                            <img src="{% url 'charts:interruptions_by_month' board.id %}" alt="Interruptions by month"/>
+                        </a>
                     </div>
                 </div>
             {% endblock interruption_charts %}
