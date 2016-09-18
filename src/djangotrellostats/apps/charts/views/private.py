@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import datetime
 
 import pygal
@@ -9,9 +11,27 @@ from isoweek import Week
 
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.boards.models import Board
-from djangotrellostats.apps.charts import cards, labels, members, interruptions, noise_measurements, repositories
+from djangotrellostats.apps.charts import boards, cards, labels, members, interruptions, noise_measurements,\
+    repositories, requirements
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
+
+
+# Requirement burndown chart
+@login_required
+def requirement_burndown(request, board_id, requirement_code=None):
+    requirement = None
+    board = get_user_boards(request.user).get(id=board_id)
+    if requirement_code is not None:
+        requirement = board.requirements.get(code=requirement_code)
+    return requirements.burndown(board, requirement)
+
+
+# Burndown according to estimates and spent times (not requirements)
+@login_required
+def burndown(request, board_id):
+    board = get_user_boards(request.user).get(id=board_id)
+    return boards.burndown(board)
 
 
 # Average card lead time

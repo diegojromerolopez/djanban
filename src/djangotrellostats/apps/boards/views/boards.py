@@ -56,12 +56,23 @@ def view(request, board_id):
         board = get_user_boards(request.user).get(id=board_id)
     except Board.DoesNotExist:
         raise Http404
+
     week_of_year = get_week_of_year()
     lists = board.lists.exclude(type="ignored").order_by("position")
+
+    # Requirements
+    requirements = board.requirements.all().order_by("-value")
+    requirement = None
+    if requirements.exists():
+        requirement = requirements[0]
+
+    # Replacements in the template
     replacements = {
         "url_prefix": "http://{0}".format(settings.DOMAIN),
         "board": board,
         "lists": lists,
+        "requirement": requirement,
+        "requirements": requirements,
         "week_of_year": week_of_year,
         "member": member,
         "weeks_of_year": get_weeks_of_year_since_one_year_ago()
@@ -74,7 +85,14 @@ def public_view(request, board_public_access_code):
     board = get_object_or_404(Board, enable_public_access=True, public_access_code=board_public_access_code)
     week_of_year = get_week_of_year()
     lists = board.lists.exclude(type="ignored").order_by("position")
+    # Requirements
+    requirements = board.requirements.all().order_by("-value")
+    requirement = None
+    if requirements.exists():
+        requirement = requirements[0]
     replacements = {
+        "requirement": requirement,
+        "requirements": requirements,
         "board": board,
         "lists": lists,
         "week_of_year": week_of_year,

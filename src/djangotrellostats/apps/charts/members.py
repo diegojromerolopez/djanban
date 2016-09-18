@@ -97,7 +97,10 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
 
     team_spent_time = 0
 
-    boards = get_user_boards(current_user)
+    if board is None:
+        boards = get_user_boards(current_user)
+    else:
+        boards = [board]
     members = Member.objects.filter(boards__in=boards, is_developer=True).distinct()
     for member in members:
         member_name = member.trello_username

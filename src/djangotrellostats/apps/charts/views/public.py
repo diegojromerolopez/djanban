@@ -1,7 +1,20 @@
 
 
 from djangotrellostats.apps.boards.models import Board
-from djangotrellostats.apps.charts import cards, labels, members
+from djangotrellostats.apps.charts import cards, labels, members, boards, requirements
+
+
+def burndown(request, board_public_access_code):
+    board = Board.objects.get(enable_public_access=True, public_access_code=board_public_access_code)
+    return boards.burndown(board=board)
+
+
+def requirement_burndown(request, board_public_access_code, requirement_code=None):
+    requirement = None
+    board = Board.objects.get(enable_public_access=True, public_access_code=board_public_access_code)
+    if requirement_code is not None:
+        requirement = board.requirements.get(code=requirement_code)
+    return requirements.burndown(board, requirement)
 
 
 def spent_time_by_week(request, week_of_year, board_public_access_code):

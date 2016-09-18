@@ -6,6 +6,20 @@ from djangotrellostats.apps.charts.views import private, public
 
 
 urlpatterns = [
+
+    url(r'^requirement_burndown(/(?P<board_id>\d+)/)?$', private.requirement_burndown, name="requirement_burndown"),
+    url(r'^requirement_burndown/(?P<board_id>\d+)/(?P<requirement_code>\w+)/?$', private.requirement_burndown,
+        name="requirement_burndown"),
+
+    url(r'^public_requirement_burndown(/(?P<board_public_access_code>.+)/)?$', public.requirement_burndown,
+        name="public_requirement_burndown"),
+    url(r'^public_requirement_burndown/(?P<board_public_access_code>.+)/(?P<requirement_code>\w+)/?$',
+        public.requirement_burndown,
+        name="public_requirement_burndown"),
+
+    url(r'^burndown/(?P<board_id>\d+)/?$', private.burndown, name="burndown"),
+    url(r'^public_burndown/(?P<board_public_access_code>.+)/?$', public.burndown, name="public_burndown"),
+
     url(r'^task_forward_movements_by_member/(?P<board_id>[\d]+)?$', private.task_forward_movements_by_member, name="task_forward_movements_by_member"),
     url(r'^task_backward_movements_by_member/(?P<board_id>[\d]+)?$', private.task_backward_movements_by_member, name="task_backward_movements_by_member"),
 
