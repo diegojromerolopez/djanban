@@ -18,9 +18,13 @@ from djangotrellostats.apps.requirements.models import Requirement
 # List of requirements
 @login_required
 def view_list(request, board_id):
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
     board = get_object_or_404(Board, id=board_id)
     requirements = board.requirements.all().order_by("value")
     replacements = {
+        "member": member,
         "board": board,
         "requirements": requirements
     }
