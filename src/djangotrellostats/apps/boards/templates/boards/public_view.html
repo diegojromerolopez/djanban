@@ -28,10 +28,14 @@
                     {% endfor %}
                 </select>
             </div>
-            <img id="spent_time_by_week" src="{% url 'charts:public_spent_time_by_week' week_of_year board.public_access_code %}" alt="Spent time by member"/>
+            <a href="{% url 'charts:public_spent_time_by_week' week_of_year board.public_access_code %}" title="Spent time by member">
+                <img id="spent_time_by_week" src="{% url 'charts:public_spent_time_by_week' week_of_year board.public_access_code %}" alt="Spent time by member"/>
+            </a>
         </div>
         <div class="col-sm-6">
-            <img src="{% url 'charts:public_avg_time_by_list' board.public_access_code %}" alt="Average time a card is in each list"/>
+            <a href="{% url 'charts:public_avg_time_by_list' board.public_access_code %}" title="Average time a card is in each list">
+                <img src="{% url 'charts:public_avg_time_by_list' board.public_access_code %}" alt="Average time a card is in each list"/>
+            </a>
         </div>
     </div>
 {% endblock task_times_charts %}
@@ -42,10 +46,14 @@
 {% block task_movement_charts %}
     <div class="row">
         <div class="col-sm-6">
-            <img src="{% url 'charts:public_task_forward_movements_by_member' board.public_access_code %}" alt="Task forward movements by member"/>
+            <a href="{% url 'charts:public_task_forward_movements_by_member' board.public_access_code %}" title="Task forward movements by member">
+                <img src="{% url 'charts:public_task_forward_movements_by_member' board.public_access_code %}" alt="Task forward movements by member"/>
+            </a>
         </div>
         <div class="col-sm-6">
-            <img src="{% url 'charts:public_task_backward_movements_by_member' board.public_access_code %}" alt="Task backward movements by member"/>
+            <a href="{% url 'charts:public_task_backward_movements_by_member' board.public_access_code %}" title="Task backward movements by member">
+                <img src="{% url 'charts:public_task_backward_movements_by_member' board.public_access_code %}" alt="Task backward movements by member"/>
+            </a>
         </div>
     </div>
 {% endblock task_movement_charts %}
@@ -53,18 +61,26 @@
 {% block card_stats_charts %}
     <div class="row">
         <div class="col-sm-6">
-            <img src="{% url 'charts:public_avg_lead_time' board.public_access_code %}" alt="Average lead time"/>
+            <a href="{% url 'charts:public_avg_lead_time' board.public_access_code %}" title="Average lead time">
+                <img src="{% url 'charts:public_avg_lead_time' board.public_access_code %}" alt="Average lead time"/>
+            </a>
         </div>
         <div class="col-sm-6">
-            <img src="{% url 'charts:public_avg_cycle_time' board.public_access_code %}" alt="Average cycle time"/>
+            <a href="{% url 'charts:public_avg_cycle_time' board.public_access_code %}" titel="Average cycle time">
+                <img src="{% url 'charts:public_avg_cycle_time' board.public_access_code %}" alt="Average cycle time"/>
+            </a>
         </div>
     </div>
     <div class="row">
         <div class="col-sm-6">
-            <img src="{% url 'charts:public_avg_spent_time' board.public_access_code %}" alt="Average spent time"/>
+            <a href="{% url 'charts:public_avg_spent_time' board.public_access_code %}" title="Average spent time">
+                <img src="{% url 'charts:public_avg_spent_time' board.public_access_code %}" alt="Average spent time"/>
+            </a>
         </div>
         <div class="col-sm-6">
-            <img src="{% url 'charts:public_avg_estimated_time' board.public_access_code %}" alt="Average estimated time"/>
+            <a href="{% url 'charts:public_avg_estimated_time' board.public_access_code %}" title="Average estimated time">
+                <img src="{% url 'charts:public_avg_estimated_time' board.public_access_code %}" alt="Average estimated time"/>
+            </a>
         </div>
     </div>
 {% endblock card_stats_charts %}
