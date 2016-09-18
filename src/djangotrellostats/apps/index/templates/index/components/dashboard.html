@@ -70,7 +70,9 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <img id="spent_time_by_day_of_the_week" src="{% url 'charts:spent_time_by_day_of_the_week' %}" alt="Spent time by {{request.user.member.trello_username}}"/>
+                    <a href="{% url 'charts:spent_time_by_day_of_the_week' %}" title="Spent time by {{request.user.member.trello_username}}">
+                        <img id="spent_time_by_day_of_the_week" src="{% url 'charts:spent_time_by_day_of_the_week' %}" alt="Spent time by {{request.user.member.trello_username}}"/>
+                    </a>
                 </div>
                 <div class="col-md-6">
                     <div>
@@ -80,7 +82,9 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
+                    <a href="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member">
+                        <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
+                    </a>
                 </div>
             {% else %}
                 {% include "members/components/no_developers_warning.html" %}
@@ -90,27 +94,39 @@
 
     <div class="row">
         <div class="col-sm-6">
-            <img src="{% url 'charts:task_forward_movements_by_member' %}" alt="Task forward movements by member"/>
+            <a href="{% url 'charts:task_forward_movements_by_member' %}" title="Task forward movements by member">
+                <img src="{% url 'charts:task_forward_movements_by_member' %}" alt="Task forward movements by member"/>
+            </a>
         </div>
         <div class="col-sm-6">
-            <img src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
+            <a href="{% url 'charts:task_backward_movements_by_member' %}" title="Task backward movements by member">
+                <img src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
+            </a>
         </div>
     </div>
 
     <div class="row">
         <div class="col-sm-6">
-            <img src="{% url 'charts:avg_lead_time' %}" alt="Average lead time"/>
+            <a href="{% url 'charts:avg_lead_time' %}" title="Average lead time">
+                <img src="{% url 'charts:avg_lead_time' %}" alt="Average lead time"/>
+            </a>
         </div>
         <div class="col-sm-6">
-            <img src="{% url 'charts:avg_cycle_time' %}" alt="Average cycle time"/>
+            <a href="{% url 'charts:avg_cycle_time' %}" title="Average cycle time">
+                <img src="{% url 'charts:avg_cycle_time' %}" alt="Average cycle time"/>
+            </a>
         </div>
     </div>
     <div class="row">
         <div class="col-sm-6">
-            <img src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
+            <a href="{% url 'charts:avg_spent_time' %}" title="Average spent time">
+                <img src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
+            </a>
         </div>
         <div class="col-sm-6">
-            <img src="{% url 'charts:avg_estimated_time' %}" alt="Average estimated time"/>
+            <a href="{% url 'charts:avg_estimated_time' %}">
+                <img src="{% url 'charts:avg_estimated_time' %}" alt="Average estimated time"/>
+            </a>
         </div>
     </div>
 {% endif %}
