@@ -35,7 +35,7 @@
     <h1>Learn about our team</h1>
 
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-6">
             <h2>Member information</h2>
             <div id="member-carousel" class="owl-carousel">
                 {% for member_i in members %}
@@ -47,9 +47,7 @@
                 <img src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-6">
             <h2>Project information</h2>
             <div id="board-carousel" class="owl-carousel">
                 {% for board in boards %}
