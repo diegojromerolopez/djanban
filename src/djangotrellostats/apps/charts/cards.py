@@ -84,15 +84,20 @@ def avg_cycle_time(request, board=None):
 
 
 # Average card time in each list
-def avg_time_by_list(board):
-    chart_title = u"Average time of all tasks living in each list for board {0} as of {1}".format(board.name,
-                                                                                                 board.get_human_fetch_datetime())
+def avg_time_by_list(board, workflow=None):
+    chart_title = u"Average time of all tasks living in each list for board {0} ".format(board.name)
+    if workflow:
+        chart_title += "for workflow {0} ".format(workflow.name)
+
+    chart_title += "as of {0}".format(board.get_human_fetch_datetime())
 
     avg_time_by_list_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                                  print_zeroes=False,
                                                  human_readable=True)
 
     list_reports = ListReport.objects.filter(list__board=board)
+    if workflow:
+        list_reports = list_reports.filter(Q(list__in=workflow.lists.all()))
     for list_report in list_reports:
         avg_time_by_list_chart.add(u"{0}".format(list_report.list.name), list_report.avg_card_time)
 
@@ -100,15 +105,20 @@ def avg_time_by_list(board):
 
 
 # Average card estimated time in each list
-def avg_estimated_time_by_list(board):
-    chart_title = u"Average estimated time of all tasks living in each list for board {0} as of {1}".format(board.name,
-                                                                                                 board.get_human_fetch_datetime())
+def avg_estimated_time_by_list(board, workflow=None):
+    chart_title = u"Average estimated time of all tasks living in each list for board {0} ".format(board.name)
+    if workflow:
+        chart_title += "for workflow {0} ".format(workflow.name)
+
+    chart_title += "as of {0}".format(board.get_human_fetch_datetime())
 
     avg_time_by_list_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                                  print_zeroes=False,
                                                  human_readable=True)
 
     list_reports = ListReport.objects.filter(list__board=board)
+    if workflow:
+        list_reports = list_reports.filter(Q(list__in=workflow.lists.all()))
     for list_report in list_reports:
         avg_time_by_list_chart.add(u"{0}".format(list_report.list.name), list_report.std_dev_card_time)
 

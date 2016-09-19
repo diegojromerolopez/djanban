@@ -5,8 +5,9 @@
 {% block content %}
     <h1>Workflows of board {{board.name}}</h1>
     <div>
-        <a href="{% url 'boards:view_boards' %}" title="Go back to list of boards">Go back to list of boards</a>
-        <a href="{% url 'boards:workflows:new' board.id %}" title="New workflow">New workflow</a>
+        <p>
+            <a href="{% url 'boards:workflows:new' board.id %}" class="btn btn-primary" title="New workflow">New workflow</a>
+        </p>
     </div>
     <div class="workflow_list">
         {% if workflows|length == 0 %}
@@ -14,29 +15,68 @@
         {% else %}
             <div>
                 {% for workflow in workflows %}
-                    <div>
-                        <h2 id="workflow_id__{{workflow.id}}">{{workflow.name}}</h2>
-                        <div>
-                            <h3>Development lists</h3>
-                            {% for workflowlist in workflow.ordered_lists  %}
-                                {% if not workflowlist.is_done_list %}
-                                    <div>{{workflowlist.list.name}}</div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
+                    <div class="panel panel-default">
+                        <div id="workflow_id__{{workflow.id}}" class="panel-heading"><h2>{{workflow.name}}</h2></div>
+                        <div class="panel-body">
 
-                        <div>
-                            <h3>Done lists</h3>
-                            {% for workflowlist in workflow.ordered_lists  %}
-                                {% if workflowlist.is_done_list %}
-                                     <div>{{workflowlist.list.name}}</div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
+                            <div class="actions">
+                                <a href="{% url 'boards:workflows:edit' board.id workflow.id %}" class="btn btn-primary">Edit</a>
+                                {% include "workflows/delete_form.html" %}
+                            </div>
+                            <div>
+                                <h3>Development lists</h3>
+                                {% for workflowlist in workflow.ordered_lists  %}
+                                    {% if not workflowlist.is_done_list %}
+                                        <div>{{workflowlist.list.name}}</div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
 
-                        <div class="actions">
-                            <a href="{% url 'boards:workflows:edit' board.id workflow.id %}">Edit</a>
-                            {% include "workflows/delete_form.html" %}
+                            <div>
+                                <h3>Done lists</h3>
+                                {% for workflowlist in workflow.ordered_lists  %}
+                                    {% if workflowlist.is_done_list %}
+                                         <div>{{workflowlist.list.name}}</div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+
+                            <div class="report">
+                                <h3>Report</h3>
+                                <div>
+                                    <strong>Avg. lead time: </strong>
+                                    <span>{{workflow.avg_lead_time|floatformat:-2}} h.</span>
+                                </div>
+                                <div>
+                                    <strong>Std. Dev. lead time: </strong>
+                                    <span>{{workflow.std_dev_lead_time|floatformat:-2}} h.</span>
+                                </div>
+                                <div>
+                                    <strong>Avg. cycle time: </strong>
+                                    <span>{{workflow.avg_cycle_time|floatformat:-2}} h.</span>
+                                </div>
+                                <div>
+                                    <strong>Std. Dev. cycle time: </strong>
+                                    <span>{{workflow.std_dev_cycle_time|floatformat:-2}} h.</span>
+                                </div>
+                            </div>
+
+                            <div class="charts">
+                                <h3>Charts</h3>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <a href="{% url 'charts:avg_time_by_list' board.id workflow.id %}" title="Average time a card is in each list">
+                                            <img src="{% url 'charts:avg_time_by_list' board.id workflow.id %}" alt="Average time a card is in each list"/>
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <a href="{% url 'charts:avg_estimated_time_by_list' board.id workflow.id %}" title="Average estimated time a card is in each list">
+                                            <img src="{% url 'charts:avg_estimated_time_by_list' board.id workflow.id %}" alt="Average estimated time a card is in each list"/>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
 
                     </div>

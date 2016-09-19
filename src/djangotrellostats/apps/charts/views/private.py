@@ -54,16 +54,22 @@ def avg_cycle_time(request, board_id=None):
 
 # Average time by board list
 @login_required
-def avg_time_by_list(request, board_id):
+def avg_time_by_list(request, board_id, workflow_id=None):
     board = get_user_boards(request.user).get(id=board_id)
-    return cards.avg_time_by_list(board)
+    workflow = None
+    if board.workflows.filter(id=workflow_id).exists():
+        workflow = board.workflows.get(id=workflow_id)
+    return cards.avg_time_by_list(board, workflow)
 
 
 # Average estimated time by list
 @login_required
-def avg_estimated_time_by_list(request, board_id):
+def avg_estimated_time_by_list(request, board_id, workflow_id=None):
     board = get_user_boards(request.user).get(id=board_id)
-    return cards.avg_estimated_time_by_list(board)
+    workflow = None
+    if board.workflows.filter(id=workflow_id).exists():
+        workflow = board.workflows.get(id=workflow_id)
+    return cards.avg_estimated_time_by_list(board, workflow)
 
 
 # Average spent time by label

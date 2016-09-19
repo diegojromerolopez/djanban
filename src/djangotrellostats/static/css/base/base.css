@@ -45,6 +45,10 @@
     cursor: help
 }
 
+.inline-block{
+    display: inline-block;
+}
+
 @media (max-width: 391px) {
     #header_image{
         width: 100%;

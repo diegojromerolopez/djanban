@@ -59,8 +59,8 @@ urlpatterns = [
     url(r'^cumulative_card_evolution/(?P<board_id>[\d]+)(/(?P<day_step>[\d]+))?$', private.cumulative_card_evolution,
         name="cumulative_card_evolution"),
 
-    url(r'^avg_time_by_list/(?P<board_id>[\d]+)$', private.avg_time_by_list, name="avg_time_by_list"),
-    url(r'^avg_estimated_time_by_list/(?P<board_id>[\d]+)$', private.avg_estimated_time_by_list, name="avg_estimated_time_by_list"),
+    url(r'^avg_time_by_list/(?P<board_id>\d+)/(?P<workflow_id>\d+)?/?$', private.avg_time_by_list, name="avg_time_by_list"),
+    url(r'^avg_estimated_time_by_list/(?P<board_id>[\d]+)/(?P<workflow_id>\d+)?/?$', private.avg_estimated_time_by_list, name="avg_estimated_time_by_list"),
 
     url(r'^public_avg_spent_times/(?P<board_public_access_code>.+)/?$', public.avg_spent_times, name="public_avg_spent_time"),
     url(r'^public_avg_estimated_times/(?P<board_public_access_code>.+)/?$', public.avg_estimated_times, name="public_avg_estimated_time"),

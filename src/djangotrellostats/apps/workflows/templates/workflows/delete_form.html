@@ -1,4 +1,4 @@
-<form action="{% url 'boards:delete_workflow' board.id workflow.id %}" method="post">
+<form action="{% url 'boards:workflows:delete' board.id workflow.id %}" class="inline-block" method="post">
     <input type="hidden" name="workflow_id" value="{{workflow.id}}"/>
-    <button type="submit">Delete</button>
+    <button type="submit" class="btn btn-danger">Delete</button>
 </form>

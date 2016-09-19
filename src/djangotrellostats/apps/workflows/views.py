@@ -8,7 +8,9 @@ from django.http import HttpResponseRedirect
 from django.http.response import Http404
 from django.shortcuts import render
 
+from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
+from djangotrellostats.apps.boards.stats import avg, std_dev
 from djangotrellostats.apps.workflows.forms import NewWorkflowForm, EditWorkflowForm
 from djangotrellostats.apps.workflows.models import Workflow
 
@@ -17,11 +19,17 @@ from djangotrellostats.apps.workflows.models import Workflow
 @login_required
 def view_list(request, board_id):
     member = request.user.member
-    board = member.boards.get(id=board_id)
+    board = get_user_boards(request.user).get(id=board_id)
     workflows = Workflow.objects.all().order_by("name")
     # Ordered workflow lists
     for workflow in workflows:
         workflow.ordered_lists = workflow.workflow_lists.all().order_by("order")
+        workflow_card_reports = workflow.workflow_card_reports.all()
+        workflow.avg_lead_time = avg(workflow_card_reports, "lead_time")
+        workflow.std_dev_lead_time = std_dev(workflow_card_reports, "lead_time")
+        workflow.avg_cycle_time = avg(workflow_card_reports, "cycle_time")
+        workflow.std_dev_cycle_time = std_dev(workflow_card_reports, "cycle_time")
+
     replacements = {"board": board, "workflows": workflows, "member": member}
     return render(request, "workflows/list.html", replacements)
 
@@ -30,7 +38,7 @@ def view_list(request, board_id):
 @member_required
 def new(request, board_id):
     member = request.user.member
-    board = member.boards.get(id=board_id)
+    board = get_user_boards(request.user).get(id=board_id)
     workflow = Workflow(name=u"New workflow", board=board)
 
     if request.method == "POST":
@@ -50,7 +58,7 @@ def new(request, board_id):
 @member_required
 def edit(request, board_id, workflow_id):
     member = request.user.member
-    board = member.boards.get(id=board_id)
+    board = get_user_boards(request.user).get(id=board_id)
     workflow = board.workflows.get(id=workflow_id)
 
     if request.method == "POST":
@@ -70,7 +78,7 @@ def edit(request, board_id, workflow_id):
 @member_required
 def delete(request, board_id, workflow_id):
     member = request.user.member
-    board = member.boards.get(id=board_id)
+    board = get_user_boards(request.user).get(id=board_id)
     confirmed_workflow_id = request.POST.get("workflow_id")
     if confirmed_workflow_id and confirmed_workflow_id == workflow_id:
         workflow = board.workflows.get(id=confirmed_workflow_id)

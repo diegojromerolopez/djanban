@@ -9,6 +9,7 @@ class Workflow(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Workflow", related_name="workflows")
     lists = models.ManyToManyField("boards.List", through="WorkflowList", related_name="workflow")
 
+    # Move this to fetcher.trello.WorkflowFetcher
     # Fetch data for this workflow, creating a workflow report
     def fetch(self, cards):
         workflow_lists = self.workflow_lists.all()
@@ -28,12 +29,12 @@ class Workflow(models.Model):
             # Lead time and cycle time only should be computed when the card is done
             if not card.is_closed and trello_card.idList in done_lists:
                 # Lead time in this workflow for this card
-                lead_time = sum([list_stats["time"] for list_uuid, list_stats in card.stats_by_list.items()])
+                lead_time = sum([list_stats["time"] for list_uuid, list_stats in trello_card.stats_by_list.items()])
 
                 # Cycle time in this workflow for this card
                 cycle_time = sum(
                     [list_stats["time"] if list_uuid in development_lists else 0 for list_uuid, list_stats in
-                     card.stats_by_list.items()])
+                     trello_card.stats_by_list.items()])
 
                 workflow_card_report = WorkflowCardReport(board=self.board, workflow=self,
                                                           card=card, cycle_time=cycle_time, lead_time=lead_time)

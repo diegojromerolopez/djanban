@@ -27,9 +27,6 @@
                                 <span class="fa fa-cogs"></span> Requirements
                             </a>
                         </li>
-                        <li {% if url_name == "view_workflows" %}class="active"{% endif %}>
-                            <a href="{% url 'boards:workflows:view_list' board.id %}" title="Workflows of board {{board.name}}">Workflows</a>
-                        </li>
                         <li {% if url_name == "view_card_report" %}class="active"{% endif %}>
                             <a href="{% url 'boards:view_card_report' board.id %}" title="Cards of board {{board.name}}">
                                 <span class="fa fa-sticky-note-o"></span> Cards
@@ -57,13 +54,13 @@
                                 </a>
                             </li>
                         {% endif %}
-                        {% for workflow in board.workflows.all %}
-                            <li {% if url_name == "view_workflow_card_report" %}class="active"{% endif %}>
-                                <a href="{% url 'boards:view_workflow_card_report' board.id workflow.id %}" title="View workflow {{workflow.name}} of board {{board.name}}">
-                                    View {{workflow.name}} report
+                        {% if member %}
+                            <li {% if url_namespace == "boards:workflows" %}class="active"{% endif %}>
+                                <a href="{% url 'boards:workflows:view_list' board.id %}" title="View workflows of board {{board.name}}">
+                                    <span class="fa fa-wrench"></span> Workflows
                                 </a>
                             </li>
-                        {% endfor %}
+                        {% endif %}
                         {% if member %}
                             {% if board.has_to_be_fetched %}
                                 <li {% if url_name == "fetch" %}class="active"{% endif %}>

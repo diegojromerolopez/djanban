@@ -38,7 +38,7 @@
                                     <span class="fa fa-sticky-note-o"></span> Cards
                                 </a>
                                 {% for workflow in board.workflows.all %}
-                                    <a class="btn btn-primary" href="{% url 'boards:workflows:view_workflow_card_report' board.id workflow.id %}" title="View workflow {{workflow.name}} report for board {{board.name}}">
+                                    <a class="btn btn-primary" href="{% url 'boards:view_workflow_card_report' board.id workflow.id %}" title="View workflow {{workflow.name}} report for board {{board.name}}">
                                         View {{workflow.name}} report
                                     </a>
                                 {% endfor %}
