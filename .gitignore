@@ -65,6 +65,9 @@ target/
 # Media directory
 src/djangotrellostats/media/*
 
+# Local temp directory
+src/djangotrellostats/tmp/*
+
 # Local configuration
 src/djangotrellostats/settings_local.py
 src/public_html
