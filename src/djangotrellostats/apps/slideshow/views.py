@@ -13,7 +13,12 @@ def view(request):
     member = None
     if user_is_member(request.user):
         member = request.user.member
-    boards = get_user_boards(request.user).exclude(last_fetch_datetime=None).order_by("-last_activity_datetime")
+
+    boards = get_user_boards(request.user).\
+        filter(show_on_slideshow=True).\
+        exclude(last_fetch_datetime=None).\
+        order_by("-last_activity_datetime")
+
     replacements = {
         "member": member,
         "boards": boards,

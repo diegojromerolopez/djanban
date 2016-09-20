@@ -7,7 +7,7 @@ from django.db import models
 
 # An interruption of one team member
 class Interruption(models.Model):
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", null=True, default=None, blank=True)
+    board = models.ForeignKey("boards.Board", verbose_name=u"Project", null=True, default=None, blank=True)
     member = models.ForeignKey("members.Member", verbose_name=u"Who suffered the interruption")
 
     datetime = models.DateTimeField(verbose_name=u"When did the interruption take place?")
@@ -31,6 +31,7 @@ class NoiseMeasurement(models.Model):
     noise_level = models.DecimalField(verbose_name=u"Noise level in decibeles", decimal_places=4, max_digits=12)
     subjective_noise_level = models.CharField(verbose_name=u"Subjective noisel level", choices=SUBJECTIVE_NOISE_LEVELS,
                                               max_length=32, default="none")
-    comments = models.TextField(verbose_name=u"Other comments about the interruption", default="", blank=True)
+    comments = models.TextField(verbose_name=u"Other comments about the noise in your environment",
+                                default="", blank=True)
 
 

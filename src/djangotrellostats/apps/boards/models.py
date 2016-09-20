@@ -65,6 +65,11 @@ class Board(models.Model):
     hourly_rates = models.ManyToManyField("hourly_rates.HourlyRate", verbose_name=u"Hourly rates",
                                           related_name="boards", blank=True)
 
+    show_on_slideshow = models.BooleanField(
+        verbose_name=u"Should this board be shown on the slideshow?",
+        help_text=u"Mark this checkbox if you want to show this board in the slideshow",
+        default=False)
+
     visitors = models.ManyToManyField(User, verbose_name=u"Visitors of this board", related_name="boards", blank=True)
 
     def __unicode__(self):

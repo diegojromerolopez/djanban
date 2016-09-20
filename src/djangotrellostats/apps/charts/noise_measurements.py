@@ -3,6 +3,7 @@
 import copy
 from datetime import timedelta
 
+import numpy
 import pygal
 from django.db.models import Min, Max
 from django.utils import timezone
@@ -12,18 +13,34 @@ from djangotrellostats.apps.dev_environment.models import NoiseMeasurement
 
 # Noise level
 def noise_level():
-    chart_title = u"Noise levels in db as of {0}".format(timezone.now())
+    chart_title = u"Average noise levels per day in db as of {0}".format(timezone.now())
 
     noise_measurements = NoiseMeasurement.objects.all().order_by("datetime")
 
-    noise_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
-                                           print_zeroes=False,
+    noise_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
+                                           print_zeroes=False, x_label_rotation=65,
                                            human_readable=True)
 
-    for noise_measurement in noise_measurements:
-        datetime = noise_measurement.datetime
-        member = noise_measurement.member
-        noise_chart.add(u"{0} {1}".format(member.initials, datetime.strftime("%Y-%m-%d %H:%M:%S")), noise_measurement.noise_level)
+    start_datetime = noise_measurements.aggregate(min_date=Min("datetime"))["min_date"]
+    end_datetime = noise_measurements.aggregate(max_date=Max("datetime"))["max_date"]
+    if start_datetime is None or end_datetime is None:
+        return noise_chart.render_django_response()
+
+    noise_values = []
+    days = []
+
+    datetime_i = copy.deepcopy(start_datetime)
+    while datetime_i <= end_datetime:
+        date_noise_measurements = noise_measurements.filter(datetime__date=datetime_i.date())
+        if date_noise_measurements.exists():
+            noise_values.append(numpy.mean([noise_measurement.noise_level for noise_measurement in date_noise_measurements]))
+            days.append(datetime_i.strftime("%Y-%m-%d"))
+
+        datetime_i += timedelta(days=1)
+
+    noise_chart.add("Average noise level by day", noise_values)
+    noise_chart.x_labels = days
+
 
     return noise_chart.render_django_response()
 

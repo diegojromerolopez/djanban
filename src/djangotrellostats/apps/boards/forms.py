@@ -11,7 +11,7 @@ class EditBoardForm(models.ModelForm):
         model = Board
         fields = ["has_to_be_fetched", "comments", "estimated_number_of_hours",
                   "percentage_of_completion", "hourly_rates",
-                  "enable_public_access", "public_access_code"]
+                  "enable_public_access", "public_access_code", "show_on_slideshow"]
 
     def __init__(self, *args, **kwargs):
         super(EditBoardForm, self).__init__(*args, **kwargs)

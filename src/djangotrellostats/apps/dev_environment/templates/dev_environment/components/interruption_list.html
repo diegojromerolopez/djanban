@@ -9,8 +9,11 @@
             </a>
         {% endif %}
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6">
                 <img src="{% url 'charts:interruptions' %}" alt="Interruptions" />
+            </div>
+            <div class="col-md-6">
+                <img src="{% url 'charts:interruptions_by_month' %}" alt="Interruptions" />
             </div>
         </div>
         {% if interruptions|length == 0 %}

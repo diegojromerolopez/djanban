@@ -237,7 +237,7 @@ def number_of_interruptions_by_month(request, board_id=None):
     board = None
     if board_id:
         board = get_user_boards(request.user).get(id=board_id)
-    return interruptions.number_of_interruptions_by_month(board)
+    return interruptions.number_of_interruptions_by_month(request.user, board)
 
 
 # Noise measurements
