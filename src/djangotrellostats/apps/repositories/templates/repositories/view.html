@@ -10,6 +10,38 @@
                   <h1>Repository {{repository.name}} of project {{board.name}}</h1>
               </div>
               <div class="panel-body row">
+                  {% with has_php_report=repository.has_php_assessment_report %}
+                        {% with has_python_report=repository.has_python_assessment_report %}
+                            {% if has_python_report %}
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <a href="{% url 'charts:number_of_code_errors_by_month' board.id repository.id 'python' %}" title="Python code quality by month">
+                                            <img src="{% url 'charts:number_of_code_errors_by_month' board.id repository.id 'python' %}" alt="Python code quality by month"/>
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <a href="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id repository.id 'python' %}" title="Number of errors of Python code per LOC by month">
+                                            <img src="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id repository.id 'python' %}" alt="Number of errors of Python code per LOC by month"/>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if has_php_report %}
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <a href="{% url 'charts:number_of_code_errors_by_month' board.id repository.id 'php' %}" title="PHP code quality by month">
+                                            <img src="{% url 'charts:number_of_code_errors_by_month' board.id repository.id 'php' %}" alt="PHP code quality by month"/>
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <a href="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id repository.id 'php' %}" title="Number of errors of PHP code per LOC by month">
+                                            <img src="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id repository.id 'php' %}" alt="Number of errors of PHP code per LOC by month"/>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    {% endwith %}
                   <div class="col-md-12">
                       <div class="actions">
                             <a href="{% url 'boards:repositories:edit_repository' board.id repository.id %}" title="Edit repository {{repository.id}}">

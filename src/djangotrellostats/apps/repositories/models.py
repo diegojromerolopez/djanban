@@ -10,15 +10,13 @@ import os
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, transaction
 from django.conf import settings
-
-
-# Repository
 from django.utils import timezone
 
 from djangotrellostats.apps.repositories.phpmd import PhpDirectoryAnalyzer
 from djangotrellostats.apps.repositories.pylinter import PythonDirectoryAnalyzer
 
 
+# Repository
 class Repository(models.Model):
     class Meta:
         verbose_name = "Repository"
@@ -65,6 +63,16 @@ class Repository(models.Model):
         derived_object = self.derived_object
         commit_info = derived_object.fetch_commit(commit)
         return commit_info
+
+    # Has this repository assessed Python code?
+    @property
+    def has_python_assessment_report(self):
+        return self.pylint_messages.all().exists()
+
+    # Has this repository assessed PHP code?
+    @property
+    def has_php_assessment_report(self):
+        return self.phpmd_messages.all().exists()
 
 
 # Gitlab profile for integration of that VCS
