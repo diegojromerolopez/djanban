@@ -105,8 +105,8 @@
                                                 <tr>
                                                     <th>Commit</th>
                                                     <th>Date</th>
+                                                    <th>Assessed?</th>
                                                     <th>Actions</th>
-                                                    <th>Assessment</th>
                                                 </tr>
                                                 {% for commit in commits %}
                                                     <tr>
@@ -117,20 +117,22 @@
                                                             {{commit.creation_datetime}}
                                                         </td>
                                                         <td>
-                                                            {% if commit.has_assessment_report %}
+                                                            {% if commit.has_been_assessed %}
+                                                                Yes (on {{commit.assessment_datetime}})
+                                                            {% else %}
+                                                                No
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            {% if commit.has_been_assessed %}
                                                                 <a href="{% url 'boards:repositories:view_assessment_report' board.id repository.id commit.id %}" title="Assessment report of commit {{commit.commit}}">
-                                                                    View report
+                                                                    <span class="fa fa-eye"></span> View report
                                                                 </a>
                                                             {% endif %}
 
                                                             <a href="{% url 'boards:repositories:delete_commit' board.id repository.id commit.id %}" title="Delete commit {{commit.commit}}">
                                                                 <span class="fa fa-trash"></span>
                                                                 Delete
-                                                            </a>
-                                                        </td>
-                                                        <td>
-                                                            <a href="{% url 'boards:repositories:assess_code_quality' board.id repository.id commit.id %}" title="Assess quality code of {{commit.commit}}">
-                                                                Assess code quality
                                                             </a>
                                                         </td>
                                                     </tr>

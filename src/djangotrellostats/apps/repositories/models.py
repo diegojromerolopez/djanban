@@ -13,6 +13,12 @@ from django.conf import settings
 
 
 # Repository
+from django.utils import timezone
+
+from djangotrellostats.apps.repositories.phpmd import PhpDirectoryAnalyzer
+from djangotrellostats.apps.repositories.pylinter import PythonDirectoryAnalyzer
+
+
 class Repository(models.Model):
     class Meta:
         verbose_name = "Repository"
@@ -104,7 +110,7 @@ class GitLabRepository(Repository):
             os.removedirs(self.repository_path)
             super(GitLabRepository, self).delete()
 
-    # Checkout a repostory
+    # Checkout a repository
     def checkout(self, commit=None):
 
         # Create userspace directory if needed
@@ -125,7 +131,7 @@ class GitLabRepository(Repository):
             print clone_stdout
 
         # Pull all changes
-        pull_command = "cd {0} && git pull && cd -".format(repository_dir)
+        pull_command = "cd {0} && git fetch --all && cd -".format(repository_dir)
         print pull_command
         pull_result = subprocess.Popen(pull_command, shell=True, stdout=subprocess.PIPE)
         pull_stdout = pull_result.stdout.read()
@@ -157,8 +163,14 @@ class Commit(models.Model):
     repository = models.ForeignKey("repositories.Repository", verbose_name=u"Repository this commit depends on",
                                    related_name="commits")
     commit = models.CharField(verbose_name=u"Commit repository", max_length=64)
+
     comments = models.TextField(verbose_name=u"Comments about this commit", blank=True, default="")
+
     creation_datetime = models.DateTimeField(verbose_name=u"Datetime of this commit")
+
+    has_been_assessed = models.BooleanField(verbose_name=u"Informs if the commit code has been assessed", default=False)
+
+    assessment_datetime = models.DateTimeField(verbose_name=u"Assessment date and time", default=None, null=True)
 
     class Meta:
         verbose_name = "commit"
@@ -183,7 +195,35 @@ class Commit(models.Model):
         repository = self.repository
         repository.checkout(self.commit)
 
+    @transaction.atomic
+    def assess_code_quality(self):
+        # Deletion of current commit files and Pylint and PHP-md messages
+        self.files.all().delete()
+        self.phpmd_messages.all().delete()
+        self.pylint_messages.all().delete()
 
+        # Checkout of this commit
+        self.checkout()
+
+        project_file_path = self.repository.repository_path
+
+        # Analysis of the PHP code in the repository
+        dir_phpmd_analyzer = PhpDirectoryAnalyzer(project_file_path)
+        results = dir_phpmd_analyzer.run()
+        PhpMdMessage.create_all(self, results)
+
+        # Analysis of the Python code in the repository
+        dir_pylinter = PythonDirectoryAnalyzer(project_file_path)
+        pylinter_results = dir_pylinter.run()
+        PylintMessage.create_all(self, pylinter_results)
+
+        # Mark the commit as already assessed
+        self.has_been_assessed = True
+        self.assessment_datetime = timezone.now()
+        self.save()
+
+
+# Each one of the files of this commit
 class CommitFile(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Project this linting message depends on",
                               related_name="commit_files")
