@@ -166,6 +166,13 @@ If you want to call this action, there is a button that allows you to fetch all 
 
 And that's all, then you have several interfaces with data about members, labels, cards and daily spent times
 
+# Assess repository code (optional)
+
+Run this command once a day to assess the code quality of your GitLab repositories.
+
+```python
+python src/manage.py assess_code_quality
+```
 
 # Board interfaces
 
