@@ -20,6 +20,7 @@ def view(request):
         order_by("-last_activity_datetime")
 
     replacements = {
+        "column_mode": "single_column" if request.GET.get("column_mode") == "1" else "normal",
         "member": member,
         "boards": boards,
         "members": Member.objects.filter(boards__in=boards).distinct(),

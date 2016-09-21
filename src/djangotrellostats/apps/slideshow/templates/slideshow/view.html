@@ -32,22 +32,10 @@
 {% endblock js %}
 
 {% block content %}
-    <h1>Learn about our team</h1>
-
+    <h1>Team summary</h1>
+    {% if column_mode == 'single_column' %}<a href="{% url 'slideshow:view' %}">Change to 2 col mode</a>{% else %}<a href="{% url 'slideshow:view' %}?column_mode=1">Change to 1 col mode</a>{% endif %}
     <div class="row">
-        <div class="col-md-6">
-            <h2>Member information</h2>
-            <div id="member-carousel" class="owl-carousel">
-                {% for member_i in members %}
-                    {% if member_i.is_developer %}
-                        <img id="spent_time_by_day_of_the_week" src="{% url 'charts:spent_time_by_day_of_the_week' member_i.id %}" alt="Spent time by {{member_i.trello_username}}"/>
-                    {% endif %}
-                {% endfor %}
-                <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
-                <img src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
-            </div>
-        </div>
-        <div class="col-md-6">
+        <div class="col-md-{% if column_mode == 'single_column' %}12{% else %}6{% endif %}">
             <h2>Project information</h2>
             <div id="board-carousel" class="owl-carousel">
                 {% for board in boards %}
@@ -72,11 +60,23 @@
                 <img src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
             </div>
         </div>
+        <div class="col-md-{% if column_mode == 'single_column' %}12{% else %}6{% endif %}">
+            <h2>Member information</h2>
+            <div id="member-carousel" class="owl-carousel">
+                {% for member_i in members %}
+                    {% if member_i.is_developer %}
+                        <img id="spent_time_by_day_of_the_week" src="{% url 'charts:spent_time_by_day_of_the_week' member_i.id %}" alt="Spent time by {{member_i.trello_username}}"/>
+                    {% endif %}
+                {% endfor %}
+                <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
+                <img src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
+            </div>
+        </div>
     </div>
 
     <div class="row">
         {% if interruptions|length > 0 %}
-            <div class="col-md-6">
+            <div class="col-md-{% if column_mode == 'single_column' %}12{% else %}6{% endif %}">
                 <h2>Interruptions</h2>
                 <div id="interruptions-carousel" class="owl-carousel">
                     <img src="{% url 'charts:interruptions_by_month' %}" alt="Task backward movements by member"/>
@@ -91,7 +91,7 @@
             </div>
         {% endif %}
         {% if noise_measurements|length > 0 %}
-            <div class="col-md-6">
+            <div class="col-md-{% if column_mode == 'single_column' %}12{% else %}6{% endif %}">
                 <h2>Noise levels</h2>
                 <div id="noise_measurements-carousel" class="owl-carousel">
                     <img src="{% url 'charts:noise_level' %}" alt="Average spent time"/>
