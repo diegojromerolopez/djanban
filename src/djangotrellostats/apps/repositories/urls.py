@@ -2,7 +2,7 @@
 
 from django.conf.urls import url, include
 
-from djangotrellostats.apps.repositories.views.repositories import view_list, new, view, edit, delete
+from djangotrellostats.apps.repositories.views.repositories import view_list, new, view, edit, delete, checkout
 from djangotrellostats.apps.repositories.views.commits import add as add_commit, delete as delete_commit, \
     view_assessment_report, assess_code_quality
 
@@ -14,6 +14,8 @@ urlpatterns = [
     url(r'^new$', new, name="new_repository"),
 
     url(r'^(?P<repository_id>\d+)/view/?$', view, name="view_repository"),
+
+    url(r'^(?P<repository_id>\d+)/checkout/?$', checkout, name="checkout_repository"),
 
     url(r'^(?P<repository_id>\d+)/commits/add/?$', add_commit, name="add_commit"),
 

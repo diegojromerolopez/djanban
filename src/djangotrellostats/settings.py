@@ -166,6 +166,8 @@ STATICFILES_DIRS = [
     BASE_DIR + "/djangotrellostats/static/"
 ]
 
+TMP_DIR = BASE_DIR + "/djangotrellostats/tmp/"
+
 STATIC_URL = '/static/'
 
 STATIC_ROOT = BASE_DIR + "/public_html/collectedstatic"

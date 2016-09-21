@@ -2,10 +2,14 @@
 
 from __future__ import unicode_literals
 
+import subprocess
+
 import gitlab
+import os
 
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.db import models, transaction
+from django.conf import settings
 
 
 # Repository
@@ -42,6 +46,14 @@ class Repository(models.Model):
     def derived_object(self):
         return self.type.get_object_for_this_type(pk=self.pk)
 
+    def checkout(self, commit=None):
+        derived_object = self.derived_object
+        return derived_object.checkout(commit)
+
+    @property
+    def repository_path(self):
+        return self.derived_object.repository_path
+
     # Fetch the commit
     def fetch_commit(self, commit):
         derived_object = self.derived_object
@@ -59,20 +71,82 @@ class GitLabRepository(Repository):
 
     # Token for Django Trello Stats Integration. For example: aoiefhsLFKDJj
     access_token = models.CharField(verbose_name=u"Access token for the repository", max_length=128)
-    project_name = models.CharField(verbose_name=u"Project userspace/name", max_length=128)
+
+    # CI token
+    ci_token = models.CharField(verbose_name=u"CI token for the repository",
+                                help_text=u"CI token used to clone and checkout the repository",
+                                max_length=128)
+
+    # Userspace of repository full name (userspace/name)
+    project_userspace = models.CharField(verbose_name=u"Project userspace", max_length=128)
+
+    # Name of repository full name (userspace/name)
+    project_name = models.CharField(verbose_name=u"Project name", max_length=128)
 
     def __unicode__(self):
         return "Access token: {0} and project name: {1}".format(self.access_token, self.project_name)
+
+    @property
+    def project_full_name(self):
+        return u"{0}/{1}".format(self.project_userspace, self.project_name)
+
+    @property
+    def repository_path(self):
+        return u"{0}{1}/{2}".format(settings.TMP_DIR, self.project_userspace, self.project_name)
+
+    @property
+    def userspace_path(self):
+        return u"{0}{1}".format(settings.TMP_DIR, self.project_userspace)
+
+    # Delete the repository
+    def delete(self):
+        with transaction.atomic():
+            os.removedirs(self.repository_path)
+            super(GitLabRepository, self).delete()
+
+    # Checkout a repostory
+    def checkout(self, commit=None):
+
+        # Create userspace directory if needed
+        repository_userspace = self.userspace_path
+        if not os.path.exists(repository_userspace):
+            os.makedirs(repository_userspace)
+
+        # Create directory inside userspace if needed
+        repository_dir = self.repository_path
+        if not os.path.exists(repository_dir):
+            clone_command = "git clone https://gitlab-ci-token:{0}@{1}/{2}/{3}.git {4}".format(
+                self.ci_token, self.url.replace("http://", ""), self.project_userspace, self.project_name, repository_dir
+            )
+
+            print clone_command
+            clone_result = subprocess.Popen(clone_command, shell=True, stdout=subprocess.PIPE)
+            clone_stdout = clone_result.stdout.read()
+            print clone_stdout
+
+        # Pull all changes
+        pull_command = "cd {0} && git pull && cd -".format(repository_dir)
+        print pull_command
+        pull_result = subprocess.Popen(pull_command, shell=True, stdout=subprocess.PIPE)
+        pull_stdout = pull_result.stdout.read()
+        print pull_stdout
+
+        if commit:
+            checkout_command = "cd {0} && git checkout {1} && cd -".format(repository_dir, commit)
+            print checkout_command
+            checkout_result = subprocess.Popen(checkout_command, shell=True, stdout=subprocess.PIPE)
+            checkout_stdout = checkout_result.stdout.read()
+            print checkout_stdout
 
     # Fetch a commit
     # Returns a dict with the keys code (with a File with the code)
     # and datetime (with the date and time when that commit was created)
     def fetch_commit(self, commit):
-        derived_object = self.derived_object
+        # Get commit info
         gl = gitlab.Gitlab(self.url, self.access_token)
-        project = gl.projects.get(self.project_name)
+        project = gl.projects.get(self.project_full_name)
         commit_response = project.commits.get(commit)
-        #commit_code = project.repository_archive(commit=commit)
+        # Checkout commit
         return {"code": None, "creation_datetime": commit_response.created_at}
 
 
@@ -85,10 +159,6 @@ class Commit(models.Model):
     commit = models.CharField(verbose_name=u"Commit repository", max_length=64)
     comments = models.TextField(verbose_name=u"Comments about this commit", blank=True, default="")
     creation_datetime = models.DateTimeField(verbose_name=u"Datetime of this commit")
-    code = models.FileField(
-        verbose_name=u"Code for this commit",
-        help_text=u"Upload a zip file with the directory that contains code that you want the system to assess"
-    )
 
     class Meta:
         verbose_name = "commit"
@@ -108,6 +178,10 @@ class Commit(models.Model):
     @property
     def has_assessment_report(self):
         return self.has_python_assessment_report or self.has_php_assessment_report
+
+    def checkout(self):
+        repository = self.repository
+        repository.checkout(self.commit)
 
 
 class CommitFile(models.Model):

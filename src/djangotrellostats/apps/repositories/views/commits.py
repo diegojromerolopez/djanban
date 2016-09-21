@@ -131,13 +131,14 @@ def _assess_php_code_quality(request, member, board, repository, commit):
     # Deletion of current commit files and PHP-md messages
     commit.files.all().delete()
 
-    output_file_path = _extract_repository_files(commit)
+    # Checkout of this commit
+    commit.checkout()
 
-    dir_phpmd_analyzer = PhpDirectoryAnalyzer(output_file_path)
+    # Analysis of the code in the repository
+    project_file_path = repository.repository_path
+    dir_phpmd_analyzer = PhpDirectoryAnalyzer(project_file_path)
     results = dir_phpmd_analyzer.run()
     PhpMdMessage.create_all(commit, results)
-
-    _delete_extracted_repository(output_file_path)
 
     replacements = {
         "board": board, "member": member, "repository": repository, "commit": commit, "phpmd_results": results,
@@ -151,29 +152,16 @@ def _assess_python_code_quality(request, member, board, repository, commit):
     # Deletion of current commit files and all Pylint messages
     commit.files.all().delete()
 
-    output_file_path = _extract_repository_files(commit)
+    # Checkout of this commit
+    commit.checkout()
 
-    dir_pylinter = PythonDirectoryAnalyzer(output_file_path)
+    # Analysis of the code in the repository
+    project_file_path = repository.repository_path
+    dir_pylinter = PythonDirectoryAnalyzer(project_file_path)
     pylinter_results = dir_pylinter.run()
     PylintMessage.create_all(commit, pylinter_results)
-
-    _delete_extracted_repository(output_file_path)
 
     replacements = {
         "board": board, "member": member, "repository": repository, "commit": commit, "pylinter_results": pylinter_results,
     }
     return render(request, "repositories/commits/assessment/python/assess_code.html", replacements)
-
-
-def _extract_repository_files(commit):
-    code_file_path = settings.MEDIA_ROOT + "/" + commit.code.name
-    output_file_path = u"/tmp/{0}-{1}".format(commit.commit, shortuuid.uuid())
-
-    zip_ref = zipfile.ZipFile(code_file_path, 'r')
-    zip_ref.extractall(output_file_path)
-    zip_ref.close()
-    return output_file_path
-
-
-def _delete_extracted_repository(output_file_path):
-    shutil.rmtree(output_file_path, ignore_errors=True)

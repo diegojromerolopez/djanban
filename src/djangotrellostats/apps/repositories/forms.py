@@ -18,7 +18,7 @@ def get_form_class(repository):
 class GitLabRepositoryForm(forms.ModelForm):
     class Meta:
         model = GitLabRepository
-        fields = ["name", "description", "url", "access_token", "project_name"]
+        fields = ["name", "description", "url", "access_token", "ci_token", "project_userspace", "project_name"]
 
     def save(self, commit=True):
         super(GitLabRepositoryForm, self).save(commit=False)
@@ -35,7 +35,7 @@ class DeleteRepositoryForm(forms.Form):
 class CommitForm(forms.ModelForm):
     class Meta:
         model = Commit
-        fields = ["commit", "comments", "code"]
+        fields = ["commit", "comments"]
 
     def save(self, commit=True):
         super(CommitForm, self).save(commit=False)

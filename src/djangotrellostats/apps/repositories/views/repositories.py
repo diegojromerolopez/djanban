@@ -100,6 +100,20 @@ def edit(request, board_id, repository_id):
     return render(request, "repositories/edit.html", replacements)
 
 
+# Checkout of a repository
+@member_required
+def checkout(request, board_id, repository_id):
+    member = request.user.member
+    try:
+        board = member.boards.get(id=board_id)
+        repository = board.repositories.get(id=repository_id)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    repository.checkout()
+    return HttpResponseRedirect(reverse("boards:repositories:view_repository", args=(board_id, repository.id)))
+
+
 # Delete a repository
 @member_required
 def delete(request, board_id, repository_id):
