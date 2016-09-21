@@ -4,12 +4,10 @@ from decimal import Decimal
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-
-
-# Daily spent time by member
 from djangotrellostats.utils.week import get_iso_week_of_year
 
 
+# Daily spent time by member
 class DailySpentTime(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="daily_spent_times")
     card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="daily_spent_times", null=True)
@@ -55,7 +53,7 @@ class DailySpentTime(models.Model):
                 return False
 
         weekday = date.strftime("%w")
-        week_of_year = DailySpentTime.get_iso_week_of_year(date)
+        week_of_year = get_iso_week_of_year(date)
         day_of_year = date.strftime("%j")
         daily_spent_time = DailySpentTime(board=board, member=member, card=card,
                                           description=description,
@@ -76,7 +74,3 @@ class DailySpentTime(models.Model):
         daily_spent_time.save()
         return spent_time
 
-    # Return the number of the week of a date
-    @staticmethod
-    def get_iso_week_of_year(date):
-        return get_iso_week_of_year(date)

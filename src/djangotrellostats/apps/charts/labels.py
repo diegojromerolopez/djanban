@@ -13,12 +13,10 @@ from djangotrellostats.apps.dev_times.models import DailySpentTime
 
 from djangotrellostats.apps.base.auth import user_is_member, user_is_visitor, get_user_boards
 from datetime import date
+from djangotrellostats.utils.week import number_of_weeks_of_year, get_iso_week_of_year
 
 
 # Average spent times
-from djangotrellostats.utils.week import number_of_weeks_of_year
-
-
 def avg_spent_times(request, board=None):
     chart_title = u"Average task spent time as of {0}".format(timezone.now())
     if board:
@@ -103,7 +101,7 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
         return period_measurement_chart.render_django_response()
 
     month_i = date_i.month
-    week_i = DailySpentTime.get_iso_week_of_year(date_i)
+    week_i = get_iso_week_of_year(date_i)
     year_i = date_i.year
 
     if operation == "Avg":

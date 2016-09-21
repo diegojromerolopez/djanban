@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import copy
 import datetime
 import pygal
@@ -14,11 +15,10 @@ from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.reports.models import MemberReport
 
+from djangotrellostats.utils.week import number_of_weeks_of_year, get_iso_week_of_year
+
 
 # Show a chart with the task movements (backward or forward) by member
-from djangotrellostats.utils.week import number_of_weeks_of_year
-
-
 def task_movements_by_member(movement_type="forward", board=None):
     if movement_type != "forward" and movement_type != "backward":
         raise ValueError("{0} is not recognized as a valid movement type".format(movement_type))
@@ -74,7 +74,7 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
     if week_of_year is None:
         now = timezone.now()
         today = now.date()
-        week_of_year_ = DailySpentTime.get_iso_week_of_year(today)
+        week_of_year_ = get_iso_week_of_year(today)
         week_of_year = "{0}W{1}".format(today.year, week_of_year_)
 
     y, w = week_of_year.split("W")
@@ -135,8 +135,8 @@ def spent_time_by_week_evolution(board):
     if end_working_date is None:
         return evolution_chart.render_django_response()
 
-    start_week = DailySpentTime.get_iso_week_of_year(start_working_date)
-    end_week = DailySpentTime.get_iso_week_of_year(end_working_date)
+    start_week = get_iso_week_of_year(start_working_date)
+    end_week = get_iso_week_of_year(end_working_date)
 
     members = board.members.filter(is_developer=True)
 

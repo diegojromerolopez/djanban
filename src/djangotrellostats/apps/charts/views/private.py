@@ -15,6 +15,7 @@ from djangotrellostats.apps.charts import boards, cards, labels, members, interr
     repositories, requirements
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
+from djangotrellostats.utils.week import get_iso_week_of_year
 
 
 # Requirement burndown chart
@@ -168,7 +169,7 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
     if week_of_year is None:
         now = timezone.now()
         today = now.date()
-        week_of_year_ = DailySpentTime.get_iso_week_of_year(today)
+        week_of_year_ = get_iso_week_of_year(today)
         week_of_year = "{0}W{1}".format(today.year, week_of_year_)
 
     y, w = week_of_year.split("W")
