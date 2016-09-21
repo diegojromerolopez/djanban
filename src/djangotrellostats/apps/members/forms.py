@@ -143,7 +143,7 @@ class AdminEditProfileForm(EditProfileForm):
     class Meta:
         model = Member
         fields = ["api_key", "api_secret", "token", "token_secret", "is_developer", "on_holidays",
-                  "minimum_working_hours_per_day", "minimum_working_hours_per_week"]
+                  "minimum_working_hours_per_day", "minimum_working_hours_per_week", "spent_time_factor"]
 
 
 # Assigns a new password to one user that has forgotten it

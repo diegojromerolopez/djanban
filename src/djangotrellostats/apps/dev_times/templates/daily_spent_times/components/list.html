@@ -61,6 +61,11 @@
                     </td>
                 </tr>
                 <tr class="header month_{{month.i}}">
+                    <td colspan="9">Adjusted sum of spent time</td>
+                    <td> {{month.adjusted_spent_time_sum|floatformat:"-2"}} hours
+                    </td>
+                </tr>
+                <tr class="header month_{{month.i}}">
                     <td colspan="9">Sum of estimated time</td>
                     <td> {{month.estimated_time_sum|floatformat:"-2"}} hours</td>
                 </tr>
@@ -85,7 +90,9 @@
                         {% endif %}
                         hours
                     </div>
+                    <div>Adjusted sum of spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{adjusted_spent_time_sum|floatformat:"2"}} hours </div>
                     <div>Sum of amount {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{spent_time_amount_sum|floatformat:"2"}} ¤</div>
+                    <div>Adjusted sum of amount {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{adjusted_spent_time_amount_sum|floatformat:"2"}} ¤</div>
                     <div>Sum of estimated time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{estimated_time_sum|floatformat:"-2"}} hours</div>
                     <div>Difference {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{diff_time_sum|floatformat:"-2"}} hours</div>
                 </div>

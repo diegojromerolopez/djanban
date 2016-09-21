@@ -44,6 +44,13 @@ class Member(models.Model):
         verbose_name=u"Minimum number of hours this developer should complete per week",
         default=None, null=True, blank=True)
 
+    spent_time_factor = models.DecimalField(
+        decimal_places=2, max_digits=5,
+        verbose_name=u"Factor that needs to be multiplied on the spent time price for this member",
+        help_text=u"Modify this value whe this member cost8needs to be adjusted by a factor",
+        default=1
+    )
+
     # Constructor for Member
     def __init__(self, *args, **kwargs):
         super(Member, self).__init__(*args, **kwargs)

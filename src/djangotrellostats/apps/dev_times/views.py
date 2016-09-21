@@ -102,7 +102,9 @@ def _get_daily_spent_times_replacements(request):
     replacements["week"] = request.GET.get('week') if request.GET.get('week') and request.GET.get('week') > 0 else None
     replacements["months"] = spent_times["per_month"]
     replacements["spent_time_sum"] = daily_spent_times.aggregate(Sum("spent_time"))["spent_time__sum"]
+    replacements["adjusted_spent_time_sum"] = _adjusted_spent_time_sum(daily_spent_times)
     replacements["spent_time_amount_sum"] = daily_spent_times.aggregate(Sum("rate_amount"))["rate_amount__sum"]
+    replacements["adjusted_spent_time_amount_sum"] = _adjusted_amount_sum(daily_spent_times)
     replacements["estimated_time_sum"] = daily_spent_times.aggregate(Sum("estimated_time"))["estimated_time__sum"]
     replacements["diff_time_sum"] = daily_spent_times.aggregate(Sum("diff_time"))["diff_time__sum"]
 
@@ -197,6 +199,7 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
                 "daily_spent_times": daily_spent_times_in_month_i,
                 "rate_amount_sum": daily_spent_times_in_month_i.aggregate(sum=Sum("rate_amount"))["sum"],
                 "spent_time_sum": daily_spent_times_in_month_i.aggregate(sum=Sum("spent_time"))["sum"],
+                'adjusted_spent_time_sum': _adjusted_spent_time_sum(daily_spent_times_in_month_i),
                 "estimated_time_sum": daily_spent_times_in_month_i.aggregate(sum=Sum("estimated_time"))["sum"],
                 "diff_time_sum": daily_spent_times_in_month_i.aggregate(sum=Sum("diff_time"))["sum"]
             }
@@ -211,3 +214,28 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
 
 def absolute_difference_between_months(d1, d2):
     return abs((d1.year - d2.year) * 12 + d1.month - d2.month)
+
+
+# Computes the adjusted amount according to the factor each member has
+def _adjusted_amount_sum(daily_spent_times):
+    return _adjusted_daily_spent_time_attribute_sum(daily_spent_times, attribute="rate_amount")
+
+
+# Computes the adjusted spent time according to the factor each member has
+def _adjusted_spent_time_sum(daily_spent_times):
+    return _adjusted_daily_spent_time_attribute_sum(daily_spent_times, attribute="spent_time")
+
+
+# Computes the adjusted spent time according to the factor each member has
+def _adjusted_daily_spent_time_attribute_sum(daily_spent_times, attribute="spent_time"):
+    adjusted_value_sum = 0
+    member_dict = {}
+    for daily_spent_time in daily_spent_times:
+        if not daily_spent_time.member_id in member_dict:
+            member_dict[daily_spent_time.member_id] = daily_spent_time.member
+        member = member_dict[daily_spent_time.member_id]
+        if member.spent_time_factor != 1:
+            adjusted_value_sum += getattr(daily_spent_time, attribute) * member.spent_time_factor
+        else:
+            adjusted_value_sum += getattr(daily_spent_time, attribute)
+    return adjusted_value_sum
