@@ -242,9 +242,21 @@ def number_of_interruptions_by_month(request, board_id=None):
 
 
 # Noise measurements
+
+# Noise level mesaurements
 @login_required
 def noise_level(request):
     return noise_measurements.noise_level()
+
+
+# Average noise level per hour
+def noise_level_per_hour(request):
+    return noise_measurements.noise_level_per_hour()
+
+
+# Average noise level per hour
+def noise_level_per_weekday(request):
+    return noise_measurements.noise_level_per_weekday()
 
 
 @login_required

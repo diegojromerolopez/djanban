@@ -69,6 +69,8 @@ urlpatterns = [
     url(r'^interruptions/(?P<board_id>\d+)?/?$', private.number_of_interruptions, name="interruptions"),
     url(r'^interruptions_by_month/(?P<board_id>\d+)?/?$', private.number_of_interruptions_by_month, name="interruptions_by_month"),
     url(r'^noise_levels/?$', private.noise_level, name="noise_level"),
+    url(r'^noise_level_per_hour/?$', private.noise_level_per_hour, name="noise_level_per_hour"),
+    url(r'^noise_level_per_weekday/?$', private.noise_level_per_weekday, name="noise_level_per_weekday"),
     url(r'^subjective_noise_levels/?$', private.subjective_noise_level, name="subjective_noise_level"),
 
     url(r'^number_of_code_errors_by_month/(?P<board_id>\d+)/(?P<language>php)?$', private.number_of_code_errors_by_month, name="number_of_code_errors_by_month"),

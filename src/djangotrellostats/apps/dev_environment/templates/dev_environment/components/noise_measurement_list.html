@@ -7,50 +7,72 @@
                 View all
             </a>
         {% endif %}
+
         <div class="row">
             <div class="col-md-6">
-                <img src="{% url 'charts:noise_level' %}" alt="Noise level" />
+                <a href="{% url 'charts:noise_level' %}" alt="Noise level per day">
+                    <img src="{% url 'charts:noise_level' %}" alt="Noise level" />
+                </a>
             </div>
             <div class="col-md-6">
-                <img src="{% url 'charts:subjective_noise_level' %}" alt="Subjective noise level" />
+                <a href="{% url 'charts:subjective_noise_level' %}" title="Subjective noise level">
+                    <img src="{% url 'charts:subjective_noise_level' %}" alt="Subjective noise level" />
+                </a>
             </div>
         </div>
-        {% if noise_measurements|length == 0 %}
-            <div class="panel panel-default">
-              <div class="panel-heading">Noise measurements</div>
-              <div class="panel-body">
-                It seems there hasn't been any interruption.
-                  <a href="{% url 'dev_environment:new_noise_measurement' %}" title="New noise measurement" class="btn btn-primary">
-                      Do you want to create a noise measurement for this moment?
-                  </a>
-              </div>
+        <div class="row">
+            <div class="col-md-6">
+                <a href="{% url 'charts:noise_level_per_hour' %}" title="Noise level per hour">
+                    <img src="{% url 'charts:noise_level_per_hour' %}" alt="Noise level per hour" />
+                </a>
             </div>
-        {% else %}
-            <a href="{% url 'dev_environment:new_noise_measurement' %}" title="New noise measurement" class="btn btn-primary">New</a>
-            <div class="panel">
-                <table class="table">
-                    <tr>
-                        <td>Date</td>
-                        <td>Member</td>
-                        <td>Noise level</td>
-                        <td>Subjective noise level</td>
-                        <td>Comments</td>
-                        <td>Actions</td>
-                    </tr>
-                    {% for noise_measurement in noise_measurements %}
-                        <tr>
-                            <td>{{noise_measurement.datetime}}</td>
-                            <td>{{noise_measurement.member.user.username}}</td>
-                            <td>{{noise_measurement.noise_level}}</td>
-                            <td>{{noise_measurement.get_subjective_noise_level_display}}</td>
-                            <td>{{noise_measurement.comments|truncatechars_html:50}}</td>
-                            <td>
-                                <a href="{% url 'dev_environment:delete_noise_measurement' noise_measurement.id %}" class="btn btn-danger">Delete</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
+            <div class="col-md-6">
+                <a href="{% url 'charts:noise_level_per_weekday' %}" title="Noise level per weekday">
+                    <img src="{% url 'charts:noise_level_per_weekday' %}" alt="Noise level per weekday" />
+                </a>
             </div>
-        {% endif %}
+        </div>
+
+        <div class="row">
+            <div class=col-md-12>
+                {% if noise_measurements|length == 0 %}
+                    <div class="panel panel-default">
+                      <div class="panel-heading">Noise measurements</div>
+                      <div class="panel-body">
+                        It seems there hasn't been any interruption.
+                          <a href="{% url 'dev_environment:new_noise_measurement' %}" title="New noise measurement" class="btn btn-primary">
+                              Do you want to create a noise measurement for this moment?
+                          </a>
+                      </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'dev_environment:new_noise_measurement' %}" title="New noise measurement" class="btn btn-primary">New</a>
+                    <div class="panel">
+                        <table class="table">
+                            <tr>
+                                <td>Date</td>
+                                <td>Member</td>
+                                <td>Noise level</td>
+                                <td>Subjective noise level</td>
+                                <td>Comments</td>
+                                <td>Actions</td>
+                            </tr>
+                            {% for noise_measurement in noise_measurements %}
+                                <tr>
+                                    <td>{{noise_measurement.datetime}}</td>
+                                    <td>{{noise_measurement.member.user.username}}</td>
+                                    <td>{{noise_measurement.noise_level}}</td>
+                                    <td>{{noise_measurement.get_subjective_noise_level_display}}</td>
+                                    <td>{{noise_measurement.comments|truncatechars_html:50}}</td>
+                                    <td>
+                                        <a href="{% url 'dev_environment:delete_noise_measurement' noise_measurement.id %}" class="btn btn-danger">Delete</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
