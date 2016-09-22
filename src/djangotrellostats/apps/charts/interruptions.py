@@ -63,7 +63,7 @@ def number_of_interruptions_by_month(current_user, board=None):
 
     interruptions = Interruption.objects.filter(**interruptions_filter).order_by("datetime")
 
-    interruptions_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
+    interruptions_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
                                                     print_zeroes=False,
                                                     human_readable=True)
 
@@ -75,9 +75,17 @@ def number_of_interruptions_by_month(current_user, board=None):
     month_i = date_i.month
     year_i = date_i.year
 
-    boards = None
     if board is None:
         boards = get_user_boards(current_user)
+        board_values = {board.id:[] for board in boards}
+    else:
+        boards = [board]
+        board_values = {board.id: []}
+
+    months = []
+    values = []
+    board_values = {board.id:[] for board in boards}
+    has_board_values = {board.id: False for board in boards }
 
     first_loop = True
     monthly_measurement = None
@@ -87,17 +95,23 @@ def number_of_interruptions_by_month(current_user, board=None):
         monthly_measurement = monthly_interruptions.count()
         # For each month that have some data, add it to the chart
         if monthly_measurement > 0:
-            interruptions_chart.add(u"On {0}-{1}".format(year_i, month_i), monthly_measurement)
-            if boards:
-                for board in boards:
-                    num_board_monthly_interruptions = monthly_interruptions.filter(board=board).count()
-                    if num_board_monthly_interruptions > 0:
-                        interruptions_chart.add(u"{0} on {1}-{2}".format(board.name, year_i, month_i),
-                                                num_board_monthly_interruptions)
+            months.append(month_i)
+            values.append(monthly_measurement)
+            for board in boards:
+                num_board_monthly_interruptions = monthly_interruptions.filter(board=board).count()
+                board_values[board.id].append(num_board_monthly_interruptions)
+                if num_board_monthly_interruptions > 0:
+                    has_board_values[board.id] = True
 
             month_i += 1
             if month_i > 12:
                 month_i = 1
                 year_i += 1
+
+    interruptions_chart.x_labels = months
+    interruptions_chart.add(u"All interruptions", values)
+    for board in boards:
+        if has_board_values[board.id]:
+            interruptions_chart.add(board.name, board_values[board.id])
 
     return interruptions_chart.render_django_response()
