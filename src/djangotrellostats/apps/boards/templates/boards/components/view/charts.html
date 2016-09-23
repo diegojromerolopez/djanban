@@ -57,6 +57,15 @@
                 </a>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <a href="{% url 'charts:avg_spent_time_by_weekday' board.id %}" title="Average spent time per weekday by member">
+                    <img src="{% url 'charts:avg_spent_time_by_weekday' board.id %}" alt="Average spent time per weekday by member" />
+                </a>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-sm-6">
                 <a href="{% url 'charts:avg_time_by_list' board.id %}" title="Average time a card is in each list">
@@ -69,6 +78,7 @@
                 </a>
             </div>
         </div>
+
     {% endblock task_times_charts %}
 
     {% block task_number %}

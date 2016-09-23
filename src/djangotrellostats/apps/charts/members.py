@@ -6,7 +6,7 @@ import pygal
 from django.contrib.auth.decorators import login_required
 from isoweek import Week
 
-from django.db.models import Sum
+from django.db.models import Sum, Avg, Count
 from django.utils import timezone
 
 from djangotrellostats.apps.base.auth import get_user_boards
@@ -114,6 +114,63 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
             spent_time_chart.add(u"{0}'s spent time".format(member_name), spent_time)
 
     spent_time_chart.add(u"Team spent time", team_spent_time)
+
+    return spent_time_chart.render_django_response()
+
+
+# Spent time by weekday by member
+def avg_spent_time_by_weekday(current_user, board=None):
+    chart_title = u"Average spent time by weekday by member"
+    if board:
+        chart_title += u" for board {0}".format(board.name)
+
+    spent_time_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
+                                  print_zeroes=False, human_readable=True)
+
+    report_filter = {}
+    if board:
+        report_filter["board_id"] = board.id
+
+    team_spent_time = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0}
+
+    if board is None:
+        boards = get_user_boards(current_user)
+    else:
+        boards = [board]
+
+    spent_time_chart.x_labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+    members = Member.objects.filter(boards__in=boards, is_developer=True).distinct()
+    for member in members:
+        member_name = member.trello_username
+        daily_spent_times = member.daily_spent_times.filter(**report_filter)
+
+        # For each week day we got his/her average number of hours he/she works
+        member_weekday_spent_time = []
+        for weekday_i in range(1, 8):
+            # Number of different dates with this weekday this member has worked
+            num_weekday_i = daily_spent_times.filter(weekday=weekday_i).aggregate(num_weekday_i=Count('date', distinct=True))["num_weekday_i"]
+
+            # Sum of spent time this member has worked in this weekday
+            member_sum_spent_time_in_weekday = daily_spent_times.filter(weekday=weekday_i).aggregate(avg_spent_time=Sum("spent_time"))["avg_spent_time"]
+
+            # If the member has no work in some weekday (for example Saturday or Sunday)
+            if member_sum_spent_time_in_weekday is None:
+                member_sum_spent_time_in_weekday = 0
+
+            # Avoid division by zero
+            if num_weekday_i == 0:
+                member_weekday_spent_time.append(0)
+
+            else:
+                member_weekday_spent_time.append(member_sum_spent_time_in_weekday/num_weekday_i)
+                team_spent_time[weekday_i] += member_sum_spent_time_in_weekday/num_weekday_i
+
+        spent_time_chart.add(u"{0}".format(member_name), member_weekday_spent_time)
+
+    num_members = members.count()
+    spent_time_chart.add(u"Team", [weekday_spent_time/num_members for weekday_i, weekday_spent_time in team_spent_time.items()])
+
 
     return spent_time_chart.render_django_response()
 

@@ -241,8 +241,12 @@ def cumulative_card_evolution(board, day_step=5):
 
             # Each category filtered by label
             for label in labels:
-                created_card_values_by_label[label.id].append(created_cards.filter(labels=label).count())
-                done_card_values_by_label[label.id].append(done_cards.filter(labels=label).count())
+                created_card_values_by_label[label.id].append(
+                    label.cards.filter(id__in=created_cards).count()
+                )
+                done_card_values_by_label[label.id].append(
+                    label.cards.filter(id__in=done_cards).count()
+                )
 
         date_i += timedelta(days=day_step)
 

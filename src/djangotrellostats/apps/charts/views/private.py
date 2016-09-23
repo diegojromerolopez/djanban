@@ -199,10 +199,18 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
 
 @login_required
 def spent_time_by_week_evolution(request, board_id):
-    board = get_user_boards(request.user).get(id=board_id)
+    board = None
     if board_id:
         board = get_user_boards(request.user).get(id=board_id)
     return members.spent_time_by_week_evolution(board=board)
+
+
+@login_required
+def avg_spent_time_by_weekday(request, board_id=None):
+    board = None
+    if board_id:
+        board = get_user_boards(request.user).get(id=board_id)
+    return members.avg_spent_time_by_weekday(request.user, board)
 
 
 @login_required

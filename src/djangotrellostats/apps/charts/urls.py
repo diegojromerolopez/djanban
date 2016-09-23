@@ -37,6 +37,8 @@ urlpatterns = [
     url(r'^spent_time_by_day_of_the_week/(?P<member_id>\d+)/(?P<week_of_year>\d{4}W\d{2})/?$', private.spent_time_by_day_of_the_week, name="spent_time_by_day_of_the_week"),
     url(r'^spent_time_by_day_of_the_week/(?P<member_id>\d+)/(?P<week_of_year>\d{4}W\d{2})/(?P<board_id>[\d]+)/?$', private.spent_time_by_day_of_the_week, name="spent_time_by_day_of_the_week"),
 
+    url(r'^avg_spent_time_by_weekday/(?P<board_id>[\d]+)?$', private.avg_spent_time_by_weekday, name="avg_spent_time_by_weekday"),
+
     url(r'^avg_lead_time/(?P<board_id>[\d]+)?$', private.avg_lead_time, name="avg_lead_time"),
     url(r'^avg_cycle_time/(?P<board_id>[\d]+)?$', private.avg_cycle_time, name="avg_cycle_time"),
 
