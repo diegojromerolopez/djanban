@@ -11,8 +11,9 @@ from django.views.generic import DeleteView
 
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.models import Board
-from djangotrellostats.apps.repositories.forms import GitLabRepositoryForm, get_form_class, DeleteRepositoryForm
-from djangotrellostats.apps.repositories.models import Repository, GitLabRepository
+from djangotrellostats.apps.repositories.forms import GitLabRepositoryForm, get_form_class, DeleteRepositoryForm, \
+    GitHubPublicRepositoryForm
+from djangotrellostats.apps.repositories.models import Repository, GitLabRepository, GitHubPublicRepository
 
 
 # List of repositories
@@ -52,23 +53,32 @@ def view(request, board_id, repository_id):
 
 # New repository
 @member_required
-def new(request, board_id):
+def new(request, board_id, type="gitlab"):
     member = request.user.member
     try:
         board = member.boards.get(id=board_id)
     except Board.DoesNotExist:
         raise Http404
 
-    gitlab_repository = GitLabRepository(board=board)
+    if type == "gitlab":
+        repository_class = GitLabRepository
+        form_class = GitLabRepositoryForm
+    elif type == "github":
+        repository_class = GitHubPublicRepository
+        form_class = GitHubPublicRepositoryForm
+    else:
+        raise Http404
+
+    repository = repository_class(board=board)
 
     if request.method == "POST":
-        form = GitLabRepositoryForm(request.POST, instance=gitlab_repository)
+        form = form_class(request.POST, instance=repository)
 
         if form.is_valid():
             form.save(commit=True)
             return HttpResponseRedirect(reverse("boards:repositories:view_repositories", args=(board_id,)))
     else:
-        form = GitLabRepositoryForm(instance=gitlab_repository)
+        form = form_class(instance=repository)
 
     return render(request, "repositories/new.html", {"form": form, "board": board, "member": member})
 

@@ -11,7 +11,8 @@ urlpatterns = [
     # List of repositories of this project
     url(r'^$', view_list, name="view_repositories"),
 
-    url(r'^new$', new, name="new_repository"),
+    url(r'^(?P<type>gitlab)/new/?$', new, name="new_repository"),
+    url(r'^(?P<type>github)/new/?$', new, name="new_repository"),
 
     url(r'^(?P<repository_id>\d+)/view/?$', view, name="view_repository"),
 

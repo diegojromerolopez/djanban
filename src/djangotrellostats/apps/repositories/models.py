@@ -4,9 +4,13 @@ from __future__ import unicode_literals
 
 import subprocess
 
+from datetime import datetime
 import gitlab
+import pygithub3
+
 import os
 
+import pytz
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, transaction
 from django.conf import settings
@@ -59,9 +63,9 @@ class Repository(models.Model):
         return self.derived_object.repository_path
 
     # Fetch the commit
-    def fetch_commit(self, commit):
+    def fetch_commit_info(self, commit):
         derived_object = self.derived_object
-        commit_info = derived_object.fetch_commit(commit)
+        commit_info = derived_object.fetch_commit_info(commit)
         return commit_info
 
     # Has this repository assessed Python code?
@@ -75,9 +79,101 @@ class Repository(models.Model):
         return self.phpmd_messages.all().exists()
 
 
+# Git repository (GitHub or GitLab)
+class GitRepository(object):
+    @property
+    def repository_path(self):
+        raise NotImplementedError(u"Do not use this class, inherit from it")
+
+    @property
+    def namespace_path(self):
+        raise NotImplementedError(u"Do not use this class, inherit from it")
+
+    @property
+    def clone_command(self):
+        raise NotImplementedError(u"Do not use this class, inherit from it")
+
+    # Delete the repository
+    def delete(self):
+        with transaction.atomic():
+            os.removedirs(self.repository_path)
+            super(GitRepository, self).delete()
+
+    # Checkout a repository
+    def _checkout(self, commit=None):
+        # Create namespace directory if needed
+        repository_namespace = self.namespace_path
+        if not os.path.exists(repository_namespace):
+            os.makedirs(repository_namespace)
+
+        # Create directory inside userspace if needed
+        repository_dir = self.repository_path
+        if not os.path.exists(repository_dir):
+            clone_result = subprocess.Popen(self.clone_command, shell=True, stdout=subprocess.PIPE)
+            clone_stdout = clone_result.stdout.read()
+
+        # Pull all changes
+        pull_command = "cd {0} && git fetch --all && cd -".format(repository_dir)
+        pull_result = subprocess.Popen(pull_command, shell=True, stdout=subprocess.PIPE)
+        pull_stdout = pull_result.stdout.read()
+
+        if commit:
+            checkout_command = "cd {0} && git checkout {1} && cd -".format(repository_dir, commit)
+            checkout_result = subprocess.Popen(checkout_command, shell=True, stdout=subprocess.PIPE)
+            checkout_stdout = checkout_result.stdout.read()
+
+
+# GitHub profile for integration of that VCS
+# Some github
+class GitHubPublicRepository(Repository, GitRepository):
+
+    class Meta:
+        verbose_name = "GitHub public repository"
+        verbose_name_plural = "GitHub public repositories"
+
+    # Username of the owner of repository
+    username = models.CharField(verbose_name=u"Username", max_length=128)
+
+    def __unicode__(self):
+        return self.project_full_name
+
+    @property
+    def project_full_name(self):
+        return u"{0}/{1}".format(self.username, self.name)
+
+    @property
+    def repository_path(self):
+        return u"{0}{1}/{2}".format(settings.TMP_DIR, self.username, self.name)
+
+    @property
+    def namespace_path(self):
+        return u"{0}{1}".format(settings.TMP_DIR, self.username)
+
+    @property
+    def clone_command(self):
+        repository_dir = self.repository_path
+        return "git clone https://github.com/{0}/{1}.git {2}".format(self.username, self.name, repository_dir)
+
+    def checkout(self, commit=False):
+        self._checkout(commit)
+
+    # Fetch a commit
+    # Returns a dict with the keys code (with a File with the code)
+    # and datetime (with the date and time when that commit was created)
+    def fetch_commit_info(self, commit):
+        # Get commit info
+        gh = pygithub3.Github(user=self.username, repo=self.name)
+        commit_info = gh.repos.commits.get(sha=commit)
+        commit_creation_date = commit_info.commit.author.date
+        local_timezone = pytz.timezone(settings.TIME_ZONE)
+        commit_creation_datetime = local_timezone.localize(commit_creation_date)
+        # Commit information
+        return {"creation_datetime": commit_creation_datetime}
+
+
 # Gitlab profile for integration of that VCS
 # python-gitlab will be used (https://github.com/gpocentek/python-gitlab)
-class GitLabRepository(Repository):
+class GitLabRepository(Repository, GitRepository):
 
     class Meta:
         verbose_name = "GitLab repository"
@@ -109,59 +205,30 @@ class GitLabRepository(Repository):
         return u"{0}{1}/{2}".format(settings.TMP_DIR, self.project_userspace, self.project_name)
 
     @property
-    def userspace_path(self):
+    def namespace_path(self):
         return u"{0}{1}".format(settings.TMP_DIR, self.project_userspace)
 
-    # Delete the repository
-    def delete(self):
-        with transaction.atomic():
-            os.removedirs(self.repository_path)
-            super(GitLabRepository, self).delete()
-
-    # Checkout a repository
-    def checkout(self, commit=None):
-
-        # Create userspace directory if needed
-        repository_userspace = self.userspace_path
-        if not os.path.exists(repository_userspace):
-            os.makedirs(repository_userspace)
-
-        # Create directory inside userspace if needed
+    @property
+    def clone_command(self):
         repository_dir = self.repository_path
-        if not os.path.exists(repository_dir):
-            clone_command = "git clone https://gitlab-ci-token:{0}@{1}/{2}/{3}.git {4}".format(
-                self.ci_token, self.url.replace("http://", ""), self.project_userspace, self.project_name, repository_dir
-            )
+        return "git clone https://gitlab-ci-token:{0}@{1}/{2}/{3}.git {4}".format(
+            self.ci_token, self.url.replace("http://", ""), self.project_userspace, self.project_name,
+            repository_dir
+        )
 
-            print clone_command
-            clone_result = subprocess.Popen(clone_command, shell=True, stdout=subprocess.PIPE)
-            clone_stdout = clone_result.stdout.read()
-            print clone_stdout
-
-        # Pull all changes
-        pull_command = "cd {0} && git fetch --all && cd -".format(repository_dir)
-        print pull_command
-        pull_result = subprocess.Popen(pull_command, shell=True, stdout=subprocess.PIPE)
-        pull_stdout = pull_result.stdout.read()
-        print pull_stdout
-
-        if commit:
-            checkout_command = "cd {0} && git checkout {1} && cd -".format(repository_dir, commit)
-            print checkout_command
-            checkout_result = subprocess.Popen(checkout_command, shell=True, stdout=subprocess.PIPE)
-            checkout_stdout = checkout_result.stdout.read()
-            print checkout_stdout
+    def checkout(self, commit=False):
+        self._checkout(commit)
 
     # Fetch a commit
     # Returns a dict with the keys code (with a File with the code)
     # and datetime (with the date and time when that commit was created)
-    def fetch_commit(self, commit):
+    def fetch_commit_info(self, commit):
         # Get commit info
         gl = gitlab.Gitlab(self.url, self.access_token)
         project = gl.projects.get(self.project_full_name)
         commit_response = project.commits.get(commit)
         # Checkout commit
-        return {"code": None, "creation_datetime": commit_response.created_at}
+        return {"creation_datetime": commit_response.created_at}
 
 
 # Each one of the commits fetched from the repository
@@ -170,7 +237,7 @@ class Commit(models.Model):
                                related_name="commits")
     repository = models.ForeignKey("repositories.Repository", verbose_name=u"Repository this commit depends on",
                                    related_name="commits")
-    commit = models.CharField(verbose_name=u"Commit repository", max_length=64)
+    commit = models.CharField(verbose_name=u"Repository commit", max_length=64)
 
     comments = models.TextField(verbose_name=u"Comments about this commit", blank=True, default="")
 

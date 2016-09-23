@@ -94,14 +94,19 @@ class Command(BaseCommand):
 
         try:
             boards = Board.objects.filter(has_to_be_fetched=True).exclude(last_fetch_datetime=None)
-            self.stdout.write(self.style.SUCCESS(u"You have {0} projects that could have repositories".format(boards.count())))
+            self.stdout.write(self.style.SUCCESS(u"You have {0} projects that could have repositories".format(
+                boards.count()
+            )))
             for board in boards:
-                self.stdout.write(self.style.SUCCESS(u"Repositories of code {0}".format(board.name)))
                 repositories = board.repositories.all()
+                self.stdout.write(self.style.SUCCESS(u"There are {0} repositories of code {1}".format(
+                    repositories.count(), board.name
+                )))
                 for repository in repositories:
                     self.stdout.write(self.style.SUCCESS(u"Repository {0}".format(repository.name)))
                     repository.checkout()
-                    for commit in repository.commits.filter(has_been_assessed=False):
+                    commits = repository.commits.filter(has_been_assessed=False)
+                    for commit in commits:
                         commit.assess_code_quality()
                         self.stdout.write(self.style.SUCCESS(u"- Commit {0}".format(commit.commit)))
                     self.stdout.write(self.style.SUCCESS(u"Repository {0} checkout successfully".format(repository.name)))

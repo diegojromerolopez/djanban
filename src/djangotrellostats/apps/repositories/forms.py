@@ -5,13 +5,19 @@ from __future__ import unicode_literals
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 
-from djangotrellostats.apps.repositories.models import GitLabRepository, Commit
+from djangotrellostats.apps.repositories.models import GitLabRepository, Commit, GitHubPublicRepository
 
 
+# Get form class for a repository
 def get_form_class(repository):
     derived_type = repository.type
-    if derived_type == ContentType.objects.get_for_model(type(repository.derived_object)):
+
+    # Get derived type
+    if derived_type == ContentType.objects.get_for_model(GitLabRepository):
         return GitLabRepositoryForm
+    elif derived_type == ContentType.objects.get_for_model(GitHubPublicRepository):
+        return GitHubPublicRepositoryForm
+
     raise NotImplementedError(u"There is only one type of repository")
 
 
@@ -28,10 +34,27 @@ class GitLabRepositoryForm(forms.ModelForm):
         return self.instance
 
 
+class GitHubPublicRepositoryForm(forms.ModelForm):
+    class Meta:
+        model = GitHubPublicRepository
+        fields = ["name", "username", "description"]
+
+    def save(self, commit=True):
+        super(GitHubPublicRepositoryForm, self).save(commit=False)
+        if commit:
+            if not self.instance.url:
+                self.instance.url = "http://github.com/{0}/{1}".format(self.instance.username, self.instance.name)
+            self.instance.type = ContentType.objects.get_for_model(type(self.instance))
+            self.instance.save()
+        return self.instance
+
+
+# Delete repository
 class DeleteRepositoryForm(forms.Form):
     confirmed = forms.BooleanField(label=u"Confirm you want to delete this repository")
 
 
+# Create and edit a commit
 class CommitForm(forms.ModelForm):
     class Meta:
         model = Commit
@@ -40,7 +63,7 @@ class CommitForm(forms.ModelForm):
     def save(self, commit=True):
         super(CommitForm, self).save(commit=False)
         if commit:
-            commit_info = self.instance.repository.fetch_commit(self.cleaned_data["commit"])
+            commit_info = self.instance.repository.fetch_commit_info(self.cleaned_data["commit"])
             self.instance.creation_datetime = commit_info["creation_datetime"]
             self.instance.save()
         return self.instance
