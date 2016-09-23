@@ -6,12 +6,10 @@ import json
 import os
 import re
 from pylint import epylint as lint
-
-
-# Pylinter for directories
 from djangotrellostats.apps.repositories.cloc import Cloc
 
 
+# Pylinter for directories
 class PythonDirectoryAnalyzer(object):
 
     def __init__(self, dir_path):
