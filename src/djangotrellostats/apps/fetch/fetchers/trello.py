@@ -25,6 +25,9 @@ import shortuuid
 
 
 # Initialize boards
+from djangotrellostats.apps.workflows.models import WorkflowCardReport
+
+
 class Initializer(object):
 
     def __init__(self, member, debug=True):
@@ -259,7 +262,7 @@ class BoardFetcher(Fetcher):
 
                 # Workflow card reports
                 for workflow in workflows:
-                    workflow.fetch([card])
+                    self._fetch_workflow(workflow, [card])
 
         # Average and std. deviation of time cards live in this list
         for list_uuid, list_report in list_report_dict.items():
@@ -345,6 +348,40 @@ class BoardFetcher(Fetcher):
             if max_date is None or max_date < action["date"]:
                 max_date = action["date"]
         return max_date
+
+    # Fetch data for this workflow, creating a workflow report
+    def _fetch_workflow(self, workflow, cards):
+        workflow_lists = workflow.workflow_lists.all()
+        development_lists = {workflow_list.list.uuid: workflow_list.list for workflow_list in
+                             workflow.workflow_lists.filter(is_done_list=False)}
+        done_lists = {workflow_list.list.uuid: workflow_list.list for workflow_list in
+                      workflow.workflow_lists.filter(is_done_list=True)}
+
+        workflow_card_reports = []
+
+        for card in cards:
+            trello_card = card.trello_card
+
+            lead_time = None
+            cycle_time = None
+
+            # Lead time and cycle time only should be computed when the card is done
+            if not card.is_closed and trello_card.idList in done_lists:
+                # Lead time in this workflow for this card
+                lead_time = sum([list_stats["time"] for list_uuid, list_stats in trello_card.stats_by_list.items()])
+
+                # Cycle time in this workflow for this card
+                cycle_time = sum(
+                    [list_stats["time"] if list_uuid in development_lists else 0 for list_uuid, list_stats in
+                     trello_card.stats_by_list.items()])
+
+                workflow_card_report = WorkflowCardReport(board=self.board, workflow=workflow,
+                                                          card=card, cycle_time=cycle_time, lead_time=lead_time)
+                workflow_card_report.save()
+
+                workflow_card_reports.append(workflow_card_report)
+
+        return workflow_card_reports
 
 
 # Fetch a card
