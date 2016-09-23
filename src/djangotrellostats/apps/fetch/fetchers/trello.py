@@ -22,12 +22,10 @@ from djangotrellostats.apps.fetch.fetchers.base import Fetcher
 from djangotrellostats.apps.reports.models import ListReport, MemberReport, CardMovement
 from trello import TrelloClient
 import shortuuid
-
-
-# Initialize boards
 from djangotrellostats.apps.workflows.models import WorkflowCardReport
 
 
+# Initialize boards
 class Initializer(object):
 
     def __init__(self, member, debug=True):
