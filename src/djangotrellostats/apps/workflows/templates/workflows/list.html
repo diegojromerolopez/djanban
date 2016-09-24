@@ -5,9 +5,11 @@
 {% block content %}
     <h1>Workflows of board {{board.name}}</h1>
     <div>
-        <p>
-            <a href="{% url 'boards:workflows:new' board.id %}" class="btn btn-primary" title="New workflow">New workflow</a>
-        </p>
+        {% if request.user.member %}
+            <p>
+                <a href="{% url 'boards:workflows:new' board.id %}" class="btn btn-primary" title="New workflow">New workflow</a>
+            </p>
+        {% endif %}
     </div>
     <div class="workflow_list">
         {% if workflows|length == 0 %}
@@ -19,10 +21,12 @@
                         <div id="workflow_id__{{workflow.id}}" class="panel-heading"><h2>{{workflow.name}}</h2></div>
                         <div class="panel-body">
 
-                            <div class="actions">
-                                <a href="{% url 'boards:workflows:edit' board.id workflow.id %}" class="btn btn-primary">Edit</a>
-                                {% include "workflows/delete_form.html" %}
-                            </div>
+                            {% if request.user.member %}
+                                <div class="actions">
+                                    <a href="{% url 'boards:workflows:edit' board.id workflow.id %}" class="btn btn-primary">Edit</a>
+                                    {% include "workflows/delete_form.html" %}
+                                </div>
+                            {% endif %}
                             <div>
                                 <h3>Development lists</h3>
                                 {% for workflowlist in workflow.ordered_lists  %}
