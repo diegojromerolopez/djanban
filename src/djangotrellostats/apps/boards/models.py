@@ -158,6 +158,22 @@ class Board(models.Model):
             return 0
         return spent_time
 
+    # Returns the adjusted spent time according to the spent time factor defined in each member
+    def get_adjusted_spent_time(self, date=None):
+        daily_spent_times_filter = {}
+        if date:
+            daily_spent_times_filter["date"] = date
+
+        adjusted_spent_time = 0
+        for member in self.members.all():
+            daily_spent_times_filter["member"] = member
+            spent_time = self.daily_spent_times.filter(**daily_spent_times_filter).aggregate(sum=Sum("spent_time"))["sum"]
+            if spent_time is not None:
+                member_adjusted_spent_time = member.spent_time_factor * spent_time
+                adjusted_spent_time += member_adjusted_spent_time
+
+        return adjusted_spent_time
+
     # Return the spent time on a given week of a year
     def get_weekly_spent_time(self, week, year):
         start_date = Week(year, week).monday()

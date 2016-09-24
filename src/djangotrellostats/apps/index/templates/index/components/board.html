@@ -6,9 +6,23 @@
           </a>
           <div class="panel-body">
               {% with spent_time=board.get_spent_time %}
-                <p>
-                    <strong title="Developed number of hours until now" class="cursor-help">{{spent_time|floatformat:-2}}</strong> {% if board.estimated_number_of_hours %}/ <strong class="cursor-help" title="Estimated number of hours">{{board.estimated_number_of_hours}}</strong>{% endif %} hours developed.
-                </p>
+                {% with adjusted_spent_time=board.get_adjusted_spent_time %}
+                    <p>
+                        <strong title="Developed number of hours until now" class="cursor-help">
+                            {{spent_time|floatformat:-2}}
+                        </strong>
+                        <strong title="Developed adjusted number of hours until now" class="cursor-help">
+                            ({{adjusted_spent_time|floatformat:-2}} adjusted)
+                        </strong>
+                        developed hours
+                        {% if board.estimated_number_of_hours %}
+                            of
+                            <strong class="cursor-help" title="Estimated number of hours">
+                                {{board.estimated_number_of_hours}}
+                            </strong>
+                        {% endif %}
+                        estimated hours.
+                    </p>
 
                 {% if board.estimated_number_of_hours %}
                     <div>
@@ -25,6 +39,7 @@
                     </div>
                 {% endif %}
 
+              {% endwith %}
               {% endwith %}
         </div>
       </div>
