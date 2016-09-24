@@ -10,7 +10,7 @@ from django.db.models import Sum, Avg, Count
 from django.utils import timezone
 
 from djangotrellostats.apps.base.auth import get_user_boards
-from djangotrellostats.apps.boards.models import Board
+from djangotrellostats.apps.boards.models import Board, CardComment
 from djangotrellostats.apps.dev_environment.models import Interruption
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
@@ -250,3 +250,49 @@ def spent_time_by_week_evolution(board, show_interruptions=False):
         evolution_chart.add("Interruptions", interruptions)
 
     return evolution_chart.render_django_response()
+
+
+# Number of total comments by member for this board or card
+def number_of_comments(current_user, board=None, card=None):
+    chart_title = u"Number of comments by member as of {0}".format(timezone.now())
+
+    if board:
+        chart_title += u" for board {0}".format(board.name)
+        if card:
+            chart_title += u" for card '{0}'".format(card.name)
+        chart_title += " (fetched on {0})".format(board.get_human_fetch_datetime())
+
+    number_of_comments_chart = pygal.Bar(
+        title=chart_title, legend_at_bottom=True, print_values=False, print_zeroes=False, fill=False,
+        margin=0, human_readable=True
+    )
+
+    card_comment_filter = {}
+    if board:
+        card_comment_filter["card__board"] = board
+        if card:
+            card_comment_filter["card"] = card
+            number_of_comments_chart.show_minor_x_labels = True
+
+    card_comments = CardComment.objects.filter(**card_comment_filter)
+
+    # If there is no comments, render an empty chart
+    if not card_comments.exists():
+        return number_of_comments_chart.render_django_response()
+
+    if board:
+        boards = [board]
+    else:
+        boards = get_user_boards(current_user)
+
+    members = Member.objects.filter(boards__in=boards).distinct().order_by("initials")
+
+    total_number_of_comments = 0
+    for member in members:
+        member_number_of_comments = card_comments.filter(author=member).count()
+        total_number_of_comments += member_number_of_comments
+        number_of_comments_chart.add(member.trello_username, member_number_of_comments)
+
+    number_of_comments_chart.add("Total number of comments", total_number_of_comments)
+
+    return number_of_comments_chart.render_django_response()

@@ -11,12 +11,13 @@ from datetime import date
 import pytz
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg, Min, Q, Count
+from django.db.models import Avg, Min, Q, Count, Max
 from django.utils import timezone
 
 from djangotrellostats.apps.base.auth import get_user_boards
-from djangotrellostats.apps.boards.models import Board, Card
+from djangotrellostats.apps.boards.models import Board, Card, CardComment
 from djangotrellostats.apps.dev_times.models import DailySpentTime
+from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.reports.models import ListReport, CardMovement
 
 
@@ -259,3 +260,81 @@ def cumulative_card_evolution(board, day_step=5):
         cumulative_chart.add("Done {0} cards".format(label.name), done_card_values_by_label[label.id])
 
     return cumulative_chart.render_django_response()
+
+
+# Number of comments chart
+def number_of_comments(current_user, board=None, card=None):
+    chart_title = u"Number of comments as of {0}".format(timezone.now())
+    if board:
+        chart_title += u" for board {0}".format(board.name)
+        if card:
+            chart_title += u" for card '{0}'".format(card.name)
+        chart_title += " (fetched on {0})".format(board.get_human_fetch_datetime())
+
+    number_of_comments_chart = pygal.Line(
+        title=chart_title, legend_at_bottom=True, print_values=False, print_zeroes=False, fill=False,
+        margin=0, show_minor_x_labels=False, human_readable=True, x_label_rotation=65
+    )
+
+    card_comment_filter = {}
+    if board:
+        card_comment_filter["card__board"] = board
+        if card:
+            card_comment_filter["card"] = card
+            number_of_comments_chart.show_minor_x_labels = True
+
+    card_comments = CardComment.objects.filter(**card_comment_filter)
+
+    # If there is no comments, render an empty chart
+    if not card_comments.exists():
+        return number_of_comments_chart.render_django_response()
+
+    # Get datetime interval where all the comments were created
+    start_datetime = card_comments.aggregate(min_creation_datetime=Min("creation_datetime"))["min_creation_datetime"]
+    end_datetime = card_comments.aggregate(max_creation_datetime=Max("creation_datetime"))["max_creation_datetime"]
+
+    start_date = start_datetime.date()
+    end_date = end_datetime.date()
+
+    if board:
+        boards = [board]
+    else:
+        boards = get_user_boards(current_user)
+
+    members = Member.objects.filter(boards__in=boards).distinct().order_by("initials")
+
+    number_of_comments_by_member = {member.id: [] for member in members}
+    number_of_comments_list = []
+
+    x_labels = []
+    x_labels_major = []
+
+    i = 1
+    date_i = copy.deepcopy(start_date)
+    while date_i <= end_date:
+        # Number of comments
+        comments = card_comments.filter(creation_datetime__date=date_i)
+        # If there is at least a comment, is a day with comments
+        if comments.exists():
+            number_of_comments_list.append(comments.count())
+            x_labels.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
+            if i == 1 or i % 5 == 0:
+                x_labels_major.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
+            # Comments for each member
+            for member in members:
+                member_comments = comments.filter(author=member)
+                number_of_comments_by_member[member.id].append(member_comments.count())
+            i += 1
+
+        date_i += timedelta(days=1)
+
+    # Setting up chart values
+    number_of_comments_chart.x_labels = x_labels
+    number_of_comments_chart.x_labels_major = x_labels_major
+    number_of_comments_chart.add("Total number of comments", number_of_comments_list)
+
+    for member in members:
+        if sum(number_of_comments_by_member[member.id]) > 0:
+            number_of_comments_chart.add("{0}".format(member.trello_username), number_of_comments_by_member[member.id])
+
+    return number_of_comments_chart.render_django_response()

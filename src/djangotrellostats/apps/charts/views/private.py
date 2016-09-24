@@ -231,6 +231,28 @@ def cumulative_card_evolution(request, board_id, day_step=5):
     return cards.cumulative_card_evolution(board, day_step)
 
 
+@login_required
+def number_of_comments(request, board_id=None, card_id=None):
+    board = None
+    card = None
+    if board_id is not None:
+        board = get_user_boards(request.user).get(id=board_id)
+        if card_id is not None:
+            card = board.cards.get(id=card_id)
+    return cards.number_of_comments(request.user, board, card)
+
+
+@login_required
+def number_of_comments_by_member(request, board_id=None, card_id=None):
+    board = None
+    card = None
+    if board_id is not None:
+        board = get_user_boards(request.user).get(id=board_id)
+        if card_id is not None:
+            card = board.cards.get(id=card_id)
+    return members.number_of_comments(request.user, board, card)
+
+
 # Interruptions
 @login_required
 def number_of_interruptions(request, board_id=None):

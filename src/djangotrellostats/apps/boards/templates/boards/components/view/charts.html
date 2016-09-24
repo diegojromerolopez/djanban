@@ -166,6 +166,19 @@
                 </a>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <a href="{% url 'charts:number_of_comments_by_member' board.id %}" title="Number of comments by member">
+                    <img src="{% url 'charts:number_of_comments_by_member' board.id %}" alt="Number of comments by member"/>
+                </a>
+            </div>
+            <div class="col-sm-6">
+                <a href="{% url 'charts:number_of_comments' board.id %}" title="Evolution of number of comments thru time">
+                    <img src="{% url 'charts:number_of_comments' board.id %}" alt="Evolution of number of comment thru time"/>
+                </a>
+            </div>
+        </div>
     {% endblock card_stats_charts %}
 
     {% block quality_charts %}

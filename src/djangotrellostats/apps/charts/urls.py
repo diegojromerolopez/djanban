@@ -61,6 +61,16 @@ urlpatterns = [
     url(r'^cumulative_card_evolution/(?P<board_id>[\d]+)(/(?P<day_step>[\d]+))?$', private.cumulative_card_evolution,
         name="cumulative_card_evolution"),
 
+    # Evolution of number of comments
+    url(r'^number_of_comments/?$',private.number_of_comments, name="number_of_comments"),
+    url(r'^number_of_comments/(?P<board_id>[\d]+)/?$',private.number_of_comments, name="number_of_comments"),
+    url(r'^number_of_comments/(?P<board_id>[\d]+)/(?P<card_id>[\d]+)/?$',private.number_of_comments, name="number_of_comments"),
+
+    # Total number of comments
+    url(r'^number_of_comments_by_member/?$',private.number_of_comments_by_member, name="number_of_comments_by_member"),
+    url(r'^number_of_comments_by_member/(?P<board_id>[\d]+)/?$',private.number_of_comments_by_member, name="number_of_comments_by_member"),
+    url(r'^number_of_comments_by_member/(?P<board_id>[\d]+)/(?P<card_id>[\d]+)/?$',private.number_of_comments_by_member, name="number_of_comments_by_member"),
+
     url(r'^avg_time_by_list/(?P<board_id>\d+)/(?P<workflow_id>\d+)?/?$', private.avg_time_by_list, name="avg_time_by_list"),
     url(r'^avg_estimated_time_by_list/(?P<board_id>[\d]+)/(?P<workflow_id>\d+)?/?$', private.avg_estimated_time_by_list, name="avg_estimated_time_by_list"),
 
