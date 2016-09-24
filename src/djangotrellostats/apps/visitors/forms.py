@@ -39,6 +39,7 @@ class NewUserForm(forms.ModelForm):
         self.fields["password2"] = forms.CharField(label=u"Repeat password", widget=forms.PasswordInput(),
                                                    required=True)
 
+    # Clean form
     def clean(self):
         cleaned_data = super(NewUserForm, self).clean()
 
