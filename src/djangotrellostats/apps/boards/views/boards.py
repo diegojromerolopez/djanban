@@ -16,7 +16,7 @@ from django.conf import settings
 from djangotrellostats.apps.base.auth import user_is_member, get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.forms import EditBoardForm
-from djangotrellostats.apps.boards.models import List, Board
+from djangotrellostats.apps.boards.models import List, Board, Card
 from djangotrellostats.apps.boards.stats import avg, std_dev
 
 from djangotrellostats.apps.fetch.fetchers.trello import BoardFetcher, Initializer
@@ -194,6 +194,31 @@ def view_card_report(request, board_id):
         "std_dev_cycle_time": std_dev(cards, "cycle_time"),
     }
     return render(request, "cards/list.html", replacements)
+
+
+# View card
+@login_required
+def view_card(request, board_id, card_id):
+    try:
+        member = None
+        if user_is_member(request.user):
+            member = request.user.member
+        board = get_user_boards(request.user).get(id=board_id)
+        card = board.cards.get(id=card_id)
+    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+        raise Http404
+
+    comments = card.comments.all().order_by("-creation_datetime")
+    labels = card.labels.all().order_by("name")
+
+    replacements = {
+        "member": member,
+        "board": board,
+        "card": card,
+        "labels": labels,
+        "comments": comments
+    }
+    return render(request, "cards/view.html", replacements)
 
 
 # Export daily spent report in CSV format

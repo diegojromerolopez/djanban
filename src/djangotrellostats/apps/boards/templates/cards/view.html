@@ -1,0 +1,93 @@
+{% extends "boards/view.html" %}
+
+{% load humanize %}
+
+{% block page_title %}{{card.name}}{% endblock %}
+
+{% block content %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+          <h1>{{card.name}}</h1>
+      </div>
+      <div class="panel-body">
+          <div>
+              <div>Created on {{card.creation_datetime}}</div>
+              <div>
+                  {% if card.is_closed %}
+                    <span class="fa fa-lock" title="This card is closed"></span> Closed
+                  {% else %}
+                    <span class="fa fa-unlock" title="This card is active"></span> Active
+                  {% endif %}
+              </div>
+              <div class="list">On list <strong>{{card.list.name}}</strong></div>
+              <div class="labels">
+                  {% if labels %}
+                    {% for label in labels %}<span>{{label.name}}</span>{% endfor %}
+                  {% else %}
+                    <em>Without labels.</em>
+                  {% endif %}
+          </div>
+
+              <div class="blocking_cards">
+                  {% if card.pending_blocking_cards.exists %}
+                        {% for blocking_card in card.pending_blocking_cards %}
+                            <a href="{% url 'boards:view_card' board.id blocking_card.id %}" title="View blocking card {{blocking_card.name}}">
+                                {{blocking_card.name}}
+                            </a>
+                            {% if forloop.revcounter > 2 %}, {% elif forloop.revcounter > 1 %} & {% endif %}
+                        {% endfor %}
+                  {% else %}
+                        <em>No other cards are blocking this one.</em>
+                  {% endif %}
+
+              </div>
+
+          {% if card.spent_time %}
+              <div class="spent_time">
+                  <h2>Spent time</h2>
+                  <div>{{card.spent_time}} hours</div>
+              </div>
+          {% endif %}
+          {% if card.cycle_time %}
+              <div class="cycle_time">
+                  <h2>Cycle time</h2>
+                  <div>{{card.cycle_time}} hours</div>
+              </div>
+          {% endif %}
+          {% if card.lead_time %}
+              <div class="lead_time ">
+                  <h2>Lead time</h2>
+                  <div>{{card.lead_time}} hours</div>
+              </div>
+          {% endif %}
+          <div class="description">
+              <h2>Content</h2>
+              {% if card.description %}
+                {{card.description}}
+              {% else %}
+                <em>No description.</em>
+              {% endif %}
+          </div>
+          <div class="comments">
+              <h2>Comments ({{comments|length}})</h2>
+              <div>
+                  {% if comments|length == 0 %}
+                    <em>No comments yet.</em>
+                  {% else %}
+                      {% for comment in comments %}
+                          <div class="panel panel-info">
+                              <div class="panel-heading">
+                                  Comment made by {{comment.author.initials}}
+                                  (<span title="Comment made by {{comment.creation_datetime}}">{{comment.creation_datetime|naturaltime}}</span>)
+                              </div>
+                              <div class="panel-body">
+                                  {{comment.content}}
+                              </div>
+                          </div>
+                      {% endfor %}
+                  {% endif %}
+              </div>
+          </div>
+      </div>
+    </div>
+{% endblock content %}
