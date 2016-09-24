@@ -260,8 +260,12 @@ def view_workflow_card_report(request, board_id, workflow_id):
         board = get_user_boards(request.user).get(id=board_id)
     except Board.DoesNotExist:
         raise Http404
+
+    workflow = board.workflows.get(id=workflow_id)
     workflow_card_reports = board.workflow_card_reports.filter(workflow_id=workflow_id)
+
     replacements = {
+        "workflow": workflow,
         "member": member, "board": board, "workflow_card_reports": workflow_card_reports,
         "avg_lead_time": avg(workflow_card_reports, "lead_time"),
         "std_dev_lead_time": std_dev(workflow_card_reports, "lead_time"),
