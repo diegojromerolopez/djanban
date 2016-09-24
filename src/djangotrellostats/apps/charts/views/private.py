@@ -32,7 +32,7 @@ def requirement_burndown(request, board_id, requirement_code=None):
 @login_required
 def burndown(request, board_id):
     board = get_user_boards(request.user).get(id=board_id)
-    return boards.burndown(board)
+    return boards.burndown(board, show_interruptions=request.GET.get("show_interruptions"))
 
 
 # Average card lead time
@@ -202,7 +202,7 @@ def spent_time_by_week_evolution(request, board_id):
     board = None
     if board_id:
         board = get_user_boards(request.user).get(id=board_id)
-    return members.spent_time_by_week_evolution(board=board)
+    return members.spent_time_by_week_evolution(board=board, show_interruptions=request.GET.get("show_interruptions"))
 
 
 @login_required

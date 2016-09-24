@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.boards.models import Board
+from djangotrellostats.apps.dev_environment.models import Interruption
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.reports.models import MemberReport
@@ -176,8 +177,10 @@ def avg_spent_time_by_weekday(current_user, board=None):
 
 
 # Evolution of spent time by member
-def spent_time_by_week_evolution(board):
+def spent_time_by_week_evolution(board, show_interruptions=False):
     chart_title = u"Evolution of each member's spent time by week"
+    if show_interruptions:
+        chart_title += u", including interruptions suffered by the team, "
     chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
 
     evolution_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
@@ -200,11 +203,16 @@ def spent_time_by_week_evolution(board):
     member_values = {member.id:[] for member in members}
     member_values["all"] = []
 
+    interruptions = []
+
     x_labels = []
 
     week_i = copy.deepcopy(start_week)
     year_i = start_working_date.year
     while year_i < end_working_date.year or (year_i == end_working_date.year and week_i < end_week):
+
+        week_i_start_date = Week(year_i, week_i).monday()
+        week_i_end_date = Week(year_i, week_i).sunday()
 
         there_is_data = board.daily_spent_times.filter(date__year=year_i, week_of_year=week_i).exists()
         if there_is_data:
@@ -223,6 +231,11 @@ def spent_time_by_week_evolution(board):
 
             member_values["all"].append(team_spent_time)
 
+            if show_interruptions:
+                num_interruptions = Interruption.objects.filter(datetime__year=year_i, datetime__date__gte=week_i_start_date, datetime__date__lte=week_i_end_date).count()
+                if num_interruptions > 0:
+                    interruptions.append(num_interruptions)
+
         week_i += 1
         if week_i > number_of_weeks_of_year(year_i):
             week_i = 1
@@ -233,5 +246,7 @@ def spent_time_by_week_evolution(board):
         evolution_chart.add(member.trello_username, member_values[member.id])
 
     evolution_chart.add("All", member_values["all"])
+    if show_interruptions:
+        evolution_chart.add("Interruptions", interruptions)
 
     return evolution_chart.render_django_response()

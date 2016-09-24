@@ -64,6 +64,11 @@
                     <img src="{% url 'charts:avg_spent_time_by_weekday' board.id %}" alt="Average spent time per weekday by member" />
                 </a>
             </div>
+            <div class="col-sm-6">
+                <a href="{% url 'charts:spent_time_by_week_evolution' board.id %}?show_interruptions=1" title="Evolution of spent time">
+                    <img src="{% url 'charts:spent_time_by_week_evolution' board.id %}?show_interruptions=1" alt="Evolution of spent time"/>
+                </a>
+            </div>
         </div>
 
         <div class="row">
