@@ -264,6 +264,20 @@ class Card(ImmutableModel):
     def pending_blocking_cards(self):
         return self.blocking_cards.exclude(list__type="done")
 
+    # Return the number of comments of a card
+    @property
+    def number_of_comments(self):
+        return self.comments.all().count()
+
+
+# Each one of the comments made by members in each card
+class CardComment(ImmutableModel):
+    uuid = models.CharField(max_length=128, verbose_name=u"External id of the comment of this comment", unique=True)
+    card = models.ForeignKey("boards.Card", verbose_name=u"Card this commenb belongs to", related_name="comments")
+    author = models.ForeignKey("members.Member", verbose_name=u"Member author of this comment", related_name="comments")
+    content = models.TextField(verbose_name=u"Content of the comment")
+    creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
+
 
 # Label of the task board
 class Label(ImmutableModel):

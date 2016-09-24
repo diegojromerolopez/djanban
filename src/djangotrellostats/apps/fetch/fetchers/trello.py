@@ -15,7 +15,7 @@ from django.utils import timezone
 from trello import ResourceUnavailable
 from trello.board import Board as TrelloBoard
 
-from djangotrellostats.apps.boards.models import Label, Card, Board, List
+from djangotrellostats.apps.boards.models import Label, Card, Board, List, CardComment
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.fetch.fetchers.base import Fetcher
@@ -465,9 +465,57 @@ class CardFetcher(object):
     def _create(self, trello_card):
         card = self._factory(trello_card)
         card.save()
+        # Creation of the comments
+        CardFetcher._create_comments(card)
         # Creation of the daily spent times
         CardFetcher._create_daily_spent_times(card)
         return card
+
+    # Create comments of the card
+    @staticmethod
+    def _create_comments(card):
+        card_comments = []
+
+        # {u'type': u'commentCard', u'idMemberCreator': u'56e2ac8e14e4eda06ac6b8fd',
+        #  u'memberCreator': {u'username': u'diegoj5', u'fullName': u'Diego J.', u'initials': u'DJ',
+        #                     u'id': u'56e2ac8e14e4eda06ac6b8fd', u'avatarHash': u'a3086f12908905354b15972cd67b64f8'},
+        #  u'date': u'2016-04-20T23:06:38.279Z',
+        #  u'data': {u'text': u'Un comentario', u'list': {u'name': u'En desarrollo', u'id': u'5717fb3fde6bdaed40201667'},
+        #            u'board': {u'id': u'5717fb368199521a139712f0', u'name': u'Test', u'shortLink': u'2CGPEnM2'},
+        #            u'card': {u'idShort': 6, u'id': u'57180ae1ed24b1cff7f8da7c', u'name': u'Por todas',
+        #                      u'shortLink': u'bnK3c1jF'}}, u'id': u'57180b7e25abc60313461aaf'}
+        member_dict = {}
+
+        local_timezone = pytz.timezone(settings.TIME_ZONE)
+
+        # Create each one of the comments
+        for comment in card.trello_card.comments:
+
+            # Author of the comment loaded using memoization
+            member_uuid = comment["idMemberCreator"]
+            if not member_uuid in member_dict:
+                member_dict[member_uuid] = Member.objects.get(uuid=comment["idMemberCreator"])
+            author = member_dict[member_uuid]
+
+            # Comment uuid
+            uuid = comment["id"]
+
+            # Comment content
+            content = comment["data"]["text"]
+
+            # Comment creation datetime
+            comment_naive_creation_datetime = datetime.strptime(comment["date"], '%Y-%m-%dT%H:%M:%S.%fZ')
+            comment_creation_datetime = local_timezone.localize(comment_naive_creation_datetime)
+
+            # Creation of the card comment
+            card_comment = CardComment(uuid=uuid, card=card, author=author,
+                                       creation_datetime=comment_creation_datetime, content=content)
+            card_comment.save()
+
+            # Create card comment list
+            card_comments.append(card_comment)
+
+        return card_comments
 
     # Creation of the daily spent times
     @staticmethod
