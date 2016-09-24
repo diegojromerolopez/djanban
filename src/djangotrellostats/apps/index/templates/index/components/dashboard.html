@@ -93,6 +93,11 @@
 
         <div class="row">
             <div class="col-sm-6">
+                <a href="{% url 'charts:number_of_comments_by_member' %}" title="Number of comments by member">
+                    <img src="{% url 'charts:number_of_comments_by_member' %}" alt="Number of comments by member" />
+                </a>
+            </div>
+            <div class="col-sm-6">
                 <a href="{% url 'charts:avg_spent_time_by_weekday' %}" title="Average spent time per weekday by member">
                     <img src="{% url 'charts:avg_spent_time_by_weekday' %}" alt="Average spent time per weekday by member" />
                 </a>
