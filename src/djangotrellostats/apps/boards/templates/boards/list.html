@@ -6,7 +6,11 @@
     <h1>Boards of {{member.trello_username}}</h1>
     <div class="board_list">
         {% if boards|length == 0 %}
-            {% include "boards/components/list/no_boards_warning.html" %}
+            {% if request.user.member %}
+                {% include "boards/components/list/no_boards_warning.html" %}
+            {% else %}
+                You don't have any assigned project. You shouldn't be seeing this.
+            {% endif %}
         {% else %}
             <ul class="list-group">
                 {% for board in boards %}

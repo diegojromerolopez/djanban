@@ -10,34 +10,38 @@
             {% if workflow_card_reports|length == 0 %}
                 There are no cards in this board. Have you tried to fetch the cards?
             {% else %}
-                <table class="table table-striped">
-                    <tr>
-                        <td>Name</td>
-                        <td>Closed?</td>
-                        <td>List</td>
-                        <td>Lead time</td>
-                        <td>Cycle time</td>
-                        <td>Last activity date</td>
-                    </tr>
-                    {% for workflow_card_report in workflow_card_reports %}
-                        {% with card=workflow_card_report.card %}
-                            <tr>
-                                <td>{{card.name}}</td>
-                                <td>{% if card.is_closed %}Yes{% else %}No{% endif %}</td>
-                                <td>{{card.list.name}}</td>
-                                <td>{{workflow_card_report.lead_time}}</td>
-                                <td>{{workflow_card_report.cycle_time}}</td>
-                                <td>{{card.last_activity_datetime}}</td>
-                            </tr>
-                        {% endwith %}
-                    {% endfor %}
-                    <tr>
-                        <td colspan="6">Cycle time (avg. & std. dev.)</td><td>{{avg_cycle_time}}</td><td>{{std_dev_cycle_time}}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="6">Lead time (avg. & std. dev.)</td><td>{{avg_lead_time}}</td><td>{{std_dev_lead_time}}</td>
-                    </tr>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Name</th>
+                            <th>Closed?</th>
+                            <th>List</th>
+                            <th>Lead time</th>
+                            <th>Cycle time</th>
+                            <th>Last activity date</th>
+                        </tr>
+                        <tbody>
+                        {% for workflow_card_report in workflow_card_reports %}
+                            {% with card=workflow_card_report.card %}
+                                <tr>
+                                    <td>{{card.name}}</td>
+                                    <td>{% if card.is_closed %}Yes{% else %}No{% endif %}</td>
+                                    <td>{{card.list.name}}</td>
+                                    <td>{{workflow_card_report.lead_time}}</td>
+                                    <td>{{workflow_card_report.cycle_time}}</td>
+                                    <td>{{card.last_activity_datetime}}</td>
+                                </tr>
+                            {% endwith %}
+                        {% endfor %}
+                        <tr>
+                            <td colspan="6">Cycle time (avg. & std. dev.)</td><td>{{avg_cycle_time}}</td><td>{{std_dev_cycle_time}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="6">Lead time (avg. & std. dev.)</td><td>{{avg_lead_time}}</td><td>{{std_dev_lead_time}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             {% endif %}
         </div>
     </div>
