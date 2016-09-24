@@ -41,6 +41,12 @@ class NewUserForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super(NewUserForm, self).clean()
+
+        # Check if he/she has at least one board
+        if len(self.cleaned_data["boards"]) == 0:
+            raise ValidationError(u"Please select at least one board for this visitor")
+
+        # Check if passwords match
         if self.cleaned_data.get("password1") \
                 and self.cleaned_data.get("password1") != self.cleaned_data.get("password2"):
             raise ValidationError(u"Passwords don't match")

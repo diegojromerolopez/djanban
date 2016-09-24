@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from isoweek import Week
 
-from djangotrellostats.apps.base.auth import get_user_boards
+from djangotrellostats.apps.base.auth import get_user_boards, user_is_member
 from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.charts import boards, cards, labels, members, interruptions, noise_measurements,\
     repositories, requirements
@@ -158,7 +158,7 @@ def spent_time_by_week(request, week_of_year=None, board_id=None):
 @login_required
 def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, board_id=None):
     if member_id is None:
-        if hasattr(request.user, "member") and request.user.member:
+        if user_is_member(request.user):
             member = request.user.member
         else:
             boards = get_user_boards(request.user)
