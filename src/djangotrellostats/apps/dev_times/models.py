@@ -9,6 +9,16 @@ from djangotrellostats.utils.week import get_iso_week_of_year
 
 # Daily spent time by member
 class DailySpentTime(models.Model):
+
+    class Meta:
+        verbose_name = u"Spent time"
+        verbose_name_plural = u"Spent times"
+        index_together = (
+            ("date", "week_of_year", "spent_time"),
+            ("date", "week_of_year", "board", "spent_time"),
+            ("board", "date", "week_of_year", "spent_time")
+        )
+
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="daily_spent_times")
     card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="daily_spent_times", null=True)
     member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="daily_spent_times")

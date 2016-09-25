@@ -233,6 +233,7 @@ class GitLabRepository(Repository, GitRepository):
 
 # Each one of the commits fetched from the repository
 class Commit(models.Model):
+
     board = models.ForeignKey("boards.Board", verbose_name=u"Project this commit depends on",
                                related_name="commits")
     repository = models.ForeignKey("repositories.Repository", verbose_name=u"Repository this commit depends on",
@@ -252,6 +253,8 @@ class Commit(models.Model):
         verbose_name_plural = "commits"
         index_together = (
             ("board", "repository", "commit"),
+            ("board", "repository", "creation_datetime", "commit"),
+            ("board", "repository", "has_been_assessed"),
         )
 
     @property
@@ -345,6 +348,16 @@ class CommitFile(models.Model):
 
 # PHP-md messages
 class PhpMdMessage(models.Model):
+
+    class Meta:
+        verbose_name = u"PHPMD message"
+        verbose_name_plural = u"PHPMD messages"
+        index_together = (
+            ("board", "repository", "commit", "commit_file"),
+            ("board", "repository", "ruleset", "commit"),
+            ("board", "repository", "commit", "ruleset"),
+        )
+
     RULESETS = ("Clean Code Rules",
                 "Code Size Rules",
                 "Controversial Rules",
@@ -421,6 +434,7 @@ class PylintMessage(models.Model):
         verbose_name_plural = u"pylint messages"
         index_together = (
             ("board", "repository", "commit", "commit_file", "type"),
+            ("board", "repository", "type", "commit", "commit_file"),
             ("commit", "type"),
             ("board", "commit", "type"),
             ("board", "type")

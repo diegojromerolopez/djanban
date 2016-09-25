@@ -7,6 +7,15 @@ from django.db import models
 
 # An interruption of one team member
 class Interruption(models.Model):
+
+    class Meta:
+        verbose_name = "Interruption"
+        verbose_name_plural = "Interruptions"
+        index_together = (
+            ("datetime", "board", "member"),
+            ("member", "datetime", "board"),
+        )
+
     board = models.ForeignKey("boards.Board", verbose_name=u"Project", null=True, default=None, blank=True)
     member = models.ForeignKey("members.Member", verbose_name=u"Who suffered the interruption")
 

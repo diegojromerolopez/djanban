@@ -234,6 +234,15 @@ class Board(models.Model):
 
 # Card of the task board
 class Card(ImmutableModel):
+
+    class Meta:
+        verbose_name = "Card"
+        verbose_name_plural = "Cards"
+        index_together = (
+            ("board", "creation_datetime"),
+            ("board", "list", "position"),
+        )
+
     COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s+(\-(?P<days_before>(\d+))d\s+)?(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)(\s*(?P<description>.+))?"
     COMMENT_BLOCKED_CARD_REGEX = r"^blocked\s+by\s+(?P<card_url>.+)$"
     COMMENT_REQUIREMENT_CARD_REGEX = r"^task\s+of\s+requirement\s+(?P<requirement_code>.+)$"
@@ -288,6 +297,17 @@ class Card(ImmutableModel):
 
 # Each one of the comments made by members in each card
 class CardComment(ImmutableModel):
+
+    class Meta:
+        verbose_name = "Card comment"
+        verbose_name_plural = "Card comments"
+        index_together = (
+            ("card", "creation_datetime", "author"),
+            ("author", "card", "creation_datetime"),
+            ("card", "author", "creation_datetime"),
+            ("creation_datetime", "card", "author"),
+        )
+
     uuid = models.CharField(max_length=128, verbose_name=u"External id of the comment of this comment", unique=True)
     card = models.ForeignKey("boards.Card", verbose_name=u"Card this commenb belongs to", related_name="comments")
     author = models.ForeignKey("members.Member", verbose_name=u"Member author of this comment", related_name="comments")

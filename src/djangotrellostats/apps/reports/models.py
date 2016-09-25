@@ -6,6 +6,15 @@ from django.db import models
 # Movements the cards suffer
 class CardMovement(models.Model):
 
+    class Meta:
+        verbose_name = u"Card movement"
+        verbose_name_plural = u"Card movements"
+        index_together = (
+            ("board", "card", "datetime"),
+            ("board", "type", "source_list", "destination_list"),
+            ("board", "destination_list", "datetime"),
+        )
+
     CARD_MOVEMENT_TYPES = (
         ("forward", "Forward"),
         ("backward", "Backward"),
