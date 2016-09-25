@@ -157,14 +157,14 @@ def spent_time_by_week(request, week_of_year=None, board_id=None):
 # Show a chart with the spent time by week by member and by board
 @login_required
 def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, board_id=None):
+    boards = get_user_boards(request.user)
     if member_id is None:
         if user_is_member(request.user):
             member = request.user.member
         else:
-            boards = get_user_boards(request.user)
             member = Member.objects.filter(boards__in=boards)[0]
     else:
-        member = Member.objects.get(id=member_id)
+        member = Member.objects.filter(boards__in=boards).distinct().get(id=member_id)
 
     if week_of_year is None:
         now = timezone.now()
@@ -182,7 +182,7 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
                                                                      end_of_week.strftime("%Y-%m-%d"))
     board = None
     if board_id:
-        board = Board.objects.get(id=board_id)
+        board = boards.get(id=board_id)
         chart_title += u" for board {0}".format(board.name)
 
     spent_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
