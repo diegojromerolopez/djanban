@@ -239,6 +239,7 @@ class Card(ImmutableModel):
         verbose_name = "Card"
         verbose_name_plural = "Cards"
         index_together = (
+            ("board", "creation_datetime", "list"),
             ("board", "creation_datetime"),
             ("board", "list", "position"),
         )
@@ -317,6 +318,13 @@ class CardComment(ImmutableModel):
 
 # Label of the task board
 class Label(ImmutableModel):
+
+    class Meta:
+        verbose_name = "label"
+        verbose_name_plural = "labels"
+        index_together = (
+            ("board", "name", "color"),
+        )
 
     name = models.CharField(max_length=128, verbose_name=u"Name of the label")
     uuid = models.CharField(max_length=128, verbose_name=u"External id of the label", unique=True)
