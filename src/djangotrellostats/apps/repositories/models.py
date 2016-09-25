@@ -349,15 +349,6 @@ class CommitFile(models.Model):
 # PHP-md messages
 class PhpMdMessage(models.Model):
 
-    class Meta:
-        verbose_name = u"PHPMD message"
-        verbose_name_plural = u"PHPMD messages"
-        index_together = (
-            ("board", "repository", "commit", "commit_file"),
-            ("board", "repository", "ruleset", "commit"),
-            ("board", "repository", "commit", "ruleset"),
-        )
-
     RULESETS = ("Clean Code Rules",
                 "Code Size Rules",
                 "Controversial Rules",
@@ -396,10 +387,12 @@ class PhpMdMessage(models.Model):
         verbose_name_plural = u"phpmd messages"
         index_together = (
             ("board", "repository", "commit", "commit_file", "ruleset"),
+            ("board", "repository", "commit", "ruleset"),
             ("commit", "commit_file", "ruleset"),
             ("board", "commit", "ruleset"),
             ("board", "commit", "commit_file", "ruleset"),
-            ("board", "ruleset")
+            ("board", "repository", "ruleset", "commit"),
+            ("board", "ruleset"),
         )
 
     @staticmethod
