@@ -52,15 +52,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'djangotrellostats.apps.base',
-    'djangotrellostats.apps.members',
-    'djangotrellostats.apps.index',
     'djangotrellostats.apps.boards',
     'djangotrellostats.apps.hourly_rates',
+    'djangotrellostats.apps.index',
+    'djangotrellostats.apps.journal',
     'djangotrellostats.apps.dev_times',
     'djangotrellostats.apps.dev_environment',
     'djangotrellostats.apps.fetch',
-    'djangotrellostats.apps.reports',
+    'djangotrellostats.apps.members',
     'djangotrellostats.apps.reporter',
+    'djangotrellostats.apps.reports',
     'djangotrellostats.apps.repositories',
     'djangotrellostats.apps.requirements',
     'djangotrellostats.apps.slideshow',
@@ -184,6 +185,12 @@ CKEDITOR_CONFIGS = {
             ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
             ['Link', 'Unlink'],
             ['RemoveFormat']
-        ]
+        ],
+    },
+    'basic': {
+        'toolbar': 'basic'
+    },
+    'full': {
+        'toolbar': 'full'
     }
 }

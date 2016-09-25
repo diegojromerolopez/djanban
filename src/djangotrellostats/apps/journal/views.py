@@ -1,0 +1,136 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
+from django.contrib.auth.decorators import login_required
+from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
+from django.core.exceptions import ObjectDoesNotExist
+
+from djangotrellostats.apps.base.auth import user_is_member, get_user_boards
+from djangotrellostats.apps.base.decorators import member_required
+from djangotrellostats.apps.boards.models import Board
+from djangotrellostats.apps.journal.forms import NewJournalEntryForm, EditJournalEntryForm, DeleteJournalEntryForm
+from djangotrellostats.apps.journal.models import JournalEntry
+
+
+# Journal
+@login_required
+def view(request, board_id):
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+
+    board = get_object_or_404(Board, id=board_id)
+
+    journal_entries = board.journal_entries.all().order_by("-creation_datetime")
+    replacements = {
+        "member": member,
+        "board": board,
+        "journal_entries": journal_entries
+    }
+    return render(request, "journal/view.html", replacements)
+
+
+# View a journal entry
+@login_required
+def view_entry(request, board_id, year, month, journal_entry_slug):
+    try:
+        member = None
+        if user_is_member(request.user):
+            member = request.user.member
+        board = get_user_boards(request.user).get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
+
+    journal_entry = get_object_or_404(
+        JournalEntry, creation_datetime__year=year, creation_datetime__month=month, slug=journal_entry_slug
+    )
+
+    replacements = {
+        "member": member,
+        "board": board,
+        "year": year,
+        "month": month,
+        "journal_entry": journal_entry
+    }
+    return render(request, "journal/entries/view.html", replacements)
+
+
+# New journal entry
+@member_required
+def new_entry(request, board_id):
+    member = request.user.member
+    try:
+        board = member.boards.get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
+
+    journal_entry = JournalEntry(board=board, author=member)
+
+    if request.method == "POST":
+        form = NewJournalEntryForm(request.POST, instance=journal_entry)
+
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect(reverse("boards:journal:view", args=(board_id,)))
+    else:
+        form = NewJournalEntryForm(instance=journal_entry)
+
+    return render(request, "journal/entries/new.html", {"form": form, "board": board, "member": member})
+
+
+# Edit journal entry
+@member_required
+def edit_entry(request, board_id, year, month, journal_entry_slug):
+    member = request.user.member
+    try:
+        board = member.boards.get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
+
+    journal_entry = get_object_or_404(
+        JournalEntry, creation_datetime__year=year, creation_datetime__month=month, slug=journal_entry_slug
+    )
+
+    if request.method == "POST":
+        form = EditJournalEntryForm(request.POST, instance=journal_entry)
+
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect(reverse("boards:journal:view", args=(board_id,)))
+    else:
+        form = EditJournalEntryForm(instance=journal_entry)
+
+    replacements = {"form": form, "board": board, "member": member, "journal_entry": journal_entry}
+    return render(request, "journal/entries/edit.html", replacements)
+
+
+# Delete a journal entry
+@member_required
+def delete_entry(request, board_id, year, month, journal_entry_slug):
+    member = request.user.member
+    try:
+        board = member.boards.get(id=board_id)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    journal_entry = get_object_or_404(
+        JournalEntry, creation_datetime__year=year, creation_datetime__month=month, slug=journal_entry_slug
+    )
+
+    if request.method == "POST":
+        form = DeleteJournalEntryForm(request.POST)
+
+        if form.is_valid() and form.cleaned_data.get("confirmed"):
+            journal_entry.delete()
+            return HttpResponseRedirect(reverse("boards:journal:view", args=(board_id,)))
+
+    else:
+        form = DeleteJournalEntryForm()
+
+    replacements = {"form": form, "board": board, "member": member, "journal_entry": journal_entry}
+    return render(request, "journal/entries/delete.html", replacements)
+
+

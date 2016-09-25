@@ -1,0 +1,57 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}Journal of board {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>Journal of board {{board.name}}</h1>
+    <div class="board_list_list">
+        <div class="row">
+            <div class="panel col-md-12">
+                {% if member %}
+                    <div>
+                        <p>
+                            <a href="{% url 'boards:journal:new_entry' board.id %}" class="btn btn-primary">New journal entry</a>
+                        </p>
+                    </div>
+                {% endif %}
+                {% if journal_entries|length == 0 %}
+                    This board's journal is empty.
+                {% else %}
+                    {% for journal_entry in journal_entries %}
+                        <div class="row">
+                          <div class="col-md-12">
+                              <div class="panel panel-info">
+                                  <div class="panel-heading">
+                                      <a href="{% url 'boards:journal:view_entry' board.id journal_entry.creation_datetime.year journal_entry.creation_datetime.month journal_entry.slug %}"
+                                         title="View {{journal_entry.title}}">
+                                          {{journal_entry.title}}
+                                      </a>
+                                  </div>
+                                  <div class="panel-body">
+                                      <div class="creation_datetime">
+                                        Created by {{journal_entry.author.trello_username}} at {{journal_entry.creation_datetime}}. {% if journal_entry.last_update_datetime != journal_entry.creation_datetime %}{{journal_entry.last_update_datetime}}{% endif %}
+                                      </div>
+                                      <p class="actions">
+                                            {% if member %}
+                                                <a href="{% url 'boards:journal:edit_entry' board.id journal_entry.creation_datetime.year journal_entry.creation_datetime.month journal_entry.slug %}" title="Edit {{journal_entry.title}}">
+                                                    <span class="fa fa-pencil"></span>
+                                                </a>
+                                                <a href="{% url 'boards:journal:delete_entry' board.id journal_entry.creation_datetime.year journal_entry.creation_datetime.month journal_entry.slug %}" title="Delete {{journal_entry.title}}">
+                                                    <span class="fa fa-trash"></span>
+                                                </a>
+                                          {% endif %}
+                                      </p>
+
+                                      <div class="content">
+                                          {{journal_entry.content|safe|truncatechars_html:200}}
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

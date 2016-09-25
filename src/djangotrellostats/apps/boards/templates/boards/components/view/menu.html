@@ -6,6 +6,28 @@
                     {{board.name|truncatechars:20}}
                 </a>
             </div>
+            {% if board.estimated_number_of_hours %}
+                {% with board_spent_time=board.get_spent_time %}
+                    {% with board_adjusted_spent_time=board.get_adjusted_spent_time %}
+                        <div id="board_spent_time">
+                            <span class="navbar-text label {% if board_spent_time < board.estimated_number_of_hours %}label-success{% elif board_spent_time == board.estimated_number_of_hours %}label-warning{% else %}label-danger{% endif %}">
+                                <strong>Spent time</strong>:
+                                <span class="cursor-help" title="Actual spent time until now ({{board_spent_time|floatformat:-2}} hours)">
+                                    {{board_spent_time|floatformat:-2}}
+                                </span>
+
+                                (<span class="cursor-help" title="Adjusted spent time until now ({{board_adjusted_spent_time|floatformat:-2}} hours)">
+                                    {{board_adjusted_spent_time|floatformat:-2}} adjusted
+                                </span>)
+                                hours of
+                                <strong class="cursor-help" title="Maximum spent time allowed by budget ({{board.estimated_number_of_hours|floatformat:-2}} hours were paid by client)">
+                                    {{board.estimated_number_of_hours|floatformat:-2}}
+                                </strong> hours
+                            </span>
+                        </div>
+                    {% endwith %}
+                {% endwith %}
+            {% endif %}
 
             <div class="" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
@@ -22,6 +44,11 @@
                         </li>
                     {% endif %}
                     {% if board.is_ready and board.is_fetched %}
+                        <li {% if url_namespace == "boards:journal" %}class="active"{% endif %}>
+                            <a href="{% url 'boards:journal:view' board.id %}" title="Journal of project {{board.name}}">
+                                <span class="fa fa-leaf"></span> Journal
+                            </a>
+                        </li>
                         <li {% if url_name == "view_requirements" %}class="active"{% endif %}>
                             <a href="{% url 'boards:requirements:view_requirements' board.id %}" title="Requirements for project {{board.name}}">
                                 <span class="fa fa-cogs"></span> Requirements
@@ -77,28 +104,6 @@
                         {% endif %}
                     {% endif %}
                 </ul>
-
-                {% if board.estimated_number_of_hours %}
-                    {% with board_spent_time=board.get_spent_time %}
-                        {% with board_adjusted_spent_time=board.get_adjusted_spent_time %}
-                            <div id="board_spent_time">
-                                <span class="navbar-text label {% if board_spent_time < board.estimated_number_of_hours %}label-success{% elif board_spent_time == board.estimated_number_of_hours %}label-warning{% else %}label-danger{% endif %}">
-                                    <span class="cursor-help" title="Actual spent time until now ({{board_spent_time|floatformat:-2}} hours)">
-                                        {{board_spent_time|floatformat:-2}}
-                                    </span>
-
-                                    (<span class="cursor-help" title="Adjusted spent time until now ({{board_adjusted_spent_time|floatformat:-2}} hours)">
-                                        adj. {{board_adjusted_spent_time|floatformat:-2}}
-                                    </span>)
-                                    of
-                                    <strong class="cursor-help" title="Maximum spent time allowed by budget ({{board.estimated_number_of_hours|floatformat:-2}} hours were paid by client)">
-                                        {{board.estimated_number_of_hours|floatformat:-2}}
-                                    </strong> hours
-                                </span>
-                            </div>
-                        {% endwith %}
-                    {% endwith %}
-                {% endif %}
             </div>
         </div>
     </nav>

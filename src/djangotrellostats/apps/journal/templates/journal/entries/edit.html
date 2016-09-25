@@ -1,0 +1,8 @@
+{% extends "journal/entries/form.html" %}
+
+{% block page_title %}Edit entry {{journal_entry.title}} for {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>Edit entry {{journal_entry.title}} of {{board.name}}</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}

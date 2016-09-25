@@ -18,7 +18,7 @@ class RequirementForm(forms.ModelForm):
         self.fields["description"].widget = CKEditorWidget()
 
 
-# Requirement form
+# New requirement form
 class NewRequirementForm(RequirementForm):
     class Meta:
         model = Requirement
@@ -30,7 +30,7 @@ class NewRequirementForm(RequirementForm):
                                                 shortuuid.ShortUUID().random(length=4).upper())
 
 
-# Requirement form
+# Edit requirement form
 class EditRequirementForm(RequirementForm):
     class Meta:
         model = Requirement

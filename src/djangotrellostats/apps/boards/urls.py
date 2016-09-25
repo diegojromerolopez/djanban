@@ -37,4 +37,6 @@ urlpatterns = [
     # Repositories for this board
     url(r'^(?P<board_id>\d+)/repositories/', include('djangotrellostats.apps.repositories.urls', namespace="repositories")),
 
+    # Journal entries of this board
+    url(r'^(?P<board_id>\d+)/journal/', include('djangotrellostats.apps.journal.urls', namespace="journal")),
 ]

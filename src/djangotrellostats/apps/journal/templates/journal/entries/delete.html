@@ -1,0 +1,8 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}Delete journal entry {{journal_entry.slug}} for {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>Delete {{journal_entry.title}} of {{board.name}}</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}

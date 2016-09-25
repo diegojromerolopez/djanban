@@ -1,0 +1,8 @@
+{% extends "journal/entries/form.html" %}
+
+{% block page_title %}New journal entry for {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>New journal entry board {{board.name}}</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}
