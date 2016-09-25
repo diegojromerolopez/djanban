@@ -1,5 +1,7 @@
 {% extends "boards/view.html" %}
 
+{% load humanize %}
+
 {% block page_title %}{{journal_entry.title}} of board {{board.name}}{% endblock %}
 
 {% block content %}
@@ -12,7 +14,8 @@
               <div class="panel-body row">
                   <div class="col-md-12">
                       <div class="">
-                          Created by {{journal_entry.author.trello_username}} at {{journal_entry.creation_datetime}}. {% if journal_entry.last_update_datetime != journal_entry.creation_datetime %}{{journal_entry.last_update_datetime}}{% endif %}
+                          Created by <a href="{% url 'boards:journal:view' board.id %}?author={{journal_entry.author.trello_username}}">{{journal_entry.author.trello_username}}</a> <span class="cursor-help" title="Created at {{journal_entry.creation_datetime}}">{{journal_entry.creation_datetime|naturaltime}}</span>.
+                          {% if journal_entry.last_update_datetime != journal_entry.creation_datetime %}{{journal_entry.last_update_datetime}}{% endif %}
                       </div>
                       <p class="actions">
                             {% if member %}

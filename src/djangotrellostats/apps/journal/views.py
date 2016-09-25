@@ -24,7 +24,13 @@ def view(request, board_id):
 
     board = get_object_or_404(Board, id=board_id)
 
-    journal_entries = board.journal_entries.all().order_by("-creation_datetime")
+    journal_entry_filter = {}
+    # Filter by author
+    if request.GET.get("author") and board.members.filter(trello_username=request.GET.get("author")).exists():
+        journal_entry_filter["author"] = board.members.filter(trello_username=request.GET.get("author"))
+
+    journal_entries = board.journal_entries.filter(**journal_entry_filter).order_by("-creation_datetime")
+
     replacements = {
         "member": member,
         "board": board,
