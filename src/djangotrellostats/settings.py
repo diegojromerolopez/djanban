@@ -152,6 +152,7 @@ USE_L10N = False
 
 USE_TZ = True
 
+LOGIN_URL = '/base/login/'
 
 EMAIL_USE_TLS = settings_local.EMAIL_USE_TLS
 EMAIL_HOST = settings_local.EMAIL_HOST
