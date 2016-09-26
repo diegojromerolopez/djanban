@@ -493,8 +493,18 @@ class CardFetcher(object):
 
             # Author of the comment loaded using memoization
             member_uuid = comment["idMemberCreator"]
-            if not member_uuid in member_dict:
-                member_dict[member_uuid] = Member.objects.get(uuid=comment["idMemberCreator"])
+            if member_uuid not in member_dict:
+                try:
+                    member_dict[member_uuid] = Member.objects.get(uuid=comment["idMemberCreator"])
+                # If the member doesn't exist, create it
+                except Member.DoesNotExist as e:
+                    deleted_member = Member(
+                        uuid=comment["idMemberCreator"], trello_username=comment["memberCreator"]["username"],
+                        initials=comment["memberCreator"]["initials"]
+                    )
+                    deleted_member.save()
+                    member_dict[member_uuid] = deleted_member
+
             author = member_dict[member_uuid]
 
             # Comment uuid

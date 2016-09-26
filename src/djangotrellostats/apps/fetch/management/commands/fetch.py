@@ -141,11 +141,15 @@ class Command(BaseCommand):
         except Exception as e:
             if last_board:
                 error_message = u"Error when fetching boards. Board {0} fetch failed.".format(last_board.name)
+                initializer = Initializer(self.member, debug=False)
+                initializer.init(last_board.uuid)
             else:
                 error_message = u"Error when fetching boards."
             # Warn the administrators messaging them the traceback and show the error on stdout
             warn_administrators(subject=error_message, message=traceback.format_exc())
             self.stdout.write(self.style.ERROR(error_message))
+
+
 
     # Fetch one board
     def fetch_board(self, board):
