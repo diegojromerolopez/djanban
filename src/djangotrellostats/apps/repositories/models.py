@@ -194,7 +194,7 @@ class GitLabRepository(Repository, GitRepository):
     project_name = models.CharField(verbose_name=u"Project name", max_length=128)
 
     def __unicode__(self):
-        return "Access token: {0} and project name: {1}".format(self.access_token, self.project_name)
+        return "Access token: {0}..., CI token: {1} and project name: {2}".format(self.access_token[0:5], self.ci_token, self.project_name)
 
     @property
     def project_full_name(self):

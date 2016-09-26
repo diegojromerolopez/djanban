@@ -46,7 +46,8 @@ def view(request, board_id, repository_id):
     replacements = {
         "member": member,
         "board": board,
-        "repository": repository
+        "repository": repository,
+        "commits": repository.commits.all().order_by("creation_datetime")
     }
     return render(request, "repositories/view.html", replacements)
 

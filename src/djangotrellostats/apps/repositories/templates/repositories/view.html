@@ -131,7 +131,6 @@
                                             </p>
                                         </div>
                                     </div>
-                                    {% with commits=repository.commits.all %}
                                         {% if commits|length > 0 %}
                                             <table class="table">
                                                 <tr>
@@ -173,7 +172,6 @@
                                         {% else %}
                                             There are no commits for this repository
                                         {% endif %}
-                                    {% endwith %}
                                 </div>
                            </div>
                         </div>
