@@ -34,6 +34,11 @@
                                         Created by <a href="{% url 'boards:journal:view' board.id %}?author={{journal_entry.author.trello_username}}">{{journal_entry.author.trello_username}}</a> <span class="cursor-help" title="Created at {{journal_entry.creation_datetime}}">{{journal_entry.creation_datetime|naturaltime}}</span>.
                                           {% if journal_entry.last_update_datetime != journal_entry.creation_datetime %}{{journal_entry.last_update_datetime}}{% endif %}
                                       </div>
+                                      <div class="tags">
+                                          {% for tag in journal_entry.ordered_tags %}
+                                            <a href="{% url 'boards:journal:view' board.id %}?tag={{tag.name}}">{{tag.name}}</a>
+                                          {% endfor %}
+                                      </div>
                                       <p class="actions">
                                             {% if member %}
                                                 <a href="{% url 'boards:journal:edit_entry' board.id journal_entry.creation_datetime.year journal_entry.creation_datetime.month journal_entry.slug %}" title="Edit {{journal_entry.title}}">

@@ -5,10 +5,12 @@ from __future__ import unicode_literals
 import shortuuid
 
 from ckeditor.widgets import CKEditorWidget
+from dal import autocomplete
+
 from django import forms
 from django.utils import timezone
 
-from djangotrellostats.apps.journal.models import JournalEntry
+from djangotrellostats.apps.journal.models import JournalEntry, JournalEntryTag
 from django.template.defaultfilters import slugify
 
 
@@ -16,7 +18,15 @@ from django.template.defaultfilters import slugify
 class JournalEntryForm(forms.ModelForm):
     class Meta:
         model = JournalEntry
-        fields = ["title", "content"]
+        fields = ["title", "content", "tags"]
+
+    # Django autocomplete light widget
+    tags = forms.ModelMultipleChoiceField(
+         label=u"Journal entry tags",
+         required=False,
+         queryset=JournalEntryTag.objects.all().order_by("name"),
+         widget=autocomplete.ModelSelect2Multiple(url='boards:journal_entry-tag-autocomplete')
+    )
 
     def __init__(self, *args, **kwargs):
         super(JournalEntryForm, self).__init__(*args, **kwargs)
@@ -27,7 +37,7 @@ class JournalEntryForm(forms.ModelForm):
 class NewJournalEntryForm(JournalEntryForm):
     class Meta:
         model = JournalEntry
-        fields = ["title", "content"]
+        fields = ["title", "content", "tags"]
 
     def __init__(self, *args, **kwargs):
         super(NewJournalEntryForm, self).__init__(*args, **kwargs)
@@ -41,6 +51,7 @@ class NewJournalEntryForm(JournalEntryForm):
         super(NewJournalEntryForm, self).save(commit=False)
         if commit:
             self.instance.save()
+            self.save_m2m()
             return self.instance
 
 
@@ -48,7 +59,7 @@ class NewJournalEntryForm(JournalEntryForm):
 class EditJournalEntryForm(JournalEntryForm):
     class Meta:
         model = JournalEntry
-        fields = ["title", "content"]
+        fields = ["title", "content", "tags"]
 
 
 # Requirement form

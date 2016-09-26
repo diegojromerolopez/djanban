@@ -3,6 +3,8 @@
 from django.conf.urls import url, include
 
 from djangotrellostats.apps.boards.views import boards
+from djangotrellostats.apps.journal.views import JournalEntryTagAutocompleteView
+
 
 urlpatterns = [
     url(r'^init-boards$', boards.init_boards, name="init_boards"),
@@ -36,6 +38,9 @@ urlpatterns = [
 
     # Repositories for this board
     url(r'^(?P<board_id>\d+)/repositories/', include('djangotrellostats.apps.repositories.urls', namespace="repositories")),
+
+    # Journal entry tags autocomplete
+    url(r'^journal-entry-tags/autocomplete/?$', JournalEntryTagAutocompleteView.as_view(create_field='name'), name="journal_entry-tag-autocomplete"),
 
     # Journal entries of this board
     url(r'^(?P<board_id>\d+)/journal/', include('djangotrellostats.apps.journal.urls', namespace="journal")),

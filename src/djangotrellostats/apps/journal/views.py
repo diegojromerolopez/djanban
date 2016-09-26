@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+from dal import autocomplete
+
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -12,7 +14,7 @@ from djangotrellostats.apps.base.auth import user_is_member, get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.journal.forms import NewJournalEntryForm, EditJournalEntryForm, DeleteJournalEntryForm
-from djangotrellostats.apps.journal.models import JournalEntry
+from djangotrellostats.apps.journal.models import JournalEntry, JournalEntryTag
 
 
 # Journal
@@ -28,6 +30,9 @@ def view(request, board_id):
     # Filter by author
     if request.GET.get("author") and board.members.filter(trello_username=request.GET.get("author")).exists():
         journal_entry_filter["author"] = board.members.filter(trello_username=request.GET.get("author"))
+    # Filter by tag
+    if request.GET.get("tag"):
+        journal_entry_filter["tags__name"] = request.GET.get("tag")
 
     journal_entries = board.journal_entries.filter(**journal_entry_filter).order_by("-creation_datetime")
 
@@ -57,6 +62,7 @@ def view_entry(request, board_id, year, month, journal_entry_slug):
     replacements = {
         "member": member,
         "board": board,
+        "tags": journal_entry.tags.all().order_by("name"),
         "year": year,
         "month": month,
         "journal_entry": journal_entry
@@ -140,3 +146,14 @@ def delete_entry(request, board_id, year, month, journal_entry_slug):
     return render(request, "journal/entries/delete.html", replacements)
 
 
+# Class-based view that returns tags that match with the one written by user
+class JournalEntryTagAutocompleteView(autocomplete.Select2QuerySetView):
+    # Only members can create tags
+    def has_add_permission(self, request):
+        return user_is_member(request.user)
+
+    def get_queryset(self):
+        qs = JournalEntryTag.objects.all().order_by("name")
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+        return qs

@@ -23,3 +23,17 @@ class JournalEntry(models.Model):
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
 
     last_update_datetime = models.DateTimeField(verbose_name=u"Last update datetime")
+
+    tags = models.ManyToManyField("journal.JournalEntryTag", verbose_name=u"Tags this entry has", blank=True)
+
+    @property
+    def ordered_tags(self):
+        return self.tags.all().order_by("name")
+
+
+# Each one of the tags of the journal entries
+class JournalEntryTag(models.Model):
+    name = models.CharField(verbose_name=u"Name", max_length=64)
+
+    def __unicode__(self):
+        return self.name

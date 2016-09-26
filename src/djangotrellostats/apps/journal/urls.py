@@ -3,7 +3,7 @@
 from django.conf.urls import url, include
 
 from djangotrellostats.apps.journal.views import view, new_entry, view_entry, edit_entry, delete_entry
-
+from djangotrellostats.apps.journal.views import JournalEntryTagAutocompleteView
 
 urlpatterns = [
 
@@ -20,5 +20,4 @@ urlpatterns = [
 
     # Delete entry of this journal
     url(r'^(?P<year>\d+)/(?P<month>\d+)/(?P<journal_entry_slug>[\w\d-]+)/delete/?$', delete_entry, name="delete_entry"),
-
 ]
