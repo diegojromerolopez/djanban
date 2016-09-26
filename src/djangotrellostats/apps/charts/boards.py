@@ -7,12 +7,10 @@ from datetime import timedelta
 
 import pygal
 from django.db.models import Sum
-
-
-# Burndown for the board
 from djangotrellostats.apps.dev_environment.models import Interruption
 
 
+# Burndown for the board
 def burndown(board, show_interruptions=False):
 
     chart_title = u"Burndown for board {0}".format(board.name)

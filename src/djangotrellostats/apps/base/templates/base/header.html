@@ -17,7 +17,7 @@
                 {% if user and user.is_authenticated %}
                     <li role="presentation" {% if url_name == "view_boards" %}class="active"{% endif %}>
                        <a href="{% url 'boards:view_boards' %}" title="View my boards">
-                           <span class="fa fa-tasks"></span> My boards
+                           <span class="fa fa-tasks"></span> Projects
                        </a>
                     </li>
                     {% if member %}

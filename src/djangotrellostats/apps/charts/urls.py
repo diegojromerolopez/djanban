@@ -99,4 +99,5 @@ urlpatterns = [
     url(r'^number_of_code_errors_per_loc_by_month/(?P<board_id>\d+)/(?P<repository_id>\d+)/(?P<language>python)?$',
         private.number_of_code_errors_per_loc_by_month, name="number_of_code_errors_per_loc_by_month"),
 
+    url(r'^view_agility_rating/(?P<board_id>\d+)/?$', private.view_agility_rating, name="view_agility_rating")
 ]

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'djangotrellostats.apps.agility_rating',
     'djangotrellostats.apps.base',
     'djangotrellostats.apps.boards',
     'djangotrellostats.apps.hourly_rates',

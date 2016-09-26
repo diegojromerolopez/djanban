@@ -32,14 +32,14 @@
             <div class="" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     {% if member %}
-                        <li {% if url_name == "edit" %}class="active"{% endif %}>
+                        <li {% if url_namespace == "boards" and url_name == "edit" %}class="active"{% endif %}>
                             <a href="{% url 'boards:edit' board.id %}" title="Edit board {{board.name}}">
-                                <span class="fa fa-pencil"></span> Edit
+                                <span class="fa fa-pencil"></span>
                             </a>
                         </li>
                         <li {% if url_name == "view_lists" %}class="active"{% endif %}>
                             <a href="{% url 'boards:view_lists' board.id %}" title="Lists of board {{board.name}}">
-                                <span class="fa fa-list"></span> Lists
+                                <span class="fa fa-list"></span>
                             </a>
                         </li>
                     {% endif %}
@@ -71,7 +71,7 @@
                         </li>
                         <li {% if url_name == "view_daily_spent_times" %}class="active"{% endif %}>
                             <a href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}" title="Spent times of board {{board.name}}">
-                                <span class="fa fa-calendar-check-o"></span> Spent times
+                                <span class="fa fa-clock-o"></span> Spent times
                             </a>
                         </li>
                         {% if member %}
@@ -88,6 +88,11 @@
                                 </a>
                             </li>
                         {% endif %}
+                            <li {% if url_namespace == "boards:agility_rating" %}class="active"{% endif %}>
+                                <a href="{% url 'boards:agility_rating:view' board.id %}" title="View agility rating of project {{board.name}}">
+                                    <span class="fa fa-certificate"></span> Ag. Rating
+                                </a>
+                            </li>
                         {% if member %}
                             {% if board.has_to_be_fetched %}
                                 <li {% if url_name == "fetch" %}class="active"{% endif %}>

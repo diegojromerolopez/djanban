@@ -10,10 +10,8 @@ from django.utils import timezone
 from isoweek import Week
 
 from djangotrellostats.apps.base.auth import get_user_boards, user_is_member
-from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.charts import boards, cards, labels, members, interruptions, noise_measurements,\
-    repositories, requirements
-from djangotrellostats.apps.dev_times.models import DailySpentTime
+    repositories, requirements, agility_rating
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.utils.week import get_iso_week_of_year
 
@@ -280,11 +278,13 @@ def noise_level(request):
 
 
 # Average noise level per hour
+@login_required
 def noise_level_per_hour(request):
     return noise_measurements.noise_level_per_hour()
 
 
 # Average noise level per hour
+@login_required
 def noise_level_per_weekday(request):
     return noise_measurements.noise_level_per_weekday()
 
@@ -317,3 +317,8 @@ def number_of_code_errors_per_loc_by_month(request, board_id, repository_id=None
     return repositories.number_of_code_errors_per_loc_by_month(board, repository, language)
 
 
+# Agility rating
+@login_required
+def view_agility_rating(request, board_id):
+    board = get_user_boards(request.user).get(id=board_id)
+    return agility_rating.view(board)

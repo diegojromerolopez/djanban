@@ -39,6 +39,9 @@ urlpatterns = [
     # Repositories for this board
     url(r'^(?P<board_id>\d+)/repositories/', include('djangotrellostats.apps.repositories.urls', namespace="repositories")),
 
+    # Agility rating of the project
+    url(r'^(?P<board_id>\d+)/agility-rating/', include('djangotrellostats.apps.agility_rating.urls', namespace="agility_rating")),
+
     # Journal entry tags autocomplete
     url(r'^journal-entry-tags/autocomplete/?$', JournalEntryTagAutocompleteView.as_view(create_field='name'), name="journal_entry-tag-autocomplete"),
 
