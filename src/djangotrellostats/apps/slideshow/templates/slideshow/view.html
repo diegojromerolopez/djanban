@@ -19,15 +19,10 @@
     {{block.super}}
     <script src="{% static 'js/libs/owl-carousel/owl.carousel.js' %}"></script>
     <script type="text/javascript">
-        $(document).ready(function() {
-
-          $("#board-carousel, #member-carousel, #interruptions-carousel, #noise_measurements-carousel").owlCarousel({
-            singleItem: true,
-            autoPlay: 7000
-          });
-
-        });
+        RELOAD_FREQUENCY = 1800;
     </script>
+    <script src="{% static 'js/slideshow/carousel.js' %}"></script>
+    <script src="{% static 'js/slideshow/reload.js' %}"></script>
 
 {% endblock js %}
 
