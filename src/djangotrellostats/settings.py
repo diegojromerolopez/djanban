@@ -178,6 +178,9 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR + "/public_html/collectedstatic"
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_RESTRICT_BY_USER = False
+CKEDITOR_BROWSE_SHOW_DIRS = True
+
 CKEDITOR_IMAGE_BACKEND = "pillow"
 CKEDITOR_CONFIGS = {
     'default': {
@@ -185,8 +188,8 @@ CKEDITOR_CONFIGS = {
         'toolbar_Custom': [
             ['Bold', 'Italic', 'Underline'],
             ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
-            ['Link', 'Unlink'],
-            ['RemoveFormat']
+            ['Image', 'Update', 'Link', 'Unlink'],
+            ['RemoveFormat'],
         ],
     },
     'basic': {

@@ -30,7 +30,7 @@ class JournalEntryForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(JournalEntryForm, self).__init__(*args, **kwargs)
-        self.fields["content"].widget = CKEditorWidget(config_name="full")
+        #self.fields["content"].widget = CKEditorWidget(config_name="full")
 
 
 # New journal entry form
