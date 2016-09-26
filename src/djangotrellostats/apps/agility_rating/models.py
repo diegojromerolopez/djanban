@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 
 from django.db import models
 
 
-# Agility rating according to Boehm &
+# Agility rating according to Boehm & Turner (extracted from their book "Balancing Agility & Discipline")
 class ProjectAgilityRating(models.Model):
     class Meta:
         verbose_name = u"project agility rating"
