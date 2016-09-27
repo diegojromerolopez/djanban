@@ -78,5 +78,5 @@ class ProjectAgilityRating(models.Model):
 
     @property
     def value(self):
-        value = (int(self.personnel) + int(self.dynamism) + int(self.culture) + int(self.size) + int(self.criticality)) / 5.0
-        return 50.0 - value
+        value = (int(self.personnel) + int(self.dynamism) + int(self.culture) + int(self.size) + int(self.criticality))
+        return 100 - value * 4.0
