@@ -38,6 +38,12 @@ class NewUserForm(forms.ModelForm):
                                                    required=True)
         self.fields["password2"] = forms.CharField(label=u"Repeat password", widget=forms.PasswordInput(),
                                                    required=True)
+        self.fields["boards"] = forms.MultipleChoiceField(
+            label=u"Boards",
+            choices=[(board.id, board.name) for board in Board.objects.all().order_by("name")],
+            help_text=u"Boards this visitor will have access",
+            required=False
+        )
 
     # Clean form
     def clean(self):
@@ -66,6 +72,11 @@ class NewUserForm(forms.ModelForm):
             visitors = Group.objects.get(name='Visitors')
             if self.instance.id is None or not visitors.user_set.filter(id=self.instance.id).exists():
                 visitors.user_set.add(self.instance)
+
+            # Add boards to visitor
+            boards = self.cleaned_data["boards"]
+            for board in boards:
+                self.instance.boards.add(board)
 
         return self.instance
 
