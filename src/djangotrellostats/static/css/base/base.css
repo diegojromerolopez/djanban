@@ -13,6 +13,10 @@
     float: none;
 }
 
+.center-text{
+    text-align: center;
+}
+
 #content{
     margin-bottom: 50px;
     margin-left: auto;

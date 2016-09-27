@@ -26,7 +26,7 @@
                        <div class="row">
                            {% if board.agility_rating %}
                                 {% with agility_rating=board.agility_rating %}
-                                   <div class="col-md-6 data">
+                                   <div class="col-md-5 data">
                                        <div class="factor">
                                            <h2>Personnel</h2>
                                            <div>{{agility_rating.get_personnel_display}}</div>
@@ -56,10 +56,23 @@
                                        </div>
                                    </div>
                                 {% endwith %}
-                               <div class="col-md-6 chart">
-                                    <a href="{% url 'charts:view_agility_rating' board.id %}" title="{{board.name}} agility rating">
-                                        <img src="{% url 'charts:view_agility_rating' board.id %}" alt="{{board.name}} agility rating"/>
-                                    </a>
+                               <div class="col-md-7 chart">
+                                   <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <h2 class="center-text">
+                                                How agile is this project?
+                                                <span class="label label-danger">
+                                                    Its agility ranking is <strong>{{agility_rating.value}} of 50.0</strong>.
+                                                </span>
+                                            </h2>
+                                        </div>
+                                   </div>
+
+                                    <div>
+                                        <a href="{% url 'charts:view_agility_rating' board.id %}" title="{{board.name}} agility rating">
+                                            <img src="{% url 'charts:view_agility_rating' board.id %}" alt="{{board.name}} agility rating"/>
+                                        </a>
+                                    </div>
                                </div>
                            {% else %}
                                 Please, <a href="{% url 'boards:agility_rating:new' board.id %}">create first an agility rating.

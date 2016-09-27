@@ -63,8 +63,10 @@ class ProjectAgilityRating(models.Model):
                                 help_text=u"Percentage of requirement changes per month.")
 
     # Culture
-    culture = models.CharField(verbose_name="Culture", max_length=64, choices=CULTURE_CHOICES,
-                                help_text=u"Thriving on chaos vs. order. What percentage of tasks are disciplined done vs. on a chaotic way.")
+    culture = models.CharField(
+        verbose_name="Culture", max_length=64, choices=CULTURE_CHOICES,
+        help_text=u"Thriving on chaos vs. order. What percentage of tasks are disciplined done vs. on a chaotic way."
+    )
 
     # Size (number of workers)
     size = models.CharField(verbose_name="Size", max_length=64, choices=SIZE_CHOICES,
@@ -72,4 +74,9 @@ class ProjectAgilityRating(models.Model):
 
     # Criticality (consequences of a software defect)
     criticality = models.CharField(verbose_name="Criticality", max_length=64, choices=CRITICALITY_CHOICES,
-                            help_text=u"Consequences of a software defect.")
+                                   help_text=u"Consequences of a software defect.")
+
+    @property
+    def value(self):
+        value = (int(self.personnel) + int(self.dynamism) + int(self.culture) + int(self.size) + int(self.criticality)) / 5.0
+        return 50.0 - value
