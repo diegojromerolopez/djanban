@@ -305,8 +305,17 @@ def view_member_report(request, board_id):
         board = get_user_boards(request.user).get(id=board_id)
     except Board.DoesNotExist:
         raise Http404
+
     member_reports = board.member_reports.all()
-    replacements = {"member": member, "board": board, "member_reports": member_reports}
+    week_of_year = get_week_of_year()
+
+    replacements = {
+        "member": member,
+        "board": board,
+        "member_reports": member_reports,
+        "week_of_year": week_of_year,
+        "weeks_of_year": get_weeks_of_year_since_one_year_ago()
+    }
     return render(request, "member_reports/list.html", replacements)
 
 

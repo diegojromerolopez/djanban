@@ -8,6 +8,37 @@
     {% if member_reports|length == 0 %}
         There are no members in this board.
     {% else %}
+        <div class="row">
+            <div class="col-sm-6">
+                <div>
+                    <select id="select_week_of_year_in_spent_time_by_week" class="select_parameter_in_spent_time_by_week">
+                        {% for week_i in weeks_of_year %}
+                            <option value="{{week_i}}" {% if week_i == week_of_year %}selected="selected"{% endif %}>{{week_i}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <a href="{% url 'charts:spent_time_by_week' week_of_year board.id  %}" title="Spent time by member">
+                    <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' week_of_year board.id  %}" alt="Spent time by member"/>
+                </a>
+            </div>
+            <div class="col-sm-6">
+                <a href="{% url 'charts:spent_time_by_week_evolution' board.id %}" title="Evolution of spent time">
+                    <img src="{% url 'charts:spent_time_by_week_evolution' board.id %}" alt="Evolution of spent time"/>
+                </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <a href="{% url 'charts:avg_spent_time_by_weekday' board.id %}" title="Average spent time per weekday by member">
+                    <img src="{% url 'charts:avg_spent_time_by_weekday' board.id %}" alt="Average spent time per weekday by member" />
+                </a>
+            </div>
+            <div class="col-sm-6">
+                <a href="{% url 'charts:spent_time_by_week_evolution' board.id %}?show_interruptions=1" title="Evolution of spent time">
+                    <img src="{% url 'charts:spent_time_by_week_evolution' board.id %}?show_interruptions=1" alt="Evolution of spent time"/>
+                </a>
+            </div>
+        </div>
         <div class="panel">
             <table class="table">
                 <tr>

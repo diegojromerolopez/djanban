@@ -9,12 +9,41 @@
             <div class="panel col-md-12">
                 {% if member %}
                     <div>
-                        <a href="{% url 'boards:requirements:new_requirement' board.id %}" class="btn btn-primary">New requirement</a>
+                        <p>
+                            <a href="{% url 'boards:requirements:new_requirement' board.id %}" class="btn btn-primary">New requirement</a>
+                        </p>
                     </div>
                 {% endif %}
                 {% if requirements|length == 0 %}
                     This board has no requirements.
                 {% else %}
+                    <div class="row">
+                        {# Requirement burndown #}
+                        <div class="col-sm-6">
+                            <div>
+                                <select id="select_requirement_for_requirement_burndown" class="select_requirement_for_requirement_burndown">
+                                    <option value="">All requirements</option>
+                                    {% for requirement_i in requirements %}
+                                        <option value="{{requirement_i.code}}" {% if requirement_i.id == requirements.0.id %}selected="selected"{% endif %}>{{requirement_i.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <a href="{% url 'charts:requirement_burndown' board.id requirements.0.code  %}" title="Requirement {{requirements.0.code}} burndown for board {{board.name}}">
+                                <img id="requirement_burndown" src="{% url 'charts:requirement_burndown' board.id  requirements.0.code  %}" alt="Requirement {{requirements.0.code}} burndown for board {{board.name}}"/>
+                            </a>
+                        </div>
+
+                        {# Burndown #}
+                        <div class="col-sm-6">
+                            {% if board.estimated_number_of_hours > 0 %}
+                                <a href="{% url 'charts:burndown' board.id %}" title="Burndown according to board estimates">
+                                    <img id="burndown" src="{% url 'charts:burndown' board.id %}" alt="Burndown of board {{board.name}}"/>
+                                </a>
+                            {% else %}
+                                Set the estimated numbers of hours to see the burndown chart.
+                            {% endif %}
+                        </div>
+                    </div>
                     <table class="table">
                         <tr>
                             <td>Code</td>

@@ -142,4 +142,28 @@
             </a>
         </div>
     </div>
+    <div class="row">
+            <div class="col-md-6">
+                <a href="{% url 'charts:noise_level' %}" alt="Noise level per day">
+                    <img src="{% url 'charts:noise_level' %}" alt="Noise level" />
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{% url 'charts:subjective_noise_level' %}" title="Subjective noise level">
+                    <img src="{% url 'charts:subjective_noise_level' %}" alt="Subjective noise level" />
+                </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <a href="{% url 'charts:noise_level_per_hour' %}" title="Noise level per hour">
+                    <img src="{% url 'charts:noise_level_per_hour' %}" alt="Noise level per hour" />
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{% url 'charts:noise_level_per_weekday' %}" title="Noise level per weekday">
+                    <img src="{% url 'charts:noise_level_per_weekday' %}" alt="Noise level per weekday" />
+                </a>
+            </div>
+        </div>
 {% endif %}

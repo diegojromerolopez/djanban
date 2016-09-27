@@ -27,11 +27,33 @@
                            {% if board.agility_rating %}
                                 {% with agility_rating=board.agility_rating %}
                                    <div class="col-md-6 data">
-                                       <p><strong>Personnel</strong>: {{agility_rating.get_personnel_display}}</p>
-                                       <p><strong>Dynamism</strong>: {{agility_rating.get_dynamism_display}}</p>
-                                       <p><strong>Culture</strong>: {{agility_rating.get_culture_display}}</p>
-                                       <p><strong>Size</strong>: {{agility_rating.get_size_display}}</p>
-                                       <p><strong>Criticality</strong>: {{agility_rating.get_criticality_display}}</p>
+                                       <div class="factor">
+                                           <h2>Personnel</h2>
+                                           <div>{{agility_rating.get_personnel_display}}</div>
+                                           <div>
+                                               Percentage of team members according to their software development skills.
+                                           </div>
+                                       </div>
+                                       <div class="factor">
+                                           <h2>Dynamism</h2>
+                                           <div>{{agility_rating.get_dynamism_display}}</div>
+                                           <div>Percentage of changes per month</div>
+                                       </div>
+                                       <div class="factor">
+                                           <h2>Culture</h2>
+                                           <div>{{agility_rating.get_culture_display}}</div>
+                                           <div>Software development culture. A high number represents a less rigid work scheme.</div>
+                                       </div>
+                                       <div class="factor">
+                                           <h2>Size</h2>
+                                           <div>{{agility_rating.get_size_display}}</div>
+                                           <div>Size of the software development team.</div>
+                                       </div>
+                                       <div class="factor">
+                                           <h2>Criticality</h2>
+                                           <div>{{agility_rating.get_criticality_display}}</div>
+                                           <div>Software products are not critical or funds/lives depend on them.</div>
+                                       </div>
                                    </div>
                                 {% endwith %}
                                <div class="col-md-6 chart">

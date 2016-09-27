@@ -205,6 +205,22 @@ class Board(models.Model):
             return 0
         return developed_value
 
+    # Returns the adjusted developed value according to the spent time factor defined in each member
+    def get_adjusted_developed_value(self, date=None):
+        daily_spent_times_filter = {}
+        if date:
+            daily_spent_times_filter["date"] = date
+
+        adjusted_developed_value = 0
+        for member in self.members.all():
+            daily_spent_times_filter["member"] = member
+            developed_value = self.daily_spent_times.filter(**daily_spent_times_filter).aggregate(sum=Sum("rate_amount"))["sum"]
+            if developed_value is not None:
+                member_adjusted_developed_value = member.spent_time_factor * developed_value
+                adjusted_developed_value += member_adjusted_developed_value
+
+        return adjusted_developed_value
+
     # Informs what is the first day the team started working in this project
     def get_working_start_date(self):
         first_spent_time_date = self.daily_spent_times.all().aggregate(min_date=Min("date"))["min_date"]

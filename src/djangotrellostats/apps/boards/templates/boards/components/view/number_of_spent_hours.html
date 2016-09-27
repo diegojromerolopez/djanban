@@ -1,22 +1,28 @@
 {% if board.estimated_number_of_hours %}
     {% with board_spent_time=board.get_spent_time%}
-        <div class="panel panel-{% if board_spent_time == board.estimated_number_of_hours %}warning{% elif board_spent_time < board.estimated_number_of_hours %}success{% else %}danger{% endif %}">
-            <div class="panel-heading">
-                <h3 class="panel-title">Number of spent hours in {{board.name}}</h3>
+        {% with board_adjusted_spent_time=board.get_adjusted_spent_time%}
+            <div class="panel panel-{% if board_adjusted_spent_time == board.estimated_number_of_hours %}warning{% elif board_adjusted_spent_time < board.estimated_number_of_hours %}success{% else %}danger{% endif %}">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Number of spent hours in {{board.name}}</h3>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        This project has spent <strong> {{board_spent_time|floatformat:-2}} {% if board_spent_time != board_adjusted_spent_time %}({{board_adjusted_spent_time|floatformat:-2}} adjusted){% endif %} hours</strong> of <strong>{{board.estimated_number_of_hours}} estimated hours</strong>.
+                        {% if board_adjusted_spent_time == board.estimated_number_of_hours %}
+                            <span>Congratulations.</span>
+                        {% elif board_adjusted_spent_time < board.estimated_number_of_hours %}
+                            <span>Congratulations.</span>
+                        {% else %}
+                            <span>Be careful. Project is in overbudget.</span>
+                        {% endif %}
+                    </p>
+                    {% with developed_value=board.get_developed_value %}
+                        {% with adjusted_developed_value=board.get_adjusted_developed_value %}
+                            <p>Developed value in this project is <strong>{{developed_value|floatformat:-2}} {% if adjusted_developed_value != developed_value %}({{adjusted_developed_value|floatformat:-2}} adjusted) ¤{% endif %}</strong></p>
+                        {% endwith %}
+                    {% endwith %}
+                </div>
             </div>
-            <div class="panel-body">
-                <p>
-                    This project has spent <strong> {{board_spent_time|floatformat:-2}} hours</strong> of <strong>{{board.estimated_number_of_hours}} estimated hours</strong>.
-                    {% if board_spent_time == board.estimated_number_of_hours %}
-                        <span>Congratulations.</span>
-                    {% elif board_spent_time < board.estimated_number_of_hours %}
-                        <span>Congratulations.</span>
-                    {% else %}
-                        <span>Be careful. Project is in overbudget.</span>
-                    {% endif %}
-                </p>
-                <p>Developed value in this project is <strong>{{board.get_developed_value|floatformat:-2}} ¤</strong></p>
-            </div>
-        </div>
+        {% endwith %}
     {% endwith %}
 {% endif %}
