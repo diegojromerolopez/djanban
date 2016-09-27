@@ -24,7 +24,7 @@ def get_form_class(repository):
 class GitLabRepositoryForm(forms.ModelForm):
     class Meta:
         model = GitLabRepository
-        fields = ["name", "description", "url", "access_token", "ci_token", "project_userspace", "project_name"]
+        fields = ["name", "description", "url", "access_token", "username", "password", "project_userspace", "project_name"]
 
     def save(self, commit=True):
         super(GitLabRepositoryForm, self).save(commit=False)

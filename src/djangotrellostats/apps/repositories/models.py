@@ -182,9 +182,14 @@ class GitLabRepository(Repository, GitRepository):
     # Token for Django Trello Stats Integration. For example: aoiefhsLFKDJj
     access_token = models.CharField(verbose_name=u"Access token for the repository", max_length=128)
 
-    # CI token
-    ci_token = models.CharField(verbose_name=u"CI token for the repository",
-                                help_text=u"CI token used to clone and checkout the repository",
+    # Username
+    username = models.CharField(verbose_name=u"Username used to clone repository",
+                                help_text=u"Username of the reporter user that will be used to clone and checkout the repository",
+                                max_length=128)
+
+    # Password of the reporter user
+    password = models.CharField(verbose_name=u"Password of the username used to clone repository",
+                                help_text=u"Password of the reporter user that will be used to clone and checkout the repository",
                                 max_length=128)
 
     # Userspace of repository full name (userspace/name)
@@ -194,7 +199,7 @@ class GitLabRepository(Repository, GitRepository):
     project_name = models.CharField(verbose_name=u"Project name", max_length=128)
 
     def __unicode__(self):
-        return "Access token: {0}..., CI token: {1} and project name: {2}".format(self.access_token[0:5], self.ci_token, self.project_name)
+        return "Access token: {0}..., Username: {1} and project name: {2}".format(self.access_token[0:5], self.username, self.project_name)
 
     @property
     def project_full_name(self):
@@ -211,10 +216,11 @@ class GitLabRepository(Repository, GitRepository):
     @property
     def clone_command(self):
         repository_dir = self.repository_path
-        return "git clone https://gitlab-ci-token:{0}@{1}/{2}/{3}.git {4}".format(
-            self.ci_token, self.url.replace("http://", ""), self.project_userspace, self.project_name,
+        clone_command = "git clone https://{0}:{1}@{2}/{3}/{4}.git {5}".format(
+            self.username, self.password, self.url.replace("http://", ""), self.project_userspace, self.project_name,
             repository_dir
         )
+        return clone_command
 
     def checkout(self, commit=False):
         self._checkout(commit)
