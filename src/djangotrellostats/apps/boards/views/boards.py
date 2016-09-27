@@ -13,7 +13,7 @@ from django.template import loader
 from django.template.context import Context
 from django.conf import settings
 
-from djangotrellostats.apps.base.auth import user_is_member, get_user_boards
+from djangotrellostats.apps.base.auth import user_is_member, get_user_boards, user_is_visitor
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.forms import EditBoardForm
 from djangotrellostats.apps.boards.models import List, Board, Card
@@ -50,10 +50,14 @@ def view_list(request):
 @login_required
 def view(request, board_id):
     try:
+        board = get_user_boards(request.user).get(id=board_id)
         member = None
+        visitor = None
         if user_is_member(request.user):
             member = request.user.member
-        board = get_user_boards(request.user).get(id=board_id)
+        elif user_is_visitor(request.user, board):
+            visitor = request.user
+
     except Board.DoesNotExist:
         raise Http404
 
@@ -75,6 +79,7 @@ def view(request, board_id):
         "requirements": requirements,
         "week_of_year": week_of_year,
         "member": member,
+        "visitor": visitor,
         "weeks_of_year": get_weeks_of_year_since_one_year_ago()
     }
     return render(request, "boards/view.html", replacements)

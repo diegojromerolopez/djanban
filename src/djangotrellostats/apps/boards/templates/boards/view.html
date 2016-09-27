@@ -82,7 +82,7 @@
 
         {% include "boards/components/view/full_board.html" %}
 
-        {% if member %}
+        {% if member or visitor %}
             {% include "boards/components/view/charts.html" %}
         {% else %}
             {% include "boards/components/view/public_charts.html" %}

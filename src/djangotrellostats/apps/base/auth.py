@@ -36,8 +36,10 @@ def user_is_member(user):
 
 
 # Informs if one user is a visitor
-def user_is_visitor(user):
-    return not user_is_member(user)
+def user_is_visitor(user, board=None):
+    if board is None:
+        return user.is_authenticated() and not user_is_member(user)
+    return board.visitors.filter(id=user.id).exists()
 
 
 # Return the boards of an user
