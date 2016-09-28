@@ -19,6 +19,7 @@ from djangotrellostats.apps.fetch.fetchers.trello import BoardFetcher, Initializ
 from djangotrellostats.apps.members.models import Member
 
 
+# Make sure you are running this command on a shell that contains the path of the virtualenv
 class Command(BaseCommand):
     help = u'Fetch board data'
 
