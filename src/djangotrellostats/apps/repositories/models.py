@@ -482,6 +482,8 @@ class PylintMessage(models.Model):
     @staticmethod
     def create_from_dict(board, repository, commit, pylinter_result):
         commit_file = CommitFile.create_from_cloc_result(commit, pylinter_result.cloc_result)
+        print(u"Messages: ")
+        print(pylinter_result.messages)
         for pylinter_result_message in pylinter_result.messages:
             if pylinter_result_message:
                 dict_message = pylinter_result_message
@@ -497,6 +499,8 @@ class PylintMessage(models.Model):
     def create_all(commit, pylinter_results):
         repository = commit.repository
         board = commit.board
+        print("PylintMessage.create_all")
         for pylinter_result in pylinter_results:
+            print(pylinter_result)
             PylintMessage.create_from_dict(board, repository, commit, pylinter_result)
 
