@@ -111,16 +111,28 @@ class GitRepository(object):
         if not os.path.exists(repository_dir):
             clone_result = subprocess.Popen(self.clone_command, shell=True, stdout=subprocess.PIPE)
             clone_stdout = clone_result.stdout.read()
+            print(clone_stdout)
+            if clone_result.stderr:
+                clone_stderr = clone_result.stderr.read()
+                print(clone_stderr)
 
         # Pull all changes
         pull_command = "cd {0} && git fetch --all && cd -".format(repository_dir)
         pull_result = subprocess.Popen(pull_command, shell=True, stdout=subprocess.PIPE)
         pull_stdout = pull_result.stdout.read()
+        print(pull_stdout)
+        if pull_result.stderr:
+            pull_stderr = pull_result.stderr.read()
+            print(pull_stderr)
 
         if commit:
             checkout_command = "cd {0} && git checkout {1} && cd -".format(repository_dir, commit)
             checkout_result = subprocess.Popen(checkout_command, shell=True, stdout=subprocess.PIPE)
             checkout_stdout = checkout_result.stdout.read()
+            print(checkout_stdout)
+            if checkout_result.stderr:
+                checkout_stderr = checkout_result.stderr.read()
+                print(checkout_stderr)
 
 
 # GitHub profile for integration of that VCS

@@ -106,22 +106,33 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS(u"Repository {0}".format(repository.name)))
                     repository.checkout()
                     commits = repository.commits.filter(has_been_assessed=False)
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            u"Repository {0} is checked out successfully and has {1} commits:".format(
+                                repository.name, commits.count()
+                            )
+                        )
+                    )
                     for commit in commits:
                         commit.assess_code_quality()
                         self.stdout.write(self.style.SUCCESS(u"- Commit {0}".format(commit.commit)))
-                    self.stdout.write(self.style.SUCCESS(u"Repository {0} checkout successfully".format(repository.name)))
+                    self.stdout.write(self.style.SUCCESS(u"Repository {0} {1} commits assessed succesfully".format(
+                        repository.name, commits.count()))
+                    )
 
             checkout_ok = True
 
         # If after two retries the exception persists, warn the administrators
         except Exception as e:
             checkout_ok = False
+            exception_message = u"We tried checkout out the code repositories but it didn't work out. {0}".format(
+                    traceback.format_exc()
+            )
             warn_administrators(
                 subject=u"Unable to checkout repositories code",
-                message=u"We tried checkout out the code repositories but it didn't work out. {0}".format(
-                    traceback.format_exc()
-                )
+                message=exception_message
             )
+            print(exception_message)
         # Always delete the lock file
         finally:
             self.end()
