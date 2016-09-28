@@ -11,7 +11,6 @@ class Cloc(object):
         self.file_path = file_path
 
     def run(self):
-        Cloc.assert_cloc_exists()
 
         cloc_command = "cloc {0} --xml".format(self.file_path)
         cloc_command_result = subprocess.Popen(cloc_command, shell=True, stdout=subprocess.PIPE)
@@ -22,7 +21,7 @@ class Cloc(object):
 
     # Asserts that cloc is installed in this system
     @staticmethod
-    def assert_cloc_exists():
+    def assert_existence():
         try:
             subprocess.call(["cloc", "--version"])
         except OSError as e:

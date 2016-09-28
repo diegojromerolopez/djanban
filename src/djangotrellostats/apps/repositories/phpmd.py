@@ -18,6 +18,7 @@ class PhpDirectoryAnalyzer(object):
         self.dir_path = dir_path
 
     def run(self):
+        Cloc.assert_existence()
         results = []
         for root, subdirs, files in os.walk(self.dir_path):
             for filename in files:
@@ -58,7 +59,7 @@ class PhpMdAnalyzer(object):
         self.stderr = None
 
     def run(self):
-        PhpMdAnalyzer.assert_phpmd_exists()
+        PhpMdAnalyzer.assert_existence()
 
         php_md_command = "phpmd {0} xml cleancode,codesize,controversial,design,naming,unusedcode".format(self.file_path)
         phpmd_call_results = subprocess.Popen(php_md_command, shell=True, stdout=subprocess.PIPE)
@@ -73,7 +74,7 @@ class PhpMdAnalyzer(object):
 
     # Asserts that phpmd is installed in this system
     @staticmethod
-    def assert_phpmd_exists():
+    def assert_existence():
         try:
             subprocess.call(["phpmd", "--version"])
         except OSError as e:

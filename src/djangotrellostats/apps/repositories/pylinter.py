@@ -16,6 +16,7 @@ class PythonDirectoryAnalyzer(object):
         self.dir_path = dir_path
 
     def run(self):
+        Cloc.assert_existence()
         results = []
         for root, subdirs, files in os.walk(self.dir_path):
             for filename in files:
@@ -39,6 +40,7 @@ class PythonDirectoryAnalyzer(object):
     def file_is_empty(file_path):
         file_size = os.path.getsize(file_path)
         return file_size == 0
+
 
 # Runs pylint on a file
 class Pylinter(object):

@@ -116,6 +116,9 @@ class Command(BaseCommand):
                     for commit in commits:
                         commit.assess_code_quality()
                         self.stdout.write(self.style.SUCCESS(u"- Commit {0}".format(commit.commit)))
+                        self.stdout.write(self.style.SUCCESS(u"  - PHPMD Messages {0}".format(commit.phpmd_messages.count())))
+                        self.stdout.write(self.style.SUCCESS(u"  - Pylint Messages {0}".format(commit.pylint_messages.count())))
+
                     self.stdout.write(self.style.SUCCESS(u"Repository {0} {1} commits assessed succesfully".format(
                         repository.name, commits.count()))
                     )
