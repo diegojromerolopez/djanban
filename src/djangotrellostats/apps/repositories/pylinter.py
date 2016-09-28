@@ -57,7 +57,7 @@ class Pylinter(object):
         command_options = u"{0} --output-format=json --reports=y".format(self.file_path)
         #stdout_filename = "{0}_output".format(self.file_path)
         stdout_filename = "/tmp/xxxx.py"
-        stdout_file = open(stdout_filename, "rw")
+        stdout_file = open(stdout_filename, "rw+")
         (stdout, stderr) = lint.py_run(command_options, return_std=False, stdout=stdout_file)
         print(command_options)
         print(stdout.getvalue())
