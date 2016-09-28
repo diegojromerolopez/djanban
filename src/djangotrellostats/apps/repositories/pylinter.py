@@ -30,6 +30,9 @@ class PythonDirectoryAnalyzer(object):
                         pylinter_result = pylinter.run()
                         pylinter_result.cloc_result = cloc_result
                         results.append(pylinter_result)
+                        print("- {0} analyzed".format(file_path))
+                    else:
+                        print("- {0} not analyzed".format(file_path))
         return results
 
     @staticmethod
