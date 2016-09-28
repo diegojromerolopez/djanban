@@ -302,7 +302,7 @@ class Commit(models.Model):
         self.checkout()
 
         project_file_path = self.repository.repository_path
-        print("Analyzing on {0}").format(project_file_path)
+        print("Analyzing on {0}".format(project_file_path))
 
         # Analysis of the PHP code in the repository
         dir_phpmd_analyzer = PhpDirectoryAnalyzer(project_file_path)
