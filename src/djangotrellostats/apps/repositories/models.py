@@ -311,6 +311,7 @@ class Commit(models.Model):
         # Analysis of the Python code in the repository
         dir_pylinter = PythonDirectoryAnalyzer(project_file_path)
         pylinter_results = dir_pylinter.run()
+        print(pylinter_results)
         PylintMessage.create_all(self, pylinter_results)
 
         # Mark the commit as already assessed

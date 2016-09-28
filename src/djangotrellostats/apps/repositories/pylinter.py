@@ -70,5 +70,6 @@ class PylinterResult(object):
     def _init_results(self):
         self.messages = []
         if self.stdout != "":
+            print(self.stdout)
             self.messages = json.loads(self.stdout)
 
