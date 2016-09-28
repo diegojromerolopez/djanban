@@ -56,6 +56,8 @@ class Pylinter(object):
     def run(self):
         command_options = u"{0} --output-format=json --reports=y".format(self.file_path)
         (stdout, stderr) = lint.py_run(command_options, return_std=True)
+        print(command_options)
+        print(stdout)
         return PylinterResult(self.file_path, stdout, stderr)
 
 
