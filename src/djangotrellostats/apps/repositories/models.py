@@ -302,7 +302,6 @@ class Commit(models.Model):
         self.checkout()
 
         project_file_path = self.repository.repository_path
-        print("Analyzing on {0}".format(project_file_path))
 
         # Analysis of the PHP code in the repository
         dir_phpmd_analyzer = PhpDirectoryAnalyzer(project_file_path)
@@ -312,7 +311,6 @@ class Commit(models.Model):
         # Analysis of the Python code in the repository
         dir_pylinter = PythonDirectoryAnalyzer(project_file_path)
         pylinter_results = dir_pylinter.run()
-        print(pylinter_results)
         PylintMessage.create_all(self, pylinter_results)
 
         # Mark the commit as already assessed
@@ -483,8 +481,6 @@ class PylintMessage(models.Model):
     @staticmethod
     def create_from_dict(board, repository, commit, pylinter_result):
         commit_file = CommitFile.create_from_cloc_result(commit, pylinter_result.cloc_result)
-        print(u"Messages: ")
-        print(pylinter_result.messages)
         for pylinter_result_message in pylinter_result.messages:
             if pylinter_result_message:
                 dict_message = pylinter_result_message
@@ -500,8 +496,6 @@ class PylintMessage(models.Model):
     def create_all(commit, pylinter_results):
         repository = commit.repository
         board = commit.board
-        print("PylintMessage.create_all")
         for pylinter_result in pylinter_results:
-            print(pylinter_result)
             PylintMessage.create_from_dict(board, repository, commit, pylinter_result)
 

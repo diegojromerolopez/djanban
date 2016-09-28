@@ -30,9 +30,6 @@ class PythonDirectoryAnalyzer(object):
                         pylinter_result = pylinter.run()
                         pylinter_result.cloc_result = cloc_result
                         results.append(pylinter_result)
-                        print("- {0} analyzed".format(file_path))
-                    else:
-                        print("- {0} not analyzed".format(file_path))
         return results
 
     @staticmethod
@@ -56,8 +53,6 @@ class Pylinter(object):
     def run(self):
         command_options = u"{0} --output-format=json --reports=y".format(self.file_path)
         (stdout, stderr) = lint.py_run(command_options, return_std=True)
-        print(command_options)
-        print(stdout.getvalue())
         return PylinterResult(self.file_path, stdout, stderr)
 
 
@@ -75,6 +70,5 @@ class PylinterResult(object):
     def _init_results(self):
         self.messages = []
         if self.stdout != "":
-            print(self.stdout)
             self.messages = json.loads(self.stdout)
 
