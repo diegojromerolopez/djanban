@@ -12,7 +12,9 @@
                     <select id="select_requirement_for_requirement_burndown" class="select_requirement_for_requirement_burndown">
                         <option value="">All requirements</option>
                         {% for requirement_i in requirements %}
-                            <option value="{{requirement_i.code}}" {% if requirement_i.id == requirement.id %}selected="selected"{% endif %}>{{requirement_i.name}}</option>
+                            {% if requirement_i.active %}
+                                <option value="{{requirement_i.code}}" {% if requirement_i.id == requirement.id %}selected="selected"{% endif %}>{{requirement_i.name}}</option>
+                            {% endif %}
                         {% endfor %}
                     </select>
                 </div>
