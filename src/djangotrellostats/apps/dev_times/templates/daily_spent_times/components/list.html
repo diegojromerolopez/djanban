@@ -53,7 +53,7 @@
                     <td> {{month.rate_amount_sum|floatformat:"-2"}} ¤</td>
                 </tr>
                 <tr class="header month_{{month.i}}">
-                    <td colspan="10">Adjusted sum of amount</td>
+                    <td colspan="10">Adjusted sum of value</td>
                     <td> {{month.adjusted_amount_sum|floatformat:"-2"}} ¤</td>
                 </tr>
                 <tr class="header month_{{month.i}}">
@@ -97,8 +97,8 @@
                         hours
                     </div>
                     <div>Adjusted sum of spent time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{adjusted_spent_time_sum|floatformat:"2"}} hours </div>
-                    <div>Sum of amount {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{spent_time_amount_sum|floatformat:"2"}} ¤</div>
-                    <div>Adjusted sum of amount {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{adjusted_amount_sum|floatformat:"2"}} ¤</div>
+                    <div>Sum of value {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{spent_time_amount_sum|floatformat:"2"}} ¤</div>
+                    <div>Adjusted sum of value {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{adjusted_amount_sum|floatformat:"2"}} ¤</div>
                     <div>Sum of estimated time {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{estimated_time_sum|floatformat:"-2"}} hours</div>
                     <div>Difference {% if selected_member %}of {{selected_member.trello_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{diff_time_sum|floatformat:"-2"}} hours</div>
                 </div>
