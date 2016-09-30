@@ -13,6 +13,12 @@
     float: none;
 }
 
+.col-md-center{
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .center-text{
     text-align: center;
 }

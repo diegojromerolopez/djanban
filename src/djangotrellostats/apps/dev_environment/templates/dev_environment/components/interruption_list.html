@@ -10,10 +10,21 @@
         {% endif %}
         <div class="row">
             <div class="col-md-6">
-                <img src="{% url 'charts:interruptions' %}" alt="Interruptions" />
+                <a href="{% url 'charts:interruptions' %}" alt="Interruptions">
+                    <img src="{% url 'charts:interruptions' %}" alt="Interruptions" />
+                </a>
             </div>
             <div class="col-md-6">
-                <img src="{% url 'charts:interruptions_by_month' %}" alt="Interruptions" />
+                <a href="{% url 'charts:interruptions_by_month' %}" alt="Interruptions by month">
+                    <img src="{% url 'charts:interruptions_by_month' %}" alt="Interruptions" />
+                </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-md-center">
+                <a href="{% url 'charts:interruption_spent_time_by_month' %}" alt="Interruptions spent time by month">
+                    <img src="{% url 'charts:interruption_spent_time_by_month' %}" alt="Interruption spent time by month" />
+                </a>
             </div>
         </div>
         {% if interruptions|length == 0 %}

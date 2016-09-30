@@ -269,6 +269,13 @@ def number_of_interruptions_by_month(request, board_id=None):
     return interruptions.number_of_interruptions_by_month(request.user, board)
 
 
+@login_required
+def interruption_spent_time_by_month(request, board_id=None):
+    board = None
+    if board_id:
+        board = get_user_boards(request.user).get(id=board_id)
+    return interruptions.interruption_spent_time_by_month(request.user, board)
+
 # Noise measurements
 
 # Noise level mesaurements
