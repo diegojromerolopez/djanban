@@ -41,6 +41,13 @@ class DailySpentTime(models.Model):
                                     decimal_places=4, max_digits=12,
                                     default=None, null=True)
 
+    # Returns the adjusted spent time for this measurement
+    def adjusted_spent_time(self):
+        member = self.member
+        if member.spent_time_factor == 1:
+            return self.spent_time
+        return member.spent_time_factor * self.spent_time
+
     # Add a new amount of spent time to a member
     @staticmethod
     def add_daily_spent_time(daily_spent_time):
