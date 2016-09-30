@@ -31,6 +31,11 @@ class Requirement(models.Model):
                                                             help_text=u"Cost in hours to complete this requirement.",
                                                             blank=True, default=None, null=True)
 
+    active = models.BooleanField(verbose_name=u"Is this requirement active?",
+                                 help_text=u"Is this requirement is not active it will treat  as a wish of the client "
+                                           u"but not as a real requirement",
+                                 default=True)
+
     @property
     def done_cards(self):
         return self.cards.filter(list__type="done")

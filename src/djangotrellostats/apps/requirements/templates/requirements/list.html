@@ -24,7 +24,9 @@
                                 <select id="select_requirement_for_requirement_burndown" class="select_requirement_for_requirement_burndown">
                                     <option value="">All requirements</option>
                                     {% for requirement_i in requirements %}
-                                        <option value="{{requirement_i.code}}" {% if requirement_i.id == requirements.0.id %}selected="selected"{% endif %}>{{requirement_i.name}}</option>
+                                        {% if requirement_i.active %}
+                                            <option value="{{requirement_i.code}}" {% if requirement_i.id == requirements.0.id %}selected="selected"{% endif %}>{{requirement_i.name}}</option>
+                                        {% endif %}
                                     {% endfor %}
                                 </select>
                             </div>
@@ -48,6 +50,7 @@
                         <tr>
                             <td>Code</td>
                             <td>Name</td>
+                            <td>Active?</td>
                             <td>Value</td>
                             <td>Description</td>
                             <td>Percentage of completion</td>
@@ -58,6 +61,7 @@
                             <tr>
                                 <td>{{requirement.code}}</td>
                                 <td>{{requirement.name}}</td>
+                                <td>{% if requirement.active %}Yes{% else %}No{% endif %}</td>
                                 <td>{{requirement.value}}</td>
                                 <td>{{requirement.description|safe|truncatechars_html:30}}</td>
                                 <td>{{requirement.done_cards_percentage}}%</td>
