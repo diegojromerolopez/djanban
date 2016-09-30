@@ -17,10 +17,13 @@ class Interruption(models.Model):
         )
 
     board = models.ForeignKey("boards.Board", verbose_name=u"Project", null=True, default=None, blank=True)
+
     member = models.ForeignKey("members.Member", verbose_name=u"Who suffered the interruption")
 
     datetime = models.DateTimeField(verbose_name=u"When did the interruption take place?")
+
     cause = models.TextField(verbose_name=u"Why were you interrupted?", default="", blank=True)
+
     comments = models.TextField(verbose_name=u"Other comments about the interruption", default="", blank=True)
 
 
