@@ -18,6 +18,9 @@ class Requirement(models.Model):
                                    help_text=u"Long description of this requirement describing behavior or "
                                              u"pointing to other resources.")
 
+    comments = models.TextField(verbose_name=u"Comments", default="", blank=True,
+                                help_text=u"Private comments for the PM and the developers")
+
     cards = models.ManyToManyField("boards.Card",
                                    verbose_name=u"Tasks that depend on this requirement",
                                    related_name="requirements")
