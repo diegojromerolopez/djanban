@@ -37,6 +37,20 @@
                            </div>
                         </div>
                       </div>
+                      {% if member and requirement.comments %}
+                          <div class="row">
+                               <div class="col-md-12 description">
+                                <div class="panel panel-info">
+                                      <div class="panel-heading">
+                                          Comments
+                                      </div>
+                                    <div class="panel-body">
+                                        {{requirement.comments|safe}}
+                                    </div>
+                               </div>
+                            </div>
+                          </div>
+                      {% endif %}
                       <div class="row">
                            <div class="col-md-12 description">
                             <div class="panel panel-info">
