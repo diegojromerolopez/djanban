@@ -1,0 +1,20 @@
+
+.mood .fa{
+    border-radius: 50%;
+}
+
+.mood.normal .fa{
+    background-color: yellow;
+}
+
+.mood.happy .fa{
+    background-color: green;
+}
+
+.mood.sad .fa{
+    background-color: blue;
+}
+
+.x-scrollable{
+    overflow-x: scroll;
+}

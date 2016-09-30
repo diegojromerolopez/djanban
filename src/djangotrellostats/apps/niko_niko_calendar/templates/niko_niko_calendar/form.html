@@ -1,0 +1,15 @@
+{% extends "base/base.html" %}
+
+{% block css %}
+    {{block.super}}
+    {{form.media.css}}
+{% endblock css %}
+
+{% block js %}
+    {{block.super}}
+    {{form.media.js}}
+{% endblock js %}
+
+{% block content %}
+    {% include "forms/form.html" %}
+{% endblock content %}

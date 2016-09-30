@@ -31,6 +31,11 @@
                                 <span class="fa fa-building-o"></span> Dev. environment
                             </a>
                         </li>
+                        <li role="presentation" {% if url_namespace == "niko_niko_calendar" %}class="active"{% endif %}>
+                            <a href="{% url 'niko_niko_calendar:view_calendar' %}" title="View Niko-niko calendar">
+                                <span class="fa fa-calendar"></span> Niko-niko calendar
+                            </a>
+                        </li>
                     {% endif %}
                     <li role="presentation" {% if url_namespace == "slideshow" %}class="active"{% endif %}>
                         <a href="{% url 'slideshow:view' %}" title="Slideshow">
@@ -69,7 +74,7 @@
                                 {% with last_cards_in_development=member.get_last_development_cards %}
                                     {% if last_cards_in_development|length > 0 %}
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Last cards worked on">
-                                            Last cards worked on<span class="caret"></span>
+                                            Last cards <span class="caret"></span>
                                         </a>
                                         <ul class="dropdown-menu">
                                             {% for last_card_in_development in last_cards_in_development %}

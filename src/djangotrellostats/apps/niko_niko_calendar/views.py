@@ -1,0 +1,58 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
+import copy
+
+from datetime import timedelta
+from django.contrib.auth.decorators import login_required
+from django.db.models import Max, Min
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+
+from django.urls import reverse
+from django.utils import timezone
+
+from djangotrellostats.apps.base.auth import get_user_boards
+from djangotrellostats.apps.base.decorators import member_required
+from djangotrellostats.apps.members.models import Member
+from djangotrellostats.apps.niko_niko_calendar.forms import NewDailyMemberMoodForm
+from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
+
+
+# Show the niko-niko calendar. List the mood of the team.
+@login_required
+def view_calendar(request):
+    boards = get_user_boards(request.user)
+    members = Member.objects.filter(boards__in=boards).distinct().filter(is_developer=True).order_by("initials")
+    min_date = DailyMemberMood.objects.filter(member__in=members).aggregate(min_date=Min("date"))["min_date"]
+    max_date = DailyMemberMood.objects.filter(member__in=members).aggregate(max_date=Max("date"))["max_date"]
+    dates = []
+    if min_date and max_date:
+        date_i = copy.deepcopy(min_date)
+        while date_i <= max_date:
+            dates.append(date_i)
+            date_i += timedelta(days=1)
+    return render(request, "niko_niko_calendar/calendar.html", {"members": members, "dates": dates})
+
+
+# Create a new mood measurement for the niko-niko calendar
+@member_required
+def new_mood_measurement(request):
+    member = request.user.member
+    today = timezone.now().date()
+
+    daily_member_mood = DailyMemberMood(member=member, date=today)
+
+    if request.method == "POST":
+        form = NewDailyMemberMoodForm(request.POST, instance=daily_member_mood)
+
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect(reverse("niko_niko_calendar:view_calendar"))
+    else:
+        form = NewDailyMemberMoodForm(instance=daily_member_mood)
+
+    replacements = {"form": form, "today": today, "member": member}
+    return render(request, "niko_niko_calendar/new_mood_measurement.html", replacements)
+
