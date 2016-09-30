@@ -24,6 +24,9 @@ class Interruption(models.Model):
 
     cause = models.TextField(verbose_name=u"Why were you interrupted?", default="", blank=True)
 
+    spent_time = models.DecimalField(verbose_name=u"Spent time in this interruption",
+                                     decimal_places=4, max_digits=12, default=None, null=True)
+
     comments = models.TextField(verbose_name=u"Other comments about the interruption", default="", blank=True)
 
 
