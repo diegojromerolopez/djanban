@@ -79,6 +79,8 @@ urlpatterns = [
     url(r'^public_avg_time_by_list/(?P<board_public_access_code>.+)/?$', public.avg_time_by_list, name="public_avg_time_by_list"),
 
     url(r'^interruptions/(?P<board_id>\d+)?/?$', private.number_of_interruptions, name="interruptions"),
+    url(r'^evolution_of_number_of_interruptions/(?P<board_id>\d+)?/?$', private.evolution_of_number_of_interruptions, name="evolution_of_interruptions"),
+
     url(r'^interruptions_by_month/(?P<board_id>\d+)?/?$', private.number_of_interruptions_by_month, name="interruptions_by_month"),
     url(r'^interruption_spent_time_by_month/(?P<board_id>\d+)?/?$', private.interruption_spent_time_by_month, name="interruption_spent_time_by_month"),
 

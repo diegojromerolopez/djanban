@@ -257,7 +257,14 @@ def number_of_interruptions(request, board_id=None):
     board = None
     if board_id:
         board = get_user_boards(request.user).get(id=board_id)
-    return interruptions.number_of_interruptions(board)
+    return interruptions.number_of_interruptions(request.user, board)
+
+
+def evolution_of_number_of_interruptions(request, board_id=None):
+    board = None
+    if board_id:
+        board = get_user_boards(request.user).get(id=board_id)
+    return interruptions.evolution_of_interruptions(request.user, board)
 
 
 # Interruptions
