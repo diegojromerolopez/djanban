@@ -35,6 +35,7 @@
                         <td>Board</td>
                         <td>Member</td>
                         <td>Cause</td>
+                        <td>Spent time</td>
                         <td>Comments</td>
                         <td>Actions</td>
                     </tr>
@@ -44,6 +45,7 @@
                             <td>{{interruption.board.name}}</td>
                             <td>{{interruption.member.user.username}}</td>
                             <td>{{interruption.cause|truncatechars_html:50}}</td>
+                            <td>{% if interruption.spent_time %}{{interruption.spent_time|floatformat:-2}}{% endif %}</td>
                             <td>{{interruption.comments|truncatechars_html:50}}</td>
                             <td>
                                 <a href="{% url 'dev_environment:delete_interruption' interruption.id %}" class="btn btn-danger">Delete</a>
