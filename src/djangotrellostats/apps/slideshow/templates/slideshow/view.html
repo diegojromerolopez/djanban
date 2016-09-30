@@ -74,6 +74,8 @@
             <div class="col-md-{% if column_mode == 'single_column' %}12{% else %}6{% endif %}">
                 <h2>Interruptions</h2>
                 <div id="interruptions-carousel" class="owl-carousel">
+                    <img src="{% url 'charts:interruptions' %}" alt="Interruptions" />
+                    <img src="{% url 'charts:evolution_of_interruptions' %}" alt="Evolution of interruptions" />
                     <img src="{% url 'charts:interruptions_by_month' %}" alt="Task backward movements by member"/>
                     {% for board in boards %}
                         {% if board.last_fetch_datetime and board.is_fetched and board.is_ready %}
