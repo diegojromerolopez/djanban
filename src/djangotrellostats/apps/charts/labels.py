@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import copy
 
 import pygal
@@ -116,11 +118,11 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
     while first_loop or (period_measurement is not None and period_measurement > 0):
         if period == "month":
             period_filter = {"date__month": month_i, "date__year": year_i}
-            measurement_title =u"All tasks on {0}-{1}".format(year_i, month_i)
+            measurement_title =u"On {0}-{1}".format(year_i, month_i)
             label_measurement_title_suffix = u"{0}-{1}".format(year_i, month_i)
         elif period == "week":
             period_filter = {"week_of_year": week_i, "date__year": year_i}
-            measurement_title = u"All tasks on {0}W{1}".format(year_i, week_i)
+            measurement_title = u"On {0}W{1}".format(year_i, week_i)
             label_measurement_title_suffix = u"{0}W{1}".format(year_i, week_i)
         else:
             raise ValueError(u"Period {0} not valid. Only 'month' or 'week' is valid".format(period))
