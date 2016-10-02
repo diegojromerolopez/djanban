@@ -260,11 +260,41 @@ def number_of_interruptions(request, board_id=None):
     return interruptions.number_of_interruptions(request.user, board)
 
 
+# Evolution of the number of interruptions
+@login_required
 def evolution_of_number_of_interruptions(request, board_id=None):
     board = None
     if board_id:
         board = get_user_boards(request.user).get(id=board_id)
     return interruptions.evolution_of_interruptions(request.user, board)
+
+
+# Interruption spent time
+@login_required
+def interruption_spent_time(request, board_id=None):
+    board = None
+    if board_id:
+        board = get_user_boards(request.user).get(id=board_id)
+    return interruptions.interruption_spent_time(request.user, board)
+
+
+# Evolution of the interruption spent time
+@login_required
+def evolution_of_interruption_spent_time(request, board_id=None):
+    board = None
+    if board_id:
+        board = get_user_boards(request.user).get(id=board_id)
+    return interruptions.evolution_of_interruption_spent_time(request.user, board)
+
+# Number of interruptions by member
+@login_required
+def number_of_interruptions_by_member(request):
+    return interruptions.number_of_interruptions_by_member(request.user)
+
+
+@login_required
+def interruption_spent_time_by_member(request):
+    return interruptions.interruption_spent_time_by_member(request.user)
 
 
 # Interruptions

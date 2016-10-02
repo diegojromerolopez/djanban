@@ -8,6 +8,12 @@
                 View all
             </a>
         {% endif %}
+
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Number of interruptions</h2>
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-6">
                 <a href="{% url 'charts:interruptions' %}" title="Interruptions">
@@ -20,6 +26,30 @@
                 </a>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Interruption spent time</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <a href="{% url 'charts:interruption_spent_time' %}" title="Interruption spent time">
+                    <img src="{% url 'charts:interruption_spent_time' %}" alt="Interruptions spent time" />
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{% url 'charts:evolution_of_interruption_spent_time' %}" title="Evolution of interruption spent time">
+                    <img src="{% url 'charts:evolution_of_interruption_spent_time' %}" alt="Evolution of interruptions spent time" />
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Interruptions by month</h2>
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-6">
                 <a href="{% url 'charts:interruptions_by_month' %}" title="Interruptions by month">
@@ -29,6 +59,24 @@
             <div class="col-md-6">
                 <a href="{% url 'charts:interruption_spent_time_by_month' %}" title="Interruptions spent time by month">
                     <img src="{% url 'charts:interruption_spent_time_by_month' %}" alt="Interruption spent time by month" />
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Interruptions by member</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <a href="{% url 'charts:interruptions_by_member' %}" title="Interruptions by member">
+                    <img src="{% url 'charts:interruptions_by_member' %}" alt="Interruptions by member" />
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{% url 'charts:interruption_spent_time_by_member' %}" title="Interruptions spent time by member">
+                    <img src="{% url 'charts:interruption_spent_time_by_member' %}" alt="Interruption spent time by member" />
                 </a>
             </div>
         </div>

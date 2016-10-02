@@ -81,8 +81,15 @@ urlpatterns = [
     url(r'^interruptions/(?P<board_id>\d+)?/?$', private.number_of_interruptions, name="interruptions"),
     url(r'^evolution_of_number_of_interruptions/(?P<board_id>\d+)?/?$', private.evolution_of_number_of_interruptions, name="evolution_of_interruptions"),
 
+    url(r'^interruption_spent_time/(?P<board_id>\d+)?/?$', private.interruption_spent_time, name="interruption_spent_time"),
+    url(r'^evolution_of_interruption_spent_time/(?P<board_id>\d+)?/?$', private.interruption_spent_time, name="evolution_of_interruption_spent_time"),
+
     url(r'^interruptions_by_month/(?P<board_id>\d+)?/?$', private.number_of_interruptions_by_month, name="interruptions_by_month"),
     url(r'^interruption_spent_time_by_month/(?P<board_id>\d+)?/?$', private.interruption_spent_time_by_month, name="interruption_spent_time_by_month"),
+
+    url(r'^interruptions_by_member/?$', private.number_of_interruptions_by_member, name="interruptions_by_member"),
+    url(r'^interruption_spent_time_by_member/?$', private.interruption_spent_time_by_member,
+        name="interruption_spent_time_by_member"),
 
     url(r'^noise_levels/?$', private.noise_level, name="noise_level"),
     url(r'^noise_level_per_hour/?$', private.noise_level_per_hour, name="noise_level_per_hour"),
