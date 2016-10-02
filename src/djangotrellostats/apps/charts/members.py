@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import copy
-import datetime
+
 import pygal
-from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Count
+from django.utils import timezone
 from isoweek import Week
 
-from django.db.models import Sum, Avg, Count
-from django.utils import timezone
-
 from djangotrellostats.apps.base.auth import get_user_boards
-from djangotrellostats.apps.boards.models import Board, CardComment
+from djangotrellostats.apps.boards.models import CardComment
 from djangotrellostats.apps.dev_environment.models import Interruption
-from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.reports.models import MemberReport
-
 from djangotrellostats.utils.week import number_of_weeks_of_year, get_iso_week_of_year
 
 
@@ -188,11 +186,8 @@ def spent_time_by_week_evolution(board, show_interruptions=False):
                                   human_readable=True, x_label_rotation=45)
 
     start_working_date = board.get_working_start_date()
-    if start_working_date is None:
-        return evolution_chart.render_django_response()
-
     end_working_date = board.get_working_end_date()
-    if end_working_date is None:
+    if start_working_date is None or end_working_date is None:
         return evolution_chart.render_django_response()
 
     start_week = get_iso_week_of_year(start_working_date)
