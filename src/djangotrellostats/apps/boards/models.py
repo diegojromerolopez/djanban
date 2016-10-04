@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from decimal import Decimal
 
+import numpy
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Avg, Sum, Min, Max
@@ -246,6 +247,11 @@ class Board(models.Model):
     @property
     def has_php_assessment_report(self):
         return self.phpmd_messages.all().exists()
+
+    @property
+    def mood(self):
+        members = self.members.filter(is_developer=False)
+        return numpy.mean([member.mood for member in members])
 
 
 # Card of the task board

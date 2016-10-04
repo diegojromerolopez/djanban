@@ -154,4 +154,14 @@ class Member(models.Model):
     def delete_current_data(self):
         self.created_boards.all().delete()
 
+    # Mood of this member
+    @property
+    def mood(self):
+        happy_days = self.daily_member_moods.filter(mood="happy").count()
+        normal_days = self.daily_member_moods.filter(mood="normal").count()
+        sad_days = self.daily_member_moods.filter(mood="sad").count()
+        all_days = (happy_days + normal_days + sad_days)
+        if all_days == 0:
+            return 0.0
+        return 1.0 * (happy_days - sad_days) / all_days
 
