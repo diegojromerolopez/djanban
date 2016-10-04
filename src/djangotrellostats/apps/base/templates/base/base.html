@@ -10,17 +10,17 @@
         <link rel='shortcut icon' type='image/png' sizes='32x32' href='{% static "img/favicon-32x32.png" %}' />
 
         {% block css %}
-            <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous" />
-            <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous" />
+            <link href="{% static 'css/libs/bootstrap.min.css' %}" rel="stylesheet" />
+            <link href="{% static 'css/libs/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" />
             <link href="{% static 'css/base/base.css' %}" rel="stylesheet" />
             <link href="{% static 'css/base/form.css' %}" rel="stylesheet" />
         {% endblock css %}
 
         {% block js %}
-            <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
-            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+            <script src="{% static 'js/libs/jquery-2.2.4.min.js' %}"></script>
+            <script src="{% static 'js/libs/bootstrap.min.js' %}"></script>
             <script type="text/javascript">
-                CKEDITOR_JQUERY_URL = "https://code.jquery.com/jquery-2.2.4.min.js";
+                CKEDITOR_JQUERY_URL = "{% static 'js/libs/jquery-2.2.4.min.js' %}";
             </script>
         {% endblock js %}
     </head>
