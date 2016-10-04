@@ -6,6 +6,7 @@ import time
 
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.http.response import Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -62,7 +63,7 @@ def view(request, board_id):
         raise Http404
 
     week_of_year = get_week_of_year()
-    lists = board.lists.exclude(type="ignored").order_by("position")
+    lists = board.lists.exclude(Q(type="ignored")|Q(type="closed")).order_by("position")
 
     # Requirements
     requirements = board.requirements.all().order_by("-value")
