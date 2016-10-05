@@ -36,11 +36,11 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
                        human_readable=False)
 
     if language.lower() == "php":
-        error_messages = board.phpmd_messages.filter(**repository_filter)
+        error_messages = board.phpmd_messages.filter(commit__has_been_assessed=True).filter(**repository_filter)
         message_types = PhpMdMessage.RULESETS
         message_type_label = "ruleset"
     elif language.lower() == "python":
-        error_messages = board.pylint_messages.filter(**repository_filter)
+        error_messages = board.pylint_messages.filter(commit__has_been_assessed=True).filter(**repository_filter)
         message_types = dict(PylintMessage.TYPE_CHOICES).keys()
         message_type_label = "type"
     else:
@@ -50,12 +50,12 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
     if project_locs is None:
         return chart.render_django_response()
 
-    min_creation_datetime = board.commits.filter(**repository_filter).aggregate(
+    min_creation_datetime = board.commits.filter(has_been_assessed=True).filter(**repository_filter).aggregate(
         min_creation_datetime=Min("creation_datetime"))["min_creation_datetime"]
     if min_creation_datetime is None:
         return chart.render_django_response()
 
-    max_creation_datetime = board.commits.filter(**repository_filter).aggregate(
+    max_creation_datetime = board.commits.filter(has_been_assessed=True).filter(**repository_filter).aggregate(
         max_creation_datetime=Max("creation_datetime"))["max_creation_datetime"]
 
     max_month_i = max_creation_datetime.month
@@ -66,10 +66,10 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
         year_i = min_creation_datetime.year
         number_of_messages_by_month = []
         chart.x_labels = []
-        while year_i <= max_year_i or (year_i == max_year_i and month_i < max_month_i):
-
+        while year_i < max_year_i or (year_i == max_year_i and month_i <= max_month_i):
             error_message_filter = {
                 message_type_label: message_type,
+                "commit__has_been_assessed": True,
                 "commit__creation_datetime__year": year_i, "commit__creation_datetime__month": month_i
             }
             month_i_messages = error_messages.filter(**error_message_filter)
@@ -79,6 +79,7 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
                 number_of_errors /= float(project_locs)
             number_of_messages_by_month.append(number_of_errors)
             chart.x_labels.append(u"{0}-{1}".format(year_i, month_i))
+
             month_i += 1
             if month_i > 12:
                 month_i = 1
