@@ -29,6 +29,18 @@
         </div>
         <div class="row">
             <div class="col-sm-6">
+                <a href="{% url 'charts:number_of_cards_by_member' board.id %}" title="Number of cards by member">
+                    <img src="{% url 'charts:number_of_cards_by_member' board.id %}" alt="Number of cards by member"/>
+                </a>
+            </div>
+            <div class="col-sm-6">
+                <a href="{% url 'charts:spent_time_by_member' board.id %}" title="Spent time by member">
+                    <img src="{% url 'charts:spent_time_by_member' board.id %}" alt="Spent time by member"/>
+                </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
                 <a href="{% url 'charts:avg_spent_time_by_weekday' board.id %}" title="Average spent time per weekday by member">
                     <img src="{% url 'charts:avg_spent_time_by_weekday' board.id %}" alt="Average spent time per weekday by member" />
                 </a>

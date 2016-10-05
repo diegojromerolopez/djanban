@@ -66,6 +66,14 @@ urlpatterns = [
     url(r'^number_of_comments/(?P<board_id>[\d]+)/?$',private.number_of_comments, name="number_of_comments"),
     url(r'^number_of_comments/(?P<board_id>[\d]+)/(?P<card_id>[\d]+)/?$',private.number_of_comments, name="number_of_comments"),
 
+    # Number of cards by member
+    url(r'^number_of_cards_by_member/?$',private.number_of_cards_by_member, name="number_of_cards_by_member"),
+    url(r'^number_of_cards_by_member/(?P<board_id>[\d]+)/?$',private.number_of_cards_by_member, name="number_of_cards_by_member"),
+
+    # Spent time by member
+    url(r'^spent_time_by_member/?$', private.spent_time_by_member, name="spent_time_by_member"),
+    url(r'^spent_time_by_member/(?P<board_id>[\d]+)/?$', private.spent_time_by_member, name="spent_time_by_member"),
+
     # Total number of comments
     url(r'^number_of_comments_by_member/?$',private.number_of_comments_by_member, name="number_of_comments_by_member"),
     url(r'^number_of_comments_by_member/(?P<board_id>[\d]+)/?$',private.number_of_comments_by_member, name="number_of_comments_by_member"),

@@ -10,8 +10,9 @@ from django.utils import timezone
 from isoweek import Week
 
 from djangotrellostats.apps.base.auth import get_user_boards
-from djangotrellostats.apps.boards.models import CardComment
+from djangotrellostats.apps.boards.models import CardComment, Card
 from djangotrellostats.apps.dev_environment.models import Interruption
+from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.reports.models import MemberReport
 from djangotrellostats.utils.week import number_of_weeks_of_year, get_iso_week_of_year
@@ -33,7 +34,7 @@ def task_movements_by_member(movement_type="forward", board=None):
     if board:
         report_filter["board_id"] = board.id
 
-    members = Member.objects.all()
+    members = Member.objects.all().order_by("initials")
 
     for member in members:
         member_name = member.trello_username
@@ -45,7 +46,7 @@ def task_movements_by_member(movement_type="forward", board=None):
             # Depending on if the member report is filtered by board or not we only have to get the forward and
             # backward movements of a report or sum all the members report of this user
             if board:
-                member_report = MemberReport.objects.get(**member_report_filter)
+                member_report = MemberReport.objects.get(**member_report_filter).order_by("member__initials")
                 forward_movements = member_report.forward_movements
                 backward_movements = member_report.backward_movements
 
@@ -100,7 +101,7 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
         boards = get_user_boards(current_user)
     else:
         boards = [board]
-    members = Member.objects.filter(boards__in=boards, is_developer=True).distinct()
+    members = Member.objects.filter(boards__in=boards, is_developer=True).distinct().order_by("initials")
     for member in members:
         member_name = member.trello_username
         daily_spent_times = member.daily_spent_times.filter(**report_filter)
@@ -139,7 +140,7 @@ def avg_spent_time_by_weekday(current_user, board=None):
 
     spent_time_chart.x_labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
-    members = Member.objects.filter(boards__in=boards, is_developer=True).distinct()
+    members = Member.objects.filter(boards__in=boards, is_developer=True).distinct().order_by("initials")
     for member in members:
         member_name = member.trello_username
         daily_spent_times = member.daily_spent_times.filter(**report_filter)
@@ -193,7 +194,7 @@ def spent_time_by_week_evolution(board, show_interruptions=False):
     start_week = get_iso_week_of_year(start_working_date)
     end_week = get_iso_week_of_year(end_working_date)
 
-    members = board.members.filter(is_developer=True)
+    members = board.members.filter(is_developer=True).order_by("initials")
 
     member_values = {member.id:[] for member in members}
     member_values["all"] = []
@@ -271,7 +272,7 @@ def number_of_comments(current_user, board=None, card=None):
 
     card_comments = CardComment.objects.filter(**card_comment_filter)
 
-    # If there is no comments, render an empty chart
+    # If there are no comments, render an empty chart
     if not card_comments.exists():
         return number_of_comments_chart.render_django_response()
 
@@ -291,3 +292,78 @@ def number_of_comments(current_user, board=None, card=None):
     number_of_comments_chart.add("Total number of comments", total_number_of_comments)
 
     return number_of_comments_chart.render_django_response()
+
+
+# Number of total cards by member for this board or card
+def number_of_cards(current_user, board=None):
+    chart_title = u"Number of cards by member as of {0}".format(timezone.now())
+
+    if board:
+        chart_title += u" for board {0}".format(board.name)
+        chart_title += u" (fetched on {0})".format(board.get_human_fetch_datetime())
+
+    number_of_cards_chart = pygal.Bar(
+        title=chart_title, legend_at_bottom=True, print_values=False, print_zeroes=False, fill=False,
+        margin=0, human_readable=True
+    )
+
+    card_comment_filter = {}
+    if board:
+        card_comment_filter["board"] = board
+
+    cards = Card.objects.filter(**card_comment_filter)
+
+    # If there are no cards, render an empty chart
+    if not cards.exists():
+        return number_of_cards_chart.render_django_response()
+
+    if board:
+        boards = [board]
+    else:
+        boards = get_user_boards(current_user)
+
+    members = Member.objects.filter(boards__in=boards).distinct().order_by("initials")
+
+    total_number_of_cards = 0
+    for member in members:
+        number_of_cards_by_member = cards.filter(members=member).count()
+        total_number_of_cards += number_of_cards_by_member
+        number_of_cards_chart.add(member.trello_username, number_of_cards_by_member)
+
+    number_of_cards_chart.add("Total number of cards", total_number_of_cards)
+
+    return number_of_cards_chart.render_django_response()
+
+
+# Spent time by member
+def spent_time(current_user, board=None):
+    chart_title = u"Spent time by member as of {0}".format(timezone.now())
+
+    if board:
+        chart_title += u" for board {0}".format(board.name)
+        chart_title += u" (fetched on {0})".format(board.get_human_fetch_datetime())
+
+    if board:
+        boards = [board]
+    else:
+        boards = get_user_boards(current_user)
+
+    spent_time_chart = pygal.Bar(
+        title=chart_title, legend_at_bottom=True, print_values=False, print_zeroes=False, fill=False,
+        margin=0, human_readable=True
+    )
+
+    members = Member.objects.filter(boards__in=boards).distinct().order_by("initials")
+
+    spent_times = DailySpentTime.objects.filter(board__in=boards)
+
+    total_spent_time_sum = 0
+    for member in members:
+        member_spent_time_sum = spent_times.filter(member=member).aggregate(sum=Sum("spent_time"))["sum"]
+        if member_spent_time_sum is not None and member_spent_time_sum > 0:
+            spent_time_chart.add(member.trello_username, member_spent_time_sum)
+            total_spent_time_sum += member_spent_time_sum
+
+    spent_time_chart.add("Total spent time", total_spent_time_sum)
+
+    return spent_time_chart.render_django_response()

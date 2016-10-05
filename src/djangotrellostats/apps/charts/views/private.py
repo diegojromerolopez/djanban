@@ -36,18 +36,14 @@ def burndown(request, board_id):
 # Average card lead time
 @login_required
 def avg_lead_time(request, board_id=None):
-    board = None
-    if board_id is not None:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return cards.avg_lead_time(request, board)
 
 
 # Average card cycle time
 @login_required
 def avg_cycle_time(request, board_id=None):
-    board = None
-    if board_id is not None:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return cards.avg_cycle_time(request, board)
 
 
@@ -74,95 +70,77 @@ def avg_estimated_time_by_list(request, board_id, workflow_id=None):
 # Average spent time by label
 @login_required
 def avg_spent_times(request, board_id=None):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return labels.avg_spent_times(request, board)
 
 
 # Average spent time by month
 @login_required
 def avg_spent_time_by_month(request, board_id):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return labels.avg_spent_time_by_month(board)
 
 
 # Average estimated times
 @login_required
 def avg_estimated_times(request, board_id=None):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return labels.avg_estimated_times(request, board)
 
 
 # Average estimated time by month
 @login_required
 def avg_estimated_time_by_month(request, board_id):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return labels.avg_estimated_time_by_month(board)
 
 
 # Number of tasks by month
 @login_required
 def number_of_cards_worked_on_by_month(request, board_id):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return labels.number_of_cards_worked_on_by_month(board)
 
 
 # Number of tasks by week
 @login_required
 def number_of_cards_worked_on_by_week(request, board_id):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return labels.number_of_cards_worked_on_by_week(board)
 
 
 # Show a chart with the task forward movements by member
 @login_required
 def task_forward_movements_by_member(request, board_id=None):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return members.task_movements_by_member("forward", board)
 
 
 # Show a chart with the task backward movements by member
 @login_required
 def task_backward_movements_by_member(request, board_id=None):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return members.task_movements_by_member("backward", board)
 
 
 # Show a chart with the spent time by week by member and by board
 @login_required
 def spent_time_by_week(request, week_of_year=None, board_id=None):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return members.spent_time_by_week(request.user, week_of_year=week_of_year, board=board)
 
 
 # Show a chart with the spent time by week by member and by board
 @login_required
 def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, board_id=None):
-    boards = get_user_boards(request.user)
+    user_boards = get_user_boards(request.user)
     if member_id is None:
         if user_is_member(request.user):
             member = request.user.member
         else:
-            member = Member.objects.filter(boards__in=boards)[0]
+            member = Member.objects.filter(boards__in=user_boards)[0]
     else:
-        member = Member.objects.filter(boards__in=boards).distinct().get(id=member_id)
+        member = Member.objects.filter(boards__in=user_boards).distinct().get(id=member_id)
 
     if week_of_year is None:
         now = timezone.now()
@@ -180,7 +158,7 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
                                                                      end_of_week.strftime("%Y-%m-%d"))
     board = None
     if board_id:
-        board = boards.get(id=board_id)
+        board = user_boards.get(id=board_id)
         chart_title += u" for board {0}".format(board.name)
 
     spent_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
@@ -197,17 +175,13 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
 
 @login_required
 def spent_time_by_week_evolution(request, board_id):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return members.spent_time_by_week_evolution(board=board, show_interruptions=request.GET.get("show_interruptions"))
 
 
 @login_required
 def avg_spent_time_by_weekday(request, board_id=None):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return members.avg_spent_time_by_weekday(request.user, board)
 
 
@@ -251,40 +225,47 @@ def number_of_comments_by_member(request, board_id=None, card_id=None):
     return members.number_of_comments(request.user, board, card)
 
 
+@login_required
+def number_of_cards_by_member(request, board_id=None):
+    board = None
+    if board_id is not None:
+        board = get_user_boards(request.user).get(id=board_id)
+    return members.number_of_cards(request.user, board)
+
+
+@login_required
+def spent_time_by_member(request, board_id=None):
+    board = _get_user_board_or_none(request, board_id)
+    return members.spent_time(request.user, board)
+
+
 # Interruptions
 @login_required
 def number_of_interruptions(request, board_id=None):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return interruptions.number_of_interruptions(request.user, board)
 
 
 # Evolution of the number of interruptions
 @login_required
 def evolution_of_number_of_interruptions(request, board_id=None):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return interruptions.evolution_of_interruptions(request.user, board)
 
 
 # Interruption spent time
 @login_required
 def interruption_spent_time(request, board_id=None):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return interruptions.interruption_spent_time(request.user, board)
 
 
 # Evolution of the interruption spent time
 @login_required
 def evolution_of_interruption_spent_time(request, board_id=None):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return interruptions.evolution_of_interruption_spent_time(request.user, board)
+
 
 # Number of interruptions by member
 @login_required
@@ -300,20 +281,15 @@ def interruption_spent_time_by_member(request):
 # Interruptions
 @login_required
 def number_of_interruptions_by_month(request, board_id=None):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return interruptions.number_of_interruptions_by_month(request.user, board)
 
 
 @login_required
 def interruption_spent_time_by_month(request, board_id=None):
-    board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
+    board = _get_user_board_or_none(request, board_id)
     return interruptions.interruption_spent_time_by_month(request.user, board)
 
-# Noise measurements
 
 # Noise level mesaurements
 @login_required
@@ -366,3 +342,11 @@ def number_of_code_errors_per_loc_by_month(request, board_id, repository_id=None
 def view_agility_rating(request, board_id):
     board = get_user_boards(request.user).get(id=board_id)
     return agility_rating.view(board)
+
+
+# Get user board or None according to the board_id parameter
+def _get_user_board_or_none(request, board_id=None):
+    if board_id is None:
+        return None
+    board = get_user_boards(request.user).get(id=board_id)
+    return board
