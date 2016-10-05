@@ -447,6 +447,8 @@ class PylintMessage(models.Model):
             ("board", "repository", "commit", "commit_file", "type"),
             ("board", "repository", "type", "commit", "commit_file"),
             ("commit", "type"),
+            ("commit", "commit_file", "type"),
+            ("commit", "type", "commit_file"),
             ("board", "commit", "type"),
             ("board", "type")
         )

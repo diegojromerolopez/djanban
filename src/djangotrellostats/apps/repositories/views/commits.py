@@ -82,11 +82,27 @@ def view_assessment_report(request, board_id, repository_id, commit_id):
     except ObjectDoesNotExist:
         raise Http404
 
+    language = request.GET.get("language")
+
+    pylint_filter = request.GET.get("type")
+    pyint_messages = commit.pylint_messages.all()
+    if pylint_filter and language == "python":
+        pyint_messages = pyint_messages.filter(type=pylint_filter)
+
+    phpmd_filter = request.GET.get("ruleset")
+    phpmd_messages = commit.phpmd_messages.all()
+    if phpmd_filter and language == "php":
+        phpmd_messages = phpmd_messages.filter(ruleset=phpmd_filter)
+
     replacements = {
         "board": board, "member": member, "repository": repository, "commit": commit,
         "commit_files": commit.files.all(),
-        "pylint_messages": commit.pylint_messages.all(),
-        "phpmd_messages": commit.phpmd_messages.all()
+        "pylint_messages": pyint_messages,
+        "pylint_filter_values": PylintMessage.TYPE_CHOICES,
+        "pylint_filter": pylint_filter,
+        "phpmd_filter_values": PhpMdMessage.RULESETS,
+        "phpmd_messages": phpmd_messages,
+        "phpmd_filter": phpmd_filter
     }
     return render(request, "repositories/commits/assessment/view_report.html", replacements)
 

@@ -1,5 +1,7 @@
 {% extends "boards/view.html" %}
 
+{% load repositories_tags %}
+
 {% block page_title %}Repository {{repository.name}} of project {{board.name}}{% endblock %}
 
 {% block content %}
@@ -25,36 +27,50 @@
                 {% if phpmd_messages|length > 0 %}
                     <div class="panel-body row">
                         <div class="col-md-12">
-                            <h2>PHP-MD messages for {{commit_files.count}} file/s </h2>
-                            {% for file in commit_files %}
-                                <div class="">
-                                    <h3>{{file.path}}</h3>
-                                    <div class="panel panel-info">
-                                          <div class="panel-heading">Code size</div>
-                                          <div class="panel-body">
-                                              <p>Programming language: {{file.language}}</p>
-                                              <p>Blank lines: {{file.blank_lines}}</p>
-                                              <p>Commented lines: {{file.commented_lines}}</p>
-                                              <p>Lines of code: {{file.lines_of_code}}</p>
-                                          </div>
-                                    </div>
-                                    {% for phpmd_message in file.phpmd_messages.all %}
-                                        <div class="panel panel-default">
-                                          <div class="panel-heading">{{phpmd_message.ruleset}} on {{phpmd_message.path}}</div>
-                                          <div class="panel-body">
-                                              <p>
-                                                  <strong>Message:</strong> ({{phpmd_message.rule}}) {{phpmd_message.message}}
-                                              </p>
-                                              <p>
-                                                  <strong>File:</strong> {{phpmd_message.path}}
-                                              </p>
-                                              <p>
-                                                  <strong>Location:</strong> lines {{phpmd_message.begin_line}} to {{phpmd_message.end_line}} of {{phpmd_message.path}}
-                                              </p>
-                                          </div>
-                                        </div>
+                            <h2>{{phpmd_messages|length}} PHP-MD messages for {{commit_files.count}} file/s </h2>
+                            <form action="" method="get">
+                                <input type="hidden" name="language" value="php" />
+                                <select name="ruleset">
+                                    <option value="" {% if phpmd_filter == '' %}selected=selected{% endif %}>All</option>
+                                    {% for filter_value in phpmd_filter_values %}
+                                        <option value="{{filter_value.0}}" {% if phpmd_filter == filter_value.0 %}selected=selected{% endif %}>{{filter_value.1}}</option>
                                     {% endfor %}
-                                </div>
+                                </select>
+                                <button type="submit" class="btn btn-primary">Filter</button>
+                            </form>
+                            {% for file in commit_files %}
+                                {% with file_php_md_messages=phpmd_messages|filter_error_messages_by_file:file %}
+                                    {% if file_php_md_messages|length > 0 %}
+                                        <div class="">
+                                            <h3>{{file.path}} ({{file_php_md_messages|length}} messages)</h3>
+                                            <div class="panel panel-info">
+                                                  <div class="panel-heading">Code size</div>
+                                                  <div class="panel-body">
+                                                      <p>Programming language: {{file.language}}</p>
+                                                      <p>Blank lines: {{file.blank_lines}}</p>
+                                                      <p>Commented lines: {{file.commented_lines}}</p>
+                                                      <p>Lines of code: {{file.lines_of_code}}</p>
+                                                  </div>
+                                            </div>
+                                            {% for phpmd_message in file_php_md_messages %}
+                                                <div class="panel panel-default">
+                                                  <div class="panel-heading">{{phpmd_message.ruleset}} on {{phpmd_message.path}}</div>
+                                                  <div class="panel-body">
+                                                      <p>
+                                                          <strong>Message:</strong> ({{phpmd_message.rule}}) {{phpmd_message.message}}
+                                                      </p>
+                                                      <p>
+                                                          <strong>File:</strong> {{phpmd_message.path}}
+                                                      </p>
+                                                      <p>
+                                                          <strong>Location:</strong> lines {{phpmd_message.begin_line}} to {{phpmd_message.end_line}} of {{phpmd_message.path}}
+                                                      </p>
+                                                  </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
                             {% endfor %}
                         </div>
                     </div>
@@ -62,36 +78,50 @@
                 {% if pylint_messages|length > 0 %}
                     <div class="panel-body row">
                         <div class="col-md-12">
-                            <h2>Pylint messages for {{commit_files.count}} file/s</h2>
-                            {% for file in commit_files %}
-                                <div class="">
-                                    <h3>{{file.path}}</h3>
-                                    <div class="panel panel-info">
-                                          <div class="panel-heading">Code size</div>
-                                          <div class="panel-body">
-                                              <p>Programming language: {{file.language}}</p>
-                                              <p>Blank lines: {{file.blank_lines}}</p>
-                                              <p>Commented lines: {{file.commented_lines}}</p>
-                                              <p>Lines of code: {{file.lines_of_code}}</p>
-                                          </div>
-                                    </div>
-                                    {% for pylint_message in file.pylint_messages.all %}
-                                        <div class="panel panel-default">
-                                          <div class="panel-heading">{{pylint_message.type}} on {{pylint_message.path}}</div>
-                                          <div class="panel-body">
-                                              <p>
-                                                  <strong>Message:</strong> ({{pylint_message.message_symbolic_name}}) {{pylint_message.message}}
-                                              </p>
-                                              <p>
-                                                  <strong>File:</strong> {{pylint_message.path}}
-                                              </p>
-                                              <p>
-                                                  <strong>Location:</strong> {{pylint_message.line}}:{{pylint_message.column}} {% if pylint_message.object %}on {{pylint_message.object}} {% endif %}
-                                              </p>
-                                          </div>
-                                        </div>
+                            <h2>{{pylint_messages|length}} Pylint messages for {{commit_files.count}} file/s</h2>
+                            <form action="" method="get">
+                                <input type="hidden" name="language" value="python" />
+                                <select name="type">
+                                    <option value="" {% if pylint_filter == '' %}selected=selected{% endif %}>All</option>
+                                    {% for filter_value in pylint_filter_values %}
+                                        <option value="{{filter_value.0}}" {% if pylint_filter == filter_value.0 %}selected=selected{% endif %}>{{filter_value.1}}</option>
                                     {% endfor %}
-                                </div>
+                                </select>
+                                <button type="submit" class="btn btn-primary">Filter</button>
+                            </form>
+                            {% for file in commit_files %}
+                                {% with file_pylint_messages=pylint_messages|filter_error_messages_by_file:file %}
+                                    {% if file_pylint_messages|length > 0 %}
+                                        <div class="">
+                                            <h3>{{file.path}} ({{file_pylint_messages|length}} messages)</h3>
+                                            <div class="panel panel-info">
+                                                  <div class="panel-heading">Code size</div>
+                                                  <div class="panel-body">
+                                                      <p>Programming language: {{file.language}}</p>
+                                                      <p>Blank lines: {{file.blank_lines}}</p>
+                                                      <p>Commented lines: {{file.commented_lines}}</p>
+                                                      <p>Lines of code: {{file.lines_of_code}}</p>
+                                                  </div>
+                                            </div>
+                                            {% for pylint_message in file_pylint_messages %}
+                                                <div class="panel panel-default">
+                                                  <div class="panel-heading">{{pylint_message.type}} on {{pylint_message.path}}</div>
+                                                  <div class="panel-body">
+                                                      <p>
+                                                          <strong>Message:</strong> ({{pylint_message.message_symbolic_name}}) {{pylint_message.message}}
+                                                      </p>
+                                                      <p>
+                                                          <strong>File:</strong> {{pylint_message.path}}
+                                                      </p>
+                                                      <p>
+                                                          <strong>Location:</strong> {{pylint_message.line}}:{{pylint_message.column}} {% if pylint_message.object %}on {{pylint_message.object}} {% endif %}
+                                                      </p>
+                                                  </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
                             {% endfor %}
                         </div>
                     </div>
