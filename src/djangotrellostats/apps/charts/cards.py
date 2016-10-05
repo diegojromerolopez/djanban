@@ -254,10 +254,12 @@ def cumulative_card_evolution(board, day_step=5):
     # Setting up chart values
     cumulative_chart.x_labels = x_labels
     cumulative_chart.add("Created cards", num_created_card_values)
-    cumulative_chart.add("Done", num_done_card_values)
+    cumulative_chart.add("Done cards", num_done_card_values)
     for label in labels:
-        cumulative_chart.add("Created {0} cards".format(label.name), created_card_values_by_label[label.id])
-        cumulative_chart.add("Done {0} cards".format(label.name), done_card_values_by_label[label.id])
+        if sum(created_card_values_by_label[label.id]) > 0:
+            cumulative_chart.add("Created {0} cards".format(label.name), created_card_values_by_label[label.id])
+        if sum(done_card_values_by_label[label.id]) > 0:
+            cumulative_chart.add("Done {0} cards".format(label.name), done_card_values_by_label[label.id])
 
     return cumulative_chart.render_django_response()
 
