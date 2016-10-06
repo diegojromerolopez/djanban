@@ -46,7 +46,7 @@ def task_movements_by_member(movement_type="forward", board=None):
             # Depending on if the member report is filtered by board or not we only have to get the forward and
             # backward movements of a report or sum all the members report of this user
             if board:
-                member_report = MemberReport.objects.get(**member_report_filter).order_by("member__initials")
+                member_report = MemberReport.objects.get(**member_report_filter)
                 forward_movements = member_report.forward_movements
                 backward_movements = member_report.backward_movements
 
