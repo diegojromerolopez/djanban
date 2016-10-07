@@ -316,25 +316,25 @@ def subjective_noise_level(request):
 
 # Code quality
 @login_required
-def number_of_code_errors_by_month(request, board_id, repository_id=None, language="python"):
+def number_of_code_errors(request, grouped_by, board_id, repository_id=None, language="python"):
     board = get_user_boards(request.user).get(id=board_id)
     repository = None
     if repository_id:
         repository = board.repositories.get(id=repository_id)
     if language is None:
         language = "python"
-    return repositories.number_of_code_errors_by_month(board, repository, language)
+    return repositories.number_of_code_errors(grouped_by, board, repository, language)
 
 
 @login_required
-def number_of_code_errors_per_loc_by_month(request, board_id, repository_id=None, language="python"):
+def number_of_code_errors_per_loc(request, grouped_by, board_id, repository_id=None, language="python"):
     board = get_user_boards(request.user).get(id=board_id)
     repository = None
     if repository_id:
         repository = board.repositories.get(id=repository_id)
     if language is None:
         language = "python"
-    return repositories.number_of_code_errors_per_loc_by_month(board, repository, language)
+    return repositories.number_of_code_errors_per_loc(grouped_by, board, repository, language)
 
 
 # Agility rating

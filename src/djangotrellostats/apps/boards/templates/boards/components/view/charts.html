@@ -189,13 +189,13 @@
                 {% if has_python_report %}
                     <div class="row">
                         <div class="col-sm-6">
-                            <a href="{% url 'charts:number_of_code_errors_by_month' board.id 'python' %}" title="Python code quality by month">
-                                <img src="{% url 'charts:number_of_code_errors_by_month' board.id 'python' %}" alt="Python code quality by month"/>
+                            <a href="{% url 'charts:number_of_code_errors' 'month' board.id 'python' %}" title="Python code quality by month">
+                                <img src="{% url 'charts:number_of_code_errors' 'month' board.id 'python' %}" alt="Python code quality by month"/>
                             </a>
                         </div>
                         <div class="col-sm-6">
-                            <a href="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id 'python' %}" title="Number of errors of Python code per LOC by month">
-                                <img src="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id 'python' %}" alt="Number of errors of Python code per LOC by month"/>
+                            <a href="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'python' %}" title="Number of errors of Python code per LOC by month">
+                                <img src="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'python' %}" alt="Number of errors of Python code per LOC by month"/>
                             </a>
                         </div>
                     </div>
@@ -203,13 +203,13 @@
                 {% if has_php_report %}
                     <div class="row">
                         <div class="col-sm-6">
-                            <a href="{% url 'charts:number_of_code_errors_by_month' board.id 'php' %}" title="PHP code quality by month">
-                                <img src="{% url 'charts:number_of_code_errors_by_month' board.id 'php' %}" alt="PHP code quality by month"/>
+                            <a href="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}" title="PHP code quality by month">
+                                <img src="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}" alt="PHP code quality by month"/>
                             </a>
                         </div>
                         <div class="col-sm-6">
-                            <a href="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id 'php' %}" title="Number of errors of PHP code per LOC by month">
-                                <img src="{% url 'charts:number_of_code_errors_per_loc_by_month' board.id 'php' %}" alt="Number of errors of PHP code per LOC by month"/>
+                            <a href="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}" title="Number of errors of PHP code per LOC by month">
+                                <img src="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}" alt="Number of errors of PHP code per LOC by month"/>
                             </a>
                         </div>
                     </div>

@@ -8,14 +8,84 @@ from django.utils import timezone
 from djangotrellostats.apps.repositories.models import PylintMessage, PhpMdMessage
 
 
-# Number of code errors by month
-def number_of_code_errors_by_month(board, repository, language="python"):
-    return _number_of_code_errors_by_month(board, repository=repository, language=language, per_loc=False)
+# Number of code errors by commit
+def number_of_code_errors(grouped_by, board, repository, language="python"):
+    if grouped_by == "commit":
+        return _number_of_code_errors_by_commit(board, repository=repository, language=language, per_loc=False)
+    elif grouped_by == "month":
+        return _number_of_code_errors_by_month(board, repository=repository, language=language, per_loc=False)
+    raise ValueError(u"Value {0} not recognized".format(grouped_by))
 
 
-# Number of code errors by month
-def number_of_code_errors_per_loc_by_month(board, repository, language="python"):
-    return _number_of_code_errors_by_month(board, repository=repository, language=language, per_loc=True)
+# Number of code errors by commit
+def number_of_code_errors_per_loc(grouped_by, board, repository, language="python"):
+    if grouped_by == "commit":
+        return _number_of_code_errors_by_commit(board, repository=repository, language=language, per_loc=True)
+    elif grouped_by == "month":
+        return _number_of_code_errors_by_month(board, repository=repository, language=language, per_loc=True)
+    raise ValueError(u"Value {0} not recognized".format(grouped_by))
+
+
+# Return the number of PHP/Python code errors by commit
+def _number_of_code_errors_by_commit(board, repository=None, language="python", per_loc=False):
+    repository_text = " "
+    repository_filter = {}
+    if repository:
+        repository_filter = {"repository": repository}
+        repository_text = u", repository {0}, ".format(repository.name)
+
+    if not per_loc:
+        chart_title = u"Errors in {0} code by commit in project {1}{2}{3}".format(language, board.name, repository_text, timezone.now())
+    else:
+        chart_title = u"Errors in {0} code per LOC by commit in project {1}{2}{3}".format(language, board.name, repository_text, timezone.now())
+
+    def formatter(x):
+        if per_loc:
+            return '{0:.2f}'.format(x)
+        return "{0}".format(x)
+
+    chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
+                       print_zeroes=False, value_formatter=formatter,
+                       human_readable=False)
+
+    if language.lower() == "php":
+        error_messages = board.phpmd_messages.filter(commit__has_been_assessed=True).filter(**repository_filter)
+        message_types = PhpMdMessage.RULESETS
+        message_type_label = "ruleset"
+    elif language.lower() == "python":
+        error_messages = board.pylint_messages.filter(commit__has_been_assessed=True).filter(**repository_filter)
+        message_types = dict(PylintMessage.TYPE_CHOICES).keys()
+        message_type_label = "type"
+    else:
+        raise ValueError(u"Programming language {0} not recognized".format(language))
+
+    project_locs = board.commit_files.filter(**repository_filter).aggregate(locs=Sum("lines_of_code"))["locs"]
+    if project_locs is None:
+        return chart.render_django_response()
+
+    commits = board.commits.filter(has_been_assessed=True).filter(**repository_filter)
+    if not commits.exists():
+        return chart.render_django_response()
+
+    for message_type in message_types:
+        number_of_messages_by_commit = []
+        chart.x_labels = []
+        for commit in commits:
+            error_message_filter = {
+                message_type_label: message_type,
+                "commit": commit
+            }
+            month_i_messages = error_messages.filter(**error_message_filter)
+
+            number_of_errors = month_i_messages.count()
+            if per_loc:
+                number_of_errors /= float(project_locs)
+            number_of_messages_by_commit.append(number_of_errors)
+            chart.x_labels.append(commit.commit[:8])
+
+        chart.add(message_type, number_of_messages_by_commit)
+
+    return chart.render_django_response()
 
 
 # Return the number of PHP/Python code errors by month
@@ -31,8 +101,13 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
     else:
         chart_title = u"Errors in {0} code per LOC by month in project {1}{2}{3}".format(language, board.name, repository_text, timezone.now())
 
+    def formatter(x):
+        if per_loc:
+            return '{0:.2f}'.format(x)
+        return "{0}".format(x)
+
     chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
-                       print_zeroes=False,
+                       print_zeroes=False, value_formatter=formatter,
                        human_readable=False)
 
     if language.lower() == "php":
