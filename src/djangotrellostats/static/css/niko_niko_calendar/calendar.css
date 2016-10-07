@@ -9,10 +9,12 @@
 
 .mood.happy .fa{
     background-color: green;
+    color: white;
 }
 
 .mood.sad .fa{
     background-color: blue;
+    color: white;
 }
 
 .x-scrollable{
