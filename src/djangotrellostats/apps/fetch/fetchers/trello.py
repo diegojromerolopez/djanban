@@ -52,7 +52,7 @@ class Initializer(object):
                 board_already_exists = Board.objects.filter(uuid=trello_board.id).exists()
                 if not board_already_exists:
                     board_name = trello_board.name
-                    board = Board(uuid=trello_board.id, name=board_name,
+                    board = Board(uuid=trello_board.id, name=board_name, description=trello_board.description,
                                   last_activity_datetime=trello_board.date_last_activity,
                                   public_access_code=shortuuid.ShortUUID().random(length=20).lower(),
                                   creator=self.member)
@@ -61,6 +61,19 @@ class Initializer(object):
                         print("Board {0} successfully created".format(board_name))
                 else:
                     board = Board.objects.get(uuid=trello_board.id)
+                    board_is_updated = False
+                    # Change in name
+                    if board.name != trello_board.name:
+                        board.name = trello_board.name
+                        board_is_updated = True
+                    # Change in description
+                    if board.description != trello_board.description:
+                        board.description = trello_board.description
+                        board_is_updated = True
+                    # Board needs updating
+                    if board_is_updated:
+                        board.save()
+                    # Board name
                     board_name = board.name
 
                 # Fetch all lists of this board
@@ -122,6 +135,22 @@ class Initializer(object):
             # Only add the board to the member if he/she has not it yet
             if not member.boards.filter(uuid=board.uuid).exists():
                 member.boards.add(board)
+
+    # Creates a new board from a non-saved board object
+    def create_board(self, board):
+        # Check if board exists
+        if board.uuid is not None:
+            raise ValueError(u"This board already exists")
+        # Connect to Trello and save the new board
+        trello_board = TrelloBoard(client=self.trello_client)
+        trello_board.name = board.name
+        trello_board.description = board.description
+        trello_board.save()
+        # Trello id attribute assignment
+        board.uuid = trello_board.id
+        board.save()
+        # Fetch initial lists
+        self.init(board.uuid)
 
 
 # Fetches a board from Trello

@@ -16,7 +16,7 @@ from django.conf import settings
 
 from djangotrellostats.apps.base.auth import user_is_member, get_user_boards, user_is_visitor
 from djangotrellostats.apps.base.decorators import member_required
-from djangotrellostats.apps.boards.forms import EditBoardForm
+from djangotrellostats.apps.boards.forms import EditBoardForm, NewBoardForm
 from djangotrellostats.apps.boards.models import List, Board, Card
 from djangotrellostats.apps.boards.stats import avg, std_dev
 
@@ -34,6 +34,23 @@ def init_boards(request):
         return HttpResponseRedirect(reverse("boards:view_boards"))
 
     raise Http404
+
+
+@member_required
+def new(request):
+    member = request.user.member
+    board = Board(creator=member)
+
+    if request.method == "POST":
+        form = NewBoardForm(request.POST, instance=board)
+
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect(reverse("boards:view_boards"))
+    else:
+        form = NewBoardForm(instance=board)
+
+    return render(request, "boards/new.html", {"form": form, "board": board, "member": member})
 
 
 # View boards of current user

@@ -29,6 +29,8 @@ class Board(models.Model):
 
     name = models.CharField(max_length=128, verbose_name=u"Name of the board")
 
+    description= models.TextField(max_length=128, verbose_name=u"Description of the board", default="", blank=True)
+
     comments = models.TextField(max_length=128, verbose_name=u"Comments for this board", default="", blank=True)
 
     uuid = models.CharField(max_length=128, verbose_name=u"External id of the board", unique=True)
