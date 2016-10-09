@@ -272,6 +272,8 @@ class BoardFetcher(Fetcher):
                 # Member reports
                 try:
                     member_report = member_report_dict[trello_member_uuid]
+                # If there is no member report, it implies that this member left the board
+                # Create a new empty member report for this old member
                 except KeyError:
                     lost_member = Member.objects.get(uuid=trello_member_uuid)
                     lost_member_report = MemberReport(board=self.board, member=lost_member)
