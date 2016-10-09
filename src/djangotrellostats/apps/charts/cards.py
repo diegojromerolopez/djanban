@@ -192,11 +192,8 @@ def cumulative_card_evolution(board, day_step=5):
                                   human_readable=True, x_label_rotation=45)
 
     start_working_date = board.get_working_start_date()
-    if start_working_date is None:
-        return cumulative_chart.render_django_response()
-
     end_working_date = board.get_working_end_date()
-    if end_working_date is None:
+    if start_working_date is None or end_working_date is None:
         return cumulative_chart.render_django_response()
 
     # Labels of the board
