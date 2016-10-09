@@ -270,7 +270,13 @@ class BoardFetcher(Fetcher):
             for trello_member_uuid in trello_card_member_uuids:
 
                 # Member reports
-                member_report = member_report_dict[trello_member_uuid]
+                try:
+                    member_report = member_report_dict[trello_member_uuid]
+                except KeyError:
+                    lost_member = Member.objects.get(uuid=trello_member_uuid)
+                    lost_member_report = MemberReport(board=self.board, member=lost_member)
+                    lost_member_report.save()
+                    member_report_dict[trello_member_uuid] = lost_member_report
 
                 # Increment the number of cards of the member report
                 member_report.number_of_cards += 1
@@ -787,7 +793,11 @@ class CardFetcher(object):
 
                 # Use of memoization to achieve a better performance when loading members
                 if member_uuid not in member_dict:
-                    member_dict[member_uuid] = self.board.members.get(uuid=member_uuid)
+                    try:
+                        member_dict[member_uuid] = self.board.members.get(uuid=member_uuid)
+                    # If the member has left the board
+                    except Member.DoesNotExist:
+                        member_dict[member_uuid] = Member.objects.get(uuid=member_uuid)
 
                 # Creation of daily spent times for this card
                 daily_spent_time = DailySpentTime(board=self.board, description=description,

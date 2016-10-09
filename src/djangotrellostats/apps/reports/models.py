@@ -51,8 +51,8 @@ class MemberReport(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="member_reports")
     number_of_cards = models.PositiveIntegerField(verbose_name=u"Number of assigned cards", default=0)
     member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="member_reports")
-    forward_movements = models.PositiveIntegerField(verbose_name=u"Forward movements")
-    backward_movements = models.PositiveIntegerField(verbose_name=u"Backward movements")
+    forward_movements = models.PositiveIntegerField(verbose_name=u"Forward movements", default=0)
+    backward_movements = models.PositiveIntegerField(verbose_name=u"Backward movements", default=0)
     avg_card_time = models.DecimalField(verbose_name=u"Average time a card lives in the board", decimal_places=4,
                                         max_digits=12, default=None, null=True)
     std_dev_card_time = models.DecimalField(verbose_name=u"Std. Dev. time a card lives in the board", decimal_places=4,
