@@ -101,6 +101,28 @@
             <div class="col-md-2">
                 <div class="panel panel-default">
                   <div class="panel-heading">
+                    <h2 class="panel-title">Dev. Value</h2>
+                  </div>
+                  <div class="panel-body">
+                    {{board.get_developed_value|floatformat:-2}} ¤
+                  </div>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h2 class="panel-title">Adj. Dev. Value</h2>
+                  </div>
+                  <div class="panel-body">
+                    {{board.get_adjusted_developed_value|floatformat:-2}} ¤
+                  </div>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
                     <h2 class="panel-title"># Comments </h2>
                   </div>
                   <div class="panel-body">
@@ -116,6 +138,28 @@
                   </div>
                   <div class="panel-body">
                     {{board.members.all.count}}
+                  </div>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h2 class="panel-title">Avg. Week Vel.</h2>
+                  </div>
+                  <div class="panel-body">
+                    {{board.average_weekly_spent_time|floatformat:-2}} hours
+                  </div>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h2 class="panel-title">Last Week Vel.</h2>
+                  </div>
+                  <div class="panel-body">
+                    {{board.last_weekly_spent_time|floatformat:-2}} hours
                   </div>
                 </div>
             </div>

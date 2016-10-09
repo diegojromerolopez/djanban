@@ -205,6 +205,30 @@ class Board(models.Model):
             return 0
         return spent_time
 
+    # Average spent time in this project per week
+    @property
+    def average_weekly_spent_time(self):
+        spent_time_by_week = self.spent_time_by_week
+        # Number of weeks of the project
+        num_weeks = len(spent_time_by_week)
+        # Sum of all time spent per week
+        spent_time_sum = Decimal("0.0")
+        for spent_time in spent_time_by_week:
+            spent_time_sum += spent_time["spent_time"]
+        # Average time spent per week
+        return Decimal(spent_time_sum) / Decimal(num_weeks)
+
+    # Last weekly spent time in this project
+    @property
+    def last_weekly_spent_time(self):
+        spent_time_by_week = self.spent_time_by_week.order_by("-week_of_year")
+        return spent_time_by_week[0]["spent_time"]
+
+    # Return spent time per week
+    @property
+    def spent_time_by_week(self):
+        return self.daily_spent_times.values('week_of_year').annotate(spent_time=Sum("spent_time")).order_by("week_of_year")
+
     # Return the spent time on a given month of a year
     def get_monthly_spent_time(self, month, year):
         spent_time_on_week_filter = {"date__month": month, "date__year": year}
