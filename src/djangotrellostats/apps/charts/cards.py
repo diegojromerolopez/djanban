@@ -142,7 +142,7 @@ def cumulative_list_evolution(board, day_step=5):
         return cumulative_chart.render_django_response()
 
     # Y-Axis
-    lists = board.lists.exclude(type="closed").order_by("position")
+    lists = board.lists.exclude(type="closed").order_by("-position")
     list_values = {list_.id: [] for list_ in lists}
 
     x_labels = []
