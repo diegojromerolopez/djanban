@@ -34,28 +34,37 @@ class EditBoardForm(models.ModelForm):
 
 # Board creation form
 class NewBoardForm(models.ModelForm):
+    MAX_NUM_LISTS = 20
+
     class Meta:
         model = Board
         fields = ["name", "description"]
 
-    #name = forms.CharField(label=u"Name of the new board")
-
-    #description = forms.CharField(label=u"Name of the new board", widget=forms.Textarea(), required=False)
-
     def __init__(self, *args, **kwargs):
         super(NewBoardForm, self).__init__(*args, **kwargs)
+        for i in range(1, NewBoardForm.MAX_NUM_LISTS+1):
+            self.fields["list_{0}".format(i)] = forms.CharField(
+                label=u"List {0}".format(i),
+                help_text=u"Name of list {0} in this new board. Optional.".format(i),
+                required=False)
 
     def clean(self):
         cleaned_data = super(NewBoardForm, self).clean()
+        list_names = []
+        for i in range(1, NewBoardForm.MAX_NUM_LISTS+1):
+            field_name = "list_{0}".format(i)
+            field_value = cleaned_data.get(field_name)
+            if field_value:
+                list_names.append(field_value)
+        cleaned_data["lists"] = list_names
         return cleaned_data
 
     def save(self, commit=True):
         if commit:
             with transaction.atomic():
-                #board = Board(name=self.cleaned_data.get("name"), description=self.cleaned_data.get("description"))
-                board = self.instance
                 initializer = Initializer(member=self.instance.creator)
-                initializer.create_board(board)
+                lists = self.cleaned_data.get("lists")
+                initializer.create_board(self.instance, lists=lists)
                 super(NewBoardForm, self).save(commit=True)
 
 

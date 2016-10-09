@@ -137,9 +137,9 @@ class Initializer(object):
                 member.boards.add(board)
 
     # Creates a new board from a non-saved board object
-    def create_board(self, board):
+    def create_board(self, board, lists=None):
         # Check if board exists
-        if board.uuid is not None:
+        if board.uuid:
             raise ValueError(u"This board already exists")
         # Connect to Trello and save the new board
         trello_board = TrelloBoard(client=self.trello_client)
@@ -149,8 +149,28 @@ class Initializer(object):
         # Trello id attribute assignment
         board.uuid = trello_board.id
         board.save()
-        # Fetch initial lists
-        self.init(board.uuid)
+        # Creation of lists
+        if lists is not None and len(lists) > 0:
+            for list_name in lists:
+                self.create_list(board, list_name, list_position="bottom")
+            # Fetch initial lists
+            self.init(board.uuid)
+
+    # Create list for a board
+    def create_list(self, board, list_name, list_position="bottom"):
+        trello_board = None
+        trello_boards = self.trello_client.list_boards()
+        for trello_board_i in trello_boards:
+            if board.uuid == trello_board_i.id:
+                trello_board = trello_board_i
+                break
+
+        # Check if this board exist in Trello
+        if trello_board is None:
+            raise ValueError(u"This board does not exist")
+
+        # Create the new lists
+        trello_board.add_list(list_name, list_position)
 
 
 # Fetches a board from Trello

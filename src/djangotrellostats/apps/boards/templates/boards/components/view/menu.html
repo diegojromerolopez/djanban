@@ -102,12 +102,15 @@
                                     </a>
                                 </li>
                             {%  endif %}
-                            <li {% if url_name == "delete" %}class="active"{% endif %}>
-                                <a href="{% url 'boards:delete' board.id %}" title="Delete board {{board.name}}">
-                                    <span class="fa fa-trash"></span>  Delete
-                                </a>
-                            </li>
                         {% endif %}
+                    {% endif %}
+
+                    {% if member %}
+                        <li {% if url_name == "delete" %}class="active"{% endif %}>
+                            <a href="{% url 'boards:delete' board.id %}" title="Delete board {{board.name}}">
+                                <span class="fa fa-trash"></span>  Delete
+                            </a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>

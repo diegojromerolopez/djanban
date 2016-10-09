@@ -1,8 +1,12 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 
 from decimal import Decimal
 
 import numpy
+import shortuuid
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Avg, Sum, Min, Max
@@ -254,6 +258,13 @@ class Board(models.Model):
     def mood(self):
         members = self.members.filter(is_developer=False)
         return numpy.mean([member.mood for member in members])
+
+    def save(self, *args, **kwargs):
+        # Creation of public access code in case there is none present
+        if not self.public_access_code:
+            self.public_access_code=shortuuid.ShortUUID().random(length=20).lower()
+        # Call to parent save method
+        super(Board, self).save(*args, **kwargs)
 
 
 # Card of the task board
