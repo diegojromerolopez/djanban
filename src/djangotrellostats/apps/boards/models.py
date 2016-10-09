@@ -85,6 +85,20 @@ class Board(models.Model):
     def __str__(self):
         return self.name
 
+    # Number of tasks
+    @property
+    def number_of_tasks(self):
+        return self.cards.filter(is_closed=False).count()
+
+    # Number of done tasks
+    @property
+    def number_of_done_tasks(self):
+        return self.cards.filter(is_closed=False, list__type="done").count()
+
+    @property
+    def number_of_comments(self):
+        return CardComment.objects.filter(card__is_closed=False, card__board=self).count()
+
     # Returns the date of the last fetch in an ISO format
     def get_human_fetch_datetime(self):
         return self.last_fetch_datetime.strftime("%Y-%m-%d")

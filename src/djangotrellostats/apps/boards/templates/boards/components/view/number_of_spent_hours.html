@@ -3,7 +3,7 @@
         {% with board_adjusted_spent_time=board.get_adjusted_spent_time%}
             <div class="panel panel-{% if board_adjusted_spent_time == board.estimated_number_of_hours %}warning{% elif board_adjusted_spent_time < board.estimated_number_of_hours %}success{% else %}danger{% endif %}">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Number of spent hours in {{board.name}}</h3>
+                    <h2 class="panel-title">Number of spent hours in {{board.name}}</h2>
                 </div>
                 <div class="panel-body">
                     <p>
