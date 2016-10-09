@@ -27,75 +27,90 @@
 {% endblock js %}
 
 {% block content %}
-    <h1>Team summary</h1>
-    {% if column_mode == 'single_column' %}<a href="{% url 'slideshow:view' %}">Change to 2 col mode</a>{% else %}<a href="{% url 'slideshow:view' %}?column_mode=1">Change to 1 col mode</a>{% endif %}
-    <div class="row">
-        <div class="col-md-{% if column_mode == 'single_column' %}12{% else %}6{% endif %}">
-            <h2>Project information</h2>
-            <div id="board-carousel" class="owl-carousel">
-                {% for board in boards %}
-                    {% if board.last_fetch_datetime and board.is_fetched and board.is_ready %}
-                        {% include "boards/components/view/number_of_spent_hours.html" %}
-                        {% include "boards/components/view/current_percentage_of_completion.html" %}
-                        <img src="{% url 'charts:burndown' board.id %}" alt="Burndown for board {{board.name}}"/>
-                        <img src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" alt="Tasks worked on by month"/>
-                        <img src="{% url 'charts:cumulative_list_evolution' board.id %}" alt="Evolution of number of tasks by list"/>
-                        <img src="{% url 'charts:avg_spent_time_by_month' board.id %}" alt="Average spent time by month"/>
-                        <img src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
-                        {% if board.has_python_assessment_report %}
-                            <img src="{% url 'charts:number_of_code_errors' 'month' board.id 'python' %}" alt="Code quality by month"/>
-                            <img src="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'python' %}" alt="Code quality per LOC by month"/>
-                        {% endif %}
-                        {% if board.has_php_assessment_report %}
-                            <img src="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}" alt="Code quality by month"/>
-                            <img src="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'php' %}" alt="Code quality per LOC by month"/>
-                        {% endif %}
-                    {% endif %}
-                {% endfor %}
-                <img src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
-            </div>
-        </div>
-        <div class="col-md-{% if column_mode == 'single_column' %}12{% else %}6{% endif %}">
-            <h2>Member information</h2>
-            <div id="member-carousel" class="owl-carousel">
-                {% for member_i in members %}
-                    {% if member_i.is_developer %}
-                        <img id="spent_time_by_day_of_the_week" src="{% url 'charts:spent_time_by_day_of_the_week' member_i.id %}" alt="Spent time by {{member_i.trello_username}}"/>
-                    {% endif %}
-                {% endfor %}
-                <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
-                <img src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
-            </div>
-        </div>
-    </div>
+    {# Activate/Deactivate the simple mode #}
+    {% if simple_carousel %}
+        <a href="{% url 'slideshow:view' %}" class="btn btn-primary">Standard mode</a>
+    {% else %}
+        <a href="{% url 'slideshow:view' %}?simple=1" class="btn btn-primary">Change to simple mode</a>
+    {% endif %}
 
-    <div class="row">
-        {% if interruptions|length > 0 %}
+    {# Activate/Deactivate the single mode carousel #}
+    {% if simple_carousel %}
+        {% include "slideshow/components/single_carousel.html" %}
+    {% else %}
+        <h1>Team summary</h1>
+        {% if column_mode == 'single_column' %}
+            <a href="{% url 'slideshow:view' %}" class="btn btn-primary">Change to 2 col mode</a>
+        {% else %}
+            <a href="{% url 'slideshow:view' %}?column_mode=1"  class="btn btn-primary">Change to 1 col mode</a>
+        {% endif %}
+        <div class="row">
             <div class="col-md-{% if column_mode == 'single_column' %}12{% else %}6{% endif %}">
-                <h2>Interruptions</h2>
-                <div id="interruptions-carousel" class="owl-carousel">
-                    <img src="{% url 'charts:interruptions' %}" alt="Interruptions" />
-                    <img src="{% url 'charts:evolution_of_interruptions' %}" alt="Evolution of interruptions" />
-                    <img src="{% url 'charts:interruptions_by_month' %}" alt="Task backward movements by member"/>
+                <h2>Project information</h2>
+                <div id="board-carousel" class="owl-carousel">
                     {% for board in boards %}
                         {% if board.last_fetch_datetime and board.is_fetched and board.is_ready %}
-                            {% if board.interruptions.all.exist %}
-                                <img src="{% url 'charts:interruptions_by_month' board.id %}" alt="Interruptions by month"/>
+                            {% include "boards/components/view/number_of_spent_hours.html" %}
+                            {% include "boards/components/view/current_percentage_of_completion.html" %}
+                            <img src="{% url 'charts:burndown' board.id %}" alt="Burndown for board {{board.name}}"/>
+                            <img src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" alt="Tasks worked on by month"/>
+                            <img src="{% url 'charts:cumulative_list_evolution' board.id %}" alt="Evolution of number of tasks by list"/>
+                            <img src="{% url 'charts:avg_spent_time_by_month' board.id %}" alt="Average spent time by month"/>
+                            <img src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
+                            {% if board.has_python_assessment_report %}
+                                <img src="{% url 'charts:number_of_code_errors' 'month' board.id 'python' %}" alt="Code quality by month"/>
+                                <img src="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'python' %}" alt="Code quality per LOC by month"/>
+                            {% endif %}
+                            {% if board.has_php_assessment_report %}
+                                <img src="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}" alt="Code quality by month"/>
+                                <img src="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'php' %}" alt="Code quality per LOC by month"/>
                             {% endif %}
                         {% endif %}
                     {% endfor %}
+                    <img src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
                 </div>
             </div>
-        {% endif %}
-        {% if noise_measurements|length > 0 %}
             <div class="col-md-{% if column_mode == 'single_column' %}12{% else %}6{% endif %}">
-                <h2>Noise levels</h2>
-                <div id="noise_measurements-carousel" class="owl-carousel">
-                    <img src="{% url 'charts:noise_level' %}" alt="Average spent time"/>
-                    <img src="{% url 'charts:subjective_noise_level' %}" alt="Average spent time"/>
+                <h2>Member information</h2>
+                <div id="member-carousel" class="owl-carousel">
+                    {% for member_i in members %}
+                        {% if member_i.is_developer %}
+                            <img id="spent_time_by_day_of_the_week" src="{% url 'charts:spent_time_by_day_of_the_week' member_i.id %}" alt="Spent time by {{member_i.trello_username}}"/>
+                        {% endif %}
+                    {% endfor %}
+                    <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
+                    <img src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
                 </div>
             </div>
-        {% endif %}
-    </div>
+        </div>
 
+        <div class="row">
+            {% if interruptions|length > 0 %}
+                <div class="col-md-{% if column_mode == 'single_column' %}12{% else %}6{% endif %}">
+                    <h2>Interruptions</h2>
+                    <div id="interruptions-carousel" class="owl-carousel">
+                        <img src="{% url 'charts:interruptions' %}" alt="Interruptions" />
+                        <img src="{% url 'charts:evolution_of_interruptions' %}" alt="Evolution of interruptions" />
+                        <img src="{% url 'charts:interruptions_by_month' %}" alt="Task backward movements by member"/>
+                        {% for board in boards %}
+                            {% if board.last_fetch_datetime and board.is_fetched and board.is_ready %}
+                                {% if board.interruptions.all.exist %}
+                                    <img src="{% url 'charts:interruptions_by_month' board.id %}" alt="Interruptions by month"/>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            {% if noise_measurements|length > 0 %}
+                <div class="col-md-{% if column_mode == 'single_column' %}12{% else %}6{% endif %}">
+                    <h2>Noise levels</h2>
+                    <div id="noise_measurements-carousel" class="owl-carousel">
+                        <img src="{% url 'charts:noise_level' %}" alt="Average spent time"/>
+                        <img src="{% url 'charts:subjective_noise_level' %}" alt="Average spent time"/>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
 {% endblock %}
