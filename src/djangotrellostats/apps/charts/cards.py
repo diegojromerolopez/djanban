@@ -232,16 +232,22 @@ def cumulative_card_evolution(board, day_step=5):
         if num_created_cards > 0 or num_done_cards > 0:
             num_created_card_values.append(num_created_cards)
             num_done_card_values.append(num_done_cards)
+
             x_labels.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
 
             # Each category filtered by label
             for label in labels:
-                created_card_values_by_label[label.id].append(
-                    label.cards.filter(id__in=created_cards).count()
-                )
-                done_card_values_by_label[label.id].append(
-                    label.cards.filter(id__in=done_cards).count()
-                )
+                # Number of created cards with this label (considered only if there are any)
+                num_created_cards_with_this_label = label.cards.filter(id__in=created_cards).count()
+                if num_created_cards_with_this_label == 0:
+                    num_created_cards_with_this_label = None
+                created_card_values_by_label[label.id].append(num_created_cards_with_this_label)
+
+                # Number of done cards with this label (considered only if there are any)
+                num_done_cards_with_this_label = label.cards.filter(id__in=done_cards).count()
+                if num_done_card_values == 0:
+                    num_done_card_values = None
+                done_card_values_by_label[label.id].append(num_done_cards_with_this_label)
 
         date_i += timedelta(days=day_step)
 
@@ -250,9 +256,9 @@ def cumulative_card_evolution(board, day_step=5):
     cumulative_chart.add("Created cards", num_created_card_values)
     cumulative_chart.add("Done cards", num_done_card_values)
     for label in labels:
-        if sum(created_card_values_by_label[label.id]) > 0:
+        if sum(filter(None, created_card_values_by_label[label.id])) > 0:
             cumulative_chart.add("Created {0} cards".format(label.name), created_card_values_by_label[label.id])
-        if sum(done_card_values_by_label[label.id]) > 0:
+        if sum(filter(None, done_card_values_by_label[label.id])) > 0:
             cumulative_chart.add("Done {0} cards".format(label.name), done_card_values_by_label[label.id])
 
     return cumulative_chart.render_django_response()
