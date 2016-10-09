@@ -32,14 +32,10 @@ def burndown(board, show_interruptions=False):
     if remaining_time is None:
         return burndown_chart.render_django_response()
 
-    # Start working date in this board
+    # Start and end working date in this board
     start_working_date = board.get_working_start_date()
-    if start_working_date is None:
-        return burndown_chart.render_django_response()
-
-    # End working date in this board
     end_working_date = board.get_working_end_date()
-    if end_working_date is None:
+    if start_working_date is None or end_working_date is None:
         return burndown_chart.render_django_response()
 
     # Remaining time values
