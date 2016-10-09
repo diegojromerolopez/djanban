@@ -28,22 +28,26 @@
 
 {% block content %}
     {# Activate/Deactivate the simple mode #}
-    {% if simple_carousel %}
-        <a href="{% url 'slideshow:view' %}" class="btn btn-primary">Standard mode</a>
-    {% else %}
-        <a href="{% url 'slideshow:view' %}?simple=1" class="btn btn-primary">Change to simple mode</a>
-    {% endif %}
+    <p>
+        {% if simple_carousel %}
+            <a href="{% url 'slideshow:view' %}" class="btn btn-primary">Standard mode</a>
+        {% else %}
+            <a href="{% url 'slideshow:view' %}?simple=1" class="btn btn-primary">Change to simple mode</a>
+        {% endif %}
+    </p>
 
     {# Activate/Deactivate the single mode carousel #}
     {% if simple_carousel %}
         {% include "slideshow/components/single_carousel.html" %}
     {% else %}
         <h1>Team summary</h1>
-        {% if column_mode == 'single_column' %}
-            <a href="{% url 'slideshow:view' %}" class="btn btn-primary">Change to 2 col mode</a>
-        {% else %}
-            <a href="{% url 'slideshow:view' %}?column_mode=1"  class="btn btn-primary">Change to 1 col mode</a>
-        {% endif %}
+        <p>
+            {% if column_mode == 'single_column' %}
+                <a href="{% url 'slideshow:view' %}" class="btn btn-primary">Change to 2 col mode</a>
+            {% else %}
+                <a href="{% url 'slideshow:view' %}?column_mode=1"  class="btn btn-primary">Change to 1 col mode</a>
+            {% endif %}
+        </p>
         <div class="row">
             <div class="col-md-{% if column_mode == 'single_column' %}12{% else %}6{% endif %}">
                 <h2>Project information</h2>
