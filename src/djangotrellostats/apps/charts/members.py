@@ -124,7 +124,7 @@ def avg_spent_time_by_weekday(current_user, board=None):
     if board:
         chart_title += u" for board {0}".format(board.name)
 
-    spent_time_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
+    spent_time_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, human_readable=True)
 
     report_filter = {}
@@ -182,7 +182,7 @@ def spent_time_by_week_evolution(board, show_interruptions=False):
         chart_title += u", including interruptions suffered by the team, "
     chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
 
-    evolution_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
+    evolution_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=False,
                                   human_readable=True, x_label_rotation=45)
 
