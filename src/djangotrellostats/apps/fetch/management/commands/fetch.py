@@ -25,12 +25,12 @@ class Command(BaseCommand):
 
     def __init__(self, stdout=None, stderr=None, no_color=False):
         super(Command, self).__init__(stdout, stderr, no_color)
-        self.member = None
+        self.members = []
         self.start_time = None
         self.end_time = None
 
     def add_arguments(self, parser):
-        parser.add_argument('member_trello_username', nargs='+', type=str)
+        parser.add_argument('member_trello_username', nargs='*', type=str, default=False)
 
     def start(self):
         self.start_time = time.time()
@@ -86,17 +86,16 @@ class Command(BaseCommand):
         return self.end_time - self.start_time
 
     def handle(self, *args, **options):
-        try:
-            member_trello_username = options['member_trello_username'][0]
-        except (IndexError, KeyError)as e:
-            self.stdout.write(self.style.ERROR("member_username is mandatory"))
-            raise AssertionError("member_username is mandatory")
 
-        self.member = Member.objects.get(trello_username=member_trello_username)
-        if not self.member.is_initialized():
-            error_message = u"Member {0} is not initialized".format(self.member.trello_username)
-            self.stderr.write(self.style.SUCCESS(error_message))
-            raise AssertionError(error_message)
+        if options['member_trello_username']:
+            try:
+                member_trello_username = options['member_trello_username'][0]
+            except (IndexError, KeyError)as e:
+                self.stdout.write(self.style.ERROR("member_username is mandatory"))
+                raise AssertionError("member_username is mandatory")
+            self.members = Member.objects.filter(trello_username=member_trello_username)
+        else:
+            self.members = Member.objects.all()
 
         if not self.start():
             self.stdout.write(self.style.ERROR("Unable to fetch"))
@@ -105,34 +104,47 @@ class Command(BaseCommand):
                                      message=error_message)
             raise AssertionError(error_message)
 
-        fetch_ok = False
+        fetch_ok = True
 
         # Make two retries to the fetch procsess
-        try:
-            self.fetch()
-            fetch_ok = True
-        # If after two retries the exception persists, warn the administrators
-        except Exception as e:
-            fetch_ok = False
-            warn_administrators(subject=u"Unable to fetch boards",
-                                     message=u"We tried initializing the boards but it didn't work out. {0}".format(traceback.format_exc()))
-        # Always delete the lock file
-        finally:
-            self.end()
+        for member in self.members:
+            if member.is_initialized:
+                self.stdout.write(
+                    self.style.SUCCESS(u"# Fetching {0} boards".format(member.trello_username))
+                )
+                try:
+                    self.fetch_member_boards(member)
+                    member.fetch_ok = True
+                    self.stdout.write(
+                        self.style.SUCCESS(u"All boards of {0} fetched successfully".format(member.trello_username))
+                    )
+                # If after two retries the exception persists, warn the administrators
+                except Exception as e:
+                    fetch_ok = True
+                    member.fetch_ok = False
+                    traceback_stack = traceback.format_exc()
+                    warn_administrators(
+                        subject=u"Unable to fetch boards",
+                        message=u"We tried initializing the boards but it didn't work out. {0}".format(traceback_stack)
+                    )
+
+        self.end()
 
         if fetch_ok:
-            self.stdout.write(self.style.SUCCESS(u"All boards fetched successfully {0}".format(self.elapsed_time())))
+            self.stdout.write(self.style.SUCCESS(u"All boards of {0} members fetched successfully {1}".format(
+                self.members.count(), self.elapsed_time()))
+            )
 
     # Fetch boards
-    def fetch(self):
+    def fetch_member_boards(self, member):
         last_board = None
         try:
             # For each board that is ready, fetch it
-            for board in self.member.created_boards.filter(has_to_be_fetched=True):
+            for board in member.created_boards.filter(has_to_be_fetched=True):
                 if board.is_ready():
                     last_board = board
                     self.stdout.write(self.style.SUCCESS(u"Board {0} is ready".format(board.name)))
-                    self.fetch_board(board)
+                    self.fetch_board(member, board)
                     self.stdout.write(self.style.SUCCESS(u"Board {0} fetched successfully".format(board.name)))
                 else:
                     self.stdout.write(self.style.ERROR(u"Board {0} is not ready".format(board.name)))
@@ -141,7 +153,7 @@ class Command(BaseCommand):
         except Exception as e:
             if last_board:
                 error_message = u"Error when fetching boards. Board {0} fetch failed.".format(last_board.name)
-                initializer = Initializer(self.member, debug=False)
+                initializer = Initializer(member, debug=False)
                 initializer.init(last_board.uuid)
             else:
                 error_message = u"Error when fetching boards."
@@ -149,10 +161,8 @@ class Command(BaseCommand):
             warn_administrators(subject=error_message, message=traceback.format_exc())
             self.stdout.write(self.style.ERROR(error_message))
 
-
-
     # Fetch one board
-    def fetch_board(self, board):
+    def fetch_board(self, member, board):
         num_retries = 0
         while num_retries < 2:
             try:
@@ -162,7 +172,7 @@ class Command(BaseCommand):
             except Exception as e:
                 if num_retries < 2:
                     # Initialize board if needed
-                    initializer = Initializer(self.member, debug=False)
+                    initializer = Initializer(member, debug=False)
                     initializer.init(board.uuid)
                 else:
                     raise e

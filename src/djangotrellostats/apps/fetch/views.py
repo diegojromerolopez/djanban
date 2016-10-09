@@ -19,7 +19,7 @@ def fetch(request):
         replacements = {"member": member}
         return render(request, "fetch/fetch.html", replacements)
 
-    if not member.is_initialized():
+    if not member.is_initialized:
         return render(request, "fetch/fetch_error.html",
                       context={"exception_message": u"Member {0} is not initialized".format(member.user.username)})
 

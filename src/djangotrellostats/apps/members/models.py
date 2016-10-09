@@ -58,7 +58,7 @@ class Member(models.Model):
     # Has this uses credentials to make actions with the Trello API?
     @property
     def has_trello_credentials(self):
-        return self.api_key is not None and self.api_secret is not None and self.token is not None
+        return self.is_initialized
 
     # Resets the password of the associated user of this member
     def reset_password(self, new_password=None):
@@ -74,6 +74,7 @@ class Member(models.Model):
         return new_password
 
     # Informs if this member is initialized, that is, it has the credentials needed for connecting to trello.com
+    @property
     def is_initialized(self):
         return self.api_key and self.api_secret and self.token and self.token_secret
 
