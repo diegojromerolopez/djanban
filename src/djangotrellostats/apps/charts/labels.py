@@ -89,9 +89,9 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
     else:
         ValueError(u"Operation not valid only Avg and Count values are valid")
 
-    period_measurement_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
-                                               print_zeroes=False,
-                                               human_readable=True)
+    period_measurement_chart = pygal.StackedBar(title=chart_title, legend_at_bottom=True, print_values=True,
+                                                print_zeroes=False,
+                                                human_readable=True)
     labels = []
     if board:
         labels = board.labels.all()
@@ -113,16 +113,22 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
     else:
         ValueError(u"Operation not valid only Avg and Count values are valid")
 
+    measurement_titles = []
+    measurement_values = []
+
+    label_measurement_titles = {label.id: [] for label in labels}
+    label_measurement_values = {label.id: [] for label in labels}
+
     first_loop = True
     period_measurement = None
     while first_loop or (period_measurement is not None and period_measurement > 0):
         if period == "month":
             period_filter = {"date__month": month_i, "date__year": year_i}
-            measurement_title =u"On {0}-{1}".format(year_i, month_i)
+            measurement_title = u"{0}-{1}".format(year_i, month_i)
             label_measurement_title_suffix = u"{0}-{1}".format(year_i, month_i)
         elif period == "week":
             period_filter = {"week_of_year": week_i, "date__year": year_i}
-            measurement_title = u"On {0}W{1}".format(year_i, week_i)
+            measurement_title = u"{0}W{1}".format(year_i, week_i)
             label_measurement_title_suffix = u"{0}W{1}".format(year_i, week_i)
         else:
             raise ValueError(u"Period {0} not valid. Only 'month' or 'week' is valid".format(period))
@@ -133,15 +139,17 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
         period_measurement = month_spent_times.aggregate(measurement=aggregation(time_measurement))["measurement"]
         # For each month that have some data, add it to the chart
         if period_measurement is not None and period_measurement > 0:
-            period_measurement_chart.add(measurement_title, period_measurement)
+            measurement_titles.append(measurement_title)
+            measurement_values.append(period_measurement)
+
+            # For each label that has a name (i.e. it is being used) and has a value, store its measurement per label
             for label in labels:
                 if label.name:
                     label_measurement = month_spent_times.filter(card__labels=label).\
                                             aggregate(measurement=aggregation(time_measurement))["measurement"]
                     if label_measurement:
-                        period_measurement_chart.add(
-                            u"{0} {1}".format(label.name, label_measurement_title_suffix), period_measurement
-                        )
+                        label_measurement_titles[label.id].append(measurement_title)
+                        label_measurement_values[label.id].append(label_measurement)
 
             if period == "month":
                 month_i += 1
@@ -154,6 +162,15 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
                 if week_i > number_of_weeks_of_year(year_i):
                     week_i = 1
                     year_i += 1
+
+    # Weeks there is any measurement
+    period_measurement_chart.x_labels = measurement_titles
+    period_measurement_chart.add("Tasks", measurement_values)
+
+    # For each label that has any measurement, add its measurement to the chart
+    for label in labels:
+        if sum(label_measurement_values[label.id]) > 0:
+            period_measurement_chart.add(label.name, label_measurement_values[label.id])
 
     return period_measurement_chart.render_django_response()
 
