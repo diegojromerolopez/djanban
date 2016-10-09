@@ -5,9 +5,11 @@
 {% block content %}
     <h1>Boards of {{member.trello_username}}</h1>
     <div class="board_list">
-        <p>
-            <a class="btn btn-primary" href="{% url 'boards:new' %}" title="New board">New</a>
-        </p>
+        {% if member.has_trello_credentials %}
+            <p>
+                <a class="btn btn-primary" href="{% url 'boards:new' %}" title="New board">New</a>
+            </p>
+        {% endif %}
         {% if boards|length == 0 %}
             {% if request.user.member %}
                 {% include "boards/components/list/no_boards_warning.html" %}

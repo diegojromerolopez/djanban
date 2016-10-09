@@ -39,6 +39,11 @@ def init_boards(request):
 @member_required
 def new(request):
     member = request.user.member
+
+    # Only members with credentials can create a new board
+    if not member.has_trello_credentials:
+        return HttpResponseRedirect(reverse("boards:view_boards"))
+
     board = Board(creator=member)
 
     if request.method == "POST":

@@ -55,6 +55,11 @@ class Member(models.Model):
     def __init__(self, *args, **kwargs):
         super(Member, self).__init__(*args, **kwargs)
 
+    # Has this uses credentials to make actions with the Trello API?
+    @property
+    def has_trello_credentials(self):
+        return self.api_key is not None and self.api_secret is not None and self.token is not None
+
     # Resets the password of the associated user of this member
     def reset_password(self, new_password=None):
         # A member without an user cannot be his/her password changed
