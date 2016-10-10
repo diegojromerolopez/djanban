@@ -37,7 +37,9 @@ def view_calendar(request):
     if min_date and max_date:
         date_i = copy.deepcopy(min_date)
         while date_i <= max_date:
-            dates.append(date_i)
+            # Only add date when there are mood measurements
+            if DailyMemberMood.objects.filter(date=date_i, member__in=members).exists():
+                dates.append(date_i)
             date_i += timedelta(days=1)
 
     replacements = {"member": member, "members": members, "dates": dates}
