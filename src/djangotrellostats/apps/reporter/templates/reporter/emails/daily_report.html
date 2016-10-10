@@ -50,6 +50,7 @@
                         <td>Board</td>
                         <td>Description</td>
                         <td>Spent time (h.)</td>
+                        <td>Adjusted Spent time (h.)</td>
                         <td>Estimated time (h.)</td>
                     </tr>
                     {% for daily_spent_time in daily_spent_times %}
@@ -63,6 +64,7 @@
                                 </a>
                             </td>
                             <td>{{daily_spent_time.spent_time|floatformat:"-2"}}</td>
+                            <td>{{daily_spent_time.adjusted_spent_time|floatformat:"-2"}}</td>
                             <td>{{daily_spent_time.estimated_time|floatformat:"-2"}}</td>
                         </tr>
                     {% endfor %}

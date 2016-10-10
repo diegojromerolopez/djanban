@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import datetime
 import time
 import traceback
@@ -12,6 +13,7 @@ from django.utils import timezone
 from djangotrellostats.apps.base.email import warn_administrators
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
+from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
 from djangotrellostats.apps.reporter.management.commands import daily_report
 from django.core.mail import EmailMultiAlternatives
 
@@ -36,7 +38,8 @@ class Command(daily_report.Command):
         iso_weekday = date.isoweekday()
         if iso_weekday == 6 or iso_weekday == 7:
             self.stdout.write(
-                self.style.SUCCESS(u"Daily development reports for day {0} are not sent because that day is holiday".format(
+                self.style.SUCCESS(
+                    u"Daily development reports for day {0} are not sent because that day is holiday".format(
                     date.strftime("%Y-%m-%d"))
                 )
             )
@@ -51,10 +54,20 @@ class Command(daily_report.Command):
                     daily_spent_times = member.daily_spent_times.filter(date=date).order_by("date", "member")
                     Command.send_daily_development_report(date, member, daily_spent_times)
                     self.stdout.write(self.style.SUCCESS(u"Daily report sent to developer {0}".format(member.user.email)))
+                elif member.user:
+                    self.stdout.write(
+                        self.style.WARNING(u"Developer {0} has not worked on day {1}".format(member.user.email,
+                                                                                         date.strftime("%Y-%m-%d")))
+                    )
+                else:
+                    self.stdout.write(
+                        self.style.WARNING(u"Developer {0} has no email".format(member.trello_username))
+                    )
+
         except Exception as e:
             warn_administrators(subject=u"Error in Daily development report",
                                 message=traceback.format_exc())
-            self.stdout.write(self.style.ERROR(u"Error en el daily development report "))
+            self.stdout.write(self.style.ERROR(u"Error in the daily development report "))
 
         end = time.time()
         elapsed_time = end-start
@@ -69,9 +82,15 @@ class Command(daily_report.Command):
     @staticmethod
     def send_daily_development_report(date, developer_member, daily_spent_times):
 
+        try:
+            developer_mood = developer_member.daily_member_moods.get(date=date)
+        except DailyMemberMood.DoesNotExist:
+            developer_mood = None
+
         replacements = {
             "date": date,
             "developer": developer_member,
+            "developer_mood": developer_mood,
             "developer_daily_spent_times": daily_spent_times.filter(member=developer_member)
         }
 

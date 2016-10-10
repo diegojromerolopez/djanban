@@ -10,7 +10,24 @@
     <body>
         <div>
             <div>
-                <h1>{{developer.trello_username}}'s spent time in day {{date}}</h1>
+                <h1>{{developer.trello_username}}'s feelings on {{date|date}}</h1>
+                {% if developer_mood %}
+                    Your mood today is:
+                    {% if developer_mood.mood == "normal" %}
+                        <span class="fa fa-meh-o fa-2x" aria-hidden="true"></span>
+                    {% elif developer_mood.mood == "happy" %}
+                        <span class="fa fa-smile-o fa-2x" aria-hidden="true"></span>
+                    {% elif developer_mood.mood == "sad" %}
+                        <span class="fa fa-frown-o fa-2x" aria-hidden="true"></span>
+                    {% else %}
+                    {% endif %}
+                {% else %}
+                    <p>You have forgotten to introduce your mood today!</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <h1>{{developer.trello_username}}'s spent time in day {{date|date}}</h1>
                     {% with developer_spent_time=developer|call:'get_spent_time'|arg:date|end_call %}
                         <p>
                             <span><strong>{{developer.trello_username}}</strong></span>
@@ -37,7 +54,7 @@
             </div>
 
             <div>
-                <h1>{{developer.trello_username}}'s spent time in day {{date}} by board</h1>
+                <h1>{{developer.trello_username}}'s spent time in day {{date|date}} by board</h1>
                 {% for board in developer.boards.all %}
                     {% if board.is_fetched %}
                         {% with developer_spent_time=developer|call:'get_spent_time'|arg:date|arg:board %}
@@ -56,14 +73,14 @@
             </div>
 
             <div>
-                <h1>{{developer.trello_username}}'s spent time in day {{date}}</h1>
+                <h1>{{developer.trello_username}}'s spent time in day {{date|date}}</h1>
                 <table>
                     <tr>
                         <td>Week day</td>
-                        <td>Member</td>
                         <td>Board</td>
                         <td>Description</td>
                         <td>Spent time (h.)</td>
+                        <td>Adjusted spent time (h.)</td>
                         <td>Estimated time (h.)</td>
                     </tr>
                     {% for daily_spent_time in developer_daily_spent_times %}
@@ -76,6 +93,7 @@
                                 </a>
                             </td>
                             <td>{{daily_spent_time.spent_time|floatformat:"-2"}}</td>
+                            <td>{{daily_spent_time.adjusted_spent_time|floatformat:"-2"}}</td>
                             <td>{{daily_spent_time.estimated_time|floatformat:"-2"}}</td>
                         </tr>
                     {% endfor %}

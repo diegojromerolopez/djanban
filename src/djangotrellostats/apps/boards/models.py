@@ -368,6 +368,17 @@ class Card(ImmutableModel):
     def number_of_comments(self):
         return self.comments.all().count()
 
+    # Returns the adjusted spent time according to the spent time factor defined in each member
+    def adjusted_spent_time(self):
+        adjusted_spent_time = 0
+        for member in self.members.all():
+            spent_time = self.daily_spent_times.filter(member=member).aggregate(sum=Sum("spent_time"))["sum"]
+            if spent_time is not None:
+                member_adjusted_spent_time = member.spent_time_factor * spent_time
+                adjusted_spent_time += member_adjusted_spent_time
+
+        return adjusted_spent_time
+
 
 # Each one of the comments made by members in each card
 class CardComment(ImmutableModel):
