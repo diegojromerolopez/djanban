@@ -166,6 +166,13 @@ EMAIL_HOST_USER = settings_local.EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = settings_local.EMAIL_HOST_PASSWORD
 DEFAULT_FROM_EMAIL = settings_local.DEFAULT_FROM_EMAIL
 
+# HTTPS configuration
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = False
+USE_X_FORWARDED_PORT = False
+SECURE_SSL_REDIRECT = False
+SECURE_SSL_HOST = None
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
@@ -179,6 +186,7 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = BASE_DIR + "/public_html/collectedstatic"
 
+# CKEDITOR preferences
 CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_RESTRICT_BY_USER = False
 CKEDITOR_BROWSE_SHOW_DIRS = True
