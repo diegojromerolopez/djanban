@@ -20,6 +20,11 @@ urlpatterns = [
 
     url(r'^(?P<board_id>\d+)/cards/?$', boards.view_card_report, name="view_card_report"),
     url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)$', boards.view_card, name="view_card"),
+
+    # Move cards
+    url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/move_forward/?$', boards.move_card_forward, name="move_card_forward"),
+    url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/move_backward/?$', boards.move_card_backward, name="move_card_backward"),
+
     url(r'^(?P<board_id>\d+)/export_card_report/?$', boards.export_card_report, name="export_card_report"),
     url(r'^(?P<board_id>\d+)/workflow_card_report/(?P<workflow_id>\d+)/?$', boards.view_workflow_card_report, name="view_workflow_card_report"),
 

@@ -8,14 +8,18 @@ import numpy
 import shortuuid
 
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Avg, Sum, Min, Max
 from django.db.models.query_utils import Q
 from django.utils import timezone
 from isoweek import Week
 
+from djangotrellostats.apps.reports.models import CardMovement
 
 # Abstract model that represents the immutable objects
+from djangotrellostats.trello_api.cards import move_card
+
+
 class ImmutableModel(models.Model):
     class Meta:
         abstract = True
@@ -306,7 +310,7 @@ class Board(models.Model):
 
 
 # Card of the task board
-class Card(ImmutableModel):
+class Card(models.Model):
 
     class Meta:
         verbose_name = "Card"
@@ -369,6 +373,7 @@ class Card(ImmutableModel):
         return self.comments.all().count()
 
     # Returns the adjusted spent time according to the spent time factor defined in each member
+    @property
     def adjusted_spent_time(self):
         adjusted_spent_time = 0
         for member in self.members.all():
@@ -378,6 +383,38 @@ class Card(ImmutableModel):
                 adjusted_spent_time += member_adjusted_spent_time
 
         return adjusted_spent_time
+
+    # Move this card to the next list
+    @transaction.atomic
+    def move_forward(self, member):
+        next_list = self.list.next_list
+        self.move(member=member, destination_list=next_list)
+
+    # Move this card to the previous list
+    @transaction.atomic
+    def move_backward(self, member):
+        previous_list = self.list.previous_list
+        self.move(member=member, destination_list=previous_list)
+
+    # Move this card to a random list
+    @transaction.atomic
+    def move(self, member, destination_list):
+        if self.list.position < destination_list.position:
+            movement_type = "forward"
+        elif self.list.position > destination_list.position:
+            movement_type = "backward"
+        else:
+            raise ValueError(u"Trying to move a card to its list")
+        # Store the movement of this card
+        card_movement = CardMovement(
+            board=self.board, card=self, type=movement_type,
+            source_list=self.list, destination_list=destination_list, datetime=timezone.now()
+        )
+        card_movement.save()
+        # Move the card
+        self.list = destination_list
+        self.save()
+        move_card(self, member, destination_list)
 
 
 # Each one of the comments made by members in each card
@@ -454,5 +491,28 @@ class List(models.Model):
     def active_cards(self):
         return self.cards.filter(is_closed=False).order_by("position")
 
+    @property
+    def is_first(self):
+        position_of_first_list = self.board.lists.aggregate(min_position=Min("position"))["min_position"]
+        return self.position == position_of_first_list
 
+    @property
+    def is_last(self):
+        position_of_last_list = self.board.lists.aggregate(max_position=Max("position"))["max_position"]
+        return self.position == position_of_last_list
 
+    # Next list of this list
+    @property
+    def next_list(self):
+        try:
+            return self.board.lists.filter(position__gt=self.position).order_by("position")[0]
+        except IndexError:
+            raise List.DoesNotExist
+
+    # Previous list of this list
+    @property
+    def previous_list(self):
+        try:
+            return self.board.lists.filter(position__lt=self.position).order_by("-position")[0]
+        except IndexError:
+            raise List.DoesNotExist

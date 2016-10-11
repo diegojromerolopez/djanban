@@ -1,6 +1,12 @@
 {% extends "boards/view.html" %}
 
 {% load humanize %}
+{% load staticfiles %}
+
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'css/boards/cards/view.css' %}" rel="stylesheet" />
+{% endblock css %}
 
 {% block page_title %}{{card.name}}{% endblock %}
 
@@ -19,16 +25,44 @@
                     <span class="fa fa-unlock" title="This card is active"></span> Active
                   {% endif %}
               </div>
-              <div class="list">On list <strong>{{card.list.name}}</strong></div>
-              <div class="labels">
+
+              <div class="row card-list-environment">
+                  {% if member and previous_list %}
+                    <div class="col-md-4 move_backward">
+                        <form action="{% url 'boards:move_card_backward' board.id card.id %}" name="move_backward" method="post">
+                            <button type="submit" class="btn btn-danger" title="Move backwards to {{previous_list.name}}">
+                                <span class="fa fa-arrow-left"></span>
+                                {{previous_list.name|truncatechars:40}}
+                            </button>
+                        </form>
+                    </div>
+                  {% endif %}
+
+                  <div class="col-md-4 list  card-current-list label {% if list.type == 'done' %}label-success{% else %}label-primary{% endif %}">
+                        On list <strong>{{list.name}} {% if list.type == "done" %}<span class="fa fa-thumbs-up"></span>{% endif %}</strong>
+                  </div>
+
+                  {% if member and next_list %}
+                    <div class="col-md-4 move_forward">
+                      <form action="{% url 'boards:move_card_forward' board.id card.id %}" name="move_forward" method="post">
+                        <button type="submit" class="btn btn-success" title="Move forward to {{next_list.name}}">
+                            {{next_list.name|truncatechars:40}}
+                            <span class="fa fa-arrow-right"></span>
+                        </button>
+                      </form>
+                    </div>
+                  {% endif %}
+              </div>
+
+              <div class="card-labels">
                   {% if labels %}
                     {% for label in labels %}<span>{{label.name}}</span>{% endfor %}
                   {% else %}
                     <em>Without labels.</em>
                   {% endif %}
-          </div>
+                </div>
 
-              <div class="blocking_cards">
+              <div class="card-blocking_cards">
                   {% if card.pending_blocking_cards.exists %}
                         {% for blocking_card in card.pending_blocking_cards %}
                             <a href="{% url 'boards:view_card' board.id blocking_card.id %}" title="View blocking card {{blocking_card.name}}">
@@ -68,24 +102,29 @@
                 <em>No description.</em>
               {% endif %}
           </div>
-          <div class="comments">
+
+          <div class="card-charts">
+              <h2>Stats</h2>
+              <div class="row">
+                    <div class="col-sm-6">
+                        <a href="{% url 'charts:number_of_comments_by_member' board.id card.id %}" title="Number of comments by member">
+                            <img src="{% url 'charts:number_of_comments_by_member' board.id card.id %}" alt="Number of comments by member"/>
+                        </a>
+                    </div>
+                    <div class="col-sm-6">
+                        <a href="{% url 'charts:number_of_comments' board.id card.id %}" title="Evolution of number of comments of this card thru time">
+                            <img src="{% url 'charts:number_of_comments' board.id card.id %}" alt="Evolution of number of comments of this card thru time"/>
+                        </a>
+                    </div>
+                </div>
+          </div>
+
+          <div class="card-comments">
               <h2>Comments ({{comments|length}})</h2>
               <div>
                   {% if comments|length == 0 %}
                     <em>No comments yet.</em>
                   {% else %}
-                      <div class="row">
-                            <div class="col-sm-6">
-                                <a href="{% url 'charts:number_of_comments_by_member' board.id card.id %}" title="Number of comments by member">
-                                    <img src="{% url 'charts:number_of_comments_by_member' board.id card.id %}" alt="Number of comments by member"/>
-                                </a>
-                            </div>
-                            <div class="col-sm-6">
-                                <a href="{% url 'charts:number_of_comments' board.id card.id %}" title="Evolution of number of comments of this card thru time">
-                                    <img src="{% url 'charts:number_of_comments' board.id card.id %}" alt="Evolution of number of comments of this card thru time"/>
-                                </a>
-                            </div>
-                        </div>
                       {% for comment in comments %}
                           <div class="panel panel-info">
                               <div class="panel-heading">

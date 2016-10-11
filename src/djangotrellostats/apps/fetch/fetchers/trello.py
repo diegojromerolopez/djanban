@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals, absolute_import
 
 import math
@@ -20,28 +22,18 @@ from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.fetch.fetchers.base import Fetcher
 from djangotrellostats.apps.reports.models import ListReport, MemberReport, CardMovement
-from trello import TrelloClient
+
 import shortuuid
 from djangotrellostats.apps.workflows.models import WorkflowCardReport
+from djangotrellostats.trello_api.connector import TrelloConnector
 
 
 # Initialize boards
-class Initializer(object):
+class Initializer(TrelloConnector):
 
     def __init__(self, member, debug=True):
-        self.member = member
-        self.trello_client = self._get_trello_client()
+        super(TrelloConnector, self).__init__(member)
         self.debug = debug
-
-    # Get a trello client for this user
-    def _get_trello_client(self):
-        client = TrelloClient(
-            api_key=self.member.api_key,
-            api_secret=self.member.api_secret,
-            token=self.member.token,
-            token_secret=self.member.token_secret
-        )
-        return client
 
     # Fetch basic information of boards and its lists
     @transaction.atomic
@@ -850,3 +842,5 @@ class LabelCreator(object):
         label = LabelCreator.factory(trello_label, board)
         label.save()
         return label
+
+

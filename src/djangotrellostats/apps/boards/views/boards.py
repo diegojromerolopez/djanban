@@ -238,15 +238,63 @@ def view_card(request, board_id, card_id):
 
     comments = card.comments.all().order_by("-creation_datetime")
     labels = card.labels.all().order_by("name")
+    card_list = card.list
+
+    try:
+        previous_list = card_list.previous_list
+    except List.DoesNotExist:
+        previous_list = None
+
+    try:
+        next_list = card_list.next_list
+    except List.DoesNotExist:
+        next_list = None
 
     replacements = {
         "member": member,
         "board": board,
         "card": card,
+        "list": card_list,
+        "next_list": next_list,
+        "previous_list": previous_list,
         "labels": labels,
         "comments": comments
     }
     return render(request, "cards/view.html", replacements)
+
+
+# Move this card forward
+@member_required
+def move_card_forward(request, board_id, card_id):
+    return _move_card(request, board_id, card_id, movement_type="forward")
+
+
+# Move this card back
+@member_required
+def move_card_backward(request, board_id, card_id):
+    return _move_card(request, board_id, card_id, movement_type="backward")
+
+
+# Move this card
+def _move_card(request, board_id, card_id, movement_type="forward"):
+    if request.method != "POST":
+        raise Http404
+
+    member = request.user.member
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        card = board.cards.get(id=card_id)
+    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+        raise Http404
+
+    if movement_type == "forward":
+        card.move_forward(member)
+    elif movement_type == "backward" or movement_type == "back":
+        card.move_backward(member)
+    else:
+        raise Http404
+
+    return HttpResponseRedirect(reverse("boards:view_card", args=(board_id, card_id)))
 
 
 # Export daily spent report in CSV format
