@@ -18,7 +18,7 @@
       <div class="panel-body">
           <div>
               <div>Created on {{card.creation_datetime}}</div>
-              <div>
+              <div class="card-status">
                   {% if card.is_closed %}
                     <span class="fa fa-lock" title="This card is closed"></span> Closed
                   {% else %}
@@ -74,6 +74,19 @@
                         <em>No other cards are blocking this one.</em>
                   {% endif %}
 
+              </div>
+
+              <div class="card-members">
+                  <h2>Members ({{members|length}})</h2>
+                  {% if members|length > 0 %}
+                    <ul>
+                        {% for member_i in members %}
+                            <li>{{member.trello_username}}</li>
+                        {% endfor %}
+                    </ul>
+                  {% else %}
+                    This task has no assigned members.
+                  {% endif %}
               </div>
 
           {% if card.spent_time %}

@@ -254,6 +254,7 @@ def view_card(request, board_id, card_id):
         "member": member,
         "board": board,
         "card": card,
+        "members": card.members.all().order_by("initials"),
         "list": card_list,
         "next_list": next_list,
         "previous_list": previous_list,
