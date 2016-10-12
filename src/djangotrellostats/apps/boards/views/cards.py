@@ -15,7 +15,7 @@ from django.template.context import Context
 from djangotrellostats.apps.base.auth import user_is_member, get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.forms import NewCardForm
-from djangotrellostats.apps.boards.models import List, Board, Card, CardComment
+from djangotrellostats.apps.boards.models import List, Board, Card, CardComment, Label
 from djangotrellostats.apps.boards.stats import avg, std_dev
 
 
@@ -41,6 +41,34 @@ def new(request, board_id):
         form = NewCardForm(instance=card)
 
     return render(request, "cards/new.html", {"form": form, "board": board, "member": member})
+
+
+# Change labels of this card
+@member_required
+def change_labels(request, board_id, card_id):
+    if request.method != "POST":
+        raise Http404
+
+    member = request.user.member
+    try:
+        board = member.boards.get(id=board_id)
+        card = board.cards.get(id=card_id)
+    except Board.DoesNotExist:
+        raise Http404
+
+    # Get in labels a list of objects Label gotten from the selected labels
+    labels = []
+    label_ids = request.POST.getlist("labels")
+    for label_id in label_ids:
+        try:
+            label = board.labels.exclude(name="").get(id=label_id)
+            labels.append(label)
+        except Label.DoesNotExist:
+            pass
+
+    card.update_labels(member, labels)
+
+    return HttpResponseRedirect(reverse("boards:view_card", args=(board_id, card_id)))
 
 
 # Move this card forward
@@ -187,7 +215,7 @@ def view(request, board_id, card_id):
         raise Http404
 
     comments = card.comments.all().order_by("-creation_datetime")
-    labels = card.labels.all().order_by("name")
+    card_labels = card.labels.all().order_by("name")
     card_list = card.list
 
     try:
@@ -208,7 +236,9 @@ def view(request, board_id, card_id):
         "list": card_list,
         "next_list": next_list,
         "previous_list": previous_list,
-        "labels": labels,
+        "card_labels": card_labels,
+        "card_label_ids": card_labels.values_list("id", flat=True),
+        "labels": board.labels.exclude(name="").order_by("name"),
         "comments": comments
     }
     return render(request, "cards/view.html", replacements)

@@ -37,6 +37,20 @@ def delete_comment_of_card(card, member, comment):
     return trello_card.delete_comment({"id": comment.uuid})
 
 
+# Add a labels to a card
+def add_label_to_card(card, member, label):
+    trello_card = _get_trello_card(card, member)
+    TrelloLabelUuid = namedtuple("TrelloLabelUuid", ["id"])
+    return trello_card.add_label(TrelloLabelUuid(id=label.uuid))
+
+
+# Add a labels to a card
+def remove_label_of_card(card, member, label):
+    trello_card = _get_trello_card(card, member)
+    TrelloLabelUuid = namedtuple("TrelloLabelUuid", ["id"])
+    return trello_card.remove_label(TrelloLabelUuid(id=label.uuid))
+
+
 # Return the trello card of a given Card object.
 # The member is used to establish the connection.
 def _get_trello_card(card, member):

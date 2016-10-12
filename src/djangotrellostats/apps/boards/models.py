@@ -22,7 +22,8 @@ from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
 from djangotrellostats.apps.reports.models import CardMovement
 
 # Abstract model that represents the immutable objects
-from djangotrellostats.trello_api.cards import move_card, add_comment_to_card, delete_comment_of_card
+from djangotrellostats.trello_api.cards import move_card, add_comment_to_card, delete_comment_of_card, \
+    remove_label_of_card, add_label_to_card
 
 
 class ImmutableModel(models.Model):
@@ -565,6 +566,26 @@ class Card(models.Model):
         delete_comment_of_card(self, member, comment)
         # Delete comment locally
         comment.delete()
+
+    # Update labels of the card
+    @transaction.atomic
+    def update_labels(self, member, labels):
+
+        # New labels
+        for label in labels:
+            if not self.labels.filter(id=label.id).exists():
+                self.labels.add(label)
+                add_label_to_card(self, member, label)
+
+        # Check if there is any label that needs to be removed
+        label_ids = {label.id: label for label in labels}
+        for card_label in self.labels.all():
+            if card_label.id not in label_ids:
+                self.labels.remove(card_label)
+                remove_label_of_card(self, member, card_label)
+
+
+
 
 
 # Each one of the comments made by members in each card

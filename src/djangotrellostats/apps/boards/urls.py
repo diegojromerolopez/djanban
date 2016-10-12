@@ -28,6 +28,8 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/move_backward/?$', cards.move_backward, name="move_card_backward"),
     # Add spent/estimated time
     url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/add_spent_estimated_time/?$', cards.add_spent_estimated_time, name="add_spent_estimated_time"),
+    # Modify card labels
+    url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/labels/?$', cards.change_labels, name="change_card_labels"),
     # New comment
     url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/comments/new/?$', cards.add_comment, name="add_comment"),
     # Delete comment

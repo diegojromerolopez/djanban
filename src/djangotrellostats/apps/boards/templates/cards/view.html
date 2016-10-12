@@ -10,7 +10,8 @@
 
 {% block js %}
     {{block.super}}
-    <script src="{% static 'js/boards/cards/confirm_delete_comment.js' %}"></script>
+    <script src="{% static 'js/boards/cards/view/confirm_delete_comment.js' %}"></script>
+    <script src="{% static 'js/boards/cards/view/label_editor.js' %}"></script>
 {% endblock js %}
 
 {% block page_title %}{{card.name}}{% endblock %}
@@ -63,10 +64,10 @@
               </div>
 
               <div class="card-labels">
-                  <h2>Labels ({{labels|length}})</h2>
-                  {% if labels %}
+                  <h2>Labels ({{card_labels|length}})</h2>
+                  {% if card_labels|length > 0 %}
                     <div class="card-labels-list">
-                        {% for label in labels %}
+                        {% for label in card_labels %}
                             <span class="card-label label label-default" style="background-color:{{label.color}};">
                                 {{label.name}}
                             </span>
@@ -77,6 +78,17 @@
                         <em>Without labels.</em>
                     </div>
                   {% endif %}
+                  <form action="{% url 'boards:change_card_labels' board.id card.id %}" method="post">
+                        <select name="labels" multiple>
+                            {% for label in labels %}
+                                <option value="{{label.id}}" {% if label.id in card_label_ids %}selected{% endif %}>{{label.name}}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-success change_labels" title="Change labels">
+                            <span class="fa fa-tags"></span>
+                            Change labels
+                        </button>
+                  </form>
                 </div>
 
               <div class="card-blocking_cards">
