@@ -585,9 +585,6 @@ class Card(models.Model):
                 remove_label_of_card(self, member, card_label)
 
 
-
-
-
 # Each one of the comments made by members in each card
 class CardComment(ImmutableModel):
 
