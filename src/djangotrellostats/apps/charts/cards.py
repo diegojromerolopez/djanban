@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+import numpy
 import copy
 from datetime import datetime, time, timedelta
 import pygal
@@ -82,6 +83,97 @@ def avg_cycle_time(request, board=None):
                 cycle_time_chart.add(u"{0} average cycle time".format(label.name), label.avg_lead_time())
 
     return cycle_time_chart.render_django_response()
+
+
+# Average card lead time by month
+def avg_lead_time_by_month(request, board=None):
+    return _avg_metric_time_by_month(request, board=board, metric="lead")
+
+
+# Average card cycle time by month
+def avg_cycle_time_by_month(request, board=None):
+    return _avg_metric_time_by_month(request, board=board, metric="cycle")
+
+
+# Average card metric (lead/cycle) by month
+def _avg_metric_time_by_month(request, board=None, metric="lead"):
+    # The metric is only lead or cycle
+    if metric != "lead" and metric != "cycle":
+        raise ValueError("The metric must be 'lead' or 'cycle'")
+
+    chart_title = u"Task average {0} time by month as of {1}".format(metric, timezone.now())
+    if board:
+        chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
+
+    metric_time_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
+                                   print_zeroes=False, human_readable=True)
+
+    if board is None:
+        boards = get_user_boards(request.user)
+        labels = None
+    else:
+        boards = [board]
+        labels = board.labels.exclude(name="").order_by("name")
+
+    # Getting the time limits of our chart
+    start_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(min_date=Min("date"))["min_date"]
+    end_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(max_date=Max("date"))["max_date"]
+    if start_working_date is None or end_working_date is None:
+        return metric_time_chart.render_django_response()
+
+    last_month = end_working_date.month
+    last_year = end_working_date.year
+
+    cards = Card.objects.filter(board__in=boards)
+
+    x_labels = []
+    metric_time_values = []
+    if board:
+        for label in labels:
+            label.metric_values = []
+
+    # Passing through the months getting the cards that were worked on by last time in that month and year
+    month_i = copy.deepcopy(start_working_date.month)
+    year_i = start_working_date.year
+    while year_i < last_year or year_i == last_year and month_i <= last_month:
+        cards_ending_this_month = cards.filter(list__type="done",
+                                               last_activity_datetime__month=month_i,
+                                               last_activity_datetime__year=year_i,
+                                               movements__destination_list__type="done")
+
+        if cards_ending_this_month.exists():
+            x_labels.append(u"{0}-{1}".format(year_i, month_i))
+            if metric == "lead":
+                def card_metric(card_):
+                    return card_.lead_time
+            elif metric == "cycle":
+                def card_metric(card_):
+                    return card_.cycle_time
+            else:
+                raise ValueError("The metric must be 'lead' or 'cycle'")
+
+            metric_time_values.append(numpy.mean([card_metric(card) for card in cards_ending_this_month]))
+            if board:
+                for label in labels:
+                    label_cards = cards_ending_this_month.filter(labels=label)
+                    if label_cards.exists():
+                        label.metric_values.append(numpy.mean([card_metric(card) for card in label_cards]))
+
+        month_i += 1
+        if month_i > 12:
+            month_i = 1
+            year_i += 1
+
+    metric_time_chart.x_labels = x_labels
+    metric_name = metric[0].upper() + metric[1:]
+    metric_title = "{0} time for all cards".format(metric_name)
+    metric_time_chart.add(metric_title, metric_time_values)
+
+    if board:
+        for label in labels:
+            metric_time_chart.add("{1} cards".format(metric_name, label.name), label.metric_values)
+
+    return metric_time_chart.render_django_response()
 
 
 # Average card time in each list

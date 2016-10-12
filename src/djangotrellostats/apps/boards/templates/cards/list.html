@@ -44,6 +44,33 @@
                 </a>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <a href="{% url 'charts:avg_lead_time' board.id %}" title="Average lead time">
+                    <img src="{% url 'charts:avg_lead_time' board.id %}" alt="Average lead time"/>
+                </a>
+            </div>
+            <div class="col-sm-6">
+                <a href="{% url 'charts:avg_lead_time_by_month' board.id %}" title="Average lead time by month">
+                    <img src="{% url 'charts:avg_lead_time_by_month' board.id %}" alt="Average lead time by month"/>
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <a href="{% url 'charts:avg_cycle_time' board.id %}" title="Average cycle time">
+                    <img src="{% url 'charts:avg_cycle_time' board.id %}" alt="Average cycle time"/>
+                </a>
+            </div>
+            <div class="col-sm-6">
+                <a href="{% url 'charts:avg_cycle_time_by_month' board.id %}" title="Average cycle time by month">
+                    <img src="{% url 'charts:avg_cycle_time_by_month' board.id %}" alt="Average cycle time by month"/>
+                </a>
+            </div>
+        </div>
+
         <div class="row">
             <div class="panel col-md-12">
                 <div>

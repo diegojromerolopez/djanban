@@ -40,11 +40,25 @@ def avg_lead_time(request, board_id=None):
     return cards.avg_lead_time(request, board)
 
 
+# Average card lead time by month
+@login_required
+def avg_lead_time_by_month(request, board_id=None):
+    board = _get_user_board_or_none(request, board_id)
+    return cards.avg_lead_time_by_month(request, board)
+
+
 # Average card cycle time
 @login_required
 def avg_cycle_time(request, board_id=None):
     board = _get_user_board_or_none(request, board_id)
     return cards.avg_cycle_time(request, board)
+
+
+# Average card cycle time by month
+@login_required
+def avg_cycle_time_by_month(request, board_id=None):
+    board = _get_user_board_or_none(request, board_id)
+    return cards.avg_cycle_time_by_month(request, board)
 
 
 # Average time by board list

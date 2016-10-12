@@ -39,8 +39,13 @@ urlpatterns = [
 
     url(r'^avg_spent_time_by_weekday/(?P<board_id>[\d]+)?$', private.avg_spent_time_by_weekday, name="avg_spent_time_by_weekday"),
 
-    url(r'^avg_lead_time/(?P<board_id>[\d]+)?$', private.avg_lead_time, name="avg_lead_time"),
+    # Lead time
+    url(r'^avg_lead_time/(?P<board_id>\d+)?$', private.avg_lead_time, name="avg_lead_time"),
+    url(r'^avg_lead_time_by_month/(?P<board_id>\d+)?$', private.avg_lead_time_by_month, name="avg_lead_time_by_month"),
+
+    # Cycle time
     url(r'^avg_cycle_time/(?P<board_id>[\d]+)?$', private.avg_cycle_time, name="avg_cycle_time"),
+    url(r'^avg_cycle_time_by_month/(?P<board_id>\d+)?$', private.avg_cycle_time_by_month, name="avg_cycle_time_by_month"),
 
     url(r'^public_avg_lead_time/(?P<board_public_access_code>.+)/?$', public.avg_lead_time, name="public_avg_lead_time"),
     url(r'^public_avg_cycle_time/(?P<board_public_access_code>.+)/?$', public.avg_cycle_time, name="public_avg_cycle_time"),
