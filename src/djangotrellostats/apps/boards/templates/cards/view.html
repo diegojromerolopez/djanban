@@ -89,12 +89,33 @@
                   {% endif %}
               </div>
 
-          {% if card.spent_time %}
-              <div class="spent_time">
-                  <h2>Spent time</h2>
-                  <div>{{card.spent_time}} hours</div>
-              </div>
-          {% endif %}
+
+          <div class="card-spent_estimated_time">
+              <h2>Spent time</h2>
+              <div>{{card.spent_time|floatformat:-2}} hours</div>
+              <form action="{% url 'boards:add_spent_estimated_time' board.id card.id %}" method="post">
+                  <select name="date">
+                      <option value="now">Now</option>
+                      <option value="-1">-1d</option>
+                      <option value="-2">-2d</option>
+                      <option value="-3">-3d</option>
+                      <option value="-4">-4d</option>
+                      <option value="-5">-5d</option>
+                      <option value="-6">-6d</option>
+                      <option value="-7">-7d</option>
+                      <option value="-8">-8d</option>
+                      <option value="-9">-9d</option>
+                  </select>
+                  <input type="number" name="spent_time" step="0.1" placeholder="S"/>
+                  <input type="number" name="estimated_time" step="0.1" placeholder="E"/>
+                  <input type="text" name="description"  placeholder="Description"/>
+                <button type="submit" class="btn btn-success" title="Add time to this card">
+                    Add spent/estimated time
+                    <span class="fa fa-clock-o"></span>
+                </button>
+              </form>
+          </div>
+
           {% if card.cycle_time %}
               <div class="cycle_time">
                   <h2>Cycle time</h2>
@@ -135,6 +156,13 @@
           <div class="card-comments">
               <h2>Comments ({{comments|length}})</h2>
               <div>
+                  <form action="{% url 'boards:add_comment' board.id card.id %}" method="post">
+                      <textarea name="comment" placeholder="Insert your comment here..."></textarea>
+                      <button type="submit" class="btn btn-success" title="Add time to this card">
+                        Send
+                        <span class="fa fa-comment-o"></span>
+                      </button>
+                  </form>
                   {% if comments|length == 0 %}
                     <em>No comments yet.</em>
                   {% else %}
@@ -154,4 +182,5 @@
           </div>
       </div>
     </div>
+</div>
 {% endblock content %}

@@ -31,3 +31,42 @@
     margin-bottom: 20px;
     margin-top: 20px;
 }
+
+/* Spent/Estimated time */
+.card-spent_estimated_time {
+
+}
+
+.card-spent_estimated_time select[name="date"]{
+    width: 55px;
+}
+
+.card-spent_estimated_time input[name="spent_time"],
+.card-spent_estimated_time input[name="estimated_time"]{
+    width: 50px;
+}
+
+.card-spent_estimated_time input[name="description"]{
+    width: 50%
+}
+
+/* Comments */
+.card-comments{
+
+}
+
+.card-comments form{
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 30px;
+    margin-top: 30px;
+    width: 90%;
+}
+
+.card-comments form textarea{
+    min-height: 60px;
+}
+
+.card-comments form button{
+
+}

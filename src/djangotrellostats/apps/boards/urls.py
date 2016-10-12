@@ -2,7 +2,7 @@
 
 from django.conf.urls import url, include
 
-from djangotrellostats.apps.boards.views import boards
+from djangotrellostats.apps.boards.views import boards, cards
 from djangotrellostats.apps.journal.views import JournalEntryTagAutocompleteView
 
 
@@ -18,14 +18,18 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/lists/?$', boards.view_lists, name="view_lists"),
     url(r'^(?P<board_id>\d+)/delete/?$', boards.delete, name="delete"),
 
-    url(r'^(?P<board_id>\d+)/cards/?$', boards.view_card_report, name="view_card_report"),
-    url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)$', boards.view_card, name="view_card"),
+    url(r'^(?P<board_id>\d+)/cards/?$', cards.view_report, name="view_card_report"),
+    url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)$', cards.view, name="view_card"),
 
     # Move cards
-    url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/move_forward/?$', boards.move_card_forward, name="move_card_forward"),
-    url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/move_backward/?$', boards.move_card_backward, name="move_card_backward"),
+    url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/move_forward/?$', cards.move_forward, name="move_card_forward"),
+    url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/move_backward/?$', cards.move_backward, name="move_card_backward"),
+    # Add spent/estimated time
+    url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/add_spent_estimated_time/?$', cards.add_spent_estimated_time, name="add_spent_estimated_time"),
+    # New comment
+    url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/comments/new/?$', cards.add_comment, name="add_comment"),
 
-    url(r'^(?P<board_id>\d+)/export_card_report/?$', boards.export_card_report, name="export_card_report"),
+    url(r'^(?P<board_id>\d+)/export_card_report/?$', cards.export_report, name="export_card_report"),
     url(r'^(?P<board_id>\d+)/workflow_card_report/(?P<workflow_id>\d+)/?$', boards.view_workflow_card_report, name="view_workflow_card_report"),
 
     url(r'^(?P<board_id>\d+)/labels/?$', boards.view_label_report, name="view_label_report"),

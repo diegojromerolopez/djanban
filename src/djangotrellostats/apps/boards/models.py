@@ -6,6 +6,7 @@ from decimal import Decimal
 
 import numpy
 import shortuuid
+from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.db import models, transaction
@@ -14,10 +15,11 @@ from django.db.models.query_utils import Q
 from django.utils import timezone
 from isoweek import Week
 
+from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.reports.models import CardMovement
 
 # Abstract model that represents the immutable objects
-from djangotrellostats.trello_api.cards import move_card
+from djangotrellostats.trello_api.cards import move_card, add_comment_to_card
 
 
 class ImmutableModel(models.Model):
@@ -322,6 +324,8 @@ class Card(models.Model):
         )
 
     COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s+(\-(?P<days_before>(\d+))d\s+)?(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)(\s*(?P<description>.+))?"
+    COMMENT_SPENT_ESTIMATED_TIME_PATTERN = "plus! {days_ago}{spent_time}/{estimated_time} {description}"
+
     COMMENT_BLOCKED_CARD_REGEX = r"^blocked\s+by\s+(?P<card_url>.+)$"
     COMMENT_REQUIREMENT_CARD_REGEX = r"^task\s+of\s+requirement\s+(?P<requirement_code>.+)$"
 
@@ -415,6 +419,59 @@ class Card(models.Model):
         self.list = destination_list
         self.save()
         move_card(self, member, destination_list)
+
+    # Add spent/estimated time
+    @transaction.atomic
+    def add_spent_estimated_time(self, member, spent_time, estimated_time=None, days_ago=None, description=None):
+
+        # By default this spent/estimated time description is this card's name
+        if description is None:
+            description = self.name
+
+        # Getting the date of the spent/estimated time
+        today = timezone.now().date()
+        date = today
+        if days_ago is not None:
+            date = date - timedelta(days=days_ago)
+
+        # Adding spent time to the card
+        if spent_time is not None:
+            self.spent_time += Decimal(spent_time)
+
+        # Adding estimated time to the card
+        if estimated_time is None:
+            estimated_time = Decimal(spent_time)
+
+        self.estimated_time += Decimal(estimated_time)
+
+        # Updating the card
+        self.save()
+
+        # Creation of daily spent time
+        DailySpentTime.add(self.board, member, date, self, description, spent_time, estimated_time)
+
+        # Preparation of the comment content with the style of Plus for Trello
+        days_ago_str = ""
+        if days_ago:
+            days_ago_str = "-{0}d ".format(days_ago)
+
+        # Creation of comment with the daily spent time
+        comment_content = Card.COMMENT_SPENT_ESTIMATED_TIME_PATTERN.format(
+            days_ago=days_ago_str, spent_time=spent_time, estimated_time=estimated_time, description=description
+        )
+
+        self.add_comment(member, comment_content)
+
+    # Add a new comment to this card
+    @transaction.atomic
+    def add_comment(self, member, content):
+        # Add comment to Trello
+        comment_data = add_comment_to_card(self, member, content)
+
+        # Create comment locally using the id of the new comment in Trello
+        card_comment = CardComment(uuid=comment_data["id"], card=self, author=member, content=content,
+                                   creation_datetime=timezone.now())
+        card_comment.save()
 
 
 # Each one of the comments made by members in each card

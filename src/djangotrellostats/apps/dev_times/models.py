@@ -74,11 +74,28 @@ class DailySpentTime(models.Model):
         weekday = date.strftime("%w")
         week_of_year = get_iso_week_of_year(date)
         day_of_year = date.strftime("%j")
+
+        # Convert spent_time to Decimal if is a number
+        if spent_time is not None:
+            spent_time = Decimal(spent_time)
+
+        # Convert estimated_time to Decimal if is a number
+        if estimated_time is not None:
+            estimated_time = Decimal(estimated_time)
+        elif spent_time is not None:
+            estimated_time = Decimal(spent_time)
+
+        # Compute difference between spent_time and estimated_time
+        diff_time = None
+        if spent_time is not None and estimated_time is not None:
+            diff_time = Decimal(estimated_time) - Decimal(spent_time)
+
+        # Creation of daily_spent_time
         daily_spent_time = DailySpentTime(board=board, member=member, card=card,
                                           description=description,
-                                          spent_time=Decimal(spent_time),
-                                          estimated_time=Decimal(estimated_time),
-                                          diff_time=Decimal(estimated_time) - Decimal(spent_time),
+                                          spent_time=spent_time,
+                                          estimated_time=estimated_time,
+                                          diff_time=diff_time,
                                           date=date, day_of_year=day_of_year, week_of_year=week_of_year,
                                           weekday=weekday)
 
