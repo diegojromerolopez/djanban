@@ -8,6 +8,7 @@
 {% block css %}
     {{block.super}}
     <link href="{% static 'css/boards/main.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/boards/view.css' %}" rel="stylesheet" />
 {% endblock css %}
 
 {% block js %}
@@ -29,7 +30,24 @@
 
 {% block content %}
     {% if board.is_ready and board.is_fetched %}
-        <h1>{{board.name}}</h1>
+        <div class="board-title-container">
+            <h1 class="board-title">{{board.name}}</h1>
+
+            {% with mood_value=board.mood_value %}
+                <div class="board-mood">
+                    <span class="board-mood-value">{{mood_value}}</span>
+                    <span class="board-mood-face">
+                        {% if mood_value > 0 %}
+                            <span class="fa fa-2x fa-smile-o"></span>
+                        {% elif mood_value < 0 %}
+                            <span class="fa fa-2x fa-frown-o"></span>
+                        {% else %}
+                            <span class="fa fa-2x fa-meh-o"></span>
+                        {% endif %}
+                    </span>
+                </div>
+            {% endwith %}
+        </div>
 
         {% block public_view %}
             <div id="public_access" class="row">

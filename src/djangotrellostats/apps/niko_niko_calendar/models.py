@@ -21,4 +21,12 @@ class DailyMemberMood(models.Model):
     mood = models.CharField(verbose_name=u"Mood of a member after one particular day", max_length=16,
                             choices=MOOD_CHOICES, default="normal")
 
-
+    @property
+    def mood_value(self):
+        if self.mood == "normal":
+            return 0
+        if self.mood == "happy":
+            return 1
+        if self.mood == "sad":
+            return -1
+        raise ValueError(u"This choice does not exist")

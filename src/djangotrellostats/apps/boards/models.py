@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from decimal import Decimal
 
 import numpy
+import copy
 import re
 import shortuuid
 from datetime import timedelta
@@ -17,6 +18,7 @@ from django.utils import timezone
 from isoweek import Week
 
 from djangotrellostats.apps.dev_times.models import DailySpentTime
+from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
 from djangotrellostats.apps.reports.models import CardMovement
 
 # Abstract model that represents the immutable objects
@@ -85,6 +87,14 @@ class Board(models.Model):
         default=False)
 
     visitors = models.ManyToManyField(User, verbose_name=u"Visitors of this board", related_name="boards", blank=True)
+
+    # Last time the mood for this project was computed.
+    # As the computation only has to be done once a day it serves us as a cache
+    last_time_mood_was_computed = models.DateTimeField(verbose_name=u"Last time mood was computed",
+                                                       default=None, null=True)
+
+    last_mood_value = models.DecimalField(verbose_name=u"Last mood value",
+                                          decimal_places=2, max_digits=10, default=None, null=True)
 
     def __unicode__(self):
         return self.name
@@ -315,10 +325,57 @@ class Board(models.Model):
     def has_php_assessment_report(self):
         return self.phpmd_messages.all().exists()
 
+    # Compute the mood for this project
     @property
     def mood(self):
+        mood_value = self.mood_value
+        if mood_value > 0:
+            return "happy"
+        if mood_value == 0:
+            return "normal"
+        if mood_value < 0:
+            return "sad"
+
+    # Compute the mood value for this project
+    @property
+    def mood_value(self):
+
+        now = timezone.now()
+        if self.last_time_mood_was_computed is not None and\
+                self.last_mood_value is not None and self.last_time_mood_was_computed - now < timedelta(days=1):
+            return self.last_mood_value
+
         members = self.members.filter(is_developer=False)
-        return numpy.mean([member.mood for member in members])
+
+        start_date = self.get_working_start_date()
+        end_date = self.get_working_start_date()
+        date_i = copy.deepcopy(start_date)
+
+        for member in members:
+            member.moods = []
+
+        while date_i <= end_date:
+            for member in members:
+                try:
+                    member_mood_value = member.daily_member_moods.get(date=date_i).mood_value
+                    member.moods.append(member_mood_value)
+                except DailyMemberMood.DoesNotExist:
+                    pass
+            date_i += timedelta(days=1)
+
+        member_mood = []
+        for member in members:
+            if len(member.moods) > 0:
+                member_mood.append(numpy.mean(member.moods))
+
+        if len(member_mood) > 0:
+            self.last_mood_value = numpy.mean(member_mood)
+        else:
+            self.last_mood_value = 0
+
+        self.last_time_mood_was_computed = timezone.now()
+        self.save()
+        return self.last_mood_value
 
     def save(self, *args, **kwargs):
         # Creation of public access code in case there is none present
