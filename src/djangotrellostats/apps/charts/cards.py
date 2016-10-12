@@ -98,7 +98,7 @@ def avg_cycle_time_by_month(request, board=None):
 # Average card metric (lead/cycle) by month
 def _avg_metric_time_by_month(request, board=None, metric="lead"):
     # The metric is only lead or cycle
-    if metric != "lead" and metric != "cycle":
+    if metric != "lead" and metric != "cycle" and metric != "spent_time" and metric != "estimated_time":
         raise ValueError("The metric must be 'lead' or 'cycle'")
 
     chart_title = u"Task average {0} time by month as of {1}".format(metric, timezone.now())
@@ -149,6 +149,16 @@ def _avg_metric_time_by_month(request, board=None, metric="lead"):
             elif metric == "cycle":
                 def card_metric(card_):
                     return card_.cycle_time
+            elif metric == "spent_time":
+                def card_metric(card_):
+                    if card_.spent_time is None:
+                        return 0
+                    return card_.spent_time
+            elif metric == "estimated_time":
+                def card_metric(card_):
+                    if card_.estimated_time is None:
+                        return 0
+                    return card_.estimated_time
             else:
                 raise ValueError("The metric must be 'lead' or 'cycle'")
 
