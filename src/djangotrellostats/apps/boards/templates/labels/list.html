@@ -1,5 +1,12 @@
 {% extends "boards/view.html" %}
 
+{% load staticfiles %}
+
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'css/boards/labels/view.css' %}" rel="stylesheet" />
+{% endblock css %}
+
 {% block page_title %}Labels of {{board.name}}{% endblock %}
 
 {% block content %}
@@ -12,7 +19,6 @@
             <table class="table">
                 <tr>
                     <td>Name</td>
-                    <td>Color</td>
                     <td>Number of cards</td>
                     <td>Avg. estimated card time</td>
                     <td>Avg. spent card time</td>
@@ -20,9 +26,10 @@
                     <td>Avg. lead time</td>
                 </tr>
                 {% for label in labels %}
-                    <tr style="color:{{label.color}};">
-                        <td>{{label.name}}</td>
-                        <td>{{label.color}}</td>
+                    <tr>
+                        <td class="label-name-td" >
+                            <span class="label-name" style="background:{{label.color}};">{{label.name}}</span>
+                        </td>
                         <td>{{label.cards.all.count}}</td>
                         <td>{{label.avg_estimated_time|floatformat:"-2"}}</td>
                         <td>{{label.avg_spent_time|floatformat:"-2"}}</td>

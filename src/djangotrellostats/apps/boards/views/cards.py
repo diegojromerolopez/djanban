@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 import re
-from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -12,19 +11,39 @@ from django.http.response import Http404, HttpResponse
 from django.shortcuts import render
 from django.template import loader
 from django.template.context import Context
-from django.utils import timezone
 
 from djangotrellostats.apps.base.auth import user_is_member, get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
+from djangotrellostats.apps.boards.forms import NewCardForm
 from djangotrellostats.apps.boards.models import List, Board, Card, CardComment
 from djangotrellostats.apps.boards.stats import avg, std_dev
-from djangotrellostats.apps.dev_times.models import DailySpentTime
+
+
+# Create a new card
+@member_required
+def new(request, board_id):
+    member = request.user.member
+    try:
+        board = member.boards.get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
+
+    card = Card(board=board, list=board.first_list)
+    card.member = member
+
+    if request.method == "POST":
+        form = NewCardForm(request.POST, instance=card)
+
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect(reverse("boards:view", args=(board_id,)))
+    else:
+        form = NewCardForm(instance=card)
+
+    return render(request, "cards/new.html", {"form": form, "board": board, "member": member})
 
 
 # Move this card forward
-from djangotrellostats.trello_api.cards import add_comment_to_card
-
-
 @member_required
 def move_forward(request, board_id, card_id):
     return _move(request, board_id, card_id, movement_type="forward")

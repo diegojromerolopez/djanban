@@ -2,19 +2,17 @@
 
 from __future__ import unicode_literals
 
-import re
 from django import forms
-from django.core.validators import MinValueValidator
+from django.utils import timezone
+
 from django.db import transaction
 from django.forms import models
-from djangotrellostats.apps.boards.models import Board
+from djangotrellostats.apps.boards.models import Board, Card
+from djangotrellostats.apps.fetch.fetchers.trello import Initializer
+from djangotrellostats.trello_api.cards import new_card
 
-from trello.board import Board as TrelloBoard
 
 # Board edition form
-from djangotrellostats.apps.fetch.fetchers.trello import Initializer
-
-
 class EditBoardForm(models.ModelForm):
     class Meta:
         model = Board
@@ -68,4 +66,33 @@ class NewBoardForm(models.ModelForm):
                 super(NewBoardForm, self).save(commit=True)
 
 
+# New card
+class NewCardForm(models.ModelForm):
+    class Meta:
+        model = Card
+        fields = ["name", "description", "list", "labels"]
 
+    def __init__(self, *args, **kwargs):
+        super(NewCardForm, self).__init__(*args, **kwargs)
+        board = self.instance.board
+
+        # Only list of the same board are choices
+        lists = board.lists.exclude(type="closed").order_by("position")
+        self.fields["list"].choices = [(list_.id, list_.name) for list_ in lists]
+
+        # Only labels of the same board are choices
+        labels = board.labels.exclude(name="").order_by("name")
+        self.fields["labels"].choices = [(label.id, label.name) for label in labels]
+
+    def save(self, commit=True):
+        if commit:
+            with transaction.atomic():
+                card = self.instance
+                trello_card = new_card(card, card.member, self.cleaned_data.get("labels"))
+                card.uuid = trello_card.id
+                card.short_url = trello_card.shortUrl
+                card.url = trello_card.url
+                card.position = trello_card.pos
+                card.creation_datetime = timezone.now()
+                card.last_activity_datetime = timezone.now()
+                super(NewCardForm, self).save(commit=True)

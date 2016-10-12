@@ -19,6 +19,8 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/delete/?$', boards.delete, name="delete"),
 
     url(r'^(?P<board_id>\d+)/cards/?$', cards.view_report, name="view_card_report"),
+
+    url(r'^(?P<board_id>\d+)/cards/new/?$', cards.new, name="new_card"),
     url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)$', cards.view, name="view_card"),
 
     # Move cards

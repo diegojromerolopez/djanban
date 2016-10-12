@@ -30,11 +30,21 @@
 
 }
 
+/* Labels */
 .card-labels {
     margin-bottom: 20px;
     margin-top: 20px;
 }
 
+.card-label{
+    color: white;
+    display: inline-block;
+    font-size: 1.5em;
+    margin-right: 5px;
+    text-shadow: 2px 0 0 black, -2px 0 0 black, 0 2px 0 black, 0 -2px 0 black, 1px 1px black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black;
+}
+
+/* Blocking cards */
 .card-blocking_cards {
     margin-bottom: 20px;
     margin-top: 20px;

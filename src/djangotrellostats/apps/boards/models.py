@@ -92,6 +92,22 @@ class Board(models.Model):
     def __str__(self):
         return self.name
 
+    # First list of this board
+    @property
+    def first_list(self):
+        try:
+            return self.lists.all().order_by("position")[0]
+        except IndexError:
+            raise List.DoesNotExist
+
+    # Last list of this board
+    @property
+    def last_list(self):
+        try:
+            return self.lists.all().order_by("-position")[0]
+        except IndexError:
+            raise List.DoesNotExist
+
     # Number of tasks
     @property
     def number_of_tasks(self):

@@ -63,14 +63,24 @@
               </div>
 
               <div class="card-labels">
+                  <h2>Labels ({{labels|length}})</h2>
                   {% if labels %}
-                    {% for label in labels %}<span>{{label.name}}</span>{% endfor %}
+                    <div class="card-labels-list">
+                        {% for label in labels %}
+                            <span class="card-label label label-default" style="background-color:{{label.color}};">
+                                {{label.name}}
+                            </span>
+                        {% endfor %}
+                    </div>
                   {% else %}
-                    <em>Without labels.</em>
+                    <div class="card-labels-list card-labels-list-empty">
+                        <em>Without labels.</em>
+                    </div>
                   {% endif %}
                 </div>
 
               <div class="card-blocking_cards">
+                  <h2>Blocking cards ({{card.pending_blocking_cards|length}})</h2>
                   {% if card.pending_blocking_cards.exists %}
                         {% for blocking_card in card.pending_blocking_cards %}
                             <a href="{% url 'boards:view_card' board.id blocking_card.id %}" title="View blocking card {{blocking_card.name}}">
