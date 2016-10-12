@@ -1,6 +1,15 @@
 
+.card-view-in-trello {
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
 
-.card-list-environment{
+.card-creation-datetime {
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.card-list-environment {
     margin-bottom: 20px;
     margin-top: 20px;
     text-align: center;
@@ -17,17 +26,16 @@
     line-height: 1.42857143;
 }
 
-.card-list-environment .card-current-list.label-success{
+.card-list-environment .card-current-list.label-success {
 
 }
 
-.card-labels{
+.card-labels {
     margin-bottom: 20px;
     margin-top: 20px;
-
 }
 
-.card-blocking_cards{
+.card-blocking_cards {
     margin-bottom: 20px;
     margin-top: 20px;
 }
@@ -37,25 +45,25 @@
 
 }
 
-.card-spent_estimated_time select[name="date"]{
+.card-spent_estimated_time select[name="date"] {
     width: 55px;
 }
 
 .card-spent_estimated_time input[name="spent_time"],
-.card-spent_estimated_time input[name="estimated_time"]{
+.card-spent_estimated_time input[name="estimated_time"] {
     width: 50px;
 }
 
-.card-spent_estimated_time input[name="description"]{
+.card-spent_estimated_time input[name="description"] {
     width: 50%
 }
 
 /* Comments */
-.card-comments{
+.card-comments {
 
 }
 
-.card-comments form{
+.card-comments form {
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 30px;
@@ -63,19 +71,19 @@
     width: 90%;
 }
 
-.card-comments form textarea{
+.card-comments form textarea {
     min-height: 120px;
 }
 
-.card-comments form button{
+.card-comments form button {
 
 }
 
-.card-comments .card-comments-comment{
+.card-comments .card-comments-comment {
 
 }
 
-.card-comments .card-comments-comment form{
+.card-comments .card-comments-comment form {
     margin-left: 10px;
     margin-bottom: 10px;
     margin-right: 0px;

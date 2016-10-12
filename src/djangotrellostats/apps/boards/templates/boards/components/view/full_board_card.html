@@ -2,7 +2,7 @@
     <div class="col-md-12 card">
         <div class="panel panel-info">
           <div class="panel-heading">
-              <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}}">{{card.name}}</a>
+              <a href="{% url 'boards:view_card' card.board_id card.id %}" title="View card {{card.name}} in board {{card.board.name}}">{{card.name}}</a>
           </div>
           <div class="panel-body">
               <div class="card-info">

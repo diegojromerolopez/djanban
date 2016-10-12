@@ -28,12 +28,16 @@
                         <div class="col-md-3">
                             <div class="panel panel-info">
                               <div class="panel-heading">
-                                  <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}}">{{card.name}}</a>
+                                  <a href="{% url 'boards:view_card' card.board_id card.id %}" title="View card {{card.name}} in board {{card.board.name}}">{{card.name}}</a>
                               </div>
                               <div class="panel-body">
                                   <p>Last activity: {{card.last_activity_datetime}}</p>
                                   {% if card.spent_time %}<p>Spent time: {{card.spent_time|floatformat:-2}} hours</p>{% else %}{% endif %}
-                                  <p>{% if card.description %}{{card.description}}.{% endif %} <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}}" class="btn btn-primary btn-sm">View in Trello</a></p>
+                                  <p>
+                                      {% if card.description %}{{card.description}}.{% endif %}
+                                      <a href="{% url 'boards:view_card' card.board_id card.id %}" title="View card {{card.name}} in board {{card.board.name}}" class="btn btn-primary btn-sm">View</a>
+                                      <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}} in Trello" class="btn btn-primary btn-sm">View in Trello</a>
+                                  </p>
                               </div>
                             </div>
                         </div>

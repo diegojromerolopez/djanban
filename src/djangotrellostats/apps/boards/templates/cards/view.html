@@ -22,7 +22,10 @@
       </div>
       <div class="panel-body">
           <div>
-              <div>Created on {{card.creation_datetime}}</div>
+              <div class="card-view-in-trello">
+                  <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}} in Trello" class="btn btn-primary btn-sm">View in Trello</a>
+              </div>
+              <div class="card-creation-datetime">Created on {{card.creation_datetime}}</div>
               <div class="card-status">
                   {% if card.is_closed %}
                     <span class="fa fa-lock" title="This card is closed"></span> Closed
@@ -94,32 +97,33 @@
                   {% endif %}
               </div>
 
-
-          <div class="card-spent_estimated_time">
-              <h2>Spent time</h2>
-              <div>{{card.spent_time|floatformat:-2}} hours</div>
-              <form action="{% url 'boards:add_spent_estimated_time' board.id card.id %}" method="post">
-                  <select name="date">
-                      <option value="now">Now</option>
-                      <option value="-1">-1d</option>
-                      <option value="-2">-2d</option>
-                      <option value="-3">-3d</option>
-                      <option value="-4">-4d</option>
-                      <option value="-5">-5d</option>
-                      <option value="-6">-6d</option>
-                      <option value="-7">-7d</option>
-                      <option value="-8">-8d</option>
-                      <option value="-9">-9d</option>
-                  </select>
-                  <input type="number" name="spent_time" step="0.1" placeholder="S"/>
-                  <input type="number" name="estimated_time" step="0.1" placeholder="E"/>
-                  <input type="text" name="description"  placeholder="Description"/>
-                <button type="submit" class="btn btn-success" title="Add time to this card">
-                    Add spent/estimated time
-                    <span class="fa fa-clock-o"></span>
-                </button>
-              </form>
-          </div>
+          {% if member %}
+              <div class="card-spent_estimated_time">
+                  <h2>Spent time</h2>
+                  <div>{{card.spent_time|floatformat:-2}} hours</div>
+                  <form action="{% url 'boards:add_spent_estimated_time' board.id card.id %}" method="post">
+                      <select name="date">
+                          <option value="now">Now</option>
+                          <option value="-1">-1d</option>
+                          <option value="-2">-2d</option>
+                          <option value="-3">-3d</option>
+                          <option value="-4">-4d</option>
+                          <option value="-5">-5d</option>
+                          <option value="-6">-6d</option>
+                          <option value="-7">-7d</option>
+                          <option value="-8">-8d</option>
+                          <option value="-9">-9d</option>
+                      </select>
+                      <input type="number" name="spent_time" step="0.1" placeholder="S"/>
+                      <input type="number" name="estimated_time" step="0.1" placeholder="E"/>
+                      <input type="text" name="description"  placeholder="Description"/>
+                    <button type="submit" class="btn btn-success" title="Add time to this card">
+                        Add spent/estimated time
+                        <span class="fa fa-clock-o"></span>
+                    </button>
+                  </form>
+              </div>
+          {% endif %}
 
           {% if card.cycle_time %}
               <div class="cycle_time">
@@ -161,13 +165,15 @@
           <div class="card-comments">
               <h2>Comments ({{comments|length}})</h2>
               <div>
-                  <form action="{% url 'boards:add_comment' board.id card.id %}" method="post">
-                      <textarea name="comment" placeholder="Insert your comment here..."></textarea>
-                      <button type="submit" class="btn btn-success" title="Add new comment to this card">
-                        Send
-                        <span class="fa fa-comment-o"></span>
-                      </button>
-                  </form>
+                  {% if member %}
+                      <form action="{% url 'boards:add_comment' board.id card.id %}" method="post">
+                          <textarea name="comment" placeholder="Insert your comment here..."></textarea>
+                          <button type="submit" class="btn btn-success" title="Add new comment to this card">
+                            Send
+                            <span class="fa fa-comment-o"></span>
+                          </button>
+                      </form>
+                  {% endif %}
                   {% if comments|length == 0 %}
                     <em>No comments yet.</em>
                   {% else %}
@@ -180,12 +186,14 @@
                               <div class="panel-body">
                                   {{comment.content}}
                               </div>
-                              <form action="{% url 'boards:delete_comment' board.id card.id comment.id %}" method="post">
-                                  <button type="submit" class="btn btn-success delete_comment" title="Delete this comment">
-                                    Delete
-                                    <span class="fa fa-trash"></span>
-                                  </button>
-                              </form>
+                              {% if member %}
+                                  <form action="{% url 'boards:delete_comment' board.id card.id comment.id %}" method="post">
+                                      <button type="submit" class="btn btn-success delete_comment" title="Delete this comment">
+                                        Delete
+                                        <span class="fa fa-trash"></span>
+                                      </button>
+                                  </form>
+                              {% endif %}
                           </div>
                       {% endfor %}
                   {% endif %}
