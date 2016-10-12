@@ -16,7 +16,7 @@ from django.utils import timezone
 
 from djangotrellostats.apps.base.auth import user_is_member, get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
-from djangotrellostats.apps.boards.models import List, Board, Card
+from djangotrellostats.apps.boards.models import List, Board, Card, CardComment
 from djangotrellostats.apps.boards.stats import avg, std_dev
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 
@@ -79,6 +79,24 @@ def add_comment(request, board_id, card_id):
 
     # Otherwise, add the comment
     card.add_comment(member, comment_content)
+    return HttpResponseRedirect(reverse("boards:view_card", args=(board_id, card_id)))
+
+
+# Delete comment of a card
+@member_required
+def delete_comment(request, board_id, card_id, comment_id):
+    if request.method != "POST":
+        raise Http404
+    member = request.user.member
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        card = board.cards.get(id=card_id)
+        comment = card.comments.get(id=comment_id)
+    except (Board.DoesNotExist, Card.DoesNotExist, CardComment.DoesNotExist) as e:
+        raise Http404
+
+    # Delete the comment
+    card.delete_comment(member, comment)
     return HttpResponseRedirect(reverse("boards:view_card", args=(board_id, card_id)))
 
 

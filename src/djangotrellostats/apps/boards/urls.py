@@ -28,6 +28,8 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/add_spent_estimated_time/?$', cards.add_spent_estimated_time, name="add_spent_estimated_time"),
     # New comment
     url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/comments/new/?$', cards.add_comment, name="add_comment"),
+    # Delete comment
+    url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/comments/(?P<comment_id>\d+)/delete/?$', cards.delete_comment, name="delete_comment"),
 
     url(r'^(?P<board_id>\d+)/export_card_report/?$', cards.export_report, name="export_card_report"),
     url(r'^(?P<board_id>\d+)/workflow_card_report/(?P<workflow_id>\d+)/?$', boards.view_workflow_card_report, name="view_workflow_card_report"),

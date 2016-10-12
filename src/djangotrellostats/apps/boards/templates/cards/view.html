@@ -8,6 +8,11 @@
     <link href="{% static 'css/boards/cards/view.css' %}" rel="stylesheet" />
 {% endblock css %}
 
+{% block js %}
+    {{block.super}}
+    <script src="{% static 'js/boards/cards/confirm_delete_comment.js' %}"></script>
+{% endblock js %}
+
 {% block page_title %}{{card.name}}{% endblock %}
 
 {% block content %}
@@ -158,7 +163,7 @@
               <div>
                   <form action="{% url 'boards:add_comment' board.id card.id %}" method="post">
                       <textarea name="comment" placeholder="Insert your comment here..."></textarea>
-                      <button type="submit" class="btn btn-success" title="Add time to this card">
+                      <button type="submit" class="btn btn-success" title="Add new comment to this card">
                         Send
                         <span class="fa fa-comment-o"></span>
                       </button>
@@ -167,7 +172,7 @@
                     <em>No comments yet.</em>
                   {% else %}
                       {% for comment in comments %}
-                          <div class="panel panel-info">
+                          <div class="card-comments-comment panel panel-info">
                               <div class="panel-heading">
                                   Comment made by {{comment.author.initials}}
                                   (<span title="Comment made by {{comment.creation_datetime}}">{{comment.creation_datetime|naturaltime}}</span>)
@@ -175,6 +180,12 @@
                               <div class="panel-body">
                                   {{comment.content}}
                               </div>
+                              <form action="{% url 'boards:delete_comment' board.id card.id comment.id %}" method="post">
+                                  <button type="submit" class="btn btn-success delete_comment" title="Delete this comment">
+                                    Delete
+                                    <span class="fa fa-trash"></span>
+                                  </button>
+                              </form>
                           </div>
                       {% endfor %}
                   {% endif %}

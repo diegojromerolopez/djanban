@@ -21,8 +21,10 @@ class DailySpentTime(models.Model):
             ("board", "date", "week_of_year", "spent_time")
         )
 
+    uuid = models.CharField(max_length=128, verbose_name=u"External id of the card", unique=False, null=True)
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="daily_spent_times")
     card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="daily_spent_times", null=True)
+    comment = models.ForeignKey("boards.CardComment", verbose_name=u"Comment", related_name="comments", null=True)
     member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="daily_spent_times")
     description = models.TextField(verbose_name="Description of the task")
     date = models.DateField(verbose_name="Date of the time measurement")
@@ -55,6 +57,7 @@ class DailySpentTime(models.Model):
     def add_daily_spent_time(daily_spent_time):
         DailySpentTime.add(board=daily_spent_time.board,
                            card=daily_spent_time.card,
+                           comment=daily_spent_time.comment,
                            description=daily_spent_time.description,
                            member=daily_spent_time.member,
                            date=daily_spent_time.date,
@@ -63,7 +66,7 @@ class DailySpentTime(models.Model):
 
     # Add a new amount of spent time to a member
     @staticmethod
-    def add(board, member, date, card, description, spent_time, estimated_time):
+    def add(board, member, date, card, comment, description, spent_time, estimated_time):
         # In case a uuid is passed, load the Member object
         if type(member) is str or type(member) is unicode:
             try:
@@ -91,7 +94,7 @@ class DailySpentTime(models.Model):
             diff_time = Decimal(estimated_time) - Decimal(spent_time)
 
         # Creation of daily_spent_time
-        daily_spent_time = DailySpentTime(board=board, member=member, card=card,
+        daily_spent_time = DailySpentTime(board=board, member=member, card=card, comment=comment, uuid=comment.uuid,
                                           description=description,
                                           spent_time=spent_time,
                                           estimated_time=estimated_time,

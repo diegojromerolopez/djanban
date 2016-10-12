@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from decimal import Decimal
 
 import numpy
+import re
 import shortuuid
 from datetime import timedelta
 
@@ -19,7 +20,7 @@ from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.reports.models import CardMovement
 
 # Abstract model that represents the immutable objects
-from djangotrellostats.trello_api.cards import move_card, add_comment_to_card
+from djangotrellostats.trello_api.cards import move_card, add_comment_to_card, delete_comment_of_card
 
 
 class ImmutableModel(models.Model):
@@ -436,19 +437,23 @@ class Card(models.Model):
 
         # Adding spent time to the card
         if spent_time is not None:
+            if self.spent_time is None:
+                self.spent_time = 0
             self.spent_time += Decimal(spent_time)
+        else:
+            spent_time = Decimal(0.0)
 
         # Adding estimated time to the card
         if estimated_time is None:
             estimated_time = Decimal(spent_time)
 
+        if self.estimated_time is None:
+            self.estimated_time = 0
+
         self.estimated_time += Decimal(estimated_time)
 
         # Updating the card
         self.save()
-
-        # Creation of daily spent time
-        DailySpentTime.add(self.board, member, date, self, description, spent_time, estimated_time)
 
         # Preparation of the comment content with the style of Plus for Trello
         days_ago_str = ""
@@ -460,7 +465,11 @@ class Card(models.Model):
             days_ago=days_ago_str, spent_time=spent_time, estimated_time=estimated_time, description=description
         )
 
-        self.add_comment(member, comment_content)
+        comment = self.add_comment(member, comment_content)
+
+        # Creation of daily spent time
+        DailySpentTime.add(board=self.board, member=member, date=date, card=self, comment=comment,
+                           description=description, spent_time=spent_time, estimated_time=estimated_time)
 
     # Add a new comment to this card
     @transaction.atomic
@@ -472,6 +481,17 @@ class Card(models.Model):
         card_comment = CardComment(uuid=comment_data["id"], card=self, author=member, content=content,
                                    creation_datetime=timezone.now())
         card_comment.save()
+
+        # Returning the comment because it can be needed
+        return card_comment
+
+    # Delete an existing comment of this card
+    @transaction.atomic
+    def delete_comment(self, member, comment):
+        # Delete comment in Trello
+        delete_comment_of_card(self, member, comment)
+        # Delete comment locally
+        comment.delete()
 
 
 # Each one of the comments made by members in each card
@@ -492,6 +512,23 @@ class CardComment(ImmutableModel):
     author = models.ForeignKey("members.Member", verbose_name=u"Member author of this comment", related_name="comments")
     content = models.TextField(verbose_name=u"Content of the comment")
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
+
+    @property
+    def spent_estimated_time_measurement(self):
+        matches = re.match(Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, self.content)
+        if matches:
+            return {"spent_time": matches.group("spent"), "estimated_time": matches.group("estimated")}
+        return None
+
+    def delete(self, *args, **kwargs):
+        super(CardComment, self).delete(*args, **kwargs)
+        spent_estimated_time = self.spent_estimated_time_measurement
+        if spent_estimated_time:
+            if self.card.spent_time is not None:
+                self.card.spent_time -= Decimal(spent_estimated_time["spent_time"])
+            if self.card.estimated_time is not None:
+                self.card.estimated_time -= Decimal(spent_estimated_time["estimated_time"])
+            self.card.save()
 
 
 # Label of the task board

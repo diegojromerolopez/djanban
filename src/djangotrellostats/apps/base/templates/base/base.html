@@ -14,11 +14,13 @@
             <link href="{% static 'css/libs/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" />
             <link href="{% static 'css/base/base.css' %}" rel="stylesheet" />
             <link href="{% static 'css/base/form.css' %}" rel="stylesheet" />
+            <link href="{% static 'css/libs/jquery-confirm.css' %}" rel="stylesheet" />
         {% endblock css %}
 
         {% block js %}
             <script src="{% static 'js/libs/jquery-2.2.4.min.js' %}"></script>
             <script src="{% static 'js/libs/bootstrap.min.js' %}"></script>
+            <script src="{% static 'js/libs/jquery-confirm.js' %}"></script>
             <script type="text/javascript">
                 CKEDITOR_JQUERY_URL = "{% static 'js/libs/jquery-2.2.4.min.js' %}";
             </script>

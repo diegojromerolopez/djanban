@@ -32,7 +32,7 @@ from djangotrellostats.trello_api.connector import TrelloConnector
 class Initializer(TrelloConnector):
 
     def __init__(self, member, debug=True):
-        super(TrelloConnector, self).__init__(member)
+        super(Initializer, self).__init__(member)
         self.debug = debug
 
     # Fetch basic information of boards and its lists
@@ -515,9 +515,9 @@ class CardFetcher(object):
         card = self._factory(trello_card)
         card.save()
         # Creation of the comments
-        CardFetcher._create_comments(card)
+        comments = CardFetcher._create_comments(card)
         # Creation of the daily spent times
-        CardFetcher._create_daily_spent_times(card)
+        CardFetcher._create_daily_spent_times(card, comments)
         return card
 
     # Create comments of the card
@@ -578,9 +578,11 @@ class CardFetcher(object):
 
     # Creation of the daily spent times
     @staticmethod
-    def _create_daily_spent_times(card):
+    def _create_daily_spent_times(card, comments):
+        comments_dict = {comment.uuid: comment for comment in comments}
         for daily_spent_time in card.trello_card.daily_spent_times:
             daily_spent_time.card = card
+            daily_spent_time.comment = comments_dict[daily_spent_time.uuid]
             DailySpentTime.add_daily_spent_time(daily_spent_time)
 
     # Constructs a Card from a Trello Card
@@ -796,6 +798,7 @@ class CardFetcher(object):
                 # Creation of daily spent times for this card
                 daily_spent_time = DailySpentTime(board=self.board, description=description,
                                                   member=member_dict[member_uuid], date=date,
+                                                  uuid=comment["id"],
                                                   spent_time=spent, estimated_time=estimated)
 
                 if not hasattr(trello_card, "daily_spent_times"):
