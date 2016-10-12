@@ -194,7 +194,7 @@
                                   (<span title="Comment made by {{comment.creation_datetime}}">{{comment.creation_datetime|naturaltime}}</span>)
                               </div>
                               <div class="panel-body">
-                                  {{comment.content}}
+                                  {{comment.content|linebreaksbr}}
                               </div>
                               {% if member %}
                                   <form action="{% url 'boards:delete_comment' board.id card.id comment.id %}" method="post">
