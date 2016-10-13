@@ -208,8 +208,8 @@ def avg_time_by_list(board, workflow=None):
 
 
 # Average card estimated time in each list
-def avg_estimated_time_by_list(board, workflow=None):
-    chart_title = u"Average estimated time of all tasks living in each list for board {0} ".format(board.name)
+def avg_std_dev_time_by_list(board, workflow=None):
+    chart_title = u"Average standard deviation time of all tasks living in each list for board {0} ".format(board.name)
     if workflow:
         chart_title += "for workflow {0} ".format(workflow.name)
 

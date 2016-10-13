@@ -73,12 +73,12 @@ def avg_time_by_list(request, board_id, workflow_id=None):
 
 # Average estimated time by list
 @login_required
-def avg_estimated_time_by_list(request, board_id, workflow_id=None):
+def avg_std_dev_time_by_list(request, board_id, workflow_id=None):
     board = get_user_boards(request.user).get(id=board_id)
     workflow = None
     if board.workflows.filter(id=workflow_id).exists():
         workflow = board.workflows.get(id=workflow_id)
-    return cards.avg_estimated_time_by_list(board, workflow)
+    return cards.avg_std_dev_time_by_list(board, workflow)
 
 
 # Average spent time by label

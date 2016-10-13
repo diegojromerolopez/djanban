@@ -85,7 +85,7 @@ urlpatterns = [
     url(r'^number_of_comments_by_member/(?P<board_id>[\d]+)/(?P<card_id>[\d]+)/?$',private.number_of_comments_by_member, name="number_of_comments_by_member"),
 
     url(r'^avg_time_by_list/(?P<board_id>\d+)/(?P<workflow_id>\d+)?/?$', private.avg_time_by_list, name="avg_time_by_list"),
-    url(r'^avg_estimated_time_by_list/(?P<board_id>[\d]+)/(?P<workflow_id>\d+)?/?$', private.avg_estimated_time_by_list, name="avg_estimated_time_by_list"),
+    url(r'^avg_std_dev_time_by_list/(?P<board_id>[\d]+)/(?P<workflow_id>\d+)?/?$', private.avg_std_dev_time_by_list, name="avg_std_dev_time_by_list"),
 
     url(r'^public_avg_spent_times/(?P<board_public_access_code>.+)/?$', public.avg_spent_times, name="public_avg_spent_time"),
     url(r'^public_avg_estimated_times/(?P<board_public_access_code>.+)/?$', public.avg_estimated_times, name="public_avg_estimated_time"),
