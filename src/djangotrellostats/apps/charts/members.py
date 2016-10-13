@@ -216,7 +216,7 @@ def spent_time_by_week_evolution(board, show_interruptions=False):
 
             team_spent_time = 0
             for member in members:
-                daily_spent_times = member.daily_spent_times.filter(date__year=year_i, week_of_year=week_i)
+                daily_spent_times = member.daily_spent_times.filter(board=board, date__year=year_i, week_of_year=week_i)
                 spent_time = daily_spent_times.aggregate(Sum("spent_time"))["spent_time__sum"]
                 if spent_time is None:
                     spent_time = 0
@@ -228,7 +228,11 @@ def spent_time_by_week_evolution(board, show_interruptions=False):
             member_values["all"].append(team_spent_time)
 
             if show_interruptions:
-                num_interruptions = Interruption.objects.filter(datetime__year=year_i, datetime__date__gte=week_i_start_date, datetime__date__lte=week_i_end_date).count()
+                num_interruptions = Interruption.objects.filter(
+                    datetime__year=year_i,
+                    datetime__date__gte=week_i_start_date,
+                    datetime__date__lte=week_i_end_date
+                ).count()
                 if num_interruptions > 0:
                     interruptions.append(num_interruptions)
 
