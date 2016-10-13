@@ -65,6 +65,8 @@ class NewUserForm(forms.ModelForm):
             # Change password if both passwords match
             if self.cleaned_data.get("password1") \
                     and self.cleaned_data.get("password1") == self.cleaned_data.get("password2"):
+                print "TEST"
+                print self.cleaned_data.get("password1")
                 self.instance.set_password(self.cleaned_data.get("password1"))
                 self.instance.save()
 
@@ -75,8 +77,12 @@ class NewUserForm(forms.ModelForm):
 
             # Add boards to visitor
             boards = self.cleaned_data["boards"]
+            self.instance.boards.clear()
             for board in boards:
-                self.instance.boards.add(board)
+                if not self.instance.boards.filter(id=board).exists():
+                    self.instance.boards.add(board)
+
+            self.instance.save()
 
         return self.instance
 
@@ -101,13 +107,7 @@ class EditUserForm(NewUserForm):
         )
 
     def save(self, commit=True):
-        super(EditUserForm, self).save(commit=False)
-        if commit:
-            self.instance.boards.clear()
-            boards = self.cleaned_data["boards"]
-            for board in boards:
-                self.instance.boards.add(board)
-            self.instance.save()
+        super(EditUserForm, self).save(commit=True)
 
 
 # Delete a visitor
