@@ -90,9 +90,11 @@
                   </div>
                   <div class="panel-body">
                       <span class="number_of_tasks">{{board.number_of_done_tasks}}/{{board.number_of_tasks}}</span>
-                      <a href="{% url 'boards:new_card' board.id %}" class="btn btn-primary new-task" title="New task for board {{board.name}}">
-                        New
-                      </a>
+                      {% if member %}
+                          <a href="{% url 'boards:new_card' board.id %}" class="btn btn-primary new-task" title="New task for board {{board.name}}">
+                            New
+                          </a>
+                      {% endif %}
                   </div>
                 </div>
             </div>
