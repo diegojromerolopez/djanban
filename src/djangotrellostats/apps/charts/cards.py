@@ -399,8 +399,6 @@ def time_scatterplot(board, time_metric_name, y_function=lambda card: card.lead_
         end_month = end_working_date.month
         end_year = end_working_date.year
 
-    hours_per_day = Decimal(24)
-
     # Completed card
     cards = board.cards.filter(is_closed=False, list__type="done").order_by("id")
 
