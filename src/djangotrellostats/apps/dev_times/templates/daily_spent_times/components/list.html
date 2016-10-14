@@ -33,8 +33,11 @@
                         <td>{{daily_spent_time.day_of_year}}</td>
                         <td class="date">{{daily_spent_time.date}}</td>
                         <td>
-                            <a href="{{daily_spent_time.card.short_url}}" title="{{daily_spent_time.card.name}}" class="source_card_link">
+                            <a href="{% url 'boards:view_card' daily_spent_time.board_id daily_spent_time.card_id %}" title="View {{daily_spent_time.card.name}}" class="source_card_link">
                                 {{daily_spent_time.description|truncatechars:40}}
+                            </a>
+                            <a href="{{daily_spent_time.card.short_url}}" title="View {{daily_spent_time.card.name}} in Trello" class="source_card_link">
+                                <span class="fa fa-trello"></span>
                             </a>
                         </td>
                         <td>{{daily_spent_time.spent_time|floatformat:"-2"}}</td>
@@ -48,37 +51,41 @@
                     <td colspan="10">Number of measurements</td>
                     <td>{{month.daily_spent_times|length}}</td>
                 </tr>
-                <tr class="header month_{{month.i}}">
-                    <td colspan="10">Sum of amount</td>
-                    <td> {{month.rate_amount_sum|floatformat:"-2"}} ¤</td>
-                </tr>
-                <tr class="header month_{{month.i}}">
-                    <td colspan="10">Adjusted sum of value</td>
-                    <td> {{month.adjusted_amount_sum|floatformat:"-2"}} ¤</td>
-                </tr>
-                <tr class="header month_{{month.i}}">
-                    <td colspan="10">Sum of spent time</td>
-                    <td> {{month.spent_time_sum|floatformat:"-2"}}
-                        {% if selected_member and week and selected_member.minimum_working_hours_per_week %}
-                        /
-                        {{selected_member.minimum_working_hours_per_week}}
-                        {% endif %}
-                        hours
-                    </td>
-                </tr>
-                <tr class="header month_{{month.i}}">
-                    <td colspan="10">Adjusted sum of spent time</td>
-                    <td> {{month.adjusted_spent_time_sum|floatformat:"-2"}} hours
-                    </td>
-                </tr>
-                <tr class="header month_{{month.i}}">
-                    <td colspan="10">Sum of estimated time</td>
-                    <td> {{month.estimated_time_sum|floatformat:"-2"}} hours</td>
-                </tr>
-                <tr class="header month_{{month.i}} last">
-                    <td colspan="10">Diff between spent and estimated time</td>
-                    <td> {{month.diff_time_sum|floatformat:"-2"}} hours</td>
-                </tr>
+                {% if month.daily_spent_times|length > 0 %}
+                    {% if month.adjusted_amount_sum %}
+                        <tr class="header month_{{month.i}}">
+                            <td colspan="10">Sum of amount</td>
+                            <td> {{month.rate_amount_sum|floatformat:"-2"}} ¤</td>
+                        </tr>
+                        <tr class="header month_{{month.i}}">
+                            <td colspan="10">Adjusted sum of value</td>
+                            <td> {{month.adjusted_amount_sum|floatformat:"-2"}} ¤</td>
+                        </tr>
+                    {% endif %}
+                    <tr class="header month_{{month.i}}">
+                        <td colspan="10">Sum of spent time</td>
+                        <td> {{month.spent_time_sum|floatformat:"-2"}}
+                            {% if selected_member and week and selected_member.minimum_working_hours_per_week %}
+                            /
+                            {{selected_member.minimum_working_hours_per_week}}
+                            {% endif %}
+                            hours
+                        </td>
+                    </tr>
+                    <tr class="header month_{{month.i}}">
+                        <td colspan="10">Adjusted sum of spent time</td>
+                        <td> {{month.adjusted_spent_time_sum|floatformat:"-2"}} hours
+                        </td>
+                    </tr>
+                    <tr class="header month_{{month.i}}">
+                        <td colspan="10">Sum of estimated time</td>
+                        <td> {{month.estimated_time_sum|floatformat:"-2"}} hours</td>
+                    </tr>
+                    <tr class="header month_{{month.i}} last">
+                        <td colspan="10">Diff between spent and estimated time</td>
+                        <td> {{month.diff_time_sum|floatformat:"-2"}} hours</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
         </table>
     </div>
