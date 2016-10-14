@@ -338,6 +338,62 @@ class BoardFetcher(Fetcher):
 
                 member_report.save()
 
+    # Return the actions of the board grouped by the uuid of each card
+    def _fetch_trello_cards(self):
+        # Fetch as long as there is a result
+        cards = []
+        must_retry = True
+
+        # Limit of cards in each request
+        limit = 1000
+
+        # We will be making request from the earliest to the oldest actions, so we will use before parameter
+        # while since is always None
+        filters = {
+            'filter': 'all',
+            'fields': 'all',
+        }
+
+        # While there are more than 1000 cards, make another request for the previous 1000 cards
+        while must_retry:
+            cards_i = self.trello_board.get_cards(filters=filters)
+            cards += cards_i
+            must_retry = len(cards_i) == limit
+            if must_retry:
+                # We get the maximum date of these cards and use it to paginate,
+                # asking Trello to give us the actions since that date
+                before = BoardFetcher._get_before_str_from_cards(cards_i)
+                filters["before"] = before
+
+        # There should be no need to assure uniqueness of the cards but it's better to be sure that
+        # we have no repeated actions
+        cards_dict = {card.id: card for card in cards}
+        unique_cards = cards_dict.values()
+
+        # Return the cards
+        return unique_cards
+
+    # Get the since parameter based on the actions we've got. That is, get the max date of the actions and prepare
+    # the since parameter adding one microsecond to that date
+    @staticmethod
+    def _get_before_str_from_cards(cards):
+        # Get max date and parse it from ISO format
+        min_date_str = BoardFetcher._get_min_date_from_cards(cards)
+        min_date = dateutil.parser.parse(min_date_str)
+        # Get next possible date (max_date + 1 millisecond)
+        before_date = min_date
+        before_date_str = before_date.strftime(BoardFetcher.DATE_FORMAT)[:-3] + "Z"
+        return before_date_str
+
+    # Get the min date of a list of cards
+    @staticmethod
+    def _get_min_date_from_cards(cards):
+        min_date = None
+        for card in cards:
+            if min_date is None or min_date > card.created_date:
+                min_date = card.created_date
+        return min_date
+
     # Return the comments of the board grouped by the uuid of each card
     def _fetch_trello_comments_by_card(self):
         comments_by_card = self._fetch_trello_actions_by_card(action_filter="commentCard", debug=True)
@@ -388,35 +444,12 @@ class BoardFetcher(Fetcher):
     # Get the since parameter based on the actions we've got. That is, get the max date of the actions and prepare
     # the since parameter adding one microsecond to that date
     @staticmethod
-    def _get_since_str_from_actions(actions):
-        # Get max date and parse it from ISO format
-        max_date_str = BoardFetcher._get_max_date_from_actions(actions)
-        max_date = dateutil.parser.parse(max_date_str)
-        # Get next possible date (max_date + 1 millisecond)
-        since_date = max_date + timedelta(microseconds=1000)
-        since_date_str = since_date.strftime(BoardFetcher.DATE_FORMAT)[:-3] + "Z"
-        return since_date_str
-
-    # Get the max date of a list of actions
-    # We are not sure about the actions order, so each time we make a fetch of the actions of this board, we have to get
-    # the max date to make other fetch since that max date
-    @staticmethod
-    def _get_max_date_from_actions(actions):
-        max_date = None
-        for action in actions:
-            if max_date is None or max_date < action["date"]:
-                max_date = action["date"]
-        return max_date
-
-    # Get the since parameter based on the actions we've got. That is, get the max date of the actions and prepare
-    # the since parameter adding one microsecond to that date
-    @staticmethod
     def _get_before_str_from_actions(actions):
         # Get max date and parse it from ISO format
         min_date_str = BoardFetcher._get_min_date_from_actions(actions)
         min_date = dateutil.parser.parse(min_date_str)
         # Get next possible date (max_date + 1 millisecond)
-        before_date = min_date + timedelta(microseconds=1000)
+        before_date = min_date
         before_date_str = before_date.strftime(BoardFetcher.DATE_FORMAT)[:-3] + "Z"
         return before_date_str
 
