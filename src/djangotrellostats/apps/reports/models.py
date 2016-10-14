@@ -33,6 +33,9 @@ class CardMovement(models.Model):
 
     datetime = models.DateTimeField(verbose_name="Date and time this card has been moved")
 
+    def __unicode__(self):
+        return "{0} -> {1} (on {2})".format(self.source_list.name, self.destination_list.name, self.datetime)
+
 
 # Stat report by list
 class ListReport(models.Model):

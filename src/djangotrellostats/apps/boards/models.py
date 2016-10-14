@@ -467,6 +467,16 @@ class Card(models.Model):
 
         return adjusted_spent_time
 
+    @property
+    def completion_datetime(self):
+        if self.list.type != "done":
+            raise ValueError(u"This card is not completed")
+        try:
+            return self.movements.filter(destination_list__type="done").order_by("-id")[0].datetime
+        # In case this card is added directly in the "done" list
+        except IndexError:
+            return self.last_activity_datetime
+
     # Move this card to the next list
     @transaction.atomic
     def move_forward(self, member):

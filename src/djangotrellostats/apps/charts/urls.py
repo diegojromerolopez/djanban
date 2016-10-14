@@ -61,9 +61,18 @@ urlpatterns = [
     url(r'^number_of_cards_worked_on_by_week/(?P<board_id>[\d]+)?$', private.number_of_cards_worked_on_by_week,
         name="number_of_cards_worked_on_by_week"),
 
-    url(r'^cumulative_list_evolution/(?P<board_id>[\d]+)(/(?P<day_step>[\d]+))?$', private.cumulative_list_evolution,
+    # Cycle time scatterplot
+    url(r'^time_scatterplot/(?P<board_id>\d+)/(?P<time_metric>lead_time|cycle_time|spent_time)/?$',
+        private.time_scatterplot, name="time_scatterplot"),
+    url(r'^time_scatterplot/(?P<board_id>\d+)/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<year>\d+)/?$',
+        private.time_scatterplot, name="time_scatterplot"),
+    url(r'^time_scatterplot/(?P<board_id>\d+)/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<year>\d+)/(?P<month>\d+)/?$',
+        private.time_scatterplot, name="time_scatterplot"),
+
+    # Cumulative list evolution
+    url(r'^cumulative_list_evolution/(?P<board_id>\d+)(/(?P<day_step>[\d]+))?$', private.cumulative_list_evolution,
         name="cumulative_list_evolution"),
-    url(r'^cumulative_card_evolution/(?P<board_id>[\d]+)(/(?P<day_step>[\d]+))?$', private.cumulative_card_evolution,
+    url(r'^cumulative_card_evolution/(?P<board_id>\d+)(/(?P<day_step>[\d]+))?$', private.cumulative_card_evolution,
         name="cumulative_card_evolution"),
 
     # Evolution of number of comments

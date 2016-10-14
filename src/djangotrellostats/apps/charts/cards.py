@@ -10,6 +10,7 @@ import calendar
 from datetime import date
 
 import pytz
+from decimal import Decimal
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Min, Q, Count, Max
@@ -364,6 +365,68 @@ def cumulative_card_evolution(board, day_step=5):
             cumulative_chart.add("Done {0} cards".format(label.name), done_card_values_by_label[label.id])
 
     return cumulative_chart.render_django_response()
+
+
+# Scatterplot comparing the spent time vs. real elapsed time
+def time_scatterplot(board, time_metric_name, y_function=lambda card: card.lead_time/Decimal(24)/Decimal(7), year=None, month=None):
+    chart_title = u"{0} scatterplot of tasks for {1} as of {2}".format(time_metric_name, board.name, timezone.now())
+    scatterplot = pygal.DateLine(
+        title=chart_title, legend_at_bottom=False, print_values=False, print_zeroes=False, fill=False,
+        human_readable=True, x_label_rotation=65, stroke=False,
+        x_title="Completion date", y_title=time_metric_name
+    )
+
+    start_working_date = board.get_working_start_date()
+    end_working_date = board.get_working_end_date()
+    if start_working_date is None or end_working_date is None:
+        return scatterplot.render_django_response()
+
+    month_i = 1
+    end_month = end_working_date.month
+    end_year = end_working_date.year
+
+    if year is not None or month is not None:
+        if year:
+            year_i = int(year)
+            end_year = int(year)
+            if month:
+                month_i = int(month)
+                end_month = int(month)
+    else:
+        month_i = start_working_date.month
+        year_i = start_working_date.year
+
+        end_month = end_working_date.month
+        end_year = end_working_date.year
+
+    hours_per_day = Decimal(24)
+
+    # Completed card
+    cards = board.cards.filter(is_closed=False, list__type="done").order_by("id")
+
+    i = 0
+    while month_i <= end_month and year_i <= end_year:
+
+        card_values = []
+        cards_by_month = cards.filter(
+            creation_datetime__month=month_i, creation_datetime__year=year_i,
+            last_activity_datetime__month=month_i, last_activity_datetime__year=year_i,
+            spent_time__isnull=False
+        )
+
+        if cards_by_month.exists():
+            for card in cards_by_month:
+                card_values.append((card.completion_datetime.date(), y_function(card)))
+
+            scatterplot.add("{0}-{1}".format(year_i, month_i), card_values)
+
+        month_i += 1
+        i += 1
+        if month_i > 12:
+            month_i = 1
+            year_i += 1
+
+    return scatterplot.render_django_response()
 
 
 # Number of comments chart

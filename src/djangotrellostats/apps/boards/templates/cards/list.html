@@ -48,6 +48,24 @@
         </div>
 
         <div class="row">
+            <div class="col-sm-4">
+                <a href="{% url 'charts:time_scatterplot' board.id 'lead_time' %}" title="Lead time scatterplot">
+                    <img src="{% url 'charts:time_scatterplot' board.id 'lead_time' %}" alt="Lead time scatterplot" />
+                </a>
+            </div>
+            <div class="col-sm-4">
+                <a href="{% url 'charts:time_scatterplot' board.id 'cycle_time' %}" title="Cycle time scatterplot">
+                    <img src="{% url 'charts:time_scatterplot' board.id 'cycle_time' %}" alt="Cycle time scatterplot" />
+                </a>
+            </div>
+            <div class="col-sm-4">
+                <a href="{% url 'charts:time_scatterplot' board.id 'spent_time' %}" title="Spent time scatterplot">
+                    <img src="{% url 'charts:time_scatterplot' board.id 'spent_time' %}" alt="Spent time scatterplot" />
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
             <div class="col-sm-6">
                 <a href="{% url 'charts:avg_spent_time' board.id %}" title="Average spent time">
                     <img src="{% url 'charts:avg_spent_time' board.id %}" alt="Average spent time"/>

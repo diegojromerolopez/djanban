@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import datetime
 
 import pygal
+from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from isoweek import Week
@@ -272,6 +273,24 @@ def evolution_of_number_of_interruptions(request, board_id=None):
 def interruption_spent_time(request, board_id=None):
     board = _get_user_board_or_none(request, board_id)
     return interruptions.interruption_spent_time(request.user, board)
+
+
+# Scatterplot comparing the completion date vs. some time metric
+@login_required
+def time_scatterplot(request, board_id, time_metric, year=None, month=None):
+    board = _get_user_board_or_none(request, board_id)
+    if time_metric == "lead_time":
+        y_function = lambda card: card.lead_time/Decimal(24)/Decimal(7)
+        time_metric_name = "Lead time (in weeks)"
+    elif time_metric == "cycle_time":
+        y_function = lambda card: card.cycle_time / Decimal(24) / Decimal(7)
+        time_metric_name = "Cycle time (in weeks)"
+    elif time_metric == "spent_time":
+        y_function = lambda card: card.spent_time
+        time_metric_name = "Spent time (in days)"
+    else:
+        raise ValueError(u"Time metric {0} not recognized".format(time_metric))
+    return cards.time_scatterplot(board, time_metric_name, y_function=y_function, year=year, month=month)
 
 
 # Evolution of the interruption spent time
