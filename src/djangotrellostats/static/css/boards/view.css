@@ -24,3 +24,7 @@
 .board-title-container .board-mood .board-mood-face {
     font-size: 2em;
 }
+
+#board-summary .panel-body {
+    min-height: 64px;
+}
