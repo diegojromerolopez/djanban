@@ -245,6 +245,8 @@ class Board(models.Model):
         spent_time_by_week = self.spent_time_by_week
         # Number of weeks of the project
         num_weeks = len(spent_time_by_week)
+        if num_weeks == 0:
+            return 0
         # Sum of all time spent per week
         spent_time_sum = Decimal("0.0")
         for spent_time in spent_time_by_week:
@@ -256,6 +258,8 @@ class Board(models.Model):
     @property
     def last_weekly_spent_time(self):
         spent_time_by_week = self.spent_time_by_week.order_by("-week_of_year")
+        if not spent_time_by_week.exists():
+            return 0
         return spent_time_by_week[0]["spent_time"]
 
     # Return spent time per week

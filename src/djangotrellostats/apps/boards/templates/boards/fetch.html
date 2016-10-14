@@ -6,29 +6,41 @@
 
 <div class="row">
     <div class="col-md-5 center-block">
-        <div class="panel panel-danger ">
-          <div class="panel-heading">Danger! This action cannot be undone</div>
-          <div class="panel-body">
-              <p>
-                {{board.name}}'s data will be deleted and fetched again.
-              </p>
-              {% if board.last_fetch_datetime %}
+        {% if not done %}
+            <div class="panel panel-danger ">
+              <div class="panel-heading">Danger! This action cannot be undone</div>
+              <div class="panel-body">
                   <p>
-                    <strong>Last fetch</strong> was on {{board.last_fetch_datetime}} (<strong>{{board.last_fetch_datetime|timesince}} ago</strong>)
+                    {{board.name}}'s data will be deleted and fetched again.
                   </p>
-              {% endif %}
-              <p>
-                Are you sure?
-              </p>
+                  {% if board.last_fetch_datetime %}
+                      <p>
+                        <strong>Last fetch</strong> was on {{board.last_fetch_datetime}} (<strong>{{board.last_fetch_datetime|timesince}} ago</strong>)
+                      </p>
+                  {% endif %}
+                  <p>
+                    Are you sure?
+                  </p>
 
-              <form action="{% url 'boards:fetch' board.id %}" method="post">
-                <input type="hidden" name="board_id" value="{{board.id}}"/>
-                <button type="submit" class="btn btn-danger">I am sure, delete board contents and fetch again its data</button>
-              </form>
+                  <form action="{% url 'boards:fetch' board.id %}" method="post">
+                    <input type="hidden" name="board_id" value="{{board.id}}"/>
+                    <button type="submit" class="btn btn-danger">I am sure, delete board contents and fetch again its data</button>
+                  </form>
 
-          </div>
+              </div>
+            </div>
         </div>
-    </div>
+    {% else %}
+        <div class="panel panel-success">
+              <div class="panel-heading">Board fetched successfully</div>
+              <div class="panel-body">
+                  <p>
+                      Board {{board.name}} was fetched successfully!
+                      <a href="{% url 'boards:view' board.id %}" class="btn btn-primary">Go back to {{board.name}} dashboard</a>
+                  </p>
+              </div>
+        </div>
+    {% endif %}
 </div>
 
 {% endblock %}

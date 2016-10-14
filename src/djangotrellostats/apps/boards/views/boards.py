@@ -185,9 +185,10 @@ def fetch(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
 
+    replacements = {"member": member, "board": board}
+
     # Show fetch form
     if request.method == "GET":
-        replacements = {"member": member, "board": board}
         return render(request, "boards/fetch.html", replacements)
 
     # Confirm fetch form
@@ -195,10 +196,11 @@ def fetch(request, board_id):
     if confirmed_board_id and confirmed_board_id == board_id:
         start_time = time.time()
         board_fetcher = BoardFetcher(board)
-        board_fetcher.fetch()
+        board_fetcher.fetch(debug=True)
         end_time = time.time()
         print("Elapsed time {0} s".format(end_time-start_time))
-        return HttpResponseRedirect(reverse("boards:view", args=(board_id,)))
+        replacements["done"] = True
+        return render(request, "boards/fetch.html", replacements)
 
     raise Http404
 

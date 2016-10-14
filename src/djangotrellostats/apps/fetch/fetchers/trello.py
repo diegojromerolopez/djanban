@@ -340,7 +340,7 @@ class BoardFetcher(Fetcher):
 
     # Return the comments of the board grouped by the uuid of each card
     def _fetch_trello_comments_by_card(self):
-        comments_by_card = self._fetch_trello_actions_by_card(action_filter="commentCard")
+        comments_by_card = self._fetch_trello_actions_by_card(action_filter="commentCard", debug=True)
         return comments_by_card
 
     # Return the card movements of the board grouped by the uuid of each card
@@ -349,27 +349,39 @@ class BoardFetcher(Fetcher):
         return comments_by_card
 
     # Return the actions of the board grouped by the uuid of each card
-    def _fetch_trello_actions_by_card(self, action_filter, limit=1000):
+    def _fetch_trello_actions_by_card(self, action_filter, limit=1000, debug=False):
         # Fetch as long as there is a result
         actions = []
         must_retry = True
+
+        # We will be making request from the earliest to the oldest actions, so we will use before parameter
+        # while since is always None
         since = None
+        before = None
+
+        # While there are more than 1000 actions, make another request for the previous 1000 actions
         while must_retry:
-            actions_i = self.trello_board.fetch_actions(action_filter, limit, since)
+            actions_i = self.trello_board.fetch_actions(action_filter, limit, before=before, since=since)
             actions += actions_i
             must_retry = len(actions_i) == limit
             if must_retry:
                 # We get the maximum date of these actions and use it to paginate,
                 # asking Trello to give us the actions since that date
-                since = BoardFetcher._get_since_str_from_actions(actions_i)
+                before = BoardFetcher._get_before_str_from_actions(actions_i)
+
+        # There should be no need to assure uniqueness of the actions but it's better to be sure that
+        # we have no repeated actions
+        actions_dict = {action["id"]: action for action in actions}
+        unique_actions = actions_dict.values()
 
         # Group actions by card
         actions_by_card = {}
-        for action in actions:
+        for action in unique_actions:
             card_uuid = action[u"data"][u"card"][u"id"]
             if card_uuid not in actions_by_card:
                 actions_by_card[card_uuid] = []
             actions_by_card[card_uuid].append(action)
+
         # Return the actions grouped by card
         return actions_by_card
 
@@ -395,6 +407,29 @@ class BoardFetcher(Fetcher):
             if max_date is None or max_date < action["date"]:
                 max_date = action["date"]
         return max_date
+
+    # Get the since parameter based on the actions we've got. That is, get the max date of the actions and prepare
+    # the since parameter adding one microsecond to that date
+    @staticmethod
+    def _get_before_str_from_actions(actions):
+        # Get max date and parse it from ISO format
+        min_date_str = BoardFetcher._get_min_date_from_actions(actions)
+        min_date = dateutil.parser.parse(min_date_str)
+        # Get next possible date (max_date + 1 millisecond)
+        before_date = min_date + timedelta(microseconds=1000)
+        before_date_str = before_date.strftime(BoardFetcher.DATE_FORMAT)[:-3] + "Z"
+        return before_date_str
+
+    # Get the min date of a list of actions
+    # We are not sure about the actions order, so each time we make a fetch of the actions of this board, we have to get
+    # the max date to make other fetch since that max date
+    @staticmethod
+    def _get_min_date_from_actions(actions):
+        min_date = None
+        for action in actions:
+            if min_date is None or min_date > action["date"]:
+                min_date = action["date"]
+        return min_date
 
     # Fetch data for this workflow, creating a workflow report
     def _fetch_workflow(self, workflow, cards):
