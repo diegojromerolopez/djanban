@@ -48,9 +48,8 @@ def burndown(board, show_interruptions=False):
     date_i = copy.deepcopy(start_working_date)
     remaining_time_i = copy.deepcopy(remaining_time)
     while date_i <= end_working_date:
-        spent_time = daily_spent_times.filter(date=date_i).aggregate(
-            spent_time_sum=Sum("spent_time")
-        )["spent_time_sum"]
+        daily_spent_times_i = daily_spent_times.filter(date=date_i)
+        spent_time = daily_spent_times_i.aggregate(spent_time_sum=Sum("spent_time"))["spent_time_sum"]
 
         if spent_time is not None and spent_time > 0:
             remaining_time_i -= spent_time
@@ -66,6 +65,7 @@ def burndown(board, show_interruptions=False):
         date_i += timedelta(days=1)
 
     burndown_chart.add(u"Initial estimation for {0}".format(board.name), [remaining_time for i in range(0, len(x_labels))])
+
     burndown_chart.x_labels = x_labels
     burndown_chart.add(u"Burndown of {0}".format(board.name), remaining_time_values)
 

@@ -40,7 +40,7 @@ def new(request, board_id):
     else:
         form = NewCardForm(instance=card)
 
-    return render(request, "cards/new.html", {"form": form, "board": board, "member": member})
+    return render(request, "boards/cards/new.html", {"form": form, "board": board, "member": member})
 
 
 # Change labels of this card
@@ -241,7 +241,7 @@ def view(request, board_id, card_id):
         "labels": board.labels.exclude(name="").order_by("name"),
         "comments": comments
     }
-    return render(request, "cards/view.html", replacements)
+    return render(request, "boards/cards/view.html", replacements)
 
 
 # View card report
@@ -262,7 +262,7 @@ def view_report(request, board_id):
         "avg_cycle_time": avg(cards, "cycle_time"),
         "std_dev_cycle_time": std_dev(cards, "cycle_time"),
     }
-    return render(request, "cards/list.html", replacements)
+    return render(request, "boards/cards/list.html", replacements)
 
 
 # Export daily spent report in CSV format
@@ -280,7 +280,7 @@ def export_report(request, board_id):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = u'attachment; filename="{0}-cards.csv"'.format(board.name)
 
-    csv_template = loader.get_template('cards/csv.txt')
+    csv_template = loader.get_template('boards/cards/csv.txt')
     replacements = Context({
         "member": member,
         "board": board,

@@ -156,7 +156,7 @@ def view_lists(request, board_id):
     lists = board.lists.all()
     list_types = {list_type_par[0]: list_type_par[1] for list_type_par in List.LIST_TYPE_CHOICES}
     replacements = {"member": member, "board": board, "lists": lists, "list_types": list_types}
-    return render(request, "boards/board_lists.html", replacements)
+    return render(request, "boards/lists/list.html", replacements)
 
 
 # Delete a board
@@ -227,7 +227,7 @@ def view_workflow_card_report(request, board_id, workflow_id):
         "avg_cycle_time": avg(workflow_card_reports, "cycle_time"),
         "std_dev_cycle_time": std_dev(workflow_card_reports, "cycle_time"),
     }
-    return render(request, "cards/workflow_card_report_list.html", replacements)
+    return render(request, "boards/cards/workflow_card_report_list.html", replacements)
 
 
 # View label report
@@ -242,7 +242,7 @@ def view_label_report(request, board_id):
         raise Http404
     labels = board.labels.exclude(name="")
     replacements = {"member": member, "board": board, "labels": labels}
-    return render(request, "labels/list.html", replacements)
+    return render(request, "boards/labels/list.html", replacements)
 
 
 # View member report
@@ -266,7 +266,7 @@ def view_member_report(request, board_id):
         "week_of_year": week_of_year,
         "weeks_of_year": get_weeks_of_year_since_one_year_ago()
     }
-    return render(request, "member_reports/list.html", replacements)
+    return render(request, "boards/member_reports/list.html", replacements)
 
 
 # Change list type. Remember a list can be "development" or "done" list

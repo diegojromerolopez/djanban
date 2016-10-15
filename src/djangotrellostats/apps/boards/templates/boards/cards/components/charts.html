@@ -1,0 +1,126 @@
+<div class="row">
+    <div class="col-sm-6">
+        <a href="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" title="Tasks worked on by month">
+            <img src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" alt="Tasks worked on by month"/>
+        </a>
+    </div>
+    <div class="col-sm-6">
+        <a href="{% url 'charts:number_of_cards_worked_on_by_week' board.id %}" title="Tasks worked on by week">
+            <img src="{% url 'charts:number_of_cards_worked_on_by_week' board.id %}" alt="Tasks worked on by week"/>
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-6">
+        <a href="{% url 'charts:cumulative_list_evolution' board.id %}" title="Evolution of number of tasks by list">
+            <img src="{% url 'charts:cumulative_list_evolution' board.id %}" alt="Evolution of number of tasks by list"/>
+        </a>
+    </div>
+     <div class="col-sm-6">
+        <a href="{% url 'charts:cumulative_card_evolution' board.id %}" title="Evolution of number of tasks thru time">
+            <img src="{% url 'charts:cumulative_card_evolution' board.id %}" alt="Evolution of number of tasks thru time"/>
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-4">
+        <a href="{% url 'charts:time_scatterplot' 'lead_time' board.id  %}" title="Lead time scatterplot">
+            <img src="{% url 'charts:time_scatterplot' 'lead_time' board.id %}" alt="Lead time scatterplot" />
+        </a>
+    </div>
+    <div class="col-sm-4">
+        <a href="{% url 'charts:time_scatterplot' 'cycle_time' board.id  %}" title="Cycle time scatterplot">
+            <img src="{% url 'charts:time_scatterplot' 'cycle_time' board.id  %}" alt="Cycle time scatterplot" />
+        </a>
+    </div>
+    <div class="col-sm-4">
+        <a href="{% url 'charts:time_scatterplot' 'spent_time' board.id  %}" title="Spent time scatterplot">
+            <img src="{% url 'charts:time_scatterplot' 'spent_time' board.id  %}" alt="Spent time scatterplot" />
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-4">
+        <a href="{% url 'charts:time_box' 'lead_time' board.id  %}" title="Lead time box chart">
+            <img src="{% url 'charts:time_box' 'lead_time' board.id %}" alt="Lead time box chart" />
+        </a>
+    </div>
+    <div class="col-sm-4">
+        <a href="{% url 'charts:time_box' 'cycle_time' board.id  %}" title="Cycle time box chart">
+            <img src="{% url 'charts:time_box' 'cycle_time' board.id  %}" alt="Cycle time box chart" />
+        </a>
+    </div>
+    <div class="col-sm-4">
+        <a href="{% url 'charts:time_box' 'spent_time' board.id  %}" title="Spent time box chart">
+            <img src="{% url 'charts:time_box' 'spent_time' board.id  %}" alt="Spent time box chart" />
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-6">
+        <a href="{% url 'charts:time_vs_spent_time' 'lead_time' board.id  %}" title="Lead time vs spent time">
+            <img src="{% url 'charts:time_vs_spent_time' 'lead_time' board.id %}" alt="Lead time vs spent time" />
+        </a>
+    </div>
+    <div class="col-sm-6">
+        <a href="{% url 'charts:time_vs_spent_time' 'cycle_time' board.id  %}" title="Cycle time vs spent time">
+            <img src="{% url 'charts:time_vs_spent_time' 'cycle_time' board.id  %}" alt="Cycle time vs spent time" />
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-6">
+        <a href="{% url 'charts:avg_spent_time' board.id %}" title="Average spent time">
+            <img src="{% url 'charts:avg_spent_time' board.id %}" alt="Average spent time"/>
+        </a>
+    </div>
+    <div class="col-sm-6">
+        <a href="{% url 'charts:avg_spent_time_by_month' board.id %}" title="Average spent time by month">
+            <img src="{% url 'charts:avg_spent_time_by_month' board.id %}" alt="Average spent time by month"/>
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-6">
+        <a href="{% url 'charts:avg_estimated_time' board.id %}" title="Average estimated time">
+            <img src="{% url 'charts:avg_estimated_time' board.id %}" alt="Average estimated time"/>
+        </a>
+    </div>
+    <div class="col-sm-6">
+        <a href="{% url 'charts:avg_estimated_time_by_month' board.id %}" title="Average estimated time by month">
+            <img src="{% url 'charts:avg_estimated_time_by_month' board.id %}" alt="Average estimated time by month"/>
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-6">
+        <a href="{% url 'charts:avg_lead_time' board.id %}" title="Average lead time">
+            <img src="{% url 'charts:avg_lead_time' board.id %}" alt="Average lead time"/>
+        </a>
+    </div>
+    <div class="col-sm-6">
+        <a href="{% url 'charts:avg_lead_time_by_month' board.id %}" title="Average lead time by month">
+            <img src="{% url 'charts:avg_lead_time_by_month' board.id %}" alt="Average lead time by month"/>
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-6">
+        <a href="{% url 'charts:avg_cycle_time' board.id %}" title="Average cycle time">
+            <img src="{% url 'charts:avg_cycle_time' board.id %}" alt="Average cycle time"/>
+        </a>
+    </div>
+    <div class="col-sm-6">
+        <a href="{% url 'charts:avg_cycle_time_by_month' board.id %}" title="Average cycle time by month">
+            <img src="{% url 'charts:avg_cycle_time_by_month' board.id %}" alt="Average cycle time by month"/>
+        </a>
+    </div>
+</div>

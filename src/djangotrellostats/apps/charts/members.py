@@ -169,7 +169,7 @@ def avg_spent_time_by_weekday(current_user, board=None):
         spent_time_chart.add(u"{0}".format(member_name), member_weekday_spent_time)
 
     num_members = members.count()
-    spent_time_chart.add(u"Team",
+    spent_time_chart.add(u"All members",
                          [weekday_spent_time/num_members for weekday_i, weekday_spent_time in team_spent_time.items()])
 
     return spent_time_chart.render_django_response()
@@ -245,7 +245,7 @@ def spent_time_by_week_evolution(board, show_interruptions=False):
     for member in members:
         evolution_chart.add(member.trello_username, member_values[member.id])
 
-    evolution_chart.add("All", member_values["all"])
+    evolution_chart.add("All members", member_values["all"])
     if show_interruptions:
         evolution_chart.add("Interruptions", interruptions)
 

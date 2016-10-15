@@ -61,18 +61,59 @@ urlpatterns = [
     url(r'^number_of_cards_worked_on_by_week/(?P<board_id>[\d]+)?$', private.number_of_cards_worked_on_by_week,
         name="number_of_cards_worked_on_by_week"),
 
-    # Cycle time scatterplot
-    url(r'^time_scatterplot/(?P<time_metric>lead_time|cycle_time|spent_time)/?$',
-        private.time_scatterplot, name="time_scatterplot"),
+    # Time scatterplot
+    url(
+        r'^time_scatterplot/(?P<time_metric>lead_time|cycle_time|spent_time)/?$',
+        private.time_scatterplot, name="time_scatterplot"
+        ),
     url(
         r'^time_scatterplot/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/?$',
-        private.time_scatterplot, name="time_scatterplot"),
+        private.time_scatterplot, name="time_scatterplot"
+    ),
     url(
         r'^time_scatterplot/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/(?P<year>\d+)/?$',
-        private.time_scatterplot, name="time_scatterplot"),
+        private.time_scatterplot, name="time_scatterplot"
+    ),
     url(
         r'^time_scatterplot/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/(?P<year>\d+)/(?P<month>\d+)/?$',
-        private.time_scatterplot, name="time_scatterplot"),
+        private.time_scatterplot, name="time_scatterplot"
+    ),
+
+    # Time box chart
+    url(
+        r'^time_box/(?P<time_metric>lead_time|cycle_time|spent_time)/?$',
+        private.time_box, name="time_box"
+    ),
+    url(
+        r'^time_box/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/?$',
+        private.time_box, name="time_box"
+    ),
+    url(
+        r'^time_box/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/(?P<year>\d+)/?$',
+        private.time_box, name="time_box"
+    ),
+    url(
+        r'^time_box/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/(?P<year>\d+)/(?P<month>\d+)/?$',
+        private.time_box, name="time_box"
+    ),
+
+    # Lead/Cycle time vs. Spent time
+    url(
+        r'^time_vs_spent_time/(?P<time_metric>lead_time|cycle_time|spent_time)/?$',
+        private.time_vs_spent_time, name="time_vs_spent_time"
+    ),
+    url(
+        r'^time_vs_spent_time/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/?$',
+        private.time_vs_spent_time, name="time_vs_spent_time"
+    ),
+    url(
+        r'^time_box/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/(?P<year>\d+)/?$',
+        private.time_box, name="time_vs_spent_time"
+    ),
+    url(
+        r'^time_vs_spent_time/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/(?P<year>\d+)/(?P<month>\d+)/?$',
+        private.time_vs_spent_time, name="time_vs_spent_time"
+    ),
 
     # Cumulative list evolution
     url(r'^cumulative_list_evolution/(?P<board_id>\d+)(/(?P<day_step>[\d]+))?$', private.cumulative_list_evolution,

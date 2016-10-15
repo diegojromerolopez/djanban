@@ -293,6 +293,39 @@ def time_scatterplot(request, time_metric, board_id=None, year=None, month=None)
     return cards.time_scatterplot(request.user, time_metric_name, board, y_function=y_function, year=year, month=month)
 
 
+# Scatterplot comparing the completion date vs. some time metric
+@login_required
+def time_box(request, time_metric, board_id=None, year=None, month=None):
+    board = _get_user_board_or_none(request, board_id)
+    if time_metric == "lead_time":
+        y_function = lambda card: card.lead_time/Decimal(24)/Decimal(7)
+        time_metric_name = "Lead time (in weeks)"
+    elif time_metric == "cycle_time":
+        y_function = lambda card: card.cycle_time/Decimal(24)/Decimal(7)
+        time_metric_name = "Cycle time (in weeks)"
+    elif time_metric == "spent_time":
+        y_function = lambda card: card.spent_time
+        time_metric_name = "Spent time (in days)"
+    else:
+        raise ValueError(u"Time metric {0} not recognized".format(time_metric))
+    return cards.time_box(request.user, time_metric_name, board, y_function=y_function, year=year, month=month)
+
+
+# Lead/Cycle Time vs Spent time
+def time_vs_spent_time(request, time_metric, board_id=None, year=None, month=None):
+    board = _get_user_board_or_none(request, board_id)
+    if time_metric == "lead_time":
+        y_function = lambda card: card.lead_time/Decimal(24)
+        time_metric_name = "Lead time (days)"
+    elif time_metric == "cycle_time":
+        y_function = lambda card: card.cycle_time/Decimal(24)
+        time_metric_name = "Cycle time (days)"
+    else:
+        raise ValueError(u"Time metric {0} not recognized".format(time_metric))
+    return cards.time_vs_spent_time(request.user, time_metric_name, board,
+                                    y_function=y_function, year=year, month=month)
+
+
 # Evolution of the interruption spent time
 @login_required
 def evolution_of_interruption_spent_time(request, board_id=None):
