@@ -398,7 +398,6 @@ def time_scatterplot(current_user, time_metric_name="Time", board=None,
     end_month = end_working_date.month
     end_year = end_working_date.year
 
-    print year, month
     if year is not None or month is not None:
         if year:
             year_i = int(year)
