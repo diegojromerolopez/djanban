@@ -429,7 +429,7 @@ def time_scatterplot(current_user, time_metric_name="Time", board=None,
             for card in cards_by_month:
                 try:
                     card_values.append((card.completion_datetime.date(), y_function(card)))
-                # A TypeError is threw when the y_function can't be computed because some of its parameters
+                # A TypeError is thrown when the y_function can't be computed because some of its parameters
                 # are None. For example if a card is not done, spent_time will be None.
                 except TypeError:
                     pass
