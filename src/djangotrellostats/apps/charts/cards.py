@@ -368,16 +368,29 @@ def cumulative_card_evolution(board, day_step=5):
 
 
 # Scatterplot comparing the spent time vs. real elapsed time
-def time_scatterplot(board, time_metric_name, y_function=lambda card: card.lead_time/Decimal(24)/Decimal(7), year=None, month=None):
-    chart_title = u"{0} scatterplot of tasks for {1} as of {2}".format(time_metric_name, board.name, timezone.now())
+def time_scatterplot(current_user, time_metric_name="Time", board=None,
+                     y_function=lambda card: card.lead_time/Decimal(24)/Decimal(7),
+                     year=None, month=None):
+
+    if board:
+        chart_title = u"{0} scatterplot of tasks for {1} as of {2}".format(time_metric_name, board.name, timezone.now())
+    else:
+        chart_title = u"{0} scatterplot of tasks for all boards as of {1}".format(time_metric_name, timezone.now())
+
     scatterplot = pygal.DateLine(
         title=chart_title, legend_at_bottom=False, print_values=False, print_zeroes=False, fill=False,
         human_readable=True, x_label_rotation=65, stroke=False,
         x_title="Completion date", y_title=time_metric_name
     )
 
-    start_working_date = board.get_working_start_date()
-    end_working_date = board.get_working_end_date()
+    if board is None:
+        boards = get_user_boards(current_user)
+    else:
+        boards = [board]
+
+    start_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(start_working_date=Min("date"))["start_working_date"]
+    end_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(end_working_date=Max("date"))["end_working_date"]
+
     if start_working_date is None or end_working_date is None:
         return scatterplot.render_django_response()
 
@@ -385,6 +398,7 @@ def time_scatterplot(board, time_metric_name, y_function=lambda card: card.lead_
     end_month = end_working_date.month
     end_year = end_working_date.year
 
+    print year, month
     if year is not None or month is not None:
         if year:
             year_i = int(year)
@@ -399,8 +413,8 @@ def time_scatterplot(board, time_metric_name, y_function=lambda card: card.lead_
         end_month = end_working_date.month
         end_year = end_working_date.year
 
-    # Completed card
-    cards = board.cards.filter(is_closed=False, list__type="done").order_by("id")
+    # Completed cards
+    cards = Card.objects.filter(board__in=boards, is_closed=False, list__type="done").order_by("id")
 
     i = 0
     while month_i <= end_month and year_i <= end_year:
@@ -408,13 +422,15 @@ def time_scatterplot(board, time_metric_name, y_function=lambda card: card.lead_
         card_values = []
         cards_by_month = cards.filter(
             creation_datetime__month=month_i, creation_datetime__year=year_i,
-            last_activity_datetime__month=month_i, last_activity_datetime__year=year_i,
-            spent_time__isnull=False
+            last_activity_datetime__month=month_i, last_activity_datetime__year=year_i
         )
 
         if cards_by_month.exists():
             for card in cards_by_month:
-                card_values.append((card.completion_datetime.date(), y_function(card)))
+                try:
+                    card_values.append((card.completion_datetime.date(), y_function(card)))
+                except TypeError:
+                    pass
 
             scatterplot.add("{0}-{1}".format(year_i, month_i), card_values)
 

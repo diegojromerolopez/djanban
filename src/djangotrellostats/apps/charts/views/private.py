@@ -277,7 +277,7 @@ def interruption_spent_time(request, board_id=None):
 
 # Scatterplot comparing the completion date vs. some time metric
 @login_required
-def time_scatterplot(request, board_id, time_metric, year=None, month=None):
+def time_scatterplot(request, time_metric, board_id=None, year=None, month=None):
     board = _get_user_board_or_none(request, board_id)
     if time_metric == "lead_time":
         y_function = lambda card: card.lead_time/Decimal(24)/Decimal(7)
@@ -290,7 +290,7 @@ def time_scatterplot(request, board_id, time_metric, year=None, month=None):
         time_metric_name = "Spent time (in days)"
     else:
         raise ValueError(u"Time metric {0} not recognized".format(time_metric))
-    return cards.time_scatterplot(board, time_metric_name, y_function=y_function, year=year, month=month)
+    return cards.time_scatterplot(request.user, time_metric_name, board, y_function=y_function, year=year, month=month)
 
 
 # Evolution of the interruption spent time

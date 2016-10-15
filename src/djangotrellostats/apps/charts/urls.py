@@ -62,11 +62,16 @@ urlpatterns = [
         name="number_of_cards_worked_on_by_week"),
 
     # Cycle time scatterplot
-    url(r'^time_scatterplot/(?P<board_id>\d+)/(?P<time_metric>lead_time|cycle_time|spent_time)/?$',
+    url(r'^time_scatterplot/(?P<time_metric>lead_time|cycle_time|spent_time)/?$',
         private.time_scatterplot, name="time_scatterplot"),
-    url(r'^time_scatterplot/(?P<board_id>\d+)/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<year>\d+)/?$',
+    url(
+        r'^time_scatterplot/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/?$',
         private.time_scatterplot, name="time_scatterplot"),
-    url(r'^time_scatterplot/(?P<board_id>\d+)/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<year>\d+)/(?P<month>\d+)/?$',
+    url(
+        r'^time_scatterplot/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/(?P<year>\d+)/?$',
+        private.time_scatterplot, name="time_scatterplot"),
+    url(
+        r'^time_scatterplot/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/(?P<year>\d+)/(?P<month>\d+)/?$',
         private.time_scatterplot, name="time_scatterplot"),
 
     # Cumulative list evolution
