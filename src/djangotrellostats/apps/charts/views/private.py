@@ -305,7 +305,7 @@ def time_box(request, time_metric, board_id=None, year=None, month=None):
         time_metric_name = "Cycle time (in weeks)"
     elif time_metric == "spent_time":
         y_function = lambda card: card.spent_time
-        time_metric_name = "Spent time (in days)"
+        time_metric_name = "Spent time (days)"
     else:
         raise ValueError(u"Time metric {0} not recognized".format(time_metric))
     return cards.time_box(request.user, time_metric_name, board, y_function=y_function, year=year, month=month)

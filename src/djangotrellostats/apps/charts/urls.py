@@ -107,8 +107,8 @@ urlpatterns = [
         private.time_vs_spent_time, name="time_vs_spent_time"
     ),
     url(
-        r'^time_box/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/(?P<year>\d+)/?$',
-        private.time_box, name="time_vs_spent_time"
+        r'^time_vs_spent_time/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/(?P<year>\d+)/?$',
+        private.time_vs_spent_time, name="time_vs_spent_time"
     ),
     url(
         r'^time_vs_spent_time/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<board_id>\d+)/(?P<year>\d+)/(?P<month>\d+)/?$',

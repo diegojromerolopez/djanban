@@ -440,6 +440,12 @@ class Card(models.Model):
     members = models.ManyToManyField("members.Member", related_name="cards")
     blocking_cards = models.ManyToManyField("boards.card", related_name="blocked_cards")
 
+    # Age of this card as a timedelta
+    @property
+    def age(self):
+        now = timezone.now()
+        return now - self.creation_datetime
+
     # Is there any other card that blocks this card?
     @property
     def is_blocked(self):
@@ -449,6 +455,11 @@ class Card(models.Model):
     @property
     def pending_blocking_cards(self):
         return self.blocking_cards.exclude(list__type="done")
+
+    # Check if this card is done
+    @property
+    def is_done(self):
+        return self.list.type == "done"
 
     # Return the number of comments of a card
     @property
