@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+import math
 import numpy
 import copy
 from datetime import datetime, time, timedelta
@@ -231,7 +232,6 @@ def avg_std_dev_time_by_list(board, workflow=None):
 
 # Cumulative list evolution by month
 def cumulative_list_evolution(board, day_step=5):
-
     chart_title = u"Cumulative flow diagram as of {0}".format(timezone.now())
     chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
 
@@ -258,7 +258,7 @@ def cumulative_list_evolution(board, day_step=5):
         for list_ in lists:
             list_id = list_.id
             # Number of cards that were created in this list before the date
-            num_cards_without_movements = board.cards.filter(creation_datetime__lte=datetime_i, list=list_).\
+            num_cards_without_movements = board.cards.filter(creation_datetime__lte=datetime_i, list=list_). \
                 annotate(num_movements=Count("movements")).filter(num_movements=0).count()
 
             # Number of cards that were moved to this list before the date
@@ -380,7 +380,7 @@ def age(board):
         x_title="List", y_title="Age (days)"
     )
 
-    for list_ in board.lists.exclude(Q(type="done")|Q(type="closed")).order_by("position"):
+    for list_ in board.lists.exclude(Q(type="done") | Q(type="closed")).order_by("position"):
         list_cards = list_.cards.exclude(is_closed=False).order_by("id")
         cards_age = [card.age.days for card in list_cards]
         age_chart.add(list_.name, cards_age)
@@ -388,11 +388,63 @@ def age(board):
     return age_chart.render_django_response()
 
 
+# Completion histogram for cards
+def completion_histogram(board, time_metric="lead_time", units="days"):
+    time_metric_name = time_metric.replace("_", " ")
+    chart_title = u"{0} histogram for {1} as of {2}".format(time_metric_name, board.name, timezone.now())
+    chart_title = chart_title.capitalize()
+
+    completion_histogram_chart = pygal.Bar(
+        title=chart_title, legend_at_bottom=False, print_values=False, print_zeroes=False, fill=False,
+        human_readable=True, x_label_rotation=70, stroke=False,
+        x_title=units.capitalize(), y_title="Number of cards completed")
+
+    max_time = board.cards. \
+        exclude(is_closed=True). \
+        filter(list__type="done"). \
+        aggregate(max_time=Max(time_metric))["max_time"]
+
+    if max_time is None:
+        return completion_histogram_chart.render_django_response()
+
+    # For each day we compute how many cards have been completed in that number of days
+    x_labels = []
+    num_card_values = []
+
+    if units == "days":
+        max_time_in_days = int(math.ceil(max_time / Decimal(24.0)))
+
+        for days in range(1, max_time_in_days+1):
+            hours_min = (days-1) * 24.0
+            hours_max = days * 24.0
+            card_filter = {"{0}__gt".format(time_metric): hours_min, "{0}__lte".format(time_metric): hours_max}
+            num_cards = board.cards.exclude(is_closed=True).filter(list__type="done").filter(**card_filter).count()
+            if num_cards > 0:
+                x_labels.append(days)
+                num_card_values.append(num_cards)
+
+    elif units == "hours":
+        for hours in range(1, max_time+1):
+            hours_min = (hours - 1)
+            card_filter = {"{0}__gt".format(time_metric): hours_min, "{0}__lte".format(time_metric): hours}
+            num_cards = board.cards.exclude(is_closed=True).filter(list__type="done").filter(**card_filter).count()
+            if num_cards > 0:
+                x_labels.append(hours)
+                num_card_values.append(num_cards)
+
+    else:
+        ValueError(u"Unknown units")
+
+    completion_histogram_chart.x_labels = x_labels
+    completion_histogram_chart.add(units.capitalize(), num_card_values)
+
+    return completion_histogram_chart.render_django_response()
+
+
 # Scatterplot comparing the completion time vs. spent/lead/cycle time
 def time_scatterplot(current_user, time_metric_name="Time", board=None,
-                     y_function=lambda card: card.lead_time/Decimal(24)/Decimal(7),
+                     y_function=lambda card: card.lead_time / Decimal(24) / Decimal(7),
                      year=None, month=None):
-
     if board:
         chart_title = u"{0} scatterplot of tasks for {1} as of {2}".format(time_metric_name, board.name, timezone.now())
     else:
@@ -409,8 +461,10 @@ def time_scatterplot(current_user, time_metric_name="Time", board=None,
     else:
         boards = [board]
 
-    start_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(start_working_date=Min("date"))["start_working_date"]
-    end_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(end_working_date=Max("date"))["end_working_date"]
+    start_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(start_working_date=Min("date"))[
+        "start_working_date"]
+    end_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(end_working_date=Max("date"))[
+        "end_working_date"]
 
     if start_working_date is None or end_working_date is None:
         return scatterplot.render_django_response()
@@ -469,7 +523,6 @@ def time_scatterplot(current_user, time_metric_name="Time", board=None,
 def time_vs_spent_time(current_user, time_metric_name="Time", board=None,
                        y_function=lambda card: card.lead_time,
                        year=None, month=None):
-
     now = timezone.now()
     if board:
         chart_title = u"{0} vs spent time of tasks for {1} as of {2}".format(time_metric_name, board.name, now)
@@ -487,8 +540,10 @@ def time_vs_spent_time(current_user, time_metric_name="Time", board=None,
     else:
         boards = [board]
 
-    start_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(start_working_date=Min("date"))["start_working_date"]
-    end_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(end_working_date=Max("date"))["end_working_date"]
+    start_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(start_working_date=Min("date"))[
+        "start_working_date"]
+    end_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(end_working_date=Max("date"))[
+        "end_working_date"]
 
     if start_working_date is None or end_working_date is None:
         return time_vs_spent_time_chart.render_django_response()
@@ -545,9 +600,8 @@ def time_vs_spent_time(current_user, time_metric_name="Time", board=None,
 
 # Box chart comparing the homogenicity of a time metric
 def time_box(current_user, time_metric_name="Time", board=None,
-             y_function=lambda card: card.lead_time/Decimal(24)/Decimal(7),
+             y_function=lambda card: card.lead_time / Decimal(24) / Decimal(7),
              year=None, month=None):
-
     if board:
         chart_title = u"{0} box chart of tasks for {1} as of {2}".format(time_metric_name, board.name, timezone.now())
     else:
@@ -564,8 +618,10 @@ def time_box(current_user, time_metric_name="Time", board=None,
     else:
         boards = [board]
 
-    start_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(start_working_date=Min("date"))["start_working_date"]
-    end_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(end_working_date=Max("date"))["end_working_date"]
+    start_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(start_working_date=Min("date"))[
+        "start_working_date"]
+    end_working_date = DailySpentTime.objects.filter(board__in=boards).aggregate(end_working_date=Max("date"))[
+        "end_working_date"]
 
     if start_working_date is None or end_working_date is None:
         return box_chart.render_django_response()

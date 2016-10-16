@@ -311,7 +311,26 @@ def time_box(request, time_metric, board_id=None, year=None, month=None):
     return cards.time_box(request.user, time_metric_name, board, y_function=y_function, year=year, month=month)
 
 
+# Completion histogram
+@login_required
+def completion_histogram(request, board_id, time_metric="lead_time", units="days"):
+    board = _get_user_board_or_none(request, board_id)
+
+    if time_metric is None:
+        time_metric = "lead_time"
+    elif time_metric != "lead_time" and time_metric != "cycle_time" and time_metric != "spent_time":
+        raise ValueError(u"Time metric {0} not recognized".format(time_metric))
+
+    if units is None:
+        units = "days"
+    elif units != "days" and units != "hours":
+        raise ValueError(u"Units value {0} not recognized".format(units))
+
+    return cards.completion_histogram(board, time_metric, units)
+
+
 # Lead/Cycle Time vs Spent time
+@login_required
 def time_vs_spent_time(request, time_metric, board_id=None, year=None, month=None):
     board = _get_user_board_or_none(request, board_id)
     if time_metric == "lead_time":
@@ -326,7 +345,8 @@ def time_vs_spent_time(request, time_metric, board_id=None, year=None, month=Non
                                     y_function=y_function, year=year, month=month)
 
 
-# Card age box chart
+# Card age per list box chart
+@login_required
 def card_age(request, board_id):
     board = _get_user_board_or_none(request, board_id)
     return cards.age(board)

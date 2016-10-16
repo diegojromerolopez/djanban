@@ -9,10 +9,14 @@
         There are no cards in this board. Have you tried to fetch the cards?
     {% else %}
         <div class="card-charts">
+            <h2>Card stats</h2>
             {% include "boards/cards/components/charts.html" %}
         </div>
 
         <div class="row">
+            <div class="col-md-12">
+                <h2>Card list</h2>
+            </div>
             <div class="panel col-md-12">
                 <div>
                     <a href="{% url 'boards:export_card_report' board.id %}" class="btn btn-primary">Export as CSV</a>
