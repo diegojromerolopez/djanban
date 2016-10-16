@@ -28,7 +28,7 @@ def burndown(board, show_interruptions=False):
     remaining_time = estimated_number_of_hours
     daily_spent_times = board.daily_spent_times.filter(spent_time__gt=0).distinct().order_by("date")
 
-    # Remaining time is neede for making the burndown chart
+    # Remaining time is needed for making the burndown chart
     if remaining_time is None:
         return burndown_chart.render_django_response()
 
