@@ -115,6 +115,9 @@ urlpatterns = [
         private.time_vs_spent_time, name="time_vs_spent_time"
     ),
 
+    # Card age per list
+    url(r'^card_age/(?P<board_id>\d+)/?$', private.card_age, name="card_age"),
+
     # Cumulative list evolution
     url(r'^cumulative_list_evolution/(?P<board_id>\d+)(/(?P<day_step>[\d]+))?$', private.cumulative_list_evolution,
         name="cumulative_list_evolution"),

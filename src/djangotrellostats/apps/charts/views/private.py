@@ -326,6 +326,12 @@ def time_vs_spent_time(request, time_metric, board_id=None, year=None, month=Non
                                     y_function=y_function, year=year, month=month)
 
 
+# Card age box chart
+def card_age(request, board_id):
+    board = _get_user_board_or_none(request, board_id)
+    return cards.age(board)
+
+
 # Evolution of the interruption spent time
 @login_required
 def evolution_of_interruption_spent_time(request, board_id=None):

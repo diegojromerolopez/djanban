@@ -367,6 +367,27 @@ def cumulative_card_evolution(board, day_step=5):
     return cumulative_chart.render_django_response()
 
 
+# Current age of each card per list in the board
+def age(board):
+    if board:
+        chart_title = u"Age box chart of tasks for {0} as of {1}".format(board.name, timezone.now())
+    else:
+        chart_title = u"Age box chart of tasks for all boards as of {0}".format(timezone.now())
+
+    age_chart = pygal.Box(
+        title=chart_title, legend_at_bottom=False, print_values=False, print_zeroes=False, fill=False,
+        human_readable=True, x_label_rotation=65, stroke=False,
+        x_title="List", y_title="Age (days)"
+    )
+
+    for list_ in board.lists.exclude(Q(type="done")|Q(type="closed")).order_by("position"):
+        list_cards = list_.cards.exclude(is_closed=False).order_by("id")
+        cards_age = [card.age.days for card in list_cards]
+        age_chart.add(list_.name, cards_age)
+
+    return age_chart.render_django_response()
+
+
 # Scatterplot comparing the completion time vs. spent/lead/cycle time
 def time_scatterplot(current_user, time_metric_name="Time", board=None,
                      y_function=lambda card: card.lead_time/Decimal(24)/Decimal(7),
