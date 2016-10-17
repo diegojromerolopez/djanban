@@ -1,6 +1,13 @@
 {% extends "boards/view.html" %}
 
+{% load staticfiles %}
+
 {% block page_title %}Fetch data from {{board.name}}{% endblock %}
+
+{% block js %}
+    {{block.super}}
+    <script src="{% static 'js/fetch/fetch.js' %}"></script>
+{% endblock js %}
 
 {% block content %}
 
@@ -22,9 +29,9 @@
                     Are you sure?
                   </p>
 
-                  <form action="{% url 'boards:fetch' board.id %}" method="post">
+                  <form id="fetch_form" action="{% url 'boards:fetch' board.id %}" method="post">
                     <input type="hidden" name="board_id" value="{{board.id}}"/>
-                    <button type="submit" class="btn btn-danger">I am sure, delete board contents and fetch again its data</button>
+                    <button id="fetch_button" type="submit" class="btn btn-danger">I am sure, delete board contents and fetch again its data</button>
                   </form>
 
               </div>
