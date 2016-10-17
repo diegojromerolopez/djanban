@@ -204,7 +204,7 @@ def _interruption_measurement_by_month(current_user, chart_title, interruption_m
 
     interruptions_filter = {}
     if board:
-        interruptions_filter["boards"] = board
+        interruptions_filter["board"] = board
     else:
         interruptions_filter["member__in"] = get_user_team_mates(current_user)
 
