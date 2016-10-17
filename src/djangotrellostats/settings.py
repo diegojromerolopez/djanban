@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'djangotrellostats.apps.agility_rating',
     'djangotrellostats.apps.base',
     'djangotrellostats.apps.boards',
+    'djangotrellostats.apps.charts',
     'djangotrellostats.apps.hourly_rates',
     'djangotrellostats.apps.index',
     'djangotrellostats.apps.journal',

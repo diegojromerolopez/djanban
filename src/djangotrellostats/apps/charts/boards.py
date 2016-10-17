@@ -7,11 +7,20 @@ from datetime import timedelta
 
 import pygal
 from django.db.models import Sum
+
+from djangotrellostats.apps.charts.models import ChartCache
 from djangotrellostats.apps.dev_environment.models import Interruption
 
 
 # Burndown for the board
 def burndown(board, show_interruptions=False):
+
+    chart_uuid = "boards.burndown-{0}".format("with_interruptions" if show_interruptions else "without_interruptions")
+    try:
+        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except ChartCache.DoesNotExist:
+        pass
 
     chart_title = u"Burndown for board {0}".format(board.name)
     if show_interruptions:
@@ -72,4 +81,5 @@ def burndown(board, show_interruptions=False):
     if show_interruptions:
         burndown_chart.add(u"Interruptions of {0}".format(board.name), interruptions)
 
-    return burndown_chart.render_django_response()
+    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=burndown_chart.render(is_unicode=True))
+    return chart.render_django_response()

@@ -9,6 +9,7 @@ from django.db.models import Avg, Min, Count
 from django.utils import timezone
 
 from djangotrellostats.apps.boards.models import Card
+from djangotrellostats.apps.charts.models import ChartCache
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 
 
@@ -20,6 +21,15 @@ from djangotrellostats.utils.week import number_of_weeks_of_year, get_iso_week_o
 
 # Average spent times
 def avg_spent_times(request, board=None):
+
+    # Caching
+    chart_uuid = "labels.avg_spent_times-{0}".format(board.id if board else "None")
+    try:
+        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except ChartCache.DoesNotExist:
+        pass
+
     chart_title = u"Average task spent time as of {0}".format(timezone.now())
     if board:
         chart_title += u" for board {0}".format(board.name)
@@ -47,7 +57,50 @@ def avg_spent_times(request, board=None):
             if label.name:
                 avg_times_chart.add(u"{0} average spent time".format(label.name), label.avg_spent_time())
 
-    return avg_times_chart.render_django_response()
+    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=avg_times_chart.render(is_unicode=True))
+    return chart.render_django_response()
+
+
+# Average estimated times
+def avg_estimated_times(request, board=None):
+
+    # Caching
+    chart_uuid = "labels.avg_estimated_times-{0}".format(board.id if board else "None")
+    try:
+        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except ChartCache.DoesNotExist:
+        pass
+
+    chart_title = u"Average task estimated time as of {0}".format(timezone.now())
+    if board:
+        chart_title += u" for board {0}".format(board.name)
+
+    avg_times_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
+                                          print_zeroes=False, human_readable=True)
+
+    if board:
+        cards = board.cards.all()
+        total_avg_estimated_time = cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
+        avg_times_chart.add(u"Average estimated time", total_avg_estimated_time)
+    else:
+        boards = get_user_boards(request.user)
+        cards = Card.objects.filter(board__in=boards)
+        total_avg_estimated_time = cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
+        avg_times_chart.add(u"All boards", total_avg_estimated_time)
+        for board in boards:
+            board_avg_estimated_time = board.cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
+            avg_times_chart.add(u"{0}".format(board.name), board_avg_estimated_time)
+
+    if board:
+        labels = board.labels.all()
+
+        for label in labels:
+            if label.name:
+                avg_times_chart.add(u"{0} average estimated time".format(label.name), label.avg_estimated_time())
+
+    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=avg_times_chart.render(is_unicode=True))
+    return chart.render_django_response()
 
 
 # Average spent time by month
@@ -72,6 +125,15 @@ def number_of_cards_worked_on_by_week(board=None):
 
 # Average spent/estimated time by week/month
 def _daily_spent_times_by_period(board=None, time_measurement="spent_time", operation="Avg", period="month"):
+
+    # Caching
+    chart_uuid = "labels._daily_spent_times_by_period-{0}-{1}-{2}-{3}".format(board.id if board else "None", time_measurement, operation, period)
+    try:
+        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except ChartCache.DoesNotExist:
+        pass
+
     daily_spent_time_filter = {"{0}__gt".format(time_measurement): 0}
     last_activity_datetime = timezone.now()
     if board:
@@ -172,36 +234,6 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
         if sum(label_measurement_values[label.id]) > 0:
             period_measurement_chart.add(label.name, label_measurement_values[label.id])
 
-    return period_measurement_chart.render_django_response()
+    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=period_measurement_chart.render(is_unicode=True))
+    return chart.render_django_response()
 
-
-# Average estimated times
-def avg_estimated_times(request, board=None):
-    chart_title = u"Average task estimated time as of {0}".format(timezone.now())
-    if board:
-        chart_title += u" for board {0}".format(board.name)
-
-    avg_times_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
-                                          print_zeroes=False, human_readable=True)
-
-    if board:
-        cards = board.cards.all()
-        total_avg_estimated_time = cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
-        avg_times_chart.add(u"Average estimated time", total_avg_estimated_time)
-    else:
-        boards = get_user_boards(request.user)
-        cards = Card.objects.filter(board__in=boards)
-        total_avg_estimated_time = cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
-        avg_times_chart.add(u"All boards", total_avg_estimated_time)
-        for board in boards:
-            board_avg_estimated_time = board.cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
-            avg_times_chart.add(u"{0}".format(board.name), board_avg_estimated_time)
-
-    if board:
-        labels = board.labels.all()
-
-        for label in labels:
-            if label.name:
-                avg_times_chart.add(u"{0} average estimated time".format(label.name), label.avg_estimated_time())
-
-    return avg_times_chart.render_django_response()

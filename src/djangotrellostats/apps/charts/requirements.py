@@ -9,6 +9,9 @@ import pygal
 from django.db.models import Sum
 
 
+from djangotrellostats.apps.charts.models import ChartCache
+
+
 # Burndown chart for each requirement
 def burndown(board, requirement=None):
     if requirement is not None:
@@ -18,6 +21,14 @@ def burndown(board, requirement=None):
 
 # Burndown for a particular requirement
 def _requirement_burndown(requirement):
+    # Caching
+    chart_uuid = "requirements._requirement_burndown-{0}".format(requirement.id)
+    try:
+        chart = ChartCache.get(board=requirement.board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except ChartCache.DoesNotExist:
+        pass
+
     board = requirement.board
 
     chart_title = u"Burndown of requirement {0}".format(requirement.code)
@@ -67,11 +78,20 @@ def _requirement_burndown(requirement):
     burndown_chart.x_labels = x_labels
     burndown_chart.add(u"Burndown of {0}".format(requirement.code), remaining_time_values)
 
-    return burndown_chart.render_django_response()
+    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=burndown_chart.render(is_unicode=True))
+    return chart.render_django_response()
 
 
 # Burndown for all requirements
 def _burndown_by_requirement(board):
+
+    # Caching
+    chart_uuid = "requirements._burndown_by_requirement-{0}".format(board.id)
+    try:
+        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except ChartCache.DoesNotExist:
+        pass
 
     chart_title = u"Burndown for board {0}".format(board.name)
     chart_title += u" as of {1}".format(board.name, board.get_human_fetch_datetime())
@@ -120,5 +140,7 @@ def _burndown_by_requirement(board):
     burndown_chart.x_labels = x_labels
     burndown_chart.add(u"Burndown according to {0} requirements".format(board.name), remaining_time_values)
 
-    return burndown_chart.render_django_response()
+    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=burndown_chart.render(is_unicode=True))
+    return chart.render_django_response()
+
 

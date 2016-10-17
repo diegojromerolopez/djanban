@@ -11,6 +11,7 @@ from isoweek import Week
 
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.boards.models import CardComment, Card
+from djangotrellostats.apps.charts.models import ChartCache
 from djangotrellostats.apps.dev_environment.models import Interruption
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
@@ -22,6 +23,14 @@ from djangotrellostats.utils.week import number_of_weeks_of_year, get_iso_week_o
 def task_movements_by_member(movement_type="forward", board=None):
     if movement_type != "forward" and movement_type != "backward":
         raise ValueError("{0} is not recognized as a valid movement type".format(movement_type))
+
+    # Caching
+    chart_uuid = "members.task_movements_by_member-{0}-{1}".format(movement_type, board.id if board else "None")
+    try:
+        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except ChartCache.DoesNotExist:
+        pass
 
     chart_title = u"Task {0} movements as of {1}".format(movement_type, timezone.now())
     if board:
@@ -66,7 +75,8 @@ def task_movements_by_member(movement_type="forward", board=None):
         except MemberReport.DoesNotExist:
             pass
 
-    return member_chart.render_django_response()
+    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=member_chart.render(is_unicode=True))
+    return chart.render_django_response()
 
 
 # Spent time by week by member
@@ -76,6 +86,14 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
         today = now.date()
         week_of_year_ = get_iso_week_of_year(today)
         week_of_year = "{0}W{1}".format(today.year, week_of_year_)
+
+    # Caching
+    chart_uuid = "members.spent_time_by_week-{0}-{1}".format(current_user.id, week_of_year, board.id if board else "None")
+    try:
+        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except ChartCache.DoesNotExist:
+        pass
 
     y, w = week_of_year.split("W")
     week = Week(int(y), int(w))
@@ -115,11 +133,21 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
 
     spent_time_chart.add(u"Team spent time", team_spent_time)
 
-    return spent_time_chart.render_django_response()
+    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=spent_time_chart.render(is_unicode=True))
+    return chart.render_django_response()
 
 
 # Spent time by weekday by member
 def avg_spent_time_by_weekday(current_user, board=None):
+
+    # Caching
+    chart_uuid = "members.avg_spent_time_by_weekday-{0}-{1}".format(current_user, board.id if board else "None")
+    try:
+        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except ChartCache.DoesNotExist:
+        pass
+
     chart_title = u"Average spent time by weekday by member"
     if board:
         chart_title += u" for board {0}".format(board.name)
@@ -172,11 +200,21 @@ def avg_spent_time_by_weekday(current_user, board=None):
     spent_time_chart.add(u"All members",
                          [weekday_spent_time/num_members for weekday_i, weekday_spent_time in team_spent_time.items()])
 
-    return spent_time_chart.render_django_response()
+    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=spent_time_chart.render(is_unicode=True))
+    return chart.render_django_response()
 
 
 # Evolution of spent time by member
 def spent_time_by_week_evolution(board, show_interruptions=False):
+
+    # Caching
+    chart_uuid = "members.spent_time_by_week_evolution-{0}-{1}".format(board.id, "with_interruptions" if show_interruptions else "without_interruptions")
+    try:
+        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except ChartCache.DoesNotExist:
+        pass
+
     chart_title = u"Evolution of each member's spent time by week"
     if show_interruptions:
         chart_title += u", including interruptions suffered by the team, "
@@ -249,11 +287,21 @@ def spent_time_by_week_evolution(board, show_interruptions=False):
     if show_interruptions:
         evolution_chart.add("Interruptions", interruptions)
 
-    return evolution_chart.render_django_response()
+    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=evolution_chart.render(is_unicode=True))
+    return chart.render_django_response()
 
 
 # Number of total comments by member for this board or card
 def number_of_comments(current_user, board=None, card=None):
+
+    # Caching
+    chart_uuid = "members.number_of_comments-{0}-{1}-{2}".format(current_user.id, board.id if board else "None", card.id if card else "None")
+    try:
+        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except ChartCache.DoesNotExist:
+        pass
+
     chart_title = u"Number of comments by member as of {0}".format(timezone.now())
 
     if board:
@@ -295,11 +343,21 @@ def number_of_comments(current_user, board=None, card=None):
 
     number_of_comments_chart.add("Total number of comments", total_number_of_comments)
 
-    return number_of_comments_chart.render_django_response()
+    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=number_of_comments_chart.render(is_unicode=True))
+    return chart.render_django_response()
 
 
 # Number of total cards by member for this board or card
 def number_of_cards(current_user, board=None):
+
+    # Caching
+    chart_uuid = "members.number_of_cards-{0}-{1}".format(current_user.id, board.id if board else "None")
+    try:
+        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except ChartCache.DoesNotExist:
+        pass
+
     chart_title = u"Number of cards by member as of {0}".format(timezone.now())
 
     if board:
@@ -336,11 +394,21 @@ def number_of_cards(current_user, board=None):
 
     number_of_cards_chart.add("Total number of cards", total_number_of_cards)
 
-    return number_of_cards_chart.render_django_response()
+    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=number_of_cards_chart.render(is_unicode=True))
+    return chart.render_django_response()
 
 
 # Spent time by member
 def spent_time(current_user, board=None):
+
+    # Caching
+    chart_uuid = "members.spent_time-{0}-{1}".format(current_user.id, board.id if board else "None")
+    try:
+        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except ChartCache.DoesNotExist:
+        pass
+
     chart_title = u"Spent time by member as of {0}".format(timezone.now())
 
     if board:
@@ -370,4 +438,5 @@ def spent_time(current_user, board=None):
 
     spent_time_chart.add("Total spent time", total_spent_time_sum)
 
-    return spent_time_chart.render_django_response()
+    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=spent_time_chart.render(is_unicode=True))
+    return chart.render_django_response()
