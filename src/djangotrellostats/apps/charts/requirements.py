@@ -9,7 +9,7 @@ import pygal
 from django.db.models import Sum
 
 
-from djangotrellostats.apps.charts.models import ChartCache
+from djangotrellostats.apps.charts.models import CachedChart
 
 
 # Burndown chart for each requirement
@@ -24,9 +24,9 @@ def _requirement_burndown(requirement):
     # Caching
     chart_uuid = "requirements._requirement_burndown-{0}".format(requirement.id)
     try:
-        chart = ChartCache.get(board=requirement.board, uuid=chart_uuid)
+        chart = CachedChart.get(board=requirement.board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     board = requirement.board
@@ -78,7 +78,7 @@ def _requirement_burndown(requirement):
     burndown_chart.x_labels = x_labels
     burndown_chart.add(u"Burndown of {0}".format(requirement.code), remaining_time_values)
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=burndown_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=burndown_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -88,9 +88,9 @@ def _burndown_by_requirement(board):
     # Caching
     chart_uuid = "requirements._burndown_by_requirement-{0}".format(board.id)
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Burndown for board {0}".format(board.name)
@@ -140,7 +140,7 @@ def _burndown_by_requirement(board):
     burndown_chart.x_labels = x_labels
     burndown_chart.add(u"Burndown according to {0} requirements".format(board.name), remaining_time_values)
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=burndown_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=burndown_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 

@@ -10,7 +10,7 @@ import pygal
 from django.db.models import Min, Max, Avg
 from django.utils import timezone
 
-from djangotrellostats.apps.charts.models import ChartCache
+from djangotrellostats.apps.charts.models import CachedChart
 from djangotrellostats.apps.dev_environment.models import NoiseMeasurement
 
 
@@ -20,9 +20,9 @@ def noise_level():
     # Caching
     chart_uuid = "noise_measurements.noise_level"
     try:
-        chart = ChartCache.get(board=None, uuid=chart_uuid)
+        chart = CachedChart.get(board=None, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Average noise levels per day in db as of {0}".format(timezone.now())
@@ -53,7 +53,7 @@ def noise_level():
     noise_chart.add("Average noise level by day", noise_values)
     noise_chart.x_labels = days
 
-    chart = ChartCache.make(board=None, uuid=chart_uuid, svg=noise_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=None, uuid=chart_uuid, svg=noise_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -62,9 +62,9 @@ def noise_level_per_hour():
     # Caching
     chart_uuid = "noise_measurements.noise_level_per_hour"
     try:
-        chart = ChartCache.get(board=None, uuid=chart_uuid)
+        chart = CachedChart.get(board=None, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Noise levels per hour in db as of {0}".format(timezone.now())
@@ -96,7 +96,7 @@ def noise_level_per_hour():
     noise_chart.add("Max noise level", noise_values["max"])
     noise_chart.x_labels = hours
 
-    chart = ChartCache.make(board=None, uuid=chart_uuid, svg=noise_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=None, uuid=chart_uuid, svg=noise_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -105,9 +105,9 @@ def noise_level_per_weekday():
     # Caching
     chart_uuid = "noise_measurements.noise_level_per_weekday"
     try:
-        chart = ChartCache.get(board=None, uuid=chart_uuid)
+        chart = CachedChart.get(board=None, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Noise levels per weekday in db as of {0}".format(timezone.now())
@@ -140,7 +140,7 @@ def noise_level_per_weekday():
     noise_chart.add("Max noise level", noise_values["max"])
     noise_chart.x_labels = weekdays
 
-    chart = ChartCache.make(board=None, uuid=chart_uuid, svg=noise_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=None, uuid=chart_uuid, svg=noise_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -153,9 +153,9 @@ def subjective_noise_level(month=None, year=None):
         year if year else "None"
     )
     try:
-        chart = ChartCache.get(board=None, uuid=chart_uuid)
+        chart = CachedChart.get(board=None, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Subjective noise levels as of {0}".format(timezone.now())
@@ -172,5 +172,5 @@ def subjective_noise_level(month=None, year=None):
     for level_key, level_name in subjective_noise_levels.items():
         noise_chart.add(u"{0}".format(level_name), noise_measurements.filter(subjective_noise_level=level_key).count())
 
-    chart = ChartCache.make(board=None, uuid=chart_uuid, svg=noise_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=None, uuid=chart_uuid, svg=noise_chart.render(is_unicode=True))
     return chart.render_django_response()

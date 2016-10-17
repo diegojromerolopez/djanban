@@ -5,7 +5,7 @@ import pygal
 from django.db.models import Min, Max, Sum
 from django.utils import timezone
 
-from djangotrellostats.apps.charts.models import ChartCache
+from djangotrellostats.apps.charts.models import CachedChart
 from djangotrellostats.apps.repositories.models import PylintMessage, PhpMdMessage
 
 
@@ -35,9 +35,9 @@ def _number_of_code_errors_by_commit(board, repository=None, language="python", 
         board.id, repository.id if repository else "None", language, "per_loc" if per_loc else "global"
     )
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     repository_text = " "
@@ -97,7 +97,7 @@ def _number_of_code_errors_by_commit(board, repository=None, language="python", 
 
         chart.add(message_type, number_of_messages_by_commit)
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -108,9 +108,9 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
         board.id, repository.id if repository else "None", language, "per_loc" if per_loc else "global"
     )
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     repository_text = " "
@@ -185,5 +185,5 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
 
         chart.add(message_type, number_of_messages_by_month)
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=chart.render(is_unicode=True))
     return chart.render_django_response()

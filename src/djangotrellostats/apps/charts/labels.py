@@ -9,7 +9,7 @@ from django.db.models import Avg, Min, Count
 from django.utils import timezone
 
 from djangotrellostats.apps.boards.models import Card
-from djangotrellostats.apps.charts.models import ChartCache
+from djangotrellostats.apps.charts.models import CachedChart
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 
 
@@ -25,9 +25,9 @@ def avg_spent_times(request, board=None):
     # Caching
     chart_uuid = "labels.avg_spent_times-{0}".format(board.id if board else "None")
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Average task spent time as of {0}".format(timezone.now())
@@ -57,7 +57,7 @@ def avg_spent_times(request, board=None):
             if label.name:
                 avg_times_chart.add(u"{0} average spent time".format(label.name), label.avg_spent_time())
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=avg_times_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=avg_times_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -67,9 +67,9 @@ def avg_estimated_times(request, board=None):
     # Caching
     chart_uuid = "labels.avg_estimated_times-{0}".format(board.id if board else "None")
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Average task estimated time as of {0}".format(timezone.now())
@@ -99,7 +99,7 @@ def avg_estimated_times(request, board=None):
             if label.name:
                 avg_times_chart.add(u"{0} average estimated time".format(label.name), label.avg_estimated_time())
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=avg_times_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=avg_times_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -129,9 +129,9 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
     # Caching
     chart_uuid = "labels._daily_spent_times_by_period-{0}-{1}-{2}-{3}".format(board.id if board else "None", time_measurement, operation, period)
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     daily_spent_time_filter = {"{0}__gt".format(time_measurement): 0}
@@ -234,6 +234,6 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
         if sum(label_measurement_values[label.id]) > 0:
             period_measurement_chart.add(label.name, label_measurement_values[label.id])
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=period_measurement_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=period_measurement_chart.render(is_unicode=True))
     return chart.render_django_response()
 

@@ -1,0 +1,40 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Fetch data from {{board.name}}{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-5 center-block">
+        {% if not done %}
+            <div class="panel panel-danger ">
+              <div class="panel-heading">Danger! This action cannot be undone</div>
+              <div class="panel-body">
+                  <p>
+                    All your Trello boards will be created in this platform.
+                  </p>
+                  <p>
+                    Are you sure?
+                  </p>
+
+                  <form action="{% url 'boards:sync' %}" method="post">
+                      <button type="submit" class="btn btn-danger">I am sure, synchronize my Trello boards</button>
+                  </form>
+
+              </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="panel panel-success">
+              <div class="panel-heading">Boards synchronized successfully</div>
+              <div class="panel-body">
+                  <p>
+                      Boards synchronized successfully
+                      <a href="{% url 'boards:view_boards' %}" class="btn btn-primary">Go back to your boards</a>
+                  </p>
+              </div>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -20,7 +20,7 @@ from django.utils import timezone
 
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.boards.models import Board, Card, CardComment
-from djangotrellostats.apps.charts.models import ChartCache
+from djangotrellostats.apps.charts.models import CachedChart
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.reports.models import ListReport, CardMovement
@@ -32,9 +32,9 @@ def avg_lead_time(request, board=None):
     # Caching
     chart_uuid = "cards.avg_lead_time-{0}".format(board.id if board else "None")
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Task average lead time as of {0}".format(timezone.now())
@@ -63,7 +63,7 @@ def avg_lead_time(request, board=None):
             if label.name:
                 lead_time_chart.add(u"{0} average lead time".format(label.name), label.avg_lead_time())
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=lead_time_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=lead_time_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -73,9 +73,9 @@ def avg_cycle_time(request, board=None):
     # Caching
     chart_uuid = "cards.avg_cycle_time-{0}".format(board.id if board else "None")
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Task average cycle time as of {0}".format(timezone.now())
@@ -105,7 +105,7 @@ def avg_cycle_time(request, board=None):
             if label.name:
                 cycle_time_chart.add(u"{0} average cycle time".format(label.name), label.avg_lead_time())
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=cycle_time_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=cycle_time_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -128,9 +128,9 @@ def _avg_metric_time_by_month(request, board=None, metric="lead"):
     # Caching
     chart_uuid = "cards._avg_metric_time_by_month-{0}-{1}".format(board.id if board else "None", metric)
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Task average {0} time by month as of {1}".format(metric, timezone.now())
@@ -215,7 +215,7 @@ def _avg_metric_time_by_month(request, board=None, metric="lead"):
         for label in labels:
             metric_time_chart.add("{1} cards".format(metric_name, label.name), label.metric_values)
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=metric_time_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=metric_time_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -224,9 +224,9 @@ def avg_time_by_list(board, workflow=None):
     # Caching
     chart_uuid = "cards.avg_time_by_list-{0}-{1}".format(board.id, workflow.id if workflow else "None")
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Average time of all tasks living in each list for board {0} ".format(board.name)
@@ -245,7 +245,7 @@ def avg_time_by_list(board, workflow=None):
     for list_report in list_reports:
         avg_time_by_list_chart.add(u"{0}".format(list_report.list.name), list_report.avg_card_time)
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=avg_time_by_list_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=avg_time_by_list_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -254,9 +254,9 @@ def avg_std_dev_time_by_list(board, workflow=None):
     # Caching
     chart_uuid = "cards.avg_std_dev_time_by_list-{0}-{1}".format(board.id, workflow.id if workflow else "None")
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Average standard deviation time of all tasks living in each list for board {0} ".format(board.name)
@@ -275,7 +275,7 @@ def avg_std_dev_time_by_list(board, workflow=None):
     for list_report in list_reports:
         avg_time_by_list_chart.add(u"{0}".format(list_report.list.name), list_report.std_dev_card_time)
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=avg_time_by_list_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=avg_time_by_list_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -285,9 +285,9 @@ def cumulative_list_evolution(board, day_step=5):
     # Caching
     chart_uuid = "cards.cumulative_list_evolution-{0}-{1}".format(board.id, day_step)
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Cumulative flow diagram as of {0}".format(timezone.now())
@@ -336,7 +336,7 @@ def cumulative_list_evolution(board, day_step=5):
         list_id = list_.id
         cumulative_chart.add(list_.name, list_values[list_id])
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=cumulative_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=cumulative_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -347,9 +347,9 @@ def cumulative_card_evolution(board, day_step=5):
     # Caching
     chart_uuid = "cards.cumulative_card_evolution-{0}-{1}".format(board.id, day_step)
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Number of created cards vs completed cards as of {0}".format(timezone.now())
@@ -432,7 +432,7 @@ def cumulative_card_evolution(board, day_step=5):
         if sum(filter(None, done_card_values_by_label[label.id])) > 0:
             cumulative_chart.add("Done {0} cards".format(label.name), done_card_values_by_label[label.id])
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=cumulative_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=cumulative_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -441,9 +441,9 @@ def age(board):
     # Caching
     chart_uuid = "cards.age-{0}".format(board.id)
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Age box chart of tasks for {0} as of {1}".format(board.name, timezone.now())
@@ -459,7 +459,7 @@ def age(board):
         cards_age = [card.age.days for card in list_cards]
         age_chart.add(list_.name, cards_age)
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=age_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=age_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -469,9 +469,9 @@ def completion_histogram(board, time_metric="lead_time", units="days"):
     # Caching
     chart_uuid = "cards.completion_histogram-{0}-{1}-{2}".format(board.id, time_metric, units)
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     time_metric_name = time_metric.replace("_", " ")
@@ -522,7 +522,7 @@ def completion_histogram(board, time_metric="lead_time", units="days"):
     completion_histogram_chart.x_labels = x_labels
     completion_histogram_chart.add(units.capitalize(), num_card_values)
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=completion_histogram_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=completion_histogram_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -537,9 +537,9 @@ def time_scatterplot(current_user, time_metric_name="Time", board=None,
         year if year else "None", month if month else "None"
     )
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     if board:
@@ -613,7 +613,7 @@ def time_scatterplot(current_user, time_metric_name="Time", board=None,
             month_i = 1
             year_i += 1
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=scatterplot.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=scatterplot.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -628,9 +628,9 @@ def time_vs_spent_time(current_user, time_metric_name="Time", board=None,
         year if year else "None", month if month else "None"
     )
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     now = timezone.now()
@@ -705,7 +705,7 @@ def time_vs_spent_time(current_user, time_metric_name="Time", board=None,
             month_i = 1
             year_i += 1
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=time_vs_spent_time_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=time_vs_spent_time_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -720,9 +720,9 @@ def time_box(current_user, time_metric_name="Time", board=None,
         year if year else "None", month if month else "None"
     )
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     if board:
@@ -796,7 +796,7 @@ def time_box(current_user, time_metric_name="Time", board=None,
             month_i = 1
             year_i += 1
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=box_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=box_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 
@@ -806,9 +806,9 @@ def number_of_comments(current_user, board=None, card=None):
     chart_uuid = "cards.number_of_comments-{0}-{1}-{2}".format(current_user.id, board.id if board else "None",
                                                          card.id if card else "None")
     try:
-        chart = ChartCache.get(board=board, uuid=chart_uuid)
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
-    except ChartCache.DoesNotExist:
+    except CachedChart.DoesNotExist:
         pass
 
     chart_title = u"Number of comments as of {0}".format(timezone.now())
@@ -885,5 +885,5 @@ def number_of_comments(current_user, board=None, card=None):
 
     number_of_comments_chart.add("All members", number_of_comments_list)
 
-    chart = ChartCache.make(board=board, uuid=chart_uuid, svg=number_of_comments_chart.render(is_unicode=True))
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=number_of_comments_chart.render(is_unicode=True))
     return chart.render_django_response()

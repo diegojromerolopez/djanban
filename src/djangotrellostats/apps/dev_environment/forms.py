@@ -6,6 +6,7 @@ from django.forms import models
 from django import forms
 from django.utils import timezone
 
+from djangotrellostats.apps.charts.models import CachedChart
 from djangotrellostats.apps.dev_environment.models import Interruption, NoiseMeasurement
 
 
@@ -20,6 +21,7 @@ class NewInterruptionForm(models.ModelForm):
         if commit:
             self.instance.datetime = timezone.now()
             self.instance.save()
+            CachedChart.objects.filter(uuid__startswith="interruptions").delete()
         return self.instance
 
 
@@ -38,6 +40,7 @@ class NewNoiseMeasurementForm(models.ModelForm):
         if commit:
             self.instance.datetime = timezone.now()
             self.instance.save()
+            CachedChart.objects.filter(uuid__startswith="noise_measurement").delete()
         return self.instance
 
 

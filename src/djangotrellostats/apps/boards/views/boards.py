@@ -58,6 +58,22 @@ def new(request):
     return render(request, "boards/new.html", {"form": form, "board": board, "member": member})
 
 
+@member_required
+def sync(request):
+    member = request.user.member
+
+    # Only members with credentials can sync their boards
+    if not member.has_trello_credentials:
+        return HttpResponseRedirect(reverse("boards:view_boards"))
+
+    if request.method == "POST":
+        initializer = Initializer(member)
+        initializer.init()
+        return HttpResponseRedirect(reverse("boards:view_boards"))
+
+    return render(request, "boards/sync.html", {"member": member})
+
+
 # View boards of current user
 @login_required
 def view_list(request):
