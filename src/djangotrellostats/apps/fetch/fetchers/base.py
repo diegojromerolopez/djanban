@@ -55,4 +55,4 @@ class Fetcher(object):
         self.board.daily_spent_times.all().delete()
         self.board.list_reports.all().delete()
         self.board.member_reports.all().delete()
-        self.board.chart_caches.all().delete()
+        self.board.clean_cached_charts()

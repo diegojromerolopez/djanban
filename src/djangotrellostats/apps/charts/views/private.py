@@ -383,27 +383,27 @@ def interruption_spent_time_by_month(request, board_id=None):
     return interruptions.interruption_spent_time_by_month(request.user, board)
 
 
-# Noise level mesaurements
+# Noise level measurements
 @login_required
 def noise_level(request):
-    return noise_measurements.noise_level()
+    return noise_measurements.noise_level(request.user)
 
 
 # Average noise level per hour
 @login_required
 def noise_level_per_hour(request):
-    return noise_measurements.noise_level_per_hour()
+    return noise_measurements.noise_level_per_hour(request.user)
 
 
 # Average noise level per hour
 @login_required
 def noise_level_per_weekday(request):
-    return noise_measurements.noise_level_per_weekday()
+    return noise_measurements.noise_level_per_weekday(request.user)
 
 
 @login_required
 def subjective_noise_level(request):
-    return noise_measurements.subjective_noise_level()
+    return noise_measurements.subjective_noise_level(request.user)
 
 
 # Code quality

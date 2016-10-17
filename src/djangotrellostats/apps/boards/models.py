@@ -382,6 +382,12 @@ class Board(models.Model):
         self.save()
         return self.last_mood_value
 
+    # Delete all cached charts of this board
+    def clean_cached_charts(self):
+        self.cached_charts.all().delete()
+
+    # Save this board:
+    # Assigns a new public_access_code if is not present
     def save(self, *args, **kwargs):
         # Creation of public access code in case there is none present
         if not self.public_access_code:
@@ -518,7 +524,10 @@ class Card(models.Model):
         # Move the card
         self.list = destination_list
         self.save()
+        # Call to trello API
         move_card(self, member, destination_list)
+        # Delete all cached charts for this board
+        self.board.clean_cached_charts()
 
     # Add spent/estimated time
     @transaction.atomic
@@ -570,6 +579,9 @@ class Card(models.Model):
         DailySpentTime.add(board=self.board, member=member, date=date, card=self, comment=comment,
                            description=description, spent_time=spent_time, estimated_time=estimated_time)
 
+        # Delete all cached charts for this board
+        self.board.clean_cached_charts()
+
     # Add a new comment to this card
     @transaction.atomic
     def add_comment(self, member, content):
@@ -581,6 +593,9 @@ class Card(models.Model):
                                    creation_datetime=timezone.now())
         card_comment.save()
 
+        # Delete all cached charts for this board
+        self.board.clean_cached_charts()
+
         # Returning the comment because it can be needed
         return card_comment
 
@@ -591,6 +606,8 @@ class Card(models.Model):
         delete_comment_of_card(self, member, comment)
         # Delete comment locally
         comment.delete()
+        # Delete all cached charts for this board
+        self.board.clean_cached_charts()
 
     # Update labels of the card
     @transaction.atomic
@@ -608,6 +625,9 @@ class Card(models.Model):
             if card_label.id not in label_ids:
                 self.labels.remove(card_label)
                 remove_label_of_card(self, member, card_label)
+
+        # Delete all cached charts for this board
+        self.board.clean_cached_charts()
 
 
 # Each one of the comments made by members in each card

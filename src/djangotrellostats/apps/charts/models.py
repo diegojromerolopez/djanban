@@ -21,7 +21,7 @@ class CachedChart(models.Model):
     uuid = models.CharField(max_length=1024, verbose_name=u"Chart view name",
                             help_text=u"Chart view name including some optional parameters")
 
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="chart_caches", default=None, null=True)
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cached_charts", default=None, null=True)
 
     svg = models.FileField(verbose_name="SVG content of the chart")
 

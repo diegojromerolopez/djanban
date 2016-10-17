@@ -88,11 +88,17 @@ class NewCardForm(models.ModelForm):
         if commit:
             with transaction.atomic():
                 card = self.instance
+                # Call Trello API to create the card
                 trello_card = new_card(card, card.member, self.cleaned_data.get("labels"))
+                # Get TrelloCard attributes and assigned them to our new object Card
                 card.uuid = trello_card.id
                 card.short_url = trello_card.shortUrl
                 card.url = trello_card.url
                 card.position = trello_card.pos
                 card.creation_datetime = timezone.now()
                 card.last_activity_datetime = timezone.now()
+                # Create the card
                 super(NewCardForm, self).save(commit=True)
+                # Clean cached charts for this board
+                card.board.clean_cached_charts()
+

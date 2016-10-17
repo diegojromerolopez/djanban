@@ -1,6 +1,8 @@
 
 from django.conf import settings
 
+from djangotrellostats.apps.members.models import Member
+
 
 def member_is_administrator(member):
     """
@@ -51,3 +53,9 @@ def get_user_boards(user):
         return user.boards.all().order_by("name")
 
     raise ValueError(u"This user is not valid")
+
+
+# Get members that work with this user
+def get_user_team_mates(user):
+    boards = get_user_boards(user)
+    return Member.objects.filter(boards__in=boards).distinct().order_by("name")

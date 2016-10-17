@@ -11,7 +11,7 @@ import pygal
 from django.db.models import Min, Max, Sum
 from django.utils import timezone
 
-from djangotrellostats.apps.base.auth import get_user_boards
+from djangotrellostats.apps.base.auth import get_user_boards, get_user_team_mates
 from djangotrellostats.apps.charts.models import CachedChart
 from djangotrellostats.apps.dev_environment.models import Interruption
 
@@ -65,6 +65,7 @@ def _number_of_interruptions(current_user, board, chart_title, interruption_meas
         boards = [board]
     else:
         boards = get_user_boards(current_user)
+        interruptions_filter["member__in"] = get_user_team_mates(current_user)
 
     board_values = {board.id: [] for board in boards}
 
@@ -140,8 +141,11 @@ def _number_of_interruptions_by_member(current_user, chart_title, interruption_m
     interruptions_filter = {}
 
     boards = get_user_boards(current_user)
-    members = Member.objects.filter(boards__in=boards).distinct().all()
+    members = Member.objects.filter(boards__in=boards).distinct()
     member_values = {member.id: [] for member in members}
+    interruptions_filter["member__in"] = members
+
+    interruptions = Interruption.objects.filter(**interruptions_filter).order_by("datetime")
 
     interruptions = Interruption.objects.filter(**interruptions_filter).order_by("datetime")
     if not interruptions.exists():
@@ -200,7 +204,9 @@ def _interruption_measurement_by_month(current_user, chart_title, interruption_m
 
     interruptions_filter = {}
     if board:
-        interruptions_filter["board"] = board
+        interruptions_filter["boards"] = board
+    else:
+        interruptions_filter["member__in"] = get_user_team_mates(current_user)
 
     interruptions = Interruption.objects.filter(**interruptions_filter).order_by("datetime")
 
@@ -228,7 +234,7 @@ def _interruption_measurement_by_month(current_user, chart_title, interruption_m
 
     months = []
     values = []
-    board_values = {board.id:[] for board in boards}
+    board_values = {board.id: [] for board in boards}
     has_board_values = {board.id: False for board in boards }
 
     while year_i < last_year or year_i == last_year and month_i <= last_month:
