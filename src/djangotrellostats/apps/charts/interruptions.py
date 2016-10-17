@@ -10,19 +10,17 @@ from datetime import timedelta
 import pygal
 from django.db.models import Min, Max, Sum
 from django.utils import timezone
+from django.template.defaultfilters import slugify
 
 from djangotrellostats.apps.base.auth import get_user_boards, get_user_team_mates
 from djangotrellostats.apps.charts.models import CachedChart
 from djangotrellostats.apps.dev_environment.models import Interruption
-
-
-# Number of interruptions
 from djangotrellostats.apps.members.models import Member
 
 
+# Number of interruptions
 def number_of_interruptions(current_user, board=None):
     chart_title = u"Number of interruptions as of {0}".format(timezone.now())
-
     return _number_of_interruptions(current_user, board, chart_title, _interruption_count, incremental=False)
 
 
@@ -32,6 +30,7 @@ def evolution_of_interruptions(current_user, board=None):
     return _number_of_interruptions(current_user, board, chart_title, _interruption_count, incremental=True)
 
 
+# Interruption spent time
 def interruption_spent_time(current_user, board=None):
     chart_title = u"Interruption spent time as of {0}".format(timezone.now())
     return _number_of_interruptions(current_user, board, chart_title, _interruption_spent_time_sum, incremental=False)
@@ -45,6 +44,21 @@ def evolution_of_interruption_spent_time(current_user, board=None):
 
 # Number of interruptions base function
 def _number_of_interruptions(current_user, board, chart_title, interruption_measurement, incremental=False):
+
+    # Caching
+    chart_uuid = "interruptions.{0}".format(
+        hashlib.sha256("_number_of_interruptions-{0}-{1}-{2}-{3}".format(
+            current_user.id,
+            board.id if board else "",
+            inspect.getsource(interruption_measurement),
+            "incremental" if incremental else "absolute"
+        )).hexdigest()
+    )
+    try:
+        chart = CachedChart.get(board=None, uuid=chart_uuid)
+        return chart.render_django_response()
+    except CachedChart.DoesNotExist:
+        pass
 
     if board:
         chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
@@ -104,7 +118,8 @@ def _number_of_interruptions(current_user, board, chart_title, interruption_meas
 
     interruptions_chart.x_labels = days
 
-    return interruptions_chart.render_django_response()
+    chart = CachedChart.make(board=None, uuid=chart_uuid, svg=interruptions_chart.render(is_unicode=True))
+    return chart.render_django_response()
 
 
 # Number of interruptions by member
@@ -127,6 +142,22 @@ def interruption_spent_time_by_member(current_user):
 
 # Number of interruptions base function
 def _number_of_interruptions_by_member(current_user, chart_title, interruption_measurement, incremental=False):
+    chart_uuid = "interruptions._number_of_interruptions_by_member-{0}-{1}-{2}".format(
+        current_user.id, slugify(chart_title), "incremental" if incremental else "absolute"
+    )
+    # Caching
+    chart_uuid = "interruptions.{0}".format(
+        hashlib.sha256("_number_of_interruptions_by_member-{0}-{1}-{2}".format(
+            current_user.id,
+            inspect.getsource(interruption_measurement),
+            "incremental" if incremental else "absolute"
+        )).hexdigest()
+    )
+    try:
+        chart = CachedChart.get(board=None, uuid=chart_uuid)
+        return chart.render_django_response()
+    except CachedChart.DoesNotExist:
+        pass
 
     interruptions_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
                                      print_zeroes=False, x_label_rotation=65,
@@ -181,7 +212,8 @@ def _number_of_interruptions_by_member(current_user, chart_title, interruption_m
 
     interruptions_chart.x_labels = days
 
-    return interruptions_chart.render_django_response()
+    chart = CachedChart.make(board=None, uuid=chart_uuid, svg=interruptions_chart.render(is_unicode=True))
+    return chart.render_django_response()
 
 
 # Number of interruptions by month
@@ -198,6 +230,19 @@ def interruption_spent_time_by_month(current_user, board=None):
 
 # Any measurement of interruptions by month
 def _interruption_measurement_by_month(current_user, chart_title, interruption_measurement, board=None):
+
+    chart_uuid = "interruptions.{0}".format(
+        hashlib.sha256("_interruption_measurement_by_month-{0}-{1}-{2}".format(
+            current_user.id,
+            inspect.getsource(interruption_measurement),
+            board.id if board else "None"
+        )).hexdigest()
+    )
+    try:
+        chart = CachedChart.get(board=None, uuid=chart_uuid)
+        return chart.render_django_response()
+    except CachedChart.DoesNotExist:
+        pass
 
     if board:
         chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
@@ -261,7 +306,8 @@ def _interruption_measurement_by_month(current_user, chart_title, interruption_m
         if has_board_values[board.id]:
             interruptions_chart.add(board.name, board_values[board.id])
 
-    return interruptions_chart.render_django_response()
+    chart = CachedChart.make(board=None, uuid=chart_uuid, svg=interruptions_chart.render(is_unicode=True))
+    return chart.render_django_response()
 
 
 # Computes the sum of the spent time of a list of interruptions
