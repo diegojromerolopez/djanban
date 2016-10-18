@@ -31,7 +31,7 @@ from djangotrellostats.trello_api.connector import TrelloConnector
 # Initialize boards
 class Initializer(TrelloConnector):
 
-    def __init__(self, member, debug=True):
+    def __init__(self, member, debug=False):
         super(Initializer, self).__init__(member)
         self.debug = debug
 
