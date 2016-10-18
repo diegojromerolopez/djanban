@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -24,6 +24,7 @@ class SignUpForm(models.ModelForm):
         self.fields["email"] = forms.EmailField(label=u"Email and username", max_length=64, required=True)
         self.fields["password1"] = forms.CharField(label=u"Password", widget=forms.PasswordInput(), max_length=16, required=True)
         self.fields["password2"] = forms.CharField(label=u"Repeat your password", widget=forms.PasswordInput(), max_length=16, required=True)
+        self.fields["captcha"] = CaptchaField(label=u"Fill this captcha to sign up")
 
     def clean(self):
         cleaned_data = super(SignUpForm, self).clean()

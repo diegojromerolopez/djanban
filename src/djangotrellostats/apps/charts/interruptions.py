@@ -295,10 +295,10 @@ def _interruption_measurement_by_month(current_user, chart_title, interruption_m
                 if monthly_interruption_measurement > 0:
                     has_board_values[board.id] = True
 
-            month_i += 1
-            if month_i > 12:
-                month_i = 1
-                year_i += 1
+        month_i += 1
+        if month_i > 12:
+            month_i = 1
+            year_i += 1
 
     interruptions_chart.x_labels = months
     interruptions_chart.add(u"All interruptions", values)

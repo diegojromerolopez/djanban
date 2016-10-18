@@ -1,3 +1,4 @@
+from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
@@ -7,6 +8,7 @@ from django.core.exceptions import ValidationError
 class LoginForm(forms.Form):
     username = forms.CharField(label=u"Username")
     password = forms.CharField(label=u"Password", widget=forms.PasswordInput)
+    captcha = CaptchaField(label=u"Fill this captcha to login")
 
     def clean(self):
         cleaned_data = super(LoginForm, self).clean()

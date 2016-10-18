@@ -23,4 +23,7 @@ urlpatterns = [
     url(r'^niko-niko-calendar/', include('djangotrellostats.apps.niko_niko_calendar.urls', namespace="niko_niko_calendar")),
 
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
+
+    url(r'^captcha/', include('captcha.urls')),
 ]
+

@@ -40,6 +40,7 @@ DATE_INPUT_FORMATS = ('%Y-%m-%d', '%Y/%m/%d', '%d-%m-%Y', '%d/%m/%Y')
 # Application definition
 
 INSTALLED_APPS = [
+    'captcha',
     'ckeditor',
     'ckeditor_uploader',
     'cuser',
