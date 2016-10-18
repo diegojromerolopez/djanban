@@ -280,7 +280,7 @@ python src/manage.py reporter monthly_report [date whose month we want to get th
 Workflows are a feature that will allow you to define what lists have to be
 considered to measure spent, estimated and card living times.
 
-Workflow stats are not completed. Only the definition of workflows is fully implemented but not their stats.
+Workflow stats are partially completed. Only the average time in each list and the standard deviation time on each list is shown for each workflow.
 
 # Legal notice
 
