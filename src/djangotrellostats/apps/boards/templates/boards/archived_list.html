@@ -1,0 +1,39 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Boards of {{member.trello_username}}{% endblock %}
+
+{% block content %}
+    <h1>Boards of {{member.trello_username}}</h1>
+    <div class="board_list">
+        {% if member.has_trello_credentials %}
+            <p>
+                <a class="btn btn-primary" href="{% url 'boards:view_boards' %}" title="Go back to board list">Go back to board list</a>
+            </p>
+        {% endif %}
+        {% if boards|length == 0 %}
+            You don't have any archived board.
+        {% else %}
+            <ul class="list-group">
+                {% for board in boards %}
+                    <li class="list-group-item">
+                        <h2>{{board.name}}</h2>
+                        {% if board.last_fetch_datetime %}
+                            <div>
+                                Last fetched on {{board.last_fetch_datetime}} ({{board.last_fetch_datetime|timesince}} ago)
+                            </div>
+                        {% else %}
+                            <div>
+                                Not fetched yet.
+                            </div>
+                        {% endif %}
+                        {% if member %}
+                            <a class="btn btn-primary" href="{% url 'boards:unarchive' board.id %}" title="Unarchive board {{board.name}}">
+                                <span class="fa fa-pencil"></span> Unarchive
+                            </a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endblock content %}

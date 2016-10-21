@@ -55,6 +55,10 @@ class Board(models.Model):
                                             help_text="Select this option if you want to fetch data for this board.",
                                             default=True)
 
+    is_archived = models.BooleanField(verbose_name=u"This board is archived",
+                                      help_text=u"Archived boards are not fetched automatically and are ignored",
+                                      default=False)
+
     enable_public_access = models.BooleanField(verbose_name=u"Enable public access to this board",
                                                help_text=u"Only when enabled the users will be able to access",
                                                default=False)
@@ -381,6 +385,16 @@ class Board(models.Model):
         self.last_time_mood_was_computed = timezone.now()
         self.save()
         return self.last_mood_value
+
+    # Archive this board
+    def archive(self):
+        self.is_archived = True
+        self.save()
+
+    # Un-archive this board
+    def unarchive(self):
+        self.is_archived = False
+        self.save()
 
     # Delete all cached charts of this board
     def clean_cached_charts(self):

@@ -140,7 +140,7 @@ class Command(BaseCommand):
         last_board = None
         try:
             # For each board that is ready, fetch it
-            for board in member.created_boards.filter(has_to_be_fetched=True):
+            for board in member.created_boards.filter(has_to_be_fetched=True, is_archived=False):
                 if board.is_ready():
                     last_board = board
                     self.stdout.write(self.style.SUCCESS(u"Board {0} is ready".format(board.name)))

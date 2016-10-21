@@ -45,12 +45,12 @@ def user_is_visitor(user, board=None):
 
 
 # Return the boards of an user
-def get_user_boards(user):
+def get_user_boards(user, is_archived=False):
     if user_is_member(user):
-        return user.member.boards.all().order_by("name")
+        return user.member.boards.filter(is_archived=is_archived).order_by("name")
 
     if user_is_visitor(user):
-        return user.boards.all().order_by("name")
+        return user.boards.filter(is_archived=is_archived).order_by("name")
 
     raise ValueError(u"This user is not valid")
 

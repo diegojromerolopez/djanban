@@ -58,6 +58,7 @@ def new(request):
     return render(request, "boards/new.html", {"form": form, "board": board, "member": member})
 
 
+# Create boards that are present in Trello but not in this platform
 @member_required
 def sync(request):
     member = request.user.member
@@ -81,9 +82,20 @@ def view_list(request):
     if user_is_member(request.user):
         member = request.user.member
     boards = get_user_boards(request.user).order_by("name")
-    replacements = {"member": member, "boards": boards}
+    archived_boards = get_user_boards(request.user, is_archived=True).order_by("name")
+    replacements = {"member": member, "boards": boards, "archived_boards": archived_boards}
     return render(request, "boards/list.html", replacements)
 
+
+# View archived boards
+@member_required
+def view_archived_boards(request):
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+    boards = get_user_boards(request.user, is_archived=True).order_by("name")
+    replacements = {"member": member, "boards": boards}
+    return render(request, "boards/archived_list.html", replacements)
 
 # View board
 @login_required
@@ -175,11 +187,51 @@ def view_lists(request, board_id):
     return render(request, "boards/lists/list.html", replacements)
 
 
+# Archive a board
+@member_required
+def archive(request, board_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id, is_archived=False)
+
+    # Show delete form
+    if request.method == "GET":
+        replacements = {"member": member, "board": board}
+        return render(request, "boards/archive.html", replacements)
+
+    # Delete action by post
+    confirmed_board_id = request.POST.get("board_id")
+    if confirmed_board_id and confirmed_board_id == board_id:
+        board.archive()
+        return HttpResponseRedirect(reverse("boards:view_boards"))
+
+    raise Http404
+
+
+# Unarchive a board
+@member_required
+def unarchive(request, board_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id, is_archived=True)
+
+    # Show un-archive form
+    if request.method == "GET":
+        replacements = {"member": member, "board": board}
+        return render(request, "boards/unarchive.html", replacements)
+
+    # Un-archive action by post
+    confirmed_board_id = request.POST.get("board_id")
+    if confirmed_board_id and confirmed_board_id == board_id:
+        board.unarchive()
+        return HttpResponseRedirect(reverse("boards:view_boards"))
+
+    raise Http404
+
+
 # Delete a board
 @member_required
 def delete(request, board_id):
     member = request.user.member
-    board = member.boards.get(id=board_id)
+    board = member.boards.get(id=board_id, is_archived=True)
 
     # Show delete form
     if request.method == "GET":

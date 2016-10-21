@@ -1,0 +1,25 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}Un-archive {{Board.name}}{% endblock %}
+
+{% block content %}
+
+ <div class="row">
+    <div class="col-md-5 center-block">
+        <div class="panel panel-danger ">
+          <div class="panel-heading">Board un-archiving</div>
+          <div class="panel-body">
+            This board will be un-archived. Are you sure?
+
+              <form action="{% url 'boards:unarchive' board.id %}" method="post">
+                <input type="hidden" name="board_id" value="{{board.id}}"/>
+                <button type="submit" class="btn btn-danger">I am sure, un-archive board</button>
+              </form>
+
+          </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
