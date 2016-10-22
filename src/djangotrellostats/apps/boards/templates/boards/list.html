@@ -7,7 +7,7 @@
     <div class="board_list">
         {% if member.has_trello_credentials %}
             <p>
-                <a class="btn btn-primary" href="{% url 'boards:new' %}" title="New board">New</a>
+                <a class="btn btn-primary" href="{% url 'boards:new' %}" title="New board">New board</a>
                 <a class="btn btn-primary" href="{% url 'boards:sync' %}" title="New board">Synchronize from Trello</a>
                 {% if archived_boards|length > 0 %}
                     <a class="btn btn-primary" href="{% url 'boards:view_archived_boards' %}" title="View archived boards">View archived boards ({{archived_boards|length}})</a>
