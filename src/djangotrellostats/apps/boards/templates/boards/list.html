@@ -7,10 +7,10 @@
     <div class="board_list">
         {% if member.has_trello_credentials %}
             <p>
-                <a class="btn btn-primary" href="{% url 'boards:new' %}" title="New board">New board</a>
-                <a class="btn btn-primary" href="{% url 'boards:sync' %}" title="New board">Synchronize from Trello</a>
+                <a class="btn btn-warning" href="{% url 'boards:new' %}" title="New board">New board</a>
+                <a class="btn btn-warning" href="{% url 'boards:sync' %}" title="New board">Synchronize from Trello</a>
                 {% if archived_boards|length > 0 %}
-                    <a class="btn btn-primary" href="{% url 'boards:view_archived_boards' %}" title="View archived boards">View archived boards ({{archived_boards|length}})</a>
+                    <a class="btn btn-info" href="{% url 'boards:view_archived_boards' %}" title="View archived boards">View archived boards ({{archived_boards|length}})</a>
                 {% else %}
                     There are no archived boards.
                 {% endif %}
@@ -48,10 +48,10 @@
                                 <span class="fa fa-eye"></span> View
                             </a>
                             {% if member %}
-                                <a class="btn btn-primary" href="{% url 'boards:edit' board.id %}" title="Edit board {{board.name}}">
+                                <a class="btn btn-warning" href="{% url 'boards:edit' board.id %}" title="Edit board {{board.name}}">
                                     <span class="fa fa-pencil"></span> Edit
                                 </a>
-                                <a class="btn btn-primary" href="{% url 'boards:archive' board.id %}" title="Archive board {{board.name}}">
+                                <a class="btn btn-warning" href="{% url 'boards:archive' board.id %}" title="Archive board {{board.name}}">
                                     <span class="fa fa-archive"></span> Archive
                                 </a>
                             {% endif %}

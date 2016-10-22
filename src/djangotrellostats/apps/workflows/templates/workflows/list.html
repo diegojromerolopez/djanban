@@ -23,7 +23,7 @@
 
                             {% if request.user.member %}
                                 <div class="actions">
-                                    <a href="{% url 'boards:workflows:edit' board.id workflow.id %}" class="btn btn-primary">Edit</a>
+                                    <a href="{% url 'boards:workflows:edit' board.id workflow.id %}" class="btn btn-warning">Edit</a>
                                     {% include "workflows/delete_form.html" %}
                                 </div>
                             {% endif %}

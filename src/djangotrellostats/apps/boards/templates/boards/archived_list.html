@@ -7,7 +7,7 @@
     <div class="board_list">
         {% if member.has_trello_credentials %}
             <p>
-                <a class="btn btn-primary" href="{% url 'boards:view_boards' %}" title="Go back to board list">Go back to board list</a>
+                <a class="btn btn-info" href="{% url 'boards:view_boards' %}" title="Go back to board list">Go back to board list</a>
             </p>
         {% endif %}
         {% if boards|length == 0 %}
@@ -27,7 +27,7 @@
                             </div>
                         {% endif %}
                         {% if member %}
-                            <a class="btn btn-primary" href="{% url 'boards:unarchive' board.id %}" title="Unarchive board {{board.name}}">
+                            <a class="btn btn-warning" href="{% url 'boards:unarchive' board.id %}" title="Unarchive board {{board.name}}">
                                 <span class="fa fa-pencil"></span> Unarchive
                             </a>
                         {% endif %}

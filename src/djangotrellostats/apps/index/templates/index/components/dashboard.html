@@ -37,7 +37,7 @@
 
     <h2>Projects summary</h2>
     {% for board in member.boards.all %}
-        {% if board.is_ready and board.is_fetched %}
+        {% if not board.is_archived and board.is_ready and board.is_fetched %}
             {% include "index/components/board.html" %}
         {% endif %}
     {% endfor %}
