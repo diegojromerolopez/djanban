@@ -13,14 +13,16 @@
                 <h1>{{developer.trello_username}}'s feelings on {{date|date}}</h1>
                 {% if developer_mood %}
                     Your mood today is:
-                    {% if developer_mood.mood == "normal" %}
-                        <span class="fa fa-meh-o fa-2x" aria-hidden="true"></span>
-                    {% elif developer_mood.mood == "happy" %}
-                        <span class="fa fa-smile-o fa-2x" aria-hidden="true"></span>
-                    {% elif developer_mood.mood == "sad" %}
-                        <span class="fa fa-frown-o fa-2x" aria-hidden="true"></span>
-                    {% else %}
-                    {% endif %}
+                    <span class="smiley" style="font-size: 40px;">
+                        {% if developer_mood.mood == "normal" %}
+                            &#x1f610;
+                        {% elif developer_mood.mood == "happy" %}
+                            &#x263A;
+                        {% elif developer_mood.mood == "sad" %}
+                            &#x2639;
+                        {% else %}
+                        {% endif %}
+                    </span>
                 {% else %}
                     <p>You have forgotten to introduce your mood today!</p>
                 {% endif %}
