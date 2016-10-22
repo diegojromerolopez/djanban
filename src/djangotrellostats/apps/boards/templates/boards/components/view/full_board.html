@@ -1,29 +1,39 @@
 {% load template_extensions %}
 
-<div id="full_task_board">
-    <h2>Full task board</h2>
-    <div class="row"">
-        {% with num_lists=lists|length %}
-            {% if num_lists <= 12 %}
-                {% for list in lists %}
-                    <div class="list {% if num_lists <= 6 %}col-md-2{% elif num_list <= 12 %}col-md-1{% endif %}">
-                        <div class="panel {% if list.type == 'done' %}panel-success{% elif list.type == 'development' %}panel-primary{% else %}panel-default{% endif %}">
-                            {% with list_active_cards=list.active_cards %}
-                                <div class="panel-heading cursor-pointer">
-                                    <strong>{{list.name}}</strong> ({{list_active_cards|length}} tasks)
-                                </div>
-                                <div class="panel-body cards" data-num_cards="{{list_active_cards|length}}">
-                                    {% for card in list_active_cards %}
-                                        {% include "boards/components/view/full_board_card.html" %}
-                                    {% endfor %}
-                                </div>
-                            {% endwith %}
-                        </div>
+{% with num_lists=lists|length %}
+    <div id="full_task_board" {% if num_lists > 6 %}style="width: {{num_lists|multiply:200}}px"{% endif %}>
+        <h2>Full task board</h2>
+        <div class="row">
+            <div class="col-md-12">
+                <p>
+                    <a href="javascript:void(0);" id="show-list-cards" class="toggle-list-cards btn btn-primary">
+                        <span class="fa fa-eye"></span>
+                        Show list cards
+                    </a>
+                    <a href="javascript:void(0);" id="hide-list-cards" class="toggle-list-cards btn btn-primary">
+                        <span class="fa fa-eye-slash"></span>
+                        Hide list cards
+                    </a>
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            {% for list in lists %}
+                <div class="list {% if num_lists <= 6 %}col-md-2{% elif num_list <= 12 %}col-md-1{% endif %}">
+                    <div class="panel {% if list.type == 'done' %}panel-success{% elif list.type == 'development' %}panel-primary{% else %}panel-default{% endif %}">
+                        {% with list_active_cards=list.active_cards %}
+                            <div class="panel-heading cursor-pointer">
+                                <strong>{{list.name}}</strong> ({{list_active_cards|length}} tasks)
+                            </div>
+                            <div class="panel-body cards" data-num_cards="{{list_active_cards|length}}">
+                                {% for card in list_active_cards %}
+                                    {% include "boards/components/view/full_board_card.html" %}
+                                {% endfor %}
+                            </div>
+                        {% endwith %}
                     </div>
-                {% endfor %}
-            {% else %}
-                The view of more thant 12 lists is not implemented.
-            {% endif %}
-        {% endwith %}
+                </div>
+            {% endfor %}
+        </div>
     </div>
-</div>
+{% endwith %}

@@ -28,3 +28,30 @@
 #board-summary .panel-body {
     min-height: 64px;
 }
+
+#full_task_board{
+    background-color: #196A3E;
+    border-radius: 5px;
+    overflow: scroll;
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+#full_task_board h2 {
+    color: white;
+}
+
+#full_task_board .row{
+    overflow: scroll;
+    min-width: 200%;
+}
+
+#full_task_board .row .list{
+    width: 260px;
+}
+
+#full_task_board .row .list .card{
+    width: 220px;
+}
