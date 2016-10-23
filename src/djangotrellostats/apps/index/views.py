@@ -9,11 +9,13 @@ from djangotrellostats.utils.week import get_week_of_year, get_weeks_of_year_sin
 # Index view
 def index(request):
     member = None
+    boards = []
     current_user = request.user
     if user_is_member(current_user):
         member = current_user.member
 
-    boards = get_user_boards(current_user).order_by("name")
+    if current_user.is_authenticated():
+        boards = get_user_boards(current_user).order_by("name")
 
     now = timezone.now()
     today = now.date()

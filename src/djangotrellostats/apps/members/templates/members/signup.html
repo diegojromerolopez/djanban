@@ -3,5 +3,18 @@
 {% block page_title %}Signup{% endblock %}
 
 {% block content %}
+    <h1>Signup</h1>
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+            Please, log in trello.com and visit <a href="https://trello.com/app-key" title="API keys for developers">https://trello.com/app-key</a>.
+            In that URL you will find your API key and your API secret (called OAuth secret).
+            </p>
+            <p>
+                You also need to use an authentication token as the <a href="https://trello.com/app-key" title="API keys for developers">same page</a> explains how to do it.
+                Visit the <strong>token link</strong> and follow the steps. Later you will have to fill the API token and API token secret.
+            </p>
+        </div>
+    </div>
     {% include "forms/form.html" %}
 {% endblock content %}
