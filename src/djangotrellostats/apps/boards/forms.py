@@ -28,6 +28,8 @@ class EditBoardForm(models.ModelForm):
         self.fields["hourly_rates"].help_text = u"Please, select the hourly rates this board uses. System does not " \
                                                 u"check if there is overlapping, so take care."
 
+        self.fields["background_color"].widget.attrs["class"] = "jscolor"
+
     def clean(self):
         cleaned_data = super(EditBoardForm, self).clean()
         return cleaned_data

@@ -1,5 +1,12 @@
 {% extends "boards/view.html" %}
 
+{% load staticfiles %}
+
+{% block js %}
+    {{block.super}}
+    <script src="{% static 'js/libs/jscolor/jscolor.min.js' %}"></script>
+{% endblock js %}
+
 {% block page_title %}Edit board {{board.name}}{% endblock %}
 
 {% block content %}

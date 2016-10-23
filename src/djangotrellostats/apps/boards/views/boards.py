@@ -181,7 +181,7 @@ def edit(request, board_id):
 def view_lists(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
-    lists = board.lists.all()
+    lists = board.lists.all().order_by("position")
     replacements = {"member": member, "board": board, "lists": lists, "list_types": List.LIST_TYPE_CHOICES}
     return render(request, "boards/lists/list.html", replacements)
 
