@@ -182,8 +182,7 @@ def view_lists(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
     lists = board.lists.all()
-    list_types = {list_type_par[0]: list_type_par[1] for list_type_par in List.LIST_TYPE_CHOICES}
-    replacements = {"member": member, "board": board, "lists": lists, "list_types": list_types}
+    replacements = {"member": member, "board": board, "lists": lists, "list_types": List.LIST_TYPE_CHOICES}
     return render(request, "boards/lists/list.html", replacements)
 
 

@@ -177,7 +177,7 @@ class Board(models.Model):
         return self.last_fetch_datetime is not None
 
     def cycle_time_lists(self):
-        return self.lists.exclude(Q(type="before_development")|Q(type="ignored"))
+        return self.lists.exclude(Q(type="backlog")|Q(type="ready_to_develop")|Q(type="ignored"))
 
     def lead_time_lists(self):
         return self.lists.exclude(Q(type="ignored"))
@@ -715,10 +715,11 @@ class Label(ImmutableModel):
 
 # List of the task board
 class List(models.Model):
-    LIST_TYPES = ("ignored", "before_development", "development", "after_development", "done", "closed")
+    LIST_TYPES = ("ignored", "backlog", "ready_to_develop", "development", "after_development", "done", "closed")
     LIST_TYPE_CHOICES = (
         ("ignored", "Ignored"),
-        ("before_development", "Before development"),
+        ("backlog", "Backlog"),
+        ("ready_to_develop", "Ready to develop"),
         ("development", "In development"),
         ("after_development", "After development"),
         ("done", "Done"),
@@ -727,7 +728,7 @@ class List(models.Model):
     name = models.CharField(max_length=128, verbose_name=u"Name of the board")
     uuid = models.CharField(max_length=128, verbose_name=u"External id of the list", unique=True)
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="lists")
-    type = models.CharField(max_length=64, choices=LIST_TYPE_CHOICES, default="before_development")
+    type = models.CharField(max_length=64, choices=LIST_TYPE_CHOICES, default="ready_to_develop")
     position = models.PositiveIntegerField(verbose_name=u"Position of this list in the board", default=0)
 
     # Return all cards that are not archived (closed)

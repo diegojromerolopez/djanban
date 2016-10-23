@@ -15,8 +15,12 @@
                         <form action="{% url 'boards:change_list_type' %}" method="post" class="form-inline">
                             <input type="hidden" name="list_id" value="{{list.id}}" />
                             <select name="type" class="form-control">
-                                {% for list_type, list_type_name in list_types.items %}
-                                    <option value="{{list_type}}" {% if list.type == list_type %}selected=selected{% endif %}>{{list_type_name}}</option>
+                                {% for list_type_parameters in list_types %}
+                                    {% with list_type=list_type_parameters.0 %}
+                                        {% with list_type_name=list_type_parameters.1 %}
+                                            <option value="{{list_type}}" {% if list.type == list_type %}selected=selected{% endif %}>{{list_type_name}}</option>
+                                        {% endwith %}
+                                    {% endwith %}
                                 {% endfor %}
                             </select>
                             <button type="submit" class="btn btn-warning">Change type</button>
