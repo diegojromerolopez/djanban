@@ -1,7 +1,7 @@
 {% load template_extensions %}
 
 {% with num_lists=lists|length %}
-    <div id="full_task_board" {% if num_lists > 6 %}style="width: {{num_lists|multiply:200}}px"{% endif %}>
+    <div id="full_task_board" {% if num_lists > 6 %}style="width: {{num_lists|multiply:200}}px"{% endif %} style="background-color: #{{board.background_color}};">
         <h2>Full task board</h2>
         <div class="row">
             <div class="col-md-12">

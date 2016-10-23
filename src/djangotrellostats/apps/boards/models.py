@@ -101,6 +101,11 @@ class Board(models.Model):
     last_mood_value = models.DecimalField(verbose_name=u"Last mood value",
                                           decimal_places=2, max_digits=10, default=None, null=True)
 
+    background_color = models.CharField(
+        verbose_name=u"Background color for this board", help_text=u"Background color for this board in hexadecimal",
+        max_length=32, default="196A3E"
+    )
+
     def __unicode__(self):
         return self.name
 
