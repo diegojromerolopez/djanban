@@ -5,6 +5,8 @@
 {% block js %}
     {{block.super}}
     <script src="{% static 'js/libs/jscolor/jscolor.min.js' %}"></script>
+    <script src="{% static 'js/libs/colors.min.js' %}"></script>
+    <script src="{% static 'js/boards/edit.js' %}"></script>
 {% endblock js %}
 
 {% block page_title %}Edit board {{board.name}}{% endblock %}

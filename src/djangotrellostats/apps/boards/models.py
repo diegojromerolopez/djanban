@@ -106,6 +106,11 @@ class Board(models.Model):
         max_length=32, default="196A3E"
     )
 
+    title_color = models.CharField(
+        verbose_name=u"Title color for this board", help_text=u"Title color for this board in hexadecimal",
+        max_length=32, default="FFFFFF"
+    )
+
     def __unicode__(self):
         return self.name
 

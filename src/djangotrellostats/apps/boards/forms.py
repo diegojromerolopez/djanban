@@ -20,7 +20,7 @@ class EditBoardForm(models.ModelForm):
             "has_to_be_fetched", "comments", "estimated_number_of_hours",
             "percentage_of_completion", "hourly_rates",
             "enable_public_access", "public_access_code", "show_on_slideshow",
-            "background_color"
+            "background_color", "title_color"
         ]
 
     def __init__(self, *args, **kwargs):
@@ -29,6 +29,7 @@ class EditBoardForm(models.ModelForm):
                                                 u"check if there is overlapping, so take care."
 
         self.fields["background_color"].widget.attrs["class"] = "jscolor"
+        self.fields["title_color"].widget.attrs["class"] = "jscolor"
 
     def clean(self):
         cleaned_data = super(EditBoardForm, self).clean()
