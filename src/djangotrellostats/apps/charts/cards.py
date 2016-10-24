@@ -355,7 +355,7 @@ def cumulative_card_evolution(board, day_step=5):
     chart_title = u"Number of created cards vs completed cards as of {0}".format(timezone.now())
     chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
 
-    cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
+    cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=False,
                                   human_readable=True, x_label_rotation=45)
 
