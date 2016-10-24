@@ -186,9 +186,15 @@ class Board(models.Model):
         """
         return self.last_fetch_datetime is not None
 
-    def cycle_time_lists(self):
-        return self.lists.exclude(Q(type="backlog")|Q(type="ready_to_develop")|Q(type="ignored"))
+    # Lists that are before development (backlog or ready to develop)
+    def before_development_lists(self):
+        return self.lists.filter(Q(type="backlog") | Q(type="ready_to_develop"))
 
+    # Lists that are used to compute cycle time
+    def cycle_time_lists(self):
+        return self.lists.exclude(Q(type="backlog") | Q(type="ready_to_develop") | Q(type="ignored"))
+
+    # Lists that are used to compute lead time
     def lead_time_lists(self):
         return self.lists.exclude(Q(type="ignored"))
 
