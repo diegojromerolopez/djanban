@@ -1,5 +1,12 @@
 {% extends "base/base.html" %}
 
+{% load staticfiles %}
+
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'css/boards/list.css' %}" rel="stylesheet" />
+{% endblock css %}
+
 {% block page_title %}Boards of {{member.trello_username}}{% endblock %}
 
 {% block content %}
@@ -26,7 +33,7 @@
             <ul class="list-group">
                 {% for board in boards %}
                     <li class="list-group-item">
-                        <h2>{{board.name}}</h2>
+                        <h2 style="background-color:#{{board.background_color}}; color:#{{board.title_color}};">{{board.name}}</h2>
                         {% if board.last_fetch_datetime %}
                             <div>
                                 Last fetched on {{board.last_fetch_datetime}} ({{board.last_fetch_datetime|timesince}} ago)
