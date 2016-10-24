@@ -20,9 +20,10 @@ class NewDailyMemberMoodForm(models.ModelForm):
         cleaned_data = super(NewDailyMemberMoodForm, self).clean()
         member = self.instance.member
         date = self.instance.date
+        # Avoid several mood measurements for the same member in the same day
         if member.daily_member_moods.filter(date=date).exists():
-            ValidationError(
-                u"Member {0} has already a mood measurement on {1}".\
+            raise ValidationError(
+                u"Member {0} has already a mood measurement on day {1}".\
                 format(member.trello_username, date.strftime("%Y-%m-%d"))
             )
         return cleaned_data
