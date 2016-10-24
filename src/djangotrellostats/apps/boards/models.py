@@ -188,7 +188,7 @@ class Board(models.Model):
 
     # Lists that are before development (backlog or ready to develop)
     def before_development_lists(self):
-        return self.lists.filter(Q(type="backlog") | Q(type="ready_to_develop"))
+        return self.lists.filter(Q(type="backlog") | Q(type="ready_to_develop") | Q(type="ignored"))
 
     # Lists that are used to compute cycle time
     def cycle_time_lists(self):
