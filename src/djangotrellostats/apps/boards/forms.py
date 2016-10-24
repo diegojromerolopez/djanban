@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from django.db import transaction
@@ -30,6 +31,20 @@ class EditBoardForm(models.ModelForm):
 
         self.fields["background_color"].widget.attrs["class"] = "jscolor"
         self.fields["title_color"].widget.attrs["class"] = "jscolor"
+
+    def clean_background_color(self):
+        try:
+            int(self.cleaned_data.get("background_color"), 16)
+        except ValueError:
+            raise ValidationError("Background color is not an hexadecimal number")
+        return self.cleaned_data.get("background_color")
+
+    def clean_title_color(self):
+        try:
+            int(self.cleaned_data.get("title_color"), 16)
+        except ValueError:
+            raise ValidationError("Title color is not an hexadecimal number")
+        return self.cleaned_data.get("title_color")
 
     def clean(self):
         cleaned_data = super(EditBoardForm, self).clean()

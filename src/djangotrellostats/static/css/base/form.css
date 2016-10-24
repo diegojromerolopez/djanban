@@ -18,3 +18,11 @@ form .django-ckeditor-widget,
 form .cke_chrome{
     width: 100% !important;
 }
+
+form .errors{
+
+}
+
+form .errors .error{
+    color: red;
+}
