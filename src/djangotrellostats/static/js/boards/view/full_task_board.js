@@ -17,7 +17,7 @@ $("document").ready(function(){
 
     // Show/Hide all list cards
     $("#full_task_board .toggle-list-cards").click(function(){
-        $("#full_task_board .list .panel-heading").each(function(){
+        $("#full_task_board .list .list-heading").each(function(){
             $(this).click();
         });
         if($("#show-list-cards").is(":visible")){

@@ -1,8 +1,8 @@
 {% load template_extensions %}
 
 {% with num_lists=lists|length %}
-    <div id="full_task_board" {% if num_lists > 6 %}style="width: {{num_lists|multiply:200}}px"{% endif %} style="background-color: #{{board.background_color}};">
-        <h2 style="color: #{{board.title_color}};">{{board.name}} task board</h2>
+    <div id="full_task_board" style="width: {{num_lists|multiply:200}}px">
+        <h2>Task board</h2>
         <div class="row">
             <div class="col-md-12">
                 <p>
@@ -27,7 +27,7 @@
                             </div>
                             <div class="panel-body cards" data-num_cards="{{list_active_cards|length}}">
                                 {% for card in list_active_cards %}
-                                    {% include "boards/components/view/full_board_card.html" %}
+                                    {% include "index/components/task_board/task.html" %}
                                 {% endfor %}
                             </div>
                         {% endwith %}

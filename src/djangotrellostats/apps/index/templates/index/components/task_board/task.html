@@ -1,12 +1,18 @@
 <div class="row card">
     <div class="col-md-12 card">
         <div class="panel panel-info">
-          <div class="panel-heading card-heading">
+          <div class="panel-heading card-heading" style="background-color: #{{card.board.background_color}}; color:#{{card.board.title_color}}">
               <a href="{% url 'boards:view_card' card.board_id card.id %}" title="View card {{card.name}} in board {{card.board.name}}">{{card.name}}</a>
           </div>
           <div class="panel-body">
               <div class="card-info">
+                  <div>Board: <a href="{% url 'boards:view' card.board_id %}">{{card.board.name}}</a></div>
                   <div>Last activity: {{card.last_activity_datetime}}</div>
+                  {% with card_members=card.members.all %}
+                    {% if card_members|length > 0 %}
+                        <div>Members: {% for member in card_members %}<span title="{{member.trello_username}}" class="cursor-help">{{member.initials}}</span> {% endfor %}</div>
+                    {% endif %}
+                  {% endwith %}
                   {% if card.spent_time %}<div>Spent time: {{card.spent_time|floatformat:-2}} hours</div>{% else %}{% endif %}
                   {% if card.description %}
                     <div class="description cursor-pointer">

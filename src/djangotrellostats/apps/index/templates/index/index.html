@@ -4,6 +4,11 @@
 
 {% block page_title %}Index{% endblock %}
 
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'css/boards/view.css' %}" rel="stylesheet" />
+{% endblock %}
+
 {% block js %}
     {{block.super}}
     <script type="text/javascript">
@@ -13,6 +18,7 @@
     </script>
     <script type="text/javascript" src="{% static 'js/index/spent_time_by_day_of_the_week.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/boards/view/spent_time_by_week.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/boards/view/full_task_board.js' %}"></script>
 {% endblock %}
 
 {% block content %}
