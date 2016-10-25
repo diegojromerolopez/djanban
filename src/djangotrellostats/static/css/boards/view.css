@@ -44,7 +44,6 @@
 }
 
 #full_task_board .row{
-    overflow: scroll;
     min-width: 200%;
 }
 
