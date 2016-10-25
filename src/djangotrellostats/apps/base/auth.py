@@ -1,6 +1,7 @@
 
 from django.conf import settings
 
+from djangotrellostats.apps.boards.models import Card
 from djangotrellostats.apps.members.models import Member
 
 
@@ -51,6 +52,17 @@ def get_user_boards(user, is_archived=False):
 
     if user_is_visitor(user):
         return user.boards.filter(is_archived=is_archived).order_by("name")
+
+    raise ValueError(u"This user is not valid")
+
+
+# Return the cards of the boards of an user
+def get_user_board_cards(user, is_archived=False):
+    if user_is_member(user):
+        return Card.objects.filter(board__members__user=user, board__is_archived=is_archived)
+
+    if user_is_visitor(user):
+        return Card.objects.filter(board__users=user, board__is_archived=is_archived)
 
     raise ValueError(u"This user is not valid")
 
