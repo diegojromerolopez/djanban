@@ -365,9 +365,10 @@ class Board(models.Model):
     @property
     def mood_value(self):
 
+        # Check if the value in cache is less than one day old
         now = timezone.now()
         if self.last_time_mood_was_computed is not None and\
-                self.last_mood_value is not None and self.last_time_mood_was_computed - now < timedelta(days=1):
+                self.last_mood_value is not None and now - self.last_time_mood_was_computed < timedelta(days=1):
             return self.last_mood_value
 
         members = self.members.filter(is_developer=False)
