@@ -16,6 +16,12 @@
     padding-bottom: 5px;
 }
 
+h2 a.view_board:hover,
+h2 a.view_board {
+    color: inherit;
+    text-decoration: none;
+}
+
 .list-group-item > div {
     margin-left: 15px;
     margin-right: 15px;

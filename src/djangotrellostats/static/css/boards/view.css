@@ -32,7 +32,7 @@
 #full_task_board{
     background-color: #196A3E;
     border-radius: 5px;
-    overflow: scroll;
+    overflow-x: scroll;
     padding-left: 50px;
     padding-right: 50px;
     padding-top: 20px;

@@ -17,7 +17,8 @@
                 <a class="btn btn-warning" href="{% url 'boards:new' %}" title="New board">New board</a>
                 <a class="btn btn-warning" href="{% url 'boards:sync' %}" title="New board">Synchronize from Trello</a>
                 {% if archived_boards|length > 0 %}
-                    <a class="btn btn-info" href="{% url 'boards:view_archived_boards' %}" title="View archived boards">View archived boards ({{archived_boards|length}})</a>
+                    <a class="btn btn-info"
+                       href="{% url 'boards:view_archived_boards' %}" title="View archived boards">View archived boards ({{archived_boards|length}})</a>
                 {% else %}
                     There are no archived boards.
                 {% endif %}
@@ -33,7 +34,12 @@
             <ul class="list-group">
                 {% for board in boards %}
                     <li class="list-group-item">
-                        <h2 style="background-color:#{{board.background_color}}; color:#{{board.title_color}};">{{board.name}}</h2>
+                        <h2 style="background-color:#{{board.background_color}}; color:#{{board.title_color}};">
+                            <a class="view_board"
+                               href="{% url 'boards:view' board.id %}" title="View board {{board.name}}">
+                                {{board.name}}
+                            </a>
+                        </h2>
                         {% if board.last_fetch_datetime %}
                             <div>
                                 Last fetched on {{board.last_fetch_datetime}} ({{board.last_fetch_datetime|timesince}} ago)
@@ -48,7 +54,10 @@
                                 {% if board.has_to_be_fetched %}
                                     <span class="fa fa-cloud-download"></span>Will be fetched.
                                 {% else %}
-                                    <span class="fa fa-times"></span>Will <strong>not</strong> be fetched. <a href="{% url 'boards:edit' board.id %}" title="Change board fetching settings">Change</a>.
+                                    <span class="fa fa-times"></span>Will <strong>not</strong> be fetched.
+                                    {% if member %}
+                                        <a href="{% url 'boards:edit' board.id %}" title="Change board fetching settings">Change</a>.
+                                    {% endif %}
                                 {% endif %}
                             </div>
                             <a class="btn btn-primary" href="{% url 'boards:view' board.id %}" title="View board {{board.name}}">

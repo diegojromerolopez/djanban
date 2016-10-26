@@ -30,8 +30,13 @@ def index(request):
             # Ignored and closed lists are not showed
             if list_type_id != "ignored" and list_type_id != "closed":
                 list_active_cards = get_user_board_cards(current_user)\
-                    .filter(list__type=list_type_id, last_activity_datetime__gte=now-timedelta(days=30)).\
+                    .filter(list__type=list_type_id).\
                     order_by("board_id", "position")
+
+                # Do not show all done tasks. Show only tasks completed in the last 30 days
+                if list_type_id == "done":
+                    list_active_cards = list_active_cards.filter(last_activity_datetime__gte=now-timedelta(days=30))
+
                 list_ = {
                     "id": list_type_id,
                     "type": list_type_id,

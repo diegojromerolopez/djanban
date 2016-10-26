@@ -62,7 +62,7 @@ def get_user_board_cards(user, is_archived=False):
         return Card.objects.filter(board__members__user=user, board__is_archived=is_archived)
 
     if user_is_visitor(user):
-        return Card.objects.filter(board__users=user, board__is_archived=is_archived)
+        return Card.objects.filter(board__visitors=user, board__is_archived=is_archived)
 
     raise ValueError(u"This user is not valid")
 
