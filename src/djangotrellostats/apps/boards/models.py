@@ -21,11 +21,11 @@ from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
 from djangotrellostats.apps.reports.models import CardMovement
 
-# Abstract model that represents the immutable objects
 from djangotrellostats.trello_api.cards import move_card, add_comment_to_card, delete_comment_of_card, \
     remove_label_of_card, add_label_to_card
 
 
+# Abstract model that represents the immutable objects
 class ImmutableModel(models.Model):
     class Meta:
         abstract = True
