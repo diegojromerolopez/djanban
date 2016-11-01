@@ -282,14 +282,52 @@ class Board(models.Model):
             return 0
         return spent_time_by_week[0]["spent_time"]
 
+    # The number of hours worked in the last month with some work
+    @property
+    def last_working_month_spent_time(self):
+        # Getting last month that had work
+        end_working_date = self.get_working_end_date()
+        if end_working_date is None:
+            return 0
+        # Getting the spent time of that month
+        end_working_month = end_working_date.month
+        end_working_year = end_working_date.year
+        spent_time = self.get_monthly_spent_time(month=end_working_month, year=end_working_year)
+        return spent_time
+
+    # The number of hours worked in the last month with some work
+    @property
+    def last_working_month_adjusted_spent_time(self):
+        # Getting last month that had work
+        end_working_date = self.get_working_end_date()
+        if end_working_date is None:
+            return 0
+
+        # The last month and year this board had some work
+        end_working_month = end_working_date.month
+        end_working_year = end_working_date.year
+
+        # Getting the spent time of that month for each member
+        adjusted_spent_time = 0
+        for member in self.members.filter(is_developer=True):
+            member_spent_time = self.get_monthly_spent_time(month=end_working_month,
+                                                            year=end_working_year,
+                                                            member=member)
+            adjusted_member_spent_time = member_spent_time * member.spent_time_factor
+            adjusted_spent_time += adjusted_member_spent_time
+
+        return adjusted_spent_time
+
     # Return spent time per week
     @property
     def spent_time_by_week(self):
         return self.daily_spent_times.values('week_of_year').annotate(spent_time=Sum("spent_time")).order_by("week_of_year")
 
     # Return the spent time on a given month of a year
-    def get_monthly_spent_time(self, month, year):
+    def get_monthly_spent_time(self, month, year, member=None):
         spent_time_on_week_filter = {"date__month": month, "date__year": year}
+        if member:
+            spent_time_on_week_filter["member"] = member
         spent_time = self.daily_spent_times.filter(**spent_time_on_week_filter).aggregate(sum=Sum("spent_time"))["sum"]
         if spent_time is None:
             return 0
