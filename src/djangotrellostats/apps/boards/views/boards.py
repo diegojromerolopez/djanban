@@ -4,22 +4,19 @@ from __future__ import unicode_literals
 
 import time
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.http.response import Http404, HttpResponse
+from django.http.response import Http404
 from django.shortcuts import render, get_object_or_404
-from django.template import loader
-from django.template.context import Context
-from django.conf import settings
 
 from djangotrellostats.apps.base.auth import user_is_member, get_user_boards, user_is_visitor
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.forms import EditBoardForm, NewBoardForm
-from djangotrellostats.apps.boards.models import List, Board, Card
+from djangotrellostats.apps.boards.models import List, Board
 from djangotrellostats.apps.boards.stats import avg, std_dev
-
 from djangotrellostats.apps.fetch.fetchers.trello import BoardFetcher, Initializer
 from djangotrellostats.utils.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
 

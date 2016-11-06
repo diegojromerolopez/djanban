@@ -14,6 +14,9 @@ from djangotrellostats.trello_api.cards import new_card
 
 
 # Board edition form
+from djangotrellostats.utils.week import number_of_weeks_of_year, get_iso_week_of_year
+
+
 class EditBoardForm(models.ModelForm):
     class Meta:
         model = Board
@@ -123,3 +126,38 @@ class NewCardForm(models.ModelForm):
                 # Clean cached charts for this board
                 card.board.clean_cached_charts()
 
+
+# Week summary filter
+# This filter filters the
+class WeekSummaryFilterForm(forms.Form):
+    year = forms.ChoiceField(label="Year", choices=[], required=True)
+    week = forms.ChoiceField(label="Week", choices=[], required=True)
+    member = forms.ChoiceField(label="Member", choices=[], required=True)
+
+    def __init__(self, board, post_data=None, initial=None):
+        super(WeekSummaryFilterForm, self).__init__(data=post_data, initial=initial)
+        now = timezone.now()
+        year = now.year
+
+        working_start_date = board.get_working_start_date()
+        working_end_date = board.get_working_end_date()
+        if working_start_date and working_end_date:
+            self.fields["year"].choices = [(year_i, year_i) for year_i in range(working_start_date.year, working_end_date.year+1)]
+
+            if working_start_date.year == working_end_date.year:
+                start_week = get_iso_week_of_year(working_start_date)
+                end_week = get_iso_week_of_year(working_end_date)
+                self.fields["week"].choices = [(week_i, week_i) for week_i in range(start_week, end_week+1)]
+            else:
+                self.fields["week"].choices = [(week_i, week_i) for week_i in range(1, 53 + 1)]
+        else:
+            self.fields["year"].choices = [(year_i, year_i) for year_i in range(year-100, year+101)]
+            self.fields["week"].choices = [(week_i, week_i) for week_i in range(1, 53+1)]
+
+        self.fields["member"].choices = [("all", "All")] +\
+            [(member.id, member.trello_username) for member in board.members.filter(is_developer=True)]
+
+        if initial is None:
+            self.initial["year"] = year
+            self.initial["week"] = get_iso_week_of_year(now)
+            self.initial["member"] = "all"

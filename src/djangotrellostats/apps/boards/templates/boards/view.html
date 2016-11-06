@@ -84,16 +84,22 @@
 
         {% include "boards/components/view/summary.html" %}
 
-        {% if member %}
+
             <div class="row">
                 <div class="col-md-12">
                     <h2>Tasks</h2>
                     <p>
-                        <a href="{% url 'boards:new_card' board.id %}" class="btn btn-primary new-task">New task</a>
+                        {% if member %}
+                            <span>
+                                <a href="{% url 'boards:new_card' board.id %}" class="btn btn-primary new-task">New task</a>
+                            </span>
+                        {% endif %}
+                        <span>
+                            <a href="{% url 'boards:view_week_summary' board.id 'all' week_of_year %}" class="btn btn-primary new-task">View week summary</a>
+                        </span>
                     </p>
                 </div>
             </div>
-        {% endif %}
 
         {% if board.estimated_number_of_hours %}
 

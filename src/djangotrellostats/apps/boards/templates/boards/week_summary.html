@@ -1,39 +1,49 @@
 {% extends "boards/view.html" %}
 
-{% block page_title %}Cards of {{board.name}}{% endblock %}
+{% load staticfiles %}
+
+{% block page_title %}Week {{week_of_year}} summary for board {{board.name}}{% endblock %}
+
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'css/boards/cards/view_week_summary.css' %}" rel="stylesheet" />
+{% endblock css %}
 
 {% block content %}
-    <h1>Cards of {{board.name}}</h1>
+    <h1>Week {{week_of_year}} summary for board {{board.name}}</h1>
     <div>Last updated: {{board.get_human_fetch_datetime}}</div>
-    {% if cards|length == 0 %}
-        There are no cards in this board. Have you tried to fetch the cards?
-    {% else %}
-        <div class="row">
-            <div class="col-md-12">
-                 <a class="btn btn-primary" href="{% url 'boards:view_week_summary' board.id 'all' week_of_year %}">
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+                <a class="btn btn-primary" href="{% url 'boards:view_card_report' board.id %}">
                     <span class="fa fa-arrow-left"></span>
-                    View completed tasks on this week
+                    View all tasks in {{board.name}}
                 </a>
-            </div>
+            </p>
         </div>
-        <div class="card-charts">
-            <h2>Card stats</h2>
-            {% include "boards/cards/components/charts.html" %}
+    </div>
+    <div id="week-summary-filter-container" class="row">
+        <div class="col-md-12">
+            <h2>Filter the list of completed cards</h2>
+            {% include "forms/form.html" %}
         </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <h2>Card list</h2>
-            </div>
-            <div class="panel col-md-12">
-                <div>
-                    <a href="{% url 'boards:export_card_report' board.id %}" class="btn btn-success">Export as CSV</a>
-                </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>
+                {{completed_cards|length}} tasks were completed in {{week_of_year}}
+                ({{week_start_date|date:"Y-m-d"}} to {{week_end_date|date:"Y-m-d"}})
+                {% if selected_member %}by {{selected_member.trello_username}}{% endif %}
+            </h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            {% if completed_cards|length > 0 %}
                 <table class="table">
                     <tr>
                         <td>Name</td>
-                        <td>Closed?</td>
-                        <td>List</td>
+                        <td>Members</td>
                         <td>Comments</td>
                         <td>Lead time</td>
                         <td>Cycle time</td>
@@ -41,16 +51,19 @@
                         <td>Last activity date</td>
                         <td>Actions</td>
                     </tr>
-                    {% for card in cards %}
+                    {% for card in completed_cards %}
                         <tr>
                             <td>
                                 <a href="{% url 'boards:view_card' board.id card.id %}" title="View card {{card.name}}">
                                     {{card.name}}
                                 </a>
                             </td>
-                            <td>{% if card.is_closed %}Yes{% else %}No{% endif %}</td>
-                            <td>{{card.list.name}}</td>
                             <td>{{card.number_of_comments}}</td>
+                            <td>
+                                {% for card_member in card.members.all %}
+                                    {{card_member.trello_username}}{% if forloop.revcounter0 > 1 %}, {% elif forloop.revcounter0 == 1 %} and {% endif %}
+                                {% endfor %}
+                            </td>
                             <td>{% if card.lead_time %}{{card.lead_time|floatformat:-2}}{% endif %}</td>
                             <td>{% if card.cycle_time %}{{card.cycle_time|floatformat:-2}}{% endif %}</td>
                             <td>{% if card.spent_time or card.estimated_time %}{{card.spent_time|floatformat:-2}}/{{card.estimated_time|floatformat:-2}}{% endif %}</td>
@@ -65,14 +78,8 @@
                             </td>
                         </tr>
                     {% endfor %}
-                    <tr>
-                        <td colspan="6">Cycle time (avg. & std. dev.)</td><td>{{avg_cycle_time|floatformat:"-3"}}</td><td>{{std_dev_cycle_time|floatformat:"-3"}}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="6">Lead time (avg. & std. dev.)</td><td>{{avg_lead_time|floatformat:"-3"}}</td><td>{{std_dev_lead_time|floatformat:"-3"}}</td>
-                    </tr>
                 </table>
-            </div>
+            {% endif %}
         </div>
-    {% endif %}
-{% endblock content %}
+    </div>
+{% endblock %}

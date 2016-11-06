@@ -55,7 +55,7 @@
                                 <span class="fa fa-cogs"></span> Requirements
                             </a>
                         </li>
-                        <li {% if url_name == "view_card_report" or url_name == "view_card"  %}class="active"{% endif %}>
+                        <li {% if url_name == "view_card_report" or url_name == "view_week_summary" or url_name == "view_card"  %}class="active"{% endif %}>
                             <a href="{% url 'boards:view_card_report' board.id %}" title="Cards of board {{board.name}}">
                                 <span class="fa fa-sticky-note-o"></span> Cards
                             </a>

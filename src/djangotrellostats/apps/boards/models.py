@@ -223,40 +223,65 @@ class Board(models.Model):
     # Returns the spent time.
     # If date parameter is present, computes the spent time on a given date for this board
     # Otherwise, computes the total spent time for this board
-    def get_spent_time(self, date=None):
+    def get_spent_time(self, date=None, member=None):
         daily_spent_times_filter = {}
         if date:
-            daily_spent_times_filter["date"] = date
+            if type(date) == tuple or type(date) == list:
+                daily_spent_times_filter["date__gte"] = date[0]
+                daily_spent_times_filter["date__lte"] = date[1]
+            else:
+                daily_spent_times_filter["date"] = date
+        member_filter = {}
+        if member:
+            member_filter["member"] = member
 
-        spent_time = self.daily_spent_times.filter(**daily_spent_times_filter).aggregate(sum=Sum("spent_time"))["sum"]
+        spent_time = self.daily_spent_times.\
+            filter(**daily_spent_times_filter).\
+            filter(**member_filter).\
+            aggregate(sum=Sum("spent_time"))["sum"]
+
         if spent_time is None:
             return 0
+
         return spent_time
 
     # Returns the adjusted spent time according to the spent time factor defined in each member
-    def get_adjusted_spent_time(self, date=None):
+    def get_adjusted_spent_time(self, date=None, member=None):
         daily_spent_times_filter = {}
         if date:
-            daily_spent_times_filter["date"] = date
+            if type(date) == tuple or type(date) == list:
+                daily_spent_times_filter["date__gte"] = date[0]
+                daily_spent_times_filter["date__lte"] = date[1]
+            else:
+                daily_spent_times_filter["date"] = date
+
+        if member is None:
+            members = self.members.filter(is_developer=True)
+        else:
+            members = [member]
 
         adjusted_spent_time = 0
-        for member in self.members.all():
-            daily_spent_times_filter["member"] = member
+        for member_i in members:
+            daily_spent_times_filter["member"] = member_i
             spent_time = self.daily_spent_times.filter(**daily_spent_times_filter).aggregate(sum=Sum("spent_time"))["sum"]
             if spent_time is not None:
-                member_adjusted_spent_time = member.spent_time_factor * spent_time
+                member_adjusted_spent_time = member_i.spent_time_factor * spent_time
                 adjusted_spent_time += member_adjusted_spent_time
 
         return adjusted_spent_time
 
     # Return the spent time on a given week of a year
     def get_weekly_spent_time(self, week, year):
+        # Get the date interval for the given week
         start_date = Week(year, week).monday()
         end_date = Week(year, week).friday()
         spent_time_on_week_filter = {"date__gte": start_date, "date__lte": end_date}
+        # Filter the daily spent times and sum their spent time
         spent_time = self.daily_spent_times.filter(**spent_time_on_week_filter).aggregate(sum=Sum("spent_time"))["sum"]
+        # As usual, a None value means 0
         if spent_time is None:
             return 0
+        # Otherwise, return the sum of spent times for the given week
         return spent_time
 
     # Average spent time in this project per week
@@ -339,7 +364,11 @@ class Board(models.Model):
     def get_developed_value(self, date=None):
         daily_spent_times_filter = {}
         if date:
-            daily_spent_times_filter["date"] = date
+            if type(date) == tuple or type(date) == list:
+                daily_spent_times_filter["date__gte"] = date[0]
+                daily_spent_times_filter["date__lte"] = date[1]
+            else:
+                daily_spent_times_filter["date"] = date
 
         developed_value = self.daily_spent_times.filter(**daily_spent_times_filter).aggregate(sum=Sum("rate_amount"))["sum"]
         if developed_value is None:
@@ -350,7 +379,11 @@ class Board(models.Model):
     def get_adjusted_developed_value(self, date=None):
         daily_spent_times_filter = {}
         if date:
-            daily_spent_times_filter["date"] = date
+            if type(date) == tuple or type(date) == list:
+                daily_spent_times_filter["date__gte"] = date[0]
+                daily_spent_times_filter["date__lte"] = date[1]
+            else:
+                daily_spent_times_filter["date"] = date
 
         adjusted_developed_value = 0
         for member in self.members.all():

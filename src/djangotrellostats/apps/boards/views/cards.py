@@ -11,12 +11,15 @@ from django.http.response import Http404, HttpResponse
 from django.shortcuts import render
 from django.template import loader
 from django.template.context import Context
+from django.utils import timezone
+from isoweek import Week
 
 from djangotrellostats.apps.base.auth import user_is_member, get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
-from djangotrellostats.apps.boards.forms import NewCardForm
+from djangotrellostats.apps.boards.forms import NewCardForm, WeekSummaryFilterForm
 from djangotrellostats.apps.boards.models import List, Board, Card, CardComment, Label
 from djangotrellostats.apps.boards.stats import avg, std_dev
+from djangotrellostats.utils.week import get_iso_week_of_year, get_week_of_year
 
 
 # Create a new card
@@ -256,6 +259,7 @@ def view_report(request, board_id):
         raise Http404
     cards = board.cards.all()
     replacements = {
+        "week_of_year": get_week_of_year(),
         "member": member, "board": board, "cards": cards,
         "avg_lead_time": avg(cards, "lead_time"),
         "std_dev_lead_time": std_dev(cards, "lead_time"),
@@ -292,3 +296,84 @@ def export_report(request, board_id):
     })
     response.write(csv_template.render(replacements))
     return response
+
+
+# View week report
+@login_required
+def view_week_summary(request, board_id, member_id="all", week_of_year=None):
+    try:
+        current_member = None
+        if user_is_member(request.user):
+            current_member = request.user.member
+        board = get_user_boards(request.user).get(id=board_id, is_archived=False)
+    except Board.DoesNotExist:
+        raise Http404
+
+    replacements = {"board": board, "member": current_member}
+
+    if request.method == "POST":
+        form = WeekSummaryFilterForm(post_data=request.POST, board=board)
+        if form.is_valid():
+            year = form.cleaned_data.get("year")
+            week = form.cleaned_data.get("week")
+            member_id = form.cleaned_data.get("member")
+            week_of_year = "{0}W{1}".format(year, week)
+            return HttpResponseRedirect(reverse("boards:view_week_summary", args=(board_id, member_id, week_of_year,)))
+
+    year = None
+    week = None
+
+    if week_of_year is None:
+        now = timezone.now()
+        year = now.year
+        week = int(get_iso_week_of_year(now))
+        week_of_year = "{0}W{1}".format(year, week)
+
+    if week is None or year is None:
+        matches = re.match(r"^(?P<year>\d{4})W(?P<week>\d{2})$", week_of_year)
+        if matches:
+            year = int(matches.group("year"))
+            week = int(matches.group("week"))
+
+    form = WeekSummaryFilterForm(initial={"year": year, "week": week, "member": member_id}, board=board)
+    replacements["form"] = form
+    replacements["week_of_year"] = week_of_year
+
+    # Done cards that are of this member
+    member_filter = {}
+    if member_id != "all":
+        member_filter = {"members": member_id}
+
+    # Date limits of the selected week
+    week_start_date = Week(year, week).monday()
+    week_end_date = Week(year, week).friday()
+
+    # Getting the cards that were completed in the selected week for the selected user
+    completed_cards = board.cards.\
+        filter(list__type="done",
+               movements__type="forward",
+               movements__destination_list__type="done",
+               movements__datetime__gte=week_start_date,
+               movements__datetime__lte=week_end_date)\
+        .filter(**member_filter).\
+        order_by("last_activity_datetime")
+
+    replacements["completed_cards"] = completed_cards
+
+    # Time spent developing on this week
+    if member_id == "all":
+        spent_time = board.get_spent_time([week_start_date, week_end_date])
+        adjusted_spent_time = board.get_spent_time([week_start_date, week_end_date])
+    else:
+        member = board.members.get(id=member_id)
+        spent_time = board.get_spent_time([week_start_date, week_end_date], member)
+        adjusted_spent_time = board.get_spent_time([week_start_date, week_end_date], member)
+        replacements["selected_member"] = member
+
+    replacements["spent_time"] = spent_time
+    replacements["adjusted_spent_time"] = adjusted_spent_time
+
+    replacements["week_start_date"] = week_start_date
+    replacements["week_end_date"] = week_end_date
+
+    return render(request, "boards/week_summary.html", replacements)

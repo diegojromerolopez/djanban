@@ -1,0 +1,16 @@
+#week-summary-filter-container {
+    overflow: hidden;
+}
+
+#week-summary-filter-container form {
+    overflow: hidden;
+}
+
+#week-summary-filter-container form .field-container {
+    width: 20%;
+    float: left;
+}
+
+#week-summary-filter-container form .btn {
+    margin-top: 10px;
+}
