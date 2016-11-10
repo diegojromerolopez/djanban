@@ -205,7 +205,7 @@ class BoardFetcher(Fetcher):
     def _fetch_labels(self):
         trello_labels = self.trello_board.get_labels()
         for trello_label in trello_labels:
-            LabelCreator.create(trello_label, self.board)
+            LabelUpdater.update(trello_label, self.board)
         self.labels = self.board.labels.all()
 
     # Return the Trello Cards
@@ -899,19 +899,21 @@ class CardFetcher(object):
         return trello_card.comment_summary
 
 
-# Label creator
-class LabelCreator(object):
+# Label updater
+class LabelUpdater(object):
 
-    # Constructs a label
+    # Creates a label if there is some change between Trello's label and this one
     @staticmethod
-    def factory(trello_label, board):
-        return Label(uuid=trello_label.id, name=trello_label.name, color=trello_label.color, board=board)
-
-    # Creates a label
-    @staticmethod
-    def create(trello_label, board):
-        label = LabelCreator.factory(trello_label, board)
-        label.save()
+    def update(trello_label, board):
+        try:
+            label = Label.objects.get(board=board, uuid=trello_label.id)
+            # If a update of the label is needed (in case of name or color change), update both attributes
+            if label.name != trello_label.name or label.color != trello_label.color:
+                label.name = trello_label.name
+                label.color = trello_label.color
+                label.save()
+        # If the label does not exist, create it with the trello label values
+        except Label.DoesNotExist:
+            label = Label(board=board, uuid=trello_label.id, name=trello_label.name, color=trello_label.color)
+            label.save()
         return label
-
-

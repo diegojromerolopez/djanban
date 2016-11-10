@@ -770,7 +770,7 @@ class CardComment(ImmutableModel):
 
 
 # Label of the task board
-class Label(ImmutableModel):
+class Label(models.Model):
 
     class Meta:
         verbose_name = "label"
