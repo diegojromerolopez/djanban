@@ -149,10 +149,10 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
         if board:
             chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
     else:
-        ValueError(u"Operation not valid only Avg and Count values are valid")
+        raise ValueError(u"Operation not valid only Avg and Count values are valid")
 
     period_measurement_chart = pygal.StackedBar(title=chart_title, legend_at_bottom=True, print_values=True,
-                                                print_zeroes=False,
+                                                print_zeroes=False, x_label_rotation=45,
                                                 human_readable=True)
     labels = []
     if board:
