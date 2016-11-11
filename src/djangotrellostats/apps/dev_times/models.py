@@ -157,3 +157,11 @@ class DailySpentTime(models.Model):
         )
         daily_spent_time.save()
         return daily_spent_time
+
+    # Set daily spent time from a card comment
+    def set_from_comment(self, comment):
+        spent_estimated_time = comment.spent_estimated_time
+        if spent_estimated_time:
+            self.date = spent_estimated_time["date"]
+            self.spent_time = spent_estimated_time["spent_time"]
+            self.estimated_time = spent_estimated_time["estimated_time"]

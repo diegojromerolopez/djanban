@@ -827,23 +827,25 @@ class CardComment(models.Model):
 
         earlier_card_comment_exists = card.comments.filter(uuid=self.uuid).exists()
 
-        super(CardComment, self).save(*args, **kwargs)
-
         if earlier_card_comment_exists:
-            self._save_old(card)
+            earlier_card_comment = card.comments.get(uuid=self.uuid)
+            super(CardComment, self).save(*args, **kwargs)
+            self._save_old(card, earlier_card_comment)
         else:
+            super(CardComment, self).save(*args, **kwargs)
             self._save_new(card)
 
     # Save an old comment
-    def _save_old(self, card):
-        earlier_card_comment = card.comments.get(uuid=self.uuid)
+    def _save_old(self, card, earlier_card_comment):
 
         if self.content != earlier_card_comment.content:
 
             # Is it a spent/estimated time comment?
             spent_estimated_time = self.spent_estimated_time
             earlier_spent_estimated_time = earlier_card_comment.spent_estimated_time
-            if spent_estimated_time != earlier_spent_estimated_time:
+
+            if spent_estimated_time["spent_time"] != earlier_spent_estimated_time["spent_time"] or \
+               spent_estimated_time["estimated_time"] != earlier_spent_estimated_time["estimated_time"]:
                 # Update this Daily Spent Time that depends on this comment
                 if not earlier_card_comment.daily_spent_time:
                     daily_spent_time = DailySpentTime.create_from_comment(self)
@@ -906,11 +908,13 @@ class Label(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="labels")
 
     def avg_estimated_time(self, **kwargs):
-        avg_estimated_time = self.cards.filter(**kwargs).aggregate(Avg("estimated_time"))["estimated_time__avg"]
+        label_cards = self.cards.filter(**kwargs)
+        avg_estimated_time = numpy.mean([label_card.spent_time for label_card in label_cards])
         return avg_estimated_time
 
     def avg_spent_time(self, **kwargs):
-        avg_spent_time = self.cards.filter(**kwargs).aggregate(Avg("spent_time"))["spent_time__avg"]
+        label_cards = self.cards.filter(**kwargs)
+        avg_spent_time = numpy.mean([label_card.spent_time for label_card in label_cards])
         return avg_spent_time
 
     def avg_cycle_time(self, **kwargs):
