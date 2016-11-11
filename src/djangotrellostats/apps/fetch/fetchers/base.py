@@ -52,7 +52,6 @@ class Fetcher(object):
 
     # Delete all children entities but lists and workflows
     def _truncate(self):
-        self.board.card_movements.all().delete()
         CardComment.objects.filter(card__board=self.board).all().delete()
         self.board.daily_spent_times.all().delete()
         self.board.list_reports.all().delete()

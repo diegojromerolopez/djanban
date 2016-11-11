@@ -746,7 +746,7 @@ class CardComment(models.Model):
         )
 
     uuid = models.CharField(max_length=128, verbose_name=u"External id of the comment of this comment", unique=True)
-    card = models.ForeignKey("boards.Card", verbose_name=u"Card this commenb belongs to", related_name="comments")
+    card = models.ForeignKey("boards.Card", verbose_name=u"Card this comment belongs to", related_name="comments")
     author = models.ForeignKey("members.Member", verbose_name=u"Member author of this comment", related_name="comments")
     content = models.TextField(verbose_name=u"Content of the comment")
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")

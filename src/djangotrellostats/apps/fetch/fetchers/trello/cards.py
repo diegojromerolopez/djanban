@@ -90,7 +90,6 @@ class CardFetcher(object):
 
         # Card movements
         for card in self.cards:
-            card.movements.all().delete()
             movements = self.trello_movements_by_card.get(card.uuid)
             if movements:
                 local_timezone = pytz.timezone(settings.TIME_ZONE)
@@ -103,10 +102,18 @@ class CardFetcher(object):
 
                     movement_naive_datetime = datetime.strptime(movement["date"], '%Y-%m-%dT%H:%M:%S.%fZ')
                     movement_datetime = local_timezone.localize(movement_naive_datetime)
-                    card_movement = CardMovement(board=self.board, card=card, type=movement_type,
+
+                    # Only create card movements that don't exist
+                    try:
+                        CardMovement.objects.get(board=self.board, card=card, type=movement_type,
                                                  source_list=source_list, destination_list=destination_list,
                                                  datetime=movement_datetime)
-                    card_movement.save()
+
+                    except CardMovement.DoesNotExist:
+                        card_movement = CardMovement(board=self.board, card=card, type=movement_type,
+                                                     source_list=source_list, destination_list=destination_list,
+                                                     datetime=movement_datetime)
+                        card_movement.save()
 
         return self.cards
 
