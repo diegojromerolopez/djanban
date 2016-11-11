@@ -232,9 +232,7 @@ class CardFetcher(object):
             card.last_activity_datetime = trello_card.dateLastActivity
             card.list = list_
             del self.deleted_cards_dict[card.uuid]
-            print "REcuperdado"
         except Card.DoesNotExist:
-            print "Creado"
             card = Card(uuid=trello_card.id, name=trello_card.name, url=trello_card.url,
                         short_url=trello_card.short_url, description=trello_card.desc, is_closed=trello_card.closed,
                         position=trello_card.pos, last_activity_datetime=trello_card.dateLastActivity,
@@ -270,9 +268,6 @@ class CardFetcher(object):
         card.member_uuids = card_member_uuids.keys()
 
         # Saving card
-        print card.uuid
-        print card.creation_datetime
-        print card.last_activity_datetime
         card.save()
 
         return card
