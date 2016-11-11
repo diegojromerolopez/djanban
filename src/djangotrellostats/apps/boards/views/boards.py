@@ -258,13 +258,17 @@ def fetch(request, board_id):
     # Confirm fetch form
     confirmed_board_id = request.POST.get("board_id")
     if confirmed_board_id and confirmed_board_id == board_id:
-        start_time = time.time()
-        board_fetcher = BoardFetcher(board)
-        board_fetcher.fetch(debug=True)
-        end_time = time.time()
-        print("Elapsed time {0} s".format(end_time-start_time))
-        replacements["done"] = True
-        return render(request, "boards/fetch.html", replacements)
+        try:
+            start_time = time.time()
+            board_fetcher = BoardFetcher(board)
+            board_fetcher.fetch(debug=True)
+            end_time = time.time()
+            print("Elapsed time {0} s".format(end_time-start_time))
+            replacements["done"] = True
+            return render(request, "boards/fetch.html", replacements)
+        except UnicodeDecodeError as e:
+            replacements["exception_message"] = e
+            return render(request, "boards/fetch_error.html", replacements)
 
     raise Http404
 

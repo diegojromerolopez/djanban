@@ -1,0 +1,20 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}Fetch data from {{board.name}}{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-7 center-block">
+        <div class="panel panel-danger ">
+          <div class="panel-heading">There was an error when fetching board {{board.name}} contents</div>
+          <div class="panel-body">
+              <p>
+                {{exception_message}}
+              </p>
+          </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

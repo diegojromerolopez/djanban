@@ -31,7 +31,7 @@ class Fetcher(object):
         fetch_lock_file_path = Fetcher.FETCH_LOCK_FILE_PATH.format(self.board.id)
         # Check if lock file exists. If it exists, warn the fetch method
         if os.path.isfile(fetch_lock_file_path):
-            return False
+            raise AssertionError("Lock file {0} already exists".format(fetch_lock_file_path))
 
         # Creates a new lock file
         with open(fetch_lock_file_path, 'w', encoding="utf-8") as lock_file:
@@ -45,7 +45,7 @@ class Fetcher(object):
         fetch_lock_file_path = Fetcher.FETCH_LOCK_FILE_PATH.format(self.board.id)
         # Lock file must exist
         if not os.path.isfile(fetch_lock_file_path):
-            return False
+            raise AssertionError("Lock file {0} does not exist".format(fetch_lock_file_path))
 
         # Deleting the lock file
         os.remove(fetch_lock_file_path)

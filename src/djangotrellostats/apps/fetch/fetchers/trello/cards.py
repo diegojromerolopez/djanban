@@ -68,6 +68,7 @@ class CardFetcher(object):
 
         # Blocking cards
         for card in self.cards:
+            card.blocking_cards.clear()
             blocking_card_urls = card.trello_card.comment_summary.get("blocking_card_urls")
             # For each one of this card's blocking cards, check if it exists and if that's the case,
             # add the blocking card to its blocking cards
@@ -78,6 +79,7 @@ class CardFetcher(object):
 
         # Requirements
         for card in self.cards:
+            card.requirements.clear()
             requirement_codes = card.trello_card.comment_summary.get("requirement_codes")
             # For each one of this card's requirements, check if it exists and if that's the case,
             # add this requirement to this card's requirements
@@ -88,6 +90,7 @@ class CardFetcher(object):
 
         # Card movements
         for card in self.cards:
+            card.movements.all().delete()
             movements = self.trello_movements_by_card.get(card.uuid)
             if movements:
                 local_timezone = pytz.timezone(settings.TIME_ZONE)
@@ -109,9 +112,23 @@ class CardFetcher(object):
 
     # Create a card from a Trello Card
     def _create(self, trello_card):
-        card = self._factory(trello_card)
+        trello_card.actions = self.trello_movements_by_card.get(trello_card.id, [])
+        trello_card._comments = self.trello_comments_by_card.get(trello_card.id, [])
+
+        # Time a card is in a list
+        self._init_trello_card_stats_by_list(trello_card)
+
+        # Comment stats spent and estimated times
+        self._init_trello_card_comment_stats(trello_card)
+
+        self._init_trello_card_stats(trello_card)
+
+        # Creates the Card object
+        card = self._create_from_trello_card(trello_card)
+
         # Creation of the comments
         comments = CardFetcher._create_comments(card)
+
         # Creation of the daily spent times
         CardFetcher._create_daily_spent_times(card, comments)
         return card
@@ -193,31 +210,13 @@ class CardFetcher(object):
             daily_spent_time.comment = comments_dict[daily_spent_time.uuid]
             DailySpentTime.add_daily_spent_time(daily_spent_time)
 
-    # Constructs a Card from a Trello Card
-    def _factory(self, trello_card):
-        trello_card.actions = self.trello_movements_by_card.get(trello_card.id, [])
-        trello_card._comments = self.trello_comments_by_card.get(trello_card.id, [])
-
-        # Time a card is in a list
-        self._init_trello_card_stats_by_list(trello_card)
-
-        # Comment stats spent and estimated times
-        self._init_trello_card_comment_stats(trello_card)
-
-        self._init_trello_card_stats(trello_card)
-
-        # Creates the Card object
-        card = self._factory_from_trello_card(trello_card)
-
-        return card
-
     # Card creation
-    def _factory_from_trello_card(self, trello_card):
+    def _create_from_trello_card(self, trello_card):
         list_ = self.board.lists.get(uuid=trello_card.idList)
 
         local_timezone = pytz.timezone(settings.TIME_ZONE)
         if trello_card.created_date.tzinfo is None or\
-                        trello_card.created_date.tzinfo.utcoffset(trello_card.created_date) is None:
+           trello_card.created_date.tzinfo.utcoffset(trello_card.created_date) is None:
             card_creation_datetime = local_timezone.localize(trello_card.created_date)
         else:
             card_creation_datetime = trello_card.created_date
@@ -230,10 +229,12 @@ class CardFetcher(object):
             card.description = trello_card.desc
             card.is_closed = trello_card.closed
             card.position = trello_card.pos
-            card.last_activity_datetime = trello_card.dateLastActivity,
+            card.last_activity_datetime = trello_card.dateLastActivity
             card.list = list_
             del self.deleted_cards_dict[card.uuid]
+            print "REcuperdado"
         except Card.DoesNotExist:
+            print "Creado"
             card = Card(uuid=trello_card.id, name=trello_card.name, url=trello_card.url,
                         short_url=trello_card.short_url, description=trello_card.desc, is_closed=trello_card.closed,
                         position=trello_card.pos, last_activity_datetime=trello_card.dateLastActivity,
@@ -268,7 +269,11 @@ class CardFetcher(object):
         card_member_uuids.update({member_uuid: True for member_uuid in comment_summary["member_uuids"]})
         card.member_uuids = card_member_uuids.keys()
 
-        # Blocking cards
+        # Saving card
+        print card.uuid
+        print card.creation_datetime
+        print card.last_activity_datetime
+        card.save()
 
         return card
 

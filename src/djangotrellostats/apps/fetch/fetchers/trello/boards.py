@@ -175,8 +175,7 @@ class BoardFetcher(Fetcher):
 
     # Fetch data of this board
     def fetch(self, debug=False):
-        if not self._start_fetch():
-            return False
+        self._start_fetch()
 
         try:
             with transaction.atomic():
@@ -211,7 +210,7 @@ class BoardFetcher(Fetcher):
         card_fetcher = CardFetcher(self, trello_cards, trello_movements_by_card, trello_comments_by_card)
         self.cards = card_fetcher.fetch()
 
-    # Fetch the cards of this board
+    # Fetch the card repots of this board
     def _create_card_reports(self, debug=False):
 
         workflows = self.board.workflows.all()
@@ -242,11 +241,13 @@ class BoardFetcher(Fetcher):
             # Label assignment to each card
             label_uuids = trello_card.idLabels
             card_labels = self.labels.filter(uuid__in=label_uuids)
+            card.labels.clear()
             for card_label in card_labels:
                 card.labels.add(card_label)
 
             # Associate members to this card
             members = self.members.filter(uuid__in=card.member_uuids)
+            card.members.clear()
             for member in members:
                 card.members.add(member)
 
