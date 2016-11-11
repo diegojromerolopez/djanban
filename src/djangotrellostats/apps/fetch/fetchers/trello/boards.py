@@ -245,26 +245,19 @@ class BoardFetcher(Fetcher):
             for card_label in card_labels:
                 card.labels.add(card_label)
 
-            # Associate members to this card
-            members = self.members.filter(uuid__in=card.member_uuids)
-            card.members.clear()
-            for member in members:
-                card.members.add(member)
-
-            trello_card_member_uuids = card.member_uuids
-            num_trello_card_members = len(trello_card_member_uuids)
-            for trello_member_uuid in trello_card_member_uuids:
-
+            num_trello_card_members = card.members.all().count()
+            for member in card.members.all():
+                member_uuid = member.uuid
                 # Member reports
                 try:
-                    member_report = member_report_dict[trello_member_uuid]
+                    member_report = member_report_dict[member_uuid]
                 # If there is no member report, it implies that this member left the board
                 # Create a new empty member report for this old member
                 except KeyError:
-                    lost_member = Member.objects.get(uuid=trello_member_uuid)
+                    lost_member = Member.objects.get(uuid=member_uuid)
                     lost_member_report = MemberReport(board=self.board, member=lost_member)
                     lost_member_report.save()
-                    member_report_dict[trello_member_uuid] = lost_member_report
+                    member_report_dict[member_uuid] = lost_member_report
 
                 # Increment the number of cards of the member report
                 member_report.number_of_cards += 1
@@ -292,14 +285,16 @@ class BoardFetcher(Fetcher):
                 # Card spent time
                 if not hasattr(member_report, "card_spent_times"):
                     member_report.card_spent_times = []
-                if card.spent_time_by_member.get(trello_member_uuid) is not None:
-                    member_report.card_spent_times.append(card.spent_time_by_member.get(trello_member_uuid))
+                card_member_spent_time = card.get_spent_time_by_member(member)
+                if card_member_spent_time is not None:
+                    member_report.card_spent_times.append(card_member_spent_time)
 
                 # Card estimated time
                 if not hasattr(member_report, "card_estimated_times"):
                     member_report.card_estimated_times = []
-                if card.estimated_time_by_member.get(trello_member_uuid) is not None:
-                    member_report.card_estimated_times.append(card.estimated_time_by_member.get(trello_member_uuid))
+                card_member_estimated_time = card.get_estimated_time_by_member(member)
+                if card_member_estimated_time is not None:
+                    member_report.card_estimated_times.append(card_member_estimated_time)
 
                 # Workflow card reports
                 for workflow in workflows:

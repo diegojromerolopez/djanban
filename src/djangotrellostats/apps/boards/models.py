@@ -548,6 +548,16 @@ class Card(models.Model):
     members = models.ManyToManyField("members.Member", related_name="cards")
     blocking_cards = models.ManyToManyField("boards.card", related_name="blocked_cards")
 
+    # Get the spent time by member for this card
+    def get_spent_time_by_member(self, member):
+        return self.daily_spent_times.filter(member=member).\
+            aggregate(spent_time_sum=Sum("spent_time"))["spent_time_sum"]
+
+    # Get the estimated time by member for this card
+    def get_estimated_time_by_member(self, member):
+        return self.daily_spent_times.filter(member=member).\
+            aggregate(estimated_time_sum=Sum("estimated_time"))["estimated_time_sum"]
+
     # Age of this card as a timedelta
     @property
     def age(self):
@@ -677,10 +687,6 @@ class Card(models.Model):
 
         comment = self.add_comment(member, comment_content)
 
-        # Creation of daily spent time
-        DailySpentTime.add(board=self.board, member=member, date=date, card=self, comment=comment,
-                           description=description, spent_time=spent_time, estimated_time=estimated_time)
-
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
 
@@ -752,21 +758,122 @@ class CardComment(models.Model):
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
 
     @property
-    def spent_estimated_time_measurement(self):
+    def spent_estimated_time(self):
         matches = re.match(Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, self.content)
         if matches:
-            return {"spent_time": matches.group("spent"), "estimated_time": matches.group("estimated")}
+            date = self.creation_datetime.date()
+
+            if matches.group("days_before"):
+                date -= timedelta(days=int(matches.group("days_before")))
+
+            if matches.group("description") and matches.group("description").strip():
+                description = matches.group("description")
+            else:
+                description = self.card.name
+
+            return {
+                "date":  date,
+                "spent_time": float(matches.group("spent")),
+                "estimated_time": float(matches.group("estimated")),
+                "description": description
+            }
+        return None
+
+    @property
+    def blocking_card(self):
+        matches = re.match(Card.COMMENT_BLOCKED_CARD_REGEX, self.content)
+        if matches:
+            blocking_card_url = matches.group("card_url")
+            blocking_card = self.card.board.cards.get(url=blocking_card_url)
+            return blocking_card
+        return None
+
+    @property
+    def requirement(self):
+        matches = re.match(Card.COMMENT_REQUIREMENT_CARD_REGEX, self.content)
+        if matches:
+            requirement_code = matches.group("requirement_code")
+            requirement = self.card.board.requirements.get(code=requirement_code)
+            return requirement
         return None
 
     def delete(self, *args, **kwargs):
         super(CardComment, self).delete(*args, **kwargs)
-        spent_estimated_time = self.spent_estimated_time_measurement
+
+        # If the comment is a spent/estimated measure it should be updated
+        spent_estimated_time = self.spent_estimated_time
         if spent_estimated_time:
             if self.card.spent_time is not None:
                 self.card.spent_time -= Decimal(spent_estimated_time["spent_time"])
             if self.card.estimated_time is not None:
                 self.card.estimated_time -= Decimal(spent_estimated_time["estimated_time"])
             self.card.save()
+
+        # If the comment is a blocking card mention, and is going to be deleted, delete it
+        blocking_card = self.blocking_card
+        if blocking_card:
+            self.card.blocking_cards.remove(blocking_card)
+
+        # If the comment is a requirement card mention, and is going to be deleted, delete it
+        requirement = self.requirement
+        if requirement:
+            self.card.requirements.remove(requirement)
+
+    # Card comment saving
+    def save(self, *args, **kwargs):
+        card = self.card
+
+        earlier_card_comment = card.comments.get(uuid=self.uuid)
+
+        super(CardComment, self).save(*args, **kwargs)
+
+        if self.content != earlier_card_comment.content:
+
+            card_changes = False
+
+            spent_estimated_time = self.spent_estimated_time
+            earlier_spent_estimated_time = earlier_card_comment.spent_estimated_time
+            if spent_estimated_time != earlier_spent_estimated_time:
+                card_changes = True
+                if card.spent_time is not None:
+                    card.spent_time -= earlier_spent_estimated_time["spent_time"]
+                    card.spent_time += spent_estimated_time["spent_time"]
+                else:
+                    card.spent_time = spent_estimated_time["spent_time"]
+
+                if card.estimated_time is not None:
+                    card.estimated_time -= earlier_spent_estimated_time["estimated_time"]
+                    card.estimated_time += spent_estimated_time["estimated_time"]
+                else:
+                    card.estimated_time = spent_estimated_time["estimated_time"]
+
+                if not earlier_card_comment.daily_spent_time:
+                    daily_spent_time = DailySpentTime.create_from_comment(self)
+                else:
+                    daily_spent_time = earlier_card_comment.daily_spent_time
+                    daily_spent_time.set_from_comment(self)
+                daily_spent_time.save()
+
+            blocking_card = self.blocking_card
+            earlier_blocking_card = earlier_card_comment.blocking_card
+            if blocking_card != earlier_blocking_card:
+                card_changes = True
+                if earlier_blocking_card is not None:
+                    card.blocking_cards.remove(earlier_blocking_card)
+                if blocking_card is not None:
+                    card.blocking_cards.add(blocking_card)
+
+            requirement = self.requirement
+            earlier_requirement = earlier_card_comment.requirement
+            if requirement != earlier_requirement:
+                card_changes = True
+                if earlier_requirement is not None:
+                    card.requirements.remove(earlier_requirement)
+                if requirement is not None:
+                    card.requirements.add(requirement)
+
+            if card_changes:
+                card.save()
 
 
 # Label of the task board

@@ -21,10 +21,10 @@ class DailySpentTime(models.Model):
             ("board", "date", "week_of_year", "spent_time")
         )
 
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of the card", unique=False, null=True)
+    uuid = models.CharField(max_length=128, verbose_name=u"External id of the comment", unique=False, null=True)
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="daily_spent_times")
     card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="daily_spent_times", null=True)
-    comment = models.ForeignKey("boards.CardComment", verbose_name=u"Comment", related_name="comments", null=True)
+    comment = models.OneToOneField("boards.CardComment", verbose_name=u"Comment", related_name="daily_spent_time", null=True)
     member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="daily_spent_times")
     description = models.TextField(verbose_name="Description of the task")
     date = models.DateField(verbose_name="Date of the time measurement")
@@ -113,3 +113,43 @@ class DailySpentTime(models.Model):
         daily_spent_time.save()
         return spent_time
 
+    # Add a new amount of spent time to a member
+    @staticmethod
+    def create_from_comment(comment):
+        card = comment.card
+        board = card.board
+        spent_estimated_time = comment.spent_estimated_time
+        date = spent_estimated_time["date"]
+
+        weekday = date.strftime("%w")
+        week_of_year = get_iso_week_of_year(date)
+        day_of_year = date.strftime("%j")
+
+        spent_time = spent_estimated_time["spent_time"]
+        estimated_time = spent_estimated_time["estimated_time"]
+
+        if spent_time is not None:
+            spent_time = Decimal(spent_time)
+
+        # Convert estimated_time to Decimal if is a number
+        if estimated_time is not None:
+            estimated_time = Decimal(estimated_time)
+
+        elif spent_time is not None:
+            estimated_time = Decimal(spent_time)
+
+        diff_time = estimated_time - spent_time
+
+        hourly_rate = board.get_date_hourly_rate(date)
+        if hourly_rate is None:
+            hourly_rate = 0
+
+        daily_spent_time = DailySpentTime(
+            uuid=comment.uuid, board=board, card=card, comment=comment,
+            date=spent_estimated_time["date"], weekday=weekday, week_of_year=week_of_year, day_of_year=day_of_year,
+            spent_time=spent_time, estimated_time=estimated_time, diff_time=diff_time,
+            description=spent_estimated_time["description"],
+            member=comment.author, hourly_rate=hourly_rate
+        )
+        daily_spent_time.save()
+        return daily_spent_time

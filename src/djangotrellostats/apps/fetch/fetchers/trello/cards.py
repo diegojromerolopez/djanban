@@ -2,17 +2,14 @@
 
 from __future__ import unicode_literals, absolute_import
 
-import re
 from collections import namedtuple
 from datetime import datetime
-from datetime import timedelta
 
 import pytz
 from django.conf import settings
 from trello import ResourceUnavailable
 
 from djangotrellostats.apps.boards.models import Card, CardComment
-from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.reports.models import CardMovement
 
@@ -63,30 +60,8 @@ class CardFetcher(object):
         self.cards = card_dict.values()
 
         # Deletion of cards that are not present in trello
-        for deleted_card_uuid, deleted_card  in self.deleted_cards_dict.items():
+        for deleted_card_uuid, deleted_card in self.deleted_cards_dict.items():
             deleted_card.delete()
-
-        # Blocking cards
-        for card in self.cards:
-            card.blocking_cards.clear()
-            blocking_card_urls = card.trello_card.comment_summary.get("blocking_card_urls")
-            # For each one of this card's blocking cards, check if it exists and if that's the case,
-            # add the blocking card to its blocking cards
-            for blocking_card_url in blocking_card_urls:
-                if self.board.cards.filter(url=blocking_card_url).exists():
-                    blocking_card = self.board.cards.get(url=blocking_card_url)
-                    card.blocking_cards.add(blocking_card)
-
-        # Requirements
-        for card in self.cards:
-            card.requirements.clear()
-            requirement_codes = card.trello_card.comment_summary.get("requirement_codes")
-            # For each one of this card's requirements, check if it exists and if that's the case,
-            # add this requirement to this card's requirements
-            for requirement_code in requirement_codes:
-                if self.board.requirements.filter(code=requirement_code).exists():
-                    requirement = self.board.requirements.get(code=requirement_code)
-                    card.requirements.add(requirement)
 
         # Card movements
         for card in self.cards:
@@ -125,9 +100,6 @@ class CardFetcher(object):
         # Time a card is in a list
         self._init_trello_card_stats_by_list(trello_card)
 
-        # Comment stats spent and estimated times
-        self._init_trello_card_comment_stats(trello_card)
-
         self._init_trello_card_stats(trello_card)
 
         # Creates the Card object
@@ -136,8 +108,6 @@ class CardFetcher(object):
         # Creation of the comments
         comments = CardFetcher._create_comments(card)
 
-        # Creation of the daily spent times
-        CardFetcher._create_daily_spent_times(card, comments)
         return card
 
     # Create comments of the card
@@ -206,16 +176,11 @@ class CardFetcher(object):
         for comment_uuid, comment in card_deleted_comments.items():
             comment.delete()
 
-        return card_comments
+        for member_uuid, member in member_dict.items():
+            if not card.members.filter(uuid=member_uuid).exists():
+                card.members.add(member)
 
-    # Creation of the daily spent times
-    @staticmethod
-    def _create_daily_spent_times(card, comments):
-        comments_dict = {comment.uuid: comment for comment in comments}
-        for daily_spent_time in card.trello_card.daily_spent_times:
-            daily_spent_time.card = card
-            daily_spent_time.comment = comments_dict[daily_spent_time.uuid]
-            DailySpentTime.add_daily_spent_time(daily_spent_time)
+        return card_comments
 
     # Card creation
     def _create_from_trello_card(self, trello_card):
@@ -249,13 +214,6 @@ class CardFetcher(object):
         # Store the trello card data for ease of use
         card.trello_card = trello_card
 
-        # Card comments
-        comment_summary = trello_card.comment_summary
-
-        # Card spent and estimated times
-        card.spent_time = comment_summary["spent"]["total"]
-        card.estimated_time = comment_summary["estimated"]["total"]
-
         # Forward and backward movements
         card.forward_movements = trello_card.forward_movements
         card.backward_movements = trello_card.backward_movements
@@ -265,14 +223,10 @@ class CardFetcher(object):
         card.lead_time = trello_card.lead_time
         card.cycle_time = trello_card.cycle_time
 
-        # Spent and estimated time by member
-        card.spent_time_by_member = comment_summary["spent"]["by_member"]
-        card.estimated_time_by_member = comment_summary["estimated"]["by_member"]
-
-        # Members that play a role in this task
-        card_member_uuids = {member_uuid: True for member_uuid in trello_card.idMembers}
-        card_member_uuids.update({member_uuid: True for member_uuid in comment_summary["member_uuids"]})
-        card.member_uuids = card_member_uuids.keys()
+        # Members
+        card.members.clear()
+        for member_uuid in trello_card.idMembers:
+            card.members.add(Member.objects.get(uuid=member_uuid))
 
         # Saving card
         card.save()
@@ -337,122 +291,3 @@ class CardFetcher(object):
                                                                   list_cmp=list_cmp,
                                                                   done_list=fake_trello_list_done,
                                                                   time_unit="hours", card_movements_filter=None)
-
-    # Fetch comments of this card
-    def _init_trello_card_comment_stats(self, trello_card):
-
-        total_spent = None
-        total_estimated = None
-        spent_by_member = {}
-        blocking_card_urls = []
-        requirement_codes = []
-        estimated_by_member = {}
-        member_uuids = {}
-
-        # Comment format:
-        # {u'type': u'commentCard', u'idMemberCreator': u'56e2ac8e14e4eda06ac6b8fd',
-        #  u'memberCreator': {u'username': u'diegoj5', u'fullName': u'Diego J.', u'initials': u'DJ',
-        #                     u'id': u'56e2ac8e14e4eda06ac6b8fd', u'avatarHash': u'a3086f12908905354b15972cd67b64f8'},
-        #  u'date': u'2016-04-20T23:06:38.279Z',
-        #  u'data': {u'text': u'Un comentario', u'list': {u'name': u'En desarrollo', u'id': u'5717fb3fde6bdaed40201667'},
-        #            u'board': {u'id': u'5717fb368199521a139712f0', u'name': u'Test', u'shortLink': u'2CGPEnM2'},
-        #            u'card': {u'idShort': 6, u'id': u'57180ae1ed24b1cff7f8da7c', u'name': u'Por todas',
-        #                      u'shortLink': u'bnK3c1jF'}}, u'id': u'57180b7e25abc60313461aaf'}
-
-        # For each comment, find the desired pattern and extract the spent and estimated times
-        trello_card.daily_spent_times = []
-        member_dict = {}
-        for comment in trello_card.comments:
-            comment_content = comment["data"]["text"]
-
-            # Spent and estimated time calculation
-            matches = re.match(Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, comment_content)
-            if matches:
-                # Member uuid that has made this Plus for Trello Comment
-                member_uuid = comment["idMemberCreator"]
-                member_uuids[member_uuid] = True
-
-                # Spent time when developing this task
-                spent = float(matches.group("spent"))
-
-                # Add to spent by member
-                if member_uuid not in spent_by_member:
-                    spent_by_member[member_uuid] = 0
-                spent_by_member[member_uuid] += spent
-
-                # Add to total spent
-                if total_spent is None:
-                    total_spent = 0
-
-                total_spent += spent
-
-                # Estimated time for developing this task
-                estimated = float(matches.group("estimated"))
-
-                # Add to estimated by member
-                if member_uuid not in estimated_by_member:
-                    estimated_by_member[member_uuid] = 0
-                estimated_by_member[member_uuid] += estimated
-
-                # Add to total estimated
-                if total_estimated is None:
-                    total_estimated = 0
-
-                total_estimated += estimated
-
-                # Store spent time by member by day
-                local_timezone = pytz.timezone(settings.TIME_ZONE)
-                date = local_timezone.localize(datetime.strptime(comment["date"],
-                                                                 '%Y-%m-%dT%H:%M:%S.%fZ')).date()
-                # If Plus for Trello comment informs that the time was spent several days ago, we have to substract
-                # the days to the date of the comment
-                if matches.group("days_before"):
-                    date -= timedelta(days=int(matches.group("days_before")))
-
-                if matches.group("description") and matches.group("description").strip():
-                    description = matches.group("description")
-                else:
-                    description = trello_card.name
-
-                # Use of memoization to achieve a better performance when loading members
-                if member_uuid not in member_dict:
-                    try:
-                        member_dict[member_uuid] = self.board.members.get(uuid=member_uuid)
-                    # If the member has left the board
-                    except Member.DoesNotExist:
-                        member_dict[member_uuid] = Member.objects.get(uuid=member_uuid)
-
-                # Creation of daily spent times for this card
-                daily_spent_time = DailySpentTime(board=self.board, description=description,
-                                                  member=member_dict[member_uuid], date=date,
-                                                  uuid=comment["id"],
-                                                  spent_time=spent, estimated_time=estimated)
-
-                if not hasattr(trello_card, "daily_spent_times"):
-                    trello_card.daily_spent_times = []
-
-                trello_card.daily_spent_times.append(daily_spent_time)
-
-            else:
-                # Blocking cards
-                matches = re.match(Card.COMMENT_BLOCKED_CARD_REGEX, comment_content, re.IGNORECASE)
-                if matches:
-                    card_url = matches.group("card_url")
-                    blocking_card_urls.append(card_url)
-
-                # Depends on requirement
-                else:
-                    matches = re.match(Card.COMMENT_REQUIREMENT_CARD_REGEX, comment_content, re.IGNORECASE)
-                    if matches:
-                        requirement_code = matches.group("requirement_code")
-                        requirement_codes.append(requirement_code)
-
-        trello_card.comment_summary = {
-            "daily_spent_times": trello_card.daily_spent_times,
-            "member_uuids": member_uuids.keys(),
-            "spent": {"total": total_spent, "by_member": spent_by_member},
-            "estimated": {"total": total_estimated, "by_member": estimated_by_member},
-            "blocking_card_urls": blocking_card_urls,
-            "requirement_codes": requirement_codes
-        }
-        return trello_card.comment_summary
