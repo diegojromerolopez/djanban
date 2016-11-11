@@ -536,6 +536,12 @@ class Card(models.Model):
                                decimal_places=4, max_digits=12,
                                default=0)
 
+    spent_time = models.DecimalField(verbose_name=u"Spent time", decimal_places=4, max_digits=12, default=None,
+                                     null=True)
+
+    estimated_time = models.DecimalField(verbose_name=u"Estimated time", decimal_places=4, max_digits=12, default=None,
+                                         null=True)
+
     cycle_time = models.DecimalField(verbose_name=u"Lead time", decimal_places=4, max_digits=12, default=None,
                                      null=True)
     lead_time = models.DecimalField(verbose_name=u"Cycle time", decimal_places=4, max_digits=12, default=None,
@@ -544,12 +550,10 @@ class Card(models.Model):
     members = models.ManyToManyField("members.Member", related_name="cards")
     blocking_cards = models.ManyToManyField("boards.card", related_name="blocked_cards")
 
-    @property
-    def spent_time(self):
+    def get_spent_time(self):
         return self.daily_spent_times.all().aggregate(spent_time_sum=Sum("spent_time"))["spent_time_sum"]
 
-    @property
-    def estimated_time(self):
+    def get_estimated_time(self):
         return self.daily_spent_times.all().aggregate(estimated_time_sum=Sum("estimated_time"))["estimated_time_sum"]
 
     # Get the spent time by member for this card
@@ -609,6 +613,12 @@ class Card(models.Model):
         # In case this card is added directly in the "done" list
         except IndexError:
             return self.last_activity_datetime
+
+    # Update spent/estimated cached time according to daily spent time values
+    def update_spent_estimated_time(self):
+        self.spent_time = self.get_spent_time()
+        self.estimated_time = self.get_estimated_time()
+        self.save()
 
     # Move this card to the next list
     @transaction.atomic
@@ -809,7 +819,7 @@ class CardComment(models.Model):
         if spent_estimated_time:
             self.daily_spent_times.filter(spent_time=spent_estimated_time["spent_time"],
                                           estimated_time=spent_estimated_time["estimated_time"]).delete()
-            self.card.save()
+            self.card.update_spent_estimated_time()
 
         # If the comment is a blocking card mention, and is going to be deleted, delete it
         blocking_card = self.blocking_card
@@ -854,6 +864,9 @@ class CardComment(models.Model):
                     daily_spent_time.set_from_comment(self)
                     daily_spent_time.save()
 
+                # Update the spent and estimated time
+                card.update_spent_estimated_time()
+
             # Is it a blocking card comment?
             blocking_card = self.blocking_card
             earlier_blocking_card = earlier_card_comment.blocking_card
@@ -879,7 +892,9 @@ class CardComment(models.Model):
         spent_estimated_time = self.spent_estimated_time
         if spent_estimated_time:
             # Creation of Daily Spent Time that depends on this comment
-            daily_spent_time = DailySpentTime.create_from_comment(self)
+            DailySpentTime.create_from_comment(self)
+            # Update the spent and estimated time
+            card.update_spent_estimated_time()
 
         # Is it a blocking card comment?
         blocking_card = self.blocking_card
@@ -909,12 +924,12 @@ class Label(models.Model):
 
     def avg_estimated_time(self, **kwargs):
         label_cards = self.cards.filter(**kwargs)
-        avg_estimated_time = numpy.mean([label_card.spent_time for label_card in label_cards])
+        avg_estimated_time = label_cards.aggregate(avg_estimated_time=Avg("estimated_time"))["avg_estimated_time"]
         return avg_estimated_time
 
     def avg_spent_time(self, **kwargs):
         label_cards = self.cards.filter(**kwargs)
-        avg_spent_time = numpy.mean([label_card.spent_time for label_card in label_cards])
+        avg_spent_time = label_cards.aggregate(avg_spent_time=Avg("spent_time"))["avg_spent_time"]
         return avg_spent_time
 
     def avg_cycle_time(self, **kwargs):

@@ -8,14 +8,10 @@ import pygal
 from django.db.models import Avg, Min, Count
 from django.utils import timezone
 
+from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.boards.models import Card
 from djangotrellostats.apps.charts.models import CachedChart
 from djangotrellostats.apps.dev_times.models import DailySpentTime
-
-
-
-from djangotrellostats.apps.base.auth import user_is_member, user_is_visitor, get_user_boards
-from datetime import date
 from djangotrellostats.utils.week import number_of_weeks_of_year, get_iso_week_of_year
 
 
@@ -196,9 +192,10 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
             raise ValueError(u"Period {0} not valid. Only 'month' or 'week' is valid".format(period))
 
         first_loop = False
-        month_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).\
+        period_times = DailySpentTime.objects.filter(**daily_spent_time_filter).\
             filter(**period_filter)
-        period_measurement = month_spent_times.aggregate(measurement=aggregation(time_measurement))["measurement"]
+
+        period_measurement = period_times.aggregate(measurement=aggregation(time_measurement))["measurement"]
         # For each month that have some data, add it to the chart
         if period_measurement is not None and period_measurement > 0:
             measurement_titles.append(measurement_title)
@@ -207,7 +204,7 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
             # For each label that has a name (i.e. it is being used) and has a value, store its measurement per label
             for label in labels:
                 if label.name:
-                    label_measurement = month_spent_times.filter(card__labels=label).\
+                    label_measurement = period_times.filter(card__labels=label).\
                                             aggregate(measurement=aggregation(time_measurement))["measurement"]
                     if label_measurement:
                         label_measurement_titles[label.id].append(measurement_title)

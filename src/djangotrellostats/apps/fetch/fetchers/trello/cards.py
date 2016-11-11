@@ -108,6 +108,8 @@ class CardFetcher(object):
         # Creation of the comments
         comments = CardFetcher._create_comments(card)
 
+        card.update_spent_estimated_time()
+
         return card
 
     # Create comments of the card
