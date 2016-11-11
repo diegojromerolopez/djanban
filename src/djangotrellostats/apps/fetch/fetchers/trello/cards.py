@@ -133,6 +133,8 @@ class CardFetcher(object):
 
         local_timezone = pytz.timezone(settings.TIME_ZONE)
 
+        card_deleted_comments = {comment.uuid: comment for comment in card.comments.all()}
+
         # Create each one of the comments
         for comment in card.trello_card.comments:
 
@@ -163,12 +165,22 @@ class CardFetcher(object):
             comment_creation_datetime = local_timezone.localize(comment_naive_creation_datetime)
 
             # Creation of the card comment
-            card_comment = CardComment(uuid=uuid, card=card, author=author,
-                                       creation_datetime=comment_creation_datetime, content=content)
-            card_comment.save()
+            try:
+                card_comment = card.comments.get(uuid=uuid)
+                card_comment.content = content
+                card_comment.save()
+                del card_deleted_comments[uuid]
+            except CardComment.DoesNotExist:
+                card_comment = CardComment(uuid=uuid, card=card, author=author,
+                                           creation_datetime=comment_creation_datetime, content=content)
+                card_comment.save()
 
             # Create card comment list
             card_comments.append(card_comment)
+
+        # Delete all card comments that are not present in trello.com
+        for comment_uuid, comment in card_deleted_comments.items():
+            comment.delete()
 
         return card_comments
 

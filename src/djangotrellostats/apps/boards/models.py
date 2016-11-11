@@ -733,7 +733,7 @@ class Card(models.Model):
 
 
 # Each one of the comments made by members in each card
-class CardComment(ImmutableModel):
+class CardComment(models.Model):
 
     class Meta:
         verbose_name = "Card comment"
