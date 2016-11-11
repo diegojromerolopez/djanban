@@ -536,10 +536,6 @@ class Card(models.Model):
                                decimal_places=4, max_digits=12,
                                default=0)
 
-    spent_time = models.DecimalField(verbose_name=u"Actual card spent time", decimal_places=4, max_digits=12,
-                                     default=None, null=True)
-    estimated_time = models.DecimalField(verbose_name=u"Estimated card completion time", decimal_places=4,
-                                         max_digits=12, default=None, null=True)
     cycle_time = models.DecimalField(verbose_name=u"Lead time", decimal_places=4, max_digits=12, default=None,
                                      null=True)
     lead_time = models.DecimalField(verbose_name=u"Cycle time", decimal_places=4, max_digits=12, default=None,
@@ -547,6 +543,14 @@ class Card(models.Model):
     labels = models.ManyToManyField("boards.Label", related_name="cards")
     members = models.ManyToManyField("members.Member", related_name="cards")
     blocking_cards = models.ManyToManyField("boards.card", related_name="blocked_cards")
+
+    @property
+    def spent_time(self):
+        return self.daily_spent_times.all().aggregate(spent_time_sum=Sum("spent_time"))["spent_time_sum"]
+
+    @property
+    def estimated_time(self):
+        return self.daily_spent_times.all().aggregate(estimated_time_sum=Sum("estimated_time"))["estimated_time_sum"]
 
     # Get the spent time by member for this card
     def get_spent_time_by_member(self, member):
@@ -803,10 +807,8 @@ class CardComment(models.Model):
         # If the comment is a spent/estimated measure it should be updated
         spent_estimated_time = self.spent_estimated_time
         if spent_estimated_time:
-            if self.card.spent_time is not None:
-                self.card.spent_time -= Decimal(spent_estimated_time["spent_time"])
-            if self.card.estimated_time is not None:
-                self.card.estimated_time -= Decimal(spent_estimated_time["estimated_time"])
+            self.daily_spent_times.filter(spent_time=spent_estimated_time["spent_time"],
+                                          estimated_time=spent_estimated_time["estimated_time"]).delete()
             self.card.save()
 
         # If the comment is a blocking card mention, and is going to be deleted, delete it
@@ -823,57 +825,69 @@ class CardComment(models.Model):
     def save(self, *args, **kwargs):
         card = self.card
 
-        earlier_card_comment = card.comments.get(uuid=self.uuid)
+        earlier_card_comment_exists = card.comments.filter(uuid=self.uuid).exists()
 
         super(CardComment, self).save(*args, **kwargs)
 
+        if earlier_card_comment_exists:
+            self._save_old(card)
+        else:
+            self._save_new(card)
+
+    # Save an old comment
+    def _save_old(self, card):
+        earlier_card_comment = card.comments.get(uuid=self.uuid)
+
         if self.content != earlier_card_comment.content:
 
-            card_changes = False
-
+            # Is it a spent/estimated time comment?
             spent_estimated_time = self.spent_estimated_time
             earlier_spent_estimated_time = earlier_card_comment.spent_estimated_time
             if spent_estimated_time != earlier_spent_estimated_time:
-                card_changes = True
-                if card.spent_time is not None:
-                    card.spent_time -= earlier_spent_estimated_time["spent_time"]
-                    card.spent_time += spent_estimated_time["spent_time"]
-                else:
-                    card.spent_time = spent_estimated_time["spent_time"]
-
-                if card.estimated_time is not None:
-                    card.estimated_time -= earlier_spent_estimated_time["estimated_time"]
-                    card.estimated_time += spent_estimated_time["estimated_time"]
-                else:
-                    card.estimated_time = spent_estimated_time["estimated_time"]
-
+                # Update this Daily Spent Time that depends on this comment
                 if not earlier_card_comment.daily_spent_time:
                     daily_spent_time = DailySpentTime.create_from_comment(self)
                 else:
                     daily_spent_time = earlier_card_comment.daily_spent_time
                     daily_spent_time.set_from_comment(self)
-                daily_spent_time.save()
+                    daily_spent_time.save()
 
+            # Is it a blocking card comment?
             blocking_card = self.blocking_card
             earlier_blocking_card = earlier_card_comment.blocking_card
             if blocking_card != earlier_blocking_card:
-                card_changes = True
                 if earlier_blocking_card is not None:
                     card.blocking_cards.remove(earlier_blocking_card)
                 if blocking_card is not None:
                     card.blocking_cards.add(blocking_card)
 
+            # Is it a requirement card comment?
             requirement = self.requirement
             earlier_requirement = earlier_card_comment.requirement
             if requirement != earlier_requirement:
-                card_changes = True
                 if earlier_requirement is not None:
                     card.requirements.remove(earlier_requirement)
                 if requirement is not None:
                     card.requirements.add(requirement)
 
-            if card_changes:
-                card.save()
+    # Save a new comment
+    def _save_new(self, card):
+
+        # Is it a spent/estimated time comment?
+        spent_estimated_time = self.spent_estimated_time
+        if spent_estimated_time:
+            # Creation of Daily Spent Time that depends on this comment
+            daily_spent_time = DailySpentTime.create_from_comment(self)
+
+        # Is it a blocking card comment?
+        blocking_card = self.blocking_card
+        if blocking_card:
+            card.blocking_cards.add(blocking_card)
+
+        # Is it a requirement card comment?
+        requirement = self.requirement
+        if requirement:
+            card.requirements.add(requirement)
 
 
 # Label of the task board

@@ -223,13 +223,12 @@ class CardFetcher(object):
         card.lead_time = trello_card.lead_time
         card.cycle_time = trello_card.cycle_time
 
+        card.save()
+
         # Members
         card.members.clear()
         for member_uuid in trello_card.idMembers:
             card.members.add(Member.objects.get(uuid=member_uuid))
-
-        # Saving card
-        card.save()
 
         return card
 
