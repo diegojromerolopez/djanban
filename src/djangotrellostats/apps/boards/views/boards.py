@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+from __future__ import unicode_literals, absolute_import
 
 import time
 
@@ -17,7 +17,7 @@ from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.forms import EditBoardForm, NewBoardForm
 from djangotrellostats.apps.boards.models import List, Board
 from djangotrellostats.apps.boards.stats import avg, std_dev
-from djangotrellostats.apps.fetch.fetchers.trello import BoardFetcher, Initializer
+from djangotrellostats.apps.fetch.fetchers.trello.boards import Initializer, BoardFetcher
 from djangotrellostats.utils.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
 
 

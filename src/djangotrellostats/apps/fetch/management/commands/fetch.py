@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+from __future__ import unicode_literals, absolute_import
 
 import os
 import time
@@ -14,7 +14,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from djangotrellostats.apps.base.email import warn_administrators
-from djangotrellostats.apps.fetch.fetchers.trello import BoardFetcher, Initializer
+from djangotrellostats.apps.fetch.fetchers.trello.boards import Initializer, BoardFetcher
 from djangotrellostats.apps.members.models import Member
 
 

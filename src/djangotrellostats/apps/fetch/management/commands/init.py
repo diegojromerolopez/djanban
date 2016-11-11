@@ -1,8 +1,10 @@
-from django.core.management.base import BaseCommand, CommandError
+
+from __future__ import unicode_literals, absolute_import
+
+from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from djangotrellostats.apps.boards.models import Board
-from djangotrellostats.apps.fetch.fetchers.trello import Initializer
+from djangotrellostats.apps.fetch.fetchers.trello.boards import Initializer
 from djangotrellostats.apps.members.models import Member
 
 

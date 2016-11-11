@@ -6,6 +6,9 @@ from io import open
 
 
 # Abstract board fetcher
+from djangotrellostats.apps.boards.models import CardComment
+
+
 class Fetcher(object):
     FETCH_LOCK_FILE_PATH = u"/tmp/django-trello-stats-fetch-board-{0}-lock.txt"
 
@@ -50,8 +53,9 @@ class Fetcher(object):
     # Delete all children entities but lists and workflows
     def _truncate(self):
         self.board.card_movements.all().delete()
-        self.board.cards.all().delete()
+        CardComment.objects.filter(card__board=self.board).all().delete()
         self.board.daily_spent_times.all().delete()
         self.board.list_reports.all().delete()
         self.board.member_reports.all().delete()
         self.board.clean_cached_charts()
+

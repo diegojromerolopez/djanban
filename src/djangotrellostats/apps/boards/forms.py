@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+from __future__ import unicode_literals, absolute_import
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.db import transaction
 from django.forms import models
 from djangotrellostats.apps.boards.models import Board, Card
-from djangotrellostats.apps.fetch.fetchers.trello import Initializer
+from djangotrellostats.apps.fetch.fetchers.trello.boards import Initializer
 from djangotrellostats.trello_api.cards import new_card
 
 
