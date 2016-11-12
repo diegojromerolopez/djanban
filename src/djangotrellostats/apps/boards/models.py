@@ -943,13 +943,15 @@ class Label(models.Model):
 
 # List of the task board
 class List(models.Model):
-    LIST_TYPES = ("ignored", "backlog", "ready_to_develop", "development", "after_development", "done", "closed")
+    LIST_TYPES = ("ignored", "backlog", "ready_to_develop", "development",
+                  "after_development_in_review", "after_development_waiting_release", "done", "closed")
     LIST_TYPE_CHOICES = (
         ("ignored", "Ignored"),
         ("backlog", "Backlog"),
         ("ready_to_develop", "Ready to develop"),
         ("development", "In development"),
-        ("after_development", "After development"),
+        ("after_development_in_review", "After development (in review)"),
+        ("after_development_waiting_release", "After development (waiting release)"),
         ("done", "Done"),
         ("closed", "Closed"),
     )
