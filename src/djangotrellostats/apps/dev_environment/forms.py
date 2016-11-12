@@ -14,7 +14,7 @@ from djangotrellostats.apps.dev_environment.models import Interruption, NoiseMea
 class NewInterruptionForm(models.ModelForm):
     class Meta:
         model = Interruption
-        fields = ["board", "cause", "spent_time", "comments"]
+        fields = ["board", "interrupted_task", "cause", "spent_time", "comments"]
 
     def save(self, commit=True):
         super(NewInterruptionForm, self).save(commit=False)

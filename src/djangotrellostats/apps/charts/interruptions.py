@@ -47,11 +47,12 @@ def _number_of_interruptions(current_user, board, chart_title, interruption_meas
 
     # Caching
     chart_uuid = "interruptions.{0}".format(
-        hashlib.sha256("_number_of_interruptions-{0}-{1}-{2}-{3}".format(
+        hashlib.sha256("_number_of_interruptions-{0}-{1}-{2}-{3}-{4}".format(
             current_user.id,
             board.id if board else "",
             inspect.getsource(interruption_measurement),
-            "incremental" if incremental else "absolute"
+            "incremental" if incremental else "absolute",
+            chart_title
         )).hexdigest()
     )
     try:

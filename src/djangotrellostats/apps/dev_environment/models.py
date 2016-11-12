@@ -22,6 +22,13 @@ class Interruption(models.Model):
 
     datetime = models.DateTimeField(verbose_name=u"When did the interruption take place?")
 
+    interrupted_task = models.TextField(
+        verbose_name=u"What were you doing?",
+        help_text=u"Describe what were you doing when interrupted. "
+                  u"This text has the aim of helping you return to your task once the interruption has ended.",
+        default="", blank=True
+    )
+
     cause = models.TextField(verbose_name=u"Why were you interrupted?", default="", blank=True)
 
     spent_time = models.DecimalField(verbose_name=u"Spent time in this interruption",
