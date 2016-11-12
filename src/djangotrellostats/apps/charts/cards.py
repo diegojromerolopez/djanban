@@ -464,10 +464,14 @@ def age(board):
 
 
 # Completion histogram for cards
-def completion_histogram(board, time_metric="lead_time", units="days"):
+def completion_histogram(current_user, board=None, time_metric="lead_time", units="days"):
 
     # Caching
-    chart_uuid = "cards.completion_histogram-{0}-{1}-{2}".format(board.id, time_metric, units)
+    if board:
+        chart_uuid = "cards.completion_histogram-{0}-{1}-{2}".format(board.id, time_metric, units)
+    else:
+        chart_uuid = "cards.completion_histogram-all-{0}-{1}".format(time_metric, units)
+
     try:
         chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
@@ -475,7 +479,10 @@ def completion_histogram(board, time_metric="lead_time", units="days"):
         pass
 
     time_metric_name = time_metric.replace("_", " ")
-    chart_title = u"{0} histogram for {1} as of {2}".format(time_metric_name, board.name, timezone.now())
+    if board:
+        chart_title = u"{0} histogram for {1} as of {2}".format(time_metric_name, board.name, timezone.now())
+    else:
+        chart_title = u"{0} histogram for all boards as of {1}".format(time_metric_name, timezone.now())
     chart_title = chart_title.capitalize()
 
     completion_histogram_chart = pygal.Bar(
@@ -483,10 +490,14 @@ def completion_histogram(board, time_metric="lead_time", units="days"):
         human_readable=True, x_label_rotation=70, stroke=False,
         x_title=units.capitalize(), y_title="Number of cards completed")
 
-    max_time = board.cards. \
-        exclude(is_closed=True). \
-        filter(list__type="done"). \
-        aggregate(max_time=Max(time_metric))["max_time"]
+    if board:
+        boards = [board]
+    else:
+        boards = get_user_boards(current_user)
+
+    cards = Card.objects.filter(board__in=boards, list__type="done")
+
+    max_time = cards.exclude(is_closed=True).aggregate(max_time=Max(time_metric))["max_time"]
 
     if max_time is None:
         return completion_histogram_chart.render_django_response()
@@ -502,7 +513,7 @@ def completion_histogram(board, time_metric="lead_time", units="days"):
             hours_min = (days-1) * 24.0
             hours_max = days * 24.0
             card_filter = {"{0}__gt".format(time_metric): hours_min, "{0}__lte".format(time_metric): hours_max}
-            num_cards = board.cards.exclude(is_closed=True).filter(list__type="done").filter(**card_filter).count()
+            num_cards = cards.filter(**card_filter).count()
             if num_cards > 0:
                 x_labels.append(days)
                 num_card_values.append(num_cards)
@@ -511,7 +522,7 @@ def completion_histogram(board, time_metric="lead_time", units="days"):
         for hours in range(1, max_time+1):
             hours_min = (hours - 1)
             card_filter = {"{0}__gt".format(time_metric): hours_min, "{0}__lte".format(time_metric): hours}
-            num_cards = board.cards.exclude(is_closed=True).filter(list__type="done").filter(**card_filter).count()
+            num_cards = cards.filter(**card_filter).count()
             if num_cards > 0:
                 x_labels.append(hours)
                 num_card_values.append(num_cards)

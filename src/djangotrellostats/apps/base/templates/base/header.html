@@ -20,6 +20,11 @@
                            <span class="fa fa-tasks"></span> Projects
                        </a>
                     </li>
+                    <li role="presentation" {% if url_name == "view_board_panorama" %}class="active"{% endif %}>
+                       <a href="{% url 'boards:view_board_panorama' %}" title="View project summary">
+                           <span class="fa fa-line-chart"></span> Summary
+                       </a>
+                    </li>
                     {% if member %}
                         <li role="presentation" {% if url_name == "view_members" %}class="active"{% endif %}>
                             <a href="{% url 'members:view_members' %}" title="View members">
@@ -50,13 +55,13 @@
                         </li>
                         <li role="presentation" {% if url_name == "view_hourly_rates" %}class="active"{% endif %}>
                            <a href="{% url 'hourly_rates:view_hourly_rates' %}" title="View available hourly rates">
-                               <span class="fa fa-usd"></span> Hourly rates
+                               <span class="fa fa-usd"></span> HRs
                            </a>
                         </li>
                         {% if request.user.member.is_initialized %}
                             <li role="presentation" {% if url_name == "fetch_boards" %}class="active"{% endif %}>
                                 <a href="{% url 'fetch:fetch_boards' %}" title="Fetch all boards">
-                                    <span class="fa fa-download"></span> Fetch
+                                    <span class="fa fa-download"></span>
                                 </a>
                             </li>
                         {% endif %}
@@ -91,7 +96,9 @@
                         {% endif %}
                     {% endwith %}
                     <li class="dropdown">
-                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Logout">Logout <span class="caret"></span></a>
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Logout">
+                          <span class="fa fa-sign-out"></span> <span class="caret"></span>
+                      </a>
                       <ul class="dropdown-menu dropdown-menu-right">
                           <li><a href="{% url 'base:logout' %}" title="Confirm logout">Confirm logout</a></li>
                       </ul>

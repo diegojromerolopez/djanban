@@ -94,6 +94,16 @@ def view_archived_boards(request):
     replacements = {"member": member, "boards": boards}
     return render(request, "boards/archived_list.html", replacements)
 
+
+# View a board stats panorama
+@login_required
+def view_board_panorama(request):
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+    replacements = {"member": member}
+    return render(request, "boards/panorama.html", replacements)
+
 # View board
 @login_required
 def view(request, board_id):

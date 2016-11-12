@@ -119,10 +119,10 @@ urlpatterns = [
     url(r'^card_age/(?P<board_id>\d+)/?$', private.card_age, name="card_age"),
 
     # Completion histogram
-    url(r'^completion_histogram/(?P<board_id>\d+)/?$', private.completion_histogram, name="completion_histogram"),
-    url(r'^completion_histogram/(?P<board_id>\d+)/(?P<time_metric>lead_time|cycle_time|spent_time)/?$',
+    url(r'^completion_histogram/(?P<board_id>\d+|all)/?$', private.completion_histogram, name="completion_histogram"),
+    url(r'^completion_histogram/(?P<board_id>\d+|all)/(?P<time_metric>lead_time|cycle_time|spent_time)/?$',
         private.completion_histogram, name="completion_histogram"),
-    url(r'^completion_histogram/(?P<board_id>\d+)/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<units>days|hours)/?$',
+    url(r'^completion_histogram/(?P<board_id>\d+|all)/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<units>days|hours)/?$',
         private.completion_histogram, name="completion_histogram"),
 
     # Cumulative list evolution

@@ -12,8 +12,12 @@ urlpatterns = [
     # Board URLs
     url(r'^new$', boards.new, name="new"),
     url(r'^sync$', boards.sync, name="sync"),
+
     url(r'^my-boards$', boards.view_list, name="view_boards"),
     url(r'^my-archived-boards$', boards.view_archived_boards, name="view_archived_boards"),
+
+    url(r'^panorama/?$', boards.view_board_panorama, name="view_board_panorama"),
+
     url(r'^(?P<board_public_access_code>.+)/public_view/?$', boards.public_view, name="public_view"),
     url(r'^(?P<board_id>\d+)/view/?$', boards.view, name="view"),
     url(r'^(?P<board_id>\d+)/edit/?$', boards.edit, name="edit"),

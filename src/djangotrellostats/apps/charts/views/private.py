@@ -313,8 +313,11 @@ def time_box(request, time_metric, board_id=None, year=None, month=None):
 
 # Completion histogram
 @login_required
-def completion_histogram(request, board_id, time_metric="lead_time", units="days"):
-    board = _get_user_board_or_none(request, board_id)
+def completion_histogram(request, board_id="all", time_metric="lead_time", units="days"):
+    if board_id != "all":
+        board = _get_user_board_or_none(request, board_id)
+    else:
+        board = None
 
     if time_metric is None:
         time_metric = "lead_time"
@@ -326,7 +329,7 @@ def completion_histogram(request, board_id, time_metric="lead_time", units="days
     elif units != "days" and units != "hours":
         raise ValueError(u"Units value {0} not recognized".format(units))
 
-    return cards.completion_histogram(board, time_metric, units)
+    return cards.completion_histogram(request.user, board, time_metric, units)
 
 
 # Lead/Cycle Time vs Spent time
