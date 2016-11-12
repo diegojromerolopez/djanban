@@ -23,23 +23,21 @@
         </div>
     </div>
 
-    {% comment %}
     <div class="row">
         <div class="col-sm-12">
             <h3>Evolution of tasks</h3>
         </div>
         <div class="col-sm-6">
-            <a href="{% url 'charts:cumulative_list_type_evolution' %}" title="Evolution of number of tasks by list">
-                <img src="{% url 'charts:cumulative_list_type_evolution' %}" alt="Evolution of number of tasks by list"/>
+            <a href="{% url 'charts:cumulative_list_type_evolution' 'all' %}" title="Evolution of number of tasks by list">
+                <img src="{% url 'charts:cumulative_type_list_evolution' 'all' %}" alt="Evolution of number of tasks by list"/>
             </a>
         </div>
          <div class="col-sm-6">
-            <a href="{% url 'charts:cumulative_card_evolution' %}" title="Evolution of number of tasks thru time">
-                <img src="{% url 'charts:cumulative_card_evolution' %}" alt="Evolution of number of tasks thru time"/>
+            <a href="{% url 'charts:cumulative_card_evolution' 'all' %}" title="Evolution of number of tasks thru time">
+                <img src="{% url 'charts:cumulative_card_evolution' 'all' %}" alt="Evolution of number of tasks thru time"/>
             </a>
         </div>
     </div>
-    {% endcomment %}
     
     <div class="row">
         <div class="col-sm-12">

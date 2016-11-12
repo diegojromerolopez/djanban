@@ -203,19 +203,39 @@ def avg_spent_time_by_weekday(request, board_id=None):
 @login_required
 def cumulative_list_evolution(request, board_id, day_step=5):
     board = get_user_boards(request.user).get(id=board_id)
+
     if day_step is None:
         day_step = 5
+
     day_step = min(int(day_step), 30)
     return cards.cumulative_list_evolution(board, day_step)
 
 
 @login_required
-def cumulative_card_evolution(request, board_id, day_step=5):
-    board = get_user_boards(request.user).get(id=board_id)
+def cumulative_list_type_evolution(request, board_id, day_step=5):
+    if board_id != "all":
+        board = get_user_boards(request.user).get(id=board_id)
+    else:
+        board = None
+
     if day_step is None:
         day_step = 5
+
     day_step = min(int(day_step), 30)
-    return cards.cumulative_card_evolution(board, day_step)
+    return cards.cumulative_list_type_evolution(request.user, board, day_step)
+
+@login_required
+def cumulative_card_evolution(request, board_id="all", day_step=5):
+    if board_id != "all":
+        board = get_user_boards(request.user).get(id=board_id)
+    else:
+        board = None
+
+    if day_step is None:
+        day_step = 5
+
+    day_step = min(int(day_step), 30)
+    return cards.cumulative_card_evolution(request.user, board, day_step)
 
 
 @login_required

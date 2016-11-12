@@ -19,7 +19,7 @@ from django.db.models import Avg, Min, Q, Count, Max
 from django.utils import timezone
 
 from djangotrellostats.apps.base.auth import get_user_boards
-from djangotrellostats.apps.boards.models import Board, Card, CardComment
+from djangotrellostats.apps.boards.models import Board, Card, CardComment, Label, List
 from djangotrellostats.apps.charts.models import CachedChart
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
@@ -340,32 +340,121 @@ def cumulative_list_evolution(board, day_step=5):
     return chart.render_django_response()
 
 
-# Cards-in cards-out
-# Number of cards that are created vs number of cards that are completed along the live of the project
-def cumulative_card_evolution(board, day_step=5):
+# Cumulative list type evolution by month
+def cumulative_list_type_evolution(current_user, board=None, day_step=5):
 
     # Caching
-    chart_uuid = "cards.cumulative_card_evolution-{0}-{1}".format(board.id, day_step)
+    if board:
+        chart_uuid = "cards.cumulative_list_type_evolution-{0}-{1}".format(board.id, day_step)
+    else:
+        chart_uuid = "cards.cumulative_list_type_evolution-all-{0}".format(day_step)
+
     try:
         chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
     except CachedChart.DoesNotExist:
         pass
 
+    chart_title = u"Cumulative flow diagram as of {0}".format(timezone.now())
+    if board:
+        chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
+
+    cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
+                                  print_zeroes=False, fill=True,
+                                  human_readable=True, x_label_rotation=65)
+
+    if board:
+        boards = [board]
+    else:
+        boards = get_user_boards(current_user)
+
+    start_working_date = numpy.min(filter(None, [board.get_working_start_date() for board in boards]))
+    end_working_date = numpy.max(filter(None, [board.get_working_end_date() for board in boards]))
+    if start_working_date is None or end_working_date is None:
+        return cumulative_chart.render_django_response()
+
+    # Y-Axis
+    list_type_values = {list_type: [] for list_type in List.LIST_TYPES}
+
+    # Cards of current user boards
+    cards = Card.objects.filter(board__in=boards)
+
+    # Card movements of current user boards
+    card_movements = CardMovement.objects.filter(board__in=boards)
+
+    x_labels = []
+
+    date_i = copy.deepcopy(start_working_date)
+    local_timezone = pytz.timezone(settings.TIME_ZONE)
+    while date_i <= end_working_date:
+        datetime_i = local_timezone.localize(datetime.combine(date_i, time.min))
+        num_total_cards = 0
+        for list_type in reversed(List.LIST_TYPES):
+            # Number of cards that were created in this list before the date
+            num_cards_without_movements = cards.filter(creation_datetime__lte=datetime_i, list__type=list_type). \
+                annotate(num_movements=Count("movements")).filter(num_movements=0).count()
+
+            # Number of cards that were moved to this list before the date
+            num_cards_moving_to_list = card_movements.filter(destination_list__type=list_type,
+                                                             datetime__lte=datetime_i).count()
+
+            num_cards = num_cards_moving_to_list + num_cards_without_movements
+            num_total_cards += num_cards
+            list_type_values[list_type].append(num_cards)
+
+        if num_total_cards > 0:
+            x_labels.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
+
+        date_i += timedelta(days=day_step)
+
+    cumulative_chart.x_labels = x_labels
+    list_types_dict = dict(List.LIST_TYPE_CHOICES)
+    for list_type in reversed(List.LIST_TYPES):
+        list_type_name = list_types_dict[list_type]
+        cumulative_chart.add(list_type_name, list_type_values[list_type])
+
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=cumulative_chart.render(is_unicode=True))
+    return chart.render_django_response()
+
+# Cards-in cards-out
+# Number of cards that are created vs number of cards that are completed along the live of the project
+def cumulative_card_evolution(current_user, board=None, day_step=5):
+
+    # Caching
+    if board:
+        chart_uuid = "cards.cumulative_card_evolution-{0}-{1}".format(board.id, day_step)
+    else:
+        chart_uuid = "cards.cumulative_card_evolution-all-{0}".format(day_step)
+
+    try:
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except CachedChart.DoesNotExist:
+        pass
+
+    if board:
+        boards = [board]
+    else:
+        boards = get_user_boards(current_user)
+
     chart_title = u"Number of created cards vs completed cards as of {0}".format(timezone.now())
-    chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
+    if board:
+        chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
 
     cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=False,
-                                  human_readable=True, x_label_rotation=45)
+                                  human_readable=True, x_label_rotation=65)
 
-    start_working_date = board.get_working_start_date()
-    end_working_date = board.get_working_end_date()
+    start_working_date = numpy.min(filter(None, [board.get_working_start_date() for board in boards]))
+    end_working_date = numpy.max(filter(None, [board.get_working_end_date() for board in boards]))
     if start_working_date is None or end_working_date is None:
         return cumulative_chart.render_django_response()
 
     # Labels of the board
-    labels = board.labels.exclude(name="").order_by("name")
+    if board:
+        labels = board.labels.exclude(name="").order_by("name")
+    else:
+        labels = Label.objects.filter(board__in=boards)
 
     # Number of created cards by label
     created_card_values_by_label = {label.id: [] for label in labels}
@@ -373,8 +462,8 @@ def cumulative_card_evolution(board, day_step=5):
     # Number of done cards by label
     done_card_values_by_label = {label.id: [] for label in labels}
 
-    # Done list
-    done_list = board.lists.get(type="done")
+    # Done lists
+    done_lists = List.objects.filter(board__in=boards, type="done")
 
     num_created_card_values = []
     num_done_card_values = []
@@ -387,13 +476,14 @@ def cumulative_card_evolution(board, day_step=5):
         datetime_i = local_timezone.localize(datetime.combine(date_i, time.min))
 
         # Created cards that were created in this list before the date
-        created_cards = board.cards.filter(creation_datetime__lte=datetime_i)
+        created_cards = Card.objects.filter(creation_datetime__lte=datetime_i, board__in=boards)
 
         # Number of created cards that were created in this list before the date
         num_created_cards = created_cards.count()
 
         # Cards that were moved to this list before the date
-        done_cards = board.card_movements.filter(destination_list=done_list,
+        done_cards = CardMovement.objects.filter(board__in=boards,
+                                                 destination_list__in=done_lists,
                                                  datetime__lte=datetime_i)
 
         # Number of cards that were moved to this list before the date
@@ -428,9 +518,9 @@ def cumulative_card_evolution(board, day_step=5):
     cumulative_chart.add("Done cards", num_done_card_values)
     for label in labels:
         if sum(filter(None, created_card_values_by_label[label.id])) > 0:
-            cumulative_chart.add("Created {0} cards".format(label.name), created_card_values_by_label[label.id])
+            cumulative_chart.add("Created {0} cards in {1}".format(label.name, label.board.name), created_card_values_by_label[label.id])
         if sum(filter(None, done_card_values_by_label[label.id])) > 0:
-            cumulative_chart.add("Done {0} cards".format(label.name), done_card_values_by_label[label.id])
+            cumulative_chart.add("Done {0} cards in {1}".format(label.name, label.board.name), done_card_values_by_label[label.id])
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=cumulative_chart.render(is_unicode=True))
     return chart.render_django_response()
