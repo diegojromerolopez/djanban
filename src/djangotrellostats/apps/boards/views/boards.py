@@ -104,6 +104,7 @@ def view_board_panorama(request):
     replacements = {"member": member}
     return render(request, "boards/panorama.html", replacements)
 
+
 # View board
 @login_required
 def view(request, board_id):
