@@ -280,13 +280,15 @@ def avg_std_dev_time_by_list(board, workflow=None):
 
 
 # Cumulative list evolution by month
-def cumulative_list_evolution(board, day_step=5):
+def cumulative_flow_diagram(board, day_step=1):
 
     # Caching
-    chart_uuid = "cards.cumulative_list_evolution-{0}-{1}".format(board.id, day_step)
+    chart_uuid = "cards.cumulative_flow-diagram-{0}-{1}".format(board.id, day_step)
     try:
         chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
+    except CachedChart.MultipleObjectsReturned:
+        CachedChart.objects.filter(board=board, uuid=chart_uuid).delete()
     except CachedChart.DoesNotExist:
         pass
 
@@ -303,7 +305,7 @@ def cumulative_list_evolution(board, day_step=5):
         return cumulative_chart.render_django_response()
 
     # Y-Axis
-    lists = board.lists.exclude(type="closed").order_by("-position")
+    lists = board.lists.exclude(type="closed").order_by("position")
     list_values = {list_.id: [] for list_ in lists}
 
     x_labels = []
@@ -320,8 +322,10 @@ def cumulative_list_evolution(board, day_step=5):
                 annotate(num_movements=Count("movements")).filter(num_movements=0).count()
 
             # Number of cards that were moved to this list before the date
-            num_cards_moving_to_list = board.card_movements.filter(destination_list=list_,
-                                                                   datetime__lte=datetime_i).count()
+            num_cards_moving_to_list = board.card_movements.filter(
+                destination_list__position__gte=list_.position,
+                datetime__lt=datetime_i,
+            ).count()
 
             num_cards = num_cards_moving_to_list + num_cards_without_movements
             num_total_cards += num_cards
@@ -350,8 +354,11 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=5):
         chart_uuid = "cards.cumulative_list_type_evolution-all-{0}".format(day_step)
 
     try:
+        raise CachedChart.DoesNotExist
         chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
+    except CachedChart.MultipleObjectsReturned:
+        CachedChart.objects.filter(board=board, uuid=chart_uuid).delete()
     except CachedChart.DoesNotExist:
         pass
 
@@ -384,18 +391,22 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=5):
 
     x_labels = []
 
+    num_list_types = len(List.LIST_TYPES)
+
     date_i = copy.deepcopy(start_working_date)
     local_timezone = pytz.timezone(settings.TIME_ZONE)
     while date_i <= end_working_date:
         datetime_i = local_timezone.localize(datetime.combine(date_i, time.min))
         num_total_cards = 0
-        for list_type in reversed(List.LIST_TYPES):
+        for list_type_index in range(0, num_list_types):
+            list_type = List.LIST_TYPES[list_type_index]
+
             # Number of cards that were created in this list before the date
             num_cards_without_movements = cards.filter(creation_datetime__lte=datetime_i, list__type=list_type). \
                 annotate(num_movements=Count("movements")).filter(num_movements=0).count()
 
             # Number of cards that were moved to this list before the date
-            num_cards_moving_to_list = card_movements.filter(destination_list__type=list_type,
+            num_cards_moving_to_list = card_movements.filter(destination_list__type__in=List.LIST_TYPES[list_type_index:],
                                                              datetime__lte=datetime_i).count()
 
             num_cards = num_cards_moving_to_list + num_cards_without_movements
@@ -409,7 +420,7 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=5):
 
     cumulative_chart.x_labels = x_labels
     list_types_dict = dict(List.LIST_TYPE_CHOICES)
-    for list_type in reversed(List.LIST_TYPES):
+    for list_type in List.LIST_TYPES:
         list_type_name = list_types_dict[list_type]
         cumulative_chart.add(list_type_name, list_type_values[list_type])
 

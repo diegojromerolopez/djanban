@@ -126,10 +126,14 @@ urlpatterns = [
         private.completion_histogram, name="completion_histogram"),
 
     # Cumulative list evolution
-    url(r'^cumulative_list_evolution/(?P<board_id>\d+)(/(?P<day_step>[\d]+))?$', private.cumulative_list_evolution,
+    url(r'^cumulative_flow_diagram/(?P<board_id>\d+)(/(?P<day_step>[\d]+))?$', private.cumulative_flow_diagram,
         name="cumulative_list_evolution"),
+    url(r'^cumulative_flow_diagram/(?P<board_id>\d+)(/(?P<day_step>[\d]+))?$', private.cumulative_flow_diagram,
+        name="cumulative_flow_diagram"),
+
     url(r'^cumulative_list_type_evolution/(?P<board_id>\d+|all)(/(?P<day_step>[\d]+))?$', private.cumulative_list_type_evolution,
         name="cumulative_list_type_evolution"),
+
     url(r'^cumulative_card_evolution/(?P<board_id>\d+|all)(/(?P<day_step>[\d]+))?$', private.cumulative_card_evolution,
         name="cumulative_card_evolution"),
 
