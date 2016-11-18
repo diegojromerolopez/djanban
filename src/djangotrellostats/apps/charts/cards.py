@@ -345,7 +345,7 @@ def cumulative_flow_diagram(board, day_step=1):
 
 
 # Cumulative list type evolution by month
-def cumulative_list_type_evolution(current_user, board=None, day_step=5):
+def cumulative_list_type_evolution(current_user, board=None, day_step=1):
 
     # Caching
     if board:
@@ -354,7 +354,6 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=5):
         chart_uuid = "cards.cumulative_list_type_evolution-all-{0}".format(day_step)
 
     try:
-        raise CachedChart.DoesNotExist
         chart = CachedChart.get(board=board, uuid=chart_uuid)
         return chart.render_django_response()
     except CachedChart.MultipleObjectsReturned:
