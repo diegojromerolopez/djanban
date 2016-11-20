@@ -163,7 +163,8 @@ class Board(models.Model):
         for hourly_rate in hourly_rates:
             # If date is inside the interval defined by the dates of the hourly rate
             # this hourly rate will be applied in this day
-            if hourly_rate.end_date and hourly_rate.start_date <= date <= hourly_rate.end_date or date >= hourly_rate.start_date:
+            if (hourly_rate.end_date and hourly_rate.start_date <= date <= hourly_rate.end_date) or\
+                     date >= hourly_rate.start_date:
                 return hourly_rate
 
         return None
@@ -550,6 +551,26 @@ class Card(models.Model):
     members = models.ManyToManyField("members.Member", related_name="cards")
     blocking_cards = models.ManyToManyField("boards.card", related_name="blocked_cards")
 
+    def get_lead_time(self):
+        if not self.is_done:
+            return None
+        creation_datetime = self.creation_datetime
+        completion_datetime = self.completion_datetime
+        time_diff = (completion_datetime - creation_datetime)
+        return time_diff.total_seconds() / 3600.0
+
+    def get_cycle_time(self):
+        if not self.is_done:
+            return None
+        try:
+            start_development_datetime = \
+                self.movements.filter(destination_list__type="development").order_by("datetime")[0].datetime
+        except IndexError:
+            start_development_datetime = self.creation_datetime
+        completion_datetime = self.completion_datetime
+        time_diff = (completion_datetime - start_development_datetime)
+        return time_diff.total_seconds() / 3600.0
+
     def get_spent_time(self):
         return self.daily_spent_times.all().aggregate(spent_time_sum=Sum("spent_time"))["spent_time_sum"]
 
@@ -613,6 +634,12 @@ class Card(models.Model):
         # In case this card is added directly in the "done" list
         except IndexError:
             return self.last_activity_datetime
+
+    # Update cycle/lead cached time according to movements of this card
+    def update_lead_cycle_time(self):
+        self.lead_time = self.get_lead_time()
+        self.cycle_time = self.get_cycle_time()
+        self.save()
 
     # Update spent/estimated cached time according to daily spent time values
     def update_spent_estimated_time(self):

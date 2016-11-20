@@ -33,6 +33,9 @@ class CardMovement(models.Model):
 
     datetime = models.DateTimeField(verbose_name="Date and time this card has been moved")
 
+    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="card_movements",
+                               null=True, default=None)
+
     def __unicode__(self):
         return "{0} -> {1} (on {2})".format(self.source_list.name, self.destination_list.name, self.datetime)
 

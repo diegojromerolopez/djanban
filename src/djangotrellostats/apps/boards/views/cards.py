@@ -242,7 +242,8 @@ def view(request, board_id, card_id):
         "card_labels": card_labels,
         "card_label_ids": card_labels.values_list("id", flat=True),
         "labels": board.labels.exclude(name="").order_by("name"),
-        "comments": comments
+        "comments": comments,
+        "movements": card.movements.all().order_by("datetime")
     }
     return render(request, "boards/cards/view.html", replacements)
 

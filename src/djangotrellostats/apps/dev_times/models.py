@@ -140,13 +140,10 @@ class DailySpentTime(models.Model):
 
         diff_time = estimated_time - spent_time
 
-        hourly_rate = board.get_date_hourly_rate(date)
-        if hourly_rate is None:
-            hourly_rate = 0
-
         rate_amount = None
+        hourly_rate = board.get_date_hourly_rate(date)
         if spent_time is not None and hourly_rate is not None:
-            rate_amount = spent_time * hourly_rate
+            rate_amount = spent_time * hourly_rate.amount
 
         daily_spent_time = DailySpentTime(
             uuid=comment.uuid, board=board, card=card, comment=comment,

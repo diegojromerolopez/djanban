@@ -67,7 +67,7 @@ class CardFetcher(object):
         for card in self.cards:
             movements = self.trello_movements_by_card.get(card.uuid)
             if movements:
-                local_timezone = pytz.timezone(settings.TIME_ZONE)
+                # For each card movement, we update its values if needed
                 for movement in movements:
                     source_list = self.board.lists.get(uuid=movement["data"]["listBefore"]["id"])
                     destination_list = self.board.lists.get(uuid=movement["data"]["listAfter"]["id"])
@@ -75,20 +75,28 @@ class CardFetcher(object):
                     if destination_list.position < source_list.position:
                         movement_type = "backward"
 
-                    movement_naive_datetime = datetime.strptime(movement["date"], '%Y-%m-%dT%H:%M:%S.%fZ')
-                    movement_datetime = local_timezone.localize(movement_naive_datetime)
+                    # Dates are in UTC
+                    movement_datetime = datetime.strptime(movement["date"], '%Y-%m-%dT%H:%M:%S.%fZ').\
+                        replace(tzinfo=pytz.UTC)
 
                     # Only create card movements that don't exist
                     try:
                         CardMovement.objects.get(board=self.board, card=card, type=movement_type,
                                                  source_list=source_list, destination_list=destination_list,
-                                                 datetime=movement_datetime)
+                                                 datetime=movement_datetime, member__uuid=movement["idMemberCreator"])
 
                     except CardMovement.DoesNotExist:
+                        try:
+                            member = self.board.members.get(uuid=movement["idMemberCreator"])
+                        except Member.DoesNotExist:
+                            member = Member.objects.get(uuid=movement["idMemberCreator"])
+
                         card_movement = CardMovement(board=self.board, card=card, type=movement_type,
                                                      source_list=source_list, destination_list=destination_list,
-                                                     datetime=movement_datetime)
+                                                     datetime=movement_datetime, member=member)
                         card_movement.save()
+
+                card.update_lead_cycle_time()
 
         return self.cards
 

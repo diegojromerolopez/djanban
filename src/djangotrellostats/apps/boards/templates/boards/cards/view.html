@@ -185,6 +185,30 @@
           </div>
 
           <div class="card-comments">
+              <h2>Movements ({{movements|length}})</h2>
+              <div>
+                  {% for movement in movements %}
+                    <div class="card-movements-movement panel panel-info">
+                          <div class="panel-heading">
+                              <strong>{{movement.source_list.name}}</strong> to <strong>{{movement.destination_list.name}}</strong>
+                              (<span title="Comment made by {{comment.creation_datetime}}">{{movement.datetime|naturaltime}}</span>)
+                          </div>
+                          <div class="panel-body">
+                              {% if movement.type == "forward"  %}
+                              Forward movement
+                              {% else %}
+                              Backward movement
+                              {% endif %}
+                              from
+                              <strong>{{movement.source_list.name}}</strong> to <strong>{{movement.destination_list.name}}</strong>
+                              at {{movement.datetime}} by {{movement.member.trello_username}}.
+                          </div>
+                    </div>
+                  {% endfor %}
+              </div>
+          </div>
+
+          <div class="card-comments">
               <h2>Comments ({{comments|length}})</h2>
               <div>
                   {% if member %}
