@@ -426,9 +426,10 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=1):
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=cumulative_chart.render(is_unicode=True))
     return chart.render_django_response()
 
+
 # Cards-in cards-out
 # Number of cards that are created vs number of cards that are completed along the live of the project
-def cumulative_card_evolution(current_user, board=None, day_step=5):
+def cumulative_card_evolution(current_user, board=None, day_step=1):
 
     # Caching
     if board:
