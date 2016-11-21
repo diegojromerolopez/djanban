@@ -297,7 +297,9 @@ def absolute_flow_diagram(board, day_step=1):
 
     cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=False,
-                                  human_readable=True, x_label_rotation=45)
+                                  x_labels_major_every=3, show_only_major_dots=True,
+                                  show_minor_x_labels=False,
+                                  human_readable=True, x_label_rotation=65)
 
     start_working_date = board.get_working_start_date()
     end_working_date = board.get_working_end_date()
@@ -363,7 +365,9 @@ def cumulative_flow_diagram(board, day_step=1):
 
     cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=True,
-                                  human_readable=True, x_label_rotation=45)
+                                  x_labels_major_every=3, show_only_major_dots=True,
+                                  show_minor_x_labels=False,
+                                  human_readable=True, x_label_rotation=65)
 
     start_working_date = board.get_working_start_date()
     end_working_date = board.get_working_end_date()
@@ -430,6 +434,8 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=1):
 
     cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=True,
+                                  x_labels_major_every=3, show_only_major_dots=True,
+                                  show_minor_x_labels=False,
                                   human_readable=True, x_label_rotation=65)
 
     if board:
@@ -517,6 +523,8 @@ def cumulative_card_evolution(current_user, board=None, day_step=1):
 
     cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=False,
+                                  x_labels_major_every=3, show_only_major_dots=True,
+                                  show_minor_x_labels=False,
                                   human_readable=True, x_label_rotation=65)
 
     start_working_date = numpy.min(filter(None, [board.get_working_start_date() for board in boards]))

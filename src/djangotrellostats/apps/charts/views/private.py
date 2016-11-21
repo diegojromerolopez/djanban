@@ -201,50 +201,50 @@ def avg_spent_time_by_weekday(request, board_id=None):
 
 
 @login_required
-def absolute_flow_diagram(request, board_id, day_step=5):
+def absolute_flow_diagram(request, board_id, day_step=1):
     board = get_user_boards(request.user).get(id=board_id)
 
     if day_step is None:
-        day_step = 5
+        day_step = 1
 
     day_step = min(int(day_step), 30)
     return cards.absolute_flow_diagram(board, day_step)
 
 
 @login_required
-def cumulative_flow_diagram(request, board_id, day_step=5):
+def cumulative_flow_diagram(request, board_id, day_step=1):
     board = get_user_boards(request.user).get(id=board_id)
 
     if day_step is None:
-        day_step = 5
+        day_step = 1
 
     day_step = min(int(day_step), 30)
     return cards.cumulative_flow_diagram(board, day_step)
 
 
 @login_required
-def cumulative_list_type_evolution(request, board_id, day_step=5):
+def cumulative_list_type_evolution(request, board_id, day_step=1):
     if board_id != "all":
         board = get_user_boards(request.user).get(id=board_id)
     else:
         board = None
 
     if day_step is None:
-        day_step = 5
+        day_step = 1
 
     day_step = min(int(day_step), 30)
     return cards.cumulative_list_type_evolution(request.user, board, day_step)
 
 
 @login_required
-def cumulative_card_evolution(request, board_id="all", day_step=5):
+def cumulative_card_evolution(request, board_id="all", day_step=1):
     if board_id != "all":
         board = get_user_boards(request.user).get(id=board_id)
     else:
         board = None
 
     if day_step is None:
-        day_step = 5
+        day_step = 1
 
     day_step = min(int(day_step), 30)
     return cards.cumulative_card_evolution(request.user, board, day_step)
