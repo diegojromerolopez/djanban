@@ -12,6 +12,8 @@ from isoweek import Week
 
 
 class Member(models.Model):
+    DEFAULT_MAX_NUMBER_OF_BOARDS = 2
+
     api_key = models.CharField(max_length=128, verbose_name=u"Trello API key", null=True, default=None, blank=True)
 
     api_secret = models.CharField(max_length=128, verbose_name=u"Trello API secret", null=True, default=None, blank=True)
@@ -49,6 +51,12 @@ class Member(models.Model):
         verbose_name=u"Factor that needs to be multiplied on the spent time price for this member",
         help_text=u"Modify this value whe this member cost8needs to be adjusted by a factor",
         default=1
+    )
+
+    max_number_of_boards = models.PositiveIntegerField(
+        verbose_name=u"Max number of boards",
+        help_text=u"Maximum number of boards this member can fetch. If null, unlimited number of boards",
+        default=None, null=True
     )
 
     # Constructor for Member

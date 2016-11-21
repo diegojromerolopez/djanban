@@ -83,6 +83,7 @@ class SignUpForm(models.ModelForm):
             member.trello_username = self.cleaned_data["trello_username"]
             member.initials = self.cleaned_data["initials"]
             member.user = user
+            member.max_number_of_boards = Member.DEFAULT_MAX_NUMBER_OF_BOARDS
             member.save()
 
         return member

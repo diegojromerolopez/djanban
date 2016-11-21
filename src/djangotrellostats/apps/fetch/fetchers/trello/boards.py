@@ -32,6 +32,11 @@ class Initializer(TrelloConnector):
     @transaction.atomic
     def init(self, board_uuid=None):
         trello_boards = self.trello_client.list_boards()
+        # If the member has a maximum numbers of boards, limit the numbers of boards the member can fetch
+        if self.member.max_number_of_boards is not None:
+            trello_boards = trello_boards[:self.member.max_number_of_boards]
+
+        # For each Trello board, create a new board if it doesn't exist or update the board if it already exists
         for trello_board in trello_boards:
             if board_uuid is None or board_uuid == trello_board.id:
                 board_already_exists = Board.objects.filter(uuid=trello_board.id).exists()

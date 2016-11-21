@@ -197,8 +197,11 @@ def avg_spent_time_by_weekday(current_user, board=None):
         spent_time_chart.add(u"{0}".format(member_name), member_weekday_spent_time)
 
     num_members = members.count()
-    spent_time_chart.add(u"All members",
-                         [weekday_spent_time/num_members for weekday_i, weekday_spent_time in team_spent_time.items()])
+    if num_members > 0:
+        spent_time_chart.add(
+            u"All members",
+            [weekday_spent_time/num_members for weekday_i, weekday_spent_time in team_spent_time.items()]
+        )
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=spent_time_chart.render(is_unicode=True))
     return chart.render_django_response()
