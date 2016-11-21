@@ -396,7 +396,7 @@ class Board(models.Model):
 
         return adjusted_developed_value
 
-    # Informs what is the first day the team started working in this project
+    # Informs what is the first day the team worked in this project
     def get_working_start_date(self):
         first_spent_time_date = self.daily_spent_times.all().aggregate(min_date=Min("date"))["min_date"]
         first_card_movement = self.card_movements.all().aggregate(min_datetime=Min("datetime"))["min_datetime"]
@@ -408,9 +408,17 @@ class Board(models.Model):
             return first_spent_time_date
         return first_card_movement
 
-    # Informs what is the first day the team started working in this project
+    # Informs what is the last day the team has been working in this project
     def get_working_end_date(self):
-        return self.daily_spent_times.all().aggregate(max_date=Max("date"))["max_date"]
+        last_spent_time_date = self.daily_spent_times.all().aggregate(max_date=Max("date"))["max_date"]
+        last_card_movement = self.card_movements.all().aggregate(max_datetime=Max("datetime"))["max_datetime"]
+        if last_spent_time_date and last_card_movement:
+            if last_spent_time_date > last_card_movement.date():
+                return last_spent_time_date
+            return last_card_movement.date()
+        elif last_spent_time_date:
+            return last_spent_time_date
+        return last_card_movement
 
     # Has this project assessed Python code?
     @property
