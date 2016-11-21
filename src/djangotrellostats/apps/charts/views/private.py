@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import datetime
 
 import pygal
+from pygal.style import DefaultStyle
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
@@ -180,10 +181,16 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
                                            print_zeroes=False,
                                            human_readable=True)
 
-    day = start_of_week
-    while day <= end_of_week:
-        spent_time_chart.add(u"{0}".format(day.strftime("%A")), member.get_spent_time(day, board))
-        day += datetime.timedelta(days=1)
+    try:
+        day = start_of_week
+        while day <= end_of_week:
+            member_spent_time = member.get_spent_time(day, board)
+            spent_time_chart.add(u"{0}".format(day.strftime("%A")), member_spent_time)
+            day += datetime.timedelta(days=1)
+    except AssertionError:
+        spent_time_chart.no_data_text = u"No developers for this board.\nCheck members' attributes."
+        spent_time_chart.style=DefaultStyle(no_data_font_size=20)
+        return spent_time_chart.render_django_response()
 
     return spent_time_chart.render_django_response()
 
