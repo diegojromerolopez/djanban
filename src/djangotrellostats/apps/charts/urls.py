@@ -125,6 +125,10 @@ urlpatterns = [
     url(r'^completion_histogram/(?P<board_id>\d+|all)/(?P<time_metric>lead_time|cycle_time|spent_time)/(?P<units>days|hours)/?$',
         private.completion_histogram, name="completion_histogram"),
 
+    # List evolution
+    url(r'^absolute_flow_diagram/(?P<board_id>\d+)(/(?P<day_step>[\d]+))?$', private.absolute_flow_diagram,
+        name="absolute_flow_diagram"),
+
     # Cumulative list evolution
     url(r'^cumulative_flow_diagram/(?P<board_id>\d+)(/(?P<day_step>[\d]+))?$', private.cumulative_flow_diagram,
         name="cumulative_list_evolution"),

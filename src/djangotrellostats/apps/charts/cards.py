@@ -279,6 +279,72 @@ def avg_std_dev_time_by_list(board, workflow=None):
     return chart.render_django_response()
 
 
+# List evolution by month
+def absolute_flow_diagram(board, day_step=1):
+
+    # Caching
+    chart_uuid = "cards.absolute_flow_diagram-{0}-{1}".format(board.id, day_step)
+    try:
+        chart = CachedChart.get(board=board, uuid=chart_uuid)
+        return chart.render_django_response()
+    except CachedChart.MultipleObjectsReturned:
+        CachedChart.objects.filter(board=board, uuid=chart_uuid).delete()
+    except CachedChart.DoesNotExist:
+        pass
+
+    chart_title = u"Flow diagram as of {0}".format(timezone.now())
+    chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
+
+    cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
+                                  print_zeroes=False, fill=False,
+                                  human_readable=True, x_label_rotation=45)
+
+    start_working_date = board.get_working_start_date()
+    end_working_date = board.get_working_end_date()
+    if start_working_date is None or end_working_date is None:
+        return cumulative_chart.render_django_response()
+
+    # Y-Axis
+    lists = board.lists.exclude(type="closed").order_by("position")
+    list_values = {list_.id: [] for list_ in lists}
+
+    x_labels = []
+
+    date_i = copy.deepcopy(start_working_date)
+    local_timezone = pytz.timezone(settings.TIME_ZONE)
+    while date_i <= end_working_date:
+        datetime_i = local_timezone.localize(datetime.combine(date_i, time.min))
+        for list_ in lists:
+            list_id = list_.id
+            # Number of cards that were created in this list before the date
+            num_cards_without_movements = board.cards.filter(creation_datetime__lt=datetime_i,
+                                                             creation_datetime__gte=datetime_i-timedelta(days=day_step),
+                                                             list=list_). \
+                annotate(num_movements=Count("movements")).filter(num_movements=0).count()
+
+            # Number of cards that were moved to this list before the date
+            num_cards_moving_to_list = board.card_movements.filter(
+                destination_list=list_,
+                datetime__lt=datetime_i,
+                datetime__gte=datetime_i-timedelta(days=day_step),
+            ).count()
+
+            num_cards = num_cards_moving_to_list + num_cards_without_movements
+            list_values[list_id].append(num_cards)
+
+        x_labels.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
+
+        date_i += timedelta(days=day_step)
+
+    cumulative_chart.x_labels = x_labels
+    for list_ in lists:
+        list_id = list_.id
+        cumulative_chart.add(list_.name, list_values[list_id])
+
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=cumulative_chart.render(is_unicode=True))
+    return chart.render_django_response()
+
+
 # Cumulative list evolution by month
 def cumulative_flow_diagram(board, day_step=1):
 
@@ -314,7 +380,6 @@ def cumulative_flow_diagram(board, day_step=1):
     local_timezone = pytz.timezone(settings.TIME_ZONE)
     while date_i <= end_working_date:
         datetime_i = local_timezone.localize(datetime.combine(date_i, time.min))
-        num_total_cards = 0
         for list_ in lists:
             list_id = list_.id
             # Number of cards that were created in this list before the date
@@ -328,11 +393,9 @@ def cumulative_flow_diagram(board, day_step=1):
             ).count()
 
             num_cards = num_cards_moving_to_list + num_cards_without_movements
-            num_total_cards += num_cards
             list_values[list_id].append(num_cards)
 
-        if num_total_cards > 0:
-            x_labels.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
+        x_labels.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
         date_i += timedelta(days=day_step)
 
     cumulative_chart.x_labels = x_labels
