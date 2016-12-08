@@ -20,11 +20,9 @@ def avg_spent_times(request, board=None):
 
     # Caching
     chart_uuid = "labels.avg_spent_times-{0}".format(board.id if board else "None")
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Average task spent time as of {0}".format(timezone.now())
     if board:
@@ -62,11 +60,9 @@ def avg_estimated_times(request, board=None):
 
     # Caching
     chart_uuid = "labels.avg_estimated_times-{0}".format(board.id if board else "None")
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Average task estimated time as of {0}".format(timezone.now())
     if board:
@@ -124,11 +120,9 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
 
     # Caching
     chart_uuid = "labels._daily_spent_times_by_period-{0}-{1}-{2}-{3}".format(board.id if board else "None", time_measurement, operation, period)
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     daily_spent_time_filter = {"{0}__gt".format(time_measurement): 0}
     last_activity_datetime = timezone.now()

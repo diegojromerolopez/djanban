@@ -16,11 +16,9 @@ from djangotrellostats.apps.dev_environment.models import Interruption
 def burndown(board, show_interruptions=False):
 
     chart_uuid = "boards.burndown-{0}".format("with_interruptions" if show_interruptions else "without_interruptions")
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Burndown for board {0}".format(board.name)
     if show_interruptions:

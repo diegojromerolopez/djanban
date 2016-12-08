@@ -15,19 +15,17 @@ from djangotrellostats.apps.charts.models import CachedChart
 # Burndown chart for each requirement
 def burndown(board, requirement=None):
     if requirement is not None:
-        return _requirement_burndown(requirement)
+        return _requirement_burndown(board, requirement)
     return _burndown_by_requirement(board)
 
 
 # Burndown for a particular requirement
-def _requirement_burndown(requirement):
+def _requirement_burndown(board, requirement):
     # Caching
     chart_uuid = "requirements._requirement_burndown-{0}".format(requirement.id)
-    try:
-        chart = CachedChart.get(board=requirement.board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     board = requirement.board
 
@@ -87,11 +85,9 @@ def _burndown_by_requirement(board):
 
     # Caching
     chart_uuid = "requirements._burndown_by_requirement-{0}".format(board.id)
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Burndown for board {0}".format(board.name)
     chart_title += u" as of {1}".format(board.name, board.get_human_fetch_datetime())

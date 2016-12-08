@@ -55,11 +55,9 @@ def _number_of_interruptions(current_user, board, chart_title, interruption_meas
             chart_title
         )).hexdigest()
     )
-    try:
-        chart = CachedChart.get(board=None, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     if board:
         chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
@@ -143,9 +141,6 @@ def interruption_spent_time_by_member(current_user):
 
 # Number of interruptions base function
 def _number_of_interruptions_by_member(current_user, chart_title, interruption_measurement, incremental=False):
-    chart_uuid = "interruptions._number_of_interruptions_by_member-{0}-{1}-{2}".format(
-        current_user.id, slugify(chart_title), "incremental" if incremental else "absolute"
-    )
     # Caching
     chart_uuid = "interruptions.{0}".format(
         hashlib.sha256("_number_of_interruptions_by_member-{0}-{1}-{2}".format(
@@ -154,11 +149,9 @@ def _number_of_interruptions_by_member(current_user, chart_title, interruption_m
             "incremental" if incremental else "absolute"
         )).hexdigest()
     )
-    try:
-        chart = CachedChart.get(board=None, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=None, uuid=chart_uuid)
+    if chart:
+        return chart
 
     interruptions_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
                                      print_zeroes=False, x_label_rotation=65,
@@ -239,11 +232,9 @@ def _interruption_measurement_by_month(current_user, chart_title, interruption_m
             board.id if board else "None"
         )).hexdigest()
     )
-    try:
-        chart = CachedChart.get(board=None, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     if board:
         chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())

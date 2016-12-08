@@ -25,9 +25,20 @@ class CachedChart(models.Model):
 
     svg = models.FileField(verbose_name="SVG content of the chart")
 
-    # Get an existing CachedChart
     @staticmethod
     def get(board, uuid):
+        try:
+            chart = CachedChart._get(board=board, uuid=uuid)
+            return chart.render_django_response()
+        except CachedChart.DoesNotExist:
+            return False
+        except CachedChart.MultipleObjectsReturned:
+            CachedChart.objects.filter(board=board, uuid=uuid).delete()
+            return False
+
+    # Get an existing CachedChart
+    @staticmethod
+    def _get(board, uuid):
         if board:
             return CachedChart.objects.get(board=board, uuid=uuid, creation_datetime__gte=board.last_fetch_datetime)
 

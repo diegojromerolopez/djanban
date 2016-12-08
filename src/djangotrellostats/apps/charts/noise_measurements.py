@@ -23,11 +23,9 @@ def noise_level(current_user):
 
     # Caching
     chart_uuid = "noise_measurements.noise_level-{0}".format(current_user.id)
-    try:
-        chart = CachedChart.get(board=None, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=None, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Average noise levels per day in db as of {0}".format(timezone.now())
 
@@ -71,11 +69,9 @@ def noise_level(current_user):
 def noise_level_per_hour(current_user):
     # Caching
     chart_uuid = "noise_measurements.noise_level_per_hour-{0}".format(current_user.id)
-    try:
-        chart = CachedChart.get(board=None, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=None, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Noise levels per hour in db as of {0}".format(timezone.now())
 
@@ -116,11 +112,9 @@ def noise_level_per_hour(current_user):
 def noise_level_per_weekday(current_user):
     # Caching
     chart_uuid = "noise_measurements.noise_level_per_weekday-{0}".format(current_user.id)
-    try:
-        chart = CachedChart.get(board=None, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=None, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Noise levels per weekday in db as of {0}".format(timezone.now())
 
@@ -167,11 +161,9 @@ def subjective_noise_level(current_user, month=None, year=None):
         month if month else "None",
         year if year else "None"
     )
-    try:
-        chart = CachedChart.get(board=None, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=None, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Subjective noise levels as of {0}".format(timezone.now())
 

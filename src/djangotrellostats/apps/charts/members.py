@@ -26,11 +26,9 @@ def task_movements_by_member(movement_type="forward", board=None):
 
     # Caching
     chart_uuid = "members.task_movements_by_member-{0}-{1}".format(movement_type, board.id if board else "None")
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Task {0} movements as of {1}".format(movement_type, timezone.now())
     if board:
@@ -89,11 +87,9 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
 
     # Caching
     chart_uuid = "members.spent_time_by_week-{0}-{1}".format(current_user.id, week_of_year, board.id if board else "None")
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     y, w = week_of_year.split("W")
     week = Week(int(y), int(w))
@@ -142,11 +138,9 @@ def avg_spent_time_by_weekday(current_user, board=None):
 
     # Caching
     chart_uuid = "members.avg_spent_time_by_weekday-{0}-{1}".format(current_user, board.id if board else "None")
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Average spent time by weekday by member"
     if board:
@@ -212,11 +206,9 @@ def spent_time_by_week_evolution(board, show_interruptions=False):
 
     # Caching
     chart_uuid = "members.spent_time_by_week_evolution-{0}-{1}".format(board.id, "with_interruptions" if show_interruptions else "without_interruptions")
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Evolution of each member's spent time by week"
     if show_interruptions:
@@ -299,11 +291,9 @@ def number_of_comments(current_user, board=None, card=None):
 
     # Caching
     chart_uuid = "members.number_of_comments-{0}-{1}-{2}".format(current_user.id, board.id if board else "None", card.id if card else "None")
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Number of comments by member as of {0}".format(timezone.now())
 
@@ -355,11 +345,9 @@ def number_of_cards(current_user, board=None):
 
     # Caching
     chart_uuid = "members.number_of_cards-{0}-{1}".format(current_user.id, board.id if board else "None")
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Number of cards by member as of {0}".format(timezone.now())
 
@@ -406,11 +394,9 @@ def spent_time(current_user, board=None):
 
     # Caching
     chart_uuid = "members.spent_time-{0}-{1}".format(current_user.id, board.id if board else "None")
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     chart_title = u"Spent time by member as of {0}".format(timezone.now())
 

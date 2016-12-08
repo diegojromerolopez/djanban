@@ -34,11 +34,9 @@ def _number_of_code_errors_by_commit(board, repository=None, language="python", 
     chart_uuid = "repositories._number_of_code_errors_by_commit-{0}-{1}-{2}-{3}".format(
         board.id, repository.id if repository else "None", language, "per_loc" if per_loc else "global"
     )
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     repository_text = " "
     repository_filter = {}
@@ -107,11 +105,9 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
     chart_uuid = "repositories._number_of_code_errors_by_month-{0}-{1}-{2}-{3}".format(
         board.id, repository.id if repository else "None", language, "per_loc" if per_loc else "global"
     )
-    try:
-        chart = CachedChart.get(board=board, uuid=chart_uuid)
-        return chart.render_django_response()
-    except CachedChart.DoesNotExist:
-        pass
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
 
     repository_text = " "
     repository_filter = {}
