@@ -25,6 +25,7 @@ class CachedChart(models.Model):
 
     svg = models.FileField(verbose_name="SVG content of the chart")
 
+    # Gets a chart or False if the cached chart does not exists and must be created
     @staticmethod
     def get(board, uuid):
         try:
