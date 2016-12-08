@@ -211,6 +211,7 @@ class CardFetcher(object):
             card.description = trello_card.desc
             card.is_closed = trello_card.closed
             card.position = trello_card.pos
+            card.creation_datetime=card_creation_datetime
             card.last_activity_datetime = trello_card.dateLastActivity
             card.list = list_
             del self.deleted_cards_dict[card.uuid]
