@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 
-import shortuuid
 from datetime import timedelta
-from django.conf import settings
 
-from django.core.files import File
+import shortuuid
 from django.core.files.base import ContentFile
 from django.db import models
-
 from django.utils import timezone
-import os
-from io import open
+from crequest.middleware import CrequestMiddleware
 
 
+# Each one of the SVG charts of this platform
 class CachedChart(models.Model):
+    FORCE_UPDATE_GET_PARAM_NAME = "update"
 
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
 
@@ -28,6 +27,13 @@ class CachedChart(models.Model):
     # Gets a chart or False if the cached chart does not exists and must be created
     @staticmethod
     def get(board, uuid):
+        # CachedChart update can be forced passing a GET parameter that would be evaluated to True
+        current_request = CrequestMiddleware.get_request()
+        force_update_param_value = current_request.GET.get(CachedChart.FORCE_UPDATE_GET_PARAM_NAME)
+        if force_update_param_value:
+            return False
+
+        # Otherwise, try to get the CachedChart and if is old or it doesn't exist, return False
         try:
             chart = CachedChart._get(board=board, uuid=uuid)
             return chart.render_django_response()

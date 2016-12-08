@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'captcha',
     'ckeditor',
     'ckeditor_uploader',
+    'crequest',
     'cuser',
     'dal',
     'dal_select2',
@@ -81,6 +82,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'crequest.middleware.CrequestMiddleware',
     'cuser.middleware.CuserMiddleware'
 )
 
