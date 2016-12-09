@@ -280,9 +280,9 @@ class CardFetcher(object):
             return self.stats_by_list
 
         # Fake class used for passing a list of trello lists to the method of Card stats_by_list
-        ListForStats = namedtuple('ListForStats', 'id django_id')
-        fake_trello_lists = [ListForStats(id=list_.uuid, django_id=list_.id) for list_ in self.lists]
-        fake_trello_list_done = ListForStats(id=self.done_list.uuid, django_id=self.done_list.id)
+        ListForStats = namedtuple('ListForStats', 'id django_id name')
+        fake_trello_lists = [ListForStats(id=list_.uuid, django_id=list_.id, name=list_.name) for list_ in self.lists]
+        fake_trello_list_done = ListForStats(id=self.done_list.uuid, django_id=self.done_list.id, name=self.done_list.name)
 
         # Hash to obtain the order of a list given its uuid
         trello_list_order_dict = {list_.uuid: list_.id for list_ in self.lists}
