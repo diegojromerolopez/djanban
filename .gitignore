@@ -9,7 +9,9 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
+env3/
 venv/
+venv3/
 build/
 develop-eggs/
 dist/
@@ -73,6 +75,8 @@ src/djangotrellostats/tmp/*
 src/djangotrellostats/settings_local.py
 src/public_html
 src/shell
+src/build
+src/dist
 src/connector
 
 # Output directory

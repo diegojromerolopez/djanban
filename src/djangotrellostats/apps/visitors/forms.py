@@ -65,8 +65,6 @@ class NewUserForm(forms.ModelForm):
             # Change password if both passwords match
             if self.cleaned_data.get("password1") \
                     and self.cleaned_data.get("password1") == self.cleaned_data.get("password2"):
-                print "TEST"
-                print self.cleaned_data.get("password1")
                 self.instance.set_password(self.cleaned_data.get("password1"))
                 self.instance.save()
 
