@@ -35,6 +35,7 @@
                         <td>Closed?</td>
                         <td>List</td>
                         <td>Comments</td>
+                        <td>Reviews</td>
                         <td>Lead time</td>
                         <td>Cycle time</td>
                         <td>Spent/Estimated time</td>
@@ -51,6 +52,22 @@
                             <td>{% if card.is_closed %}Yes{% else %}No{% endif %}</td>
                             <td>{{card.list.name}}</td>
                             <td>{{card.number_of_comments}}</td>
+                            <td>
+                                {% for review in card.reviews.all %}
+                                    <span class="review">
+                                        <span class="review_creation_datetime">{{review.creation_datetime}}</span>
+                                        {% with reviewers=review.reviewers.all %}
+                                            {% if reviewers|length > 0 %}
+                                                <ul>
+                                                    {% for reviewer in reviewers %}
+                                                        <li>{{reviewer.trello_username}}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </span>
+                                {% endfor %}
+                            </td>
                             <td>{% if card.lead_time %}{{card.lead_time|floatformat:-2}}{% endif %}</td>
                             <td>{% if card.cycle_time %}{{card.cycle_time|floatformat:-2}}{% endif %}</td>
                             <td>{% if card.spent_time or card.estimated_time %}{{card.spent_time|floatformat:-2}}/{{card.estimated_time|floatformat:-2}}{% endif %}</td>

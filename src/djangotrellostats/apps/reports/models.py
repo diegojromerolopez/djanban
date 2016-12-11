@@ -22,7 +22,7 @@ class CardMovement(models.Model):
 
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="card_movements")
 
-    card = models.ForeignKey("boards.Card", verbose_name=u"Board", related_name="movements")
+    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="movements")
 
     type = models.CharField(verbose_name="Movement type", choices=CARD_MOVEMENT_TYPES, max_length=32)
 
@@ -38,6 +38,43 @@ class CardMovement(models.Model):
 
     def __unicode__(self):
         return "{0} -> {1} (on {2})".format(self.source_list.name, self.destination_list.name, self.datetime)
+
+
+# Reviews of a card
+class CardReview(models.Model):
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="card_reviews")
+    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="reviews")
+    reviewers = models.ManyToManyField("members.Member", verbose_name=u"Members", related_name="card_reviews")
+    creation_datetime = models.DateTimeField(verbose_name="Date and time this card has been reviewed")
+
+    @staticmethod
+    def create_from_card_comment(card_comment, reviewers):
+        print "Creating {0}".format(card_comment.content)
+        card_review = CardReview(card=card_comment.card, board=card_comment.card.board,
+                                 creation_datetime=card_comment.creation_datetime)
+        card_review.save()
+        print reviewers
+        for reviewer in reviewers:
+            card_review.reviewers.add(reviewer)
+
+    @staticmethod
+    def update_from_card_comment(card_comment, reviewers):
+        print "Updating {0}".format(card_comment.content)
+        card = card_comment.card
+        card_review = card.reviews.get(creation_datetime=card_comment.creation_datetime)
+        card_review.reviewers.clear()
+        print reviewers
+        for reviewer in reviewers:
+            card_review.reviewers.add(reviewer)
+
+    @staticmethod
+    def update_or_create_from_card_comment(card_comment, reviewers):
+        try:
+            CardReview.update_from_card_comment(card_comment, reviewers)
+            print "Update successfully"
+        except CardReview.DoesNotExist:
+            CardReview.create_from_card_comment(card_comment, reviewers)
+            print "Creation successfully"
 
 
 # Stat report by list

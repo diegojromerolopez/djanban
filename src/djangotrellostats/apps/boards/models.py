@@ -19,7 +19,7 @@ from isoweek import Week
 
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
-from djangotrellostats.apps.reports.models import CardMovement
+from djangotrellostats.apps.reports.models import CardMovement, CardReview
 
 from djangotrellostats.trello_api.cards import move_card, add_comment_to_card, delete_comment_of_card, \
     remove_label_of_card, add_label_to_card
@@ -525,6 +525,9 @@ class Card(models.Model):
     COMMENT_BLOCKED_CARD_REGEX = r"^blocked\s+by\s+(?P<card_url>.+)$"
     COMMENT_REQUIREMENT_CARD_REGEX = r"^task\s+of\s+requirement\s+(?P<requirement_code>.+)$"
 
+    COMMENT_REVIEWED_BY_MEMBERS_REGEX = r"^reviewed\s+by\s+(?P<member_usernames>((@[\w\d]+)(\s|,|and)*)+)$"
+    COMMENT_REVIEWED_BY_MEMBERS_FINDALL_REGEX = r"@[\w\d]+"
+
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
     list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")
 
@@ -808,7 +811,7 @@ class CardComment(models.Model):
 
     @property
     def spent_estimated_time(self):
-        matches = re.match(Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, self.content)
+        matches = re.match(Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, self.content, re.IGNORECASE)
         if matches:
             date = self.creation_datetime.date()
 
@@ -828,22 +831,43 @@ class CardComment(models.Model):
             }
         return None
 
+    # Returns the blocking card linked to this comment extracted from its content.
+    # If it is not a blocking card comment, return None
     @property
     def blocking_card(self):
-        matches = re.match(Card.COMMENT_BLOCKED_CARD_REGEX, self.content)
+        matches = re.match(Card.COMMENT_BLOCKED_CARD_REGEX, self.content, re.IGNORECASE)
         if matches:
             blocking_card_url = matches.group("card_url")
             blocking_card = self.card.board.cards.get(url=blocking_card_url)
             return blocking_card
         return None
 
+    # Return the requirement linked to this comment extracted from its content.
+    # If it is not a requirement card comment, return None.
     @property
     def requirement(self):
-        matches = re.match(Card.COMMENT_REQUIREMENT_CARD_REGEX, self.content)
+        matches = re.match(Card.COMMENT_REQUIREMENT_CARD_REGEX, self.content, re.IGNORECASE)
         if matches:
             requirement_code = matches.group("requirement_code")
             requirement = self.card.board.requirements.get(code=requirement_code)
             return requirement
+        return None
+
+    # Return the reviewer members of this comment extracted from its content.
+    # If it is not a reviewer card comment, return None.
+    @property
+    def review(self):
+        matches = re.match(Card.COMMENT_REVIEWED_BY_MEMBERS_REGEX, self.content, re.IGNORECASE)
+        if matches:
+            member_usernames_string = matches.group("member_usernames")
+            member_usernames = re.findall(Card.COMMENT_REVIEWED_BY_MEMBERS_FINDALL_REGEX, member_usernames_string)
+            if len(member_usernames) == 1 and member_usernames[0] == "@board":
+                members = self.card.board.members.all()
+            else:
+                cleaned_member_usernames = [member_username.replace("@", "") for member_username in member_usernames]
+                members = [member for member in self.card.board.members.filter(trello_username__in=cleaned_member_usernames)]
+            return {"reviewers": members, "datetime": self.creation_datetime, "card": self.card, "board": self.card.board}
+
         return None
 
     def delete(self, *args, **kwargs):
@@ -865,6 +889,11 @@ class CardComment(models.Model):
         requirement = self.requirement
         if requirement:
             self.card.requirements.remove(requirement)
+
+        # If the comment is a review card mention, and is going to be deleted, delete it
+        review = self.review
+        if review:
+            self.card.reviews.filter(creation_datetime=self.creation_datetime).delete()
 
     # Card comment saving
     def save(self, *args, **kwargs):
@@ -889,8 +918,9 @@ class CardComment(models.Model):
             spent_estimated_time = self.spent_estimated_time
             earlier_spent_estimated_time = earlier_card_comment.spent_estimated_time
 
-            if spent_estimated_time["spent_time"] != earlier_spent_estimated_time["spent_time"] or \
-               spent_estimated_time["estimated_time"] != earlier_spent_estimated_time["estimated_time"]:
+            if (spent_estimated_time and earlier_spent_estimated_time) and\
+               (spent_estimated_time["spent_time"] != earlier_spent_estimated_time["spent_time"] or\
+                spent_estimated_time["estimated_time"] != earlier_spent_estimated_time["estimated_time"]):
                 # Update this Daily Spent Time that depends on this comment
                 if not earlier_card_comment.daily_spent_time:
                     daily_spent_time = DailySpentTime.create_from_comment(self)
@@ -920,6 +950,16 @@ class CardComment(models.Model):
                 if requirement is not None:
                     card.requirements.add(requirement)
 
+            # Is it a review comment?
+            review = self.review
+            # If there is a new review in this comment, add or update this review accordingly
+            if review:
+                CardReview.update_or_create_from_card_comment(self, review["reviewers"])
+
+            # If there is not a review, check if there was an earlier review and in that case, delete it
+            elif self.card.reviews.get(creation_datetime=self.creation_datetime).exists():
+                self.card.reviews.get(creation_datetime=self.creation_datetime).delete()
+
     # Save a new comment
     def _save_new(self, card):
 
@@ -940,6 +980,12 @@ class CardComment(models.Model):
         requirement = self.requirement
         if requirement:
             card.requirements.add(requirement)
+
+        # Is it a reviewer card comment?
+        review = self.review
+        if review:
+            reviewer_members = review["reviewers"]
+            CardReview.update_or_create_from_card_comment(self, reviewer_members)
 
 
 # Label of the task board

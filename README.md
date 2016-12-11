@@ -192,6 +192,14 @@ A subset of board view, this view allows sharing stats with stakeholders that ar
 
 ![Board cards](resources/images/screencaptures/board-cards.png)
 
+## Card reviews
+
+To mark a card as reviewed, write **Reviewed by ** followed by the prefixed-by-@-usernames of the board members that reviewed this card.
+
+For example: **Reviewed by @anastasious45 @petra99** means that both members (anastaious45 and petra99 have contributed to this card review.)
+
+![Card review](resources/images/screencaptures/board-card-reviews.png)
+
 ## Board blocked cards
 
 To block a card, make a comment in the blocked card with the following text:
