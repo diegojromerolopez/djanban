@@ -196,7 +196,7 @@ A subset of board view, this view allows sharing stats with stakeholders that ar
 
 To mark a card as reviewed, write **Reviewed by ** followed by the prefixed-by-@-usernames of the board members that reviewed this card.
 
-For example: **Reviewed by @anastasious45 @petra99** means that both members (anastaious45 and petra99 have contributed to this card review.)
+For example: **Reviewed by @anastasious45 @petra99** means that both members (anastasious45 and petra99 have contributed to this card review.)
 
 ![Card review](resources/images/screencaptures/board-card-reviews.png)
 
