@@ -538,6 +538,8 @@ class Card(models.Model):
     description = models.TextField(verbose_name=u"Description of the card")
     is_closed = models.BooleanField(verbose_name=u"Is this card closed?", default=False)
     position = models.PositiveIntegerField(verbose_name=u"Position in the list")
+
+    due_datetime = models.DateTimeField(verbose_name=u"Deadline", blank=True, null=True, default=None)
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
     last_activity_datetime = models.DateTimeField(verbose_name=u"Last activity datetime")
 

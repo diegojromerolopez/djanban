@@ -39,6 +39,7 @@
                         <td>Lead time</td>
                         <td>Cycle time</td>
                         <td>Spent/Estimated time</td>
+                        <td>Deadline</td>
                         <td>Last activity date</td>
                         <td>Actions</td>
                     </tr>
@@ -71,6 +72,7 @@
                             <td>{% if card.lead_time %}{{card.lead_time|floatformat:-2}}{% endif %}</td>
                             <td>{% if card.cycle_time %}{{card.cycle_time|floatformat:-2}}{% endif %}</td>
                             <td>{% if card.spent_time or card.estimated_time %}{{card.spent_time|floatformat:-2}}/{{card.estimated_time|floatformat:-2}}{% endif %}</td>
+                            <td>{% if card.due_datetime %}{{card.due_datetime}}{% endif %}</td>
                             <td>{{card.last_activity_datetime}}</td>
                             <td>
                                 <a href="{% url 'boards:view_card' board.id card.id %}" title="View card {{card.name}}">

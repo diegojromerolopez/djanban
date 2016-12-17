@@ -9,6 +9,7 @@ import pytz
 from django.conf import settings
 from trello import ResourceUnavailable
 
+from djangotrellostats.apps.base.utils.datetime import localize_if_needed
 from djangotrellostats.apps.boards.models import Card, CardComment
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.reports.models import CardMovement
@@ -196,13 +197,6 @@ class CardFetcher(object):
     def _create_from_trello_card(self, trello_card):
         list_ = self.board.lists.get(uuid=trello_card.idList)
 
-        local_timezone = pytz.timezone(settings.TIME_ZONE)
-        if trello_card.created_date.tzinfo is None or\
-           trello_card.created_date.tzinfo.utcoffset(trello_card.created_date) is None:
-            card_creation_datetime = local_timezone.localize(trello_card.created_date)
-        else:
-            card_creation_datetime = trello_card.created_date
-
         try:
             card = self.board.cards.get(uuid=trello_card.id)
             card.name = trello_card.name
@@ -211,16 +205,20 @@ class CardFetcher(object):
             card.description = trello_card.desc
             card.is_closed = trello_card.closed
             card.position = trello_card.pos
-            card.creation_datetime=card_creation_datetime
-            card.last_activity_datetime = trello_card.dateLastActivity
             card.list = list_
             del self.deleted_cards_dict[card.uuid]
         except Card.DoesNotExist:
             card = Card(uuid=trello_card.id, name=trello_card.name, url=trello_card.url,
                         short_url=trello_card.short_url, description=trello_card.desc, is_closed=trello_card.closed,
-                        position=trello_card.pos, last_activity_datetime=trello_card.dateLastActivity,
-                        board=self.board, list=list_, creation_datetime=card_creation_datetime
-                        )
+                        position=trello_card.pos, board=self.board, list=list_)
+
+        # Update card dates if needed
+        if trello_card.due_date:
+            card.due_datetime = localize_if_needed(trello_card.due_date)
+        else:
+            card.due_datetime = None
+        card.creation_datetime = localize_if_needed(trello_card.created_date)
+        card.last_activity_datetime = localize_if_needed(trello_card.dateLastActivity)
 
         # Store the trello card data for ease of use
         card.trello_card = trello_card
