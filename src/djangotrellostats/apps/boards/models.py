@@ -615,7 +615,14 @@ class Card(models.Model):
         arrivals_to_in_development_list = self.movements.filter(destination_list__type="development").order_by("datetime")
         if arrivals_to_in_development_list.exists():
             return arrivals_to_in_development_list[0].datetime
-        return None
+        return self.creation_datetime
+
+    @property
+    def end_datetime(self):
+        arrivals_to_done_list = self.movements.filter(destination_list__type="done").order_by("-datetime")
+        if arrivals_to_done_list.exists():
+            return arrivals_to_done_list[0].datetime
+        return self.creation_datetime
 
     # Is there any other card that blocks this card?
     @property

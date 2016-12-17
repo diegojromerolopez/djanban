@@ -38,23 +38,11 @@
             g.setFormatArr("day","week","month","quarter") // Set format options (up to 4 : "minute","hour","day","week","month","quarter")
 
             {% for card in cards %}
-                {% if card.has_started and card.due_datetime %}
                     g.AddTaskItem(new JSGantt.TaskItem(
-                        {{card.id}},
-                        "{{card.name}}",
-                        "{% with start_datetime=card.start_datetime %}{% if not start_datetime %}{{card.creation_datetime|date:"Y-m-d"}}{% else %}{{start_datetime|date:"Y-m-d"}}{% endif %}{% endwith %}",
-                        {% if card.due_datetime  %}"{{card.due_datetime|date:"Y-m-d"}}"{% else %}""{% endif %},
-                        {% if card.labels.all.exists %}"{{card.labels.all.0.color}}"{% else %}"unlabeled"{% endif %},
-                        "{% url 'boards:view_card' card.board_id card.id %}",
-                        0,
-                        "{{card.members.all.0.trello_username}}",
-                        {% if card.list.type == "development" %}0{% elif card.list.type == "after_development_in_review" %}75{% elif card.list.type == "after_development_waiting_release" %}90{% elif card.list.type == "done" %}100{% else %}100{% endif %},
-                        {% if card.blocked_cards.all.exists %}1{% else %}0{% endif %},
-                        {% if card.blocking_cards.all.exists %}{{card.blocking_cards.all.0.id}}{% else %}0{% endif %},
-                        0,
-                        {% if card.blocking_cards.all.exists %}"{% for blocking_card in card.blocking_cards.all.0 %}{{blocking_card.id}}{% if not forloop.last %},{% endif %}{% endfor %}"{% else %}{{card.id}}{% endif %}
+                        {{card.pID}}, "{{card.pName}}", "{{card.pStart}}", "{{card.pEnd}}", "{{card.pClass}}", "{{card.pLink}}",
+                        {{card.pMile}}, "{{card.pRes}}", {{card.pComp}}, {{card.pGroup}}, "{{card.pParent}}", {{card.pOpen}},
+                        "{{card.pDepend}}", "{{card.pCaption}}", "{{card.pNotes}}", g
                     ));
-                {% endif %}
             {% endfor %}
             g.Draw();
             g.DrawDependencies();

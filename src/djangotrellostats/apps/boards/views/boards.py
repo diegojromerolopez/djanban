@@ -4,6 +4,7 @@ from __future__ import unicode_literals, absolute_import
 
 import time
 
+from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -116,12 +117,75 @@ def view_gantt_chart(request, board_id):
             member = request.user.member
         elif user_is_visitor(request.user, board):
             visitor = request.user
-
     except Board.DoesNotExist:
         raise Http404
+
+    board_cards = board.cards.filter(list__type__in=List.STARTED_CARD_LIST_TYPES)
+
+    cards = []
+    for board_card in board_cards:
+
+        # Task start
+        start_date = board_card.start_datetime
+        if start_date is None:
+            start_date = board_card.creation_datetime
+
+        # Task end
+        if board_card.due_datetime is not None:
+            end_date = board_card.due_datetime
+        elif board_card.list.type == "done":
+            end_date = board_card.end_datetime
+        else:
+            end_date = start_date + timedelta(days=1)
+
+        # Percentage of completion of the task
+        if board_card.list.type == "development":
+            completion_percentage = 0
+        elif board_card.list.type == "after_development_in_review":
+            completion_percentage = 75
+        elif board_card.list.type == "after_development_waiting_release":
+            completion_percentage = 85
+        else:
+            completion_percentage = 100
+
+        # Parent Task
+        blocking_cards = board_card.blocking_cards.all().order_by("creation_datetime")
+        parent_card = 0
+        if blocking_cards.exists():
+            parent_card = blocking_cards[0].id
+
+        # Dependant tasks
+        blocked_cards = board_card.blocked_cards.all()
+        dependant_cards = ""
+        if blocked_cards.exists():
+            for blocked_card in blocked_cards:
+                dependant_cards += ",".format(blocked_card.id)
+            dependant_cards = dependant_cards[:-1]
+
+        members = board_card.members.all()[:1]
+        for member in members:
+            card = {
+                "pID": board_card.id,
+                "pName": board_card.name,
+                "pStart": start_date.strftime("%Y-%m-%d"),
+                "pEnd": end_date.strftime("%Y-%m-%d"),
+                "pClass": "red",
+                "pLink": reverse("boards:view_card", args=(board_id, board_card.id)),
+                "pMile": 0,
+                "pRes": member.trello_username,
+                "pComp": completion_percentage,
+                "pGroup": 1 if blocked_cards.exists() else 0,
+                "pParent": parent_card,
+                "pOpen": 0,
+                "pDepend": dependant_cards,
+                "pCaption": board_card.name,
+                "pNotes": board_card.description
+            }
+            cards.append(card)
+
     replacements = {
         "board": board,
-        "cards": board.cards.filter(list__type__in=List.STARTED_CARD_LIST_TYPES),
+        "cards": cards,
         "member": member,
         "visitor": visitor,
     }
