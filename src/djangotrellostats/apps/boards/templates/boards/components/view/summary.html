@@ -149,9 +149,10 @@
                       <ul>
                           {% for next_due_date_card in next_due_date_cards %}
                                 <li>
-                                    <a href="{{next_due_date_card.short_url}}" title="View card {{next_due_date_card.name}} in board {{next_due_date_card.board.name}}">
+                                    <a href="{% url 'boards:view_card' board.id next_due_date_card.id %}" title="View card {{next_due_date_card.name}} in board {{next_due_date_card.board.name}}">
                                         {{next_due_date_card.name}}
                                     </a>
+
                                     <span class="card_list"><strong>{{next_due_date_card.list.get_type_display}}</strong></span>
                                     <span class="due_datetime_value">
                                         ({{next_due_date_card.due_datetime}}, <strong>{{next_due_date_card.due_datetime|naturaltime}})</strong>

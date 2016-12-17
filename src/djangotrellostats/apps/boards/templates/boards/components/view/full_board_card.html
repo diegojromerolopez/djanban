@@ -23,7 +23,7 @@
                           <div class="list-group">
                               {% for blocking_card in card.pending_blocking_cards %}
                                 <p class="list-group-item">
-                                    <a href="{{blocking_card.short_url}}" title="View card {{blocking_card.name}} in board {{blocking_card.board.name}}">{{blocking_card.name}}</a>
+                                    <a href="{% url 'boards:view_card' blocking_card.board_id blocking_card.id %}" title="View card {{blocking_card.name}} in board {{blocking_card.board.name}}">{{blocking_card.name}}</a>
                                 </p>
                               {% endfor %}
                           </div>
