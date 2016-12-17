@@ -105,6 +105,29 @@ def view_board_panorama(request):
     return render(request, "boards/panorama.html", replacements)
 
 
+# View board gantt chart
+@login_required
+def view_gantt_chart(request, board_id):
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        member = None
+        visitor = None
+        if user_is_member(request.user):
+            member = request.user.member
+        elif user_is_visitor(request.user, board):
+            visitor = request.user
+
+    except Board.DoesNotExist:
+        raise Http404
+    replacements = {
+        "board": board,
+        "cards": board.cards.filter(list__type__in=List.STARTED_CARD_LIST_TYPES),
+        "member": member,
+        "visitor": visitor,
+    }
+    return render(request, "boards/gantt_chart.html", replacements)
+
+
 # View board
 @login_required
 def view(request, board_id):

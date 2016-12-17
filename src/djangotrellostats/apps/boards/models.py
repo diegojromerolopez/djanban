@@ -606,6 +606,17 @@ class Card(models.Model):
         now = timezone.now()
         return now - self.creation_datetime
 
+    @property
+    def has_started(self):
+        return self.list.type in List.STARTED_CARD_LIST_TYPES
+
+    @property
+    def start_datetime(self):
+        arrivals_to_in_development_list = self.movements.filter(destination_list__type="development").order_by("datetime")
+        if arrivals_to_in_development_list.exists():
+            return arrivals_to_in_development_list[0].datetime
+        return None
+
     # Is there any other card that blocks this card?
     @property
     def is_blocked(self):
@@ -1028,6 +1039,7 @@ class Label(models.Model):
 class List(models.Model):
     LIST_TYPES = ("ignored", "backlog", "ready_to_develop", "development",
                   "after_development_in_review", "after_development_waiting_release", "done", "closed")
+    STARTED_CARD_LIST_TYPES = ("development", "after_development_in_review", "after_development_waiting_release", "done")
     LIST_TYPE_CHOICES = (
         ("ignored", "Ignored"),
         ("backlog", "Backlog"),

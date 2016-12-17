@@ -1,0 +1,74 @@
+{% extends "boards/view.html" %}
+
+{% load staticfiles %}
+
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'js/libs/jsgantt-improved-1.7.5.2/jsgantt.css' %}" rel="stylesheet" />
+{% endblock css %}
+
+{% block js %}
+    {{block.super}}
+    <script type="text/javascript" src="{% static 'js/libs/jsgantt-improved-1.7.5.2/jsgantt.js' %}"></script>
+{% endblock js %}
+
+
+{% block page_title %}Gantt chart for project {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>Gantt chart for project {{board.name}}</h1>
+
+    {% if cards|length > 0 %}
+        <div style="position:relative" class="gantt" id="GanttChartDIV"></div>
+
+        <script language="javascript">
+            var g = new JSGantt.GanttChart(document.getElementById('GanttChartDIV'), 'day');
+            g.setShowRes(1); // Show/Hide Responsible (0/1)
+            g.setShowDur(1); // Show/Hide Duration (0/1)
+            g.setShowComp(1); // Show/Hide % Complete(0/1)
+            g.setCaptionType('Resource');  // Set to Show Caption (None,Caption,Resource,Duration,Complete)
+            g.setShowStartDate(1); // Show/Hide Start Date(0/1)
+            g.setShowEndDate(1); // Show/Hide End Date(0/1)
+            g.setDateInputFormat('yyyy-mm-dd')  // Set format of input dates ('mm/dd/yyyy', 'dd/mm/yyyy', 'yyyy-mm-dd')
+            g.setDateTaskDisplayFormat('day dd month yyyy'); // Shown in tool tip box
+		    g.setDayMajorDateDisplayFormat('mon yyyy - Week ww') // Set format to display dates in the "Major" header of the "Day" view
+		    g.setWeekMinorDateDisplayFormat('dd mon') // Set format to display dates in the "Minor" header of the "Week" view
+		    g.setShowTaskInfoLink(1); //Show link in tool tip (0/1)
+		    g.setShowEndWeekDate(0); // Show/Hide the date for the last day
+            g.setFormatArr("day","week","month","quarter") // Set format options (up to 4 : "minute","hour","day","week","month","quarter")
+
+            {% for card in cards %}
+                {% if card.has_started and card.due_datetime %}
+                    g.AddTaskItem(new JSGantt.TaskItem(
+                        {{card.id}},
+                        "{{card.name}}",
+                        "{% with start_datetime=card.start_datetime %}{% if not start_datetime %}{{card.creation_datetime|date:"Y-m-d"}}{% else %}{{start_datetime|date:"Y-m-d"}}{% endif %}{% endwith %}",
+                        {% if card.due_datetime  %}"{{card.due_datetime|date:"Y-m-d"}}"{% else %}""{% endif %},
+                        {% if card.labels.all.exists %}"{{card.labels.all.0.color}}"{% else %}"unlabeled"{% endif %},
+                        "{% url 'boards:view_card' card.board_id card.id %}",
+                        0,
+                        "{{card.members.all.0.trello_username}}",
+                        {% if card.list.type == "development" %}0{% elif card.list.type == "after_development_in_review" %}75{% elif card.list.type == "after_development_waiting_release" %}90{% elif card.list.type == "done" %}100{% else %}100{% endif %},
+                        {% if card.blocked_cards.all.exists %}1{% else %}0{% endif %},
+                        {% if card.blocking_cards.all.exists %}{{card.blocking_cards.all.0.id}}{% else %}0{% endif %},
+                        0,
+                        {% if card.blocking_cards.all.exists %}"{% for blocking_card in card.blocking_cards.all.0 %}{{blocking_card.id}}{% if not forloop.last %},{% endif %}{% endfor %}"{% else %}{{card.id}}{% endif %}
+                    ));
+                {% endif %}
+            {% endfor %}
+            g.Draw();
+            g.DrawDependencies();
+        </script>
+    {% else %}
+        <div class="row">
+            <div class="col-md-5 center-block">
+                <div class="panel panel-warning">
+                  <div class="panel-heading">You don't have any task with deadline that has been started</div>
+                  <div class="panel-body">
+                    <p>Currently you have no started tasks with deadline in this board {{board.name}}</p>
+                  </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock content %}
