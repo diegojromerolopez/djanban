@@ -121,7 +121,14 @@ def view(request, board_id):
         raise Http404
 
     week_of_year = get_week_of_year()
-    lists = board.lists.exclude(Q(type="ignored")|Q(type="closed")).order_by("position")
+    lists = board.lists.exclude(Q(type="ignored") | Q(type="closed")).order_by("position")
+
+    # Next cards by due date
+    next_due_date_cards = board.cards\
+        .filter(due_datetime__isnull=False)\
+        .exclude(
+            Q(list__type="ignored") | Q(list__type="closed")
+        ).order_by("-due_datetime")
 
     # Requirements
     requirements = board.requirements.all().order_by("-value")
@@ -133,6 +140,7 @@ def view(request, board_id):
     replacements = {
         "url_prefix": "http://{0}".format(settings.DOMAIN),
         "board": board,
+        "next_due_date_cards": next_due_date_cards,
         "lists": lists,
         "requirement": requirement,
         "requirements": requirements,
