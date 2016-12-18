@@ -71,6 +71,10 @@ src/djangotrellostats/media/*
 src/djangotrellostats/tmp
 src/djangotrellostats/tmp/*
 
+# Logs
+src/djangotrellostats/logs
+src/djangotrellostats/logs/*
+
 # Local configuration
 src/djangotrellostats/settings_local.py
 src/public_html

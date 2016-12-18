@@ -1,20 +1,22 @@
 import os
 import socket
 import urllib
+
 try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
+
 import cherrypy
 from django.core.wsgi import get_wsgi_application
 import webview
 import subprocess
 import sys
 import threading
-import logging
 import logging.handlers
 
 
+# Django standalone application for DjangoTrelloStats
 class DjangoApplication(object):
     def __init__(self):
         self.servers = []
@@ -115,6 +117,7 @@ def main(**kwargs):
 
 
 if __name__ == '__main__':
+
     # check if we are running as py2app bundle or as a script
     if getattr(sys, 'frozen', None):
         base_dir = os.path.realpath(
@@ -126,17 +129,17 @@ if __name__ == '__main__':
 
     # set up logging and app_name
     if run_as_binary is True:
-        log_file = os.path.join(base_dir, "..", "PyBrowse.log")
-        cherry_access_log = os.path.join(base_dir, "..", "access.log")
-        cherry_error_log = os.path.join(base_dir, "..", "error.log")
-        app_name = "PyBrowse"
+        log_file = os.path.join(base_dir, "../logs/", "DjangoTrelloStats.log")
+        cherry_access_log = os.path.join(base_dir, "../logs/", "access.log")
+        cherry_error_log = os.path.join(base_dir, "../logs/", "error.log")
+        app_name = "DjangoTrelloStats"
     else:
-        log_file = os.path.join(base_dir, "PyBrowse.log")
-        cherry_access_log = os.path.join(base_dir, "access.log")
-        cherry_error_log = os.path.join(base_dir, "error.log")
-        app_name = "Python"
+        log_file = os.path.join(base_dir, "logs/DjangoTrelloStats.log")
+        cherry_access_log = os.path.join(base_dir, "logs/access.log")
+        cherry_error_log = os.path.join(base_dir, "logs/error.log")
+        app_name = "DjangoTrelloStats"
 
-    log = logging.getLogger("PyBrowse")
+    log = logging.getLogger("DjangoTrelloStats")
     log.setLevel(logging.DEBUG)
     handler = logging.handlers.RotatingFileHandler(log_file,
                                                    maxBytes=30000000,
@@ -167,9 +170,10 @@ if __name__ == '__main__':
     t.start()
 
     # Create a resizable webview window with 800x600 dimensions
-    webview.create_window("PyBrowse", "http://localhost:9090/",
+    webview.create_window("Django Trello Stats", "http://localhost:9090/",
                           width=800, height=600, resizable=True,
                           fullscreen=False)
 
     # stop django when user closes UI
     cherrypy.engine.stop()
+    cherrypy.engine.exit()
