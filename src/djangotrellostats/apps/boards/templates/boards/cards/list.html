@@ -14,6 +14,10 @@
                     <span class="fa fa-arrow-left"></span>
                     View completed tasks on this week
                 </a>
+                <a class="btn btn-primary" href="{% url 'boards:view_gantt_chart' board.id %}">
+                    <span class="fa fa-bar-chart fa-rotate-90"></span>
+                    View gantt chart
+                </a>
             </div>
         </div>
         <div class="card-charts">

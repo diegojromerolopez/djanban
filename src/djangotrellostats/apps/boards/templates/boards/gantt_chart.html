@@ -16,6 +16,15 @@
 {% block page_title %}Gantt chart for project {{board.name}}{% endblock %}
 
 {% block content %}
+   <div class="row">
+            <div class="col-md-12">
+                 <a class="btn btn-primary" href="{% url 'boards:view_card_report' board.id %}">
+                    <span class="fa fa-arrow-left"></span>
+                    View tasks
+                </a>
+            </div>
+        </div>
+
     <h1>Gantt chart for project {{board.name}}</h1>
 
     {% if cards|length > 0 %}

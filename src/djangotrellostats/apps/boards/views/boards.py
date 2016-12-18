@@ -138,6 +138,13 @@ def view_gantt_chart(request, board_id):
         else:
             end_date = start_date + timedelta(days=1)
 
+        # Color of task
+        task_color = "black"
+        labels = board_card.labels.all()
+        if labels.exists():
+            main_label = labels[0]
+            task_color = main_label.color
+
         # Percentage of completion of the task
         if board_card.list.type == "development":
             completion_percentage = 0
@@ -169,7 +176,7 @@ def view_gantt_chart(request, board_id):
                 "pName": board_card.name,
                 "pStart": start_date.strftime("%Y-%m-%d"),
                 "pEnd": end_date.strftime("%Y-%m-%d"),
-                "pClass": "red",
+                "pClass": "gtask{0}".format(task_color),
                 "pLink": reverse("boards:view_card", args=(board_id, board_card.id)),
                 "pMile": 0,
                 "pRes": member.trello_username,
