@@ -4,6 +4,9 @@ from django.conf.urls import url, include
 from django.contrib import admin
 
 from djangotrellostats.apps.index import views as index_views
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
     url(r'^$', index_views.index, name="index"),
@@ -26,4 +29,3 @@ urlpatterns = [
 
     url(r'^captcha/', include('captcha.urls')),
 ]
-

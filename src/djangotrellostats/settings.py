@@ -10,6 +10,7 @@ from trello.organization import Organization
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR+"/djangotrellostats/media"
 
 # Quick-start development settings - unsuitable for production
