@@ -7,6 +7,7 @@
           <div class="panel-body">
               <div class="card-info">
                   <div>Last activity: {{card.last_activity_datetime}}</div>
+                  {% if card.due_datetime %}<p> Deadline: {{card.due_datetime}}</p>{% endif %}
                   {% if card.spent_time %}<div>Spent time: {{card.spent_time|floatformat:-2}} hours</div>{% else %}{% endif %}
                   {% if card.description %}
                     <div class="description cursor-pointer">
@@ -22,7 +23,7 @@
                           <div class="list-group">
                               {% for blocking_card in card.pending_blocking_cards %}
                                 <p class="list-group-item">
-                                    <a href="{{blocking_card.short_url}}" title="View card {{blocking_card.name}} in board {{blocking_card.board.name}}">{{blocking_card.name}}</a>
+                                    <a href="{% url 'boards:view_card' blocking_card.board_id blocking_card.id %}" title="View card {{blocking_card.name}} in board {{blocking_card.board.name}}">{{blocking_card.name}}</a>
                                 </p>
                               {% endfor %}
                           </div>

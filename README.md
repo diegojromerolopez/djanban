@@ -192,6 +192,14 @@ A subset of board view, this view allows sharing stats with stakeholders that ar
 
 ![Board cards](resources/images/screencaptures/board-cards.png)
 
+## Card reviews
+
+To mark a card as reviewed, write **Reviewed by ** followed by the prefixed-by-@-usernames of the board members that reviewed this card.
+
+For example: **Reviewed by @anastasious45 @petra99** means that both members (anastasious45 and petra99 have contributed to this card review.)
+
+![Card review](resources/images/screencaptures/board-card-reviews.png)
+
 ## Board blocked cards
 
 To block a card, make a comment in the blocked card with the following text:
@@ -290,8 +298,7 @@ Trello is a registered trademark in USA and other countries.
 
 This project uses [Trello API](https://developers.trello.com/) to help users of Trello to get some useful charts, lists and stats.
 
-The license of this project is [BSD](LICENSE) and the logos have been created with [Mark Maker](http://emblemmatic.org/markmaker).
-
+The license of this project is [MIT](LICENSE) and the logos have been created with [Mark Maker](http://emblemmatic.org/markmaker).
 
 # Questions? Suggestions?
 

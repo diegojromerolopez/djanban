@@ -27,6 +27,9 @@
                   <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}} in Trello" class="btn btn-primary btn-sm">View in Trello</a>
               </div>
               <div class="card-creation-datetime">Created on {{card.creation_datetime}}</div>
+              {% if card.due_datetime %}
+                <div class="card-due-datetime">Deadline: {{card.due_datetime}} ({{card.due_datetime|naturaltime}})</div>
+              {% endif %}
               <div class="card-status">
                   {% if card.is_closed %}
                     <span class="fa fa-lock" title="This card is closed"></span> Closed

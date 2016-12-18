@@ -32,6 +32,7 @@
                               </div>
                               <div class="panel-body">
                                   <p>Last activity: {{card.last_activity_datetime}}</p>
+                                  {% if card.due_datetime %}<p> Deadline: {{card.due_datetime}}</p>{% endif %}
                                   {% if card.spent_time %}<p>Spent time: {{card.spent_time|floatformat:-2}} hours</p>{% else %}{% endif %}
                                   <p>
                                       {% if card.description %}{{card.description}}.{% endif %}

@@ -172,7 +172,7 @@ class BoardFetcher(Fetcher):
     # Create a fetcher from a board
     def __init__(self, board, debug=True):
         super(BoardFetcher, self).__init__(board)
-        self.initializer = Initializer(self.creator)
+        self.initializer = Initializer(self.creator, debug=debug)
         self.trello_client = self.initializer.trello_client
         self.trello_board = TrelloBoard(client=self.trello_client, board_id=self.board.uuid)
         self.trello_board.fetch()
