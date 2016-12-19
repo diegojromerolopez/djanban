@@ -75,8 +75,12 @@ src/djangotrellostats/tmp/*
 src/djangotrellostats/logs
 src/djangotrellostats/logs/*
 
+# Databases
+src/djangotrellostats/db/djangotrellostats.db
+
 # Local configuration
 src/djangotrellostats/settings_local.py
+/src/djangotrellostats/settings_local_desktop_app.py
 src/public_html
 src/shell
 src/build
@@ -94,3 +98,4 @@ configuration/*
 
 # PyCharm
 .idea
+

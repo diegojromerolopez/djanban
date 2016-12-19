@@ -13,14 +13,20 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR+"/djangotrellostats/media"
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
+#
+settings_local_module = 'djangotrellostats.settings_local'
+if os.environ.get("DJANGO_APP_MODE") == "desktop_app":
+    settings_local_module = 'djangotrellostats.settings_desktop_app'
 
 try:
-    settings_local = importlib.import_module('djangotrellostats.settings_local')
+    settings_local = importlib.import_module(settings_local_module)
 except ImportError:
-    print("Please, create a local_settings.py in project directory with SECRET_KEY, DEBUG, DOMAIN, ALLOWED_HOSTS and DATABASES settings")
+    print("Please, create a {0} in project directory with SECRET_KEY, DEBUG, DOMAIN, ALLOWED_HOSTS and DATABASES settings".format(settings_local_module))
     exit(-1)
+
+print settings_local_module
+
+DATABASES = settings_local.DATABASES
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = settings_local.SECRET_KEY
@@ -114,7 +120,6 @@ WSGI_APPLICATION = 'wsgi.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
-DATABASES = settings_local.DATABASES
 
 
 # Password validation

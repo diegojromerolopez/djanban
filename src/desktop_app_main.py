@@ -2,6 +2,10 @@ import os
 import socket
 import urllib
 
+# This code is heavily based on https://moosystems.com/articles/14-distribute-django-app-as-native-desktop-app-01.html
+
+os.environ["DJANGO_APP_MODE"] = "desktop_app"
+
 try:
     import urlparse
 except ImportError:
