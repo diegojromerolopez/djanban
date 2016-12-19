@@ -39,6 +39,16 @@ SECRET_KEY = settings_local.SECRET_KEY
 LANGUAGE_CODE = settings_local.LANGUAGE_CODE
 TIME_ZONE = settings_local.TIME_ZONE
 
+if hasattr(settings_local, "DATE_FORMAT"):
+    DATE_FORMAT = settings_local.DATE_FORMAT
+else:
+    DATE_FORMAT = "Y-m-d"
+
+if hasattr(settings_local, "DATETIME_FORMAT"):
+    DATETIME_FORMAT = settings_local.DATETIME_FORMAT
+else:
+    DATETIME_FORMAT = "Y-m-d H:i"
+
 EMAIL_USE_TLS = settings_local.EMAIL_USE_TLS
 EMAIL_HOST = settings_local.EMAIL_HOST
 EMAIL_PORT = settings_local.EMAIL_PORT
