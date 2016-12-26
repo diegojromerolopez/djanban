@@ -107,6 +107,16 @@ DATABASES = {
     }
 }
 
+LANGUAGE_CODE = '<language code>'
+TIME_ZONE = "<TIME ZONE>"
+
+EMAIL_USE_TLS = <USE TLS?>
+EMAIL_HOST = '<email host>'
+EMAIL_PORT = <email host portr>
+EMAIL_HOST_USER = '<email host user>'
+EMAIL_HOST_PASSWORD = '<email host user password>'
+DEFAULT_FROM_EMAIL = '<email host user from email>'
+
 # Date format that will be used in templates, by default is Y-m-d. Optional.
 DATE_FORMAT = "<LOCAL DATE FORMAT IN TEMPLATES>"
 
@@ -114,6 +124,39 @@ DATE_FORMAT = "<LOCAL DATE FORMAT IN TEMPLATES>"
 DATETIME_FORMAT = "<LOCAL DATETIME FORMAT IN TEMPLATES>"
 
 ```
+
+## Desktop app local settings
+
+Copy this code and create a **settings_local_desktop_app.py** file in your server in **src**.
+ 
+ ```python
+# -*- coding: utf-8 -*-
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = '<whatever string you want>'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+LANGUAGE_CODE = '<language code>'
+TIME_ZONE = "<TIME ZONE>"
+
+EMAIL_USE_TLS = <USE TLS?>
+EMAIL_HOST = '<email host>'
+EMAIL_PORT = <email host portr>
+EMAIL_HOST_USER = '<email host user>'
+EMAIL_HOST_PASSWORD = '<email host user password>'
+DEFAULT_FROM_EMAIL = '<email host user from email>'
+
+# Date format that will be used in templates, by default is Y-m-d. Optional.
+DATE_FORMAT = "<LOCAL DATE FORMAT IN TEMPLATES>"
+
+# Datetime format that will be used in templates, by default is Y-m-d H:i. Optional.
+DATETIME_FORMAT = "<LOCAL DATETIME FORMAT IN TEMPLATES>"
+```
+
+The sqlite database will be created in **djangotrellostats/db/djangotrellostats.db** if it doesn't exist.
+ 
 
 ## Sign up
 
