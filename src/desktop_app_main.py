@@ -18,6 +18,7 @@ import subprocess
 import sys
 import threading
 import logging.handlers
+import platform
 
 
 # Django standalone application for DjangoTrelloStats
@@ -158,13 +159,14 @@ if __name__ == '__main__':
     application = get_wsgi_application()
 
     # make app show up as frontmost app
-    system_feedback = subprocess.Popen([
-        "/usr/bin/osascript",
-        "-e",
-        'tell app \"Finder\" to set frontmost of process \"%s\" to true' % app_name],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        close_fds=True).communicate()[0].rstrip().decode("utf-8")
+    if platform.system() == "Darwin":
+        system_feedback = subprocess.Popen([
+            "/usr/bin/osascript",
+            "-e",
+            'tell app \"Finder\" to set frontmost of process \"%s\" to true' % app_name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            close_fds=True).communicate()[0].rstrip().decode("utf-8")
 
     # let web app run as background thread
     t = threading.Thread(target=main(netloc="0.0.0.0:9090",

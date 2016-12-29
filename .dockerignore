@@ -1,0 +1,11 @@
+.git
+Dockerfile
+.DS_Store
+.gitignore
+README.md
+venv
+virtualenv
+devops
+
+src/djangotrellostats/media
+src/djangotrellostats/tmp
