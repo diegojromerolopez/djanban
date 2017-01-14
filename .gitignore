@@ -76,7 +76,7 @@ src/djangotrellostats/logs
 src/djangotrellostats/logs/*
 
 # Databases
-src/djangotrellostats/db/djangotrellostats.db
+resources/database/djangotrellostats.db
 
 # Local configuration
 src/djangotrellostats/settings_local.py

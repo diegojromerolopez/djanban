@@ -10,7 +10,7 @@ DOMAIN = "localhost"
 ALLOWED_HOSTS = [DOMAIN]
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATABASE_PATH = os.path.join(BASE_DIR, "djangotrellostats/db/djangotrellostats.db")
+DATABASE_PATH = os.path.join(BASE_DIR, "../resources/database/djangotrellostats.db")
 
 # Create database if not exists
 if not os.path.isfile(DATABASE_PATH):

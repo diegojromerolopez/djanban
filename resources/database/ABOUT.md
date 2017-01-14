@@ -1,0 +1,1 @@
+Place your database in this directory. If not present, a new one will be created when running run_desktop_app.sh script.
