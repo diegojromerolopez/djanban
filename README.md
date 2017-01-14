@@ -36,7 +36,7 @@ You can also give other board members access to the dashboard. Each member will 
 Use [Plus for Trello](https://chrome.google.com/webstore/detail/plus-for-trello-time-trac/gjjpophepkbhejnglcmkdnncmaanojkf?hl=en)
 in your boards to allow this application to get card spent and estimated times.
 
-Configure Plus for Trello to use **time storage in comments**. Otherwise, Django Trello Stats will be unable to trak spend and estimated time.
+Configure Plus for Trello to use **time storage in comments**. Otherwise, Django Trello Stats will be unable to track spend and estimated time.
 
 Don't use the feature of assigning times to other members of the team because it is not implemented yet.
 
@@ -44,9 +44,13 @@ Don't use the feature of assigning times to other members of the team because it
 
 [This library](https://github.com/sarumont/py-trello) is free software and I've collaborated with Py-Trello team to include all features required for Django-Trello-Stats.
 
-My pull request are not merged so you'll have to use the version in [my local repository](https://github.com/diegojromerolopez/py-trello) included in requirements.txt file.
+## virtualenv-pythonw-osx
 
-## Installation
+virtualenv-pythonw-osx is a package that allows the conversion of a virtualenv to a MacOS app.
+
+[virtualenv-pythonw-osx](https://github.com/gldnspud/virtualenv-pythonw-osx)
+
+## Other packages
 
 Django, python-mysql and more packages specified in **requirements.txt**.
 
@@ -155,7 +159,21 @@ DATE_FORMAT = "<LOCAL DATE FORMAT IN TEMPLATES>"
 DATETIME_FORMAT = "<LOCAL DATETIME FORMAT IN TEMPLATES>"
 ```
 
-The sqlite database will be created in **djangotrellostats/db/djangotrellostats.db** if it doesn't exist.
+The sqlite database will be created in **resources/database/djangotrellostats.db** if it doesn't exist.
+
+Run the desktop app by running **run_desktop_app.sh** script. That script will make all the set up for this project.
+
+### Linux
+
+Checkout the dockerfile and test if it works. Work in Progress.
+ 
+### MacOS
+
+The MacOS version uses [Virtualenv Pythonw OSX](https://github.com/gldnspud/virtualenv-pythonw-osx).
+
+You'll have to write your password on this script request to create the rightfull .PythonApp directory inside your virtualenv.
+
+Don't worry, the script needs to complete the conversion of the virtualenv to a MacOS app.
  
 
 ## Sign up
