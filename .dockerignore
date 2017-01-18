@@ -4,6 +4,7 @@ Dockerfile
 .gitignore
 README.md
 venv
+venv.desktop_app
 virtualenv
 devops
 

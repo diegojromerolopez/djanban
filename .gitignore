@@ -11,6 +11,7 @@ __pycache__/
 env/
 env3/
 venv/
+venv.desktop_app/
 venv3/
 build/
 develop-eggs/
