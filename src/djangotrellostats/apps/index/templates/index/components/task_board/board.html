@@ -1,8 +1,9 @@
 {% load template_extensions %}
 
 {% with num_lists=lists|length %}
-    <div id="full_task_board" style="width: {{num_lists|multiply:200}}px">
+    <div id="full_task_board" style="min-width: {{num_lists|multiply:200}}px">
         <h2>Task board</h2>
+        <span class="subtitle">Showing only completed tasks of the last 30 days.</span>
         <div class="row">
             <div class="col-md-12">
                 <p>

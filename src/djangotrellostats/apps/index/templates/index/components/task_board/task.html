@@ -2,7 +2,11 @@
     <div class="col-md-12 card">
         <div class="panel panel-info">
           <div class="panel-heading card-heading" style="background-color: #{{card.board.background_color}}; color:#{{card.board.title_color}}">
-              <a href="{% url 'boards:view_card' card.board_id card.id %}" title="View card {{card.name}} in board {{card.board.name}}">{{card.name}}</a>
+              <a href="{% url 'boards:view_card' card.board_id card.id %}"
+                 style="color:#{{card.board.title_color}}"
+                 title="View card {{card.name}} in board {{card.board.name}}">
+                  {{card.name}}
+              </a>
           </div>
           <div class="panel-body">
               <div class="card-info">
@@ -28,7 +32,9 @@
                           <div class="list-group">
                               {% for blocking_card in card.pending_blocking_cards %}
                                 <p class="list-group-item">
-                                    <a href="{{blocking_card.short_url}}" title="View card {{blocking_card.name}} in board {{blocking_card.board.name}}">{{blocking_card.name}}</a>
+                                    <a href="{{blocking_card.short_url}}" title="View card {{blocking_card.name}} in board {{blocking_card.board.name}}">
+                                        {{blocking_card.name}}
+                                    </a>
                                 </p>
                               {% endfor %}
                           </div>

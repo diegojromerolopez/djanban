@@ -1,0 +1,12 @@
+#full_task_board .subtitle {
+    color: white;
+}
+
+#full_task_board .card-heading > a:hover {
+    text-decoration: none;
+}
+
+#full_task_board .cursor-pointer {
+    cursor: pointer;
+}
+
