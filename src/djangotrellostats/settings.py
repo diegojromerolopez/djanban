@@ -24,8 +24,6 @@ except ImportError:
     print("Please, create a {0} in project directory with SECRET_KEY, DEBUG, DOMAIN, ALLOWED_HOSTS and DATABASES settings".format(settings_local_module))
     exit(-1)
 
-print settings_local_module
-
 DATABASES = settings_local.DATABASES
 
 # SECURITY WARNING: keep the secret key used in production secret!

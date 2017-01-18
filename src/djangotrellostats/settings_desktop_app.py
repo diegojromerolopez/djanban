@@ -27,31 +27,31 @@ DATABASES = {
 }
 
 try:
-    settings_local = importlib.import_module("djangotrellostats.settings_local_desktop_app")
+    settings_local_desktop_app = importlib.import_module("djangotrellostats.settings_local_desktop_app")
 except ImportError:
     print("Please, create a settings_local_desktop_app.py in project directory with SECRET_KEY, DEBUG, DOMAIN, ALLOWED_HOSTS and DATABASES settings")
     exit(-1)
 
-DEBUG = settings_local.DEBUG
+DEBUG = settings_local_desktop_app.DEBUG
 
-SECRET_KEY = settings_local.SECRET_KEY
+SECRET_KEY = settings_local_desktop_app.SECRET_KEY
 
-LANGUAGE_CODE = settings_local.LANGUAGE_CODE
-TIME_ZONE = settings_local.TIME_ZONE
+LANGUAGE_CODE = settings_local_desktop_app.LANGUAGE_CODE
+TIME_ZONE = settings_local_desktop_app.TIME_ZONE
 
-if hasattr(settings_local, "DATE_FORMAT"):
-    DATE_FORMAT = settings_local.DATE_FORMAT
+if hasattr(settings_local_desktop_app, "DATE_FORMAT"):
+    DATE_FORMAT = settings_local_desktop_app.DATE_FORMAT
 else:
     DATE_FORMAT = "Y-m-d"
 
-if hasattr(settings_local, "DATETIME_FORMAT"):
-    DATETIME_FORMAT = settings_local.DATETIME_FORMAT
+if hasattr(settings_local_desktop_app, "DATETIME_FORMAT"):
+    DATETIME_FORMAT = settings_local_desktop_app.DATETIME_FORMAT
 else:
     DATETIME_FORMAT = "Y-m-d H:i"
 
-EMAIL_USE_TLS = settings_local.EMAIL_USE_TLS
-EMAIL_HOST = settings_local.EMAIL_HOST
-EMAIL_PORT = settings_local.EMAIL_PORT
-EMAIL_HOST_USER = settings_local.EMAIL_HOST_USER
-EMAIL_HOST_PASSWORD = settings_local.EMAIL_HOST_PASSWORD
-DEFAULT_FROM_EMAIL = settings_local.DEFAULT_FROM_EMAIL
+EMAIL_USE_TLS = settings_local_desktop_app.EMAIL_USE_TLS
+EMAIL_HOST = settings_local_desktop_app.EMAIL_HOST
+EMAIL_PORT = settings_local_desktop_app.EMAIL_PORT
+EMAIL_HOST_USER = settings_local_desktop_app.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = settings_local_desktop_app.EMAIL_HOST_PASSWORD
+DEFAULT_FROM_EMAIL = settings_local_desktop_app.DEFAULT_FROM_EMAIL
