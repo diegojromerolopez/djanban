@@ -17,6 +17,7 @@ build/
 develop-eggs/
 dist/
 downloads/
+src/angularapp/node_modules/*
 eggs/
 .eggs/
 lib/

@@ -28,4 +28,5 @@ urlpatterns = [
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
 
     url(r'^captcha/', include('captcha.urls')),
-]
+
+] + static(settings.ANGULAR_URL, document_root=settings.ANGULAR_ROOT)

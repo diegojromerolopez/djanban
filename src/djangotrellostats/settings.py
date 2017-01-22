@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'corsheaders',
     'djangotrellostats.apps.agility_rating',
     'djangotrellostats.apps.base',
     'djangotrellostats.apps.boards',
@@ -84,12 +85,16 @@ INSTALLED_APPS = [
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'crequest.middleware.CrequestMiddleware',
     'cuser.middleware.CuserMiddleware'
 )
+
+ANGULAR_URL = '/ng/'
+ANGULAR_ROOT = os.path.join(BASE_DIR, 'angularapp/')
 
 ROOT_URLCONF = 'djangotrellostats.urls'
 

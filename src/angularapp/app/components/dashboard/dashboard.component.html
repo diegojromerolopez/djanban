@@ -1,0 +1,5 @@
+<div *ngIf="boards">
+    <div *ngFor="let board of boards">
+        <span (click)="onBoardSelect(board)">{{board.name}}</span>
+    </div>
+</div>

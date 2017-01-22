@@ -1,0 +1,10 @@
+<div *ngIf="board" class="board">
+    <h1 class="board_name">{{board.name}}</h1>
+    <div class="board_lists">
+        <div class="board_list" *ngFor="let list of board.lists">
+            <h2>{{list.name}}</h2>
+            <div class="board_list_cards">
+            </div>
+        </div>
+    </div>
+</div>

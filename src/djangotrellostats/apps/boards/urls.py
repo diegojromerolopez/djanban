@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from django.conf.urls import url, include
-
 from djangotrellostats.apps.boards.views import boards, cards
+from djangotrellostats.apps.boards.api import boards as boards_api
 from djangotrellostats.apps.journal.views import JournalEntryTagAutocompleteView
 
 
 urlpatterns = [
+    url(r'^dashboard/?$', boards.view_dashboard, name="dashboard"),
+
     url(r'^init-boards$', boards.init_boards, name="init_boards"),
 
     # Board URLs
@@ -20,6 +22,7 @@ urlpatterns = [
 
     url(r'^(?P<board_public_access_code>.+)/public_view/?$', boards.public_view, name="public_view"),
     url(r'^(?P<board_id>\d+)/view/?$', boards.view, name="view"),
+
     url(r'^(?P<board_id>\d+)/edit/?$', boards.edit, name="edit"),
     url(r'^(?P<board_id>\d+)/archive/?$', boards.archive, name="archive"),
     url(r'^(?P<board_id>\d+)/unarchive/?$', boards.unarchive, name="unarchive"),
@@ -75,4 +78,8 @@ urlpatterns = [
 
     # Journal entries of this board
     url(r'^(?P<board_id>\d+)/journal/', include('djangotrellostats.apps.journal.urls', namespace="journal")),
+
+    # API
+    url(r'^api/info/?$', boards_api.get_boards, name="get_boards"),
+    url(r'^api/(?P<board_id>\d+)/info/?$', boards_api.get_board, name="get_board"),
 ]

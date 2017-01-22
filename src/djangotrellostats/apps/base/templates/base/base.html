@@ -9,6 +9,9 @@
         <link rel='shortcut icon' type='image/png' sizes='16x16' href='{% static "img/favicon-16x16.png" %}' />
         <link rel='shortcut icon' type='image/png' sizes='32x32' href='{% static "img/favicon-32x32.png" %}' />
 
+        {% block extra_meta %}
+        {% endblock extra_meta %}
+
         {% block css %}
             <link href="{% static 'css/libs/bootstrap.min.css' %}" rel="stylesheet" />
             <link href="{% static 'css/libs/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" />
