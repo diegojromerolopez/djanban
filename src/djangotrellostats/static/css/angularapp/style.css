@@ -1,0 +1,61 @@
+/* Overwriting base styles */
+#content {
+    margin-left: 40px;
+    margin-right: 40px;
+    overflow: hidden;
+    width: auto;
+}
+/* Dashboard */
+
+
+/* Task board */
+h1, h2, h3 {
+    margin: 0;
+    padding: 0;
+}
+
+.board {
+    overflow: scroll;
+}
+
+.board .board_name {
+    display: block;
+}
+
+.board .lists {
+    overflow: hidden;
+}
+
+.board .lists .list {
+    float: left;
+    margin-right: 20px;
+    width: 400px;
+}
+
+.board .lists .list .list_name {
+    display: block;
+}
+
+.board .lists .list .list_name h2 {
+    font-size: 1.3em;
+}
+
+.board .lists .list .cards {
+    list-style-type: none;
+    padding: 0;
+}
+
+.board .lists .list .cards .card {
+    margin-bottom: 20px;
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.board .lists .list .cards .card .card_name {
+    display: block;
+}
+
+.board .lists .list .cards .card .card_name h3 {
+    font-size: 1.1em;
+}

@@ -4,6 +4,7 @@ from __future__ import unicode_literals, absolute_import
 
 from django.http import Http404
 from django.http import JsonResponse
+from django.urls import reverse
 
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
@@ -55,14 +56,13 @@ def get_board(request, board_id):
                 "uuid": card.uuid,
                 "name": card.name,
                 "description": card.description,
-                "url": card.url,
+                "url": reverse("boards:view_card", args=(board.id, card.id,)),
                 "short_url": card.short_url,
-                "is_closed": card.is_closed,
                 "position": card.position
             }
             card_list.append(card_json)
 
-        #list_json["cards"] = card_list
+        list_json["cards"] = card_list
 
         lists_json.append(list_json)
 

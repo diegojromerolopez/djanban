@@ -11,12 +11,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var core_1 = require('@angular/core');
 var AppComponent = (function () {
     function AppComponent() {
-        this.title = 'Django Trello Stats';
     }
     AppComponent = __decorate([
         core_1.Component({
             selector: 'django-trello-stats',
-            template: "\n        <h1>DASHBOARD</h1>\n        <nav>\n            <a routerLink=\"/dashboard\" routerLinkActive=\"active\">Dashboard</a>\n        </nav>\n        <router-outlet></router-outlet>\n    ",
+            template: "\n        <nav>\n            <a routerLink=\"/dashboard\" routerLinkActive=\"active\">Board list</a>\n        </nav>\n        <router-outlet></router-outlet>\n    ",
         }), 
         __metadata('design:paramtypes', [])
     ], AppComponent);
