@@ -17,8 +17,9 @@ require('rxjs/add/operator/toPromise');
 var BoardService = (function () {
     function BoardService(http) {
         this.http = http;
-        this.GET_BOARD_URL = 'http://localhost:8000/boards/api/{id}/info';
-        this.GET_BOARDS_URL = 'http://localhost:8000/boards/api/info';
+        this.GET_BOARD_URL = 'http://localhost:8000/api/boards/{id}/info';
+        this.GET_BOARDS_URL = 'http://localhost:8000/api/boards/info';
+        this.GET_CARD_URL = 'http://localhost:8000/api/cards/{board_id}/{card_id}/info';
     }
     BoardService.prototype.extractData = function (res) {
         var body = res.json();
@@ -47,6 +48,13 @@ var BoardService = (function () {
     BoardService.prototype.getBoard = function (board_id) {
         var get_board_url = this.GET_BOARD_URL.replace(/\{id\}/, board_id.toString());
         return this.http.get(get_board_url)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    BoardService.prototype.getCard = function (board_id, card_id) {
+        var get_card_url = this.GET_CARD_URL.replace(/\{board_id\}/, board_id.toString()).replace(/\{card_id\}/, card_id.toString());
+        return this.http.get(get_card_url)
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);

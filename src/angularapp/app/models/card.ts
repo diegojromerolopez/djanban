@@ -1,3 +1,5 @@
+
+
 export class Card {
   id: number;
   uuid: string;
@@ -6,4 +8,5 @@ export class Card {
   url: string;
   short_url: string;
   is_closed?: boolean;
+  comments?: CardComment[];
 }

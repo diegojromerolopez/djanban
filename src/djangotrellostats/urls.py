@@ -15,6 +15,7 @@ urlpatterns = [
 
     url(r'^base/', include('djangotrellostats.apps.base.urls', namespace="base")),
     url(r'^member/', include('djangotrellostats.apps.members.urls', namespace="members")),
+    url(r'^api/', include('djangotrellostats.apps.api.urls', namespace="api")),
     url(r'^boards/', include('djangotrellostats.apps.boards.urls', namespace="boards")),
     url(r'^times/', include('djangotrellostats.apps.dev_times.urls', namespace="dev_times")),
     url(r'^charts/', include('djangotrellostats.apps.charts.urls', namespace="charts")),

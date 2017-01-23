@@ -11,38 +11,36 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var core_1 = require('@angular/core');
 var router_1 = require('@angular/router');
 var board_service_1 = require('../../services/board.service');
-var router_2 = require('@angular/router');
-var BoardComponent = (function () {
-    function BoardComponent(router, route, boardService) {
-        this.router = router;
+var CardComponent = (function () {
+    function CardComponent(route, boardService) {
         this.route = route;
         this.boardService = boardService;
     }
-    BoardComponent.prototype.ngOnInit = function () {
+    CardComponent.prototype.ngOnInit = function () {
+        var _this = this;
         var that = this;
         this.route.params.subscribe(function (params) {
             var board_id = params["board_id"];
-            that.loadBoard(board_id);
+            var card_id = params["card_id"];
+            _this.board_id = board_id;
+            that.loadCard(board_id, card_id);
         });
     };
-    BoardComponent.prototype.loadBoard = function (board_id) {
+    CardComponent.prototype.loadCard = function (board_id, card_id) {
         var _this = this;
-        this.boardService.getBoard(board_id).then(function (board) { return _this.board = board; });
+        this.boardService.getCard(board_id, card_id).then(function (card) { return _this.card = card; });
     };
-    BoardComponent.prototype.onCardSelect = function (card) {
-        this.router.navigate(['/board', this.board.id, 'card', card.id]);
-    };
-    BoardComponent = __decorate([
+    CardComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            selector: 'board',
-            templateUrl: 'board.component.html',
-            styleUrls: ['board.component.css'],
+            selector: 'card',
+            templateUrl: 'card.component.html',
+            styleUrls: ['card.component.css'],
             providers: [board_service_1.BoardService]
         }), 
-        __metadata('design:paramtypes', [router_1.Router, router_2.ActivatedRoute, board_service_1.BoardService])
-    ], BoardComponent);
-    return BoardComponent;
+        __metadata('design:paramtypes', [router_1.ActivatedRoute, board_service_1.BoardService])
+    ], CardComponent);
+    return CardComponent;
 }());
-exports.BoardComponent = BoardComponent;
-//# sourceMappingURL=board.component.js.map
+exports.CardComponent = CardComponent;
+//# sourceMappingURL=card.component.js.map

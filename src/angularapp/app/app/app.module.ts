@@ -11,6 +11,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { BoardService } from '../services/board.service';
 import { BoardComponent } from '../components/board/board.component';
 import { DashboardComponent } from '../components/dashboard/dashboard.component';
+import { CardComponent } from '../components/card/card.component';
 
 
 @NgModule({
@@ -20,7 +21,7 @@ import { DashboardComponent } from '../components/dashboard/dashboard.component'
     FormsModule, 
     AppRoutingModule
   ],
-  declarations: [ AppComponent, DashboardComponent, BoardComponent ],
+  declarations: [ AppComponent, DashboardComponent, BoardComponent, CardComponent ],
   providers: [ BoardService ],
   bootstrap:    [ AppComponent ]
 })

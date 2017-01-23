@@ -2,7 +2,6 @@
 
 from django.conf.urls import url, include
 from djangotrellostats.apps.boards.views import boards, cards
-from djangotrellostats.apps.boards.api import boards as boards_api
 from djangotrellostats.apps.journal.views import JournalEntryTagAutocompleteView
 
 
@@ -79,7 +78,5 @@ urlpatterns = [
     # Journal entries of this board
     url(r'^(?P<board_id>\d+)/journal/', include('djangotrellostats.apps.journal.urls', namespace="journal")),
 
-    # API
-    url(r'^api/info/?$', boards_api.get_boards, name="get_boards"),
-    url(r'^api/(?P<board_id>\d+)/info/?$', boards_api.get_board, name="get_board"),
+
 ]

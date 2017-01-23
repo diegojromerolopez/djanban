@@ -1,0 +1,16 @@
+<!--component html goes here -->
+<a [routerLink]="['/board', board_id]" >Return to board</a>
+<div *ngIf="card" class="card_detail">
+    <h1>{{card.name}}</h1>
+    <div>
+        {{card.description}}
+    </div>
+    <div class="comments">
+        <div *ngFor="let comment of card.comments">
+            <div class="comment">
+                <div class="comment_content">{{comment.content}}</div>
+                <div class="comment_date">{{comment.creation_datetime}}</div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -17,6 +17,7 @@ var app_routing_module_1 = require('./app-routing.module');
 var board_service_1 = require('../services/board.service');
 var board_component_1 = require('../components/board/board.component');
 var dashboard_component_1 = require('../components/dashboard/dashboard.component');
+var card_component_1 = require('../components/card/card.component');
 var AppModule = (function () {
     function AppModule() {
     }
@@ -28,7 +29,7 @@ var AppModule = (function () {
                 forms_1.FormsModule,
                 app_routing_module_1.AppRoutingModule
             ],
-            declarations: [app_component_1.AppComponent, dashboard_component_1.DashboardComponent, board_component_1.BoardComponent],
+            declarations: [app_component_1.AppComponent, dashboard_component_1.DashboardComponent, board_component_1.BoardComponent, card_component_1.CardComponent],
             providers: [board_service_1.BoardService],
             bootstrap: [app_component_1.AppComponent]
         }), 

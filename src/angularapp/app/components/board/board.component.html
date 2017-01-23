@@ -7,8 +7,8 @@
             </span>
             <ul *ngIf="list.cards" class="cards">
                 <li *ngFor="let card of list.cards" class="card panel panel-info">
-                    <span class="panel-heading card_name">
-                        <span>{{card.name}}</span>
+                    <span class="panel-heading card_heading">
+                        <span (click)="onCardSelect(card)" class="card_name">{{card.name}}</span>
                         <a href="{{card.short_url}}" title="View card" class="card_action_view">
                             <span class="fa fa-trello"></span>
                         </a>

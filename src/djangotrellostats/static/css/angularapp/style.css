@@ -6,7 +6,20 @@
     width: auto;
 }
 /* Dashboard */
+.dashboard {
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%
+}
 
+.dashboard .board {
+    background-color: blue;
+    color: white;
+    cursor: pointer;
+    float: left;
+    margin: 10px;
+    padding: 20px;
+}
 
 /* Task board */
 h1, h2, h3 {
@@ -52,10 +65,32 @@ h1, h2, h3 {
     margin-right: 20px;
 }
 
-.board .lists .list .cards .card .card_name {
+.board .lists .list .cards .card .card_heading {
     display: block;
 }
 
-.board .lists .list .cards .card .card_name h3 {
+.board .lists .list .cards .card .card_heading .card_name {
+    cursor: pointer;
     font-size: 1.1em;
+}
+
+/* Card view */
+.card_detail {
+
+}
+
+.card_detail .comments {
+
+}
+
+.card_detail .comments .comment {
+
+}
+
+.card_detail .comments .comment .comment_content {
+
+}
+
+.card_detail .comments .comment .comment_date {
+
 }
