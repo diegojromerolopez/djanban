@@ -13,7 +13,6 @@ var router_1 = require('@angular/router');
 var board_component_1 = require('../components/board/board.component');
 var dashboard_component_1 = require('../components/dashboard/dashboard.component');
 var routes = [
-    //{ path: '', redirectTo: 'dashboard', pathMatch: "prefix" },
     { path: '', component: dashboard_component_1.DashboardComponent },
     { path: 'board/:id', component: board_component_1.BoardComponent },
 ];

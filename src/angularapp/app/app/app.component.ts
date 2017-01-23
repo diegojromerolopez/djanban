@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'django-trello-stats',
   template: `
         <nav>
-            <a routerLink="/dashboard" routerLinkActive="active">Board list</a>
+            <a routerLink="" routerLinkActive="active">Board list</a>
         </nav>
         <router-outlet></router-outlet>
     `,

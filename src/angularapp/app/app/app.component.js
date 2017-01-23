@@ -15,7 +15,7 @@ var AppComponent = (function () {
     AppComponent = __decorate([
         core_1.Component({
             selector: 'django-trello-stats',
-            template: "\n        <nav>\n            <a routerLink=\"/dashboard\" routerLinkActive=\"active\">Board list</a>\n        </nav>\n        <router-outlet></router-outlet>\n    ",
+            template: "\n        <nav>\n            <a routerLink=\"\" routerLinkActive=\"active\">Board list</a>\n        </nav>\n        <router-outlet></router-outlet>\n    ",
         }), 
         __metadata('design:paramtypes', [])
     ], AppComponent);
