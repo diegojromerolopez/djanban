@@ -1,16 +1,245 @@
 <!--component html goes here -->
 <a [routerLink]="['/board', board_id]" >Return to board</a>
-<div *ngIf="card" class="card_detail">
-    <h1>{{card.name}}</h1>
-    <div>
-        {{card.description}}
+
+
+<div *ngIf="card" class="panel panel-default">
+    <div class="panel-heading">
+        <h1>{{card.name}}</h1>
     </div>
-    <div class="comments">
-        <div *ngFor="let comment of card.comments">
-            <div class="comment">
-                <div class="comment_content">{{comment.content}}</div>
-                <div class="comment_date">{{comment.creation_datetime}}</div>
+    <div class="panel-body">
+        <div>
+            <div class="card-view-in-trello">
+                <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}} in Trello" class="btn btn-primary btn-sm">View in Trello</a>
+            </div>
+            <div class="card-creation-datetime">Created on {{card.creation_datetime}}</div>
+            
+            <div *ngIf="card.due_datetime != null">
+                <div class="card-due-datetime">Deadline: {{card.due_datetime}} ({{card.due_datetime}})</div>
+            </div>
+
+            <div class="card-status">
+                <span *ngIf="card.closed">
+                    <span class="fa fa-lock" title="This card is closed"></span> Closed
+                </span>
+                <span *ngIf="!card.closed">
+                    <span class="fa fa-unlock" title="This card is active"></span> Active
+                </span>
+            </div>
+<!--
+            <div class="row card-list-environment">
+                {% if member and previous_list %}
+                <div class="col-md-4 move_backward">
+                    <form action="{% url 'boards:move_card_backward' board.id card.id %}" name="move_backward" method="post">
+                        <button type="submit" class="btn btn-danger" title="Move backwards to {{previous_list.name}}">
+                            <span class="fa fa-arrow-left"></span>
+                            {{previous_list.name|truncatechars:40}}
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+                <div class="col-md-4 list  card-current-list label {% if list.type == 'done' %}label-success{% else %}label-primary{% endif %}">
+                    On list <strong>{{list.name}} {% if list.type == "done" %}<span class="fa fa-thumbs-up"></span>{% endif %}</strong>
+                </div>
+
+                {% if member and next_list %}
+                <div class="col-md-4 move_forward">
+                    <form action="{% url 'boards:move_card_forward' board.id card.id %}" name="move_forward" method="post">
+                    <button type="submit" class="btn btn-success" title="Move forward to {{next_list.name}}">
+                        {{next_list.name|truncatechars:40}}
+                        <span class="fa fa-arrow-right"></span>
+                    </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card-labels">
+                <h2>Labels ({{card_labels|length}})</h2>
+                {% if card_labels|length > 0 %}
+                <div class="card-labels-list">
+                    {% for label in card_labels %}
+                        <span class="card-label label label-default" style="background-color:{{label.color}};">
+                            {{label.name}}
+                        </span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="card-labels-list card-labels-list-empty">
+                    <em>Without labels.</em>
+                </div>
+                {% endif %}
+                <form action="{% url 'boards:change_card_labels' board.id card.id %}" method="post">
+                    <select name="labels" multiple>
+                        {% for label in labels %}
+                            <option value="{{label.id}}" {% if label.id in card_label_ids %}selected{% endif %}>{{label.name}}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-success change_labels" title="Change labels">
+                        <span class="fa fa-tags"></span>
+                        Change labels
+                    </button>
+                </form>
+            </div>
+
+            <div class="card-blocking_cards">
+                <h2>Blocking cards ({{card.pending_blocking_cards|length}})</h2>
+                {% if card.pending_blocking_cards.exists %}
+                    {% for blocking_card in card.pending_blocking_cards %}
+                        <a href="{% url 'boards:view_card' board.id blocking_card.id %}" title="View blocking card {{blocking_card.name}}">
+                            {{blocking_card.name}}
+                        </a>
+                        {% if forloop.revcounter > 2 %}, {% elif forloop.revcounter > 1 %} & {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <em>No other cards are blocking this one.</em>
+                {% endif %}
+
+            </div>
+
+            <div class="card-members">
+                <h2>Members ({{members|length}})</h2>
+                {% if members|length > 0 %}
+                <ul>
+                    {% for member_i in members %}
+                        <li>{{member_i.trello_username}}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                This task has no assigned members.
+                {% endif %}
+            </div>
+-->
+        
+        <div class="card-spent_estimated_time">
+            <h2>Spent/Estimated time</h2>
+            <div>{{card.spent_time}}/{{card.estimated_time}} hours</div>
+            <form action="" method="post">
+                <select name="date">
+                    <option value="now">Now</option>
+                    <option value="-1">-1d</option>
+                    <option value="-2">-2d</option>
+                    <option value="-3">-3d</option>
+                    <option value="-4">-4d</option>
+                    <option value="-5">-5d</option>
+                    <option value="-6">-6d</option>
+                    <option value="-7">-7d</option>
+                    <option value="-8">-8d</option>
+                    <option value="-9">-9d</option>
+                </select>
+                <input type="number" name="spent_time" step="0.1" placeholder="S"/>
+                <input type="number" name="estimated_time" step="0.1" placeholder="E"/>
+                <input type="text" name="description"  placeholder="Description"/>
+            <button type="submit" class="btn btn-success" title="Add time to this card">
+                Add spent/estimated time
+                <span class="fa fa-clock-o"></span>
+            </button>
+            </form>
+        </div>
+        
+        <div *ngIf="card.cycle_time">
+            <div class="cycle_time">
+                <h2>Cycle time</h2>
+                <div>{{card.cycle_time}} hours</div>
+            </div>
+        </div>
+        
+        <div *ngIf="card.lead_time">
+            <div class="lead_time ">
+                <h2>Lead time</h2>
+                <div>{{card.lead_time}} hours</div>
+            </div>
+        </div>
+
+        <div class="description">
+            <h2>Content</h2>
+            <div *ngIf="card.description">
+                {{card.description}}
+            </div>
+            <div *ngIf="!card.description">
+                <em>No description.</em>
+            </div>
+        </div>
+<!--
+        <div class="card-charts">
+            <h2>Stats</h2>
+            <div class="row">
+                <div class="col-sm-6">
+                    <a href="{% url 'charts:number_of_comments_by_member' board.id card.id %}" title="Number of comments by member">
+                        <img src="{% url 'charts:number_of_comments_by_member' board.id card.id %}" alt="Number of comments by member"/>
+                    </a>
+                </div>
+                <div class="col-sm-6">
+                    <a href="{% url 'charts:number_of_comments' board.id card.id %}" title="Evolution of number of comments of this card thru time">
+                        <img src="{% url 'charts:number_of_comments' board.id card.id %}" alt="Evolution of number of comments of this card thru time"/>
+                    </a>
+                </div>
+            </div>
+        </div>
+-->
+        <div class="card-comments">
+            <h2>Movements ({{card.movements.length}})</h2>
+            <div *ngIf="card.movements.length > 0">
+                <div *ngFor="let movement of card.movements">
+                    <div class="card-movements-movement panel panel-info">
+                            <div class="panel-heading">
+                                <strong>{{movement.source_list.name}}</strong> to <strong>{{movement.destination_list.name}}</strong>
+                                (<span title="Comment made by {{comment.creation_datetime}}">{{movement.datetime}}</span>)
+                            </div>
+                            <div class="panel-body">
+                                <span *ngIf="movement.type == 'forward'">
+                                    Forward movement
+                                </span>
+                                <span *ngIf="movement.type == 'backward'">
+                                Backward movement
+                                </span>
+                                from
+                                <strong>{{movement.source_list.name}}</strong> to <strong>{{movement.destination_list.name}}</strong>
+                                at {{movement.datetime}} by {{movement.member.trello_username}}.
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-comments">
+            <h2>Comments ({{card.comments.length}})</h2>
+            <div>
+                
+            <form action="" method="post">
+                <textarea name="comment" placeholder="Insert your comment here..."></textarea>
+                <button type="submit" class="btn btn-success" title="Add new comment to this card">
+                Send
+                <span class="fa fa-comment-o"></span>
+                </button>
+            </form>
+                
+                <div *ngIf="card.comments.length == 0">
+                    <em>No comments yet.</em>
+                </div>
+                <div *ngIf="card.comments.length > 0">
+                    <div *ngFor="let comment of card.comments">
+                        <div class="card-comments-comment panel panel-info">
+                            <div class="panel-heading">
+                                Comment made by {{comment.author.initials}}
+                                (<span title="Comment made by {{comment.creation_datetime}}">{{comment.creation_datetime}}</span>)
+                            </div>
+                            <div class="panel-body">
+                                {{comment.content}}
+                            </div>
+                            
+                            <form action="{% url 'boards:delete_comment' board.id card.id comment.id %}" method="post">
+                                <button type="submit" class="btn btn-success delete_comment" title="Delete this comment">
+                                Delete
+                                <span class="fa fa-trash"></span>
+                                </button>
+                            </form>
+                            
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+</div>
 </div>

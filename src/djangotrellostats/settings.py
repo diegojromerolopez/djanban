@@ -92,6 +92,8 @@ MIDDLEWARE_CLASSES = (
     'cuser.middleware.CuserMiddleware'
 )
 
+# Based on the tutorial that integrates Django with Angular
+# (https://4sw.in/blog/2016/django-angular2-tutorial-part-2/)
 ANGULAR_URL = '/ng/'
 ANGULAR_ROOT = os.path.join(BASE_DIR, 'angularapp/')
 
@@ -160,8 +162,6 @@ if hasattr(settings_local, "DATETIME_FORMAT"):
     DATETIME_FORMAT = settings_local.DATETIME_FORMAT
 else:
     DATETIME_FORMAT = "Y-m-d H:i"
-
-
 
 USE_I18N = False
 
