@@ -16,6 +16,11 @@ var CardComponent = (function () {
         this.route = route;
         this.boardService = boardService;
     }
+    /*private spentEstimatedForm = this.formBuilder.group({
+        "date": ["", Validators.required],
+        "spent_time": ["", Validators.required],
+        "estimated_time": ["", Validators.required]
+    });*/
     CardComponent.prototype.ngOnInit = function () {
         var _this = this;
         var that = this;
@@ -25,6 +30,13 @@ var CardComponent = (function () {
             _this.board_id = board_id;
             that.loadCard(board_id, card_id);
         });
+    };
+    CardComponent.prototype.onSubmitSETimeForm = function (form) {
+        console.log(form);
+        //console.log(this.spentEstimatedForm.value.date);
+        //console.log(this.spentEstimatedForm.value.spent_time);
+        //console.log(this.spentEstimatedForm.value.estimated_time);
+        //this.spentEstimatedForm.reset();
     };
     CardComponent.prototype.loadCard = function (board_id, card_id) {
         var _this = this;

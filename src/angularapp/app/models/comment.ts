@@ -1,3 +1,4 @@
+import { Member } from './member';
 
 
 export class CardComment {

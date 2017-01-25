@@ -67,4 +67,12 @@ export class BoardService {
                   .catch(this.handleError);
   }
 
+  /*addSETimeToCard(card_id: number, date: string, spent_time:number, estimated_time: number) StringMap<>{
+    let add_se_to_card_url = this.ADD_SE_TO_CARD_URL.replace(/\{board_id\}/, board_id.toString()).replace(/\{card_id\}/, card_id.toString());
+    return this.http.get(get_card_url)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+}*/
+
 }

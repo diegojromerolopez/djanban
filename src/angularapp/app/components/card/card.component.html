@@ -114,9 +114,9 @@
         <div class="card-spent_estimated_time">
             <h2>Spent/Estimated time</h2>
             <div>{{card.spent_time}}/{{card.estimated_time}} hours</div>
-            <form action="" method="post">
-                <select name="date">
-                    <option value="now">Now</option>
+            <form (ngSubmit)="onSubmitSETimeForm(SETimeForm.value)" #SETimeForm="ngForm">
+                <select name="date" ngModel>
+                    <option value="now" selected="selected">Now</option>
                     <option value="-1">-1d</option>
                     <option value="-2">-2d</option>
                     <option value="-3">-3d</option>
@@ -127,13 +127,13 @@
                     <option value="-8">-8d</option>
                     <option value="-9">-9d</option>
                 </select>
-                <input type="number" name="spent_time" step="0.1" placeholder="S"/>
-                <input type="number" name="estimated_time" step="0.1" placeholder="E"/>
-                <input type="text" name="description"  placeholder="Description"/>
-            <button type="submit" class="btn btn-success" title="Add time to this card">
-                Add spent/estimated time
-                <span class="fa fa-clock-o"></span>
-            </button>
+                <input type="number" name="spent_time" step="0.1" placeholder="S" ngModel />
+                <input type="number" name="estimated_time" step="0.1" placeholder="E" ngModel />
+                <input type="text" name="description"  placeholder="Description" ngModel />
+                <button type="submit" class="btn btn-success" title="Add time to this card">
+                    Add spent/estimated time
+                    <span class="fa fa-clock-o"></span>
+                </button>
             </form>
         </div>
         
@@ -184,7 +184,7 @@
                     <div class="card-movements-movement panel panel-info">
                             <div class="panel-heading">
                                 <strong>{{movement.source_list.name}}</strong> to <strong>{{movement.destination_list.name}}</strong>
-                                (<span title="Comment made by {{comment.creation_datetime}}">{{movement.datetime}}</span>)
+                                (<span title="Comment made by {{movement.datetime}}">{{movement.datetime}}</span>)
                             </div>
                             <div class="panel-body">
                                 <span *ngIf="movement.type == 'forward'">

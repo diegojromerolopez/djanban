@@ -1,8 +1,11 @@
+import { composeValidators } from '@angular/forms/src/directives/shared';
+import { Validator } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BoardService } from '../../services/board.service';
 import { Card } from '../../models/card';
 import { Board } from '../../models/board';
+import { FormBuilder, Validators } from '@angular/forms';
 
 
 @Component({
@@ -18,6 +21,12 @@ export class CardComponent implements OnInit  {
 
     private board_id: number;
     private card: Card;
+    
+    /*private spentEstimatedForm = this.formBuilder.group({
+        "date": ["", Validators.required],
+        "spent_time": ["", Validators.required],
+        "estimated_time": ["", Validators.required]
+    });*/
 
     ngOnInit(): void {
         let that = this;
@@ -34,6 +43,14 @@ export class CardComponent implements OnInit  {
         private boardService: BoardService
     ) {
         
+    }
+
+    onSubmitSETimeForm(form: any) {
+        console.log(form);
+        //console.log(this.spentEstimatedForm.value.date);
+        //console.log(this.spentEstimatedForm.value.spent_time);
+        //console.log(this.spentEstimatedForm.value.estimated_time);
+        //this.spentEstimatedForm.reset();
     }
 
     loadCard(board_id: number, card_id: number): void {
