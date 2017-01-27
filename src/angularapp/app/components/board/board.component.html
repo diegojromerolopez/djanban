@@ -5,7 +5,7 @@
             <span class="list_name panel-heading cursor-pointer">
                 <span>{{list.name}}</span> {{list.cards.length}} tasks
             </span>
-            <ul *ngIf="list.cards" class="cards">
+            <ul *ngIf="list.cards" class="cards" [dragula]='"first-bag"'>
                 <li *ngFor="let card of list.cards" class="card panel panel-info">
                     <span class="panel-heading card_heading">
                         <span (click)="onCardSelect(card)" class="card_name">{{card.name}}</span>

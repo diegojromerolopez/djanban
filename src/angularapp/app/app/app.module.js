@@ -28,7 +28,8 @@ var AppModule = (function () {
                 platform_browser_1.BrowserModule,
                 http_1.HttpModule,
                 forms_1.FormsModule,
-                app_routing_module_1.AppRoutingModule
+                app_routing_module_1.AppRoutingModule,
+                DragulaModule
             ],
             declarations: [app_component_1.AppComponent, dashboard_component_1.DashboardComponent, board_component_1.BoardComponent, card_component_1.CardComponent],
             providers: [board_service_1.BoardService, card_service_1.CardService],
