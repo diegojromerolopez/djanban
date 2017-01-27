@@ -1,5 +1,5 @@
 
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
 import { Headers, RequestOptions } from '@angular/http';
 
@@ -7,6 +7,7 @@ import { Headers, RequestOptions } from '@angular/http';
 import { Observable }     from 'rxjs/Observable';
 import { Card } from '../models/card';
 import { Board } from '../models/board';
+
 
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
@@ -17,12 +18,14 @@ import 'rxjs/add/operator/toPromise';
 @Injectable()
 export class BoardService {
 
-  private GET_BOARD_URL = 'http://localhost:8000/api/boards/{id}/info';
   private GET_BOARDS_URL = 'http://localhost:8000/api/boards/info';
 
-  private GET_CARD_URL = 'http://localhost:8000/api/cards/{board_id}/{card_id}/info';
+  private GET_BOARD_URL = 'http://localhost:8000/api/board/{id}/info';
+  private GET_CARD_URL = 'http://localhost:8000/api/board/{board_id}/card/{card_id}/info';
 
-  constructor (private http: Http) { }
+  constructor (private http: Http) {
+
+  }
 
   private extractData(res: Response) {
     let body = res.json();

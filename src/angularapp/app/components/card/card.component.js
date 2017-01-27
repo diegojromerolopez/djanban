@@ -11,10 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var core_1 = require('@angular/core');
 var router_1 = require('@angular/router');
 var board_service_1 = require('../../services/board.service');
+var card_service_1 = require('../../services/card.service');
 var CardComponent = (function () {
-    function CardComponent(route, boardService) {
+    function CardComponent(route, boardService, cardService) {
         this.route = route;
         this.boardService = boardService;
+        this.cardService = cardService;
     }
     /*private spentEstimatedForm = this.formBuilder.group({
         "date": ["", Validators.required],
@@ -31,12 +33,36 @@ var CardComponent = (function () {
             that.loadCard(board_id, card_id);
         });
     };
+    CardComponent.prototype.showCommentEdition = function (comment) {
+        this.editing_comment = comment;
+        //this.EditCommentForm.value.content = comment.content;
+    };
+    CardComponent.prototype.hideCommentEdition = function (comment) {
+        this.editing_comment = null;
+    };
     CardComponent.prototype.onSubmitSETimeForm = function (form) {
         console.log(form);
         //console.log(this.spentEstimatedForm.value.date);
         //console.log(this.spentEstimatedForm.value.spent_time);
         //console.log(this.spentEstimatedForm.value.estimated_time);
         //this.spentEstimatedForm.reset();
+    };
+    CardComponent.prototype.onSubmitNewComment = function (card, comment_content) {
+        var _this = this;
+        this.cardService.addNewComment(card, comment_content).then(function (comment) { return _this.card.comments.push(comment); });
+    };
+    CardComponent.prototype.onSubmitEditComment = function (card, comment, new_content) {
+        var _this = this;
+        this.cardService.editComment(card, comment, new_content).then(function (edited_comment) {
+            comment.content = new_content;
+            _this.editing_comment = null;
+        });
+    };
+    CardComponent.prototype.onSubmitDeleteComment = function (card, comment) {
+        var _this = this;
+        this.cardService.deleteComment(card, comment).then(function (deleted_comment) {
+            _this.card.comments.splice(_this.card.comments.indexOf(comment), 1);
+        });
     };
     CardComponent.prototype.loadCard = function (board_id, card_id) {
         var _this = this;
@@ -48,9 +74,9 @@ var CardComponent = (function () {
             selector: 'card',
             templateUrl: 'card.component.html',
             styleUrls: ['card.component.css'],
-            providers: [board_service_1.BoardService]
+            providers: [board_service_1.BoardService, card_service_1.CardService]
         }), 
-        __metadata('design:paramtypes', [router_1.ActivatedRoute, board_service_1.BoardService])
+        __metadata('design:paramtypes', [router_1.ActivatedRoute, board_service_1.BoardService, card_service_1.CardService])
     ], CardComponent);
     return CardComponent;
 }());

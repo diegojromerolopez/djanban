@@ -33,6 +33,7 @@ SECRET_KEY = settings_local.SECRET_KEY
 DEBUG = settings_local.DEBUG
 
 DOMAIN = settings_local.DOMAIN
+PORT = settings_local.PORT
 ALLOWED_HOSTS = settings_local.ALLOWED_HOSTS
 
 SITE_ID = 1

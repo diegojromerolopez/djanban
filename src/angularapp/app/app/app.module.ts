@@ -12,6 +12,7 @@ import { BoardService } from '../services/board.service';
 import { BoardComponent } from '../components/board/board.component';
 import { DashboardComponent } from '../components/dashboard/dashboard.component';
 import { CardComponent } from '../components/card/card.component';
+import { CardService } from '../services/card.service';
 
 
 @NgModule({
@@ -22,7 +23,7 @@ import { CardComponent } from '../components/card/card.component';
     AppRoutingModule
   ],
   declarations: [ AppComponent, DashboardComponent, BoardComponent, CardComponent ],
-  providers: [ BoardService ],
+  providers: [ BoardService, CardService ],
   bootstrap:    [ AppComponent ]
 })
 

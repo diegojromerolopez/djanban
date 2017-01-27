@@ -21,7 +21,8 @@ from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
 from djangotrellostats.apps.reports.models import CardMovement, CardReview
 
-from djangotrellostats.trello_api.cards import move_card, add_comment_to_card, delete_comment_of_card, \
+from djangotrellostats.trello_api.cards import move_card,\
+    add_comment_to_card, edit_comment_of_card, delete_comment_of_card, \
     remove_label_of_card, add_label_to_card
 
 
@@ -779,6 +780,26 @@ class Card(models.Model):
         # Returning the comment because it can be needed
         return card_comment
 
+    # Edit a card comment
+    @transaction.atomic
+    def edit_comment(self, member, comment, new_content):
+        if member.uuid != comment.author.uuid:
+            raise AssertionError(u"This comment does not belong to {0}".format(member.trello_username))
+
+        # Edit comment Trello
+        comment_data = edit_comment_of_card(self, member, comment, new_content)
+
+        # Create comment locally using the id of the new comment in Trello
+        comment.content = new_content
+        comment.last_edition_datetime = timezone.now()
+        comment.save()
+
+        # Delete all cached charts for this board
+        self.board.clean_cached_charts()
+
+        # Returning the comment because it can be needed
+        return comment
+
     # Delete an existing comment of this card
     @transaction.atomic
     def delete_comment(self, member, comment):
@@ -828,6 +849,7 @@ class CardComment(models.Model):
     author = models.ForeignKey("members.Member", verbose_name=u"Member author of this comment", related_name="comments")
     content = models.TextField(verbose_name=u"Content of the comment")
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
+    last_edition_datetime = models.DateTimeField(verbose_name=u"Last edition of the comment", default=None)
 
     @property
     def spent_estimated_time(self):
@@ -977,8 +999,8 @@ class CardComment(models.Model):
                 CardReview.update_or_create_from_card_comment(self, review["reviewers"])
 
             # If there is not a review, check if there was an earlier review and in that case, delete it
-            elif self.card.reviews.get(creation_datetime=self.creation_datetime).exists():
-                self.card.reviews.get(creation_datetime=self.creation_datetime).delete()
+            elif self.card.reviews.filter(creation_datetime=self.creation_datetime).exists():
+                self.card.reviews.filter(creation_datetime=self.creation_datetime).delete()
 
     # Save a new comment
     def _save_new(self, card):

@@ -31,6 +31,14 @@ def add_comment_to_card(card, member, content):
     return trello_card.comment(content)
 
 
+# Edit comment content
+def edit_comment_of_card(card, member, comment, new_content):
+    if member.uuid != comment.author.uuid:
+        raise AssertionError(u"You can only edit your comments")
+    trello_card = _get_trello_card(card, member)
+    return trello_card.update_comment(comment.uuid, new_content)
+
+
 # Delete comment of card
 def delete_comment_of_card(card, member, comment):
     trello_card = _get_trello_card(card, member)

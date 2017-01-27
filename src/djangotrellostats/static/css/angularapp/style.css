@@ -94,3 +94,13 @@ h1, h2, h3 {
 .card_detail .comments .comment .comment_date {
 
 }
+
+.card-comments .card-comments-comment form {
+    display: inline-block;
+    margin:0;
+    width: auto;
+}
+
+.edit-comment-button {
+    margin-left: 10px;
+}

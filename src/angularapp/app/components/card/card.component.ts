@@ -1,11 +1,13 @@
 import { composeValidators } from '@angular/forms/src/directives/shared';
 import { Validator } from '@angular/forms';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, DebugElement } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BoardService } from '../../services/board.service';
 import { Card } from '../../models/card';
 import { Board } from '../../models/board';
 import { FormBuilder, Validators } from '@angular/forms';
+import { CardService } from '../../services/card.service';
+import { CardComment } from '../../models/comment';
 
 
 @Component({
@@ -13,7 +15,7 @@ import { FormBuilder, Validators } from '@angular/forms';
     selector: 'card',
     templateUrl: 'card.component.html',
     styleUrls: ['card.component.css'],
-    providers: [BoardService]
+    providers: [BoardService, CardService]
 })
 
 
@@ -21,6 +23,7 @@ export class CardComponent implements OnInit  {
 
     private board_id: number;
     private card: Card;
+    private editing_comment?: CardComment;
     
     /*private spentEstimatedForm = this.formBuilder.group({
         "date": ["", Validators.required],
@@ -40,9 +43,19 @@ export class CardComponent implements OnInit  {
 
     constructor(
         private route: ActivatedRoute,
-        private boardService: BoardService
+        private boardService: BoardService,
+        private cardService: CardService
     ) {
         
+    }
+
+    showCommentEdition(comment: CardComment) {
+        this.editing_comment = comment;
+        //this.EditCommentForm.value.content = comment.content;
+    }
+
+    hideCommentEdition(comment: CardComment) {
+        this.editing_comment = null;
     }
 
     onSubmitSETimeForm(form: any) {
@@ -51,6 +64,23 @@ export class CardComponent implements OnInit  {
         //console.log(this.spentEstimatedForm.value.spent_time);
         //console.log(this.spentEstimatedForm.value.estimated_time);
         //this.spentEstimatedForm.reset();
+    }
+    
+    onSubmitNewComment(card:Card, comment_content: string): void {
+        this.cardService.addNewComment(card, comment_content).then(comment => this.card.comments.push(comment));
+    }
+
+    onSubmitEditComment(card:Card, comment: CardComment, new_content: string): void {
+        this.cardService.editComment(card, comment, new_content).then(edited_comment => {
+            comment.content = new_content;
+            this.editing_comment = null;
+        });
+    }
+
+    onSubmitDeleteComment(card:Card, comment: CardComment): void {
+        this.cardService.deleteComment(card, comment).then(deleted_comment => {
+            this.card.comments.splice(this.card.comments.indexOf(comment), 1);
+        });
     }
 
     loadCard(board_id: number, card_id: number): void {

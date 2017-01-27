@@ -13,19 +13,15 @@ var http_1 = require('@angular/http');
 require('rxjs/add/operator/map');
 require('rxjs/add/operator/catch');
 require('rxjs/add/operator/toPromise');
-//import { Observable }     from 'rxjs/Observable';
-var BoardService = (function () {
-    function BoardService(http) {
+var DjangoTrelloStatsService = (function () {
+    function DjangoTrelloStatsService(http) {
         this.http = http;
-        this.GET_BOARDS_URL = 'http://localhost:8000/api/boards/info';
-        this.GET_BOARD_URL = 'http://localhost:8000/api/board/{id}/info';
-        this.GET_CARD_URL = 'http://localhost:8000/api/board/{board_id}/card/{card_id}/info';
     }
-    BoardService.prototype.extractData = function (res) {
+    DjangoTrelloStatsService.prototype.extractData = function (res) {
         var body = res.json();
         return body || {};
     };
-    BoardService.prototype.handleError = function (error) {
+    DjangoTrelloStatsService.prototype.handleError = function (error) {
         var errMsg;
         if (error instanceof http_1.Response) {
             var body = error.json() || '';
@@ -38,32 +34,11 @@ var BoardService = (function () {
         console.error(errMsg);
         return Promise.reject(errMsg);
     };
-    BoardService.prototype.getBoards = function () {
-        var get_boards_url = this.GET_BOARDS_URL;
-        return this.http.get(get_boards_url)
-            .toPromise()
-            .then(this.extractData)
-            .catch(this.handleError);
-    };
-    BoardService.prototype.getBoard = function (board_id) {
-        var get_board_url = this.GET_BOARD_URL.replace(/\{id\}/, board_id.toString());
-        return this.http.get(get_board_url)
-            .toPromise()
-            .then(this.extractData)
-            .catch(this.handleError);
-    };
-    BoardService.prototype.getCard = function (board_id, card_id) {
-        var get_card_url = this.GET_CARD_URL.replace(/\{board_id\}/, board_id.toString()).replace(/\{card_id\}/, card_id.toString());
-        return this.http.get(get_card_url)
-            .toPromise()
-            .then(this.extractData)
-            .catch(this.handleError);
-    };
-    BoardService = __decorate([
+    DjangoTrelloStatsService = __decorate([
         core_1.Injectable(), 
         __metadata('design:paramtypes', [http_1.Http])
-    ], BoardService);
-    return BoardService;
+    ], DjangoTrelloStatsService);
+    return DjangoTrelloStatsService;
 }());
-exports.BoardService = BoardService;
-//# sourceMappingURL=board.service.js.map
+exports.DjangoTrelloStatsService = DjangoTrelloStatsService;
+//# sourceMappingURL=djangotrellostats.service.js.map

@@ -6,8 +6,6 @@ from djangotrellostats.apps.journal.views import JournalEntryTagAutocompleteView
 
 
 urlpatterns = [
-    url(r'^dashboard/?$', boards.view_dashboard, name="dashboard"),
-
     url(r'^init-boards$', boards.init_boards, name="init_boards"),
 
     # Board URLs
@@ -78,5 +76,8 @@ urlpatterns = [
     # Journal entries of this board
     url(r'^(?P<board_id>\d+)/journal/', include('djangotrellostats.apps.journal.urls', namespace="journal")),
 
+    # Routing with catch-em-all pattern useful for allowing loading push-state URLs
+    # Read https://www.metaltoad.com/blog/url-routing-decoupled-app-angular-2-and-django for more information.
+    url(r'^dashboard(/(?P<path>.*))?/$', boards.view_dashboard, name="dashboard"),
 
 ]

@@ -6,5 +6,6 @@ export class CardComment {
   uuid: string;
   content: string;
   creation_datetime: Date;
+  last_edition_datetime?: Date;
   author: Member;
 }

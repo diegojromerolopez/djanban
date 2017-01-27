@@ -206,9 +206,9 @@
             <h2>Comments ({{card.comments.length}})</h2>
             <div>
                 
-            <form action="" method="post">
-                <textarea name="comment" placeholder="Insert your comment here..."></textarea>
-                <button type="submit" class="btn btn-success" title="Add new comment to this card">
+            <form (ngSubmit)="onSubmitNewComment(card, NewCommentForm.value.comment)" #NewCommentForm="ngForm">
+                <textarea name="comment" placeholder="Insert your comment here..." required ngModel></textarea>
+                <button type="submit" class="btn btn-success" title="Add new comment to this card" (ngSubmit)="button.disabled = true" #button>
                 Send
                 <span class="fa fa-comment-o"></span>
                 </button>
@@ -222,19 +222,33 @@
                         <div class="card-comments-comment panel panel-info">
                             <div class="panel-heading">
                                 Comment made by {{comment.author.initials}}
-                                (<span title="Comment made by {{comment.creation_datetime}}">{{comment.creation_datetime}}</span>)
+                                (
+                                    <span title="Comment made by {{comment.creation_datetime}}">{{comment.creation_datetime}}</span>
+                                    <span *ngIf="comment.last_edition_datetime" title="Comment edited {{comment.creation_datetime}}">{{comment.last_edited_datetime}}</span>
+                                    )
                             </div>
+
                             <div class="panel-body">
                                 {{comment.content}}
                             </div>
+
+                            <form *ngIf="editing_comment && editing_comment.id == comment.id" (ngSubmit)="onSubmitEditComment(card, comment, EditCommentForm.value.content)" #EditCommentForm="ngForm">
+                                <textarea name="content" placeholder="{{comment.content}}" ngModel>
+                                </textarea>
+                                <span class="btn btn-danger" (click)="hideCommentEdition(comment)">Cancel</span>
+                                <button type="submit" class="btn btn-success" title="Edit comment">
+                                    Send
+                                </button>
+                            </form>
                             
-                            <form action="{% url 'boards:delete_comment' board.id card.id comment.id %}" method="post">
+                            <span *ngIf="!editing_comment || (editing_comment && editing_comment.id != comment.id)" class="btn btn-danger edit-comment-button" (click)="showCommentEdition(comment)">Edit</span>
+
+                            <form *ngIf="!editing_comment || (editing_comment && editing_comment.id != comment.id)" (ngSubmit)="onSubmitDeleteComment(card, comment)" #DeleteCommentForm="ngForm">
                                 <button type="submit" class="btn btn-success delete_comment" title="Delete this comment">
                                 Delete
                                 <span class="fa fa-trash"></span>
                                 </button>
                             </form>
-                            
                         </div>
                     </div>
                 </div>

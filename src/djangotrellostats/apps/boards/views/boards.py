@@ -200,9 +200,11 @@ def view_gantt_chart(request, board_id):
 
 
 # Dynamic task board view
-def view_dashboard(request):
+def view_dashboard(request, path=""):
     replacements = {
-        "ANGULAR_URL": settings.ANGULAR_URL
+        "ANGULAR_URL": settings.ANGULAR_URL,
+        "DOMAIN": settings.DOMAIN,
+        "PORT": settings.PORT
     }
     return render(request, "boards/view_dashboard.html", replacements)
 

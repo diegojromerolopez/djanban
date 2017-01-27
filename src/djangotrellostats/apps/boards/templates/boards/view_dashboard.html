@@ -5,6 +5,7 @@
 {% block css %}
     {{block.super}}
       <link href="{% static 'css/angularapp/style.css' %}" rel="stylesheet" />
+      <link href="{% static 'css/boards/cards/view.css' %}" rel="stylesheet" />
 {% endblock css %}
 
 
@@ -16,7 +17,8 @@
         <script src="{{ ANGULAR_URL }}node_modules/reflect-metadata/Reflect.js"></script>
         <script src="{{ ANGULAR_URL }}node_modules/systemjs/dist/system.src.js"></script>
         <script src="{{ ANGULAR_URL }}systemjs.config.js"></script>
-        <script>
+        <script type="text/javascript">
+          window.API_URL_PREFIX = "http://{{DOMAIN}}:{{PORT}}/api/";
           window.STATIC_URL = "{{ ANGULAR_URL }}";
           System.import('/ng/app/main').catch(function(err){
               console.error(err);
