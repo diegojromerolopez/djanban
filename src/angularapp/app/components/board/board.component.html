@@ -5,8 +5,13 @@
             <span class="list_name panel-heading cursor-pointer">
                 <span>{{list.name}}</span> {{list.cards.length}} tasks
             </span>
-            <ul *ngIf="list.cards" class="cards">
-                <li *ngFor="let card of list.cards" class="card panel panel-info">
+            <ul *ngIf="list.cards" class="cards"
+                    dnd-droppable (onDropSuccess)="transferDataSuccess($event)">
+                
+                <li *ngFor="let card of list.cards"
+                        class="card panel panel-info"
+                        dnd-draggable [dragEnabled]="true" [dragData]="transferData">
+                        
                     <span class="panel-heading card_heading">
                         <span (click)="onCardSelect(card)" class="card_name">{{card.name}}</span>
                         <a href="{{card.short_url}}" title="View card" class="card_action_view">
@@ -16,7 +21,9 @@
                             <span class="fa fa-eye"></span>
                         </a>
                     </span>
+                
                 </li>
+            
             </ul>
         </div>
     </div>

@@ -6,6 +6,7 @@ import { HttpModule }    from '@angular/http';
 
 import { AppComponent }  from './app.component';
 
+import {DndModule} from 'ng2-dnd';
 
 import { AppRoutingModule } from './app-routing.module';
 import { BoardService } from '../services/board.service';
@@ -18,6 +19,7 @@ import { CardService } from '../services/card.service';
 @NgModule({
   imports: [ 
     BrowserModule,
+    DndModule.forRoot(),
     HttpModule,
     FormsModule, 
     AppRoutingModule

@@ -16,6 +16,7 @@ import { Card } from '../../models/card';
 
 export class BoardComponent implements OnInit {
     board: Board;
+    receivedData:Array<any> = [];
 
     ngOnInit(): void {
       let that = this;
@@ -39,6 +40,11 @@ export class BoardComponent implements OnInit {
 
     onCardSelect(card: Card): void {
       this.router.navigate(['/board', this.board.id, 'card', card.id]);
+    }
+
+    transferDataSuccess($event: any) {
+        console.log($event.dragData);
+        this.receivedData.push($event.dragData);
     }
 
 }

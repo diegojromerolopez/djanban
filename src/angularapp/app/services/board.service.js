@@ -13,19 +13,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var core_1 = require('@angular/core');
-var http_1 = require('@angular/http');
-var djangotrellostats_service_1 = require('./djangotrellostats.service');
-require('rxjs/add/operator/map');
-require('rxjs/add/operator/catch');
-require('rxjs/add/operator/toPromise');
+var core_1 = require("@angular/core");
+var http_1 = require("@angular/http");
+var djangotrellostats_service_1 = require("./djangotrellostats.service");
+require("rxjs/add/operator/map");
+require("rxjs/add/operator/catch");
+require("rxjs/add/operator/toPromise");
 var BoardService = (function (_super) {
     __extends(BoardService, _super);
     function BoardService(http) {
-        _super.call(this, http);
-        this.GET_BOARDS_URL = 'http://localhost:8000/api/boards/info';
-        this.GET_BOARD_URL = 'http://localhost:8000/api/board/{id}/info';
-        this.GET_CARD_URL = 'http://localhost:8000/api/board/{board_id}/card/{card_id}/info';
+        var _this = _super.call(this, http) || this;
+        _this.GET_BOARDS_URL = 'http://localhost:8000/api/boards/info';
+        _this.GET_BOARD_URL = 'http://localhost:8000/api/board/{id}/info';
+        _this.GET_CARD_URL = 'http://localhost:8000/api/board/{board_id}/card/{card_id}/info';
+        return _this;
     }
     BoardService.prototype.getBoards = function () {
         var get_boards_url = this.GET_BOARDS_URL;
@@ -48,11 +49,11 @@ var BoardService = (function (_super) {
             .then(this.extractData)
             .catch(this.handleError);
     };
-    BoardService = __decorate([
-        core_1.Injectable(), 
-        __metadata('design:paramtypes', [http_1.Http])
-    ], BoardService);
     return BoardService;
 }(djangotrellostats_service_1.DjangoTrelloStatsService));
+BoardService = __decorate([
+    core_1.Injectable(),
+    __metadata("design:paramtypes", [http_1.Http])
+], BoardService);
 exports.BoardService = BoardService;
 //# sourceMappingURL=board.service.js.map
