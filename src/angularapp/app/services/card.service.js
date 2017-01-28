@@ -13,22 +13,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var core_1 = require('@angular/core');
-var http_1 = require('@angular/http');
-var djangotrellostats_service_1 = require('./djangotrellostats.service');
-require('rxjs/add/operator/map');
-require('rxjs/add/operator/catch');
-require('rxjs/add/operator/toPromise');
+var core_1 = require("@angular/core");
+var http_1 = require("@angular/http");
+var djangotrellostats_service_1 = require("./djangotrellostats.service");
+require("rxjs/add/operator/map");
+require("rxjs/add/operator/catch");
+require("rxjs/add/operator/toPromise");
 //import { Observable }     from 'rxjs/Observable';
 var CardService = (function (_super) {
     __extends(CardService, _super);
     function CardService(http) {
-        _super.call(this, http);
-        this.ADD_SE_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/time";
-        this.ADD_COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment";
-        this.COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
-        this.CHANGE_LIST_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/list";
-        this.CHANGE_LABELS_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/labels";
+        var _this = _super.call(this, http) || this;
+        _this.ADD_SE_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/time";
+        _this.ADD_COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment";
+        _this.COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
+        _this.CHANGE_LIST_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/list";
+        _this.CHANGE_LABELS_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/labels";
+        return _this;
     }
     CardService.prototype.changeList = function (card, new_list) {
         var chage_list_url = this.prepareUrl(this.CHANGE_LIST_URL, card);
@@ -80,11 +81,11 @@ var CardService = (function (_super) {
         var card_id = card.id.toString();
         return url.replace(/\{board_id\}/, board_id).replace(/\{card_id\}/, card_id);
     };
-    CardService = __decorate([
-        core_1.Injectable(), 
-        __metadata('design:paramtypes', [http_1.Http])
-    ], CardService);
     return CardService;
 }(djangotrellostats_service_1.DjangoTrelloStatsService));
+CardService = __decorate([
+    core_1.Injectable(),
+    __metadata("design:paramtypes", [http_1.Http])
+], CardService);
 exports.CardService = CardService;
 //# sourceMappingURL=card.service.js.map
