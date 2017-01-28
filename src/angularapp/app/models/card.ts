@@ -1,5 +1,8 @@
+import { List } from './list';
 import { CardComment } from './comment';
 import { Board } from './board';
+import { Member } from './member';
+import { Label } from './label';
 
 
 export class Card {
@@ -17,5 +20,8 @@ export class Card {
   lead_time?: number;
   is_closed?: boolean;
   board?: Board;
+  list?: List;
+  labels?: Label[];
   comments?: CardComment[];
+  members?: Member[];
 }

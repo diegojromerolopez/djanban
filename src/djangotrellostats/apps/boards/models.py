@@ -118,6 +118,10 @@ class Board(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def active_lists(self):
+        return self.lists.exclude(Q(type="closed")|Q(type="ignored")).order_by("position")
+
     # First list of this board
     @property
     def first_list(self):
@@ -702,7 +706,7 @@ class Card(models.Model):
             raise ValueError(u"Trying to move a card to its list")
         # Store the movement of this card
         card_movement = CardMovement(
-            board=self.board, card=self, type=movement_type,
+            board=self.board, card=self, type=movement_type, member=member,
             source_list=self.list, destination_list=destination_list, datetime=timezone.now()
         )
         card_movement.save()
@@ -849,7 +853,7 @@ class CardComment(models.Model):
     author = models.ForeignKey("members.Member", verbose_name=u"Member author of this comment", related_name="comments")
     content = models.TextField(verbose_name=u"Content of the comment")
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
-    last_edition_datetime = models.DateTimeField(verbose_name=u"Last edition of the comment", default=None)
+    last_edition_datetime = models.DateTimeField(verbose_name=u"Last edition of the comment", default=None, null=True)
 
     @property
     def spent_estimated_time(self):

@@ -15,4 +15,10 @@ urlpatterns = [
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/info/?$', cards.get_card, name="get_card"),
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/comment/?$', cards.add_new_comment, name="add_new_comment"),
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/comment/(?P<comment_id>\d+)/?$', cards.modify_comment, name="modify_comment"),
+
+    url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/list/?$', cards.change_list, name="change_list"),
+
+    url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/labels/?$', cards.change_labels, name="change_labels"),
+
+    url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/time/?$', cards.add_se_time, name="add_se_time"),
 ]

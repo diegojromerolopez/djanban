@@ -61,7 +61,7 @@
     margin-left: auto;
     margin-right: auto;
     margin-top: 20px;
-    width: 200px;
+    width: 300px;
 }
 
 .card-labels form select[name="labels"] {
@@ -72,7 +72,7 @@
 }
 
 .card-labels form button {
-    display: block;
+    display: inline-block;
     margin-left: auto;
     margin-right: auto;
 }

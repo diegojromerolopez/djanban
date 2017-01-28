@@ -5,6 +5,7 @@ import { Headers, RequestOptions } from '@angular/http';
 
 
 import { Observable }     from 'rxjs/Observable';
+import { DjangoTrelloStatsService } from './djangotrellostats.service';
 import { Card } from '../models/card';
 import { Board } from '../models/board';
 
@@ -13,38 +14,18 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/toPromise';
 
-//import { Observable }     from 'rxjs/Observable';
 
 @Injectable()
-export class BoardService {
+export class BoardService extends DjangoTrelloStatsService{
 
   private GET_BOARDS_URL = 'http://localhost:8000/api/boards/info';
 
   private GET_BOARD_URL = 'http://localhost:8000/api/board/{id}/info';
   private GET_CARD_URL = 'http://localhost:8000/api/board/{board_id}/card/{card_id}/info';
 
-  constructor (private http: Http) {
-
+  constructor (http: Http) {
+      super(http);
   }
-
-  private extractData(res: Response) {
-    let body = res.json();
-    return body || { };
-  }
-
-  private handleError (error: Response | any) {
-    let errMsg: string;
-    if (error instanceof Response) {
-      const body = error.json() || '';
-      const err = body.error || JSON.stringify(body);
-      errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
-    } else {
-      errMsg = error.message ? error.message : error.toString();
-    }
-    console.error(errMsg);
-    return Promise.reject(errMsg);
-  }
-
 
   getBoards(): Promise<Board[]> {
     let get_boards_url = this.GET_BOARDS_URL;
@@ -69,13 +50,5 @@ export class BoardService {
                   .then(this.extractData)
                   .catch(this.handleError);
   }
-
-  /*addSETimeToCard(card_id: number, date: string, spent_time:number, estimated_time: number) StringMap<>{
-    let add_se_to_card_url = this.ADD_SE_TO_CARD_URL.replace(/\{board_id\}/, board_id.toString()).replace(/\{card_id\}/, card_id.toString());
-    return this.http.get(get_card_url)
-                  .toPromise()
-                  .then(this.extractData)
-                  .catch(this.handleError);
-}*/
 
 }

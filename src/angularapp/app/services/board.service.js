@@ -1,4 +1,9 @@
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -10,34 +15,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require('@angular/core');
 var http_1 = require('@angular/http');
+var djangotrellostats_service_1 = require('./djangotrellostats.service');
 require('rxjs/add/operator/map');
 require('rxjs/add/operator/catch');
 require('rxjs/add/operator/toPromise');
-//import { Observable }     from 'rxjs/Observable';
-var BoardService = (function () {
+var BoardService = (function (_super) {
+    __extends(BoardService, _super);
     function BoardService(http) {
-        this.http = http;
+        _super.call(this, http);
         this.GET_BOARDS_URL = 'http://localhost:8000/api/boards/info';
         this.GET_BOARD_URL = 'http://localhost:8000/api/board/{id}/info';
         this.GET_CARD_URL = 'http://localhost:8000/api/board/{board_id}/card/{card_id}/info';
     }
-    BoardService.prototype.extractData = function (res) {
-        var body = res.json();
-        return body || {};
-    };
-    BoardService.prototype.handleError = function (error) {
-        var errMsg;
-        if (error instanceof http_1.Response) {
-            var body = error.json() || '';
-            var err = body.error || JSON.stringify(body);
-            errMsg = error.status + " - " + (error.statusText || '') + " " + err;
-        }
-        else {
-            errMsg = error.message ? error.message : error.toString();
-        }
-        console.error(errMsg);
-        return Promise.reject(errMsg);
-    };
     BoardService.prototype.getBoards = function () {
         var get_boards_url = this.GET_BOARDS_URL;
         return this.http.get(get_boards_url)
@@ -64,6 +53,6 @@ var BoardService = (function () {
         __metadata('design:paramtypes', [http_1.Http])
     ], BoardService);
     return BoardService;
-}());
+}(djangotrellostats_service_1.DjangoTrelloStatsService));
 exports.BoardService = BoardService;
 //# sourceMappingURL=board.service.js.map

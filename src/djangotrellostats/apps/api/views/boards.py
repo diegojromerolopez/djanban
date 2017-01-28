@@ -40,7 +40,7 @@ def get_board(request, board_id):
         raise Http404
 
     lists_json = []
-    for list_ in board.lists.all().order_by("position"):
+    for list_ in board.active_lists.order_by("position"):
         list_json = {
             "id": list_.id,
             "name": list_.name,

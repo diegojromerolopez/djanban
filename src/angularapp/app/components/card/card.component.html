@@ -25,91 +25,86 @@
                     <span class="fa fa-unlock" title="This card is active"></span> Active
                 </span>
             </div>
-<!--
-            <div class="row card-list-environment">
-                {% if member and previous_list %}
-                <div class="col-md-4 move_backward">
-                    <form action="{% url 'boards:move_card_backward' board.id card.id %}" name="move_backward" method="post">
-                        <button type="submit" class="btn btn-danger" title="Move backwards to {{previous_list.name}}">
-                            <span class="fa fa-arrow-left"></span>
-                            {{previous_list.name|truncatechars:40}}
-                        </button>
-                    </form>
-                </div>
-                {% endif %}
 
-                <div class="col-md-4 list  card-current-list label {% if list.type == 'done' %}label-success{% else %}label-primary{% endif %}">
-                    On list <strong>{{list.name}} {% if list.type == "done" %}<span class="fa fa-thumbs-up"></span>{% endif %}</strong>
+            <div class="list card-current-list">
+                <span class="card-current-list-title">On list</span>
+                <div>
+                    <span class="card-current-list-title label label-success">{{card.list.name}}</span>
+                    <span *ngIf="card.list.type == 'done'" class="fa fa-thumbs-up"></span>
+                    <span class="btn btn-primary" *ngIf="!change_card_list" (click)="change_card_list = true">Change</span>
+                    
+                    <div *ngIf="change_card_list">
+                        <form (ngSubmit)="onSubmitChangeList(changeListForm.value.destination_list)" #changeListForm="ngForm">
+                            <div>
+                                <select name="destination_list" required ngModel>
+                                    <option *ngFor="let list_i of card.board.lists" value="{{list_i.id}}"  [selected]="list_i.id == card.list.id?true:false">
+                                        {{list_i.name}}<span *ngIf="list_i.id == card.list.id">(current)</span>
+                                    </option>
+                                </select>
+                            </div>
+                            <div>
+                                <span class="btn btn-danger" (click)="change_card_list = false">Cancel</span>
+                                <button type="submit" class="btn btn-success" title="Change list" >Change</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-
-                {% if member and next_list %}
-                <div class="col-md-4 move_forward">
-                    <form action="{% url 'boards:move_card_forward' board.id card.id %}" name="move_forward" method="post">
-                    <button type="submit" class="btn btn-success" title="Move forward to {{next_list.name}}">
-                        {{next_list.name|truncatechars:40}}
-                        <span class="fa fa-arrow-right"></span>
-                    </button>
-                    </form>
-                </div>
-                {% endif %}
             </div>
 
             <div class="card-labels">
-                <h2>Labels ({{card_labels|length}})</h2>
-                {% if card_labels|length > 0 %}
-                <div class="card-labels-list">
-                    {% for label in card_labels %}
-                        <span class="card-label label label-default" style="background-color:{{label.color}};">
-                            {{label.name}}
-                        </span>
-                    {% endfor %}
+                <h2>Labels ({{card.labels.length}})</h2>
+                <div *ngIf="card.labels.length > 0" class="card-labels-list">
+                    <span *ngFor="let label of card.labels" class="card-label label label-default" [ngStyle]="{'background-color': label.color}">
+                        {{label.name}}
+                    </span>
                 </div>
-                {% else %}
-                <div class="card-labels-list card-labels-list-empty">
+                <div *ngIf="card.labels.length == 0" class="card-labels-list card-labels-list-empty">
                     <em>Without labels.</em>
                 </div>
-                {% endif %}
-                <form action="{% url 'boards:change_card_labels' board.id card.id %}" method="post">
-                    <select name="labels" multiple>
-                        {% for label in labels %}
-                            <option value="{{label.id}}" {% if label.id in card_label_ids %}selected{% endif %}>{{label.name}}</option>
-                        {% endfor %}
-                    </select>
-                    <button type="submit" class="btn btn-success change_labels" title="Change labels">
-                        <span class="fa fa-tags"></span>
-                        Change labels
-                    </button>
-                </form>
+                <span class="btn btn-primary" *ngIf="!change_card_labels" (click)="change_card_labels = true">Change</span>
+
+                <div *ngIf="change_card_labels">
+                    <form (ngSubmit)="onChangeCardLabels(changeCardLabelsForm.value.labels)" #changeCardLabelsForm="ngForm">
+                        <select name="labels" multiple required ngModel>
+                            <option *ngFor="let label of card.board.labels" value="{{label.id}}" [selected]="cardHasLabel(label)?true:false">
+                                {{label.name}}
+                            </option>
+                        </select>
+                        <div>
+                            <span class="btn btn-danger" (click)="change_card_labels = false">Cancel</span>
+                            <button type="submit" class="btn btn-success change_labels" title="Change labels">
+                                <span class="fa fa-tags"></span>
+                                Change labels
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <div class="card-blocking_cards">
-                <h2>Blocking cards ({{card.pending_blocking_cards|length}})</h2>
-                {% if card.pending_blocking_cards.exists %}
-                    {% for blocking_card in card.pending_blocking_cards %}
-                        <a href="{% url 'boards:view_card' board.id blocking_card.id %}" title="View blocking card {{blocking_card.name}}">
-                            {{blocking_card.name}}
-                        </a>
-                        {% if forloop.revcounter > 2 %}, {% elif forloop.revcounter > 1 %} & {% endif %}
-                    {% endfor %}
-                {% else %}
+                <h2>Blocking cards ({{card.pending_blocking_cards.length}})</h2>
+                <div *ngIf="card.pending_blocking_cards.length > 0">
+                    <a *ngFor="let blocking_card of card.pending_blocking_cards"
+                    href="{{blocking_card.local_url}}"
+                    title="View blocking card {{blocking_card.name}}">
+                        {{blocking_card.name}}
+                    </a>
+                </div>
+                <div *ngIf="card.pending_blocking_cards.length == 0">
                     <em>No other cards are blocking this one.</em>
-                {% endif %}
-
+                </div>
             </div>
 
             <div class="card-members">
-                <h2>Members ({{members|length}})</h2>
-                {% if members|length > 0 %}
-                <ul>
-                    {% for member_i in members %}
-                        <li>{{member_i.trello_username}}</li>
-                    {% endfor %}
+                <h2>Members ({{card.members.length}})</h2>
+                
+                <ul *ngIf="card.members.length > 0">
+                    <li *ngFor="let member_i of card.members">{{member_i.trello_username}}</li>
                 </ul>
-                {% else %}
-                This task has no assigned members.
-                {% endif %}
+                <div *ngIf="card.members.length == 0">
+                    This task has no assigned members.
+                </div>
             </div>
--->
         
         <div class="card-spent_estimated_time">
             <h2>Spent/Estimated time</h2>
@@ -191,7 +186,7 @@
                                     Forward movement
                                 </span>
                                 <span *ngIf="movement.type == 'backward'">
-                                Backward movement
+                                    Backward movement
                                 </span>
                                 from
                                 <strong>{{movement.source_list.name}}</strong> to <strong>{{movement.destination_list.name}}</strong>
@@ -206,11 +201,11 @@
             <h2>Comments ({{card.comments.length}})</h2>
             <div>
                 
-            <form (ngSubmit)="onSubmitNewComment(card, NewCommentForm.value.comment)" #NewCommentForm="ngForm">
+            <form (ngSubmit)="onSubmitNewComment(NewCommentForm.value.comment)" #NewCommentForm="ngForm">
                 <textarea name="comment" placeholder="Insert your comment here..." required ngModel></textarea>
                 <button type="submit" class="btn btn-success" title="Add new comment to this card" (ngSubmit)="button.disabled = true" #button>
-                Send
-                <span class="fa fa-comment-o"></span>
+                    Send
+                    <span class="fa fa-comment-o"></span>
                 </button>
             </form>
                 
@@ -232,7 +227,7 @@
                                 {{comment.content}}
                             </div>
 
-                            <form *ngIf="editing_comment && editing_comment.id == comment.id" (ngSubmit)="onSubmitEditComment(card, comment, EditCommentForm.value.content)" #EditCommentForm="ngForm">
+                            <form *ngIf="editing_comment && editing_comment.id == comment.id" (ngSubmit)="onSubmitEditComment(comment, EditCommentForm.value.content)" #EditCommentForm="ngForm">
                                 <textarea name="content" placeholder="{{comment.content}}" ngModel>
                                 </textarea>
                                 <span class="btn btn-danger" (click)="hideCommentEdition(comment)">Cancel</span>
@@ -243,7 +238,7 @@
                             
                             <span *ngIf="!editing_comment || (editing_comment && editing_comment.id != comment.id)" class="btn btn-danger edit-comment-button" (click)="showCommentEdition(comment)">Edit</span>
 
-                            <form *ngIf="!editing_comment || (editing_comment && editing_comment.id != comment.id)" (ngSubmit)="onSubmitDeleteComment(card, comment)" #DeleteCommentForm="ngForm">
+                            <form *ngIf="!editing_comment || (editing_comment && editing_comment.id != comment.id)" (ngSubmit)="onSubmitDeleteComment(comment)" #DeleteCommentForm="ngForm">
                                 <button type="submit" class="btn btn-success delete_comment" title="Delete this comment">
                                 Delete
                                 <span class="fa fa-trash"></span>
