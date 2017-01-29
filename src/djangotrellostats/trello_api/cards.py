@@ -6,16 +6,29 @@ from collections import namedtuple
 
 
 # Creates a new card
-def new_card(card, member, labels=None):
+def new_card(card, member=None, labels=None, position="bottom"):
+
+    # We can pass the member through the card
+    if member is None:
+        member = card.member
+
     # Getting trello board
     trello_board = _get_trello_board(card.board, member)
     trello_list = trello_board.get_list(list_id=card.list.uuid)
-    # Creation trello card
+
+    # PyTrello API needs the labels to be to be an object with a label id, so we construct a
+    # fake object with a label id inside
     trello_labels = []
     if labels:
         TrelloLabelUuid = namedtuple("TrelloLabelUuid", ["id"])
         trello_labels = [TrelloLabelUuid(id=label.uuid) for label in labels]
-    trello_card = trello_list.add_card(card.name, desc=card.description, labels=trello_labels, due="null", source=None)
+
+    # Calling the Trello API to create the card
+    trello_card = trello_list.add_card(
+        card.name, desc=card.description,
+        labels=trello_labels, due="null",
+        source=None, position=position
+    )
     return trello_card
 
 

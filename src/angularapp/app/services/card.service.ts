@@ -23,6 +23,8 @@ import 'rxjs/add/operator/toPromise';
 @Injectable()
 export class CardService extends DjangoTrelloStatsService {
 
+
+  private ADD_CARD_URL = '/api/board/{board_id}/card';
   private ADD_SE_URL = "/api/board/{board_id}/card/{card_id}/time";
   private ADD_COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment";
   private COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
@@ -30,9 +32,27 @@ export class CardService extends DjangoTrelloStatsService {
   private CHANGE_LABELS_URL = "/api/board/{board_id}/card/{card_id}/labels";
   private CHANGE_MEMBERS_URL = "/api/board/{board_id}/card/{card_id}/members";
   private CHANGE_CARD_URL = "/api/board/{board_id}/card/{card_id}";
+  private GET_CARD_URL = '/api/board/{board_id}/card/{card_id}/info';
+  
 
   constructor (http: Http) {
     super(http);
+  }
+
+  /**
+  * Adds a new card to a list of the board.
+  */
+  addCard(board: Board, list: List, name: string, position="top"): Promise<Card> {
+    let add_card_url = this.ADD_CARD_URL.replace(/\{board_id\}/, board.id.toString());
+    let put_body = {
+      name: name,
+      list: list.id,
+      position: position
+    };
+    return this.http.put(add_card_url, put_body)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
   }
 
   addSETime(card: Card, date: string, spent_time:number, estimated_time: number, description: string){
@@ -84,15 +104,6 @@ export class CardService extends DjangoTrelloStatsService {
                   .catch(this.handleError);
   }
 
-  editComment(card: Card, comment: CardComment, new_content: string) : Promise<CardComment> {
-    let comment_id = comment.id.toString();
-    let comment_url = this.prepareUrl(this.COMMENT_URL, card).replace("{comment_id}", comment_id);
-    return this.http.post(comment_url, {content: new_content})
-                  .toPromise()
-                  .then(this.extractData)
-                  .catch(this.handleError);
-  }
-
   deleteComment(card: Card, comment: CardComment) : Promise<CardComment> {
     let comment_id = comment.id.toString();
     let comment_url = this.prepareUrl(this.COMMENT_URL, card).replace("{comment_id}", comment_id);
@@ -102,16 +113,30 @@ export class CardService extends DjangoTrelloStatsService {
                   .catch(this.handleError);
   }
 
-  moveCard(card: Card, new_list: List, position = "top"): Promise<Card> {
-    console.log(card, new_list, position);
-    let move_list_url = this.prepareUrl(this.MOVE_CARD_URL, card);
-    return this.http.post(move_list_url, {new_list: new_list.id, position: position})
+  editComment(card: Card, comment: CardComment, new_content: string) : Promise<CardComment> {
+    let comment_id = comment.id.toString();
+    let comment_url = this.prepareUrl(this.COMMENT_URL, card).replace("{comment_id}", comment_id);
+    return this.http.post(comment_url, {content: new_content})
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);
   }
 
-  
+  getCard(board_id: number, card_id: number): Promise<Card> {
+    let get_card_url = this.GET_CARD_URL.replace(/\{board_id\}/, board_id.toString()).replace(/\{card_id\}/, card_id.toString());
+    return this.http.get(get_card_url)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }
+
+  moveCard(card: Card, new_list: List, position = "top"): Promise<Card> {
+    let move_list_url = this.prepareUrl(this.MOVE_CARD_URL, card);
+    return this.http.post(move_list_url, {new_list: new_list.id, position: position})
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }  
 
   private prepareUrl(url: string, card: Card): string{
     let board_id = card.board.id.toString();

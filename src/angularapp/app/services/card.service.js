@@ -24,6 +24,7 @@ var CardService = (function (_super) {
     __extends(CardService, _super);
     function CardService(http) {
         var _this = _super.call(this, http) || this;
+        _this.ADD_CARD_URL = '/api/board/{board_id}/card';
         _this.ADD_SE_URL = "/api/board/{board_id}/card/{card_id}/time";
         _this.ADD_COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment";
         _this.COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
@@ -31,8 +32,25 @@ var CardService = (function (_super) {
         _this.CHANGE_LABELS_URL = "/api/board/{board_id}/card/{card_id}/labels";
         _this.CHANGE_MEMBERS_URL = "/api/board/{board_id}/card/{card_id}/members";
         _this.CHANGE_CARD_URL = "/api/board/{board_id}/card/{card_id}";
+        _this.GET_CARD_URL = '/api/board/{board_id}/card/{card_id}/info';
         return _this;
     }
+    /**
+    * Adds a new card to a list of the board.
+    */
+    CardService.prototype.addCard = function (board, list, name, position) {
+        if (position === void 0) { position = "top"; }
+        var add_card_url = this.ADD_CARD_URL.replace(/\{board_id\}/, board.id.toString());
+        var put_body = {
+            name: name,
+            list: list.id,
+            position: position
+        };
+        return this.http.put(add_card_url, put_body)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
     CardService.prototype.addSETime = function (card, date, spent_time, estimated_time, description) {
         var add_se_url = this.prepareUrl(this.ADD_SE_URL, card);
         var post_body = { date: date, spent_time: spent_time, estimated_time: estimated_time, description: description };
@@ -76,14 +94,6 @@ var CardService = (function (_super) {
             .then(this.extractData)
             .catch(this.handleError);
     };
-    CardService.prototype.editComment = function (card, comment, new_content) {
-        var comment_id = comment.id.toString();
-        var comment_url = this.prepareUrl(this.COMMENT_URL, card).replace("{comment_id}", comment_id);
-        return this.http.post(comment_url, { content: new_content })
-            .toPromise()
-            .then(this.extractData)
-            .catch(this.handleError);
-    };
     CardService.prototype.deleteComment = function (card, comment) {
         var comment_id = comment.id.toString();
         var comment_url = this.prepareUrl(this.COMMENT_URL, card).replace("{comment_id}", comment_id);
@@ -92,9 +102,23 @@ var CardService = (function (_super) {
             .then(this.extractData)
             .catch(this.handleError);
     };
+    CardService.prototype.editComment = function (card, comment, new_content) {
+        var comment_id = comment.id.toString();
+        var comment_url = this.prepareUrl(this.COMMENT_URL, card).replace("{comment_id}", comment_id);
+        return this.http.post(comment_url, { content: new_content })
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    CardService.prototype.getCard = function (board_id, card_id) {
+        var get_card_url = this.GET_CARD_URL.replace(/\{board_id\}/, board_id.toString()).replace(/\{card_id\}/, card_id.toString());
+        return this.http.get(get_card_url)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
     CardService.prototype.moveCard = function (card, new_list, position) {
         if (position === void 0) { position = "top"; }
-        console.log(card, new_list, position);
         var move_list_url = this.prepareUrl(this.MOVE_CARD_URL, card);
         return this.http.post(move_list_url, { new_list: new_list.id, position: position })
             .toPromise()

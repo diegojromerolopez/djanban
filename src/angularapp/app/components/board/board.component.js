@@ -24,6 +24,7 @@ var BoardComponent = (function () {
         this.boardService = boardService;
         this.cardService = cardService;
         this.dragulaService = dragulaService;
+        this.showNewCardForm = {};
         dragulaService.drag.subscribe(function (value) {
             console.log("drag: " + value[0]);
             _this.onDrag(value.slice(1));
@@ -94,12 +95,24 @@ var BoardComponent = (function () {
         var e = args[0], el = args[1], container = args[2];
         // do something
     };
+    /** Load board */
     BoardComponent.prototype.loadBoard = function (board_id) {
         var _this = this;
-        this.boardService.getBoard(board_id).then(function (board_response) { _this.board = new board_1.Board(board_response); });
+        this.boardService.getBoard(board_id).then(function (board_response) {
+            _this.board = new board_1.Board(board_response);
+        });
     };
+    /** Move to the card view */
     BoardComponent.prototype.onCardSelect = function (card) {
         this.router.navigate([this.board.id, 'card', card.id]);
+    };
+    /* Controls for card creation form */
+    BoardComponent.prototype.onNewCardSubmit = function (list, name, position) {
+        var _this = this;
+        this.cardService.addCard(this.board, list, name, position).then(function (card_response) {
+            list_1.List.addCardToList(list, card_response, position);
+            _this.showNewCardForm[list.id] = false;
+        });
     };
     return BoardComponent;
 }());

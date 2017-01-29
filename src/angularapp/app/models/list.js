@@ -8,15 +8,18 @@ var List = (function () {
         return this.cards.find(function (card_i) { return card_i.id == card_id; });
     };
     List.prototype.addCard = function (card, position) {
+        List.addCardToList(this, card, position);
+    };
+    List.addCardToList = function (list, card, position) {
         if (position == "top") {
-            this.cards = [card].concat(this.cards);
+            list.cards = [card].concat(list.cards);
         }
         else if (position == "bottom") {
-            this.cards = this.cards.concat([card]);
+            list.cards = list.cards.concat([card]);
         }
         else {
-            this.cards.push(card);
-            this.sortCards();
+            list.cards.push(card);
+            List.sortListCards(list);
         }
     };
     List.prototype.removeCard = function (card) {
@@ -37,7 +40,10 @@ var List = (function () {
         return true;
     };
     List.prototype.sortCards = function () {
-        this.cards.sort(function (card_i, card_j) {
+        List.sortListCards(this);
+    };
+    List.sortListCards = function (list) {
+        list.cards.sort(function (card_i, card_j) {
             if (card_i.position < card_j.position) {
                 return -1;
             }

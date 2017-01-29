@@ -23,7 +23,7 @@ from djangotrellostats.apps.reports.models import CardMovement, CardReview
 
 from djangotrellostats.trello_api.cards import move_card,\
     add_comment_to_card, edit_comment_of_card, delete_comment_of_card, \
-    remove_label_of_card, add_label_to_card, order_card
+    remove_label_of_card, add_label_to_card, order_card, new_card
 
 
 # Abstract model that represents the immutable objects
@@ -1119,16 +1119,44 @@ class List(models.Model):
     type = models.CharField(max_length=64, choices=LIST_TYPE_CHOICES, default="ready_to_develop")
     position = models.PositiveIntegerField(verbose_name=u"Position of this list in the board", default=0)
 
+    # Adds a new card
+    @transaction.atomic
+    def add_card(self, member, name, position="bottom"):
+        board = self.board
+
+        # Construction of the card
+        # We don't save it yet because we need some Trello attributes before saving
+        card = Card(board=board, name=name, list=self)
+        card.creator = member # TODO: not a model attribute (yet)
+
+        # Call Trello API to create the card in Trello's servers
+        trello_card = new_card(card, member=member, position=position)
+
+        # Get TrelloCard attributes and assigned them to our new object Card
+        card.uuid = trello_card.id
+        card.short_url = trello_card.shortUrl
+        card.url = trello_card.url
+        card.position = trello_card.pos
+        card.creation_datetime = timezone.now()
+        card.last_activity_datetime = timezone.now()
+
+        # Now we can save the card and return it to the outside caller
+        card.save()
+
+        return card
+
     # Return all cards that are not archived (closed)
     @property
     def active_cards(self):
         return self.cards.filter(is_closed=False).order_by("position")
 
+    # Informs if this list is the first list
     @property
     def is_first(self):
         position_of_first_list = self.board.lists.aggregate(min_position=Min("position"))["min_position"]
         return self.position == position_of_first_list
 
+    # Informs if this list is the last list
     @property
     def is_last(self):
         position_of_last_list = self.board.lists.aggregate(max_position=Max("position"))["max_position"]

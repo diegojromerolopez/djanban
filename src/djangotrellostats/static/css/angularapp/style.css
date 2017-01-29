@@ -55,6 +55,26 @@ h1, h2, h3 {
     display: block;
 }
 
+.board .lists .list .list_name .list_name_name {
+
+}
+
+.board .lists .list .list_name .list_name_new_card {
+
+}
+
+.board .lists .list .list_name form {
+    display: block;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.board .lists .list .list_name form div,
+.board .lists .list .list_name form select,
+.board .lists .list .list_name form textarea {
+    margin-bottom: 10px;
+}
+
 .board .lists .list .list_name h2 {
     font-size: 1.3em;
 }

@@ -142,7 +142,7 @@ export class CardComponent implements OnInit  {
     }
 
     loadCard(board_id: number, card_id: number): void {
-        this.boardService.getCard(board_id, card_id).then(card => this.card = card);
+        this.cardService.getCard(board_id, card_id).then(card => this.card = card);
     }
 
     loadBoard(board_id: number): void {

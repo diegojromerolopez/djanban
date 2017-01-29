@@ -4,9 +4,32 @@
         </h1>
     <div class="lists" [style.width.px]="board.lists.length * 420 + 80">
         <div *ngFor="let list of board.lists" class="list panel panel-default">
-            <span class="list_name panel-heading cursor-pointer">
-                <span>{{list.name}}</span> ({{list.cards.length}} tasks)
-            </span>
+            <div class="list_name panel-heading cursor-pointer">
+                <div class="list_name">
+                    <span class="list_name_name">
+                        <span>{{list.name}}</span> ({{list.cards.length}} tasks)
+                    </span>
+                    <span (click)="showNewCardForm[list.id] = true" class="btn btn-primary list_name_new_card" title="New card in list {{list.name}}">
+                        <span class="fa fa-plus"></span> Card
+                    </span>
+                </div>
+                <div *ngIf="showNewCardForm[list.id]" class="list_new_card">
+                    <form (ngSubmit)="onNewCardSubmit(list, newCardForm.value.name, newCardForm.value.position)" #newCardForm="ngForm">
+                    <textarea name="name" class=card_name-edit placeholder="Title of your new card" required ngModel></textarea>
+                    <select name="position" required ngModel>
+                        <option value="top">Top</option>
+                        <option value="bottom">Bottom</option>
+                    </select>
+                    <div>
+                        <span class="btn btn-danger" (click)="showNewCardForm[list.id] = false">Cancel</span>
+                        <button type="submit" class="btn btn-success change_name" title="Create new card on list {{list.name}}"
+                                [disabled]="!newCardForm.valid">
+                            Create
+                        </button>
+                    </div>
+                    </form>
+                </div>
+            </div>
             <div [dragula]='"cards"' [dragulaModel]='list.cards'
                     id="card-list-{{list.id}}" class="cards" [attr.data-list]="list.id">
                 <div *ngFor="let card of list.cards"
@@ -15,7 +38,6 @@
                         <span (click)="onCardSelect(card)" class="card_name">
                             <span class=card_name-name>{{card.name}}</span>
                         </span>
-
                         <a href="{{card.short_url}}" title="View card" class="card_action_view">
                             <span class="fa fa-trello"></span>
                         </a>

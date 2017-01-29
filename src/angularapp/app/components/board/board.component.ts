@@ -19,6 +19,7 @@ import { CardService } from '../../services/card.service';
 
 export class BoardComponent implements OnInit {
     board: Board;
+    showNewCardForm: {};
 
     ngOnInit(): void {
       let that = this;
@@ -35,6 +36,7 @@ export class BoardComponent implements OnInit {
         private cardService: CardService,
         private dragulaService: DragulaService
     ) {
+      this.showNewCardForm = { };
       dragulaService.drag.subscribe((value: any) => {
         console.log(`drag: ${value[0]}`);
         this.onDrag(value.slice(1));
@@ -112,14 +114,24 @@ export class BoardComponent implements OnInit {
       // do something
     }
 
+    /** Load board */
     loadBoard(board_id: number): void {
-        this.boardService.getBoard(board_id).then(board_response =>{this.board =new Board(board_response)});
+        this.boardService.getBoard(board_id).then(board_response =>{
+          this.board = new Board(board_response);
+        });
     }
 
+    /** Move to the card view */
     onCardSelect(card: Card): void {
       this.router.navigate([this.board.id, 'card', card.id]);
     }
 
-    
+    /* Controls for card creation form */
+    onNewCardSubmit(list: List, name: string, position: string): void {
+      this.cardService.addCard(this.board, list, name, position).then(card_response => {
+        List.addCardToList(list, card_response, position);
+        this.showNewCardForm[list.id] = false;
+      });
+    }
 
 }

@@ -107,7 +107,7 @@ var CardComponent = (function () {
     };
     CardComponent.prototype.loadCard = function (board_id, card_id) {
         var _this = this;
-        this.boardService.getCard(board_id, card_id).then(function (card) { return _this.card = card; });
+        this.cardService.getCard(board_id, card_id).then(function (card) { return _this.card = card; });
     };
     CardComponent.prototype.loadBoard = function (board_id) {
         var _this = this;

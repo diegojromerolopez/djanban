@@ -18,15 +18,18 @@ export class List {
   }
 
   public addCard(card: Card, position: any){
-    if(position == "top"){
-      this.cards = [card].concat(this.cards);
-    }else if(position == "bottom"){
-      this.cards = this.cards.concat([card]);
-    }else{
-      this.cards.push(card);
-      this.sortCards();
-    }
+    List.addCardToList(this, card, position);
+  }
 
+  public static addCardToList(list: List, card: Card, position: any){
+    if(position == "top"){
+      list.cards = [card].concat(list.cards);
+    }else if(position == "bottom"){
+      list.cards = list.cards.concat([card]);
+    }else{
+      list.cards.push(card);
+      List.sortListCards(list);
+    }
   }
 
   public removeCard(card: Card){
@@ -46,7 +49,11 @@ export class List {
   }
 
   private sortCards(){
-    this.cards.sort(function(card_i: Card, card_j: Card){
+    List.sortListCards(this);
+  }
+
+  private static sortListCards(list: List){
+    list.cards.sort(function(card_i: Card, card_j: Card){
         if(card_i.position < card_j.position) {
           return -1;
         }else if(card_i.position > card_j.position) {

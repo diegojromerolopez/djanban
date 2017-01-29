@@ -25,7 +25,6 @@ var BoardService = (function (_super) {
         var _this = _super.call(this, http) || this;
         _this.GET_BOARDS_URL = '/api/boards/info';
         _this.GET_BOARD_URL = '/api/board/{id}/info';
-        _this.GET_CARD_URL = '/api/board/{board_id}/card/{card_id}/info';
         return _this;
     }
     BoardService.prototype.getBoards = function () {
@@ -38,13 +37,6 @@ var BoardService = (function (_super) {
     BoardService.prototype.getBoard = function (board_id) {
         var get_board_url = this.GET_BOARD_URL.replace(/\{id\}/, board_id.toString());
         return this.http.get(get_board_url)
-            .toPromise()
-            .then(this.extractData)
-            .catch(this.handleError);
-    };
-    BoardService.prototype.getCard = function (board_id, card_id) {
-        var get_card_url = this.GET_CARD_URL.replace(/\{board_id\}/, board_id.toString()).replace(/\{card_id\}/, card_id.toString());
-        return this.http.get(get_card_url)
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);
