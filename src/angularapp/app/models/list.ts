@@ -32,11 +32,17 @@ export class List {
   public removeCard(card: Card){
     let removed_card = this.getCardById(card.id);
     let removed_card_index = this.cards.indexOf(removed_card);
+    if(removed_card_index < 0){
+      return false;
+    }
     if(removed_card_index == 0){
       this.cards.pop();
+    }else if(removed_card_index == this.cards.length){
+      this.cards = this.cards.slice(0, this.cards.length-1);
     }else{
       this.cards.slice(0, removed_card_index).concat(this.cards.slice(removed_card_index+1))
-    } 
+    }
+    return true; 
   }
 
   private sortCards(){

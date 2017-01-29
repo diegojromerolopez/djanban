@@ -23,13 +23,13 @@ import 'rxjs/add/operator/toPromise';
 @Injectable()
 export class CardService extends DjangoTrelloStatsService {
 
-  private ADD_SE_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/time";
-  private ADD_COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment";
-  private COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
-  private MOVE_CARD_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/list";
-  private CHANGE_LABELS_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/labels";
-  private CHANGE_MEMBERS_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/members";
-  private CHANGE_CARD_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}";
+  private ADD_SE_URL = "/api/board/{board_id}/card/{card_id}/time";
+  private ADD_COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment";
+  private COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
+  private MOVE_CARD_URL = "/api/board/{board_id}/card/{card_id}/list";
+  private CHANGE_LABELS_URL = "/api/board/{board_id}/card/{card_id}/labels";
+  private CHANGE_MEMBERS_URL = "/api/board/{board_id}/card/{card_id}/members";
+  private CHANGE_CARD_URL = "/api/board/{board_id}/card/{card_id}";
 
   constructor (http: Http) {
     super(http);

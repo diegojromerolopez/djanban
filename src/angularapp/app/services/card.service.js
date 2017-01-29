@@ -24,13 +24,13 @@ var CardService = (function (_super) {
     __extends(CardService, _super);
     function CardService(http) {
         var _this = _super.call(this, http) || this;
-        _this.ADD_SE_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/time";
-        _this.ADD_COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment";
-        _this.COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
-        _this.MOVE_CARD_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/list";
-        _this.CHANGE_LABELS_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/labels";
-        _this.CHANGE_MEMBERS_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/members";
-        _this.CHANGE_CARD_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}";
+        _this.ADD_SE_URL = "/api/board/{board_id}/card/{card_id}/time";
+        _this.ADD_COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment";
+        _this.COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
+        _this.MOVE_CARD_URL = "/api/board/{board_id}/card/{card_id}/list";
+        _this.CHANGE_LABELS_URL = "/api/board/{board_id}/card/{card_id}/labels";
+        _this.CHANGE_MEMBERS_URL = "/api/board/{board_id}/card/{card_id}/members";
+        _this.CHANGE_CARD_URL = "/api/board/{board_id}/card/{card_id}";
         return _this;
     }
     CardService.prototype.addSETime = function (card, date, spent_time, estimated_time, description) {

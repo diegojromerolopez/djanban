@@ -23,9 +23,9 @@ var BoardService = (function (_super) {
     __extends(BoardService, _super);
     function BoardService(http) {
         var _this = _super.call(this, http) || this;
-        _this.GET_BOARDS_URL = 'http://localhost:8000/api/boards/info';
-        _this.GET_BOARD_URL = 'http://localhost:8000/api/board/{id}/info';
-        _this.GET_CARD_URL = 'http://localhost:8000/api/board/{board_id}/card/{card_id}/info';
+        _this.GET_BOARDS_URL = '/api/boards/info';
+        _this.GET_BOARD_URL = '/api/board/{id}/info';
+        _this.GET_CARD_URL = '/api/board/{board_id}/card/{card_id}/info';
         return _this;
     }
     BoardService.prototype.getBoards = function () {

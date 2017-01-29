@@ -97,8 +97,8 @@ export class BoardComponent implements OnInit {
 
       // Move card to list
       this.cardService.moveCard(moved_card, destination_list, destination_position).then(card => {
-        source_list.removeCard(moved_card);
-        destination_list.addCard(moved_card, destination_position);
+        //source_list.removeCard(moved_card);
+        //destination_list.addCard(moved_card, destination_position);
       });
     }
 

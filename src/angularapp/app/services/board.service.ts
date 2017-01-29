@@ -18,10 +18,10 @@ import 'rxjs/add/operator/toPromise';
 @Injectable()
 export class BoardService extends DjangoTrelloStatsService{
 
-  private GET_BOARDS_URL = 'http://localhost:8000/api/boards/info';
+  private GET_BOARDS_URL = '/api/boards/info';
 
-  private GET_BOARD_URL = 'http://localhost:8000/api/board/{id}/info';
-  private GET_CARD_URL = 'http://localhost:8000/api/board/{board_id}/card/{card_id}/info';
+  private GET_BOARD_URL = '/api/board/{id}/info';
+  private GET_CARD_URL = '/api/board/{board_id}/card/{card_id}/info';
 
   constructor (http: Http) {
       super(http);

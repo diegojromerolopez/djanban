@@ -82,8 +82,8 @@ var BoardComponent = (function () {
         }
         // Move card to list
         this.cardService.moveCard(moved_card, destination_list, destination_position).then(function (card) {
-            source_list.removeCard(moved_card);
-            destination_list.addCard(moved_card, destination_position);
+            //source_list.removeCard(moved_card);
+            //destination_list.addCard(moved_card, destination_position);
         });
     };
     BoardComponent.prototype.onOver = function (args) {
