@@ -72,6 +72,7 @@ def get_board(request, board_id):
         "uuid": board.uuid,
         "name": board.name,
         "description": board.description,
+        "local_url": reverse("boards:view", args=(board.id,)),
         "lists": lists_json,
         "members": [
             {"id": member.id, "trello_username": member.trello_username, "initials": member.initials}

@@ -1,9 +1,11 @@
 <div *ngIf="board" class="board">
-    <h1 class="board_name">{{board.name}}</h1>
+    <h1 class="board_name">
+        <a href="{{board.local_url}}" title="View board {{board.name}} details">{{board.name}}</a>
+        </h1>
     <div class="lists" [style.width.px]="board.lists.length * 420 + 80">
         <div *ngFor="let list of board.lists" class="list panel panel-default">
             <span class="list_name panel-heading cursor-pointer">
-                <span>{{list.name}}</span> {{list.cards.length}} tasks
+                <span>{{list.name}}</span> ({{list.cards.length}} tasks)
             </span>
             <div [dragula]='"cards"' [dragulaModel]='list.cards'
                     id="card-list-{{list.id}}" class="cards" [attr.data-list]="list.id">

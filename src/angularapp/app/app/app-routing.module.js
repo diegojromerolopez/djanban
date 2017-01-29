@@ -12,8 +12,8 @@ var dashboard_component_1 = require("../components/dashboard/dashboard.component
 var card_component_1 = require("../components/card/card.component");
 var routes = [
     { path: '', component: dashboard_component_1.DashboardComponent },
-    { path: 'board/:board_id', component: board_component_1.BoardComponent },
-    { path: 'board/:board_id/card/:card_id', component: card_component_1.CardComponent }
+    { path: ':board_id', component: board_component_1.BoardComponent },
+    { path: ':board_id/card/:card_id', component: card_component_1.CardComponent }
 ];
 var AppRoutingModule = (function () {
     function AppRoutingModule() {

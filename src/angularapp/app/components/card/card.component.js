@@ -13,7 +13,8 @@ var router_1 = require("@angular/router");
 var board_service_1 = require("../../services/board.service");
 var card_service_1 = require("../../services/card.service");
 var CardComponent = (function () {
-    function CardComponent(route, boardService, cardService) {
+    function CardComponent(router, route, boardService, cardService) {
+        this.router = router;
         this.route = route;
         this.boardService = boardService;
         this.cardService = cardService;
@@ -101,6 +102,9 @@ var CardComponent = (function () {
             _this.card.comments.splice(_this.card.comments.indexOf(comment), 1);
         });
     };
+    CardComponent.prototype.onReturnToBoardSelect = function () {
+        this.router.navigate([this.board.id]);
+    };
     CardComponent.prototype.loadCard = function (board_id, card_id) {
         var _this = this;
         this.boardService.getCard(board_id, card_id).then(function (card) { return _this.card = card; });
@@ -119,7 +123,8 @@ CardComponent = __decorate([
         styleUrls: ['card.component.css'],
         providers: [board_service_1.BoardService, card_service_1.CardService]
     }),
-    __metadata("design:paramtypes", [router_1.ActivatedRoute,
+    __metadata("design:paramtypes", [router_1.Router,
+        router_1.ActivatedRoute,
         board_service_1.BoardService,
         card_service_1.CardService])
 ], CardComponent);

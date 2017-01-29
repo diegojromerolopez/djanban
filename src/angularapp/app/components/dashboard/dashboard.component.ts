@@ -29,7 +29,7 @@ export class DashboardComponent implements OnInit  {
     }
 
     onBoardSelect(board: Board) {
-        this.router.navigate(['/board', board.id]);
+        this.router.navigate([board.id]);
     }
 
 }

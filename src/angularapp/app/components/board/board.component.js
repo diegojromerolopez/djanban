@@ -99,7 +99,7 @@ var BoardComponent = (function () {
         this.boardService.getBoard(board_id).then(function (board_response) { _this.board = new board_1.Board(board_response); });
     };
     BoardComponent.prototype.onCardSelect = function (card) {
-        this.router.navigate(['/board', this.board.id, 'card', card.id]);
+        this.router.navigate([this.board.id, 'card', card.id]);
     };
     return BoardComponent;
 }());

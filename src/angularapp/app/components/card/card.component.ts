@@ -2,7 +2,7 @@ import { composeValidators } from '@angular/forms/src/directives/shared';
 import { Validator } from '@angular/forms';
 import { Component, OnInit, DebugElement } from '@angular/core';
 import { FormGroup, FormBuilder ,Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BoardService } from '../../services/board.service';
 import { Card } from '../../models/card';
 import { Board } from '../../models/board';
@@ -51,6 +51,7 @@ export class CardComponent implements OnInit  {
     }
 
     constructor(
+        private router: Router,
         private route: ActivatedRoute,
         private boardService: BoardService,
         private cardService: CardService
@@ -134,6 +135,10 @@ export class CardComponent implements OnInit  {
         this.cardService.deleteComment(this.card, comment).then(deleted_comment => {
             this.card.comments.splice(this.card.comments.indexOf(comment), 1);
         });
+    }
+
+    onReturnToBoardSelect(): void {
+      this.router.navigate([this.board.id]);
     }
 
     loadCard(board_id: number, card_id: number): void {

@@ -117,7 +117,7 @@ export class BoardComponent implements OnInit {
     }
 
     onCardSelect(card: Card): void {
-      this.router.navigate(['/board', this.board.id, 'card', card.id]);
+      this.router.navigate([this.board.id, 'card', card.id]);
     }
 
     

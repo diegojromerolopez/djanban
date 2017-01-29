@@ -24,7 +24,7 @@ var DashboardComponent = (function () {
         this.boardService.getBoards().then(function (boards) { return _this.boards = boards; });
     };
     DashboardComponent.prototype.onBoardSelect = function (board) {
-        this.router.navigate(['/board', board.id]);
+        this.router.navigate([board.id]);
     };
     return DashboardComponent;
 }());

@@ -4,6 +4,14 @@
     <div id="full_task_board" style="min-width: {{num_lists|multiply:260|add:100}}px; background-color: #{{board.background_color}};">
         <h2 style="color: #{{board.title_color}};">{{board.name}} task board</h2>
         <div class="row">
+            <div class="col-md-12">
+                <a href="{% url 'boards:view_dashboard' board.id %}" class="btn btn-primary">
+                    <span class="fa fa-eye">
+                    View task board
+                </a>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-12" style="color: #{{board.title_color}};">
                 This board show all done tasks.
             </div>

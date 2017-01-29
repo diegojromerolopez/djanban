@@ -200,8 +200,19 @@ def view_gantt_chart(request, board_id):
 
 
 # Dynamic task board view
-def view_dashboard(request, path=""):
+@member_required
+def view_dashboard(request, board_id, path=""):
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        member = None
+        if user_is_member(request.user):
+            member = request.user.member
+    except Board.DoesNotExist:
+        raise Http404
+
     replacements = {
+        "member": member,
+        "board": board,
         "ANGULAR_URL": settings.ANGULAR_URL,
         "DOMAIN": settings.DOMAIN,
         "PORT": settings.PORT

@@ -8,8 +8,8 @@ import { CardComponent } from '../components/card/card.component';
 
 const routes: Routes = [
   { path: '',  component: DashboardComponent },
-  { path: 'board/:board_id',  component: BoardComponent },
-  { path: 'board/:board_id/card/:card_id',  component: CardComponent }
+  { path: ':board_id',  component: BoardComponent },
+  { path: ':board_id/card/:card_id',  component: CardComponent }
 ];
 
 

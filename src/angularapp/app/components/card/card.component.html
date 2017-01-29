@@ -1,8 +1,10 @@
 <!--component html goes here -->
-<a *ngIf="board" [routerLink]="['/board', board.id]" class="btn btn-primary">
-    <span class="fa fa-eye"></span>
-    Return to board
-</a>
+<p>
+    <a *ngIf="board" (click)="onReturnToBoardSelect()" class="btn btn-primary">
+        <span class="fa fa-arrow-left"></span>
+        Return to board
+    </a>
+</p>
 
 
 <div *ngIf="card" class="panel panel-default card-view">

@@ -9,6 +9,7 @@ export class Board {
   uuid: string;
   name: string;
   description: string;
+  local_url?: string;
   lists?: List[];
   labels?: Label[];
   members?: Member[];

@@ -35,6 +35,10 @@
   <base href="/boards/dashboard">
 {% endblock extra_meta %}
 
+{% block content_menu %}
+    {% include "boards/components/view/menu.html" %}
+{% endblock %}
+
 {% block content %}
   <django-trello-stats>Loading...</django-trello-stats>
 {% endblock content %}
