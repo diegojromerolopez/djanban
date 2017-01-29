@@ -29,6 +29,7 @@ var CardService = (function (_super) {
         _this.COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
         _this.MOVE_CARD_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/list";
         _this.CHANGE_LABELS_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/labels";
+        _this.CHANGE_MEMBERS_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/members";
         _this.CHANGE_CARD_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}";
         return _this;
     }
@@ -54,9 +55,16 @@ var CardService = (function (_super) {
             .then(this.extractData)
             .catch(this.handleError);
     };
-    CardService.prototype.changeCardLabels = function (card, new_labels_id) {
+    CardService.prototype.changeCardLabels = function (card, new_label_ids) {
         var chage_labels_url = this.prepareUrl(this.CHANGE_LABELS_URL, card);
-        return this.http.post(chage_labels_url, { labels: new_labels_id })
+        return this.http.post(chage_labels_url, { labels: new_label_ids })
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    CardService.prototype.changeCardMembers = function (card, new_members_ids) {
+        var chage_members_url = this.prepareUrl(this.CHANGE_MEMBERS_URL, card);
+        return this.http.post(chage_members_url, { members: new_members_ids })
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);

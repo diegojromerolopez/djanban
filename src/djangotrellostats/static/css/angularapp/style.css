@@ -110,3 +110,7 @@ h1, h2, h3 {
 .edit-comment-button {
     margin-left: 10px;
 }
+
+.card-section.card-labels form {
+    margin-left: 0px;
+}

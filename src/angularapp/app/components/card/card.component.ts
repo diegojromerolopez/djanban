@@ -10,6 +10,7 @@ import { List } from '../../models/list';
 import { CardService } from '../../services/card.service';
 import { CardComment } from '../../models/comment';
 import { Label } from '../../models/label';
+import { Member } from '../../models/member';
 
 
 @Component({
@@ -23,8 +24,9 @@ import { Label } from '../../models/label';
 
 export class CardComponent implements OnInit  {
 
-    private board_id: number;
+    private board: Board;
     private card: Card;
+    
     private editing_comment?: CardComment;
     private change_card_list?: boolean;
     private change_card_labels?: boolean;
@@ -35,13 +37,16 @@ export class CardComponent implements OnInit  {
     private show_card_description_edition_form?: boolean;
     private editing_card_description?: boolean;
 
+    private show_card_members_edition_form?: boolean;
+    private editing_card_members?: boolean;
+
     ngOnInit(): void {
         let that = this;
         this.route.params.subscribe(params => {
-        let board_id = params["board_id"];
-        let card_id = params["card_id"];
-        this.board_id = board_id;
-        that.loadCard(board_id, card_id);
+            let board_id = params["board_id"];
+            let card_id = params["card_id"];
+            that.loadBoard(board_id);
+            that.loadCard(board_id, card_id);
         });
     }
 
@@ -57,6 +62,10 @@ export class CardComponent implements OnInit  {
         return this.card.labels.find(function(label_i){ return label_i.id == label.id }) != undefined;
     }
 
+    cardHasMember(member: Member): boolean {
+        return this.card.members.find(function(member_id){ return member_id.id == member.id }) != undefined;
+    }
+
     showCommentEdition(comment: CardComment) {
         this.editing_comment = comment;
         //this.EditCommentForm.value.content = comment.content;
@@ -70,15 +79,19 @@ export class CardComponent implements OnInit  {
         this.cardService.changeCardLabels(this.card, label_ids).then(updated_card => this.card = updated_card);
     }
 
-    onChangeCardName(card: Card, name: string){
-        this.cardService.changeCardName(card, name).then(card_response => {
+    onChangeCardMembers(member_ids: number[]): void{
+        this.cardService.changeCardMembers(this.card, member_ids).then(updated_card => this.card = updated_card);
+    }
+
+    onChangeCardName(name: string){
+        this.cardService.changeCardName(this.card, name).then(card_response => {
             this.card.name = name;
             this.show_card_name_edition_form = false;
         });
     }
 
-    onChangeCardDescription(card: Card, description: string){
-        this.cardService.changeCardDescription(card, description).then(card_response => {
+    onChangeCardDescription(description: string){
+        this.cardService.changeCardDescription(this.card, description).then(card_response => {
             this.card.description = description;
             this.show_card_description_edition_form = false;
         });
@@ -125,6 +138,10 @@ export class CardComponent implements OnInit  {
 
     loadCard(board_id: number, card_id: number): void {
         this.boardService.getCard(board_id, card_id).then(card => this.card = card);
+    }
+
+    loadBoard(board_id: number): void {
+        this.boardService.getBoard(board_id).then(board => this.board = board);
     }
 
 }

@@ -6,7 +6,7 @@
     <div class="panel-heading">
         <h1 *ngIf="!show_card_name_edition_form" (click)="show_card_name_edition_form=true">{{card.name}}</h1>
         <div *ngIf="show_card_name_edition_form">
-            <form (ngSubmit)="onChangeCardName(card, changeCardNameForm.value.name)" #changeCardNameForm="ngForm">
+            <form (ngSubmit)="onChangeCardName(changeCardNameForm.value.name)" #changeCardNameForm="ngForm">
                 <textarea name="name" class=card_name-edit required [(ngModel)]='card.name'></textarea>
                 <div>
                     <span class="btn btn-danger" (click)="show_card_name_edition_form=false">Cancel</span>
@@ -117,6 +117,24 @@
                 <div *ngIf="card.members.length == 0">
                     This task has no assigned members.
                 </div>
+                <button class="btn btn-primary" *ngIf="!show_card_members_edition_form" (click)="show_card_members_edition_form=true">Edit</button>
+                
+                <div *ngIf="show_card_members_edition_form">
+                    <form (ngSubmit)="onChangeCardMembers(changeCardMembersForm.value.members)" #changeCardMembersForm="ngForm">
+                        <select name="members" multiple required ngModel>
+                            <option *ngFor="let member of board.members" [value]="member.id" [selected]="cardHasMember(member)?true:false">
+                                {{member.trello_username}}
+                            </option>
+                        </select>
+                        <div>
+                            <span class="btn btn-danger" (click)="show_card_members_edition_form = false">Cancel</span>
+                            <button type="submit" class="btn btn-success change_labels" title="Change labels">
+                                <span class="fa fa-users"></span>
+                                Change members
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         
         <div class="card-spent_estimated_time card-section">
@@ -168,7 +186,7 @@
                 <em>No description.</em>
             </div>
             <div *ngIf="show_card_description_edition_form">
-                <form (ngSubmit)="onChangeCardDescription(card, changeCardDescriptionForm.value.description)" #changeCardDescriptionForm="ngForm">
+                <form (ngSubmit)="onChangeCardDescription(changeCardDescriptionForm.value.description)" #changeCardDescriptionForm="ngForm">
                     <textarea name="description" class=card_description-edit required [(ngModel)]='card.description'></textarea>
                     <div>
                         <span class="btn btn-danger" (click)="show_card_description_edition_form=false">Cancel</span>

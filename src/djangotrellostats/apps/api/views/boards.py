@@ -72,7 +72,11 @@ def get_board(request, board_id):
         "uuid": board.uuid,
         "name": board.name,
         "description": board.description,
-        "lists": lists_json
+        "lists": lists_json,
+        "members": [
+            {"id": member.id, "trello_username": member.trello_username, "initials": member.initials}
+            for member in board.members.all().order_by("initials")
+        ],
     }
 
     return JsonResponse(board_json)

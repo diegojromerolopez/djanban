@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import json
 import re
 
+from django.db import transaction
 from django.http import Http404
 from django.http import HttpResponseBadRequest
 from django.http import JsonResponse
@@ -18,27 +19,19 @@ from djangotrellostats.trello_api.cards import set_name, set_description
 
 @member_required
 def get_card(request, board_id, card_id):
-    try:
-        board = get_user_boards(request.user).get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
-
-    card = board.cards.get(id=card_id)
+    card = _get_card_or_404(request, board_id, card_id)
     card_json = serialize_card(card)
     return JsonResponse(card_json)
 
 
 @member_required
+@transaction.atomic
 def change(request, board_id, card_id):
     if request.method != "PUT":
         raise Http404
 
     member = request.user.member
-    try:
-        board = get_user_boards(request.user).get(id=board_id)
-        card = board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
-        raise Http404
+    card = _get_card_or_404(request, board_id, card_id)
 
     put_params = json.loads(request.body)
 
@@ -57,16 +50,15 @@ def change(request, board_id, card_id):
 
     return JsonResponse(serialize_card(card))
 
+
 @member_required
+@transaction.atomic
 def change_labels(request, board_id, card_id):
     if request.method != "POST":
         raise Http404
 
-    try:
-        board = get_user_boards(request.user).get(id=board_id)
-        card = board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
-        raise Http404
+    card = _get_card_or_404(request, board_id, card_id)
+    board = card.board
 
     post_params = json.loads(request.body)
 
@@ -83,8 +75,33 @@ def change_labels(request, board_id, card_id):
     return JsonResponse(serialize_card(card))
 
 
+@member_required
+@transaction.atomic
+def change_members(request, board_id, card_id):
+    if request.method != "POST":
+        raise Http404
+
+    card = _get_card_or_404(request, board_id, card_id)
+    board = card.board
+
+    post_params = json.loads(request.body)
+
+    if not post_params.get("members"):
+        return HttpResponseBadRequest()
+
+    member_ids = post_params.get("members")
+    card.members.clear()
+    for member_id in member_ids:
+        if board.members.filter(id=member_id).exists():
+            member = board.members.get(id=member_id)
+            card.members.add(member)
+
+    return JsonResponse(serialize_card(card))
+
+
 # Change list
 @member_required
+@transaction.atomic
 def move_to_list(request, board_id, card_id):
     if request.method != "POST":
         raise Http404
@@ -92,16 +109,12 @@ def move_to_list(request, board_id, card_id):
     post_params = json.loads(request.body)
 
     member = request.user.member
-    try:
-        board = get_user_boards(request.user).get(id=board_id)
-        card = board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
-        raise Http404
+    card = _get_card_or_404(request, board_id, card_id)
 
     if not post_params.get("new_list"):
         return HttpResponseBadRequest()
 
-    list_ = board.lists.get(id=post_params.get("new_list"))
+    list_ = card.board.lists.get(id=post_params.get("new_list"))
 
     new_position = post_params.get("position", "top")
 
@@ -112,6 +125,7 @@ def move_to_list(request, board_id, card_id):
 
 # Creates a new comment
 @member_required
+@transaction.atomic
 def add_new_comment(request, board_id, card_id):
     if request.method != "PUT":
         raise Http404
@@ -119,11 +133,7 @@ def add_new_comment(request, board_id, card_id):
     put_params = json.loads(request.body)
 
     member = request.user.member
-    try:
-        board = get_user_boards(request.user).get(id=board_id)
-        card = board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
-        raise Http404
+    card = _get_card_or_404(request, board_id, card_id)
 
     # Getting the comment content
     comment_content = put_params.get("content")
@@ -147,16 +157,13 @@ def add_new_comment(request, board_id, card_id):
 
 # Add S/E time to card
 @member_required
+@transaction.atomic
 def add_se_time(request, board_id, card_id):
     if request.method != "POST":
         return HttpResponseBadRequest()
 
     member = request.user.member
-    try:
-        board = get_user_boards(request.user).get(id=board_id)
-        card = board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
-        raise Http404
+    card = _get_card_or_404(request, board_id, card_id)
 
     post_params = json.loads(request.body)
     spent_time = post_params.get("spent_time")
@@ -196,6 +203,7 @@ def add_se_time(request, board_id, card_id):
 
 # Delete or update a comment
 @member_required
+@transaction.atomic
 def modify_comment(request, board_id, card_id, comment_id):
     if request.method != "DELETE" and request.method != "POST":
         return HttpResponseBadRequest()
@@ -246,3 +254,10 @@ def _delete_comment(member, card, comment_to_delete):
     card.delete_comment(member, comment_to_delete)
     return comment_to_delete
 
+
+def _get_card_or_404(request, board_id, card_id):
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        return board.cards.get(id=card_id)
+    except (Board.DoesNotExist, Card.DoesNotExist, CardComment.DoesNotExist) as e:
+        raise Http404

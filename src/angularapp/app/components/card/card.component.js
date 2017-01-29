@@ -19,17 +19,19 @@ var CardComponent = (function () {
         this.cardService = cardService;
     }
     CardComponent.prototype.ngOnInit = function () {
-        var _this = this;
         var that = this;
         this.route.params.subscribe(function (params) {
             var board_id = params["board_id"];
             var card_id = params["card_id"];
-            _this.board_id = board_id;
+            that.loadBoard(board_id);
             that.loadCard(board_id, card_id);
         });
     };
     CardComponent.prototype.cardHasLabel = function (label) {
         return this.card.labels.find(function (label_i) { return label_i.id == label.id; }) != undefined;
+    };
+    CardComponent.prototype.cardHasMember = function (member) {
+        return this.card.members.find(function (member_id) { return member_id.id == member.id; }) != undefined;
     };
     CardComponent.prototype.showCommentEdition = function (comment) {
         this.editing_comment = comment;
@@ -42,16 +44,20 @@ var CardComponent = (function () {
         var _this = this;
         this.cardService.changeCardLabels(this.card, label_ids).then(function (updated_card) { return _this.card = updated_card; });
     };
-    CardComponent.prototype.onChangeCardName = function (card, name) {
+    CardComponent.prototype.onChangeCardMembers = function (member_ids) {
         var _this = this;
-        this.cardService.changeCardName(card, name).then(function (card_response) {
+        this.cardService.changeCardMembers(this.card, member_ids).then(function (updated_card) { return _this.card = updated_card; });
+    };
+    CardComponent.prototype.onChangeCardName = function (name) {
+        var _this = this;
+        this.cardService.changeCardName(this.card, name).then(function (card_response) {
             _this.card.name = name;
             _this.show_card_name_edition_form = false;
         });
     };
-    CardComponent.prototype.onChangeCardDescription = function (card, description) {
+    CardComponent.prototype.onChangeCardDescription = function (description) {
         var _this = this;
-        this.cardService.changeCardDescription(card, description).then(function (card_response) {
+        this.cardService.changeCardDescription(this.card, description).then(function (card_response) {
             _this.card.description = description;
             _this.show_card_description_edition_form = false;
         });
@@ -98,6 +104,10 @@ var CardComponent = (function () {
     CardComponent.prototype.loadCard = function (board_id, card_id) {
         var _this = this;
         this.boardService.getCard(board_id, card_id).then(function (card) { return _this.card = card; });
+    };
+    CardComponent.prototype.loadBoard = function (board_id) {
+        var _this = this;
+        this.boardService.getBoard(board_id).then(function (board) { return _this.board = board; });
     };
     return CardComponent;
 }());

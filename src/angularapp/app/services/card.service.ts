@@ -28,6 +28,7 @@ export class CardService extends DjangoTrelloStatsService {
   private COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
   private MOVE_CARD_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/list";
   private CHANGE_LABELS_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/labels";
+  private CHANGE_MEMBERS_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/members";
   private CHANGE_CARD_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}";
 
   constructor (http: Http) {
@@ -59,9 +60,17 @@ export class CardService extends DjangoTrelloStatsService {
                   .catch(this.handleError);
   }
 
-  changeCardLabels(card: Card, new_labels_id: number[]): Promise<Card> {
+  changeCardLabels(card: Card, new_label_ids: number[]): Promise<Card> {
     let chage_labels_url = this.prepareUrl(this.CHANGE_LABELS_URL, card);
-    return this.http.post(chage_labels_url, {labels: new_labels_id})
+    return this.http.post(chage_labels_url, {labels: new_label_ids})
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }
+
+  changeCardMembers(card: Card, new_members_ids: number[]): Promise<Card> {
+    let chage_members_url = this.prepareUrl(this.CHANGE_MEMBERS_URL, card);
+    return this.http.post(chage_members_url, {members: new_members_ids})
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);
