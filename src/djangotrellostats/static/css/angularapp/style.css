@@ -41,6 +41,25 @@ h1, h2, h3 {
     text-decoration: none;
 }
 
+/* Members */
+.board .members .members_header {
+    display: block;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.board .members .members_header h2 {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+
+.board .members form div,
+.board .members form select {
+    margin-bottom: 10px;
+}
+
+/* Listas */
 .board .lists {
     overflow: hidden;
 }

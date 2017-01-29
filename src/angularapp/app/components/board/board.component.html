@@ -6,10 +6,12 @@
             </h1>
         </div>
         <div class="members" *ngIf="members">
-            <h2>Members ({{board.members.length}})</h2>
-            <span class="btn btn-primary" (click)="showAddMemberForm=true">
-                <span class="fa fa-plus"></span>
-                Add member
+            <span class="members_header">
+                <h2>Members ({{board.members.length}})</h2>
+                <span class="btn btn-primary" (click)="showAddMemberForm=true" title="Show add member form for board {{board.name}}">
+                    <span class="fa fa-plus"></span>
+                    Member
+                </span>
             </span>
             <div *ngIf="showAddMemberForm" class="add_member">
                 <form (ngSubmit)="onAddMemberSubmit(addMemberForm.value.member)" #addMemberForm="ngForm">
