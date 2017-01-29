@@ -63,6 +63,27 @@ h1, h2, h3 {
 
 }
 
+.board .lists .list .move_list_handle {
+    cursor: move;
+    display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+
+    color: #fff;
+    background-color: #337ab7;
+    border-color: #2e6da4;
+}
+
 .board .lists .list .list_name form {
     display: block;
     margin-top: 10px;
@@ -87,6 +108,7 @@ h1, h2, h3 {
 }
 
 .board .lists .list .cards .card {
+    cursor: move;
     margin-bottom: 20px;
     margin-top: 20px;
     margin-left: 20px;
@@ -94,6 +116,7 @@ h1, h2, h3 {
 }
 
 .board .lists .list .cards .card .card_heading {
+    cursor: pointer;
     display: block;
 }
 

@@ -25,6 +25,11 @@ var BoardComponent = (function () {
         this.cardService = cardService;
         this.dragulaService = dragulaService;
         this.showNewCardForm = {};
+        dragulaService.setOptions('lists', {
+            moves: function (el, container, handle) {
+                return handle.className === 'move_list_handle';
+            }
+        });
         dragulaService.drag.subscribe(function (value) {
             console.log("drag: " + value[0]);
             _this.onDrag(value.slice(1));
@@ -35,6 +40,9 @@ var BoardComponent = (function () {
             // Card drop
             if (parameters[0] == "cards") {
                 _this.onCardDrop(parameters);
+            }
+            else if (parameters[0] == "lists") {
+                _this.onListDrop(parameters);
             }
         });
         dragulaService.over.subscribe(function (value) {
@@ -58,8 +66,6 @@ var BoardComponent = (function () {
         // do something
     };
     BoardComponent.prototype.onCardDrop = function (parameters) {
-        console.log(this.board);
-        console.log(this.board.getListById);
         // Source list
         var source_list_id = parameters[3]["dataset"]["list"];
         var source_list = new list_1.List(this.board.getListById(parseInt(source_list_id)));
@@ -86,6 +92,25 @@ var BoardComponent = (function () {
             //source_list.removeCard(moved_card);
             //destination_list.addCard(moved_card, destination_position);
         });
+    };
+    BoardComponent.prototype.onListDrop = function (parameters) {
+        console.log(parameters);
+        // Moved list
+        var moved_list_id = parameters[1]["dataset"]["list"];
+        var moved_list = new list_1.List(this.board.getListById(parseInt(moved_list_id)));
+        // Next list after the list has been moved
+        var next_list_id = parameters[4]["dataset"]["list"];
+        var next_list = null;
+        var destination_position = "bottom";
+        if (next_list_id) {
+            next_list = new list_1.List(this.board.getListById(parseInt(next_list_id)));
+            console.log("THIS IS NEXT LIST");
+            console.log(next_list);
+            console.log("THIS IS NEXT LIST POSITION");
+            console.log(next_list.position);
+            destination_position = (next_list.position - 10).toString();
+        }
+        this.boardService.moveList(this.board, moved_list, destination_position).then(function (list) { moved_list.position = list.position; });
     };
     BoardComponent.prototype.onOver = function (args) {
         var e = args[0], el = args[1], container = args[2];

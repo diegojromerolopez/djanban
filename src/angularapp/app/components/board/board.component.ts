@@ -37,6 +37,13 @@ export class BoardComponent implements OnInit {
         private dragulaService: DragulaService
     ) {
       this.showNewCardForm = { };
+
+      dragulaService.setOptions('lists', {
+        moves: function (el: any, container: any, handle: any) {
+          return handle.className === 'move_list_handle';
+        }
+      });
+
       dragulaService.drag.subscribe((value: any) => {
         console.log(`drag: ${value[0]}`);
         this.onDrag(value.slice(1));
@@ -49,6 +56,8 @@ export class BoardComponent implements OnInit {
         // Card drop
         if(parameters[0] == "cards"){
           this.onCardDrop(parameters);
+        }else if(parameters[0] == "lists"){
+          this.onListDrop(parameters);
         }
         
       });
@@ -69,8 +78,7 @@ export class BoardComponent implements OnInit {
     }
 
     private onCardDrop(parameters: any) {
-      console.log(this.board);
-      console.log(this.board.getListById);
+      
       // Source list
       let source_list_id = parameters[3]["dataset"]["list"];
       let source_list = new List(this.board.getListById(parseInt(source_list_id)));
@@ -102,6 +110,30 @@ export class BoardComponent implements OnInit {
         //source_list.removeCard(moved_card);
         //destination_list.addCard(moved_card, destination_position);
       });
+    }
+
+    private onListDrop(parameters: any) {
+      console.log(parameters);
+
+      // Moved list
+      let moved_list_id = parameters[1]["dataset"]["list"];
+      let moved_list = new List(this.board.getListById(parseInt(moved_list_id)));
+
+      // Next list after the list has been moved
+      let next_list_id = parameters[4]["dataset"]["list"];
+      let next_list = null;
+      let destination_position = "bottom";
+      if(next_list_id){
+        next_list = new List(this.board.getListById(parseInt(next_list_id)));
+        console.log("THIS IS NEXT LIST");
+        console.log(next_list);
+        console.log("THIS IS NEXT LIST POSITION");
+        console.log(next_list.position);
+        destination_position = (next_list.position - 10).toString();
+      }
+
+      this.boardService.moveList(this.board, moved_list, destination_position).then(list => { moved_list.position = list.position; });
+      
     }
 
     private onOver(args: any) {

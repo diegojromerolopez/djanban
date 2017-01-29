@@ -2,8 +2,8 @@
     <h1 class="board_name">
         <a href="{{board.local_url}}" title="View board {{board.name}} details">{{board.name}}</a>
         </h1>
-    <div class="lists" [style.width.px]="board.lists.length * 420 + 80">
-        <div *ngFor="let list of board.lists" class="list panel panel-default">
+    <div class="lists" [dragula]='"lists"' [dragulaModel]='list' [style.width.px]="board.lists.length * 420 + 80">
+        <div *ngFor="let list of board.lists" class="list panel panel-default" [attr.data-list]="list.id">
             <div class="list_name panel-heading cursor-pointer">
                 <div class="list_name">
                     <span class="list_name_name">
@@ -12,6 +12,7 @@
                     <span (click)="showNewCardForm[list.id] = true" class="btn btn-primary list_name_new_card" title="New card in list {{list.name}}">
                         <span class="fa fa-plus"></span> Card
                     </span>
+                    <span class="move_list_handle">[ + ]</span>
                 </div>
                 <div *ngIf="showNewCardForm[list.id]" class="list_new_card">
                     <form (ngSubmit)="onNewCardSubmit(list, newCardForm.value.name, newCardForm.value.position)" #newCardForm="ngForm">

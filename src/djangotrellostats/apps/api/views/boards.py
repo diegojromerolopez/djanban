@@ -6,6 +6,7 @@ from django.http import Http404
 from django.http import JsonResponse
 from django.urls import reverse
 
+from djangotrellostats.apps.api.serializers import serialize_list
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.models import Board
@@ -41,13 +42,7 @@ def get_board(request, board_id):
 
     lists_json = []
     for list_ in board.active_lists.order_by("position"):
-        list_json = {
-            "id": list_.id,
-            "name": list_.name,
-            "uuid": list_.uuid,
-            "type": list_.type,
-            "position": list_.position
-        }
+        list_json = serialize_list(list_)
 
         card_list = []
         for card in list_.cards.filter(is_closed=False).order_by("position"):

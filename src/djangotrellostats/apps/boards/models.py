@@ -25,6 +25,7 @@ from djangotrellostats.trello_api.cards import move_card,\
     add_comment_to_card, edit_comment_of_card, delete_comment_of_card, \
     remove_label_of_card, add_label_to_card, order_card, new_card
 
+from djangotrellostats.trello_api.lists import move_list
 
 # Abstract model that represents the immutable objects
 class ImmutableModel(models.Model):
@@ -1144,6 +1145,14 @@ class List(models.Model):
         card.save()
 
         return card
+
+    @transaction.atomic
+    # Move the position of a list
+    def move(self, member, position):
+        self.position = position
+        self.save()
+        # Call to trello API
+        move_list(self, member, position)
 
     # Return all cards that are not archived (closed)
     @property

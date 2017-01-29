@@ -11,6 +11,7 @@ from django.http import HttpResponseBadRequest
 from django.http import JsonResponse
 
 from djangotrellostats.apps.api.serializers import serialize_card
+from djangotrellostats.apps.api.util import get_list_or_404, get_card_or_404
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.models import Board, Card, CardComment, List
@@ -32,7 +33,7 @@ def add_card(request, board_id):
     if put_params.get("position") != "top" and put_params.get("position") != "bottom":
         return HttpResponseBadRequest()
 
-    list_ = _get_list_or_404(request, board_id, put_params.get("list"))
+    list_ = get_list_or_404(request, board_id, put_params.get("list"))
 
     new_card = list_.add_card(member=member, name=put_params.get("name"), position=put_params.get("position"))
 
@@ -41,7 +42,7 @@ def add_card(request, board_id):
 
 @member_required
 def get_card(request, board_id, card_id):
-    card = _get_card_or_404(request, board_id, card_id)
+    card = get_card_or_404(request, board_id, card_id)
     card_json = serialize_card(card)
     return JsonResponse(card_json)
 
@@ -53,7 +54,7 @@ def change(request, board_id, card_id):
         raise Http404
 
     member = request.user.member
-    card = _get_card_or_404(request, board_id, card_id)
+    card = get_card_or_404(request, board_id, card_id)
 
     put_params = json.loads(request.body)
 
@@ -79,7 +80,7 @@ def change_labels(request, board_id, card_id):
     if request.method != "POST":
         raise Http404
 
-    card = _get_card_or_404(request, board_id, card_id)
+    card = get_card_or_404(request, board_id, card_id)
     board = card.board
 
     post_params = json.loads(request.body)
@@ -103,7 +104,7 @@ def change_members(request, board_id, card_id):
     if request.method != "POST":
         raise Http404
 
-    card = _get_card_or_404(request, board_id, card_id)
+    card = get_card_or_404(request, board_id, card_id)
     board = card.board
 
     post_params = json.loads(request.body)
@@ -131,7 +132,7 @@ def move_to_list(request, board_id, card_id):
     post_params = json.loads(request.body)
 
     member = request.user.member
-    card = _get_card_or_404(request, board_id, card_id)
+    card = get_card_or_404(request, board_id, card_id)
 
     if not post_params.get("new_list"):
         return HttpResponseBadRequest()
@@ -155,7 +156,7 @@ def add_new_comment(request, board_id, card_id):
     put_params = json.loads(request.body)
 
     member = request.user.member
-    card = _get_card_or_404(request, board_id, card_id)
+    card = get_card_or_404(request, board_id, card_id)
 
     # Getting the comment content
     comment_content = put_params.get("content")
@@ -185,7 +186,7 @@ def add_se_time(request, board_id, card_id):
         return HttpResponseBadRequest()
 
     member = request.user.member
-    card = _get_card_or_404(request, board_id, card_id)
+    card = get_card_or_404(request, board_id, card_id)
 
     post_params = json.loads(request.body)
     spent_time = post_params.get("spent_time")
@@ -276,32 +277,3 @@ def _delete_comment(member, card, comment_to_delete):
     card.delete_comment(member, comment_to_delete)
     return comment_to_delete
 
-
-# Returns the card with id card_id
-# if this is not a user's card or doesn't exist, raise 404.
-def _get_card_or_404(request, board_id, card_id):
-    try:
-        board = _get_board_or_404(request, board_id)
-        return board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist):
-        raise Http404
-
-
-# Returns the list with id equals to list_id
-# if the list does not belong to the board with board_id or it does not exist (or is closed)
-# raises a 404 error.
-def _get_list_or_404(request, board_id, list_id):
-    try:
-        board = _get_board_or_404(request, board_id)
-        return board.active_lists.get(id=list_id)
-    except (Board.DoesNotExist, List.DoesNotExist):
-        raise Http404
-
-
-# Returns the board with id board_id
-# if this is not a user's board or it doesn't exist, raise 404.
-def _get_board_or_404(request, board_id):
-    try:
-        return get_user_boards(request.user).get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404

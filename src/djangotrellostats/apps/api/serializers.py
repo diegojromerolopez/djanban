@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from django.urls import reverse
 
 
+# Card serialization
 def serialize_card(card):
     board = card.board
     card_list = card.list
@@ -61,13 +62,7 @@ def serialize_card(card):
                 for label in board.labels.exclude(name="").order_by("name")
             ]
         },
-        "list": {
-            "id": card_list.id,
-            "name": card_list.name,
-            "uuid": card_list.uuid,
-            "type": card_list.type,
-            "position": card_list.position
-        },
+        "list": serialize_list(card_list),
         "members": [
             {"id": member.id, "trello_username": member.trello_username, "initials": member.initials}
             for member in card.members.all().order_by("initials")
@@ -101,3 +96,15 @@ def serialize_card(card):
         }
     }
     return card_json
+
+
+# List serialization
+def serialize_list(list_):
+    list_json = {
+        "id": list_.id,
+        "name": list_.name,
+        "uuid": list_.uuid,
+        "type": list_.type,
+        "position": list_.position
+    }
+    return list_json

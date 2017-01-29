@@ -130,7 +130,7 @@ export class CardService extends DjangoTrelloStatsService {
                   .catch(this.handleError);
   }
 
-  moveCard(card: Card, new_list: List, position = "top"): Promise<Card> {
+  moveCard(card: Card, new_list: List, position="top"): Promise<Card> {
     let move_list_url = this.prepareUrl(this.MOVE_CARD_URL, card);
     return this.http.post(move_list_url, {new_list: new_list.id, position: position})
                   .toPromise()
