@@ -43,14 +43,15 @@
                                 <span class="fa fa-list"></span>
                             </a>
                         </li>
-                        <li {% if url_name == "view_dashboard" %}class="active"{% endif %}>
-                            <a href="{% url 'boards:view_dashboard' board.id %}" title="Full board for {{board.name}}">
-                                <span class="fa fa-navicon fa-rotate-90"></span>
-                            </a>
-                        </li>
-
                     {% endif %}
                     {% if board.is_ready and board.is_fetched %}
+                        {% if member %}
+                            <li {% if url_name == "view_dashboard" %}class="active"{% endif %}>
+                                <a href="{% url 'boards:view_dashboard' board.id %}" title="Full board for {{board.name}}">
+                                    <span class="fa fa-navicon fa-rotate-90"></span>
+                                </a>
+                            </li>
+                        {% endif %}
                         <li {% if url_namespace == "boards:journal" %}class="active"{% endif %}>
                             <a href="{% url 'boards:journal:view' board.id %}" title="Journal of project {{board.name}}">
                                 <span class="fa fa-leaf"></span> Journal

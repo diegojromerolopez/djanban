@@ -20,12 +20,14 @@ from isoweek import Week
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
 from djangotrellostats.apps.reports.models import CardMovement, CardReview
+from djangotrellostats.trello_api.boards import add_member, remove_member
 
 from djangotrellostats.trello_api.cards import move_card,\
     add_comment_to_card, edit_comment_of_card, delete_comment_of_card, \
     remove_label_of_card, add_label_to_card, order_card, new_card
 
 from djangotrellostats.trello_api.lists import move_list
+
 
 # Abstract model that represents the immutable objects
 class ImmutableModel(models.Model):
@@ -498,6 +500,18 @@ class Board(models.Model):
     def unarchive(self):
         self.is_archived = False
         self.save()
+
+    @transaction.atomic
+    def remove_member(self, member, member_to_remove):
+        self.members.remove(member_to_remove)
+        remove_member(self, member, member_to_remove)
+        return member_to_remove
+
+    @transaction.atomic
+    def add_member(self, member, member_to_add):
+        self.members.add(member_to_add)
+        add_member(self, member, member_to_add)
+        return member_to_add
 
     # Delete all cached charts of this board
     def clean_cached_charts(self):

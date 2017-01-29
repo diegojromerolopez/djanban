@@ -26,6 +26,8 @@ var BoardService = (function (_super) {
         _this.GET_BOARDS_URL = '/api/boards/info';
         _this.GET_BOARD_URL = '/api/board/{id}/info';
         _this.MOVE_LIST_URL = '/api/board/{id}/list/{list_id}';
+        _this.DELETE_MEMBER_URL = '/api/board/{id}/member/{member_id}';
+        _this.ADD_MEMBER_URL = '/api/board/{id}/member';
         return _this;
     }
     BoardService.prototype.getBoards = function () {
@@ -44,12 +46,25 @@ var BoardService = (function (_super) {
     };
     BoardService.prototype.moveList = function (board, list, position) {
         if (position === void 0) { position = "bottom"; }
-        console.log(board);
-        console.log(list);
-        console.log(position);
         var move_list_url = this.MOVE_LIST_URL.replace("{id}", board.id.toString()).replace("{list_id}", list.id.toString());
         var post_body = { position: position };
         return this.http.post(move_list_url, post_body)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    BoardService.prototype.removeMember = function (board, member) {
+        var delete_member_url = this.DELETE_MEMBER_URL.replace("{id}", board.id.toString()).replace("{member_id}", member.id.toString());
+        return this.http.delete(delete_member_url)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    BoardService.prototype.addMember = function (board, member) {
+        var add_member_url = this.ADD_MEMBER_URL.replace("{id}", board.id.toString());
+        var put_body = { member: member.id };
+        console.log(put_body);
+        return this.http.put(add_member_url, put_body)
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);

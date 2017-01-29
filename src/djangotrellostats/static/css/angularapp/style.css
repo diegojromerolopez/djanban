@@ -125,6 +125,21 @@ h1, h2, h3 {
     font-size: 1.1em;
 }
 
+.board .header {
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.board .header .board_name {
+    float: left;
+    width: 50%
+}
+
+.board .header .members {
+    float: left;
+    width: 30%
+}
+
 /* Card view */
 
 .card-view .card-section{

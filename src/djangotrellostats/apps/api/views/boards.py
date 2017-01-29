@@ -2,14 +2,19 @@
 
 from __future__ import unicode_literals, absolute_import
 
-from django.http import Http404
+import json
+
+from django.db import transaction
+from django.http import Http404, HttpResponseBadRequest
 from django.http import JsonResponse
 from django.urls import reverse
 
-from djangotrellostats.apps.api.serializers import serialize_list
+from djangotrellostats.apps.api.serializers import serialize_list, serialize_member
+from djangotrellostats.apps.api.util import get_board_or_404
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.models import Board
+from djangotrellostats.apps.members.models import Member
 
 
 @member_required
@@ -69,11 +74,53 @@ def get_board(request, board_id):
         "description": board.description,
         "local_url": reverse("boards:view", args=(board.id,)),
         "lists": lists_json,
-        "members": [
-            {"id": member.id, "trello_username": member.trello_username, "initials": member.initials}
-            for member in board.members.all().order_by("initials")
-        ],
+        "members": [serialize_member(member) for member in board.members.all().order_by("initials")],
     }
 
     return JsonResponse(board_json)
 
+
+# Add a member to a board
+@member_required
+@transaction.atomic
+def add_member(request, board_id):
+    if request.method != "PUT":
+        raise Http404
+
+    member = request.user.member
+    put_body = json.loads(request.body)
+
+    if not put_body.get("member"):
+        return HttpResponseBadRequest()
+
+    member_id = put_body.get("member")
+
+    board = get_board_or_404(request, board_id)
+
+    if board.members.filter(id=member_id).exists():
+        return JsonResponse(serialize_member(board.members.get(id=member_id)))
+
+    try:
+        new_member = Member.objects.get(id=member_id)
+        board.add_member(member=member, member_to_add=new_member)
+    except Member.DoesNotExist:
+        raise Http404
+
+    return JsonResponse(serialize_member(new_member))
+
+
+# Delete member from board
+@member_required
+@transaction.atomic
+def remove_member(request, board_id, member_id):
+    if request.method != "DELETE":
+        raise Http404
+
+    member = request.user.member
+    board = get_board_or_404(request, board_id)
+    try:
+        member_to_remove = board.members.get(id=member_id)
+        board.remove_member(member=member, member_to_remove=member_to_remove)
+    except Member.DoesNotExist:
+        raise Http404
+    return JsonResponse(serialize_member(member_to_remove))

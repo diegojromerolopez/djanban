@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 
 from django.conf.urls import url, include
-from djangotrellostats.apps.api.views import boards, cards, lists
+from djangotrellostats.apps.api.views import boards, cards, lists, members
 from djangotrellostats.apps.journal.views import JournalEntryTagAutocompleteView
 
 
 urlpatterns = [
+    # Members API
+    url(r'^members/info/?$', members.get_members, name="get_members"),
+
     # Board API
     url(r'^boards/info/?$', boards.get_boards, name="get_boards"),
     url(r'^board/(?P<board_id>\d+)/info/?$', boards.get_board, name="get_board"),
+    url(r'^board/(?P<board_id>\d+)/member/?$', boards.add_member, name="add_member"),
+    url(r'^board/(?P<board_id>\d+)/member/(?P<member_id>\d+)/?$', boards.remove_member, name="remove_member"),
 
     # List API
     url(r'^board/(?P<board_id>\d+)/list/(?P<list_id>\d+)?$', lists.move_list, name="move_list"),

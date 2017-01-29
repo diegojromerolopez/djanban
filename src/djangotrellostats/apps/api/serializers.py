@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from django.urls import reverse
+from crequest.middleware import CrequestMiddleware
 
 
 # Card serialization
@@ -63,10 +64,7 @@ def serialize_card(card):
             ]
         },
         "list": serialize_list(card_list),
-        "members": [
-            {"id": member.id, "trello_username": member.trello_username, "initials": member.initials}
-            for member in card.members.all().order_by("initials")
-            ],
+        "members": [serialize_member(member) for member in card.members.all().order_by("initials")],
         "pending_blocking_cards": [
             {
                 "id": pending_blocking.id,
@@ -85,8 +83,7 @@ def serialize_card(card):
                 "source_list": {"id": movement.source_list.id, "name": movement.source_list.name},
                 "destination_list": {"id": movement.destination_list.id, "name": movement.destination_list.name},
                 "datetime": movement.datetime,
-                "member": {"id": movement.member.id, "trello_username": movement.member.trello_username,
-                           "initials": movement.member.initials}
+                "member": serialize_member(movement.member)
             }
             for movement in card.movements.all().order_by("datetime")
             ],
@@ -108,3 +105,21 @@ def serialize_list(list_):
         "position": list_.position
     }
     return list_json
+
+
+# Member serialization
+def serialize_member(member):
+    current_request = CrequestMiddleware.get_request()
+    current_user = current_request.user
+    current_member = None
+    if hasattr(current_user, "member"):
+        current_member = current_user.member
+
+    member_json = {
+        "id": member.id,
+        "trello_username": member.trello_username,
+        "extern_username": member.extern_username,
+        "initials": member.initials,
+        "is_current_user": True if current_member and member.id == current_member.id else False
+    }
+    return member_json

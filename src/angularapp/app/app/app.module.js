@@ -17,6 +17,7 @@ var dashboard_component_1 = require("../components/dashboard/dashboard.component
 var card_component_1 = require("../components/card/card.component");
 var card_service_1 = require("../services/card.service");
 var ng2_dragula_1 = require("ng2-dragula/ng2-dragula");
+var member_service_1 = require("../services/member.service");
 var AppModule = (function () {
     function AppModule() {
     }
@@ -32,7 +33,7 @@ AppModule = __decorate([
             ng2_dragula_1.DragulaModule
         ],
         declarations: [app_component_1.AppComponent, dashboard_component_1.DashboardComponent, board_component_1.BoardComponent, card_component_1.CardComponent],
-        providers: [board_service_1.BoardService, card_service_1.CardService],
+        providers: [member_service_1.MemberService, board_service_1.BoardService, card_service_1.CardService],
         bootstrap: [app_component_1.AppComponent]
     })
 ], AppModule);

@@ -14,6 +14,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/toPromise';
 import { List } from '../models/list';
+import { Member } from '../models/member';
 
 
 @Injectable()
@@ -23,6 +24,8 @@ export class BoardService extends DjangoTrelloStatsService{
   private GET_BOARD_URL = '/api/board/{id}/info';
 
   private MOVE_LIST_URL = '/api/board/{id}/list/{list_id}';
+  private DELETE_MEMBER_URL = '/api/board/{id}/member/{member_id}';
+  private ADD_MEMBER_URL = '/api/board/{id}/member';
 
   constructor (http: Http) {
       super(http);
@@ -45,12 +48,27 @@ export class BoardService extends DjangoTrelloStatsService{
   }
 
   moveList(board: Board, list: List, position="bottom") : Promise<List> {
-    console.log(board);
-    console.log(list);
-    console.log(position);
     let move_list_url = this.MOVE_LIST_URL.replace("{id}", board.id.toString()).replace("{list_id}", list.id.toString());
     let post_body = {position: position}
     return this.http.post(move_list_url, post_body)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }
+
+  removeMember(board: Board, member: Member): Promise<Member> {
+    let delete_member_url = this.DELETE_MEMBER_URL.replace("{id}", board.id.toString()).replace("{member_id}", member.id.toString());
+    return this.http.delete(delete_member_url)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }
+
+  addMember(board: Board, member: Member): Promise<Member> {
+    let add_member_url = this.ADD_MEMBER_URL.replace("{id}", board.id.toString());
+    let put_body = {member: member.id};
+    console.log(put_body);
+    return this.http.put(add_member_url, put_body)
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);

@@ -16,11 +16,13 @@ var router_2 = require("@angular/router");
 var ng2_dragula_1 = require("ng2-dragula/ng2-dragula");
 var list_1 = require("../../models/list");
 var card_service_1 = require("../../services/card.service");
+var member_service_1 = require("../../services/member.service");
 var BoardComponent = (function () {
-    function BoardComponent(router, route, boardService, cardService, dragulaService) {
+    function BoardComponent(router, route, memberService, boardService, cardService, dragulaService) {
         var _this = this;
         this.router = router;
         this.route = route;
+        this.memberService = memberService;
         this.boardService = boardService;
         this.cardService = cardService;
         this.dragulaService = dragulaService;
@@ -30,13 +32,7 @@ var BoardComponent = (function () {
                 return handle.className === 'move_list_handle';
             }
         });
-        dragulaService.drag.subscribe(function (value) {
-            console.log("drag: " + value[0]);
-            _this.onDrag(value.slice(1));
-        });
         dragulaService.drop.subscribe(function (parameters) {
-            console.log("drop: " + parameters[0]);
-            console.log(parameters);
             // Card drop
             if (parameters[0] == "cards") {
                 _this.onCardDrop(parameters);
@@ -45,14 +41,6 @@ var BoardComponent = (function () {
                 _this.onListDrop(parameters);
             }
         });
-        dragulaService.over.subscribe(function (value) {
-            console.log("over: " + value[0]);
-            _this.onOver(value.slice(1));
-        });
-        dragulaService.out.subscribe(function (value) {
-            console.log("out: " + value[0]);
-            _this.onOut(value.slice(1));
-        });
     }
     BoardComponent.prototype.ngOnInit = function () {
         var that = this;
@@ -60,10 +48,7 @@ var BoardComponent = (function () {
             var board_id = params["board_id"];
             that.loadBoard(board_id);
         });
-    };
-    BoardComponent.prototype.onDrag = function (args) {
-        var e = args[0], el = args[1];
-        // do something
+        this.loadMembers();
     };
     BoardComponent.prototype.onCardDrop = function (parameters) {
         // Source list
@@ -94,7 +79,6 @@ var BoardComponent = (function () {
         });
     };
     BoardComponent.prototype.onListDrop = function (parameters) {
-        console.log(parameters);
         // Moved list
         var moved_list_id = parameters[1]["dataset"]["list"];
         var moved_list = new list_1.List(this.board.getListById(parseInt(moved_list_id)));
@@ -104,21 +88,9 @@ var BoardComponent = (function () {
         var destination_position = "bottom";
         if (next_list_id) {
             next_list = new list_1.List(this.board.getListById(parseInt(next_list_id)));
-            console.log("THIS IS NEXT LIST");
-            console.log(next_list);
-            console.log("THIS IS NEXT LIST POSITION");
-            console.log(next_list.position);
             destination_position = (next_list.position - 10).toString();
         }
         this.boardService.moveList(this.board, moved_list, destination_position).then(function (list) { moved_list.position = list.position; });
-    };
-    BoardComponent.prototype.onOver = function (args) {
-        var e = args[0], el = args[1], container = args[2];
-        // do something
-    };
-    BoardComponent.prototype.onOut = function (args) {
-        var e = args[0], el = args[1], container = args[2];
-        // do something
     };
     /** Load board */
     BoardComponent.prototype.loadBoard = function (board_id) {
@@ -126,6 +98,11 @@ var BoardComponent = (function () {
         this.boardService.getBoard(board_id).then(function (board_response) {
             _this.board = new board_1.Board(board_response);
         });
+    };
+    /** Load all available members */
+    BoardComponent.prototype.loadMembers = function () {
+        var _this = this;
+        this.memberService.getMembers().then(function (members) { return _this.members = members; });
     };
     /** Move to the card view */
     BoardComponent.prototype.onCardSelect = function (card) {
@@ -139,6 +116,23 @@ var BoardComponent = (function () {
             _this.showNewCardForm[list.id] = false;
         });
     };
+    /* Member actions */
+    BoardComponent.prototype.removeMember = function (member) {
+        var _this = this;
+        this.boardService.removeMember(this.board, member).then(function (deleted_member) {
+            _this.board.removeMember(member);
+        });
+    };
+    BoardComponent.prototype.onAddMemberSubmit = function (member_id) {
+        var _this = this;
+        var member = this.members.find(function (member_i) { return member_i.id == member_id; });
+        if (member) {
+            this.boardService.addMember(this.board, member).then(function (added_member) {
+                _this.board.addMember(added_member);
+                _this.showAddMemberForm = false;
+            });
+        }
+    };
     return BoardComponent;
 }());
 BoardComponent = __decorate([
@@ -147,10 +141,11 @@ BoardComponent = __decorate([
         selector: 'board',
         templateUrl: 'board.component.html',
         styleUrls: ['board.component.css'],
-        providers: [board_service_1.BoardService, card_service_1.CardService, ng2_dragula_1.DragulaService]
+        providers: [member_service_1.MemberService, board_service_1.BoardService, card_service_1.CardService, ng2_dragula_1.DragulaService]
     }),
     __metadata("design:paramtypes", [router_1.Router,
         router_2.ActivatedRoute,
+        member_service_1.MemberService,
         board_service_1.BoardService,
         card_service_1.CardService,
         ng2_dragula_1.DragulaService])

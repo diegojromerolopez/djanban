@@ -7,6 +7,8 @@ import { Card } from '../../models/card';
 import {DragulaDirective, DragulaService} from 'ng2-dragula/ng2-dragula';
 import { List } from '../../models/list';
 import { CardService } from '../../services/card.service';
+import { Member } from '../../models/member';
+import { MemberService } from '../../services/member.service';
 
 
 @Component({
@@ -14,12 +16,14 @@ import { CardService } from '../../services/card.service';
     selector: 'board',
     templateUrl: 'board.component.html',
     styleUrls: ['board.component.css'],
-    providers: [BoardService, CardService, DragulaService]
+    providers: [MemberService, BoardService, CardService, DragulaService]
 })
 
 export class BoardComponent implements OnInit {
     board: Board;
+    members: Member[];
     showNewCardForm: {};
+    showAddMemberForm?: boolean;
 
     ngOnInit(): void {
       let that = this;
@@ -27,11 +31,13 @@ export class BoardComponent implements OnInit {
         let board_id = params["board_id"];
         that.loadBoard(board_id);
       });
+      this.loadMembers();
     }
 
       constructor(
         private router: Router,
         private route: ActivatedRoute,
+        private memberService: MemberService,
         private boardService: BoardService,
         private cardService: CardService,
         private dragulaService: DragulaService
@@ -43,16 +49,8 @@ export class BoardComponent implements OnInit {
           return handle.className === 'move_list_handle';
         }
       });
-
-      dragulaService.drag.subscribe((value: any) => {
-        console.log(`drag: ${value[0]}`);
-        this.onDrag(value.slice(1));
-      });
       
       dragulaService.drop.subscribe((parameters: any) => {
-        console.log(`drop: ${parameters[0]}`);
-        console.log(parameters);
-
         // Card drop
         if(parameters[0] == "cards"){
           this.onCardDrop(parameters);
@@ -61,20 +59,6 @@ export class BoardComponent implements OnInit {
         }
         
       });
-      
-      dragulaService.over.subscribe((value: any) => {
-        console.log(`over: ${value[0]}`);
-        this.onOver(value.slice(1));
-      });
-      dragulaService.out.subscribe((value: any) => {
-        console.log(`out: ${value[0]}`);
-        this.onOut(value.slice(1));
-      });
-    }
-
-    private onDrag(args: any) {
-      let [e, el] = args;
-      // do something
     }
 
     private onCardDrop(parameters: any) {
@@ -113,8 +97,6 @@ export class BoardComponent implements OnInit {
     }
 
     private onListDrop(parameters: any) {
-      console.log(parameters);
-
       // Moved list
       let moved_list_id = parameters[1]["dataset"]["list"];
       let moved_list = new List(this.board.getListById(parseInt(moved_list_id)));
@@ -125,10 +107,6 @@ export class BoardComponent implements OnInit {
       let destination_position = "bottom";
       if(next_list_id){
         next_list = new List(this.board.getListById(parseInt(next_list_id)));
-        console.log("THIS IS NEXT LIST");
-        console.log(next_list);
-        console.log("THIS IS NEXT LIST POSITION");
-        console.log(next_list.position);
         destination_position = (next_list.position - 10).toString();
       }
 
@@ -136,21 +114,16 @@ export class BoardComponent implements OnInit {
       
     }
 
-    private onOver(args: any) {
-      let [e, el, container] = args;
-      // do something
-    }
-
-    private onOut(args: any) {
-      let [e, el, container] = args;
-      // do something
-    }
-
     /** Load board */
     loadBoard(board_id: number): void {
         this.boardService.getBoard(board_id).then(board_response =>{
           this.board = new Board(board_response);
         });
+    }
+
+    /** Load all available members */
+    loadMembers(): void {
+      this.memberService.getMembers().then(members => this.members = members);
     }
 
     /** Move to the card view */
@@ -164,6 +137,23 @@ export class BoardComponent implements OnInit {
         List.addCardToList(list, card_response, position);
         this.showNewCardForm[list.id] = false;
       });
+    }
+
+    /* Member actions */
+    removeMember(member: Member): void {
+      this.boardService.removeMember(this.board, member).then(deleted_member => {
+        this.board.removeMember(member);
+      });
+    }
+
+    onAddMemberSubmit(member_id: number):void {
+      let member = this.members.find(function(member_i: Member){ return member_i.id == member_id; });
+      if(member){
+        this.boardService.addMember(this.board, member).then(added_member => {
+          this.board.addMember(added_member);
+          this.showAddMemberForm = false;
+        });
+      }
     }
 
 }

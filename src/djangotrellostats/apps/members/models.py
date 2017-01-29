@@ -68,6 +68,11 @@ class Member(models.Model):
     def has_trello_credentials(self):
         return self.is_initialized
 
+    # Alias very useful for now
+    @property
+    def extern_username(self):
+        return self.trello_username
+
     # Resets the password of the associated user of this member
     def reset_password(self, new_password=None):
         # A member without an user cannot be his/her password changed

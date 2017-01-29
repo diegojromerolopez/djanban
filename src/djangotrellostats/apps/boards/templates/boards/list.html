@@ -63,6 +63,13 @@
                             <a class="btn btn-primary" href="{% url 'boards:view' board.id %}" title="View board {{board.name}}">
                                 <span class="fa fa-eye"></span> View
                             </a>
+
+                            {% if board.is_ready and board.is_fetched and member %}
+                                <a class="btn btn-primary" href="{% url 'boards:view_dashboard' board.id %}" title="View full card board of {{board.name}}">
+                                    <span class="fa fa-navicon fa-rotate-90"></span> Full card board
+                                </a>
+                            {% endif %}
+
                             {% if member %}
                                 <a class="btn btn-warning" href="{% url 'boards:edit' board.id %}" title="Edit board {{board.name}}">
                                     <span class="fa fa-pencil"></span> Edit

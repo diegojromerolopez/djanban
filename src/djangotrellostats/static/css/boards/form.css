@@ -1,0 +1,4 @@
+select[multiple]#id_members{
+    width: 100%;
+    height: 400px;
+}

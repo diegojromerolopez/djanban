@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^sync$', boards.sync, name="sync"),
 
     url(r'^my-boards$', boards.view_list, name="view_boards"),
+    url(r'^dashboard/?$', boards.view_list, name="view_board_dashboard"),
     url(r'^my-archived-boards$', boards.view_archived_boards, name="view_archived_boards"),
 
     url(r'^panorama/?$', boards.view_board_panorama, name="view_board_panorama"),

@@ -14,6 +14,7 @@ import { DashboardComponent } from '../components/dashboard/dashboard.component'
 import { CardComponent } from '../components/card/card.component';
 import { CardService } from '../services/card.service';
 import { DragulaModule } from 'ng2-dragula/ng2-dragula';
+import { MemberService } from '../services/member.service';
 
 
 @NgModule({
@@ -25,7 +26,7 @@ import { DragulaModule } from 'ng2-dragula/ng2-dragula';
     DragulaModule
   ],
   declarations: [ AppComponent, DashboardComponent, BoardComponent, CardComponent ],
-  providers: [ BoardService, CardService ],
+  providers: [ MemberService, BoardService, CardService ],
   bootstrap:    [ AppComponent ]
 })
 
