@@ -16,6 +16,7 @@ var board_component_1 = require("../components/board/board.component");
 var dashboard_component_1 = require("../components/dashboard/dashboard.component");
 var card_component_1 = require("../components/card/card.component");
 var card_service_1 = require("../services/card.service");
+var ng2_dragula_1 = require("ng2-dragula/ng2-dragula");
 var AppModule = (function () {
     function AppModule() {
     }
@@ -27,7 +28,8 @@ AppModule = __decorate([
             platform_browser_1.BrowserModule,
             http_1.HttpModule,
             forms_1.FormsModule,
-            app_routing_module_1.AppRoutingModule
+            app_routing_module_1.AppRoutingModule,
+            ng2_dragula_1.DragulaModule
         ],
         declarations: [app_component_1.AppComponent, dashboard_component_1.DashboardComponent, board_component_1.BoardComponent, card_component_1.CardComponent],
         providers: [board_service_1.BoardService, card_service_1.CardService],

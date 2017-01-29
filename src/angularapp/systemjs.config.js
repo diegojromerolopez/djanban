@@ -25,7 +25,14 @@
 
       // other libraries
       'rxjs':                      'npm:rxjs',
-      'angular-in-memory-web-api': 'npm:angular-in-memory-web-api/bundles/in-memory-web-api.umd.js'
+      'angular-in-memory-web-api': 'npm:angular-in-memory-web-api/bundles/in-memory-web-api.umd.js',
+      'dragula': 'npm:dragula',
+      'contra': 'npm:contra',
+      'atoa': 'npm:atoa',
+      'ticky': 'npm:ticky',
+      'crossvent': 'npm:crossvent/src',
+      'custom-event': 'npm:custom-event',
+      'ng2-dragula': 'npm:ng2-dragula'
     },
     baseURL: '/ng/',
     // packages tells the System loader how to load when no filename and/or no extension
@@ -36,7 +43,14 @@
       },
       rxjs: {
         defaultExtension: 'js'
-      }
+      },
+      'dragula': { main: 'dragula.js', defaultExtension: 'js' },
+      'contra': { main: 'contra.js', defaultExtension: 'js' },
+      'atoa': { main: 'atoa.js', defaultExtension: 'js' },
+      'ticky': { main: 'ticky.js', defaultExtension: 'js' },
+      'crossvent': { main: 'crossvent.js', defaultExtension: 'js' },
+      'custom-event': { main: 'index.js', defaultExtension: 'js' },
+      'ng2-dragula': { main: 'ng2-dragula.js', defaultExtension: 'js' },
     }
   });
 })(this);

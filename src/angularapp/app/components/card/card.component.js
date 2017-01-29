@@ -18,11 +18,6 @@ var CardComponent = (function () {
         this.boardService = boardService;
         this.cardService = cardService;
     }
-    /*private spentEstimatedForm = this.formBuilder.group({
-        "date": ["", Validators.required],
-        "spent_time": ["", Validators.required],
-        "estimated_time": ["", Validators.required]
-    });*/
     CardComponent.prototype.ngOnInit = function () {
         var _this = this;
         var that = this;
@@ -43,6 +38,24 @@ var CardComponent = (function () {
     CardComponent.prototype.hideCommentEdition = function (comment) {
         this.editing_comment = null;
     };
+    CardComponent.prototype.onChangeCardLabels = function (label_ids) {
+        var _this = this;
+        this.cardService.changeCardLabels(this.card, label_ids).then(function (updated_card) { return _this.card = updated_card; });
+    };
+    CardComponent.prototype.onChangeCardName = function (card, name) {
+        var _this = this;
+        this.cardService.changeCardName(card, name).then(function (card_response) {
+            _this.card.name = name;
+            _this.show_card_name_edition_form = false;
+        });
+    };
+    CardComponent.prototype.onChangeCardDescription = function (card, description) {
+        var _this = this;
+        this.cardService.changeCardDescription(card, description).then(function (card_response) {
+            _this.card.description = description;
+            _this.show_card_description_edition_form = false;
+        });
+    };
     CardComponent.prototype.onSubmitSETimeForm = function (time_values) {
         var _this = this;
         var date = time_values["date"];
@@ -61,7 +74,7 @@ var CardComponent = (function () {
         for (var list_index in this.card.board.lists) {
             var list_i = this.card.board.lists[list_index];
             if (list_i.id == destination_list_id) {
-                this.cardService.changeList(this.card, list_i).then(function (updated_card) { return _this.card = updated_card; });
+                this.cardService.moveCard(this.card, list_i).then(function (updated_card) { return _this.card = updated_card; });
             }
         }
     };
@@ -81,10 +94,6 @@ var CardComponent = (function () {
         this.cardService.deleteComment(this.card, comment).then(function (deleted_comment) {
             _this.card.comments.splice(_this.card.comments.indexOf(comment), 1);
         });
-    };
-    CardComponent.prototype.onChangeCardLabels = function (label_ids) {
-        var _this = this;
-        this.cardService.changeCardLabels(this.card, label_ids).then(function (updated_card) { return _this.card = updated_card; });
     };
     CardComponent.prototype.loadCard = function (board_id, card_id) {
         var _this = this;

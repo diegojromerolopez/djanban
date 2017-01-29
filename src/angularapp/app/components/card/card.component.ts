@@ -28,12 +28,12 @@ export class CardComponent implements OnInit  {
     private editing_comment?: CardComment;
     private change_card_list?: boolean;
     private change_card_labels?: boolean;
+    
+    private show_card_name_edition_form?: boolean;
+    private editing_card_name?: boolean;
 
-    /*private spentEstimatedForm = this.formBuilder.group({
-        "date": ["", Validators.required],
-        "spent_time": ["", Validators.required],
-        "estimated_time": ["", Validators.required]
-    });*/
+    private show_card_description_edition_form?: boolean;
+    private editing_card_description?: boolean;
 
     ngOnInit(): void {
         let that = this;
@@ -66,6 +66,24 @@ export class CardComponent implements OnInit  {
         this.editing_comment = null;
     }
 
+    onChangeCardLabels(label_ids: number[]): void{
+        this.cardService.changeCardLabels(this.card, label_ids).then(updated_card => this.card = updated_card);
+    }
+
+    onChangeCardName(card: Card, name: string){
+        this.cardService.changeCardName(card, name).then(card_response => {
+            this.card.name = name;
+            this.show_card_name_edition_form = false;
+        });
+    }
+
+    onChangeCardDescription(card: Card, description: string){
+        this.cardService.changeCardDescription(card, description).then(card_response => {
+            this.card.description = description;
+            this.show_card_description_edition_form = false;
+        });
+    }
+
     onSubmitSETimeForm(time_values: any) {
         let date = time_values["date"];
         let spent_time = time_values["spent_time"];
@@ -83,7 +101,7 @@ export class CardComponent implements OnInit  {
         for(let list_index in this.card.board.lists){
             let list_i = this.card.board.lists[list_index];
             if (list_i.id == destination_list_id) {
-                this.cardService.changeList(this.card, list_i).then(updated_card => this.card = updated_card);
+                this.cardService.moveCard(this.card, list_i).then(updated_card => this.card = updated_card);
             }
         }
     }
@@ -105,14 +123,8 @@ export class CardComponent implements OnInit  {
         });
     }
 
-    onChangeCardLabels(label_ids: number[]): void{
-        this.cardService.changeCardLabels(this.card, label_ids).then(updated_card => this.card = updated_card);
-    }
-
     loadCard(board_id: number, card_id: number): void {
         this.boardService.getCard(board_id, card_id).then(card => this.card = card);
     }
-
-
 
 }

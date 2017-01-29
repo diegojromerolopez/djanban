@@ -26,16 +26,34 @@ export class CardService extends DjangoTrelloStatsService {
   private ADD_SE_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/time";
   private ADD_COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment";
   private COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
-  private CHANGE_LIST_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/list";
+  private MOVE_CARD_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/list";
   private CHANGE_LABELS_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/labels";
+  private CHANGE_CARD_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}";
 
   constructor (http: Http) {
     super(http);
   }
 
-  changeList(card: Card, new_list: List): Promise<Card> {
-    let chage_list_url = this.prepareUrl(this.CHANGE_LIST_URL, card);
-    return this.http.post(chage_list_url, {new_list: new_list.id})
+  addSETime(card: Card, date: string, spent_time:number, estimated_time: number, description: string){
+    let add_se_url = this.prepareUrl(this.ADD_SE_URL, card);
+    let post_body = {date: date, spent_time: spent_time, estimated_time: estimated_time, description: description};
+    return this.http.post(add_se_url, post_body)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }
+
+  changeCardName(card: Card, new_name: string): Promise<Card> {
+    let chage_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+    return this.http.put(chage_card_url, {name: new_name})
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }
+
+  changeCardDescription(card: Card, new_description: string): Promise<Card> {
+    let chage_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+    return this.http.put(chage_card_url, {description: new_description})
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);
@@ -75,14 +93,16 @@ export class CardService extends DjangoTrelloStatsService {
                   .catch(this.handleError);
   }
 
-  addSETime(card: Card, date: string, spent_time:number, estimated_time: number, description: string){
-    let add_se_url = this.prepareUrl(this.ADD_SE_URL, card);
-    let post_body = {date: date, spent_time: spent_time, estimated_time: estimated_time, description: description};
-    return this.http.post(add_se_url, post_body)
+  moveCard(card: Card, new_list: List, position = "top"): Promise<Card> {
+    console.log(card, new_list, position);
+    let move_list_url = this.prepareUrl(this.MOVE_CARD_URL, card);
+    return this.http.post(move_list_url, {new_list: new_list.id, position: position})
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);
   }
+
+  
 
   private prepareUrl(url: string, card: Card): string{
     let board_id = card.board.id.toString();

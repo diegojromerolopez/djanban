@@ -50,7 +50,7 @@ def get_board(request, board_id):
         }
 
         card_list = []
-        for card in list_.cards.filter(is_closed=False).order_by("position")[:2]:
+        for card in list_.cards.filter(is_closed=False).order_by("position"):
             card_json = {
                 "id": card.id,
                 "uuid": card.uuid,
@@ -58,7 +58,8 @@ def get_board(request, board_id):
                 "description": card.description,
                 "url": reverse("boards:view_card", args=(board.id, card.id,)),
                 "short_url": card.short_url,
-                "position": card.position
+                "position": card.position,
+                "board": {"id": board.id, "uuid": board.uuid, "name": board.name,}
             }
             card_list.append(card_json)
 

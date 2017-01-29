@@ -3,6 +3,7 @@ import { CardComment } from './comment';
 import { Board } from './board';
 import { Member } from './member';
 import { Label } from './label';
+import { assign } from 'rxjs/util/assign';
 
 
 export class Card {
@@ -14,6 +15,7 @@ export class Card {
   due_datetime?: Date;
   local_url: string;
   url: string;
+  position: number;
   short_url: string;
   spent_time?: number;
   cycle_time?: number;
@@ -24,4 +26,9 @@ export class Card {
   labels?: Label[];
   comments?: CardComment[];
   members?: Member[];
+
+  public constructor(card: Card){
+    assign(this, card)
+  }
+
 }

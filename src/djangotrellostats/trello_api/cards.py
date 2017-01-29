@@ -19,6 +19,12 @@ def new_card(card, member, labels=None):
     return trello_card
 
 
+# Order card
+def order_card(card, member, position):
+    trello_card = _get_trello_card(card, member)
+    trello_card.change_pos(position)
+
+
 # Move the card to other list
 def move_card(card, member, destination_list):
     trello_card = _get_trello_card(card, member)
@@ -57,6 +63,18 @@ def remove_label_of_card(card, member, label):
     trello_card = _get_trello_card(card, member)
     TrelloLabelUuid = namedtuple("TrelloLabelUuid", ["id"])
     return trello_card.remove_label(TrelloLabelUuid(id=label.uuid))
+
+
+# Sets the name of the card in Trello
+def set_name(card, member):
+    trello_card = _get_trello_card(card, member)
+    return trello_card.set_name(card.name)
+
+
+# Sets the description of the card in Trello
+def set_description(card, member):
+    trello_card = _get_trello_card(card, member)
+    return trello_card.set_description(card.description)
 
 
 # Return the trello card of a given Card object.

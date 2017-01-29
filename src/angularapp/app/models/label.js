@@ -1,6 +1,8 @@
 "use strict";
+var assign_1 = require("rxjs/util/assign");
 var Label = (function () {
-    function Label() {
+    function Label(label) {
+        assign_1.assign(this, label);
     }
     return Label;
 }());

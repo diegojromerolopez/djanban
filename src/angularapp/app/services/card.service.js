@@ -27,13 +27,29 @@ var CardService = (function (_super) {
         _this.ADD_SE_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/time";
         _this.ADD_COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment";
         _this.COMMENT_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
-        _this.CHANGE_LIST_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/list";
+        _this.MOVE_CARD_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/list";
         _this.CHANGE_LABELS_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}/labels";
+        _this.CHANGE_CARD_URL = "http://localhost:8000/api/board/{board_id}/card/{card_id}";
         return _this;
     }
-    CardService.prototype.changeList = function (card, new_list) {
-        var chage_list_url = this.prepareUrl(this.CHANGE_LIST_URL, card);
-        return this.http.post(chage_list_url, { new_list: new_list.id })
+    CardService.prototype.addSETime = function (card, date, spent_time, estimated_time, description) {
+        var add_se_url = this.prepareUrl(this.ADD_SE_URL, card);
+        var post_body = { date: date, spent_time: spent_time, estimated_time: estimated_time, description: description };
+        return this.http.post(add_se_url, post_body)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    CardService.prototype.changeCardName = function (card, new_name) {
+        var chage_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+        return this.http.put(chage_card_url, { name: new_name })
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    CardService.prototype.changeCardDescription = function (card, new_description) {
+        var chage_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+        return this.http.put(chage_card_url, { description: new_description })
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);
@@ -68,10 +84,11 @@ var CardService = (function (_super) {
             .then(this.extractData)
             .catch(this.handleError);
     };
-    CardService.prototype.addSETime = function (card, date, spent_time, estimated_time, description) {
-        var add_se_url = this.prepareUrl(this.ADD_SE_URL, card);
-        var post_body = { date: date, spent_time: spent_time, estimated_time: estimated_time, description: description };
-        return this.http.post(add_se_url, post_body)
+    CardService.prototype.moveCard = function (card, new_list, position) {
+        if (position === void 0) { position = "top"; }
+        console.log(card, new_list, position);
+        var move_list_url = this.prepareUrl(this.MOVE_CARD_URL, card);
+        return this.http.post(move_list_url, { new_list: new_list.id, position: position })
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);

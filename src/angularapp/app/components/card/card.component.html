@@ -2,22 +2,35 @@
 <a [routerLink]="['/board', board_id]" >Return to board</a>
 
 
-<div *ngIf="card" class="panel panel-default">
+<div *ngIf="card" class="panel panel-default card-view">
     <div class="panel-heading">
-        <h1>{{card.name}}</h1>
+        <h1 *ngIf="!show_card_name_edition_form" (click)="show_card_name_edition_form=true">{{card.name}}</h1>
+        <div *ngIf="show_card_name_edition_form">
+            <form (ngSubmit)="onChangeCardName(card, changeCardNameForm.value.name)" #changeCardNameForm="ngForm">
+                <textarea name="name" class=card_name-edit required [(ngModel)]='card.name'></textarea>
+                <div>
+                    <span class="btn btn-danger" (click)="show_card_name_edition_form=false">Cancel</span>
+                    <button type="submit" class="btn btn-success change_name" title="Edit {{card.name}} name"
+                            [disabled]="!changeCardNameForm.valid">
+                        Edit
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+
     <div class="panel-body">
         <div>
-            <div class="card-view-in-trello">
+            <div class="card-view-in-trello card-section">
                 <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}} in Trello" class="btn btn-primary btn-sm">View in Trello</a>
             </div>
-            <div class="card-creation-datetime">Created on {{card.creation_datetime}}</div>
+            <div class="card-creation-datetime card-section">Created on {{card.creation_datetime}}</div>
             
             <div *ngIf="card.due_datetime != null">
-                <div class="card-due-datetime">Deadline: {{card.due_datetime}} ({{card.due_datetime}})</div>
+                <div class="card-due-datetime card-section">Deadline: {{card.due_datetime}} ({{card.due_datetime}})</div>
             </div>
 
-            <div class="card-status">
+            <div class="card-status card-section">
                 <span *ngIf="card.closed">
                     <span class="fa fa-lock" title="This card is closed"></span> Closed
                 </span>
@@ -26,7 +39,7 @@
                 </span>
             </div>
 
-            <div class="list card-current-list">
+            <div class="list card-current-list card-section">
                 <span class="card-current-list-title">On list</span>
                 <div>
                     <span class="card-current-list-title label label-success">{{card.list.name}}</span>
@@ -51,7 +64,7 @@
                 </div>
             </div>
 
-            <div class="card-labels">
+            <div class="card-labels card-section">
                 <h2>Labels ({{card.labels.length}})</h2>
                 <div *ngIf="card.labels.length > 0" class="card-labels-list">
                     <span *ngFor="let label of card.labels" class="card-label label label-default" [ngStyle]="{'background-color': label.color}">
@@ -81,7 +94,7 @@
                 </div>
             </div>
 
-            <div class="card-blocking_cards">
+            <div class="card-blocking_cards card-section">
                 <h2>Blocking cards ({{card.pending_blocking_cards.length}})</h2>
                 <div *ngIf="card.pending_blocking_cards.length > 0">
                     <a *ngFor="let blocking_card of card.pending_blocking_cards"
@@ -95,7 +108,7 @@
                 </div>
             </div>
 
-            <div class="card-members">
+            <div class="card-members card-section">
                 <h2>Members ({{card.members.length}})</h2>
                 
                 <ul *ngIf="card.members.length > 0">
@@ -106,7 +119,7 @@
                 </div>
             </div>
         
-        <div class="card-spent_estimated_time">
+        <div class="card-spent_estimated_time card-section">
             <h2>Spent/Estimated time</h2>
             <div>{{card.spent_time}}/{{card.estimated_time}} hours</div>
             <form (ngSubmit)="onSubmitSETimeForm(SETimeForm.value)" #SETimeForm="ngForm">
@@ -133,30 +146,42 @@
         </div>
         
         <div *ngIf="card.cycle_time">
-            <div class="cycle_time">
+            <div class="cycle_time card-section">
                 <h2>Cycle time</h2>
                 <div>{{card.cycle_time}} hours</div>
             </div>
         </div>
         
         <div *ngIf="card.lead_time">
-            <div class="lead_time ">
+            <div class="lead_time  card-section">
                 <h2>Lead time</h2>
                 <div>{{card.lead_time}} hours</div>
             </div>
         </div>
 
-        <div class="description">
-            <h2>Content</h2>
-            <div *ngIf="card.description">
+        <div class="description card-section">
+            <h2>Description</h2>
+            <div *ngIf="card.description && !show_card_description_edition_form" (click)="show_card_description_edition_form=true">
                 {{card.description}}
             </div>
-            <div *ngIf="!card.description">
+            <div *ngIf="!card.description && !show_card_description_edition_form" (click)="show_card_description_edition_form=true">
                 <em>No description.</em>
+            </div>
+            <div *ngIf="show_card_description_edition_form">
+                <form (ngSubmit)="onChangeCardDescription(card, changeCardDescriptionForm.value.description)" #changeCardDescriptionForm="ngForm">
+                    <textarea name="description" class=card_description-edit required [(ngModel)]='card.description'></textarea>
+                    <div>
+                        <span class="btn btn-danger" (click)="show_card_description_edition_form=false">Cancel</span>
+                        <button type="submit" class="btn btn-success change_description" title="Edit {{card.name}} description"
+                                [disabled]="!changeCardDescriptionForm.valid">
+                            Edit
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 <!--
-        <div class="card-charts">
+        <div class="card-charts card-section">
             <h2>Stats</h2>
             <div class="row">
                 <div class="col-sm-6">
@@ -172,7 +197,7 @@
             </div>
         </div>
 -->
-        <div class="card-comments">
+        <div class="card-movements card-section">
             <h2>Movements ({{card.movements.length}})</h2>
             <div *ngIf="card.movements.length > 0">
                 <div *ngFor="let movement of card.movements">
@@ -197,7 +222,7 @@
             </div>
         </div>
 
-        <div class="card-comments">
+        <div class="card-comments card-section">
             <h2>Comments ({{card.comments.length}})</h2>
             <div>
                 

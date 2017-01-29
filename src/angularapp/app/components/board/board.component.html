@@ -5,10 +5,15 @@
             <span class="list_name panel-heading cursor-pointer">
                 <span>{{list.name}}</span> {{list.cards.length}} tasks
             </span>
-            <ul *ngIf="list.cards" class="cards">
-                <li *ngFor="let card of list.cards" class="card panel panel-info">
+            <div  [dragula]='"first-bag"' [dragulaModel]='list.cards'
+                    id="card-list-{{list.id}}" class="cards" [attr.data-list]="list.id">
+                <div *ngFor="let card of list.cards"
+                        id="card-{{card.id}}" class="card panel panel-info" [attr.data-card]="card.id">
                     <span class="panel-heading card_heading">
-                        <span (click)="onCardSelect(card)" class="card_name">{{card.name}}</span>
+                        <span (click)="onCardSelect(card)" class="card_name">
+                            <span class=card_name-name>{{card.name}}</span>
+                        </span>
+
                         <a href="{{card.short_url}}" title="View card" class="card_action_view">
                             <span class="fa fa-trello"></span>
                         </a>
@@ -16,8 +21,8 @@
                             <span class="fa fa-eye"></span>
                         </a>
                     </span>
-                </li>
-            </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div>

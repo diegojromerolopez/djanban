@@ -5,15 +5,15 @@ from __future__ import unicode_literals
 import json
 import re
 
-from django.http import HttpResponseBadRequest
 from django.http import Http404
+from django.http import HttpResponseBadRequest
 from django.http import JsonResponse
-from django.urls import reverse
 
-from djangotrellostats.apps.api.views.serializers import serialize_card
+from djangotrellostats.apps.api.serializers import serialize_card
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.models import Board, Card, CardComment
+from djangotrellostats.trello_api.cards import set_name, set_description
 
 
 @member_required
@@ -27,6 +27,35 @@ def get_card(request, board_id, card_id):
     card_json = serialize_card(card)
     return JsonResponse(card_json)
 
+
+@member_required
+def change(request, board_id, card_id):
+    if request.method != "PUT":
+        raise Http404
+
+    member = request.user.member
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        card = board.cards.get(id=card_id)
+    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+        raise Http404
+
+    put_params = json.loads(request.body)
+
+    if put_params.get("name"):
+        card.name = put_params.get("name")
+        card.save()
+        set_name(card, member)
+
+    elif put_params.get("description"):
+        card.description = put_params.get("description")
+        card.save()
+        set_description(card, member)
+
+    else:
+        return HttpResponseBadRequest()
+
+    return JsonResponse(serialize_card(card))
 
 @member_required
 def change_labels(request, board_id, card_id):
@@ -56,7 +85,7 @@ def change_labels(request, board_id, card_id):
 
 # Change list
 @member_required
-def change_list(request, board_id, card_id):
+def move_to_list(request, board_id, card_id):
     if request.method != "POST":
         raise Http404
 
@@ -74,7 +103,9 @@ def change_list(request, board_id, card_id):
 
     list_ = board.lists.get(id=post_params.get("new_list"))
 
-    card.move(member, destination_list=list_)
+    new_position = post_params.get("position", "top")
+
+    card.move(member, destination_list=list_, destination_position=new_position)
 
     return JsonResponse(serialize_card(card))
 

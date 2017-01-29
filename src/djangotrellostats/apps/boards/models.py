@@ -23,7 +23,7 @@ from djangotrellostats.apps.reports.models import CardMovement, CardReview
 
 from djangotrellostats.trello_api.cards import move_card,\
     add_comment_to_card, edit_comment_of_card, delete_comment_of_card, \
-    remove_label_of_card, add_label_to_card
+    remove_label_of_card, add_label_to_card, order_card
 
 
 # Abstract model that represents the immutable objects
@@ -697,24 +697,52 @@ class Card(models.Model):
 
     # Move this card to a random list
     @transaction.atomic
-    def move(self, member, destination_list):
-        if self.list.position < destination_list.position:
-            movement_type = "forward"
-        elif self.list.position > destination_list.position:
-            movement_type = "backward"
-        else:
-            raise ValueError(u"Trying to move a card to its list")
-        # Store the movement of this card
-        card_movement = CardMovement(
-            board=self.board, card=self, type=movement_type, member=member,
-            source_list=self.list, destination_list=destination_list, datetime=timezone.now()
-        )
-        card_movement.save()
-        # Move the card
-        self.list = destination_list
-        self.save()
-        # Call to trello API
-        move_card(self, member, destination_list)
+    def move(self, member, destination_list, destination_position="top"):
+        # Only move the card if the source list is different from the destination list.
+        # Otherwise only a ordering is needed on the current card list.
+        if self.list.id != destination_list.id:
+            # Checking if it is a forward or backward movement
+            if self.list.position < destination_list.position:
+                movement_type = "forward"
+            elif self.list.position > destination_list.position:
+                movement_type = "backward"
+            else:
+                raise ValueError(u"Trying to move a card to its list")
+
+            # Store the movement of this card
+            card_movement = CardMovement(
+                board=self.board, card=self, type=movement_type, member=member,
+                source_list=self.list, destination_list=destination_list, datetime=timezone.now()
+            )
+            card_movement.save()
+
+            # Move the card
+            self.list = destination_list
+            self.save()
+
+            # Call to trello API
+            move_card(self, member, destination_list)
+
+        # Move to the required position
+        destination_list_cards = destination_list.active_cards
+        if destination_list_cards.exists():
+            if destination_position == "top":
+                first_card_in_destination_list = destination_list_cards.order_by("position")[0]
+                destination_position_value = first_card_in_destination_list.position - 10
+            elif destination_position == "bottom":
+                first_card_in_destination_list = destination_list_cards.order_by("-position")[0]
+                destination_position_value = first_card_in_destination_list.position + 10
+            else:
+                destination_position_value = destination_position
+
+            # Saving the changes in the card
+            self.position = destination_position_value
+            self.save()
+
+            # Call to Trello API to order the card
+            order_card(self, member, destination_position_value)
+            print "{0} to position {1}".format(self.name, destination_position_value)
+
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
 
