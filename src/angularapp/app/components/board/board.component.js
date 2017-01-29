@@ -32,7 +32,7 @@ var BoardComponent = (function () {
             console.log("drop: " + parameters[0]);
             console.log(parameters);
             // Card drop
-            if (parameters[0] == "first-bag") {
+            if (parameters[0] == "cards") {
                 _this.onCardDrop(parameters);
             }
         });

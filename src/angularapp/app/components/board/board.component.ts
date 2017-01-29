@@ -45,7 +45,7 @@ export class BoardComponent implements OnInit {
         console.log(parameters);
 
         // Card drop
-        if(parameters[0] == "first-bag"){
+        if(parameters[0] == "cards"){
           this.onCardDrop(parameters);
         }
         

@@ -94,6 +94,10 @@ def serialize_card(card):
                            "initials": movement.member.initials}
             }
             for movement in card.movements.all().order_by("datetime")
-            ]
+            ],
+        "charts": {
+            "number_of_comments_by_member": reverse("charts:number_of_comments_by_member", args=(board.id, card.id)),
+            "number_of_comments": reverse("charts:number_of_comments", args=(board.id, card.id))
+        }
     }
     return card_json

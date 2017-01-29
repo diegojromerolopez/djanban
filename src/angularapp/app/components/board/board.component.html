@@ -5,7 +5,7 @@
             <span class="list_name panel-heading cursor-pointer">
                 <span>{{list.name}}</span> {{list.cards.length}} tasks
             </span>
-            <div  [dragula]='"first-bag"' [dragulaModel]='list.cards'
+            <div [dragula]='"cards"' [dragulaModel]='list.cards'
                     id="card-list-{{list.id}}" class="cards" [attr.data-list]="list.id">
                 <div *ngFor="let card of list.cards"
                         id="card-{{card.id}}" class="card panel panel-info" [attr.data-card]="card.id">

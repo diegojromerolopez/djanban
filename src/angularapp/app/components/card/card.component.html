@@ -1,5 +1,8 @@
 <!--component html goes here -->
-<a [routerLink]="['/board', board_id]" >Return to board</a>
+<a *ngIf="board" [routerLink]="['/board', board.id]" class="btn btn-primary">
+    <span class="fa fa-eye"></span>
+    Return to board
+</a>
 
 
 <div *ngIf="card" class="panel panel-default card-view">
@@ -198,23 +201,23 @@
                 </form>
             </div>
         </div>
-<!--
+
         <div class="card-charts card-section">
             <h2>Stats</h2>
             <div class="row">
                 <div class="col-sm-6">
-                    <a href="{% url 'charts:number_of_comments_by_member' board.id card.id %}" title="Number of comments by member">
-                        <img src="{% url 'charts:number_of_comments_by_member' board.id card.id %}" alt="Number of comments by member"/>
+                    <a href="{{card.charts.number_of_comments_by_member}}" title="Number of comments by member">
+                        <img src="{{card.charts.number_of_comments_by_member}}" alt="Number of comments by member"/>
                     </a>
                 </div>
                 <div class="col-sm-6">
-                    <a href="{% url 'charts:number_of_comments' board.id card.id %}" title="Evolution of number of comments of this card thru time">
-                        <img src="{% url 'charts:number_of_comments' board.id card.id %}" alt="Evolution of number of comments of this card thru time"/>
+                    <a href="{{card.charts.number_of_comments}}" title="Evolution of number of comments of this card thru time">
+                        <img src="{{card.charts.number_of_comments}}" alt="Evolution of number of comments of this card thru time"/>
                     </a>
                 </div>
             </div>
         </div>
--->
+
         <div class="card-movements card-section">
             <h2>Movements ({{card.movements.length}})</h2>
             <div *ngIf="card.movements.length > 0">

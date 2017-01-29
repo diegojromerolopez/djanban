@@ -1,6 +1,7 @@
 import { assign } from 'rxjs/util/assign';
 import { List } from './list';
 import { Label } from './label';
+import { Member } from './member';
 
 
 export class Board {
@@ -10,6 +11,7 @@ export class Board {
   description: string;
   lists?: List[];
   labels?: Label[];
+  members?: Member[];
 
   public constructor(board: Board){
     assign(this, board);

@@ -729,6 +729,8 @@ class Card(models.Model):
             if destination_position == "top":
                 first_card_in_destination_list = destination_list_cards.order_by("position")[0]
                 destination_position_value = first_card_in_destination_list.position - 10
+                if destination_position_value < 0:
+                    destination_position_value = 1
             elif destination_position == "bottom":
                 first_card_in_destination_list = destination_list_cards.order_by("-position")[0]
                 destination_position_value = first_card_in_destination_list.position + 10
