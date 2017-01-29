@@ -29,7 +29,7 @@ pathlib2==2.1.0
 pexpect==4.0.1
 pickleshare==0.7.2
 ptyprocess==0.5.1
-py-trello==0.8.0
+-e git://github.com/diegojromerolopez/py-trello.git#egg=pytrello
 pyOpenSSL==16.0.0
 pyasn1==0.1.9
 pycparser==2.14
