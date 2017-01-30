@@ -15,7 +15,7 @@ from django.shortcuts import render, get_object_or_404
 
 from djangotrellostats.apps.base.auth import user_is_member, get_user_boards, user_is_visitor
 from djangotrellostats.apps.base.decorators import member_required
-from djangotrellostats.apps.boards.forms import EditBoardForm, NewBoardForm
+from djangotrellostats.apps.boards.forms import EditBoardForm, NewBoardForm, NewListForm
 from djangotrellostats.apps.boards.models import List, Board
 from djangotrellostats.apps.boards.stats import avg, std_dev
 from djangotrellostats.apps.fetch.fetchers.trello.boards import Initializer, BoardFetcher
@@ -315,6 +315,34 @@ def view_lists(request, board_id):
     lists = board.lists.all().order_by("position")
     replacements = {"member": member, "board": board, "lists": lists, "list_types": List.LIST_TYPE_CHOICES}
     return render(request, "boards/lists/list.html", replacements)
+
+
+# Create a new list
+@member_required
+def new_list(request, board_id):
+    member = request.user.member
+    try:
+        board = member.boards.get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
+
+    list_ = List(board=board)
+
+    # Setting maximum position of this new list (this list will be the last)
+    lists = board.lists.all().order_by("-position")
+    if lists.exists():
+        list_.position = lists[0].position + 10
+
+    if request.method == "POST":
+        form = NewListForm(request.POST, instance=list_)
+
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect(reverse("boards:view_lists", args=(board_id,)))
+    else:
+        form = NewListForm(instance=list_)
+
+    return render(request, "boards/lists/new.html", {"form": form, "board": board, "member": member})
 
 
 # Archive a board

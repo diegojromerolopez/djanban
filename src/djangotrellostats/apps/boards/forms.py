@@ -2,15 +2,18 @@
 
 from __future__ import unicode_literals, absolute_import
 
+from crequest.middleware import CrequestMiddleware
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from django.db import transaction
 from django.forms import models
-from djangotrellostats.apps.boards.models import Board, Card
+from djangotrellostats.apps.boards.models import Board, Card, List
 from djangotrellostats.apps.fetch.fetchers.trello.boards import Initializer
 from djangotrellostats.trello_api.cards import new_card
+from djangotrellostats.trello_api.lists import new_list
 
 
 # Board edition form
@@ -88,6 +91,39 @@ class NewBoardForm(models.ModelForm):
                 lists = self.cleaned_data.get("lists")
                 initializer.create_board(self.instance, lists=lists)
                 super(NewBoardForm, self).save(commit=True)
+
+
+# New list form
+class NewListForm(models.ModelForm):
+    class Meta:
+        model = List
+        fields = ["name", "type"]
+
+    def save(self, commit=True):
+        if commit:
+            with transaction.atomic():
+                # Getting the current member (current user)
+                current_request = CrequestMiddleware.get_request()
+                current_user = current_request.user
+                if not hasattr(current_user, "member"):
+                    raise AssertionError("Only members can create lists")
+
+                member = current_user.member
+                list_ = self.instance
+
+                # Call Trello API to create the list
+                trello_list = new_list(list_, member)
+
+                # Get TrelloList attributes and assigned them to our new object List
+                list_.uuid = trello_list.id
+                list_.creation_datetime = timezone.now()
+                list_.last_activity_datetime = timezone.now()
+
+                # Create the list
+                super(NewListForm, self).save(commit=True)
+
+                # Clean cached charts for this lists' board
+                list_.board.clean_cached_charts()
 
 
 # New card

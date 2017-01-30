@@ -4,6 +4,9 @@
 
 {% block content %}
     <h1>Lists of board {{board.name}}</h1>
+    <div class="board_list_actions">
+        <a href="{% url 'boards:new_list' board.id %}" class="btn btn-primary" title="Create new list">Create new list</a>
+    </div>
     <div class="board_list_list">
         {% if lists|length == 0 %}
             This board has no lists

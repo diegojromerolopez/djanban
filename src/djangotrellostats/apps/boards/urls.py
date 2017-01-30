@@ -25,6 +25,8 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/archive/?$', boards.archive, name="archive"),
     url(r'^(?P<board_id>\d+)/unarchive/?$', boards.unarchive, name="unarchive"),
     url(r'^(?P<board_id>\d+)/lists/?$', boards.view_lists, name="view_lists"),
+    url(r'^(?P<board_id>\d+)/lists/new/?$', boards.new_list, name="new_list"),
+
     url(r'^(?P<board_id>\d+)/delete/?$', boards.delete, name="delete"),
 
     url(r'^(?P<board_id>\d+)/week-summary/(?P<member_id>(all|\d+))/(?P<week_of_year>\d{4}W\d{1,2})/?$',

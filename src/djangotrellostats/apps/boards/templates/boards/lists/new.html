@@ -1,0 +1,14 @@
+{% extends "boards/view.html" %}
+
+{% load staticfiles %}
+
+{% block js %}
+    {{block.super}}
+{% endblock js %}
+
+{% block page_title %}Create new list for board {{board.name}}{% endblock %}
+
+{% block content %}
+    <h1>Create new list for board {{board.name}}</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}
