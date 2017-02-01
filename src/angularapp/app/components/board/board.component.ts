@@ -22,8 +22,12 @@ import { MemberService } from '../../services/member.service';
 export class BoardComponent implements OnInit {
     board: Board;
     members: Member[];
-    showNewCardForm: {};
-    showAddMemberForm?: boolean;
+    // Status of the new card form. Stores if it is showed and if is waiting the server response
+    public newCardFormStatus: {};
+    // Status of the remove member action
+    public removeMemberStatus: {};
+    // Status of the add member form
+    public addMemberStatus: {};
 
     ngOnInit(): void {
       let that = this;
@@ -42,7 +46,10 @@ export class BoardComponent implements OnInit {
         private cardService: CardService,
         private dragulaService: DragulaService
     ) {
-      this.showNewCardForm = { };
+
+      this.newCardFormStatus = {};
+      this.removeMemberStatus = {};
+      this.addMemberStatus = {};
 
       dragulaService.setOptions('lists', {
         moves: function (el: any, container: any, handle: any) {
@@ -111,19 +118,26 @@ export class BoardComponent implements OnInit {
       }
 
       this.boardService.moveList(this.board, moved_list, destination_position).then(list => { moved_list.position = list.position; });
-      
     }
 
     /** Load board */
     loadBoard(board_id: number): void {
         this.boardService.getBoard(board_id).then(board_response =>{
           this.board = new Board(board_response);
+          for(let list of this.board.lists){
+            this.newCardFormStatus[list.id] = {show: false, waiting: false};
+          }
         });
     }
 
     /** Load all available members */
     loadMembers(): void {
-      this.memberService.getMembers().then(members => this.members = members);
+      this.memberService.getMembers().then(members => {
+        this.members = members;
+        for(let member of this.members){
+          this.removeMemberStatus[member.id] = {waiting: false};
+        }
+      });
     }
 
     /** Move to the card view */
@@ -135,7 +149,7 @@ export class BoardComponent implements OnInit {
     onNewCardSubmit(list: List, name: string, position: string): void {
       this.cardService.addCard(this.board, list, name, position).then(card_response => {
         List.addCardToList(list, card_response, position);
-        this.showNewCardForm[list.id] = false;
+        this.newCardFormStatus[list.id] = {"show": false, "waiting": false};
       });
     }
 
@@ -143,6 +157,7 @@ export class BoardComponent implements OnInit {
     removeMember(member: Member): void {
       this.boardService.removeMember(this.board, member).then(deleted_member => {
         this.board.removeMember(member);
+        this.removeMemberStatus[member.id] = {waiting: false};
       });
     }
 
@@ -151,7 +166,7 @@ export class BoardComponent implements OnInit {
       if(member){
         this.boardService.addMember(this.board, member).then(added_member => {
           this.board.addMember(added_member);
-          this.showAddMemberForm = false;
+          this.addMemberStatus = {show: false, waiting: false};
         });
       }
     }

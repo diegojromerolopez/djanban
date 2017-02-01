@@ -8,21 +8,23 @@
         <div class="members" *ngIf="members">
             <span class="members_header">
                 <h2>Members ({{board.members.length}})</h2>
-                <span class="btn btn-primary" (click)="showAddMemberForm=true" title="Show add member form for board {{board.name}}">
+                <span class="btn btn-primary" (click)="addMemberStatus = {show: true, waiting: false}" title="Show add member form for board {{board.name}}">
                     <span class="fa fa-plus"></span>
                     Member
                 </span>
             </span>
-            <div *ngIf="showAddMemberForm" class="add_member">
+            <div *ngIf="addMemberStatus['show']" class="add_member">
                 <form (ngSubmit)="onAddMemberSubmit(addMemberForm.value.member)" #addMemberForm="ngForm">
                     <select name="member" required ngModel>
                         <option *ngFor="let member of members" value="{{member.id}}">{{member.extern_username}}</option>
                     </select>
                     <div>
-                        <span class="btn btn-danger" (click)="showAddMemberForm=false">Cancel</span>
+                        <span class="btn btn-danger" (click)="addMemberStatus['show']=false">Cancel</span>
                         <button type="submit" class="btn btn-success change_name" title="Add new member to board {{board.name}}"
-                                [disabled]="!addMemberForm.valid">
-                            Add member
+                                (click)="addMemberForm.ngSubmit.emit()"
+                                (click)="addMemberStatus['waiting'] = true"
+                                [disabled]="!addMemberForm.valid || addMemberStatus['waiting']">
+                            <span *ngIf="addMemberStatus['waiting']" class="fa fa-spinner fa-spin"></span> Add member
                         </button>
                     </div>
                 </form>
@@ -30,7 +32,14 @@
             <div *ngFor="let member of board.members">
                 <span class="member">
                     <span class="member_name">{{member.extern_username}}</span>
-                    <span *ngIf="!member.is_current_user" class="btn btn-primary" (click)="removeMember(member)"><span class="fa fa-ban"></span></span>
+                    <button *ngIf="!member.is_current_user" class="btn btn-primary"
+                            (click)="removeMember(member)"
+                            (click)="removeMemberStatus[member.id]['waiting'] = true"
+                            [disabled]="removeMemberStatus[member.id]['waiting']"
+                            >
+                        <span *ngIf="removeMemberStatus[member.id]['waiting']" class="fa fa-spinner fa-spin"></span>
+                        <span class="fa fa-ban"></span>
+                    </button>
                     <span *ngIf="member.is_current_user">(You)</span>
                 </span>
             </div>
@@ -43,14 +52,14 @@
                     <span class="list_name_name">
                         <span>{{list.name}}</span> ({{list.cards.length}} tasks)
                     </span>
-                    <span (click)="showNewCardForm[list.id] = true" class="btn btn-primary list_name_new_card" title="New card in list {{list.name}}">
+                    <span (click)="newCardFormStatus[list.id]['show'] = true" class="btn btn-primary list_name_new_card" title="New card in list {{list.name}}">
                         <span class="fa fa-plus"></span> Card
                     </span>
                     <span class="move_list_handle">
                         <span class="fa fa-arrows"></span>
                     </span>
                 </div>
-                <div *ngIf="showNewCardForm[list.id]" class="list_new_card">
+                <div *ngIf="newCardFormStatus[list.id]['show']" class="list_new_card">
                     <form (ngSubmit)="onNewCardSubmit(list, newCardForm.value.name, newCardForm.value.position)" #newCardForm="ngForm">
                     <textarea name="name" class=card_name-edit placeholder="Title of your new card" required ngModel></textarea>
                     <select name="position" required ngModel>
@@ -58,10 +67,12 @@
                         <option value="bottom">Bottom</option>
                     </select>
                     <div>
-                        <span class="btn btn-danger" (click)="showNewCardForm[list.id] = false">Cancel</span>
+                        <span class="btn btn-danger" (click)="newCardFormStatus[list.id] = {show: false, waiting: false}">Cancel</span>
                         <button type="submit" class="btn btn-success change_name" title="Create new card on list {{list.name}}"
-                                [disabled]="!newCardForm.valid">
-                            Create
+                                (click)="newCardForm.ngSubmit.emit()"
+                                (click)="newCardFormStatus[list.id]['waiting'] = true"
+                                [disabled]="!newCardForm.valid || newCardFormStatus[list.id]['waiting']">
+                            <span *ngIf="newCardFormStatus[list.id]['waiting']" class="fa fa-spinner fa-spin"></span>Create
                         </button>
                     </div>
                     </form>
