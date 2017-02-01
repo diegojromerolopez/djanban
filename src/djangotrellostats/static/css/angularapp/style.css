@@ -82,6 +82,7 @@ h1, h2, h3 {
 
 }
 
+.move_list_handle,
 .board .lists .list .move_list_handle {
     cursor: move;
     display: inline-block;
