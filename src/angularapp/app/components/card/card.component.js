@@ -18,6 +18,8 @@ var CardComponent = (function () {
         this.route = route;
         this.boardService = boardService;
         this.cardService = cardService;
+        this.changeCardNameStatus = "hidden";
+        this.changeCardMembersStatus = "hidden";
     }
     CardComponent.prototype.ngOnInit = function () {
         var that = this;
@@ -47,13 +49,16 @@ var CardComponent = (function () {
     };
     CardComponent.prototype.onChangeCardMembers = function (member_ids) {
         var _this = this;
-        this.cardService.changeCardMembers(this.card, member_ids).then(function (updated_card) { return _this.card = updated_card; });
+        this.cardService.changeCardMembers(this.card, member_ids).then(function (updated_card) {
+            _this.card = updated_card;
+            _this.changeCardMembersStatus = "hidden";
+        });
     };
     CardComponent.prototype.onChangeCardName = function (name) {
         var _this = this;
         this.cardService.changeCardName(this.card, name).then(function (card_response) {
             _this.card.name = name;
-            _this.show_card_name_edition_form = false;
+            _this.changeCardNameStatus = "hidden";
         });
     };
     CardComponent.prototype.onChangeCardDescription = function (description) {

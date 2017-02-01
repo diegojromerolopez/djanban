@@ -27,12 +27,13 @@ export class CardComponent implements OnInit  {
     private board: Board;
     private card: Card;
     
+    private changeCardNameStatus: string;
+    private changeCardMembersStatus: string;
+
     private editing_comment?: CardComment;
     private change_card_list?: boolean;
     private change_card_labels?: boolean;
-    
-    private show_card_name_edition_form?: boolean;
-    private editing_card_name?: boolean;
+
 
     private show_card_description_edition_form?: boolean;
     private editing_card_description?: boolean;
@@ -56,7 +57,8 @@ export class CardComponent implements OnInit  {
         private boardService: BoardService,
         private cardService: CardService
     ) {
-        
+        this.changeCardNameStatus = "hidden";
+        this.changeCardMembersStatus = "hidden";
     }
 
     cardHasLabel(label: Label): boolean {
@@ -81,13 +83,16 @@ export class CardComponent implements OnInit  {
     }
 
     onChangeCardMembers(member_ids: number[]): void{
-        this.cardService.changeCardMembers(this.card, member_ids).then(updated_card => this.card = updated_card);
+        this.cardService.changeCardMembers(this.card, member_ids).then(updated_card => {
+            this.card = updated_card;
+            this.changeCardMembersStatus = "hidden";
+        });
     }
 
     onChangeCardName(name: string){
         this.cardService.changeCardName(this.card, name).then(card_response => {
             this.card.name = name;
-            this.show_card_name_edition_form = false;
+            this.changeCardNameStatus = "hidden";
         });
     }
 

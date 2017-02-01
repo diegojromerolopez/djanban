@@ -9,15 +9,28 @@
 
 <div *ngIf="card" class="panel panel-default card-view">
     <div class="panel-heading">
-        <h1 *ngIf="!show_card_name_edition_form" (click)="show_card_name_edition_form=true">{{card.name}}</h1>
-        <div *ngIf="show_card_name_edition_form">
+        <h1 *ngIf="changeCardNameStatus != 'waiting' && changeCardNameStatus != 'showed'"
+            (click)="changeCardNameStatus = 'showed'"
+            (click)="oldCardName = card.name"
+            >
+            {{card.name}}
+        </h1>
+        <div *ngIf="changeCardNameStatus == 'showed' || changeCardNameStatus == 'waiting'">
             <form (ngSubmit)="onChangeCardName(changeCardNameForm.value.name)" #changeCardNameForm="ngForm">
                 <textarea name="name" class=card_name-edit required [(ngModel)]='card.name'></textarea>
                 <div>
-                    <span class="btn btn-danger" (click)="show_card_name_edition_form=false">Cancel</span>
+                    <button class="btn btn-danger"
+                        (click)="card.name = oldCardName"
+                        (click)="changeCardNameStatus = 'hidden'"
+                        (click)="$event.preventDefault()"
+                        [disabled]="changeCardNameStatus == 'waiting'"
+                        >Cancel
+                    </button>
                     <button type="submit" class="btn btn-success change_name" title="Edit {{card.name}} name"
-                            [disabled]="!changeCardNameForm.valid">
-                        Edit
+                            (click)="changeCardNameForm.ngSubmit.emit()"
+                            (click)="changeCardNameStatus = 'waiting'"
+                            [disabled]="!changeCardNameForm.valid || changeCardNameStatus == 'waiting'">
+                        <span *ngIf="changeCardNameStatus == 'waiting'" class="fa fa-spinner fa-spin"></span> Edit
                     </button>
                 </div>
             </form>
