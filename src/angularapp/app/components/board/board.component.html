@@ -81,7 +81,7 @@
             <div [dragula]='"cards"' [dragulaModel]='list.cards'
                     id="card-list-{{list.id}}" class="cards" [attr.data-list]="list.id">
                 <div *ngFor="let card of list.cards"
-                        id="card-{{card.id}}" class="card panel panel-info" [attr.data-card]="card.id">
+                        id="card-{{card.id}}" class="card panel panel-info board-card" [attr.data-card]="card.id">
                     <span class="panel-heading card_heading">
                         <span (click)="onCardSelect(card)" class="card_name">
                             <span class=card_name-name>{{card.name}}</span>

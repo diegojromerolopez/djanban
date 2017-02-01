@@ -126,7 +126,10 @@ h1, h2, h3 {
     padding: 0;
 }
 
+.board-card,
 .board .lists .list .cards .card {
+    background-color: #d9edf7;
+    border-color: #bce8f1;
     cursor: move;
     margin-bottom: 20px;
     margin-top: 20px;
@@ -134,6 +137,7 @@ h1, h2, h3 {
     margin-right: 20px;
 }
 
+.panel-heading.card_heading,
 .board .lists .list .cards .card .card_heading {
     cursor: pointer;
     display: block;
