@@ -4,7 +4,7 @@ import { Board } from '../../models/board';
 import { BoardService } from '../../services/board.service';
 import { ActivatedRoute } from '@angular/router';
 import { Card } from '../../models/card';
-import {DragulaDirective, DragulaService} from 'ng2-dragula/ng2-dragula';
+import { DragulaDirective, DragulaService } from 'ng2-dragula/ng2-dragula';
 import { List } from '../../models/list';
 import { CardService } from '../../services/card.service';
 import { Member } from '../../models/member';
