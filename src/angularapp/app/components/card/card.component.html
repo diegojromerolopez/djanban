@@ -9,28 +9,28 @@
 
 <div *ngIf="card" class="panel panel-default card-view">
     <div class="panel-heading">
-        <h1 *ngIf="changeCardNameStatus != 'waiting' && changeCardNameStatus != 'showed'"
-            (click)="changeCardNameStatus = 'showed'"
-            (click)="oldCardName = card.name"
+        <h1 *ngIf="changeNameStatus != 'waiting' && changeNameStatus != 'showed'"
+            (click)="changeNameStatus = 'showed'"
+            (click)="oldName = card.name"
             >
             {{card.name}}
         </h1>
-        <div *ngIf="changeCardNameStatus == 'showed' || changeCardNameStatus == 'waiting'">
-            <form (ngSubmit)="onChangeCardName(changeCardNameForm.value.name)" #changeCardNameForm="ngForm">
+        <div *ngIf="changeNameStatus == 'showed' || changeNameStatus == 'waiting'">
+            <form (ngSubmit)="onChangeName(changeNameForm.value.name)" #changeNameForm="ngForm">
                 <textarea name="name" class=card_name-edit required [(ngModel)]='card.name'></textarea>
                 <div>
                     <button class="btn btn-danger"
-                        (click)="card.name = oldCardName"
-                        (click)="changeCardNameStatus = 'hidden'"
+                        (click)="card.name = oldName"
+                        (click)="changeNameStatus = 'hidden'"
                         (click)="$event.preventDefault()"
-                        [disabled]="changeCardNameStatus == 'waiting'"
+                        [disabled]="changeNameStatus == 'waiting'"
                         >Cancel
                     </button>
                     <button type="submit" class="btn btn-success change_name" title="Edit {{card.name}} name"
-                            (click)="changeCardNameForm.ngSubmit.emit()"
-                            (click)="changeCardNameStatus = 'waiting'"
-                            [disabled]="!changeCardNameForm.valid || changeCardNameStatus == 'waiting'">
-                        <span *ngIf="changeCardNameStatus == 'waiting'" class="fa fa-spinner fa-spin"></span> Edit
+                            (click)="changeNameForm.ngSubmit.emit()"
+                            (click)="changeNameStatus = 'waiting'"
+                            [disabled]="!changeNameForm.valid || changeNameStatus == 'waiting'">
+                        <span *ngIf="changeNameStatus == 'waiting'" class="fa fa-spinner fa-spin"></span> Edit
                     </button>
                 </div>
             </form>
@@ -58,13 +58,13 @@
             </div>
 
             <div class="list card-current-list card-section">
-                <span class="card-current-list-title">On list</span>
+                <span class="card-current-list-title">
+                    On list
+                    <span class="card-current-list-title label label-success">{{card.list.name}} <span *ngIf="card.list.type == 'done'" class="fa fa-thumbs-up"></span></span>
+                </span>
                 <div>
-                    <span class="card-current-list-title label label-success">{{card.list.name}}</span>
-                    <span *ngIf="card.list.type == 'done'" class="fa fa-thumbs-up"></span>
-                    <span class="btn btn-primary" *ngIf="!change_card_list" (click)="change_card_list = true">Change</span>
-                    
-                    <div *ngIf="change_card_list">
+                    <span class="btn btn-primary" *ngIf="changeListStatus != 'showed' && changeListStatus != 'waiting'" (click)="changeListStatus = 'showed'">Change</span>
+                    <div *ngIf="changeListStatus == 'showed' || changeListStatus == 'waiting'">
                         <form (ngSubmit)="onSubmitChangeList(changeListForm.value.destination_list)" #changeListForm="ngForm">
                             <div>
                                 <select name="destination_list" required ngModel>
@@ -74,8 +74,19 @@
                                 </select>
                             </div>
                             <div>
-                                <span class="btn btn-danger" (click)="change_card_list = false">Cancel</span>
-                                <button type="submit" class="btn btn-success" title="Change list" >Change</button>
+                                <button class="btn btn-danger"
+                                    (click)="changeListStatus = 'hidden'"
+                                    (click)="$event.preventDefault()"
+                                    [disabled]="changeListStatus == 'waiting'"
+                                    >Cancel
+                                </button>
+                                <button type="submit" class="btn btn-success change_name" title="Edit {{card.name}} list"
+                                        (click)="changeListForm.ngSubmit.emit()"
+                                        (click)="changeListStatus = 'waiting'"
+                                        (click)="$event.preventDefault()"
+                                        [disabled]="!changeListForm.valid || changeListStatus == 'waiting'">
+                                    <span *ngIf="changeListStatus == 'waiting'" class="fa fa-spinner fa-spin"></span> Change
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -92,21 +103,29 @@
                 <div *ngIf="card.labels.length == 0" class="card-labels-list card-labels-list-empty">
                     <em>Without labels.</em>
                 </div>
-                <span class="btn btn-primary" *ngIf="!change_card_labels" (click)="change_card_labels = true">Change</span>
+                <span class="btn btn-primary" *ngIf="changeLabelsStatus != 'showed' && changeLabelsStatus != 'waiting'" (click)="changeLabelsStatus = 'showed'">Change</span>
 
-                <div *ngIf="change_card_labels">
-                    <form (ngSubmit)="onChangeCardLabels(changeCardLabelsForm.value.labels)" #changeCardLabelsForm="ngForm">
+                <div *ngIf="changeLabelsStatus == 'showed' || changeLabelsStatus == 'waiting'">
+                    <form (ngSubmit)="onChangeLabels(changeLabelsForm.value.labels)" #changeLabelsForm="ngForm">
                         <select name="labels" multiple required ngModel>
                             <option *ngFor="let label of card.board.labels" value="{{label.id}}" [selected]="cardHasLabel(label)?true:false">
                                 {{label.name}}
                             </option>
                         </select>
                         <div>
-                            <span class="btn btn-danger" (click)="change_card_labels = false">Cancel</span>
-                            <button type="submit" class="btn btn-success change_labels" title="Change labels">
-                                <span class="fa fa-tags"></span>
-                                Change labels
-                            </button>
+                            <button class="btn btn-danger"
+                                    (click)="changeLabelsStatus = 'hidden'"
+                                    (click)="$event.preventDefault()"
+                                    [disabled]="changeLabelsStatus == 'waiting'"
+                                    >Cancel
+                                </button>
+                                <button type="submit" class="btn btn-success change_name" title="Edit {{card.name}} list"
+                                        (click)="changeLabelsStatus = 'waiting'"
+                                        (click)="changeLabelsForm.ngSubmit.emit()"
+                                        (click)="$event.preventDefault()"
+                                        [disabled]="!changeLabelsForm.valid || changeLabelsStatus == 'waiting'">
+                                    <span *ngIf="changeLabelsStatus == 'waiting'" class="fa fa-spinner fa-spin"></span> Change
+                                </button>
                         </div>
                     </form>
                 </div>
@@ -135,21 +154,29 @@
                 <div *ngIf="card.members.length == 0">
                     This task has no assigned members.
                 </div>
-                <button class="btn btn-primary" *ngIf="!show_card_members_edition_form" (click)="show_card_members_edition_form=true">Edit</button>
+                <button class="btn btn-primary" *ngIf="changeMembersStatus!='showed' && changeMembersStatus!='waiting'" (click)="changeMembersStatus='showed'">Edit</button>
                 
-                <div *ngIf="show_card_members_edition_form">
-                    <form (ngSubmit)="onChangeCardMembers(changeCardMembersForm.value.members)" #changeCardMembersForm="ngForm">
+                <div *ngIf="changeMembersStatus=='showed' || changeMembersStatus=='waiting'">
+                    <form (ngSubmit)="onChangeMembers(changeMembersForm.value.members)" #changeMembersForm="ngForm">
                         <select name="members" multiple required ngModel>
                             <option *ngFor="let member of board.members" [value]="member.id" [selected]="cardHasMember(member)?true:false">
                                 {{member.trello_username}}
                             </option>
                         </select>
                         <div>
-                            <span class="btn btn-danger" (click)="show_card_members_edition_form = false">Cancel</span>
-                            <button type="submit" class="btn btn-success change_labels" title="Change labels">
-                                <span class="fa fa-users"></span>
-                                Change members
-                            </button>
+                             <button class="btn btn-danger"
+                                    (click)="changeMembersStatus = 'hidden'"
+                                    (click)="$event.preventDefault()"
+                                    [disabled]="changeMembersStatus == 'waiting'"
+                                    >Cancel
+                                </button>
+                                <button type="submit" class="btn btn-success change_name" title="Edit members of {{card.name}}"
+                                        (click)="changeMembersForm.ngSubmit.emit()"
+                                        (click)="changeMembersStatus = 'waiting'"
+                                        [disabled]="!changeMembersForm.valid || changeMembersStatus == 'waiting'">
+                                    <span *ngIf="changeMembersStatus == 'waiting'" class="fa fa-spinner fa-spin"></span>
+                                    <span class="fa fa-users"></span> Change members
+                                </button>
                         </div>
                     </form>
                 </div>
@@ -174,9 +201,20 @@
                 <input type="number" name="spent_time" step="0.1" placeholder="S" ngModel />
                 <input type="number" name="estimated_time" step="0.1" placeholder="E" ngModel />
                 <input type="text" name="description"  placeholder="Description" ngModel />
-                <button type="submit" class="btn btn-success" title="Add time to this card">
-                    Add spent/estimated time
-                    <span class="fa fa-clock-o"></span>
+
+                <button class="btn btn-danger"
+                    (click)="changeSETimeStatus = 'hidden'"
+                    (click)="$event.preventDefault()"
+                    (click)="SETimeForm.reset()"
+                    [disabled]="changeSETimeStatus == 'waiting'"
+                    >Cancel
+                </button>
+                <button type="submit" class="btn btn-success change_name" title="Edit Spent/Estimated time for {{card.name}}"
+                        (click)="SETimeForm.ngSubmit.emit()"
+                        (click)="changeSETimeStatus = 'waiting'"
+                        [disabled]="!SETimeForm.valid || changeSETimeStatus == 'waiting'">
+                    <span *ngIf="changeSETimeStatus == 'waiting'" class="fa fa-spinner fa-spin"></span>
+                    <span class="fa fa-clock-o"></span> Add spent/estimated time
                 </button>
             </form>
         </div>
@@ -197,19 +235,32 @@
 
         <div class="description card-section">
             <h2>Description</h2>
-            <div *ngIf="card.description && !show_card_description_edition_form" (click)="show_card_description_edition_form=true">
+            <div *ngIf="card.description && changeDescriptionStatus=='hidden'"
+                (click)="changeDescriptionStatus=='showed'"
+                (click)="oldDescription = card.description">
                 {{card.description}}
             </div>
-            <div *ngIf="!card.description && !show_card_description_edition_form" (click)="show_card_description_edition_form=true">
+            <div *ngIf="!card.description && changeDescriptionStatus=='hidden'"
+                (click)="changeDescriptionStatus = 'showed'"
+                (click)="oldDescription = ''">
                 <em>No description.</em>
             </div>
-            <div *ngIf="show_card_description_edition_form">
-                <form (ngSubmit)="onChangeCardDescription(changeCardDescriptionForm.value.description)" #changeCardDescriptionForm="ngForm">
+            <div *ngIf="changeDescriptionStatus=='showed' || changeDescriptionStatus=='waiting'">
+                <form (ngSubmit)="onChangeDescription(changeDescriptionForm.value.description)" #changeDescriptionForm="ngForm">
                     <textarea name="description" class=card_description-edit required [(ngModel)]='card.description'></textarea>
                     <div>
-                        <span class="btn btn-danger" (click)="show_card_description_edition_form=false">Cancel</span>
-                        <button type="submit" class="btn btn-success change_description" title="Edit {{card.name}} description"
-                                [disabled]="!changeCardDescriptionForm.valid">
+                        <button class="btn btn-danger"
+                            (click)="changeDescriptionStatus = 'hidden'"
+                            (click)="$event.preventDefault()"
+                            (click)="card.description = oldDescription"
+                            [disabled]="changeDescriptionStatus == 'waiting'"
+                            >Cancel
+                        </button>
+                        <button type="submit" class="btn btn-success change_name" title="Edit Spent/Estimated time for {{card.name}}"
+                                (click)="changeDescriptionForm.ngSubmit.emit()"
+                                (click)="changeDescriptionStatus = 'waiting'"
+                                [disabled]="!changeDescriptionForm.valid || changeDescriptionStatus == 'waiting'">
+                            <span *ngIf="changeDescriptionStatus == 'waiting'" class="fa fa-spinner fa-spin"></span>
                             Edit
                         </button>
                     </div>
@@ -263,8 +314,15 @@
             <div>
                 
             <form (ngSubmit)="onSubmitNewComment(NewCommentForm.value.comment)" #NewCommentForm="ngForm">
-                <textarea name="comment" placeholder="Insert your comment here..." required ngModel></textarea>
-                <button type="submit" class="btn btn-success" title="Add new comment to this card" (ngSubmit)="button.disabled = true" #button>
+                <textarea name="comment" placeholder="Insert your comment here..." required ngModel [disabled]="newCommentStatus == 'waiting'"></textarea>
+                <button type="submit" class="btn btn-success" title="Add new comment to this card"
+                        (click)="NewCommentForm.ngSubmit.emit()"
+                        (click)="newCommentStatus = 'waiting'"
+                        (click)="$event.preventDefault()"
+                        (click)="NewCommentForm.reset()"
+                        [disabled]="newCommentStatus == 'waiting'"
+                        >
+                    <span *ngIf="newCommentStatus == 'waiting'" class="fa fa-spinner fa-spin"></span>
                     Send
                     <span class="fa fa-comment-o"></span>
                 </button>
@@ -288,22 +346,69 @@
                                 {{comment.content}}
                             </div>
 
-                            <form *ngIf="editing_comment && editing_comment.id == comment.id" (ngSubmit)="onSubmitEditComment(comment, EditCommentForm.value.content)" #EditCommentForm="ngForm">
+                            <!-- Comment edition -->
+                            <form *ngIf="editCommentStatus[comment.id] == 'waiting' || editCommentStatus[comment.id] == 'showed'"
+                                  (ngSubmit)="onSubmitEditComment(comment, editCommentForm.value.content)" #editCommentForm="ngForm">
                                 <textarea name="content" placeholder="{{comment.content}}" ngModel>
                                 </textarea>
-                                <span class="btn btn-danger" (click)="hideCommentEdition(comment)">Cancel</span>
-                                <button type="submit" class="btn btn-success" title="Edit comment">
+                                <button class="btn btn-danger"
+                                     (click)="editCommentStatus = null"
+                                     [disabled]="editCommentStatus[comment.id] == 'waiting'"
+                                     (click)="$event.preventDefault()"
+                                     >
+                                     Cancel
+                                </button>
+                                <button type="submit" class="btn btn-success" title="Edit comment"
+                                        (click)="editCommentForm.ngSubmit.emit()"
+                                        (click)="editCommentStatus[comment.id] = 'waiting'"
+                                        (click)="$event.preventDefault()"
+                                        [disabled]="editCommentStatus[comment.id] == 'waiting'"
+                                        >
+                                        <span *ngIf="editCommentStatus[comment.id] == 'waiting'" class="fa fa-spinner fa-spin"></span>
                                     Send
                                 </button>
                             </form>
                             
-                            <span *ngIf="!editing_comment || (editing_comment && editing_comment.id != comment.id)" class="btn btn-danger edit-comment-button" (click)="showCommentEdition(comment)">Edit</span>
+                            <span *ngIf="editCommentStatus[comment.id] == 'standby'" class="btn btn-success edit-comment-button" (click)="editCommentStatus[comment.id] = 'showed'">
+                                Edit
+                            </span>
 
-                            <form *ngIf="!editing_comment || (editing_comment && editing_comment.id != comment.id)" (ngSubmit)="onSubmitDeleteComment(comment)" #DeleteCommentForm="ngForm">
-                                <button type="submit" class="btn btn-success delete_comment" title="Delete this comment">
-                                Delete
-                                <span class="fa fa-trash"></span>
+                            <!-- Comment deletion -->
+                            <form   *ngIf="deleteCommentStatus[comment.id] == 'standby' || deleteCommentStatus[comment.id] == 'asking' || deleteCommentStatus[comment.id] == 'waiting'"
+                                    (ngSubmit)="onSubmitDeleteComment(comment)" #deleteCommentForm="ngForm">
+                                
+                                <button type="submit" class="btn btn-danger delete_comment" title="Delete this comment"
+                                    *ngIf="deleteCommentStatus[comment.id] == 'standby'"
+                                    (click)="deleteCommentStatus[comment.id] = 'asking'"
+                                    (click)="$event.preventDefault()"
+                                    >
+                                    Delete
+                                    <span class="fa fa-trash"></span>
                                 </button>
+
+                                <div *ngIf="deleteCommentStatus[comment.id] == 'asking' || deleteCommentStatus[comment.id] == 'waiting'">
+                                    <div>
+                                        <input type="checkbox" name="confirm" ngModel required [disabled]="deleteCommentStatus[comment.id] == 'waiting'" /> Are you sure?
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-success delete_comment" title="Cancel"
+                                            (click)="$event.preventDefault()"
+                                            (click)="deleteCommentStatus[comment.id] = 'standby'"
+                                            [disabled]="deleteCommentStatus[comment.id] == 'waiting'"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="btn btn-danger delete_comment" title="Delete this comment"
+                                        [disabled]="deleteCommentStatus[comment.id] == 'waiting'"
+                                        (click)="deleteCommentStatus[comment.id] = 'waiting'"
+                                        (click)="$event.preventDefault()"
+                                        (click)="deleteCommentForm.ngSubmit.emit()"
+                                        >
+                                        <span *ngIf="deleteCommentStatus[comment.id] == 'waiting'" class="fa fa-spinner fa-spin"></span>
+                                        Delete comment
+                                        <span class="fa fa-trash"></span>
+                                    </button>
+                                </div>
                             </form>
                         </div>
                     </div>

@@ -967,7 +967,7 @@ class CardComment(models.Model):
         # If the comment is a spent/estimated measure it should be updated
         spent_estimated_time = self.spent_estimated_time
         if spent_estimated_time:
-            self.daily_spent_times.filter(spent_time=spent_estimated_time["spent_time"],
+            self.card.daily_spent_times.filter(spent_time=spent_estimated_time["spent_time"],
                                           estimated_time=spent_estimated_time["estimated_time"]).delete()
             self.card.update_spent_estimated_time()
 

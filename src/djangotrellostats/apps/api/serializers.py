@@ -38,6 +38,7 @@ def serialize_card(card):
         "creation_datetime": card.creation_datetime,
         "due_datetime": card.due_datetime,
         "spent_time": card.spent_time,
+        "estimated_time": card.estimated_time,
         "lead_time": card.lead_time,
         "cycle_time": card.cycle_time,
         "labels": [
