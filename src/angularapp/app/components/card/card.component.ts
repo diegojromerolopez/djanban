@@ -34,7 +34,17 @@ export class CardComponent implements OnInit  {
     private changeSETimeStatus: string;
     private changeDescriptionStatus: string;
     private newCommentStatus: string;
+    
+    /**
+     * Stores the status of the edition of each comment: standby (standby),
+     * asking confirmation (asking) and waiting server response (waiting)
+     * */
     private editCommentStatus: {};
+    
+    /**
+     * Stores the status of the deletion of each comment: standby (standby),
+     * asking confirmation (asking) and waiting server response (waiting)
+     * */
     private deleteCommentStatus: {};
 
 
@@ -145,7 +155,7 @@ export class CardComponent implements OnInit  {
         });
     }
 
-    /** Called when edition a comment */
+    /** Called when editing a comment */
     onSubmitEditComment(comment: CardComment, new_content: string): void {
         this.cardService.editComment(this.card, comment, new_content).then(edited_comment => {
             comment.content = new_content;
@@ -153,6 +163,7 @@ export class CardComponent implements OnInit  {
         });
     }
 
+    /** Called when deleting a comment */
     onSubmitDeleteComment(comment: CardComment): void {
         this.cardService.deleteComment(this.card, comment).then(deleted_comment => {
             this.card.comments.splice(this.card.comments.indexOf(comment), 1);

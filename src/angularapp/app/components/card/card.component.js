@@ -115,7 +115,7 @@ var CardComponent = (function () {
             _this.deleteCommentStatus[comment.id] = "standby";
         });
     };
-    /** Called when edition a comment */
+    /** Called when editing a comment */
     CardComponent.prototype.onSubmitEditComment = function (comment, new_content) {
         var _this = this;
         this.cardService.editComment(this.card, comment, new_content).then(function (edited_comment) {
@@ -123,6 +123,7 @@ var CardComponent = (function () {
             _this.editCommentStatus[comment.id] = "standby";
         });
     };
+    /** Called when deleting a comment */
     CardComponent.prototype.onSubmitDeleteComment = function (comment) {
         var _this = this;
         this.cardService.deleteComment(this.card, comment).then(function (deleted_comment) {
