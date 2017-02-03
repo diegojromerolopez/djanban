@@ -18,6 +18,7 @@ var CardComponent = (function () {
         this.route = route;
         this.boardService = boardService;
         this.cardService = cardService;
+        this.card_hash = {};
         this.changeNameStatus = "hidden";
         this.changeListStatus = "hidden";
         this.changeLabelsStatus = "hidden";
@@ -25,8 +26,10 @@ var CardComponent = (function () {
         this.changeSETimeStatus = "standby";
         this.changeDescriptionStatus = "hidden";
         this.newCommentStatus = "standby";
+        this.addBlockingCardStatus = "hidden";
         this.editCommentStatus = {};
         this.deleteCommentStatus = {};
+        this.removeBlockingCardStatus = {};
     }
     CardComponent.prototype.ngOnInit = function () {
         var that = this;
@@ -57,6 +60,37 @@ var CardComponent = (function () {
         this.cardService.changeCardMembers(this.card, member_ids).then(function (updated_card) {
             _this.card = updated_card;
             _this.changeMembersStatus = "hidden";
+        });
+    };
+    /** Called when we remove a blocking card */
+    CardComponent.prototype.onRemoveBlockingCard = function (blockingCard) {
+        var _this = this;
+        this.cardService.removeBlockingCard(this.card, blockingCard).then(function (card_response) {
+            _this.card.blocking_cards = card_response.blocking_cards;
+            delete _this.removeBlockingCardStatus[blockingCard.id];
+            // We have to remove the associated comment
+            // Remember that comments with the format "blocked by <card_url_in_trello>" means card-blocking
+            _this.card.comments = card_response.comments;
+        });
+    };
+    CardComponent.prototype.addBlockingCardRightCandidate = function (blockingCardId) {
+        var blocking_card_ids = {};
+        for (var _i = 0, _a = this.card.blocking_cards; _i < _a.length; _i++) {
+            var blocking_card = _a[_i];
+            blocking_card_ids[blocking_card.id] = true;
+        }
+        return this.card.id != blockingCardId && !(blockingCardId in blocking_card_ids);
+    };
+    /** Called when we add a blocking card */
+    CardComponent.prototype.onAddBlockingCard = function (blockingCardId) {
+        var _this = this;
+        console.log("onAddBlockingCard");
+        var blockingCard = this.card_hash[blockingCardId];
+        this.cardService.addBlockingCard(this.card, blockingCard).then(function (card_response) {
+            _this.card.blocking_cards = card_response.blocking_cards;
+            // We have to update the comments
+            _this.card.comments = card_response.comments;
+            _this.addBlockingCardStatus = "hidden";
         });
     };
     /** Called when the card name change form is submitted */
@@ -139,16 +173,34 @@ var CardComponent = (function () {
         var _this = this;
         this.cardService.getCard(board_id, card_id).then(function (card) {
             _this.card = card;
+            // Inicialization of the status of the edition or deletion or the comments of this card
             for (var _i = 0, _a = _this.card.comments; _i < _a.length; _i++) {
                 var comment = _a[_i];
                 _this.editCommentStatus[comment.id] = "standby";
                 _this.deleteCommentStatus[comment.id] = "standby";
             }
+            // Initialization of the status of the removal of each one of the blocking cards or this card
+            for (var _b = 0, _c = _this.card.blocking_cards; _b < _c.length; _b++) {
+                var blocking_card = _c[_b];
+                _this.removeBlockingCardStatus[blocking_card.id] = "showed";
+            }
         });
     };
     CardComponent.prototype.loadBoard = function (board_id) {
         var _this = this;
-        this.boardService.getBoard(board_id).then(function (board) { return _this.board = board; });
+        this.boardService.getBoard(board_id).then(function (board) {
+            _this.board = board;
+            _this.card_hash = {};
+            _this.cards = [];
+            for (var _i = 0, _a = _this.board.lists; _i < _a.length; _i++) {
+                var list = _a[_i];
+                for (var _b = 0, _c = list.cards; _b < _c.length; _b++) {
+                    var card = _c[_b];
+                    _this.cards.push(card);
+                    _this.card_hash[card.id] = card;
+                }
+            }
+        });
     };
     return CardComponent;
 }());

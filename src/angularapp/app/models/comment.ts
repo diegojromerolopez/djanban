@@ -1,4 +1,5 @@
 import { Member } from './member';
+import { Card } from './card';
 
 
 export class CardComment {
@@ -8,4 +9,5 @@ export class CardComment {
   creation_datetime: Date;
   last_edition_datetime?: Date;
   author: Member;
+  blocking_card?: Card;
 }

@@ -27,6 +27,7 @@ export class Card {
   comments?: CardComment[];
   members?: Member[];
   charts?: {};
+  blocking_cards?: Card[];
 
   public constructor(card: Card){
     assign(this, card)

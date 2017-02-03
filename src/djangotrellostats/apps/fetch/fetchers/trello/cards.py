@@ -173,15 +173,23 @@ class CardFetcher(object):
             try:
                 card_comment = card.comments.get(uuid=uuid)
                 card_comment.content = content
-                card_comment.save()
+                card_comment.blocking_card = None
                 del card_deleted_comments[uuid]
             except CardComment.DoesNotExist:
                 card_comment = CardComment(uuid=uuid, card=card, author=author,
                                            creation_datetime=comment_creation_datetime, content=content)
-                card_comment.save()
+
+            # Check if comment has a blocking card
+            blocking_card = card_comment.blocking_card_from_content
+            if blocking_card:
+                card_comment.blocking_card = blocking_card
+
+            card_comment.save()
 
             # Create card comment list
             card_comments.append(card_comment)
+
+
 
         # Delete all card comments that are not present in trello.com
         for comment_uuid, comment in card_deleted_comments.items():

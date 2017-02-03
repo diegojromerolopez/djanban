@@ -224,6 +224,46 @@ def add_se_time(request, board_id, card_id):
     return JsonResponse(serialize_card(card))
 
 
+# Add a new blocking card to this card
+@member_required
+def add_blocking_card(request, board_id, card_id):
+    if request.method != "PUT":
+        return HttpResponseBadRequest()
+
+    member = request.user.member
+    put_body = json.loads(request.body)
+    if not put_body.get("blocking_card"):
+        return HttpResponseBadRequest()
+
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        card = board.cards.get(id=card_id)
+        blocking_card = board.cards.exclude(id=card_id).get(id=put_body.get("blocking_card"))
+    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+        raise Http404
+
+    card.add_blocking_card(member, blocking_card)
+    return JsonResponse(serialize_card(card))
+
+
+# Remove a blocking card to this card
+@member_required
+def remove_blocking_card(request, board_id, card_id, blocking_card_id):
+    if request.method != "DELETE":
+        return HttpResponseBadRequest()
+
+    member = request.user.member
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        card = board.cards.get(id=card_id)
+        blocking_card = card.blocking_cards.exclude(id=card_id).get(id=blocking_card_id)
+    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+        raise Http404
+
+    card.remove_blocking_card(member, blocking_card)
+    return JsonResponse(serialize_card(card))
+
+
 # Delete or update a comment
 @member_required
 @transaction.atomic

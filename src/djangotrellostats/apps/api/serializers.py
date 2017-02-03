@@ -20,7 +20,16 @@ def serialize_card(card):
             "content": comment.content,
             "creation_datetime": comment.creation_datetime,
             "last_edition_datetime": comment.last_edition_datetime,
-            "author": {"id": author.id, "trello_username": author.trello_username, "initials": author.initials}
+            "author": {"id": author.id, "trello_username": author.trello_username, "initials": author.initials},
+            "blocking_card": {
+                "id": comment.blocking_card.id,
+                "uuid": comment.blocking_card.uuid,
+                "name": comment.blocking_card.name,
+                "description": comment.blocking_card.description,
+                "url": reverse("boards:view_card", args=(board.id, comment.blocking_card.id,)),
+                "short_url": comment.blocking_card.short_url,
+                "position": comment.blocking_card.position,
+            } if comment.blocking_card else None
         }
         comments_json.append(comment_json)
 
@@ -66,17 +75,24 @@ def serialize_card(card):
         },
         "list": serialize_list(card_list),
         "members": [serialize_member(member) for member in card.members.all().order_by("initials")],
-        "pending_blocking_cards": [
+        "blocking_cards": [
             {
-                "id": pending_blocking.id,
-                "uuid": pending_blocking.uuid,
-                "name": pending_blocking.name,
-                "description": pending_blocking.description,
-                "url": reverse("boards:view_card", args=(board.id, pending_blocking.id,)),
-                "short_url": pending_blocking.short_url,
-                "position": pending_blocking.position
+                "id": blocking_card.id,
+                "uuid": blocking_card.uuid,
+                "name": blocking_card.name,
+                "description": blocking_card.description,
+                "url": reverse("boards:view_card", args=(board.id, blocking_card.id,)),
+                "short_url": blocking_card.short_url,
+                "position": blocking_card.position,
+                "list": {
+                    "id": blocking_card.list.id,
+                    "name": blocking_card.list.name,
+                    "uuid": blocking_card.list.uuid,
+                    "type": blocking_card.list.type,
+                    "position": blocking_card.list.position
+                }
             }
-            for pending_blocking in card.pending_blocking_cards.order_by("creation_datetime")
+            for blocking_card in card.blocking_cards.order_by("creation_datetime")
             ],
         "movements": [
             {
@@ -86,8 +102,16 @@ def serialize_card(card):
                 "datetime": movement.datetime,
                 "member": serialize_member(movement.member)
             }
-            for movement in card.movements.all().order_by("datetime")
+            for movement in card.movements.all().order_by("-datetime")
             ],
+        "reviews": [
+            {
+                "id": review.id,
+                "creation_datetime": review.creation_datetime,
+                "reviewers": [serialize_member(reviewer) for reviewer in review.reviewers.all()]
+            }
+            for review in card.reviews.all().order_by("-creation_datetime")
+        ],
         "charts": {
             "number_of_comments_by_member": reverse("charts:number_of_comments_by_member", args=(board.id, card.id)),
             "number_of_comments": reverse("charts:number_of_comments", args=(board.id, card.id))

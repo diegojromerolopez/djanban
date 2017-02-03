@@ -33,6 +33,8 @@ export class CardService extends DjangoTrelloStatsService {
   private CHANGE_MEMBERS_URL = "/api/board/{board_id}/card/{card_id}/members";
   private CHANGE_CARD_URL = "/api/board/{board_id}/card/{card_id}";
   private GET_CARD_URL = '/api/board/{board_id}/card/{card_id}/info';
+  private BLOCKING_CARD_URL = '/api/board/{board_id}/card/{card_id}/blocking_card';
+  private REMOVE_BLOCKING_CARD_URL = '/api/board/{board_id}/card/{card_id}/blocking_card/{blocking_card_id}';
   
 
   constructor (http: Http) {
@@ -94,6 +96,25 @@ export class CardService extends DjangoTrelloStatsService {
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);
+  }
+
+  addBlockingCard(card: Card, blocking_card: Card): Promise<Card> {
+    let add_blocking_card_url = this.prepareUrl(this.BLOCKING_CARD_URL, card);
+    let put_body = {blocking_card: blocking_card.id};
+    console.log(card, blocking_card);
+    console.log(put_body);
+    return this.http.put(add_blocking_card_url, put_body)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }
+
+  removeBlockingCard(card: Card, blocking_card: Card): Promise<Card> {
+    let remove_blocking_card_url = this.prepareUrl(this.REMOVE_BLOCKING_CARD_URL, card).replace("{blocking_card_id}", blocking_card.id.toString());
+    return this.http.delete(remove_blocking_card_url)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);    
   }
 
   addNewComment(card: Card, comment_content: string) : Promise<CardComment> {

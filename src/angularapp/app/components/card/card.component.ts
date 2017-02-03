@@ -26,6 +26,8 @@ export class CardComponent implements OnInit  {
 
     private board: Board;
     private card: Card;
+    private cards: Card[];
+    private card_hash: {};
     
     private changeNameStatus: string;
     private changeListStatus: string;
@@ -34,6 +36,9 @@ export class CardComponent implements OnInit  {
     private changeSETimeStatus: string;
     private changeDescriptionStatus: string;
     private newCommentStatus: string;
+    // Blocking card statuses
+    private addBlockingCardStatus: string;
+    private removeBlockingCardStatus: {};
     
     /**
      * Stores the status of the edition of each comment: standby (standby),
@@ -64,6 +69,7 @@ export class CardComponent implements OnInit  {
         private boardService: BoardService,
         private cardService: CardService
     ) {
+        this.card_hash = {};
         this.changeNameStatus = "hidden";
         this.changeListStatus = "hidden";
         this.changeLabelsStatus = "hidden";
@@ -71,8 +77,10 @@ export class CardComponent implements OnInit  {
         this.changeSETimeStatus = "standby";
         this.changeDescriptionStatus = "hidden";
         this.newCommentStatus = "standby";
+        this.addBlockingCardStatus = "hidden";
         this.editCommentStatus = { };
         this.deleteCommentStatus = { };
+        this.removeBlockingCardStatus = { };
     }
 
     cardHasLabel(label: Label): boolean {
@@ -96,6 +104,37 @@ export class CardComponent implements OnInit  {
         this.cardService.changeCardMembers(this.card, member_ids).then(updated_card => {
             this.card = updated_card;
             this.changeMembersStatus = "hidden";
+        });
+    }
+
+    /** Called when we remove a blocking card */
+    onRemoveBlockingCard(blockingCard: Card){
+        this.cardService.removeBlockingCard(this.card, blockingCard).then(card_response => {
+            this.card.blocking_cards = card_response.blocking_cards;
+            delete this.removeBlockingCardStatus[blockingCard.id];
+            // We have to remove the associated comment
+            // Remember that comments with the format "blocked by <card_url_in_trello>" means card-blocking
+            this.card.comments = card_response.comments;
+        });
+    }
+
+    addBlockingCardRightCandidate(blockingCardId: number) {
+        let blocking_card_ids = {};
+        for(let blocking_card of this.card.blocking_cards){
+            blocking_card_ids[blocking_card.id] = true;
+        }
+        return this.card.id != blockingCardId && !(blockingCardId in blocking_card_ids);
+    }
+
+    /** Called when we add a blocking card */
+    onAddBlockingCard(blockingCardId: number){
+        console.log("onAddBlockingCard");
+        let blockingCard = this.card_hash[blockingCardId];
+        this.cardService.addBlockingCard(this.card, blockingCard).then(card_response => {
+            this.card.blocking_cards = card_response.blocking_cards;
+            // We have to update the comments
+            this.card.comments = card_response.comments;
+            this.addBlockingCardStatus = "hidden";
         });
     }
 
@@ -179,15 +218,30 @@ export class CardComponent implements OnInit  {
     loadCard(board_id: number, card_id: number): void {
         this.cardService.getCard(board_id, card_id).then(card => {
             this.card = card;
+            // Inicialization of the status of the edition or deletion or the comments of this card
             for(let comment of this.card.comments){
                 this.editCommentStatus[comment.id] = "standby";
                 this.deleteCommentStatus[comment.id] = "standby";
+            }
+            // Initialization of the status of the removal of each one of the blocking cards or this card
+            for(let blocking_card of this.card.blocking_cards){
+                this.removeBlockingCardStatus[blocking_card.id] = "showed";
             }
         });
     }
 
     loadBoard(board_id: number): void {
-        this.boardService.getBoard(board_id).then(board => this.board = board);
+        this.boardService.getBoard(board_id).then(board => {
+            this.board = board;
+            this.card_hash = {};
+            this.cards = [];
+            for(let list of this.board.lists){
+                for(let card of list.cards){
+                    this.cards.push(card);
+                    this.card_hash[card.id] = card;
+                }
+            }
+        });
     }
 
 }

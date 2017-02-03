@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cardcomment',
             name='last_edition_datetime',
-            field=models.DateTimeField(default=None, verbose_name='Last edition of the comment'),
+            field=models.DateTimeField(default=None, null=True, verbose_name='Last edition of the comment'),
         ),
     ]

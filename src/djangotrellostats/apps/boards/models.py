@@ -543,6 +543,9 @@ class Card(models.Model):
     COMMENT_SPENT_ESTIMATED_TIME_PATTERN = "plus! {days_ago}{spent_time}/{estimated_time} {description}"
 
     COMMENT_BLOCKED_CARD_REGEX = r"^blocked\s+by\s+(?P<card_url>.+)$"
+    COMMENT_BLOCKED_CARD_PATTERN = "blocked by {card_url}"
+
+
     COMMENT_REQUIREMENT_CARD_REGEX = r"^task\s+of\s+requirement\s+(?P<requirement_code>.+)$"
 
     COMMENT_REVIEWED_BY_MEMBERS_REGEX = r"^reviewed\s+by\s+(?P<member_usernames>((@[\w\d]+)(\s|,|and)*)+)$"
@@ -812,6 +815,17 @@ class Card(models.Model):
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
 
+    # Add a new blocking card to this card
+    @transaction.atomic
+    def add_blocking_card(self, member, blocking_card):
+        comment_content = Card.COMMENT_BLOCKED_CARD_PATTERN.format(card_url=blocking_card.url)
+        comment = self.add_comment(member, comment_content)
+
+    # Remove a blocking card of this card
+    @transaction.atomic
+    def remove_blocking_card(self, member, blocking_card):
+        self.delete_comment(member, blocking_card.blocking_comments.get(card=self))
+
     # Add a new comment to this card
     @transaction.atomic
     def add_comment(self, member, content):
@@ -897,6 +911,7 @@ class CardComment(models.Model):
     card = models.ForeignKey("boards.Card", verbose_name=u"Card this comment belongs to", related_name="comments")
     author = models.ForeignKey("members.Member", verbose_name=u"Member author of this comment", related_name="comments")
     content = models.TextField(verbose_name=u"Content of the comment")
+    blocking_card = models.ForeignKey("boards.Card", verbose_name=u"Blocking card this comment belongs to", related_name="blocking_comments", null=True, default=None)
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
     last_edition_datetime = models.DateTimeField(verbose_name=u"Last edition of the comment", default=None, null=True)
 
@@ -925,7 +940,7 @@ class CardComment(models.Model):
     # Returns the blocking card linked to this comment extracted from its content.
     # If it is not a blocking card comment, return None
     @property
-    def blocking_card(self):
+    def blocking_card_from_content(self):
         matches = re.match(Card.COMMENT_BLOCKED_CARD_REGEX, self.content, re.IGNORECASE)
         if matches:
             blocking_card_url = matches.group("card_url")
@@ -994,11 +1009,11 @@ class CardComment(models.Model):
 
         if earlier_card_comment_exists:
             earlier_card_comment = card.comments.get(uuid=self.uuid)
-            super(CardComment, self).save(*args, **kwargs)
             self._save_old(card, earlier_card_comment)
         else:
-            super(CardComment, self).save(*args, **kwargs)
             self._save_new(card)
+
+        super(CardComment, self).save(*args, **kwargs)
 
     # Save an old comment
     def _save_old(self, card, earlier_card_comment):
@@ -1024,13 +1039,15 @@ class CardComment(models.Model):
                 card.update_spent_estimated_time()
 
             # Is it a blocking card comment?
-            blocking_card = self.blocking_card
+            blocking_card = self.blocking_card_from_content
             earlier_blocking_card = earlier_card_comment.blocking_card
             if blocking_card != earlier_blocking_card:
                 if earlier_blocking_card is not None:
                     card.blocking_cards.remove(earlier_blocking_card)
+                    self.blocking_card = None
                 if blocking_card is not None:
                     card.blocking_cards.add(blocking_card)
+                    self.blocking_card = blocking_card
 
             # Is it a requirement card comment?
             requirement = self.requirement
@@ -1063,9 +1080,10 @@ class CardComment(models.Model):
             card.update_spent_estimated_time()
 
         # Is it a blocking card comment?
-        blocking_card = self.blocking_card
+        blocking_card = self.blocking_card_from_content
         if blocking_card:
             card.blocking_cards.add(blocking_card)
+            self.blocking_card = blocking_card
 
         # Is it a requirement card comment?
         requirement = self.requirement

@@ -32,4 +32,8 @@ urlpatterns = [
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/time/?$', cards.add_se_time, name="add_se_time"),
 
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/?$', cards.change, name="change"),
+
+    # Blocking cards
+    url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/blocking_card/?$', cards.add_blocking_card, name="add_blocking_card"),
+    url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/blocking_card/(?P<blocking_card_id>\d+)?$', cards.remove_blocking_card, name="remove_blocking_card"),
 ]
