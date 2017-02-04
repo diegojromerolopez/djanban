@@ -32,7 +32,7 @@ var BoardComponent = (function () {
         this.moveAllCardsStatus = {};
         dragulaService.setOptions('lists', {
             moves: function (el, container, handle) {
-                return handle.className === 'move_list_handle';
+                return handle.className === 'move_list_handle' || handle.className == 'move_list_handle_icon';
             }
         });
         dragulaService.drop.subscribe(function (parameters) {

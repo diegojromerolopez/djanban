@@ -93,15 +93,18 @@ h1, h2, h3 {
 
 .move_list_handle,
 .board .lists .list .move_list_handle {
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+
     cursor: move;
     display: inline-block;
-    padding: 2px 7px;
+    /*padding: 2px 7px;*/
     margin-bottom: 10px;
     margin-top: 5px;
-    margin-right: 10px;
     font-size: 14px;
     font-weight: 400;
-    line-height: 1.42857143;
+    line-height: 1.6;
     text-align: center;
     white-space: nowrap;
     vertical-align: middle;
@@ -110,15 +113,24 @@ h1, h2, h3 {
     border: 1px solid transparent;
     border-radius: 4px;
 
+    height: 25px;
+    width: 25px;
+
     color: #fff;
     background-color: #337ab7;
     border-color: #2e6da4;
 }
 
+.move_list_handle:before,
+.board .lists .list .move_list_handle:before{
+    content: "\f047";
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+}
+
 .move_list_handle_icon {
-    display: block;
-    height: 30px;
-    width: 30px;
+    display: inline-block;
 }
 
 .move_list_cards,

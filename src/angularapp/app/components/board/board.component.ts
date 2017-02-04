@@ -56,7 +56,7 @@ export class BoardComponent implements OnInit {
 
       dragulaService.setOptions('lists', {
         moves: function (el: any, container: any, handle: any) {
-          return handle.className === 'move_list_handle';
+          return handle.className === 'move_list_handle' || handle.className == 'move_list_handle_icon';
         }
       });
       

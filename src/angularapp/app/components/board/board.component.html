@@ -52,9 +52,7 @@
                     <span class="list_name_name">
                         <span>{{list.name}}</span> ({{list.cards.length}} tasks)
                     </span>
-                    <span class="move_list_handle">
-                        <span class="fa fa-arrows"></span>
-                    </span>
+                    <span class="move_list_handle" title="Move list"></span>
                     <div class="list_actions">
                         <span (click)="newCardFormStatus[list.id]['show'] = true" class="btn btn-primary list_name_new_card" title="New card in list {{list.name}}">
                             <span class="fa fa-plus"></span> Card
