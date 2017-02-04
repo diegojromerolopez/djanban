@@ -52,12 +52,44 @@
                     <span class="list_name_name">
                         <span>{{list.name}}</span> ({{list.cards.length}} tasks)
                     </span>
-                    <span (click)="newCardFormStatus[list.id]['show'] = true" class="btn btn-primary list_name_new_card" title="New card in list {{list.name}}">
-                        <span class="fa fa-plus"></span> Card
-                    </span>
                     <span class="move_list_handle">
                         <span class="fa fa-arrows"></span>
                     </span>
+                    <div class="list_actions">
+                        <span (click)="newCardFormStatus[list.id]['show'] = true" class="btn btn-primary list_name_new_card" title="New card in list {{list.name}}">
+                            <span class="fa fa-plus"></span> Card
+                        </span>
+                        <div class="move_list_cards">
+                            <button class="move_cards_button btn btn-primary"
+                                    (click)="moveAllCardsStatus[list.id]='showed'"
+                                    *ngIf="list.cards.length > 0"
+                                    [disabled]="moveAllCardsStatus[list.id]=='waiting'">
+                                <span class="fa fa-backward"></span>
+                                Cards
+                                <span class="fa fa-forward"></span>
+                            </button>
+                            <form (ngSubmit)="onMoveAllCardsSubmit(list.id, moveAllCardsForm.value.destination_list)" #moveAllCardsForm="ngForm" *ngIf="moveAllCardsStatus[list.id]=='showed' || moveAllCardsStatus[list.id]=='waiting'">
+                                <select name="destination_list" required ngModel>
+                                    <option *ngFor="let list_i of board.lists" value="{{list_i.id}}">{{list_i.name}}</option>
+                                </select>
+                                <div class="actions">
+                                    <button (click)="$event.preventDefault()"
+                                            (click)="moveAllCardsStatus[list.id]='hidden'"
+                                            [disabled]="moveAllCardsStatus[list.id]=='waiting'"
+                                            class="btn btn-danger">Cancel</button>
+                                    
+                                    <button class="btn btn-success"
+                                            (click)="$event.preventDefault()"
+                                            (click)="moveAllCardsStatus[list.id]='waiting'"
+                                            (click)="moveAllCardsForm.ngSubmit.emit()"
+                                            [disabled]="!moveAllCardsForm.valid || moveAllCardsStatus[list.id]=='waiting'">
+                                        <span class="fa fa-spin fa-spinner" *ngIf="moveAllCardsStatus[list.id]=='waiting'"></span>
+                                        Move
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
                 <div *ngIf="newCardFormStatus[list.id]['show']" class="list_new_card">
                     <form (ngSubmit)="onNewCardSubmit(list, newCardForm.value.name, newCardForm.value.position)" #newCardForm="ngForm">

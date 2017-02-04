@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from djangotrellostats.trello_api.common import get_trello_board, get_trello_card
+from djangotrellostats.trello_api.common import get_trello_board, get_trello_card, get_trello_list
 from djangotrellostats.trello_api.connector import TrelloConnector
 from trello import Card as TrelloCard
 from trello import List as TrelloList
@@ -45,6 +45,19 @@ def order_card(card, member, position):
 def move_card(card, member, destination_list):
     trello_card = get_trello_card(card, member)
     trello_card.change_list(destination_list.uuid)
+
+
+# Move all cards from a list
+def move_list_cards(source_list, member, destination_list):
+    trello_list = get_trello_list(source_list, member)
+    # FakeTrelloBoard and FakeTrelloList are needed because the pytrello API needs an
+    # object (list) with an id and a board (also with an id)
+    # There is no easy way to do it, unless you want to construct a TrelloBoard or fetch a TrelloBoard
+    FakeTrelloBoard = namedtuple("FakeTrelloBoard", ["id"])
+    fake_trello_board = FakeTrelloBoard(id=source_list.board.uuid)
+    FakeTrelloList = namedtuple("FakeTrelloList", ["id", "board"])
+    fake_trello_destination_list = FakeTrelloList(id=destination_list.uuid, board=fake_trello_board)
+    trello_list.move_all_cards(fake_trello_destination_list)
 
 
 # Add comment to a card

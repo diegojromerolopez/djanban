@@ -7,21 +7,38 @@ import re
 
 from django.db import transaction
 from django.http import Http404
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.http import JsonResponse
 
-from djangotrellostats.apps.api.serializers import serialize_card
-from djangotrellostats.apps.api.util import get_list_or_404, get_card_or_404
+from djangotrellostats.apps.api.http import HttpResponseMethodNotAllowed
+from djangotrellostats.apps.api.serializers import serialize_card, serialize_board
+from djangotrellostats.apps.api.util import get_list_or_404, get_card_or_404, get_board_or_404
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.models import Board, Card, CardComment, List
 from djangotrellostats.trello_api.cards import set_name, set_description
 
 
+# Point of access to several actions
 @member_required
-def add_card(request, board_id):
+def modify_cards(request, board_id):
+    # Create a new card
+    if request.method == "PUT":
+        return _add_card(request, board_id)
+
+    # Move all cards in a list
+    if request.method == "POST":
+        return _move_all_list_cards(request, board_id)
+
+    # Otherwise, return HTTP ERROR 405
+    return HttpResponseMethodNotAllowed()
+
+
+# Adds a new card in the board
+# Used by modify_cards
+def _add_card(request, board_id):
     if request.method != "PUT":
-        raise Http404
+        return HttpResponseMethodNotAllowed()
 
     member = request.user.member
 
@@ -40,18 +57,57 @@ def add_card(request, board_id):
     return JsonResponse(serialize_card(new_card))
 
 
+# Move all cards from a list to another
+# Used by modify_cards
+def _move_all_list_cards(request, board_id):
+    if request.method != "POST":
+        return HttpResponseMethodNotAllowed()
+
+    member = request.user.member
+    board = get_board_or_404(request, board_id)
+
+    post_params = json.loads(request.body)
+
+    print post_params.get("source_list")
+    print post_params.get("destination_list")
+    if not post_params.get("source_list") or not post_params.get("destination_list"):
+        print "W"
+        return HttpResponseBadRequest()
+
+    # Check if the lists exists and if they are different
+    try:
+        source_list = board.active_lists.get(id=post_params.get("source_list"))
+        destination_list = board.active_lists.get(id=post_params.get("destination_list"))
+        if source_list.id == destination_list.id:
+            print "X"
+            raise AssertionError()
+    except (List.DoesNotExist, AssertionError):
+        print "Y"
+        return HttpResponseBadRequest()
+
+    # Move the cards
+    source_list.move_cards(member=member, destination_list=destination_list)
+
+    return JsonResponse(serialize_board(board))
+
+
+
+# Return the JSON representation of a card
 @member_required
 def get_card(request, board_id, card_id):
+    if request.method != "GET":
+        return HttpResponseMethodNotAllowed()
     card = get_card_or_404(request, board_id, card_id)
     card_json = serialize_card(card)
     return JsonResponse(card_json)
 
 
+# Change the name or description of the card
 @member_required
 @transaction.atomic
 def change(request, board_id, card_id):
     if request.method != "PUT":
-        raise Http404
+        return HttpResponseMethodNotAllowed()
 
     member = request.user.member
     card = get_card_or_404(request, board_id, card_id)
@@ -74,11 +130,12 @@ def change(request, board_id, card_id):
     return JsonResponse(serialize_card(card))
 
 
+# Change the labels of the card
 @member_required
 @transaction.atomic
 def change_labels(request, board_id, card_id):
     if request.method != "POST":
-        raise Http404
+        return HttpResponseMethodNotAllowed()
 
     card = get_card_or_404(request, board_id, card_id)
     board = card.board
@@ -102,7 +159,7 @@ def change_labels(request, board_id, card_id):
 @transaction.atomic
 def change_members(request, board_id, card_id):
     if request.method != "POST":
-        raise Http404
+        return HttpResponseMethodNotAllowed()
 
     card = get_card_or_404(request, board_id, card_id)
     board = card.board
@@ -127,7 +184,7 @@ def change_members(request, board_id, card_id):
 @transaction.atomic
 def move_to_list(request, board_id, card_id):
     if request.method != "POST":
-        raise Http404
+        return HttpResponseMethodNotAllowed()
 
     post_params = json.loads(request.body)
 
@@ -151,7 +208,7 @@ def move_to_list(request, board_id, card_id):
 @transaction.atomic
 def add_new_comment(request, board_id, card_id):
     if request.method != "PUT":
-        raise Http404
+        return HttpResponseMethodNotAllowed()
 
     put_params = json.loads(request.body)
 
@@ -183,7 +240,7 @@ def add_new_comment(request, board_id, card_id):
 @transaction.atomic
 def add_se_time(request, board_id, card_id):
     if request.method != "POST":
-        return HttpResponseBadRequest()
+        return HttpResponseMethodNotAllowed()
 
     member = request.user.member
     card = get_card_or_404(request, board_id, card_id)
@@ -228,7 +285,7 @@ def add_se_time(request, board_id, card_id):
 @member_required
 def add_blocking_card(request, board_id, card_id):
     if request.method != "PUT":
-        return HttpResponseBadRequest()
+        return HttpResponseMethodNotAllowed()
 
     member = request.user.member
     put_body = json.loads(request.body)
@@ -269,7 +326,7 @@ def remove_blocking_card(request, board_id, card_id, blocking_card_id):
 @transaction.atomic
 def add_new_review(request, board_id, card_id):
     if request.method != "PUT":
-        return HttpResponseBadRequest()
+        return HttpResponseMethodNotAllowed()
 
     member = request.user.member
     card = get_card_or_404(request, board_id, card_id)
@@ -293,7 +350,7 @@ def add_new_review(request, board_id, card_id):
 @transaction.atomic
 def delete_review(request, board_id, card_id, review_id):
     if request.method != "DELETE":
-        return HttpResponseBadRequest()
+        return HttpResponseMethodNotAllowed()
 
     member = request.user.member
     try:
@@ -312,7 +369,7 @@ def delete_review(request, board_id, card_id, review_id):
 @transaction.atomic
 def add_requirement(request, board_id, card_id):
     if request.method != "PUT":
-        return HttpResponseBadRequest()
+        return HttpResponseMethodNotAllowed()
 
     member = request.user.member
     card = get_card_or_404(request, board_id, card_id)
@@ -338,7 +395,7 @@ def add_requirement(request, board_id, card_id):
 @transaction.atomic
 def remove_requirement(request, board_id, card_id, requirement_id):
     if request.method != "DELETE":
-        return HttpResponseBadRequest()
+        return HttpResponseMethodNotAllowed()
 
     member = request.user.member
     try:
@@ -357,7 +414,7 @@ def remove_requirement(request, board_id, card_id, requirement_id):
 @transaction.atomic
 def modify_comment(request, board_id, card_id, comment_id):
     if request.method != "DELETE" and request.method != "POST":
-        return HttpResponseBadRequest()
+        return HttpResponseMethodNotAllowed()
 
     member = request.user.member
     card = get_card_or_404(request, board_id, card_id)

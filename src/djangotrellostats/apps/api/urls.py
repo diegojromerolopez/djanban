@@ -19,7 +19,8 @@ urlpatterns = [
     url(r'^board/(?P<board_id>\d+)/list/(?P<list_id>\d+)?$', lists.move_list, name="move_list"),
 
     # Card API
-    url(r'^board/(?P<board_id>\d+)/card/?$', cards.add_card, name="add_card"),
+    url(r'^board/(?P<board_id>\d+)/card/?$', cards.modify_cards, name="modify_cards"),
+
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/info/?$', cards.get_card, name="get_card"),
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/comment/?$', cards.add_new_comment, name="add_new_comment"),
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/comment/(?P<comment_id>\d+)/?$', cards.modify_comment, name="modify_comment"),

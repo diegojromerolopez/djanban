@@ -29,6 +29,7 @@ var BoardComponent = (function () {
         this.newCardFormStatus = {};
         this.removeMemberStatus = {};
         this.addMemberStatus = {};
+        this.moveAllCardsStatus = {};
         dragulaService.setOptions('lists', {
             moves: function (el, container, handle) {
                 return handle.className === 'move_list_handle';
@@ -94,15 +95,20 @@ var BoardComponent = (function () {
         }
         this.boardService.moveList(this.board, moved_list, destination_position).then(function (list) { moved_list.position = list.position; });
     };
+    /** Prepare board attributes, status, etc. when fetching the board from the server */
+    BoardComponent.prototype.prepareBoard = function (board_response) {
+        this.board = new board_1.Board(board_response);
+        for (var _i = 0, _a = this.board.lists; _i < _a.length; _i++) {
+            var list = _a[_i];
+            this.newCardFormStatus[list.id] = { show: false, waiting: false };
+            this.moveAllCardsStatus[list.id] = "hidden";
+        }
+    };
     /** Load board */
     BoardComponent.prototype.loadBoard = function (board_id) {
         var _this = this;
         this.boardService.getBoard(board_id).then(function (board_response) {
-            _this.board = new board_1.Board(board_response);
-            for (var _i = 0, _a = _this.board.lists; _i < _a.length; _i++) {
-                var list = _a[_i];
-                _this.newCardFormStatus[list.id] = { show: false, waiting: false };
-            }
+            _this.prepareBoard(board_response);
         });
     };
     /** Load all available members */
@@ -127,6 +133,18 @@ var BoardComponent = (function () {
             list_1.List.addCardToList(list, card_response, position);
             _this.newCardFormStatus[list.id] = { "show": false, "waiting": false };
         });
+    };
+    BoardComponent.prototype.onMoveAllCardsSubmit = function (source_list_id, destination_list_id) {
+        var _this = this;
+        console.log(source_list_id, destination_list_id);
+        var source_list = this.board.lists.find(function (list_i) { return list_i.id == source_list_id; });
+        var destination_list = this.board.lists.find(function (list_i) { return list_i.id == destination_list_id; });
+        if (source_list && destination_list) {
+            this.cardService.moveAllListCards(this.board, source_list, destination_list).then(function (board_response) { return _this.prepareBoard(board_response); });
+        }
+        else {
+            console.error("There is something wrong with the lists");
+        }
     };
     /* Member actions */
     BoardComponent.prototype.removeMember = function (member) {

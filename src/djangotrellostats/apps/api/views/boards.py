@@ -9,7 +9,9 @@ from django.http import Http404, HttpResponseBadRequest
 from django.http import JsonResponse
 from django.urls import reverse
 
-from djangotrellostats.apps.api.serializers import serialize_list, serialize_member, serialize_requirement
+from djangotrellostats.apps.api.http import HttpResponseMethodNotAllowed
+from djangotrellostats.apps.api.serializers import serialize_list, serialize_member, serialize_requirement, \
+    serialize_board
 from djangotrellostats.apps.api.util import get_board_or_404
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
@@ -19,6 +21,8 @@ from djangotrellostats.apps.members.models import Member
 
 @member_required
 def get_boards(request):
+    if request.method != "GET":
+        return HttpResponseMethodNotAllowed()
     try:
         boards = get_user_boards(request.user)
     except Board.DoesNotExist:
@@ -40,45 +44,14 @@ def get_boards(request):
 
 @member_required
 def get_board(request, board_id):
+    if request.method != "GET":
+        return HttpResponseMethodNotAllowed()
     try:
         board = get_user_boards(request.user).get(id=board_id)
     except Board.DoesNotExist:
         raise Http404
 
-    lists_json = []
-    for list_ in board.active_lists.order_by("position"):
-        list_json = serialize_list(list_)
-
-        card_list = []
-        for card in list_.cards.filter(is_closed=False).order_by("position"):
-            card_json = {
-                "id": card.id,
-                "uuid": card.uuid,
-                "name": card.name,
-                "description": card.description,
-                "url": reverse("boards:view_card", args=(board.id, card.id,)),
-                "short_url": card.short_url,
-                "position": card.position,
-                "board": {"id": board.id, "uuid": board.uuid, "name": board.name,}
-            }
-            card_list.append(card_json)
-
-        list_json["cards"] = card_list
-
-        lists_json.append(list_json)
-
-    board_json = {
-        "id": board.id,
-        "uuid": board.uuid,
-        "name": board.name,
-        "description": board.description,
-        "local_url": reverse("boards:view", args=(board.id,)),
-        "lists": lists_json,
-        "members": [serialize_member(member) for member in board.members.all().order_by("initials")],
-        "requirements": [serialize_requirement(requirement) for requirement in board.requirements.all()],
-    }
-
-    return JsonResponse(board_json)
+    return JsonResponse(serialize_board(board))
 
 
 # Add a member to a board
@@ -86,7 +59,7 @@ def get_board(request, board_id):
 @transaction.atomic
 def add_member(request, board_id):
     if request.method != "PUT":
-        raise Http404
+        return HttpResponseMethodNotAllowed()
 
     member = request.user.member
     put_body = json.loads(request.body)
@@ -115,7 +88,7 @@ def add_member(request, board_id):
 @transaction.atomic
 def remove_member(request, board_id, member_id):
     if request.method != "DELETE":
-        raise Http404
+        return HttpResponseMethodNotAllowed()
 
     member = request.user.member
     board = get_board_or_404(request, board_id)

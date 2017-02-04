@@ -8,6 +8,42 @@ from crequest.middleware import CrequestMiddleware
 from djangotrellostats.apps.reports.models import CardReview
 
 
+def serialize_board(board):
+    lists_json = []
+    for list_ in board.active_lists.order_by("position"):
+        list_json = serialize_list(list_)
+
+        card_list = []
+        for card in list_.cards.filter(is_closed=False).order_by("position"):
+            card_json = {
+                "id": card.id,
+                "uuid": card.uuid,
+                "name": card.name,
+                "description": card.description,
+                "url": reverse("boards:view_card", args=(board.id, card.id,)),
+                "short_url": card.short_url,
+                "position": card.position,
+                "board": {"id": board.id, "uuid": board.uuid, "name": board.name,}
+            }
+            card_list.append(card_json)
+
+        list_json["cards"] = card_list
+
+        lists_json.append(list_json)
+
+    board_json = {
+        "id": board.id,
+        "uuid": board.uuid,
+        "name": board.name,
+        "description": board.description,
+        "local_url": reverse("boards:view", args=(board.id,)),
+        "lists": lists_json,
+        "members": [serialize_member(member) for member in board.members.all().order_by("initials")],
+        "requirements": [serialize_requirement(requirement) for requirement in board.requirements.all()],
+    }
+    return board_json
+
+
 # Basic card serialization
 def basic_serialize_card(card):
     return {
@@ -20,6 +56,7 @@ def basic_serialize_card(card):
         "short_url": card.short_url,
         "position": card.position
     }
+
 
 # Full card serialization
 def serialize_card(card):

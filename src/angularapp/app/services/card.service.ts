@@ -31,6 +31,7 @@ export class CardService extends DjangoTrelloStatsService {
   private ADD_COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment";
   private COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
   private MOVE_CARD_URL = "/api/board/{board_id}/card/{card_id}/list";
+  private MOVE_ALL_LIST_CARDS_URL = "/api/board/{board_id}/card";
   private CHANGE_LABELS_URL = "/api/board/{board_id}/card/{card_id}/labels";
   private CHANGE_MEMBERS_URL = "/api/board/{board_id}/card/{card_id}/members";
   private CHANGE_CARD_URL = "/api/board/{board_id}/card/{card_id}";
@@ -195,13 +196,23 @@ export class CardService extends DjangoTrelloStatsService {
                   .catch(this.handleError);
   }
 
+  /** Move a card to another list */
   moveCard(card: Card, new_list: List, position="top"): Promise<Card> {
     let move_list_url = this.prepareUrl(this.MOVE_CARD_URL, card);
     return this.http.post(move_list_url, {new_list: new_list.id, position: position})
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);
-  }  
+  }
+
+  /** Move all list from a card to another card */
+  moveAllListCards(board: Board, source_list: List, destination_list: List): Promise<Board> {
+    let move_all_list_cards_url = this.MOVE_ALL_LIST_CARDS_URL.replace("{board_id}", board.id.toString());
+    return this.http.post(move_all_list_cards_url, {source_list: source_list.id, destination_list: destination_list.id})
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }
 
   private prepareUrl(url: string, card: Card): string{
     let board_id = card.board.id.toString();

@@ -9,6 +9,7 @@ from django.http import Http404, HttpResponseBadRequest
 from django.http import JsonResponse
 from django.urls import reverse
 
+from djangotrellostats.apps.api.http import HttpResponseMethodNotAllowed
 from djangotrellostats.apps.api.serializers import serialize_list, serialize_member
 from djangotrellostats.apps.api.util import get_board_or_404
 from djangotrellostats.apps.base.auth import get_user_boards
@@ -19,6 +20,10 @@ from djangotrellostats.apps.members.models import Member
 
 @member_required
 def get_members(request):
+
+    if request.method != "GET":
+        return HttpResponseMethodNotAllowed()
+
     members = Member.objects.all()
 
     response_json = []

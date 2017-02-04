@@ -28,6 +28,8 @@ export class BoardComponent implements OnInit {
     public removeMemberStatus: {};
     // Status of the add member form
     public addMemberStatus: {};
+    // Status of the form that moves all cards of a list at once
+    public moveAllCardsStatus: {};
 
     ngOnInit(): void {
       let that = this;
@@ -50,6 +52,7 @@ export class BoardComponent implements OnInit {
       this.newCardFormStatus = {};
       this.removeMemberStatus = {};
       this.addMemberStatus = {};
+      this.moveAllCardsStatus = {};
 
       dragulaService.setOptions('lists', {
         moves: function (el: any, container: any, handle: any) {
@@ -120,13 +123,19 @@ export class BoardComponent implements OnInit {
       this.boardService.moveList(this.board, moved_list, destination_position).then(list => { moved_list.position = list.position; });
     }
 
+    /** Prepare board attributes, status, etc. when fetching the board from the server */
+    private prepareBoard(board_response: Board){
+        this.board = new Board(board_response);
+        for(let list of this.board.lists){
+          this.newCardFormStatus[list.id] = {show: false, waiting: false};
+          this.moveAllCardsStatus[list.id] = "hidden";
+        }
+    }
+
     /** Load board */
     loadBoard(board_id: number): void {
         this.boardService.getBoard(board_id).then(board_response =>{
-          this.board = new Board(board_response);
-          for(let list of this.board.lists){
-            this.newCardFormStatus[list.id] = {show: false, waiting: false};
-          }
+            this.prepareBoard(board_response);
         });
     }
 
@@ -151,6 +160,17 @@ export class BoardComponent implements OnInit {
         List.addCardToList(list, card_response, position);
         this.newCardFormStatus[list.id] = {"show": false, "waiting": false};
       });
+    }
+
+    onMoveAllCardsSubmit(source_list_id: number, destination_list_id: number): void{
+      console.log(source_list_id, destination_list_id);
+      let source_list = this.board.lists.find(function(list_i){ return list_i.id == source_list_id;  });
+      let destination_list = this.board.lists.find(function(list_i){ return list_i.id == destination_list_id;  });
+      if(source_list && destination_list){
+        this.cardService.moveAllListCards(this.board, source_list, destination_list).then(board_response => this.prepareBoard(board_response));
+      } else {
+        console.error("There is something wrong with the lists");
+      }
     }
 
     /* Member actions */

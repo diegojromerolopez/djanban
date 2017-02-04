@@ -29,6 +29,7 @@ var CardService = (function (_super) {
         _this.ADD_COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment";
         _this.COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
         _this.MOVE_CARD_URL = "/api/board/{board_id}/card/{card_id}/list";
+        _this.MOVE_ALL_LIST_CARDS_URL = "/api/board/{board_id}/card";
         _this.CHANGE_LABELS_URL = "/api/board/{board_id}/card/{card_id}/labels";
         _this.CHANGE_MEMBERS_URL = "/api/board/{board_id}/card/{card_id}/members";
         _this.CHANGE_CARD_URL = "/api/board/{board_id}/card/{card_id}";
@@ -174,10 +175,19 @@ var CardService = (function (_super) {
             .then(this.extractData)
             .catch(this.handleError);
     };
+    /** Move a card to another list */
     CardService.prototype.moveCard = function (card, new_list, position) {
         if (position === void 0) { position = "top"; }
         var move_list_url = this.prepareUrl(this.MOVE_CARD_URL, card);
         return this.http.post(move_list_url, { new_list: new_list.id, position: position })
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    /** Move all list from a card to another card */
+    CardService.prototype.moveAllListCards = function (board, source_list, destination_list) {
+        var move_all_list_cards_url = this.MOVE_ALL_LIST_CARDS_URL.replace("{board_id}", board.id.toString());
+        return this.http.post(move_all_list_cards_url, { source_list: source_list.id, destination_list: destination_list.id })
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);

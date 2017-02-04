@@ -22,7 +22,7 @@ from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
 from djangotrellostats.apps.reports.models import CardMovement, CardReview
 from djangotrellostats.trello_api.boards import add_member, remove_member
 
-from djangotrellostats.trello_api.cards import move_card,\
+from djangotrellostats.trello_api.cards import move_card, move_list_cards, \
     add_comment_to_card, edit_comment_of_card, delete_comment_of_card, \
     remove_label_of_card, add_label_to_card, order_card, new_card
 
@@ -718,30 +718,33 @@ class Card(models.Model):
 
     # Move this card to a random list
     @transaction.atomic
-    def move(self, member, destination_list, destination_position="top"):
+    def move(self, member, destination_list, destination_position="top", local_move_only=False):
         # Only move the card if the source list is different from the destination list.
         # Otherwise only a ordering is needed on the current card list.
-        if self.list.id != destination_list.id:
-            # Checking if it is a forward or backward movement
-            if self.list.position < destination_list.position:
-                movement_type = "forward"
-            elif self.list.position > destination_list.position:
-                movement_type = "backward"
-            else:
-                raise ValueError(u"Trying to move a card to its list")
+        if self.list.id == destination_list.id:
+            raise ValueError(u"Trying to move a card to its list")
 
-            # Store the movement of this card
-            card_movement = CardMovement(
-                board=self.board, card=self, type=movement_type, member=member,
-                source_list=self.list, destination_list=destination_list, datetime=timezone.now()
-            )
-            card_movement.save()
+        # Checking if it is a forward or backward movement
+        if self.list.position < destination_list.position:
+            movement_type = "forward"
+        elif self.list.position > destination_list.position:
+            movement_type = "backward"
+        else:
+            raise ValueError(u"Trying to move a card to its list")
 
-            # Move the card
-            self.list = destination_list
-            self.save()
+        # Store the movement of this card
+        card_movement = CardMovement(
+            board=self.board, card=self, type=movement_type, member=member,
+            source_list=self.list, destination_list=destination_list, datetime=timezone.now()
+        )
+        card_movement.save()
 
-            # Call to trello API
+        # Move the card
+        self.list = destination_list
+        self.save()
+
+        # Call to trello API
+        if not local_move_only:
             move_card(self, member, destination_list)
 
         # Move to the required position
@@ -763,8 +766,8 @@ class Card(models.Model):
             self.save()
 
             # Call to Trello API to order the card
-            order_card(self, member, destination_position_value)
-            print "{0} to position {1}".format(self.name, destination_position_value)
+            if not local_move_only:
+                order_card(self, member, destination_position_value)
 
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
@@ -1239,6 +1242,17 @@ class List(models.Model):
         self.save()
         # Call to trello API
         move_list(self, member, position)
+
+    @transaction.atomic
+    def move_cards(self, member, destination_list):
+        if self.id == destination_list.id:
+            raise AssertionError(u"Source list and destination list cannot be the same")
+        # Card local movement
+        cards_to_move = self.active_cards.all()
+        for card_to_move in cards_to_move:
+            card_to_move.move(member, destination_list, destination_position="top", local_move_only=True)
+        # Call to trello API
+        move_list_cards(member=member, source_list=self, destination_list=destination_list)
 
     # Return all cards that are not archived (closed)
     @property
