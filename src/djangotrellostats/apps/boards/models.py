@@ -842,8 +842,6 @@ class Card(models.Model):
             content = Card.COMMENT_REVIEWED_BY_MEMBERS_PATTERN.format(
                 member_usernames=member_usernames
             )
-        print content
-        print member
 
         self.add_comment(member, content)
 
@@ -993,11 +991,9 @@ class CardComment(models.Model):
     # If it is not a reviewer card comment, return None.
     @property
     def review_from_comment(self):
-        print "Property review_from_comment"
-        print self.content
         matches = re.match(Card.COMMENT_REVIEWED_BY_MEMBERS_REGEX, self.content, re.IGNORECASE)
-        print matches
         if matches:
+            # Extracting member usernames
             member_usernames_string = matches.group("member_usernames")
             member_usernames = re.findall(Card.COMMENT_REVIEWED_BY_MEMBERS_FINDALL_REGEX, member_usernames_string)
             if len(member_usernames) == 1 and member_usernames[0] == "@board":
@@ -1005,12 +1001,14 @@ class CardComment(models.Model):
             else:
                 cleaned_member_usernames = [member_username.replace("@", "") for member_username in member_usernames]
                 members = [member for member in self.card.board.members.filter(trello_username__in=cleaned_member_usernames)]
+            # Checkout the description of the review
             try:
                 description = matches.group("description")
             except IndexError:
                 description = ""
+
+            # Construct a dict with the review info
             _review_from_comment = {"reviewers": members, "datetime": self.creation_datetime, "card": self.card, "board": self.card.board, "description": description}
-            print _review_from_comment
             return _review_from_comment
 
         return None
@@ -1131,12 +1129,9 @@ class CardComment(models.Model):
 
         # Is it a reviewer card comment?
         review_from_comment = self.review_from_comment
-        print "review_from_comment"
-        print review_from_comment
         if review_from_comment:
             reviewer_members = review_from_comment.get("reviewers")
             description = review_from_comment.get("description", "")
-            print " CardReview.create(self, reviewer_members, description)"
             review = CardReview.create(self, reviewer_members, description)
             self.review = review
 

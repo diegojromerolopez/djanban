@@ -51,7 +51,6 @@ class CardReview(models.Model):
     @staticmethod
     def create(card_comment, reviewers, description=""):
         # Create the card review
-        print "Creating {0}".format(card_comment.content)
         card = card_comment.card
         board = card.board
         card_review = CardReview(
@@ -67,14 +66,12 @@ class CardReview(models.Model):
 
     @staticmethod
     def update(card_comment, reviewers, description=""):
-        print "Updating {0}".format(card_comment.content)
 
         # Get the card review
         card_review = card_comment.review
         card_review.reviewers.clear()
 
         # Update the reviewers
-        print reviewers
         for reviewer in reviewers:
             card_review.reviewers.add(reviewer)
 
