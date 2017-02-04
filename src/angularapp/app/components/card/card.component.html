@@ -599,12 +599,54 @@
                         <div *ngIf="card.requirements.length > 0">
                             <ul class="requirements">
                                 <li class="requirement" *ngFor="let requirement of card.requirements">
-                                    <h3>{{requirement.name}}</h3>
-                                    <div>
-                                        {{requirement.description}}
+                                    <h3>{{requirement.name}} ({{requirement.code}})</h3>
+                                    <div *ngIf="removeRequirementStatus[requirement.id]=='showed'">
+                                        <div class="requirement-value">
+                                            {{requirement.value}} points
+                                        </div>
+                                        <div *ngIf="requirement.cards.length > 0 || requirement.spent_time || requirement.estimated_time || requirement.percentage_of_completion"  class="requirement-summary requirement-time">
+                                            {{requirement.cards.length}} tasks, {{requirement.spent_time}} spent hours <span *ngIf="requirement.estimated_time">of {{requirement.estimated_time}} estimated hours</span> ( {{requirement.percentage_of_completion}} % completed)
+                                        </div>
+                                        <div>
+                                            {{requirement.description}}
+                                        </div>
+                                        <div *ngIf="requirement.other_comments" class="requirement-other_comments">
+                                            {{requirement.other_comments}}
+                                        </div>
+                                        <div *ngIf="requirement.cards.length == 0"  class="requirement-cards requirement-cards-empty">
+                                            <em>This requirement has no associated cards</em>
+                                        </div>
+                                        <div *ngIf="requirement.cards.length > 0" class="requirement-cards">
+                                            <h4>Associated cards</h4>
+                                            <ul>
+                                                <li *ngFor="let requirement_card of requirement.cards" class="requirement-card">
+                                                    <a href="{{requirement_card.local_url}}" title="{{requirement_card.name}}" class="requirement-card-link">
+                                                        <span class="requirement-card-name" class="requirement-card-link-name">{{requirement_card.name}}</span>
+                                                        <span *ngIf="requirement_card.spent_time > 0 || requirement_card.estimated_time > 0" class="requirement-card-link-time">
+                                                            {{requirement_card.spent_time}} spent time hours / {{requirement_card.estimated_time}} estimated hours
+                                                        </span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                     <!-- Remove requirement -->
                                     <div class="requirement-actions">
+
+                                        <button class="btn btn-primary"
+                                                *ngIf="removeRequirementStatus[requirement.id]!='showed' && removeRequirementStatus[requirement.id]!='asking' && removeRequirementStatus[requirement.id]!='waiting'"
+                                                (click)="removeRequirementStatus[requirement.id]='showed'">
+                                            <span class="fa fa-eye"></span>
+                                            View
+                                        </button>
+
+                                        <button class="btn btn-primary"
+                                                *ngIf="removeRequirementStatus[requirement.id]=='showed'"
+                                                (click)="removeRequirementStatus[requirement.id]='standby'">
+                                            <span class="fa fa-close"></span>
+                                            Close
+                                        </button>
+                                        
                                         <button class="btn btn-danger"
                                                 *ngIf="removeRequirementStatus[requirement.id]!='asking' && removeRequirementStatus[requirement.id]!='waiting'"
                                                 (click)="removeRequirementStatus[requirement.id]='asking'">

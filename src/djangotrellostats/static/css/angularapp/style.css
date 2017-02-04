@@ -225,6 +225,20 @@ h1, h2, h3 {
     font-size: 1.4em;
 }
 
+.card-requirements ul.requirements li.requirement .requirement-cards {
+
+}
+
+.card-requirements ul.requirements li.requirement .requirement-cards ul {
+    margin-bottom: 10px;
+    margin-top: 10px;
+    padding-left: 0;
+}
+
+.card-requirements ul.requirements li.requirement .requirement-cards ul li.requirement-card {
+    list-style-type: none;
+}
+
 /* Comments */
 .card_detail .comments {
 
