@@ -22,6 +22,7 @@ var CardComponent = (function () {
         this.card_hash = {};
         this.changeNameStatus = "hidden";
         this.changeListStatus = "hidden";
+        this.statusCardStatus = "standby";
         this.changeLabelsStatus = "hidden";
         this.changeMembersStatus = "hidden";
         this.changeSETimeStatus = "standby";
@@ -51,6 +52,22 @@ var CardComponent = (function () {
     };
     CardComponent.prototype.cardHasMember = function (member) {
         return this.card.members.find(function (member_id) { return member_id.id == member.id; }) != undefined;
+    };
+    /** Mark card as active */
+    CardComponent.prototype.activeCard = function () {
+        var _this = this;
+        this.cardService.activeCard(this.card).then(function (updated_card) {
+            _this.card.is_closed = false;
+            _this.statusCardStatus = "standby";
+        });
+    };
+    /** Mark card as closed (disabled) */
+    CardComponent.prototype.closeCard = function () {
+        var _this = this;
+        this.cardService.closeCard(this.card).then(function (updated_card) {
+            _this.card.is_closed = true;
+            _this.statusCardStatus = "standby";
+        });
     };
     /** Called when the change labels form is submitted */
     CardComponent.prototype.onChangeLabels = function (label_ids) {
@@ -219,9 +236,12 @@ var CardComponent = (function () {
             delete _this.commentPreviousContent[comment.id];
         });
     };
+    /** Navigation on the top of the page */
     CardComponent.prototype.onReturnToBoardSelect = function () {
         this.router.navigate([this.board.id]);
     };
+    // Basic loading methods
+    /** Load card data and prepare its statuses */
     CardComponent.prototype.loadCard = function (board_id, card_id) {
         var _this = this;
         this.cardService.getCard(board_id, card_id).then(function (card) {

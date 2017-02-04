@@ -33,6 +33,10 @@ export class CardComponent implements OnInit  {
     
     private changeNameStatus: string;
     private changeListStatus: string;
+
+    // Status of the lateral menu
+    /** Change of status of the card (active/closed) */
+    private statusCardStatus: string;
     private changeLabelsStatus: string;
     private changeMembersStatus: string;
     private changeSETimeStatus: string;
@@ -85,6 +89,7 @@ export class CardComponent implements OnInit  {
         this.card_hash = {};
         this.changeNameStatus = "hidden";
         this.changeListStatus = "hidden";
+        this.statusCardStatus = "standby";
         this.changeLabelsStatus = "hidden";
         this.changeMembersStatus = "hidden";
         this.changeSETimeStatus = "standby";
@@ -107,6 +112,22 @@ export class CardComponent implements OnInit  {
 
     cardHasMember(member: Member): boolean {
         return this.card.members.find(function(member_id){ return member_id.id == member.id }) != undefined;
+    }
+
+    /** Mark card as active */
+    activeCard(): void{
+        this.cardService.activeCard(this.card).then(updated_card => {
+            this.card.is_closed = false;
+            this.statusCardStatus = "standby";
+        });
+    }
+
+    /** Mark card as closed (disabled) */
+    closeCard(): void{
+        this.cardService.closeCard(this.card).then(updated_card => {
+            this.card.is_closed = true;
+            this.statusCardStatus = "standby";
+        });
     }
 
     /** Called when the change labels form is submitted */
@@ -275,10 +296,14 @@ export class CardComponent implements OnInit  {
         });
     }
 
+    /** Navigation on the top of the page */
     onReturnToBoardSelect(): void {
       this.router.navigate([this.board.id]);
     }
 
+    // Basic loading methods
+
+    /** Load card data and prepare its statuses */
     loadCard(board_id: number, card_id: number): void {
         this.cardService.getCard(board_id, card_id).then(card => {
             this.card = card;

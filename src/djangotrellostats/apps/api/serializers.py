@@ -14,7 +14,7 @@ def serialize_board(board):
         list_json = serialize_list(list_)
 
         card_list = []
-        for card in list_.cards.filter(is_closed=False).order_by("position"):
+        for card in list_.cards.all().order_by("position"):
             card_json = {
                 "id": card.id,
                 "uuid": card.uuid,
@@ -23,6 +23,7 @@ def serialize_board(board):
                 "url": reverse("boards:view_card", args=(board.id, card.id,)),
                 "short_url": card.short_url,
                 "position": card.position,
+                "is_closed": card.is_closed,
                 "board": {"id": board.id, "uuid": board.uuid, "name": board.name,}
             }
             card_list.append(card_json)
@@ -54,7 +55,8 @@ def basic_serialize_card(card):
         "local_url": reverse("boards:view_card", args=(card.board_id, card.id,)),
         "url": card.url,
         "short_url": card.short_url,
-        "position": card.position
+        "position": card.position,
+        "is_closed": card.is_closed
     }
 
 

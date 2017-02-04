@@ -110,20 +110,20 @@
             </div>
             <div [dragula]='"cards"' [dragulaModel]='list.cards'
                     id="card-list-{{list.id}}" class="cards" [attr.data-list]="list.id">
-                <div *ngFor="let card of list.cards"
-                        id="card-{{card.id}}" class="card panel panel-info board-card" [attr.data-card]="card.id">
-                    <span class="panel-heading card_heading">
-                        <span (click)="onCardSelect(card)" class="card_name">
-                            <span class=card_name-name>{{card.name}}</span>
+                    <div *ngFor="let card of list.cards"
+                            id="card-{{card.id}}" class="card panel panel-info board-card" [ngClass]="{'closed-card': card.is_closed }" [attr.data-card]="card.id">
+                        <span class="panel-heading card_heading" [ngClass]="{'closed-card_heading': card.is_closed }">
+                            <span (click)="onCardSelect(card)" class="card_name">
+                                <span class=card_name-name>{{card.name}}</span>
+                            </span>
+                            <a href="{{card.short_url}}" title="View card" class="card_action_view">
+                                <span class="fa fa-trello"></span>
+                            </a>
+                            <a href="{{card.url}}" title="View card" class="card_action_view">
+                                <span class="fa fa-eye"></span>
+                            </a>
                         </span>
-                        <a href="{{card.short_url}}" title="View card" class="card_action_view">
-                            <span class="fa fa-trello"></span>
-                        </a>
-                        <a href="{{card.url}}" title="View card" class="card_action_view">
-                            <span class="fa fa-eye"></span>
-                        </a>
-                    </span>
-                </div>
+                    </div>
             </div>
         </div>
     </div>

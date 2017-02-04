@@ -74,19 +74,41 @@ export class CardService extends DjangoTrelloStatsService {
   }
 
   changeCardName(card: Card, new_name: string): Promise<Card> {
-    let chage_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
-    return this.http.put(chage_card_url, {name: new_name})
+    let change_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+    return this.http.put(change_card_url, {name: new_name})
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);
   }
 
+  /** Change the description of the card */
   changeCardDescription(card: Card, new_description: string): Promise<Card> {
-    let chage_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
-    return this.http.put(chage_card_url, {description: new_description})
+    let change_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+    return this.http.put(change_card_url, {description: new_description})
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);
+  }
+
+  /** Change the status of the card to "active" (open or visible) */
+  activeCard(card: Card): Promise<Card> {
+    let is_closed = false;
+    return this.changeCardClausure(card, is_closed);
+  }
+
+  /** Change the status of the card to "closed" (archived) */
+  closeCard(card: Card): Promise<Card> {
+    let is_closed = true;
+    return this.changeCardClausure(card, is_closed);
+  }
+
+  /** Change the status of the card */
+  changeCardClausure(card: Card, is_closed: boolean): Promise<Card> {
+    let change_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+    return this.http.put(change_card_url,  {is_closed: is_closed})
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);    
   }
 
   changeCardLabels(card: Card, new_label_ids: number[]): Promise<Card> {

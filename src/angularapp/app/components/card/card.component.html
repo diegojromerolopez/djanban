@@ -6,13 +6,14 @@
     </a>
 </p>
 
-<div *ngIf="card" class="panel panel-default card-view">
+<div *ngIf="card" class="panel card-view" [ngClass]="{ 'panel-default': !card.is_closed, 'panel-danger': card.is_closed }">
     <div class="panel-heading">
         <h1 *ngIf="changeNameStatus != 'waiting' && changeNameStatus != 'showed'"
             (click)="changeNameStatus = 'showed'"
             (click)="oldName = card.name"
             >
             {{card.name}}
+            <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}} in Trello"><span class="fa fa-trello"></span></a>
         </h1>
         <div *ngIf="changeNameStatus == 'showed' || changeNameStatus == 'waiting'">
             <form (ngSubmit)="onChangeName(changeNameForm.value.name)" #changeNameForm="ngForm">
@@ -38,58 +39,13 @@
 
     <div class="panel-body">
         <div>
-            <div class="card-view-in-trello card-section">
-                <a href="{{card.short_url}}" title="View card {{card.name}} in board {{card.board.name}} in Trello" class="btn btn-primary btn-sm">View in Trello</a>
+            <div class="card-section">
+                <span class="card-creation-datetime card-section">Created on {{card.creation_datetime}}</span>
+                
             </div>
-            <div class="card-creation-datetime card-section">Created on {{card.creation_datetime}}</div>
             
-            <div *ngIf="card.due_datetime != null">
+            <div *ngIf="card.due_datetime">
                 <div class="card-due-datetime card-section">Deadline: {{card.due_datetime}} ({{card.due_datetime}})</div>
-            </div>
-
-            <div class="card-status card-section">
-                <span *ngIf="card.closed">
-                    <span class="fa fa-lock" title="This card is closed"></span> Closed
-                </span>
-                <span *ngIf="!card.closed">
-                    <span class="fa fa-unlock" title="This card is active"></span> Active
-                </span>
-            </div>
-
-            <div class="list card-current-list card-section">
-                <span class="card-current-list-title">
-                    On list
-                    <span class="card-current-list-title label label-success">{{card.list.name}} <span *ngIf="card.list.type == 'done'" class="fa fa-thumbs-up"></span></span>
-                </span>
-                <div>
-                    <span class="btn btn-primary" *ngIf="changeListStatus != 'showed' && changeListStatus != 'waiting'" (click)="changeListStatus = 'showed'">Change</span>
-                    <div *ngIf="changeListStatus == 'showed' || changeListStatus == 'waiting'">
-                        <form (ngSubmit)="onSubmitChangeList(changeListForm.value.destination_list)" #changeListForm="ngForm">
-                            <div>
-                                <select name="destination_list" required ngModel>
-                                    <option *ngFor="let list_i of card.board.lists" value="{{list_i.id}}"  [selected]="list_i.id == card.list.id?true:false">
-                                        {{list_i.name}}<span *ngIf="list_i.id == card.list.id">(current)</span>
-                                    </option>
-                                </select>
-                            </div>
-                            <div>
-                                <button class="btn btn-danger"
-                                    (click)="changeListStatus = 'hidden'"
-                                    (click)="$event.preventDefault()"
-                                    [disabled]="changeListStatus == 'waiting'"
-                                    >Cancel
-                                </button>
-                                <button type="submit" class="btn btn-success change_name" title="Edit {{card.name}} list"
-                                        (click)="changeListForm.ngSubmit.emit()"
-                                        (click)="changeListStatus = 'waiting'"
-                                        (click)="$event.preventDefault()"
-                                        [disabled]="!changeListForm.valid || changeListStatus == 'waiting'">
-                                    <span *ngIf="changeListStatus == 'waiting'" class="fa fa-spinner fa-spin"></span> Change
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
             </div>
 
             <div class="row">
@@ -338,6 +294,66 @@
                 </div>
 
                 <div class="col-md-4">
+                    <!-- Status (active/closed) -->
+                    <div class="card-status card-section">
+                        <h2>Status</h2>
+                        <div *ngIf="card.is_closed" class="card-status-closed">
+                            <strong>Archived</strong>
+                            <button class="btn btn-success"
+                                    (click)="statusCardStatus='waiting'"
+                                    (click)="activeCard()"
+                                    [disabled]="statusCardStatus=='waiting'">
+                                    <span class="fa fa-spin fa-spinner" *ngIf="statusCardStatus=='waiting'"></span>
+                                    <span class="fa fa-check"></span>
+                                Active
+                            </button>
+                        </div>
+                        <div *ngIf="!card.is_closed" class="card-status-active">
+                            <strong>Active</strong>
+                            <button class="btn btn-danger"
+                                    (click)="statusCardStatus='waiting'"
+                                    (click)="closeCard()"
+                                    [disabled]="statusCardStatus=='waiting'">
+                                    <span class="fa fa-spin fa-spinner" *ngIf="statusCardStatus=='waiting'"></span>
+                                    <span class="fa fa-times"></span>
+                                Archive
+                            </button>
+                        </div>
+                    </div>
+                    <!-- List -->
+                    <div class="card-list card-section">
+                        <h2>On list {{card.list.name}} <span class="fa fa-thumbs-up" *ngIf="card.list.type == 'done'"></span></h2>
+
+                        <div class="card-change-list-form">
+                            <span class="btn btn-primary" *ngIf="changeListStatus != 'showed' && changeListStatus != 'waiting'" (click)="changeListStatus = 'showed'">Change</span>
+                            <div *ngIf="changeListStatus == 'showed' || changeListStatus == 'waiting'">
+                                <form (ngSubmit)="onSubmitChangeList(changeListForm.value.destination_list)" #changeListForm="ngForm">
+                                    <div>
+                                        <select name="destination_list" required ngModel>
+                                            <option *ngFor="let list_i of card.board.lists" value="{{list_i.id}}"  [selected]="list_i.id == card.list.id?true:false">
+                                                {{list_i.name}} <span *ngIf="list_i.id == card.list.id">(current)</span>
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-danger"
+                                            (click)="changeListStatus = 'hidden'"
+                                            (click)="$event.preventDefault()"
+                                            [disabled]="changeListStatus == 'waiting'"
+                                            >Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-success change_name" title="Edit {{card.name}} list"
+                                                (click)="changeListForm.ngSubmit.emit()"
+                                                (click)="changeListStatus = 'waiting'"
+                                                (click)="$event.preventDefault()"
+                                                [disabled]="!changeListForm.valid || changeListForm.value.destination_list == card.list.id || changeListStatus == 'waiting'">
+                                            <span *ngIf="changeListStatus == 'waiting'" class="fa fa-spinner fa-spin"></span> Change
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                     <!-- Labels -->
                     <div class="card-labels card-section">
                         <h2>Labels ({{card.labels.length}})</h2>

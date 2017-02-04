@@ -67,15 +67,34 @@ var CardService = (function (_super) {
             .catch(this.handleError);
     };
     CardService.prototype.changeCardName = function (card, new_name) {
-        var chage_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
-        return this.http.put(chage_card_url, { name: new_name })
+        var change_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+        return this.http.put(change_card_url, { name: new_name })
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);
     };
+    /** Change the description of the card */
     CardService.prototype.changeCardDescription = function (card, new_description) {
-        var chage_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
-        return this.http.put(chage_card_url, { description: new_description })
+        var change_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+        return this.http.put(change_card_url, { description: new_description })
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    /** Change the status of the card to "active" (open or visible) */
+    CardService.prototype.activeCard = function (card) {
+        var is_closed = false;
+        return this.changeCardClausure(card, is_closed);
+    };
+    /** Change the status of the card to "closed" (archived) */
+    CardService.prototype.closeCard = function (card) {
+        var is_closed = true;
+        return this.changeCardClausure(card, is_closed);
+    };
+    /** Change the status of the card */
+    CardService.prototype.changeCardClausure = function (card, is_closed) {
+        var change_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+        return this.http.put(change_card_url, { is_closed: is_closed })
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);

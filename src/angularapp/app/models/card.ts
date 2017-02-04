@@ -19,10 +19,10 @@ export class Card {
   url: string;
   position: number;
   short_url: string;
+  is_closed: boolean;
   spent_time?: number;
   cycle_time?: number;
   lead_time?: number;
-  is_closed?: boolean;
   board?: Board;
   list?: List;
   labels?: Label[];

@@ -16,7 +16,7 @@ from djangotrellostats.apps.api.util import get_list_or_404, get_card_or_404, ge
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.models import Board, Card, CardComment, List
-from djangotrellostats.trello_api.cards import set_name, set_description
+from djangotrellostats.trello_api.cards import set_name, set_description, set_is_closed
 
 
 # Point of access to several actions
@@ -68,10 +68,7 @@ def _move_all_list_cards(request, board_id):
 
     post_params = json.loads(request.body)
 
-    print post_params.get("source_list")
-    print post_params.get("destination_list")
     if not post_params.get("source_list") or not post_params.get("destination_list"):
-        print "W"
         return HttpResponseBadRequest()
 
     # Check if the lists exists and if they are different
@@ -79,10 +76,8 @@ def _move_all_list_cards(request, board_id):
         source_list = board.active_lists.get(id=post_params.get("source_list"))
         destination_list = board.active_lists.get(id=post_params.get("destination_list"))
         if source_list.id == destination_list.id:
-            print "X"
             raise AssertionError()
     except (List.DoesNotExist, AssertionError):
-        print "Y"
         return HttpResponseBadRequest()
 
     # Move the cards
@@ -123,6 +118,11 @@ def change(request, board_id, card_id):
         card.description = put_params.get("description")
         card.save()
         set_description(card, member)
+
+    elif put_params.get("is_closed") is not None:
+        card.is_closed = put_params.get("is_closed")
+        card.save()
+        set_is_closed(card, member)
 
     else:
         return HttpResponseBadRequest()

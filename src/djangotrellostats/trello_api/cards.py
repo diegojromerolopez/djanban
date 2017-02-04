@@ -106,3 +106,7 @@ def set_description(card, member):
     return trello_card.set_description(card.description)
 
 
+# Set if the card is closed or active
+def set_is_closed(card, member):
+    trello_card = get_trello_card(card, member)
+    return trello_card.set_closed(card.is_closed)

@@ -208,44 +208,7 @@ def add_spent_estimated_time(request, board_id, card_id):
 # View card
 @login_required
 def view(request, board_id, card_id):
-    try:
-        member = None
-        if user_is_member(request.user):
-            member = request.user.member
-        board = get_user_boards(request.user).get(id=board_id)
-        card = board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
-        raise Http404
-
-    comments = card.comments.all().order_by("-creation_datetime")
-    card_labels = card.labels.all().order_by("name")
-    card_list = card.list
-
-    try:
-        previous_list = card_list.previous_list
-    except List.DoesNotExist:
-        previous_list = None
-
-    try:
-        next_list = card_list.next_list
-    except List.DoesNotExist:
-        next_list = None
-
-    replacements = {
-        "member": member,
-        "board": board,
-        "card": card,
-        "members": card.members.all().order_by("initials"),
-        "list": card_list,
-        "next_list": next_list,
-        "previous_list": previous_list,
-        "card_labels": card_labels,
-        "card_label_ids": card_labels.values_list("id", flat=True),
-        "labels": board.labels.exclude(name="").order_by("name"),
-        "comments": comments,
-        "movements": card.movements.all().order_by("datetime")
-    }
-    return render(request, "boards/cards/view.html", replacements)
+    return HttpResponseRedirect(reverse("boards:view_dashboard", args=(board_id,"/card/{0}".format(card_id))))
 
 
 # View card report

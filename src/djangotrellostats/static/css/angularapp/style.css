@@ -179,6 +179,11 @@ h1, h2, h3 {
     margin-right: 20px;
 }
 
+card.closed-card,
+.board .lists .list .cards .card.closed-card {
+    display: none;
+}
+
 .panel-heading.card_heading,
 .board .lists .list .cards .card .card_heading {
     cursor: pointer;
@@ -214,6 +219,29 @@ h1, h2, h3 {
 
 .card_detail {
 
+}
+
+/* Status */
+.card-status-active strong,
+.card-status-closed strong {
+    font-size: 1.5em;
+    vertical-align: middle;
+}
+
+/* List */
+.card-change-list-form {
+
+}
+
+.card-change-list-form form {
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+
+.card-change-list-form form div {
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 /* Reviews */
