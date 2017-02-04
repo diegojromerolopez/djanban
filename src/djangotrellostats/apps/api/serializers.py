@@ -104,6 +104,7 @@ def serialize_card_review(review):
     return {
         "id": review.id,
         "creation_datetime": review.creation_datetime,
+        "description": review.description,
         "reviewers": [serialize_member(reviewer) for reviewer in review.reviewers.all()]
     }
 
