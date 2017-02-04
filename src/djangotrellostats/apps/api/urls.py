@@ -36,4 +36,7 @@ urlpatterns = [
     # Blocking cards
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/blocking_card/?$', cards.add_blocking_card, name="add_blocking_card"),
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/blocking_card/(?P<blocking_card_id>\d+)?$', cards.remove_blocking_card, name="remove_blocking_card"),
+
+    url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/review/?$', cards.add_new_review, name="add_new_review"),
+    url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/review/(?P<review_id>\d+)/?$', cards.delete_review, name="delete_review"),
 ]

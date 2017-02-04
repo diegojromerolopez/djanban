@@ -11,6 +11,7 @@ import { CardService } from '../../services/card.service';
 import { CardComment } from '../../models/comment';
 import { Label } from '../../models/label';
 import { Member } from '../../models/member';
+import { CardReview } from '../../models/review';
 
 
 @Component({
@@ -36,15 +37,22 @@ export class CardComponent implements OnInit  {
     private changeSETimeStatus: string;
     private changeDescriptionStatus: string;
     private newCommentStatus: string;
+    
+    // Review statuses
+    private newReviewStatus: string;
+    private deleteReviewStatus: {};
+    
     // Blocking card statuses
     private addBlockingCardStatus: string;
     private removeBlockingCardStatus: {};
-    
+
     /**
      * Stores the status of the edition of each comment: standby (standby),
      * asking confirmation (asking) and waiting server response (waiting)
      * */
     private editCommentStatus: {};
+
+    private commentPreviousContent = {};
     
     /**
      * Stores the status of the deletion of each comment: standby (standby),
@@ -78,9 +86,12 @@ export class CardComponent implements OnInit  {
         this.changeDescriptionStatus = "hidden";
         this.newCommentStatus = "standby";
         this.addBlockingCardStatus = "hidden";
+        this.newReviewStatus = "hidden";
         this.editCommentStatus = { };
+        this.commentPreviousContent = { }
         this.deleteCommentStatus = { };
         this.removeBlockingCardStatus = { };
+        this.deleteReviewStatus = { };
     }
 
     cardHasLabel(label: Label): boolean {
@@ -135,6 +146,25 @@ export class CardComponent implements OnInit  {
             // We have to update the comments
             this.card.comments = card_response.comments;
             this.addBlockingCardStatus = "hidden";
+        });
+    }
+
+    onAddReview(member_ids: number[], description: string): void{
+        this.cardService.addNewReview(this.card, member_ids, description).then(card_response => {
+            this.card.reviews = card_response.reviews;
+            this.card.comments = card_response.comments;
+            this.newReviewStatus = "hidden";
+            let review_comment = this.card.comments[0];
+            this.editCommentStatus[review_comment.id] == 'standby';
+            this.deleteCommentStatus[review_comment.id] = "standby";
+        });
+    }
+
+    deleteReview(review: CardReview): void {
+        this.cardService.deleteReview(this.card, review).then(card_response => {
+            this.card.reviews = card_response.reviews;
+            this.card.comments = card_response.comments;
+            this.newReviewStatus = "hidden";
         });
     }
 
@@ -208,6 +238,7 @@ export class CardComponent implements OnInit  {
             this.card.comments.splice(this.card.comments.indexOf(comment), 1);
             delete this.deleteCommentStatus[comment.id];
             delete this.editCommentStatus[comment.id];
+            delete this.commentPreviousContent[comment.id];
         });
     }
 
@@ -223,9 +254,13 @@ export class CardComponent implements OnInit  {
                 this.editCommentStatus[comment.id] = "standby";
                 this.deleteCommentStatus[comment.id] = "standby";
             }
-            // Initialization of the status of the removal of each one of the blocking cards or this card
+            // Initialization of the status of the removal of each one of the blocking cards of this card
             for(let blocking_card of this.card.blocking_cards){
                 this.removeBlockingCardStatus[blocking_card.id] = "showed";
+            }
+            // Initialization of the status of the removal of each one of the reviews of this card
+            for(let review of this.card.reviews){
+                this.deleteReviewStatus[review.id] = "showed";
             }
         });
     }

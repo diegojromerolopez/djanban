@@ -18,6 +18,7 @@ var CardComponent = (function () {
         this.route = route;
         this.boardService = boardService;
         this.cardService = cardService;
+        this.commentPreviousContent = {};
         this.card_hash = {};
         this.changeNameStatus = "hidden";
         this.changeListStatus = "hidden";
@@ -27,9 +28,12 @@ var CardComponent = (function () {
         this.changeDescriptionStatus = "hidden";
         this.newCommentStatus = "standby";
         this.addBlockingCardStatus = "hidden";
+        this.newReviewStatus = "hidden";
         this.editCommentStatus = {};
+        this.commentPreviousContent = {};
         this.deleteCommentStatus = {};
         this.removeBlockingCardStatus = {};
+        this.deleteReviewStatus = {};
     }
     CardComponent.prototype.ngOnInit = function () {
         var that = this;
@@ -91,6 +95,25 @@ var CardComponent = (function () {
             // We have to update the comments
             _this.card.comments = card_response.comments;
             _this.addBlockingCardStatus = "hidden";
+        });
+    };
+    CardComponent.prototype.onAddReview = function (member_ids, description) {
+        var _this = this;
+        this.cardService.addNewReview(this.card, member_ids, description).then(function (card_response) {
+            _this.card.reviews = card_response.reviews;
+            _this.card.comments = card_response.comments;
+            _this.newReviewStatus = "hidden";
+            var review_comment = _this.card.comments[0];
+            _this.editCommentStatus[review_comment.id] == 'standby';
+            _this.deleteCommentStatus[review_comment.id] = "standby";
+        });
+    };
+    CardComponent.prototype.deleteReview = function (review) {
+        var _this = this;
+        this.cardService.deleteReview(this.card, review).then(function (card_response) {
+            _this.card.reviews = card_response.reviews;
+            _this.card.comments = card_response.comments;
+            _this.newReviewStatus = "hidden";
         });
     };
     /** Called when the card name change form is submitted */
@@ -164,6 +187,7 @@ var CardComponent = (function () {
             _this.card.comments.splice(_this.card.comments.indexOf(comment), 1);
             delete _this.deleteCommentStatus[comment.id];
             delete _this.editCommentStatus[comment.id];
+            delete _this.commentPreviousContent[comment.id];
         });
     };
     CardComponent.prototype.onReturnToBoardSelect = function () {
@@ -179,10 +203,15 @@ var CardComponent = (function () {
                 _this.editCommentStatus[comment.id] = "standby";
                 _this.deleteCommentStatus[comment.id] = "standby";
             }
-            // Initialization of the status of the removal of each one of the blocking cards or this card
+            // Initialization of the status of the removal of each one of the blocking cards of this card
             for (var _b = 0, _c = _this.card.blocking_cards; _b < _c.length; _b++) {
                 var blocking_card = _c[_b];
                 _this.removeBlockingCardStatus[blocking_card.id] = "showed";
+            }
+            // Initialization of the status of the removal of each one of the reviews of this card
+            for (var _d = 0, _e = _this.card.reviews; _d < _e.length; _d++) {
+                var review = _e[_d];
+                _this.deleteReviewStatus[review.id] = "showed";
             }
         });
     };

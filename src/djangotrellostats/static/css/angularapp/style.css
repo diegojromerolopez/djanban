@@ -175,12 +175,47 @@ h1, h2, h3 {
 
 }
 
+/* Reviews */
+.card-reviews {
+
+}
+
+.card-reviews ul.reviews {
+    margin-bottom: 10px;
+    margin-top: 10px;
+    padding-left: 0;
+}
+
+.card-reviews ul.reviews li.review {
+    list-style-type: none;
+    margin-bottom: 15px;
+}
+
+.card-reviews ul.reviews li.review h3 {
+    font-size: 1.4em;
+}
+
+.card-reviews ul.reviews li ul.review-reviewers {
+    margin-bottom: 5px;
+    padding-left: 0px;
+}
+
+.card-reviews ul.reviews li ul.review-reviewers li {
+    list-style-type: none;
+    margin-bottom: 5px;
+}
+
+/* Comments */
 .card_detail .comments {
 
 }
 
 .card_detail .comments .comment {
 
+}
+
+.card-comments .card-comments-comment {
+    padding-bottom: 10px;
 }
 
 .card_detail .comments .comment .comment_content {
@@ -191,10 +226,39 @@ h1, h2, h3 {
 
 }
 
-.card-comments .card-comments-comment form {
+.card-comments .card-comments-comment .comment-edit,
+.card-comments .card-comments-comment .comment-delete {
     display: inline-block;
     margin:0;
     width: auto;
+}
+
+.card-comments .card-comments-comment .comment-edit.showed,
+.card-comments .card-comments-comment .comment-delete.showed {
+    display: block;
+    margin-left: auto;
+    margin-bottom: auto;
+    margin-right: auto;
+    margin-top: 0px;
+    width: 100%;
+}
+
+.card-comments .card-comments-comment .comment-delete form {
+    margin-left: auto;
+    margin-bottom: 10px;
+    margin-right: auto;
+    margin-top: 20px;
+    width: 95%;
+    display: block;
+}
+
+.card-comments .card-comments-comment .comment-edit form {
+    margin-left: auto;
+    margin-bottom: 10px;
+    margin-right: auto;
+    margin-top: 20px;
+    width: 90%;
+    display: block;
 }
 
 .edit-comment-button {

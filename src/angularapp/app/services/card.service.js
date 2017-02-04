@@ -35,6 +35,8 @@ var CardService = (function (_super) {
         _this.GET_CARD_URL = '/api/board/{board_id}/card/{card_id}/info';
         _this.BLOCKING_CARD_URL = '/api/board/{board_id}/card/{card_id}/blocking_card';
         _this.REMOVE_BLOCKING_CARD_URL = '/api/board/{board_id}/card/{card_id}/blocking_card/{blocking_card_id}';
+        _this.ADD_REVIEW_URL = '/api/board/{board_id}/card/{card_id}/review';
+        _this.DELETE_REVIEW_URL = '/api/board/{board_id}/card/{card_id}/review/{review_id}';
         return _this;
     }
     /**
@@ -82,9 +84,9 @@ var CardService = (function (_super) {
             .then(this.extractData)
             .catch(this.handleError);
     };
-    CardService.prototype.changeCardMembers = function (card, new_members_ids) {
+    CardService.prototype.changeCardMembers = function (card, new_member_ids) {
         var chage_members_url = this.prepareUrl(this.CHANGE_MEMBERS_URL, card);
-        return this.http.post(chage_members_url, { members: new_members_ids })
+        return this.http.post(chage_members_url, { members: new_member_ids })
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);
@@ -102,6 +104,23 @@ var CardService = (function (_super) {
     CardService.prototype.removeBlockingCard = function (card, blocking_card) {
         var remove_blocking_card_url = this.prepareUrl(this.REMOVE_BLOCKING_CARD_URL, card).replace("{blocking_card_id}", blocking_card.id.toString());
         return this.http.delete(remove_blocking_card_url)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    /** Create a new card review */
+    CardService.prototype.addNewReview = function (card, new_member_ids, description) {
+        var add_new_review_url = this.prepareUrl(this.ADD_REVIEW_URL, card);
+        var put_body = { members: new_member_ids, description: description };
+        return this.http.put(add_new_review_url, put_body)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    /** Delete a card review */
+    CardService.prototype.deleteReview = function (card, review) {
+        var delete_review_url = this.prepareUrl(this.DELETE_REVIEW_URL, card).replace("{review_id}", review.id.toString());
+        return this.http.delete(delete_review_url)
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);

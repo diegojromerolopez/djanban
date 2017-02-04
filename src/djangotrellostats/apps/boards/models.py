@@ -545,10 +545,12 @@ class Card(models.Model):
     COMMENT_BLOCKED_CARD_REGEX = r"^blocked\s+by\s+(?P<card_url>.+)$"
     COMMENT_BLOCKED_CARD_PATTERN = "blocked by {card_url}"
 
-
     COMMENT_REQUIREMENT_CARD_REGEX = r"^task\s+of\s+requirement\s+(?P<requirement_code>.+)$"
 
-    COMMENT_REVIEWED_BY_MEMBERS_REGEX = r"^reviewed\s+by\s+(?P<member_usernames>((@[\w\d]+)(\s|,|and)*)+)$"
+    COMMENT_REVIEWED_BY_MEMBERS_REGEX = r"^reviewed\s+by\s+(?P<member_usernames>((@[\w\d]+)(\s|,|and)*)+(\s*:\s*(?P<description>.+))?)$"
+    COMMENT_REVIEWED_BY_MEMBERS_PATTERN = "reviewed by {member_usernames}"
+    COMMENT_REVIEWED_BY_MEMBERS_WITH_DESCRIPTION_PATTERN = "reviewed by {member_usernames}: {description}"
+
     COMMENT_REVIEWED_BY_MEMBERS_FINDALL_REGEX = r"@[\w\d]+"
 
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
@@ -826,6 +828,33 @@ class Card(models.Model):
     def remove_blocking_card(self, member, blocking_card):
         self.delete_comment(member, blocking_card.blocking_comments.get(card=self))
 
+    # Add a review for this
+    @transaction.atomic
+    def add_review(self, member, reviewers, description=""):
+        # Add the blocking card with the review format
+        member_usernames = ", ".join(["@{0}".format(reviewer.trello_username) for reviewer in reviewers])
+        if description:
+            content = Card.COMMENT_REVIEWED_BY_MEMBERS_WITH_DESCRIPTION_PATTERN.format(
+                member_usernames=member_usernames,
+                description=description
+            )
+        else:
+            content = Card.COMMENT_REVIEWED_BY_MEMBERS_PATTERN.format(
+                member_usernames=member_usernames
+            )
+        print content
+        print member
+
+        self.add_comment(member, content)
+
+    # Deletion of review
+    @transaction.atomic
+    def delete_review(self, member, review):
+        try:
+            self.delete_comment(member, review.comment)
+        except:
+            review.delete()
+
     # Add a new comment to this card
     @transaction.atomic
     def add_comment(self, member, content):
@@ -912,6 +941,7 @@ class CardComment(models.Model):
     author = models.ForeignKey("members.Member", verbose_name=u"Member author of this comment", related_name="comments")
     content = models.TextField(verbose_name=u"Content of the comment")
     blocking_card = models.ForeignKey("boards.Card", verbose_name=u"Blocking card this comment belongs to", related_name="blocking_comments", null=True, default=None)
+    review = models.OneToOneField("reports.CardReview", verbose_name=u"Card review this comment represents", related_name="comment", null=True, default=None)
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
     last_edition_datetime = models.DateTimeField(verbose_name=u"Last edition of the comment", default=None, null=True)
 
@@ -962,8 +992,11 @@ class CardComment(models.Model):
     # Return the reviewer members of this comment extracted from its content.
     # If it is not a reviewer card comment, return None.
     @property
-    def review(self):
+    def review_from_comment(self):
+        print "Property review_from_comment"
+        print self.content
         matches = re.match(Card.COMMENT_REVIEWED_BY_MEMBERS_REGEX, self.content, re.IGNORECASE)
+        print matches
         if matches:
             member_usernames_string = matches.group("member_usernames")
             member_usernames = re.findall(Card.COMMENT_REVIEWED_BY_MEMBERS_FINDALL_REGEX, member_usernames_string)
@@ -972,7 +1005,13 @@ class CardComment(models.Model):
             else:
                 cleaned_member_usernames = [member_username.replace("@", "") for member_username in member_usernames]
                 members = [member for member in self.card.board.members.filter(trello_username__in=cleaned_member_usernames)]
-            return {"reviewers": members, "datetime": self.creation_datetime, "card": self.card, "board": self.card.board}
+            try:
+                description = matches.group("description")
+            except IndexError:
+                description = ""
+            _review_from_comment = {"reviewers": members, "datetime": self.creation_datetime, "card": self.card, "board": self.card.board, "description": description}
+            print _review_from_comment
+            return _review_from_comment
 
         return None
 
@@ -999,7 +1038,7 @@ class CardComment(models.Model):
         # If the comment is a review card mention, and is going to be deleted, delete it
         review = self.review
         if review:
-            self.card.reviews.filter(creation_datetime=self.creation_datetime).delete()
+            self.card.reviews.filter(id=review.id).delete()
 
     # Card comment saving
     def save(self, *args, **kwargs):
@@ -1059,14 +1098,14 @@ class CardComment(models.Model):
                     card.requirements.add(requirement)
 
             # Is it a review comment?
-            review = self.review
+            review_from_comment = self.review_from_comment
             # If there is a new review in this comment, add or update this review accordingly
-            if review:
-                CardReview.update_or_create_from_card_comment(self, review["reviewers"])
+            if review_from_comment:
+                CardReview.update_or_create(self, review_from_comment["reviewers"], review_from_comment.get("description"))
 
             # If there is not a review, check if there was an earlier review and in that case, delete it
-            elif self.card.reviews.filter(creation_datetime=self.creation_datetime).exists():
-                self.card.reviews.filter(creation_datetime=self.creation_datetime).delete()
+            elif self.card.reviews.filter(id=self.review.id).exists():
+                self.card.reviews.filter(id=self.review.id).delete()
 
     # Save a new comment
     def _save_new(self, card):
@@ -1091,10 +1130,15 @@ class CardComment(models.Model):
             card.requirements.add(requirement)
 
         # Is it a reviewer card comment?
-        review = self.review
-        if review:
-            reviewer_members = review["reviewers"]
-            CardReview.update_or_create_from_card_comment(self, reviewer_members)
+        review_from_comment = self.review_from_comment
+        print "review_from_comment"
+        print review_from_comment
+        if review_from_comment:
+            reviewer_members = review_from_comment.get("reviewers")
+            description = review_from_comment.get("description", "")
+            print " CardReview.create(self, reviewer_members, description)"
+            review = CardReview.create(self, reviewer_members, description)
+            self.review = review
 
 
 # Label of the task board

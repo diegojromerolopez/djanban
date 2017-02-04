@@ -6,6 +6,7 @@ import { Headers, RequestOptions } from '@angular/http';
 
 
 import { Observable }     from 'rxjs/Observable';
+import { CardReview } from '../models/review';
 import { Label } from '../models/label';
 import { CardComment } from '../models/comment';
 import { DjangoTrelloStatsService } from './djangotrellostats.service';
@@ -35,6 +36,8 @@ export class CardService extends DjangoTrelloStatsService {
   private GET_CARD_URL = '/api/board/{board_id}/card/{card_id}/info';
   private BLOCKING_CARD_URL = '/api/board/{board_id}/card/{card_id}/blocking_card';
   private REMOVE_BLOCKING_CARD_URL = '/api/board/{board_id}/card/{card_id}/blocking_card/{blocking_card_id}';
+  private ADD_REVIEW_URL = '/api/board/{board_id}/card/{card_id}/review';
+  private DELETE_REVIEW_URL = '/api/board/{board_id}/card/{card_id}/review/{review_id}';
   
 
   constructor (http: Http) {
@@ -90,9 +93,9 @@ export class CardService extends DjangoTrelloStatsService {
                   .catch(this.handleError);
   }
 
-  changeCardMembers(card: Card, new_members_ids: number[]): Promise<Card> {
+  changeCardMembers(card: Card, new_member_ids: number[]): Promise<Card> {
     let chage_members_url = this.prepareUrl(this.CHANGE_MEMBERS_URL, card);
-    return this.http.post(chage_members_url, {members: new_members_ids})
+    return this.http.post(chage_members_url, {members: new_member_ids})
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);
@@ -115,6 +118,25 @@ export class CardService extends DjangoTrelloStatsService {
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);    
+  }
+
+  /** Create a new card review */
+  addNewReview(card: Card, new_member_ids: number[], description: string): Promise<Card> {
+    let add_new_review_url = this.prepareUrl(this.ADD_REVIEW_URL, card);
+    let put_body = {members: new_member_ids, description: description};
+    return this.http.put(add_new_review_url, put_body)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }
+
+  /** Delete a card review */
+  deleteReview(card: Card, review: CardReview): Promise<Card> {
+    let delete_review_url = this.prepareUrl(this.DELETE_REVIEW_URL, card).replace("{review_id}", review.id.toString());
+    return this.http.delete(delete_review_url)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
   }
 
   addNewComment(card: Card, comment_content: string) : Promise<CardComment> {

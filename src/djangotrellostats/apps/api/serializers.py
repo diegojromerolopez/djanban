@@ -7,30 +7,16 @@ from crequest.middleware import CrequestMiddleware
 
 
 # Card serialization
+from djangotrellostats.apps.reports.models import CardReview
+
+
 def serialize_card(card):
     board = card.board
     card_list = card.list
 
     comments_json = []
     for comment in card.comments.all().order_by("-creation_datetime"):
-        author = comment.author
-        comment_json = {
-            "id": comment.id,
-            "uuid": comment.uuid,
-            "content": comment.content,
-            "creation_datetime": comment.creation_datetime,
-            "last_edition_datetime": comment.last_edition_datetime,
-            "author": {"id": author.id, "trello_username": author.trello_username, "initials": author.initials},
-            "blocking_card": {
-                "id": comment.blocking_card.id,
-                "uuid": comment.blocking_card.uuid,
-                "name": comment.blocking_card.name,
-                "description": comment.blocking_card.description,
-                "url": reverse("boards:view_card", args=(board.id, comment.blocking_card.id,)),
-                "short_url": comment.blocking_card.short_url,
-                "position": comment.blocking_card.position,
-            } if comment.blocking_card else None
-        }
+        comment_json = serialize_card_comment(comment, board=board)
         comments_json.append(comment_json)
 
     card_json = {
@@ -104,20 +90,52 @@ def serialize_card(card):
             }
             for movement in card.movements.all().order_by("-datetime")
             ],
-        "reviews": [
-            {
-                "id": review.id,
-                "creation_datetime": review.creation_datetime,
-                "reviewers": [serialize_member(reviewer) for reviewer in review.reviewers.all()]
-            }
-            for review in card.reviews.all().order_by("-creation_datetime")
-        ],
+        "reviews": [serialize_card_review(review) for review in card.reviews.all().order_by("-creation_datetime")],
         "charts": {
             "number_of_comments_by_member": reverse("charts:number_of_comments_by_member", args=(board.id, card.id)),
             "number_of_comments": reverse("charts:number_of_comments", args=(board.id, card.id))
         }
     }
     return card_json
+
+
+# Serialize card review
+def serialize_card_review(review):
+    return {
+        "id": review.id,
+        "creation_datetime": review.creation_datetime,
+        "reviewers": [serialize_member(reviewer) for reviewer in review.reviewers.all()]
+    }
+
+
+# Serialize card comment
+def serialize_card_comment(comment, board=None):
+    if board is None:
+        board = comment.board
+    try:
+        review = comment.review
+    except CardReview.DoesNotExist:
+        review = None
+    author = comment.author
+    comment_json = {
+        "id": comment.id,
+        "uuid": comment.uuid,
+        "content": comment.content,
+        "creation_datetime": comment.creation_datetime,
+        "last_edition_datetime": comment.last_edition_datetime,
+        "author": {"id": author.id, "trello_username": author.trello_username, "initials": author.initials},
+        "blocking_card": {
+            "id": comment.blocking_card.id,
+            "uuid": comment.blocking_card.uuid,
+            "name": comment.blocking_card.name,
+            "description": comment.blocking_card.description,
+            "url": reverse("boards:view_card", args=(board.id, comment.blocking_card.id,)),
+            "short_url": comment.blocking_card.short_url,
+            "position": comment.blocking_card.position,
+        } if comment.blocking_card else None,
+        "review": serialize_card_review(review) if review else None
+    }
+    return comment_json
 
 
 # List serialization

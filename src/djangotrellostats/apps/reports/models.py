@@ -44,37 +44,51 @@ class CardMovement(models.Model):
 class CardReview(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="card_reviews")
     card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="reviews")
+    description = models.TextField(verbose_name=u"Description of the review", default="", blank=True)
     reviewers = models.ManyToManyField("members.Member", verbose_name=u"Members", related_name="card_reviews")
     creation_datetime = models.DateTimeField(verbose_name="Date and time this card has been reviewed")
 
     @staticmethod
-    def create_from_card_comment(card_comment, reviewers):
+    def create(card_comment, reviewers, description=""):
+        # Create the card review
         print "Creating {0}".format(card_comment.content)
-        card_review = CardReview(card=card_comment.card, board=card_comment.card.board,
-                                 creation_datetime=card_comment.creation_datetime)
-        card_review.save()
-        print reviewers
-        for reviewer in reviewers:
-            card_review.reviewers.add(reviewer)
-
-    @staticmethod
-    def update_from_card_comment(card_comment, reviewers):
-        print "Updating {0}".format(card_comment.content)
         card = card_comment.card
-        card_review = card.reviews.get(creation_datetime=card_comment.creation_datetime)
+        board = card.board
+        card_review = CardReview(
+            card=card, board=board, description=description,
+            creation_datetime=card_comment.creation_datetime
+        )
+        card_review.save()
+
+        # Assign the reviewers
+        for reviewer in reviewers:
+            card_review.reviewers.add(reviewer)
+        return card_review
+
+    @staticmethod
+    def update(card_comment, reviewers, description=""):
+        print "Updating {0}".format(card_comment.content)
+
+        # Get the card review
+        card_review = card_comment.review
         card_review.reviewers.clear()
+
+        # Update the reviewers
         print reviewers
         for reviewer in reviewers:
             card_review.reviewers.add(reviewer)
 
+        # Update the description
+        card_review.description = description
+        card_review.save()
+        return card_review
+
     @staticmethod
-    def update_or_create_from_card_comment(card_comment, reviewers):
+    def update_or_create(card_comment, reviewers, description=""):
         try:
-            CardReview.update_from_card_comment(card_comment, reviewers)
-            print "Update successfully"
+            return CardReview.update(card_comment, reviewers, description)
         except CardReview.DoesNotExist:
-            CardReview.create_from_card_comment(card_comment, reviewers)
-            print "Creation successfully"
+            return CardReview.create(card_comment, reviewers, description)
 
 
 # Stat report by list

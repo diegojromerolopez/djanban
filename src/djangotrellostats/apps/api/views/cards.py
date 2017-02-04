@@ -264,6 +264,49 @@ def remove_blocking_card(request, board_id, card_id, blocking_card_id):
     return JsonResponse(serialize_card(card))
 
 
+# Add a new review
+@member_required
+@transaction.atomic
+def add_new_review(request, board_id, card_id):
+    if request.method != "PUT":
+        return HttpResponseBadRequest()
+
+    member = request.user.member
+    card = get_card_or_404(request, board_id, card_id)
+    board = card.board
+
+    put_body = json.loads(request.body)
+    if not put_body.get("members"):
+        return HttpResponseBadRequest()
+
+    reviewers = board.members.filter(id__in=put_body.get("members"))
+
+    description = put_body.get("description", "")
+
+    card.add_review(member, reviewers=reviewers, description=description)
+
+    return JsonResponse(serialize_card(card))
+
+
+# Add a review
+@member_required
+@transaction.atomic
+def delete_review(request, board_id, card_id, review_id):
+    if request.method != "DELETE":
+        return HttpResponseBadRequest()
+
+    member = request.user.member
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        card = board.cards.get(id=card_id)
+        review = card.reviews.get(id=review_id)
+    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+        raise Http404
+
+    card.delete_review(member, review)
+    return JsonResponse(serialize_card(card))
+
+
 # Delete or update a comment
 @member_required
 @transaction.atomic
@@ -272,11 +315,10 @@ def modify_comment(request, board_id, card_id, comment_id):
         return HttpResponseBadRequest()
 
     member = request.user.member
+    card = get_card_or_404(request, board_id, card_id)
     try:
-        board = get_user_boards(request.user).get(id=board_id)
-        card = board.cards.get(id=card_id)
         comment = card.comments.get(id=comment_id)
-    except (Board.DoesNotExist, Card.DoesNotExist, CardComment.DoesNotExist) as e:
+    except CardComment.DoesNotExist as e:
         raise Http404
 
     if request.method == "DELETE":

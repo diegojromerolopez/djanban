@@ -220,80 +220,88 @@
                                                 )
                                         </div>
 
-                                        <div class="panel-body">
+                                        <div *ngIf="editCommentStatus[comment.id] == 'standby' || comment.review || comment.blocking_card" class="panel-body">
                                             {{comment.content}}
                                         </div>
-
-                                        <!-- Comment edition -->
-                                        <form *ngIf="editCommentStatus[comment.id] == 'waiting' || editCommentStatus[comment.id] == 'showed'"
-                                            (ngSubmit)="onSubmitEditComment(comment, editCommentForm.value.content)" #editCommentForm="ngForm">
-                                            <textarea name="content" placeholder="{{comment.content}}" ngModel>
-                                            </textarea>
-                                            <button class="btn btn-danger"
-                                                (click)="editCommentStatus = null"
-                                                [disabled]="editCommentStatus[comment.id] == 'waiting'"
-                                                (click)="$event.preventDefault()"
-                                                >
-                                                Cancel
-                                            </button>
-                                            <button type="submit" class="btn btn-success" title="Edit comment"
-                                                    (click)="editCommentForm.ngSubmit.emit()"
-                                                    (click)="editCommentStatus[comment.id] = 'waiting'"
-                                                    (click)="$event.preventDefault()"
-                                                    [disabled]="editCommentStatus[comment.id] == 'waiting'"
-                                                    >
-                                                    <span *ngIf="editCommentStatus[comment.id] == 'waiting'" class="fa fa-spinner fa-spin"></span>
-                                                Send
-                                            </button>
-                                        </form>
                                         
                                         <!--
                                             I don't want have to worry about updating the blocking cards.
                                             If you want to edit/delete a blocking card comment, use the blocking card menu
                                         -->
-                                        <div *ngIf="!comment.blocking_card">
+                                        <div *ngIf="!comment.blocking_card && !comment.review">
                                             <!-- Comment edition -->
-                                            <span *ngIf="editCommentStatus[comment.id] == 'standby'" class="btn btn-success edit-comment-button" (click)="editCommentStatus[comment.id] = 'showed'">
-                                                Edit
-                                            </span>
-
-                                            <!-- Comment deletion -->
-                                            <form   *ngIf="deleteCommentStatus[comment.id] == 'standby' || deleteCommentStatus[comment.id] == 'asking' || deleteCommentStatus[comment.id] == 'waiting'"
-                                                    (ngSubmit)="onSubmitDeleteComment(comment)" #deleteCommentForm="ngForm">
-                                                
-                                                <button type="submit" class="btn btn-danger delete_comment" title="Delete this comment"
-                                                    *ngIf="deleteCommentStatus[comment.id] == 'standby'"
-                                                    (click)="deleteCommentStatus[comment.id] = 'asking'"
-                                                    (click)="$event.preventDefault()"
-                                                    >
-                                                    Delete
-                                                    <span class="fa fa-trash"></span>
-                                                </button>
-
-                                                <div *ngIf="deleteCommentStatus[comment.id] == 'asking' || deleteCommentStatus[comment.id] == 'waiting'">
-                                                    <div>
-                                                        <input type="checkbox" name="confirm" ngModel required [disabled]="deleteCommentStatus[comment.id] == 'waiting'" /> Are you sure?
-                                                    </div>
-                                                    
-                                                    <button type="submit" class="btn btn-success delete_comment" title="Cancel"
-                                                            (click)="$event.preventDefault()"
-                                                            (click)="deleteCommentStatus[comment.id] = 'standby'"
-                                                            [disabled]="deleteCommentStatus[comment.id] == 'waiting'"
-                                                    >
+                                            <div class="comment-edit" *ngIf="deleteCommentStatus[comment.id] == 'standby'" [ngClass]="{'showed': editCommentStatus[comment.id] == 'showed' }">
+                                                <span *ngIf="editCommentStatus[comment.id] == 'standby'"
+                                                    (click)="editCommentStatus[comment.id] = 'showed'"
+                                                    (click)="commentPreviousContent[comment.id] = comment.content"
+                                                    class="btn btn-success edit-comment-button" >
+                                                    Edit
+                                                </span>
+                                                <!-- Comment edition form -->
+                                                <form class="comment-edit" *ngIf="editCommentStatus[comment.id] == 'waiting' || editCommentStatus[comment.id] == 'showed'"
+                                                    (ngSubmit)="onSubmitEditComment(comment, editCommentForm.value.content)" #editCommentForm="ngForm">
+                                                    <textarea name="content" [(ngModel)]='comment.content'>
+                                                    </textarea>
+                                                    <button class="btn btn-danger"
+                                                        (click)="editCommentStatus[comment.id] = 'standby'"
+                                                        (click)="comment.content = commentPreviousContent[comment.id]"
+                                                        (click)="$event.preventDefault()"
+                                                        [disabled]="editCommentStatus[comment.id] == 'waiting'"
+                                                        >
                                                         Cancel
                                                     </button>
+                                                    <button type="submit" class="btn btn-success" title="Edit comment"
+                                                            (click)="editCommentForm.ngSubmit.emit()"
+                                                            (click)="editCommentStatus[comment.id] = 'waiting'"
+                                                            (click)="$event.preventDefault()"
+                                                            [disabled]="editCommentStatus[comment.id] == 'waiting'"
+                                                            >
+                                                            <span *ngIf="editCommentStatus[comment.id] == 'waiting'" class="fa fa-spinner fa-spin"></span>
+                                                        Send
+                                                    </button>
+                                                </form>
+                                            </div>
+
+                                            <!-- Comment deletion -->
+                                            <div class="comment-delete" *ngIf="editCommentStatus[comment.id] == 'standby'" [ngClass]="{'showed': deleteCommentStatus[comment.id] == 'asking' }">
+                                                <form *ngIf="deleteCommentStatus[comment.id] == 'standby' || deleteCommentStatus[comment.id] == 'asking' || deleteCommentStatus[comment.id] == 'waiting'"
+                                                        (ngSubmit)="onSubmitDeleteComment(comment)" #deleteCommentForm="ngForm">
+                                                    
                                                     <button type="submit" class="btn btn-danger delete_comment" title="Delete this comment"
-                                                        [disabled]="deleteCommentStatus[comment.id] == 'waiting'"
-                                                        (click)="deleteCommentStatus[comment.id] = 'waiting'"
+                                                        *ngIf="deleteCommentStatus[comment.id] == 'standby'"
+                                                        (click)="deleteCommentStatus[comment.id] = 'asking'"
                                                         (click)="$event.preventDefault()"
-                                                        (click)="deleteCommentForm.ngSubmit.emit()"
+                                                        [disabled]="deleteCommentStatus[comment.id] == 'asking'"
                                                         >
-                                                        <span *ngIf="deleteCommentStatus[comment.id] == 'waiting'" class="fa fa-spinner fa-spin"></span>
-                                                        Delete comment
+                                                        Delete
                                                         <span class="fa fa-trash"></span>
                                                     </button>
-                                                </div>
-                                            </form>
+
+                                                    <div *ngIf="deleteCommentStatus[comment.id] == 'asking' || deleteCommentStatus[comment.id] == 'waiting'">
+                                                        <div>
+                                                            <input type="checkbox" name="confirm" ngModel required [disabled]="deleteCommentStatus[comment.id] == 'waiting'" /> Are you sure?
+                                                        </div>
+                                                        
+                                                        <button type="submit" class="btn btn-success delete_comment" title="Cancel"
+                                                                (click)="$event.preventDefault()"
+                                                                (click)="deleteCommentStatus[comment.id] = 'standby'"
+                                                                [disabled]="deleteCommentStatus[comment.id] == 'waiting'"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button type="submit" class="btn btn-danger delete_comment" title="Delete this comment"
+                                                            [disabled]="deleteCommentStatus[comment.id] == 'waiting'"
+                                                            (click)="deleteCommentStatus[comment.id] = 'waiting'"
+                                                            (click)="$event.preventDefault()"
+                                                            (click)="deleteCommentForm.ngSubmit.emit()"
+                                                            >
+                                                            <span *ngIf="deleteCommentStatus[comment.id] == 'waiting'" class="fa fa-spinner fa-spin"></span>
+                                                            Delete comment
+                                                            <span class="fa fa-trash"></span>
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -420,6 +428,96 @@
                         </div>
                     </div>
 
+                    <!-- Reviews -->
+                    <div class="card-reviews card-section">
+                        <h2>Reviews ({{card.reviews.length}})</h2>
+                        <!-- New review -->
+                        <button class="btn btn-primary"
+                                *ngIf="newReviewStatus=='hidden'"
+                                (click)="newReviewStatus='showed'">
+                            Add review
+                        </button>
+                        <button class="btn btn-primary"
+                                *ngIf="newReviewStatus=='showed'"
+                                (click)="newReviewStatus='hidden'">
+                            Cancel
+                        </button>
+                        <div *ngIf="newReviewStatus=='showed' || newReviewStatus=='waiting'">
+                            <form (ngSubmit)="onAddReview(addReviewForm.value.members, addReviewForm.value.description)" #addReviewForm="ngForm">
+                                <textarea name="description" ngModel></textarea>
+                                <select name="members" multiple required ngModel>
+                                    <option *ngFor="let member of board.members" [value]="member.id" [selected]="cardHasMember(member)?true:false">
+                                        {{member.trello_username}}
+                                    </option>
+                                </select>
+                                <button class="btn btn-danger"
+                                        (click)="$event.preventDefault()"
+                                        (click)="newReviewStatus='standy'"
+                                        [disabled]="!addReviewForm.valid || newReviewStatus=='waiting'">
+                                        Cancel
+                                </button>
+                                <button class="btn btn-primary"
+                                        (click)="newReviewStatus='waiting'"
+                                        (click)="addReviewForm.ngSubmit.emit()"
+                                        (click)="$event.preventDefault()"
+                                        [disabled]="!addReviewForm.valid || newReviewStatus=='waiting'">
+                                        <span class="fa fa-spinner fa-spin" *ngIf="newReviewStatus=='waiting'"></span>
+                                    Add review
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Review list -->
+                        <div *ngIf="card.reviews.length == 0">
+                            <em>This card has no reviews.</em>
+                        </div>
+                        <ul *ngIf="card.reviews.length > 0" class="reviews">
+                            <li *ngFor="let review of card.reviews" class="review">
+                                <h3>Review on {{review.creation_datetime}}</h3>
+                                
+                                <!-- Description of the review -->
+                                <div *ngIf="review.description">
+                                    {{review.description}}
+                                </div>
+
+                                <!-- Reviewers of this review -->
+                                <ul class="review-reviewers">
+                                    <li *ngFor="let member of review.reviewers">
+                                        {{member.trello_username}}
+                                    </li>
+                                </ul>
+                                
+                                <!-- Delete review -->
+                                <div class="review-actions">
+                                    <button class="btn btn-danger"
+                                            *ngIf="deleteReviewStatus[review.id]!='asking' && deleteReviewStatus[review.id]!='waiting'"
+                                            (click)="deleteReviewStatus[review.id]='asking'">
+                                        <span class="fa fa-trash"></span>
+                                        Delete
+                                    </button>
+                                    
+                                    <button class="btn btn-primary"
+                                            *ngIf="deleteReviewStatus[review.id]=='asking'"
+                                            (click)="deleteReviewStatus[review.id]='standby'"
+                                            [disabled]="deleteReviewStatus[review.id]=='waiting'">
+                                        Cancel
+                                    </button>
+
+                                    <button class="btn btn-danger"
+                                            *ngIf="deleteReviewStatus[review.id]=='asking' || deleteReviewStatus[review.id]=='waiting'"
+                                            (click)="deleteReviewStatus[review.id]='waiting'"
+                                            (click)="deleteReview(review)"
+                                            [disabled]="deleteReviewStatus[review.id]=='waiting'"
+                                            >
+                                        <span class="fa fa-spinner fa-spin" *ngIf="deleteReviewStatus[review.id]=='waiting'"></span>
+                                        <span class="fa fa-trash"></span>
+                                        Confirm deletion of this review
+                                    </button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
                     <!-- Members -->
                     <div class="card-members card-section">
                         <h2>Members ({{card.members.length}})</h2>
@@ -428,7 +526,7 @@
                             <li *ngFor="let member_i of card.members">{{member_i.trello_username}}</li>
                         </ul>
                         <div *ngIf="card.members.length == 0">
-                            This task has no assigned members.
+                            <em>This task has no assigned members.</em>
                         </div>
                         <button class="btn btn-primary" *ngIf="changeMembersStatus!='showed' && changeMembersStatus!='waiting'" (click)="changeMembersStatus='showed'">Edit</button>
                         

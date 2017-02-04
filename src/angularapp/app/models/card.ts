@@ -4,6 +4,7 @@ import { Board } from './board';
 import { Member } from './member';
 import { Label } from './label';
 import { assign } from 'rxjs/util/assign';
+import { CardReview } from './review';
 
 
 export class Card {
@@ -26,6 +27,7 @@ export class Card {
   labels?: Label[];
   comments?: CardComment[];
   members?: Member[];
+  reviews?: CardReview[];
   charts?: {};
   blocking_cards?: Card[];
 
