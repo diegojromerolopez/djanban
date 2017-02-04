@@ -9,7 +9,7 @@ from django.http import Http404, HttpResponseBadRequest
 from django.http import JsonResponse
 from django.urls import reverse
 
-from djangotrellostats.apps.api.serializers import serialize_list, serialize_member
+from djangotrellostats.apps.api.serializers import serialize_list, serialize_member, serialize_requirement
 from djangotrellostats.apps.api.util import get_board_or_404
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
@@ -75,6 +75,7 @@ def get_board(request, board_id):
         "local_url": reverse("boards:view", args=(board.id,)),
         "lists": lists_json,
         "members": [serialize_member(member) for member in board.members.all().order_by("initials")],
+        "requirements": [serialize_requirement(requirement) for requirement in board.requirements.all()],
     }
 
     return JsonResponse(board_json)

@@ -18,7 +18,7 @@ class Requirement(models.Model):
                                    help_text=u"Long description of this requirement describing behavior or "
                                              u"pointing to other resources.")
 
-    comments = models.TextField(verbose_name=u"Comments", default="", blank=True,
+    other_comments = models.TextField(verbose_name=u"Comments", default="", blank=True,
                                 help_text=u"Private comments for the PM and the developers")
 
     cards = models.ManyToManyField("boards.Card",
@@ -35,6 +35,11 @@ class Requirement(models.Model):
                                  help_text=u"Is this requirement is not active it will treat  as a wish of the client "
                                            u"but not as a real requirement",
                                  default=True)
+
+    # Alias of card_comments attribute
+    @property
+    def comments(self):
+        return self.card_comments
 
     @property
     def done_cards(self):

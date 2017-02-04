@@ -5,11 +5,23 @@ from __future__ import unicode_literals
 from django.urls import reverse
 from crequest.middleware import CrequestMiddleware
 
-
-# Card serialization
 from djangotrellostats.apps.reports.models import CardReview
 
 
+# Basic card serialization
+def basic_serialize_card(card):
+    return {
+        "id": card.id,
+        "uuid": card.uuid,
+        "name": card.name,
+        "description": card.description,
+        "local_url": reverse("boards:view_card", args=(card.board_id, card.id,)),
+        "url": card.url,
+        "short_url": card.short_url,
+        "position": card.position
+    }
+
+# Full card serialization
 def serialize_card(card):
     board = card.board
     card_list = card.list
@@ -91,6 +103,7 @@ def serialize_card(card):
             for movement in card.movements.all().order_by("-datetime")
             ],
         "reviews": [serialize_card_review(review) for review in card.reviews.all().order_by("-creation_datetime")],
+        "requirements": [serialize_requirement(requirement) for requirement in card.requirements.all()],
         "charts": {
             "number_of_comments_by_member": reverse("charts:number_of_comments_by_member", args=(board.id, card.id)),
             "number_of_comments": reverse("charts:number_of_comments", args=(board.id, card.id))
@@ -117,6 +130,7 @@ def serialize_card_comment(comment, board=None):
         review = comment.review
     except CardReview.DoesNotExist:
         review = None
+
     author = comment.author
     comment_json = {
         "id": comment.id,
@@ -134,7 +148,8 @@ def serialize_card_comment(comment, board=None):
             "short_url": comment.blocking_card.short_url,
             "position": comment.blocking_card.position,
         } if comment.blocking_card else None,
-        "review": serialize_card_review(review) if review else None
+        "review": serialize_card_review(review) if review else None,
+        "requirement": serialize_requirement(comment.requirement) if comment.requirement else None
     }
     return comment_json
 
@@ -167,3 +182,20 @@ def serialize_member(member):
         "is_current_user": True if current_member and member.id == current_member.id else False
     }
     return member_json
+
+
+# Requirement serialization
+def serialize_requirement(requirement):
+    return {
+        "id": requirement.id,
+        "code": requirement.code,
+        "name": requirement.name,
+        "description": requirement.description,
+        "other_comments": requirement.other_comments,
+        "cards": [basic_serialize_card(card) for card in requirement.cards.all()],
+        "value": requirement.value,
+        "estimated_number_of_hours": requirement.estimated_number_of_hours,
+        "active": requirement.active,
+        "spent_time": requirement.done_cards_spent_time,
+        "percentage_of_completion": requirement.done_cards_percentage
+    }

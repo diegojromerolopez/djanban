@@ -546,6 +546,7 @@ class Card(models.Model):
     COMMENT_BLOCKED_CARD_PATTERN = "blocked by {card_url}"
 
     COMMENT_REQUIREMENT_CARD_REGEX = r"^task\s+of\s+requirement\s+(?P<requirement_code>.+)$"
+    COMMENT_REQUIREMENT_CARD_PATTERN = "task of requirement {requirement_code}"
 
     COMMENT_REVIEWED_BY_MEMBERS_REGEX = r"^reviewed\s+by\s+(?P<member_usernames>((@[\w\d]+)(\s|,|and)*)+(\s*:\s*(?P<description>.+))?)$"
     COMMENT_REVIEWED_BY_MEMBERS_PATTERN = "reviewed by {member_usernames}"
@@ -828,7 +829,7 @@ class Card(models.Model):
     def remove_blocking_card(self, member, blocking_card):
         self.delete_comment(member, blocking_card.blocking_comments.get(card=self))
 
-    # Add a review for this
+    # Add a review to this card
     @transaction.atomic
     def add_review(self, member, reviewers, description=""):
         # Add the blocking card with the review format
@@ -848,10 +849,20 @@ class Card(models.Model):
     # Deletion of review
     @transaction.atomic
     def delete_review(self, member, review):
-        try:
-            self.delete_comment(member, review.comment)
-        except:
-            review.delete()
+        self.delete_comment(member, review.comment)
+
+    # Add a requirement to this card
+    @transaction.atomic
+    def add_requirement(self, member, requirement):
+        # Add the requirement with the comment format
+        comment_content = Card.COMMENT_REQUIREMENT_CARD_PATTERN.format(requirement_code=requirement.code)
+        self.add_comment(member, comment_content)
+
+    # Removing a requirement of this card
+    @transaction.atomic
+    def remove_requirement(self, member, requirement):
+        comment = self.comments.get(requirement=requirement)
+        self.delete_comment(member, comment)
 
     # Add a new comment to this card
     @transaction.atomic
@@ -940,6 +951,7 @@ class CardComment(models.Model):
     content = models.TextField(verbose_name=u"Content of the comment")
     blocking_card = models.ForeignKey("boards.Card", verbose_name=u"Blocking card this comment belongs to", related_name="blocking_comments", null=True, default=None)
     review = models.OneToOneField("reports.CardReview", verbose_name=u"Card review this comment represents", related_name="comment", null=True, default=None)
+    requirement = models.ForeignKey("requirements.Requirement", verbose_name=u"Requirement this comment belongs to", related_name="card_comments", null=True, default=None)
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
     last_edition_datetime = models.DateTimeField(verbose_name=u"Last edition of the comment", default=None, null=True)
 
@@ -979,7 +991,7 @@ class CardComment(models.Model):
     # Return the requirement linked to this comment extracted from its content.
     # If it is not a requirement card comment, return None.
     @property
-    def requirement(self):
+    def requirement_from_content(self):
         matches = re.match(Card.COMMENT_REQUIREMENT_CARD_REGEX, self.content, re.IGNORECASE)
         if matches:
             requirement_code = matches.group("requirement_code")
@@ -1087,13 +1099,15 @@ class CardComment(models.Model):
                     self.blocking_card = blocking_card
 
             # Is it a requirement card comment?
-            requirement = self.requirement
+            requirement = self.requirement_from_content
             earlier_requirement = earlier_card_comment.requirement
             if requirement != earlier_requirement:
                 if earlier_requirement is not None:
                     card.requirements.remove(earlier_requirement)
+                    self.requirement = None
                 if requirement is not None:
                     card.requirements.add(requirement)
+                    self.requirement = requirement
 
             # Is it a review comment?
             review_from_comment = self.review_from_comment
@@ -1123,9 +1137,10 @@ class CardComment(models.Model):
             self.blocking_card = blocking_card
 
         # Is it a requirement card comment?
-        requirement = self.requirement
+        requirement = self.requirement_from_content
         if requirement:
             card.requirements.add(requirement)
+            self.requirement = requirement
 
         # Is it a reviewer card comment?
         review_from_comment = self.review_from_comment

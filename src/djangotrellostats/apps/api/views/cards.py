@@ -288,7 +288,7 @@ def add_new_review(request, board_id, card_id):
     return JsonResponse(serialize_card(card))
 
 
-# Add a review
+# Delete a review
 @member_required
 @transaction.atomic
 def delete_review(request, board_id, card_id, review_id):
@@ -304,6 +304,51 @@ def delete_review(request, board_id, card_id, review_id):
         raise Http404
 
     card.delete_review(member, review)
+    return JsonResponse(serialize_card(card))
+
+
+# Add a requirement to the card
+@member_required
+@transaction.atomic
+def add_requirement(request, board_id, card_id):
+    if request.method != "PUT":
+        return HttpResponseBadRequest()
+
+    member = request.user.member
+    card = get_card_or_404(request, board_id, card_id)
+    board = card.board
+
+    put_body = json.loads(request.body)
+    if not put_body.get("requirement"):
+        return HttpResponseBadRequest()
+
+    requirement = board.requirements.get(id=put_body.get("requirement"))
+
+    # If the requirement is already in the card, we can't continue
+    if card.requirements.filter(id=requirement.id).exists():
+        return HttpResponseBadRequest()
+
+    card.add_requirement(member, requirement)
+
+    return JsonResponse(serialize_card(card))
+
+
+# Remove a requirement of the card
+@member_required
+@transaction.atomic
+def remove_requirement(request, board_id, card_id, requirement_id):
+    if request.method != "DELETE":
+        return HttpResponseBadRequest()
+
+    member = request.user.member
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        card = board.cards.get(id=card_id)
+        requirement = card.requirements.get(id=requirement_id)
+    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+        raise Http404
+
+    card.remove_requirement(member, requirement)
     return JsonResponse(serialize_card(card))
 
 

@@ -6,6 +6,7 @@ import { Headers, RequestOptions } from '@angular/http';
 
 
 import { Observable }     from 'rxjs/Observable';
+import { Requirement } from '../models/requirement';
 import { CardReview } from '../models/review';
 import { Label } from '../models/label';
 import { CardComment } from '../models/comment';
@@ -38,6 +39,8 @@ export class CardService extends DjangoTrelloStatsService {
   private REMOVE_BLOCKING_CARD_URL = '/api/board/{board_id}/card/{card_id}/blocking_card/{blocking_card_id}';
   private ADD_REVIEW_URL = '/api/board/{board_id}/card/{card_id}/review';
   private DELETE_REVIEW_URL = '/api/board/{board_id}/card/{card_id}/review/{review_id}';
+  private ADD_REQUIREMENT_URL = '/api/board/{board_id}/card/{card_id}/requirement';
+  private REMOVE_REQUIREMENT_URL = '/api/board/{board_id}/card/{card_id}/requirement/{requirement_id}';
   
 
   constructor (http: Http) {
@@ -137,6 +140,25 @@ export class CardService extends DjangoTrelloStatsService {
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);
+  }
+
+  /** Add a new requirement to a card */
+  addRequirement(card: Card, requirement: Requirement): Promise<Card> {
+    let add_requirement_url = this.prepareUrl(this.ADD_REQUIREMENT_URL, card);
+    let put_body = {requirement: requirement.id}
+    return this.http.put(add_requirement_url, put_body)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);    
+  }
+
+  /** Remove a requirement from a card */
+  removeRequirement(card: Card, requirement: Requirement): Promise<Card> {
+    let remove_requirement_url = this.prepareUrl(this.REMOVE_REQUIREMENT_URL, card).replace("{requirement_id}", requirement.id.toString());
+    return this.http.delete(remove_requirement_url)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);    
   }
 
   addNewComment(card: Card, comment_content: string) : Promise<CardComment> {

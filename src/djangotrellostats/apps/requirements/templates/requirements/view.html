@@ -37,7 +37,7 @@
                            </div>
                         </div>
                       </div>
-                      {% if member and requirement.comments %}
+                      {% if member and requirement.other_comments %}
                           <div class="row">
                                <div class="col-md-12 description">
                                 <div class="panel panel-info">
@@ -45,7 +45,7 @@
                                           Comments
                                       </div>
                                     <div class="panel-body">
-                                        {{requirement.comments|safe}}
+                                        {{requirement.other_comments|safe}}
                                     </div>
                                </div>
                             </div>

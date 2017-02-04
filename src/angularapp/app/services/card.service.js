@@ -37,6 +37,8 @@ var CardService = (function (_super) {
         _this.REMOVE_BLOCKING_CARD_URL = '/api/board/{board_id}/card/{card_id}/blocking_card/{blocking_card_id}';
         _this.ADD_REVIEW_URL = '/api/board/{board_id}/card/{card_id}/review';
         _this.DELETE_REVIEW_URL = '/api/board/{board_id}/card/{card_id}/review/{review_id}';
+        _this.ADD_REQUIREMENT_URL = '/api/board/{board_id}/card/{card_id}/requirement';
+        _this.REMOVE_REQUIREMENT_URL = '/api/board/{board_id}/card/{card_id}/requirement/{requirement_id}';
         return _this;
     }
     /**
@@ -121,6 +123,23 @@ var CardService = (function (_super) {
     CardService.prototype.deleteReview = function (card, review) {
         var delete_review_url = this.prepareUrl(this.DELETE_REVIEW_URL, card).replace("{review_id}", review.id.toString());
         return this.http.delete(delete_review_url)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    /** Add a new requirement to a card */
+    CardService.prototype.addRequirement = function (card, requirement) {
+        var add_requirement_url = this.prepareUrl(this.ADD_REQUIREMENT_URL, card);
+        var put_body = { requirement: requirement.id };
+        return this.http.put(add_requirement_url, put_body)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    /** Remove a requirement from a card */
+    CardService.prototype.removeRequirement = function (card, requirement) {
+        var remove_requirement_url = this.prepareUrl(this.REMOVE_REQUIREMENT_URL, card).replace("{requirement_id}", requirement.id.toString());
+        return this.http.delete(remove_requirement_url)
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);

@@ -5,6 +5,7 @@ import { Member } from './member';
 import { Label } from './label';
 import { assign } from 'rxjs/util/assign';
 import { CardReview } from './review';
+import { Requirement } from './requirement';
 
 
 export class Card {
@@ -30,6 +31,7 @@ export class Card {
   reviews?: CardReview[];
   charts?: {};
   blocking_cards?: Card[];
+  requirements?: Requirement[];
 
   public constructor(card: Card){
     assign(this, card)

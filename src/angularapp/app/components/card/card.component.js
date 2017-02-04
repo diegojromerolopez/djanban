@@ -34,6 +34,8 @@ var CardComponent = (function () {
         this.deleteCommentStatus = {};
         this.removeBlockingCardStatus = {};
         this.deleteReviewStatus = {};
+        this.addRequirementStatus = "hidden";
+        this.removeRequirementStatus = {};
     }
     CardComponent.prototype.ngOnInit = function () {
         var that = this;
@@ -97,6 +99,7 @@ var CardComponent = (function () {
             _this.addBlockingCardStatus = "hidden";
         });
     };
+    /** Called when adding a review. */
     CardComponent.prototype.onAddReview = function (member_ids, description) {
         var _this = this;
         this.cardService.addNewReview(this.card, member_ids, description).then(function (card_response) {
@@ -108,12 +111,38 @@ var CardComponent = (function () {
             _this.deleteCommentStatus[review_comment.id] = "standby";
         });
     };
+    /** Called when deleting a review */
     CardComponent.prototype.deleteReview = function (review) {
         var _this = this;
         this.cardService.deleteReview(this.card, review).then(function (card_response) {
             _this.card.reviews = card_response.reviews;
             _this.card.comments = card_response.comments;
             _this.newReviewStatus = "hidden";
+        });
+    };
+    /** Called when adding a requirement. */
+    CardComponent.prototype.onAddRequirement = function (requirement_id) {
+        var _this = this;
+        var requirement = this.board.requirements.find(function (requirement_i) { return requirement_i.id == requirement_id; });
+        this.cardService.addRequirement(this.card, requirement).then(function (card_response) {
+            _this.card.requirements = card_response.requirements;
+            _this.card.comments = card_response.comments;
+            _this.addRequirementStatus = "hidden";
+            for (var _i = 0, _a = _this.card.requirements; _i < _a.length; _i++) {
+                var requirement_1 = _a[_i];
+                _this.removeRequirementStatus[requirement_1.id] = "standby";
+            }
+        });
+    };
+    /** Remove a requirement of this card */
+    CardComponent.prototype.removeRequirement = function (requirement) {
+        var _this = this;
+        this.cardService.removeRequirement(this.card, requirement).then(function (card_response) {
+            // Note we have to update the requirements and the comments because a comment has also been deleted.
+            // Remember that the information about a requirement is stored in card comments.
+            _this.card.requirements = card_response.requirements;
+            _this.card.comments = card_response.comments;
+            delete _this.removeRequirementStatus[requirement.id];
         });
     };
     /** Called when the card name change form is submitted */
@@ -212,6 +241,11 @@ var CardComponent = (function () {
             for (var _d = 0, _e = _this.card.reviews; _d < _e.length; _d++) {
                 var review = _e[_d];
                 _this.deleteReviewStatus[review.id] = "showed";
+            }
+            // Initalization of requirements' status
+            for (var _f = 0, _g = _this.card.requirements; _f < _g.length; _f++) {
+                var requirement = _g[_f];
+                _this.removeRequirementStatus[requirement.id] = "hidden";
             }
         });
     };

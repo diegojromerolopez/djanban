@@ -12,6 +12,7 @@ import { CardComment } from '../../models/comment';
 import { Label } from '../../models/label';
 import { Member } from '../../models/member';
 import { CardReview } from '../../models/review';
+import { Requirement } from '../../models/requirement';
 
 
 @Component({
@@ -38,13 +39,17 @@ export class CardComponent implements OnInit  {
     private changeDescriptionStatus: string;
     private newCommentStatus: string;
     
-    // Review statuses
-    private newReviewStatus: string;
-    private deleteReviewStatus: {};
-    
     // Blocking card statuses
     private addBlockingCardStatus: string;
     private removeBlockingCardStatus: {};
+
+    // Review statuses
+    private newReviewStatus: string;
+    private deleteReviewStatus: {};
+
+    // Requirement statuses
+    private addRequirementStatus: string;
+    private removeRequirementStatus: {};
 
     /**
      * Stores the status of the edition of each comment: standby (standby),
@@ -92,6 +97,8 @@ export class CardComponent implements OnInit  {
         this.deleteCommentStatus = { };
         this.removeBlockingCardStatus = { };
         this.deleteReviewStatus = { };
+        this.addRequirementStatus = "hidden";
+        this.removeRequirementStatus = { };
     }
 
     cardHasLabel(label: Label): boolean {
@@ -149,6 +156,7 @@ export class CardComponent implements OnInit  {
         });
     }
 
+    /** Called when adding a review. */
     onAddReview(member_ids: number[], description: string): void{
         this.cardService.addNewReview(this.card, member_ids, description).then(card_response => {
             this.card.reviews = card_response.reviews;
@@ -160,11 +168,36 @@ export class CardComponent implements OnInit  {
         });
     }
 
+    /** Called when deleting a review */
     deleteReview(review: CardReview): void {
         this.cardService.deleteReview(this.card, review).then(card_response => {
             this.card.reviews = card_response.reviews;
             this.card.comments = card_response.comments;
             this.newReviewStatus = "hidden";
+        });
+    }
+
+    /** Called when adding a requirement. */
+    onAddRequirement(requirement_id: number):void {
+        let requirement = this.board.requirements.find(function(requirement_i){ return requirement_i.id == requirement_id; });
+        this.cardService.addRequirement(this.card, requirement).then(card_response => {
+            this.card.requirements = card_response.requirements;
+            this.card.comments = card_response.comments;
+            this.addRequirementStatus = "hidden";
+            for(let requirement of this.card.requirements){
+                this.removeRequirementStatus[requirement.id] = "standby";
+            }
+        });
+    }
+
+    /** Remove a requirement of this card */
+    removeRequirement(requirement: Requirement): void {
+        this.cardService.removeRequirement(this.card, requirement).then(card_response => {
+            // Note we have to update the requirements and the comments because a comment has also been deleted.
+            // Remember that the information about a requirement is stored in card comments.
+            this.card.requirements = card_response.requirements;
+            this.card.comments = card_response.comments;
+            delete this.removeRequirementStatus[requirement.id];
         });
     }
 
@@ -261,6 +294,10 @@ export class CardComponent implements OnInit  {
             // Initialization of the status of the removal of each one of the reviews of this card
             for(let review of this.card.reviews){
                 this.deleteReviewStatus[review.id] = "showed";
+            }
+            // Initalization of requirements' status
+            for(let requirement of this.card.requirements){
+                this.removeRequirementStatus[requirement.id] = "hidden";
             }
         });
     }

@@ -6,7 +6,6 @@
     </a>
 </p>
 
-
 <div *ngIf="card" class="panel panel-default card-view">
     <div class="panel-heading">
         <h1 *ngIf="changeNameStatus != 'waiting' && changeNameStatus != 'showed'"
@@ -228,7 +227,7 @@
                                             I don't want have to worry about updating the blocking cards.
                                             If you want to edit/delete a blocking card comment, use the blocking card menu
                                         -->
-                                        <div *ngIf="!comment.blocking_card && !comment.review">
+                                        <div *ngIf="!comment.blocking_card && !comment.review && !comment.requirement">
                                             <!-- Comment edition -->
                                             <div class="comment-edit" *ngIf="deleteCommentStatus[comment.id] == 'standby'" [ngClass]="{'showed': editCommentStatus[comment.id] == 'showed' }">
                                                 <span *ngIf="editCommentStatus[comment.id] == 'standby'"
@@ -378,6 +377,44 @@
                         </div>
                     </div>
 
+                    <!-- Members -->
+                    <div class="card-members card-section">
+                        <h2>Members ({{card.members.length}})</h2>
+                        
+                        <ul *ngIf="card.members.length > 0">
+                            <li *ngFor="let member_i of card.members">{{member_i.trello_username}}</li>
+                        </ul>
+                        <div *ngIf="card.members.length == 0">
+                            <em>This task has no assigned members.</em>
+                        </div>
+                        <button class="btn btn-primary" *ngIf="changeMembersStatus!='showed' && changeMembersStatus!='waiting'" (click)="changeMembersStatus='showed'">Edit</button>
+                        
+                        <div *ngIf="changeMembersStatus=='showed' || changeMembersStatus=='waiting'">
+                            <form (ngSubmit)="onChangeMembers(changeMembersForm.value.members)" #changeMembersForm="ngForm">
+                                <select name="members" multiple required ngModel>
+                                    <option *ngFor="let member of board.members" [value]="member.id" [selected]="cardHasMember(member)?true:false">
+                                        {{member.trello_username}}
+                                    </option>
+                                </select>
+                                <div>
+                                    <button class="btn btn-danger"
+                                            (click)="changeMembersStatus = 'hidden'"
+                                            (click)="$event.preventDefault()"
+                                            [disabled]="changeMembersStatus == 'waiting'"
+                                            >Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-success change_name" title="Edit members of {{card.name}}"
+                                                (click)="changeMembersForm.ngSubmit.emit()"
+                                                (click)="changeMembersStatus = 'waiting'"
+                                                [disabled]="!changeMembersForm.valid || changeMembersStatus == 'waiting'">
+                                            <span *ngIf="changeMembersStatus == 'waiting'" class="fa fa-spinner fa-spin"></span>
+                                            <span class="fa fa-users"></span> Change members
+                                        </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
                     <!-- Blocking cards -->
                     <div class="card-blocking_cards card-section">
                         <h2>Blocking cards ({{card.blocking_cards.length}})</h2>
@@ -518,43 +555,86 @@
                         </ul>
                     </div>
 
-                    <!-- Members -->
-                    <div class="card-members card-section">
-                        <h2>Members ({{card.members.length}})</h2>
-                        
-                        <ul *ngIf="card.members.length > 0">
-                            <li *ngFor="let member_i of card.members">{{member_i.trello_username}}</li>
-                        </ul>
-                        <div *ngIf="card.members.length == 0">
-                            <em>This task has no assigned members.</em>
-                        </div>
-                        <button class="btn btn-primary" *ngIf="changeMembersStatus!='showed' && changeMembersStatus!='waiting'" (click)="changeMembersStatus='showed'">Edit</button>
-                        
-                        <div *ngIf="changeMembersStatus=='showed' || changeMembersStatus=='waiting'">
-                            <form (ngSubmit)="onChangeMembers(changeMembersForm.value.members)" #changeMembersForm="ngForm">
-                                <select name="members" multiple required ngModel>
-                                    <option *ngFor="let member of board.members" [value]="member.id" [selected]="cardHasMember(member)?true:false">
-                                        {{member.trello_username}}
+                    <!-- Requirement -->
+                    <div class="card-requirements">
+                        <h2>Requirements ({{card.requirements.length}})</h2>
+                        <!-- New requirement -->
+                        <button class="btn btn-primary"
+                                *ngIf="addRequirementStatus=='hidden'"
+                                (click)="addRequirementStatus='showed'">
+                            Add requirement
+                        </button>
+                        <button class="btn btn-primary"
+                                *ngIf="addRequirementStatus=='showed'"
+                                (click)="addRequirementStatus='hidden'">
+                            Cancel
+                        </button>
+                        <div *ngIf="addRequirementStatus=='showed' || addRequirementStatus=='waiting'">
+                            <form (ngSubmit)="onAddRequirement(addRequirementForm.value.requirement)" #addRequirementForm="ngForm">
+                                <select name="requirement" required ngModel>
+                                    <option *ngFor="let requirement_i of board.requirements" [value]="requirement_i.id">
+                                        {{requirement_i.name}} (value of {{requirement_i.value}})
                                     </option>
                                 </select>
-                                <div>
-                                    <button class="btn btn-danger"
-                                            (click)="changeMembersStatus = 'hidden'"
-                                            (click)="$event.preventDefault()"
-                                            [disabled]="changeMembersStatus == 'waiting'"
-                                            >Cancel
-                                        </button>
-                                        <button type="submit" class="btn btn-success change_name" title="Edit members of {{card.name}}"
-                                                (click)="changeMembersForm.ngSubmit.emit()"
-                                                (click)="changeMembersStatus = 'waiting'"
-                                                [disabled]="!changeMembersForm.valid || changeMembersStatus == 'waiting'">
-                                            <span *ngIf="changeMembersStatus == 'waiting'" class="fa fa-spinner fa-spin"></span>
-                                            <span class="fa fa-users"></span> Change members
-                                        </button>
-                                </div>
+                                <button class="btn btn-danger"
+                                        (click)="$event.preventDefault()"
+                                        (click)="addRequirementStatus='standy'"
+                                        [disabled]="!addRequirementForm.valid || addRequirementStatus=='waiting'">
+                                        Cancel
+                                </button>
+                                <button class="btn btn-primary"
+                                        (click)="addRequirementStatus='waiting'"
+                                        (click)="addRequirementForm.ngSubmit.emit()"
+                                        (click)="$event.preventDefault()"
+                                        [disabled]="!addRequirementForm.valid || addRequirementStatus=='waiting'">
+                                        <span class="fa fa-spinner fa-spin" *ngIf="addRequirementStatus=='waiting'"></span>
+                                    Add requirement
+                                </button>
                             </form>
                         </div>
+
+                        <div *ngIf="card.requirements.length == 0">
+                            <em>This card has no associated requirements.</em>
+                        </div>
+                        <div *ngIf="card.requirements.length > 0">
+                            <ul class="requirements">
+                                <li class="requirement" *ngFor="let requirement of card.requirements">
+                                    <h3>{{requirement.name}}</h3>
+                                    <div>
+                                        {{requirement.description}}
+                                    </div>
+                                    <!-- Remove requirement -->
+                                    <div class="requirement-actions">
+                                        <button class="btn btn-danger"
+                                                *ngIf="removeRequirementStatus[requirement.id]!='asking' && removeRequirementStatus[requirement.id]!='waiting'"
+                                                (click)="removeRequirementStatus[requirement.id]='asking'">
+                                            <span class="fa fa-trash"></span>
+                                            Remove
+                                        </button>
+                                        
+                                        <button class="btn btn-primary"
+                                                *ngIf="removeRequirementStatus[requirement.id]=='asking'"
+                                                (click)="removeRequirementStatus[requirement.id]='standby'"
+                                                [disabled]="removeRequirementStatus[requirement.id]=='waiting'">
+                                            Cancel
+                                        </button>
+
+                                        <button class="btn btn-danger"
+                                                *ngIf="removeRequirementStatus[requirement.id]=='asking' || removeRequirementStatus[requirement.id]=='waiting'"
+                                                (click)="removeRequirementStatus[requirement.id]='waiting'"
+                                                (click)="removeRequirement(requirement)"
+                                                [disabled]="removeRequirementStatus[requirement.id]=='waiting'"
+                                                >
+                                            <span class="fa fa-spinner fa-spin" *ngIf="removeRequirementStatus[requirement.id]=='waiting'"></span>
+                                            <span class="fa fa-trash"></span>
+                                            Confirm removing of this requirement
+                                        </button>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
+
                 <!-- col-md-2-->
                 </div>
         <!--row-->

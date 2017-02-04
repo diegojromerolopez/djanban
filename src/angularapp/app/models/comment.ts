@@ -1,6 +1,7 @@
 import { Member } from './member';
 import { Card } from './card';
 import { CardReview } from './review';
+import { Requirement } from './requirement';
 
 
 export class CardComment {
@@ -12,4 +13,5 @@ export class CardComment {
   author: Member;
   blocking_card?: Card;
   review?: CardReview;
+  requirement?: Requirement;
 }
