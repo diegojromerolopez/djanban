@@ -223,6 +223,7 @@ h1, h2, h3 {
 
 .card-requirements ul.requirements li.requirement h3 {
     font-size: 1.4em;
+    margin-bottom: 10px;
 }
 
 .card-requirements ul.requirements li.requirement .requirement-cards {
@@ -230,13 +231,22 @@ h1, h2, h3 {
 }
 
 .card-requirements ul.requirements li.requirement .requirement-cards ul {
-    margin-bottom: 10px;
-    margin-top: 10px;
+    margin-bottom: 5px;
+    margin-top: 0px;
     padding-left: 0;
 }
 
 .card-requirements ul.requirements li.requirement .requirement-cards ul li.requirement-card {
     list-style-type: none;
+}
+
+.card-requirements ul.requirements li.requirement .requirement-cards ul li.requirement-card .requirement-value {
+    text-align: center;
+}
+
+.card-requirements ul.requirements li.requirement .requirement-cards ul li.requirement-card h4 {
+    font-size: 1.2em;
+    margin-bottom: 5px;
 }
 
 /* Comments */
