@@ -83,7 +83,7 @@ var CardService = (function (_super) {
     };
     /** Change the due datetime (deadline) */
     CardService.prototype.changeCardDueDatetime = function (card, due_datetime) {
-        console.log("changeCardDueDatetime");
+        console.log("CardService.changeCardDueDatetime");
         console.log(due_datetime);
         var change_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
         return this.http.put(change_card_url, { due_datetime: due_datetime })

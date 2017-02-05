@@ -18,6 +18,7 @@ import { MemberService } from '../services/member.service';
 
 import { DragulaModule } from 'ng2-dragula/ng2-dragula';
 import { SimpleNotificationsModule, NotificationsService } from 'angular2-notifications';
+import { LocalizeDatetimePipe } from './pipes/localize_datetime.pipe';
 
 
 @NgModule({
@@ -29,7 +30,7 @@ import { SimpleNotificationsModule, NotificationsService } from 'angular2-notifi
     DragulaModule,
     SimpleNotificationsModule.forRoot()
   ],
-  declarations: [ AppComponent, DashboardComponent, BoardComponent, CardComponent ],
+  declarations: [ AppComponent, LocalizeDatetimePipe, DashboardComponent, BoardComponent, CardComponent ],
   providers: [ MemberService, BoardService, CardService, NotificationsService ],
   bootstrap:    [ AppComponent ]
 })

@@ -19,7 +19,7 @@ var AppComponent = (function () {
 AppComponent = __decorate([
     core_1.Component({
         selector: 'django-trello-stats',
-        template: "\n        <!--<a routerLink=\"\" routerLinkActive=\"active\">Board list</a>-->\n        <router-outlet></router-outlet>\n        <simple-notifications [options]=\"options\" (onCreate)=\"created($event)\" (onDestroy)=\"destroyed($event)\"></simple-notifications>\n    ",
+        template: "\n        <!--<a routerLink=\"\" routerLinkActive=\"active\">Board list</a>-->\n        <router-outlet></router-outlet>\n        <!--<simple-notifications [options]=\"options\" (onCreate)=\"created($event)\" (onDestroy)=\"destroyed($event)\"></simple-notifications>-->\n    ",
     })
 ], AppComponent);
 exports.AppComponent = AppComponent;

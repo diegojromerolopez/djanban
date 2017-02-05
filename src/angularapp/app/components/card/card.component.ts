@@ -178,24 +178,10 @@ export class CardComponent implements OnInit  {
 
     /** Set due datetime */
     onChangeDueDatetime(due_date: string, due_time: string){
-        console.log(due_date, due_time);
         let yymmdd = due_date.split("-");
         let hhmm = due_time.split(":");
-        console.log(yymmdd);
-        console.log(hhmm);
         let local_due_datetime = new Date(parseInt(yymmdd[0]), parseInt(yymmdd[1])-1, parseInt(yymmdd[2]), parseInt(hhmm[0]), parseInt(hhmm[1]));
-        let due_datetime = new Date(
-            local_due_datetime.getUTCFullYear(),
-            local_due_datetime.getUTCMonth(),
-            local_due_datetime.getUTCDate(),
-            local_due_datetime.getUTCHours(),
-            local_due_datetime.getUTCMinutes(),
-            local_due_datetime.getUTCSeconds()
-        );
-        console.log(parseInt(yymmdd[0]), parseInt(yymmdd[1])-1, parseInt(yymmdd[2]), parseInt(hhmm[0]), parseInt(hhmm[1]), 0, 0)
-        console.log(local_due_datetime);
-        console.log(due_datetime);
-        this.cardService.changeCardDueDatetime(this.card, due_datetime).then(card_response => {
+        this.cardService.changeCardDueDatetime(this.card, local_due_datetime).then(card_response => {
             this.card.due_datetime = new Date(card_response.due_datetime);
             this.changeDueDatetimeStatus = "hidden";    
         });
@@ -211,7 +197,6 @@ export class CardComponent implements OnInit  {
 
     /** Called when we add a blocking card */
     onAddBlockingCard(blockingCardId: number){
-        console.log("onAddBlockingCard");
         let blockingCard = this.card_hash[blockingCardId];
         this.cardService.addBlockingCard(this.card, blockingCard).then(card_response => {
             this.card.blocking_cards = card_response.blocking_cards;

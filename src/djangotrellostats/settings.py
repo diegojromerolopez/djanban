@@ -154,7 +154,8 @@ LANGUAGE_CODE = settings_local.LANGUAGE_CODE
 
 TIME_ZONE = settings_local.TIME_ZONE
 Organization.TIMEZONE = TIME_ZONE
-PYTZ_TIME_ZONE = pytz.timezone(TIME_ZONE)
+PYTZ_SERVER_TIME_ZONE = pytz.timezone(TIME_ZONE)
+PYTZ_UTC_TIME_ZONE = pytz.timezone('UTC')
 
 if hasattr(settings_local, "DATE_FORMAT"):
     DATE_FORMAT = settings_local.DATE_FORMAT

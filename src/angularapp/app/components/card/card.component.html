@@ -40,7 +40,7 @@
     <div class="panel-body">
         <div>
             <div class="card-section">
-                <span class="card-creation-datetime card-section">Created on {{card.creation_datetime}}</span>
+                <span class="card-creation-datetime card-section">Created on {{card.creation_datetime | localize_datetime}}</span>
             </div>
 
             <div class="row">
@@ -165,8 +165,8 @@
                                         <div class="panel-heading">
                                             Comment made by {{comment.author.initials}}
                                             (
-                                                <span title="Comment made by {{comment.creation_datetime}}">{{comment.creation_datetime}}</span>
-                                                <span *ngIf="comment.last_edition_datetime" title="Comment edited {{comment.creation_datetime}}">{{comment.last_edited_datetime}}</span>
+                                                <span title="Comment made by {{comment.creation_datetime | localize_datetime}}">{{comment.creation_datetime | localize_datetime}}</span>
+                                                <span *ngIf="comment.last_edition_datetime" title="Comment edited {{comment.creation_datetime | localize_datetime}}">{{comment.last_edited_datetime | localize_datetime}}</span>
                                                 )
                                         </div>
 
@@ -267,7 +267,7 @@
                                 <div class="card-movements-movement panel panel-info">
                                         <div class="panel-heading">
                                             <strong>{{movement.source_list.name}}</strong> to <strong>{{movement.destination_list.name}}</strong>
-                                            (<span title="Comment made by {{movement.datetime}}">{{movement.datetime}}</span>)
+                                            (<span title="Comment made by {{movement.datetime | localize_datetime}}">{{movement.datetime | localize_datetime}}</span>)
                                         </div>
                                         <div class="panel-body">
                                             <span *ngIf="movement.type == 'forward'">
@@ -278,7 +278,7 @@
                                             </span>
                                             from
                                             <strong>{{movement.source_list.name}}</strong> to <strong>{{movement.destination_list.name}}</strong>
-                                            at {{movement.datetime}} by {{movement.member.trello_username}}.
+                                            at {{movement.datetime | localize_datetime}} by {{movement.member.trello_username}}.
                                         </div>
                                 </div>
                             </div>
@@ -433,8 +433,7 @@
                             <em>No deadline</em>
                         </div>
                         <div *ngIf="card.due_datetime">
-                            {{card.due_datetime}}
-                            {{card.getLocalDueDatetime()}}
+                            {{card.due_datetime | localize_datetime}}
                             <button class="btn btn-danger"
                                     (click)="removeDueDatetimeStatus='waiting'"
                                     (click)="removeDueDatetime()"
@@ -448,8 +447,8 @@
                             <div *ngIf="changeDueDatetimeStatus == 'showed' || changeDueDatetimeStatus == 'waiting' ">
                                 <form (ngSubmit)="onChangeDueDatetime(changeDueDatetimeForm.value.due_date, changeDueDatetimeForm.value.due_time)" #changeDueDatetimeForm="ngForm">
                                     <div>
-                                        <input name="due_date" type="date" required ngModel value="card.due_datetime|date:'y-MM-dd'" />
-                                        <input name="due_time" type="time" required ngModel value="card.due_datetime|date:'hh:mm'" />
+                                        <input name="due_date" type="date" required ngModel value="2017-02-02" />
+                                        <input name="due_time" type="time" required ngModel value="00:00" />
                                     </div>
                                     <div>
                                         <button class="btn btn-danger"
@@ -567,7 +566,7 @@
                         </div>
                         <ul *ngIf="card.reviews.length > 0" class="reviews">
                             <li *ngFor="let review of card.reviews" class="review">
-                                <h3>Review on {{review.creation_datetime}}</h3>
+                                <h3>Review on {{review.creation_datetime | localize_datetime}}</h3>
                                 
                                 <!-- Description of the review -->
                                 <div *ngIf="review.description">

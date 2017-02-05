@@ -6,6 +6,7 @@ import dateutil
 import json
 import re
 
+from django.conf import settings
 from django.db import transaction
 from django.http import Http404
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -128,7 +129,6 @@ def change(request, board_id, card_id):
     elif put_params.get("due_datetime"):
         due_datetime_str = put_params.get("due_datetime")
         card.due_datetime = dateutil.parser.parse(due_datetime_str)
-        print card.due_datetime
         card.save()
         set_due_datetime(card, member)
 

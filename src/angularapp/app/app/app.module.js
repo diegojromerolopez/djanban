@@ -19,6 +19,7 @@ var card_service_1 = require("../services/card.service");
 var member_service_1 = require("../services/member.service");
 var ng2_dragula_1 = require("ng2-dragula/ng2-dragula");
 var angular2_notifications_1 = require("angular2-notifications");
+var localize_datetime_pipe_1 = require("./pipes/localize_datetime.pipe");
 var AppModule = (function () {
     function AppModule() {
     }
@@ -34,7 +35,7 @@ AppModule = __decorate([
             ng2_dragula_1.DragulaModule,
             angular2_notifications_1.SimpleNotificationsModule.forRoot()
         ],
-        declarations: [app_component_1.AppComponent, dashboard_component_1.DashboardComponent, board_component_1.BoardComponent, card_component_1.CardComponent],
+        declarations: [app_component_1.AppComponent, localize_datetime_pipe_1.LocalizeDatetimePipe, dashboard_component_1.DashboardComponent, board_component_1.BoardComponent, card_component_1.CardComponent],
         providers: [member_service_1.MemberService, board_service_1.BoardService, card_service_1.CardService, angular2_notifications_1.NotificationsService],
         bootstrap: [app_component_1.AppComponent]
     })
