@@ -13,12 +13,20 @@ var router_1 = require("@angular/router");
 var board_service_1 = require("../../services/board.service");
 var card_1 = require("../../models/card");
 var card_service_1 = require("../../services/card.service");
+var angular2_notifications_1 = require("angular2-notifications");
 var CardComponent = (function () {
-    function CardComponent(router, route, boardService, cardService) {
+    function CardComponent(router, route, boardService, cardService, notificationsService) {
         this.router = router;
         this.route = route;
         this.boardService = boardService;
         this.cardService = cardService;
+        this.notificationsService = notificationsService;
+        // NotificationsService options
+        this.notificationsOptions = {
+            position: ["top", "right"],
+            timeOut: 10000,
+            pauseOnHover: true,
+        };
         this.commentPreviousContent = {};
         this.card_hash = {};
         this.changeNameStatus = "hidden";
@@ -63,6 +71,9 @@ var CardComponent = (function () {
         this.cardService.activeCard(this.card).then(function (updated_card) {
             _this.card.is_closed = false;
             _this.statusCardStatus = "standby";
+            _this.notificationsService.success("Card actived", _this.card.name + " is now active.");
+        }, function (error) {
+            _this.notificationsService.error("Error", "Couldn't active " + _this.card.name + ".");
         });
     };
     /** Mark card as closed (disabled) */
@@ -71,6 +82,7 @@ var CardComponent = (function () {
         this.cardService.closeCard(this.card).then(function (updated_card) {
             _this.card.is_closed = true;
             _this.statusCardStatus = "standby";
+            _this.notificationsService.success("Card actived", _this.card.name + " is now archived. Remember if will not show up on the board.");
         });
     };
     /** Called when the change labels form is submitted */
@@ -79,6 +91,7 @@ var CardComponent = (function () {
         this.cardService.changeCardLabels(this.card, label_ids).then(function (updated_card) {
             _this.card = updated_card;
             _this.changeLabelsStatus = "hidden";
+            _this.notificationsService.success("Labels changed", _this.card.name + " has now " + _this.card.labels.length + " labels.");
         });
     };
     /** Called when the change members form is submitted */
@@ -87,17 +100,7 @@ var CardComponent = (function () {
         this.cardService.changeCardMembers(this.card, member_ids).then(function (updated_card) {
             _this.card = updated_card;
             _this.changeMembersStatus = "hidden";
-        });
-    };
-    /** Called when we remove a blocking card */
-    CardComponent.prototype.onRemoveBlockingCard = function (blockingCard) {
-        var _this = this;
-        this.cardService.removeBlockingCard(this.card, blockingCard).then(function (card_response) {
-            _this.card.blocking_cards = card_response.blocking_cards;
-            delete _this.removeBlockingCardStatus[blockingCard.id];
-            // We have to remove the associated comment
-            // Remember that comments with the format "blocked by <card_url_in_trello>" means card-blocking
-            _this.card.comments = card_response.comments;
+            _this.notificationsService.success("Members changed", _this.card.name + " has now " + _this.card.members.length + " members.");
         });
     };
     CardComponent.prototype.removeDueDatetime = function () {
@@ -105,6 +108,7 @@ var CardComponent = (function () {
         this.cardService.removeCardDueDatetime(this.card).then(function (card_response) {
             _this.card.due_datetime = null;
             _this.removeDueDatetimeStatus = "standby";
+            _this.notificationsService.success("Deadline removed", _this.card.name + " has no deadline.");
         });
     };
     /** Set due datetime */
@@ -116,6 +120,7 @@ var CardComponent = (function () {
         this.cardService.changeCardDueDatetime(this.card, local_due_datetime).then(function (card_response) {
             _this.card.due_datetime = new Date(card_response.due_datetime);
             _this.changeDueDatetimeStatus = "hidden";
+            _this.notificationsService.success("Deadline added", _this.card.name + " has a new deadline.");
         });
     };
     CardComponent.prototype.addBlockingCardRightCandidate = function (blockingCardId) {
@@ -135,6 +140,19 @@ var CardComponent = (function () {
             // We have to update the comments
             _this.card.comments = card_response.comments;
             _this.addBlockingCardStatus = "hidden";
+            _this.notificationsService.success("Blocking card removed", _this.card.name + " is now blocked by " + blockingCard.name + " (leaving " + _this.card.blocking_cards.length + " blocking cards in total).");
+        });
+    };
+    /** Called when we remove a blocking card */
+    CardComponent.prototype.onRemoveBlockingCard = function (blockingCard) {
+        var _this = this;
+        this.cardService.removeBlockingCard(this.card, blockingCard).then(function (card_response) {
+            _this.card.blocking_cards = card_response.blocking_cards;
+            delete _this.removeBlockingCardStatus[blockingCard.id];
+            // We have to remove the associated comment
+            // Remember that comments with the format "blocked by <card_url_in_trello>" means card-blocking
+            _this.card.comments = card_response.comments;
+            _this.notificationsService.success("Blocking card removed", _this.card.name + " is not blocked by " + blockingCard.name + " (leaving " + _this.card.blocking_cards.length + " blocking cards in total).");
         });
     };
     /** Called when adding a review. */
@@ -147,6 +165,7 @@ var CardComponent = (function () {
             var review_comment = _this.card.comments[0];
             _this.editCommentStatus[review_comment.id] == 'standby';
             _this.deleteCommentStatus[review_comment.id] = "standby";
+            _this.notificationsService.success("Blocking card added", _this.card.name + " has a new review (" + _this.card.blocking_cards.length + " in total).");
         });
     };
     /** Called when deleting a review */
@@ -156,6 +175,7 @@ var CardComponent = (function () {
             _this.card.reviews = card_response.reviews;
             _this.card.comments = card_response.comments;
             _this.newReviewStatus = "hidden";
+            _this.notificationsService.success("Review deleted", "A review of " + _this.card.name + " was deleted. This card has now " + _this.card.reviews.length + " reviews.");
         });
     };
     /** Called when adding a requirement. */
@@ -169,6 +189,7 @@ var CardComponent = (function () {
             for (var _i = 0, _a = _this.card.requirements; _i < _a.length; _i++) {
                 var requirement_1 = _a[_i];
                 _this.removeRequirementStatus[requirement_1.id] = "standby";
+                _this.notificationsService.success("Requirement added", "This card depends on the requirement " + requirement_1.name + ".");
             }
         });
     };
@@ -181,6 +202,7 @@ var CardComponent = (function () {
             _this.card.requirements = card_response.requirements;
             _this.card.comments = card_response.comments;
             delete _this.removeRequirementStatus[requirement.id];
+            _this.notificationsService.success("Requirement removed", "This card already does not depend on the requirement " + requirement.name + ".");
         });
     };
     /** Called when the card name change form is submitted */
@@ -189,6 +211,7 @@ var CardComponent = (function () {
         this.cardService.changeCardName(this.card, name).then(function (card_response) {
             _this.card.name = name;
             _this.changeNameStatus = "hidden";
+            _this.notificationsService.success("Name changed", "This card now is know as " + name + ".");
         });
     };
     /** Called when the card description change form is submitted */
@@ -197,6 +220,7 @@ var CardComponent = (function () {
         this.cardService.changeCardDescription(this.card, description).then(function (card_response) {
             _this.card.description = description;
             _this.changeDescriptionStatus = "hidden";
+            _this.notificationsService.success("Description changed", "This card now has a new description.");
         });
     };
     /** Called when the card S/E form is submitted */
@@ -209,6 +233,7 @@ var CardComponent = (function () {
         this.cardService.addSETime(this.card, date, spent_time, estimated_time, description).then(function (updated_card) {
             _this.card = updated_card;
             _this.changeSETimeStatus = "standby";
+            _this.notificationsService.success("New S/E time added", "S: " + spent_time + " / E: " + estimated_time + ".");
         });
     };
     /** Called when the change list  form is submitted */
@@ -225,6 +250,7 @@ var CardComponent = (function () {
                 this.cardService.moveCard(this.card, list_i).then(function (updated_card) {
                     _this.card = updated_card;
                     _this.changeListStatus = "hidden";
+                    _this.notificationsService.success("This card has been moved", _this.card.name + " is in " + _this.card.list.name + ".");
                 });
             }
         }
@@ -237,6 +263,7 @@ var CardComponent = (function () {
             _this.newCommentStatus = "standby";
             _this.editCommentStatus[comment.id] = "standby";
             _this.deleteCommentStatus[comment.id] = "standby";
+            _this.notificationsService.success("New comment added", _this.card.name + " has a new comment (" + _this.card.comments.length + " in total).");
         });
     };
     /** Called when editing a comment */
@@ -245,6 +272,7 @@ var CardComponent = (function () {
         this.cardService.editComment(this.card, comment, new_content).then(function (edited_comment) {
             comment.content = new_content;
             _this.editCommentStatus[comment.id] = "standby";
+            _this.notificationsService.success("Comment edited", "A comment of " + _this.card.name + " was edited.");
         });
     };
     /** Called when deleting a comment */
@@ -255,6 +283,7 @@ var CardComponent = (function () {
             delete _this.deleteCommentStatus[comment.id];
             delete _this.editCommentStatus[comment.id];
             delete _this.commentPreviousContent[comment.id];
+            _this.notificationsService.success("Comment deleted", "A comment of " + _this.card.name + " was deleted.");
         });
     };
     /** Navigation on the top of the page */
@@ -288,6 +317,7 @@ var CardComponent = (function () {
                 var requirement = _g[_f];
                 _this.removeRequirementStatus[requirement.id] = "hidden";
             }
+            _this.notificationsService.success("Successful load", card.name + " loaded successfully");
         });
     };
     CardComponent.prototype.loadBoard = function (board_id) {
@@ -314,12 +344,13 @@ CardComponent = __decorate([
         selector: 'card',
         templateUrl: 'card.component.html',
         styleUrls: ['card.component.css'],
-        providers: [board_service_1.BoardService, card_service_1.CardService]
+        providers: [board_service_1.BoardService, card_service_1.CardService, angular2_notifications_1.NotificationsService]
     }),
     __metadata("design:paramtypes", [router_1.Router,
         router_1.ActivatedRoute,
         board_service_1.BoardService,
-        card_service_1.CardService])
+        card_service_1.CardService,
+        angular2_notifications_1.NotificationsService])
 ], CardComponent);
 exports.CardComponent = CardComponent;
 //# sourceMappingURL=card.component.js.map

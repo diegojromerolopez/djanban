@@ -22,14 +22,18 @@ var DjangoTrelloStatsService = (function () {
         return body || {};
     };
     DjangoTrelloStatsService.prototype.handleError = function (error) {
-        var errMsg;
-        if (error instanceof http_1.Response) {
-            var body = error.json() || '';
-            var err = body.error || JSON.stringify(body);
-            errMsg = error.status + " - " + (error.statusText || '') + " " + err;
+        var errMsg = "Not controlled error";
+        try {
+            if (error instanceof http_1.Response) {
+                var body = error.json() || '';
+                var err = body.error || JSON.stringify(body);
+                errMsg = error.status + " - " + (error.statusText || '') + " " + err;
+            }
+            else {
+                errMsg = error.message ? error.message : error.toString();
+            }
         }
-        else {
-            errMsg = error.message ? error.message : error.toString();
+        catch (e) {
         }
         console.error(errMsg);
         return Promise.reject(errMsg);

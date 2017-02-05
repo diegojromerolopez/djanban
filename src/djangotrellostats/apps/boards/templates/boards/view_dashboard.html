@@ -40,7 +40,12 @@
 {% endblock %}
 
 {% block content %}
-  <django-trello-stats>Loading...</django-trello-stats>
+  <django-trello-stats>
+      <div class="loading-app-message">
+        <span class="fa fa-spin fa-spinner"></span>
+        <span class="loading-app-message-text">Loading, please wait...</span>
+      </div>
+  </django-trello-stats>
 {% endblock content %}
 
 

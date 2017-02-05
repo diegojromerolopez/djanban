@@ -19,6 +19,7 @@ var card_service_1 = require("../../services/card.service");
 var member_service_1 = require("../../services/member.service");
 var angular2_notifications_1 = require("angular2-notifications");
 var BoardComponent = (function () {
+    /** Constructor of BoardComponent: initialization of status and setting up the Dragula service */
     function BoardComponent(router, route, memberService, boardService, cardService, dragulaService, notificationsService) {
         var _this = this;
         this.router = router;
@@ -28,15 +29,24 @@ var BoardComponent = (function () {
         this.cardService = cardService;
         this.dragulaService = dragulaService;
         this.notificationsService = notificationsService;
+        // NotificationsService options
+        this.notificationsOptions = {
+            position: ["top", "right"],
+            timeOut: 10000,
+            pauseOnHover: true,
+        };
+        // Initialization of statuses
         this.newCardFormStatus = {};
         this.removeMemberStatus = {};
         this.addMemberStatus = {};
         this.moveAllCardsStatus = {};
+        // Options of the drag and drop service
         dragulaService.setOptions('lists', {
             moves: function (el, container, handle) {
                 return handle.className === 'move_list_handle' || handle.className == 'move_list_handle_icon';
             }
         });
+        // Subscription to drop event 
         dragulaService.drop.subscribe(function (parameters) {
             // Card drop
             if (parameters[0] == "cards") {
@@ -47,6 +57,7 @@ var BoardComponent = (function () {
             }
         });
     }
+    /** First thing we have to do is loading both the board and all available members */
     BoardComponent.prototype.ngOnInit = function () {
         var that = this;
         this.route.params.subscribe(function (params) {
@@ -54,9 +65,10 @@ var BoardComponent = (function () {
             that.loadBoard(board_id);
         });
         this.loadMembers();
-        this.notificationsService.success("WELLCOME", "WOWOW");
     };
+    /** Action of the drop card event */
     BoardComponent.prototype.onCardDrop = function (parameters) {
+        var _this = this;
         // Source list
         var source_list_id = parameters[3]["dataset"]["list"];
         var source_list = new list_1.List(this.board.getListById(parseInt(source_list_id)));
@@ -74,6 +86,8 @@ var BoardComponent = (function () {
             next_card_in_destination_id = parameters[4]["dataset"]["card"];
             next_card = destination_list.getCardById(parseInt(next_card_in_destination_id));
         }
+        // Position of the moved card. It will be based on the next card on the destination list (if exists).
+        // Otherwise, the position will be at the bottom of the list.
         var destination_position = "bottom";
         if (next_card != null) {
             destination_position = (next_card.position - 10).toString();
@@ -82,9 +96,12 @@ var BoardComponent = (function () {
         this.cardService.moveCard(moved_card, destination_list, destination_position).then(function (card) {
             //source_list.removeCard(moved_card);
             //destination_list.addCard(moved_card, destination_position);
+            _this.notificationsService.success("Card moved successfully", card.name + " was moved to list " + destination_list.name + " sucessfully");
         });
     };
+    /** Action of the drop list event */
     BoardComponent.prototype.onListDrop = function (parameters) {
+        var _this = this;
         // Moved list
         var moved_list_id = parameters[1]["dataset"]["list"];
         var moved_list = new list_1.List(this.board.getListById(parseInt(moved_list_id)));
@@ -96,7 +113,20 @@ var BoardComponent = (function () {
             next_list = new list_1.List(this.board.getListById(parseInt(next_list_id)));
             destination_position = (next_list.position - 10).toString();
         }
-        this.boardService.moveList(this.board, moved_list, destination_position).then(function (list) { moved_list.position = list.position; });
+        // Call to list mover service
+        this.boardService.moveList(this.board, moved_list, destination_position).then(function (list) {
+            moved_list.position = list.position;
+            // Sucess message
+            // Show one message or another depending on if this is the last list or not
+            var successNotificationMessage = null;
+            if (next_list != null) {
+                var successNotificationMessage_1 = moved_list.name + " was sucessfully moved at in front of " + next_list.name;
+            }
+            else {
+                var successNotificationMessage_2 = moved_list.name + " was sucessfully moved at the end of the board";
+            }
+            _this.notificationsService.success("List moved successfully", successNotificationMessage);
+        });
     };
     /** Prepare board attributes, status, etc. when fetching the board from the server */
     BoardComponent.prototype.prepareBoard = function (board_response) {
@@ -112,6 +142,7 @@ var BoardComponent = (function () {
         var _this = this;
         this.boardService.getBoard(board_id).then(function (board_response) {
             _this.prepareBoard(board_response);
+            _this.notificationsService.success("Welcome to board " + _this.board.name, "Here you could manage all tasks. You can click no the notifications like this to close them.");
         });
     };
     /** Load all available members */
@@ -135,18 +166,24 @@ var BoardComponent = (function () {
         this.cardService.addCard(this.board, list, name, position).then(function (card_response) {
             list_1.List.addCardToList(list, card_response, position);
             _this.newCardFormStatus[list.id] = { "show": false, "waiting": false };
+            _this.notificationsService.success("New card created", card_response.name + " was successfully created.");
         });
     };
+    /** Action of the move all cards submit form */
     BoardComponent.prototype.onMoveAllCardsSubmit = function (source_list_id, destination_list_id) {
         var _this = this;
         console.log(source_list_id, destination_list_id);
-        var source_list = this.board.lists.find(function (list_i) { return list_i.id == source_list_id; });
-        var destination_list = this.board.lists.find(function (list_i) { return list_i.id == destination_list_id; });
-        if (source_list && destination_list) {
-            this.cardService.moveAllListCards(this.board, source_list, destination_list).then(function (board_response) { return _this.prepareBoard(board_response); });
+        var sourceList = this.board.lists.find(function (list_i) { return list_i.id == source_list_id; });
+        var numberOfCardsToMove = sourceList.cards.length;
+        var destinationList = this.board.lists.find(function (list_i) { return list_i.id == destination_list_id; });
+        if (sourceList && destinationList) {
+            this.cardService.moveAllListCards(this.board, sourceList, destinationList).then(function (board_response) {
+                _this.prepareBoard(board_response);
+                _this.notificationsService.success("Cards moved", numberOfCardsToMove + " cards from " + sourceList.name + " were moved to " + destinationList.name + ".");
+            });
         }
         else {
-            console.error("There is something wrong with the lists");
+            this.notificationsService.error("Unable to move cards", "There is something wrong with " + sourceList.name + " or " + destinationList.name + ".");
         }
     };
     /* Member actions */
@@ -155,6 +192,7 @@ var BoardComponent = (function () {
         this.boardService.removeMember(this.board, member).then(function (deleted_member) {
             _this.board.removeMember(member);
             _this.removeMemberStatus[member.id] = { waiting: false };
+            _this.notificationsService.success("Removed member", member.extern_username + " was successfully removed from " + _this.board.name + ".");
         });
     };
     BoardComponent.prototype.onAddMemberSubmit = function (member_id) {
@@ -164,6 +202,7 @@ var BoardComponent = (function () {
             this.boardService.addMember(this.board, member).then(function (added_member) {
                 _this.board.addMember(added_member);
                 _this.addMemberStatus = { show: false, waiting: false };
+                _this.notificationsService.success("Added member", member.extern_username + " was successfully added to " + _this.board.name + ".");
             });
         }
     };
