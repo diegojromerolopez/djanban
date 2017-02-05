@@ -110,3 +110,9 @@ def set_description(card, member):
 def set_is_closed(card, member):
     trello_card = get_trello_card(card, member)
     return trello_card.set_closed(card.is_closed)
+
+
+# Set due datetime
+def set_due_datetime(card, member):
+    trello_card = get_trello_card(card, member)
+    return trello_card.set_due(card.due_datetime)

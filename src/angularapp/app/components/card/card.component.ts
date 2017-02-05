@@ -31,6 +31,10 @@ export class CardComponent implements OnInit  {
     private cards: Card[];
     private card_hash: {};
     
+    private locale_due_datetime_string: string;
+
+    private now: any;
+
     private changeNameStatus: string;
     private changeListStatus: string;
 
@@ -39,6 +43,11 @@ export class CardComponent implements OnInit  {
     private statusCardStatus: string;
     private changeLabelsStatus: string;
     private changeMembersStatus: string;
+    
+    // Status of the due datetime
+    private removeDueDatetimeStatus: string;
+    private changeDueDatetimeStatus: string;
+    
     private changeSETimeStatus: string;
     private changeDescriptionStatus: string;
     private newCommentStatus: string;
@@ -71,6 +80,7 @@ export class CardComponent implements OnInit  {
 
 
     ngOnInit(): void {
+        this.now = Date();
         let that = this;
         this.route.params.subscribe(params => {
             let board_id = params["board_id"];
@@ -92,6 +102,8 @@ export class CardComponent implements OnInit  {
         this.statusCardStatus = "standby";
         this.changeLabelsStatus = "hidden";
         this.changeMembersStatus = "hidden";
+        this.changeDueDatetimeStatus = "hidden";
+        this.removeDueDatetimeStatus = "standby"
         this.changeSETimeStatus = "standby";
         this.changeDescriptionStatus = "hidden";
         this.newCommentStatus = "standby";
@@ -154,6 +166,38 @@ export class CardComponent implements OnInit  {
             // We have to remove the associated comment
             // Remember that comments with the format "blocked by <card_url_in_trello>" means card-blocking
             this.card.comments = card_response.comments;
+        });
+    }
+
+    removeDueDatetime(){
+        this.cardService.removeCardDueDatetime(this.card).then(card_response => {
+            this.card.due_datetime = null;
+            this.removeDueDatetimeStatus = "standby"; 
+        });
+    }
+
+    /** Set due datetime */
+    onChangeDueDatetime(due_date: string, due_time: string){
+        console.log(due_date, due_time);
+        let yymmdd = due_date.split("-");
+        let hhmm = due_time.split(":");
+        console.log(yymmdd);
+        console.log(hhmm);
+        let local_due_datetime = new Date(parseInt(yymmdd[0]), parseInt(yymmdd[1])-1, parseInt(yymmdd[2]), parseInt(hhmm[0]), parseInt(hhmm[1]));
+        let due_datetime = new Date(
+            local_due_datetime.getUTCFullYear(),
+            local_due_datetime.getUTCMonth(),
+            local_due_datetime.getUTCDate(),
+            local_due_datetime.getUTCHours(),
+            local_due_datetime.getUTCMinutes(),
+            local_due_datetime.getUTCSeconds()
+        );
+        console.log(parseInt(yymmdd[0]), parseInt(yymmdd[1])-1, parseInt(yymmdd[2]), parseInt(hhmm[0]), parseInt(hhmm[1]), 0, 0)
+        console.log(local_due_datetime);
+        console.log(due_datetime);
+        this.cardService.changeCardDueDatetime(this.card, due_datetime).then(card_response => {
+            this.card.due_datetime = new Date(card_response.due_datetime);
+            this.changeDueDatetimeStatus = "hidden";    
         });
     }
 
@@ -306,7 +350,7 @@ export class CardComponent implements OnInit  {
     /** Load card data and prepare its statuses */
     loadCard(board_id: number, card_id: number): void {
         this.cardService.getCard(board_id, card_id).then(card => {
-            this.card = card;
+            this.card = new Card(card);
             // Inicialization of the status of the edition or deletion or the comments of this card
             for(let comment of this.card.comments){
                 this.editCommentStatus[comment.id] = "standby";

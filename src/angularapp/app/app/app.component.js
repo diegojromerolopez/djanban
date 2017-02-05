@@ -8,13 +8,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var core_1 = require("@angular/core");
 var AppComponent = (function () {
     function AppComponent() {
+        this.options = {
+            position: ["bottom", "left"],
+            timeOut: 5000,
+            lastOnBottom: true
+        };
     }
     return AppComponent;
 }());
 AppComponent = __decorate([
     core_1.Component({
         selector: 'django-trello-stats',
-        template: "\n        <!--<a routerLink=\"\" routerLinkActive=\"active\">Board list</a>-->\n        <router-outlet></router-outlet>\n    ",
+        template: "\n        <!--<a routerLink=\"\" routerLinkActive=\"active\">Board list</a>-->\n        <router-outlet></router-outlet>\n        <simple-notifications [options]=\"options\" (onCreate)=\"created($event)\" (onDestroy)=\"destroyed($event)\"></simple-notifications>\n    ",
     })
 ], AppComponent);
 exports.AppComponent = AppComponent;

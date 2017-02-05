@@ -41,11 +41,6 @@
         <div>
             <div class="card-section">
                 <span class="card-creation-datetime card-section">Created on {{card.creation_datetime}}</span>
-                
-            </div>
-            
-            <div *ngIf="card.due_datetime">
-                <div class="card-due-datetime card-section">Deadline: {{card.due_datetime}} ({{card.due_datetime}})</div>
             </div>
 
             <div class="row">
@@ -431,6 +426,52 @@
                         </div>
                     </div>
 
+                    <!-- Deadline (Due datetime) -->
+                    <div class="card-due_datetime card-deadline">
+                        <h2>Deadline</h2>
+                        <div *ngIf="!card.due_datetime">
+                            <em>No deadline</em>
+                        </div>
+                        <div *ngIf="card.due_datetime">
+                            {{card.due_datetime}}
+                            {{card.getLocalDueDatetime()}}
+                            <button class="btn btn-danger"
+                                    (click)="removeDueDatetimeStatus='waiting'"
+                                    (click)="removeDueDatetime()"
+                                    > <span class="fa fa-spin fa-spinner" *ngIf="removeDueDatetimeStatus=='waiting'"></span> Remove </button>
+                        </div>
+                        <div class="card-change-due_datetime-form" *ngIf="!card.due_datetime">
+                            <span class="btn btn-primary" *ngIf="changeDueDatetimeStatus != 'showed' && changeDueDatetimeStatus != 'waiting'" 
+                                  (click)="changeDueDatetimeStatus = 'showed'">
+                                  Add
+                            </span>
+                            <div *ngIf="changeDueDatetimeStatus == 'showed' || changeDueDatetimeStatus == 'waiting' ">
+                                <form (ngSubmit)="onChangeDueDatetime(changeDueDatetimeForm.value.due_date, changeDueDatetimeForm.value.due_time)" #changeDueDatetimeForm="ngForm">
+                                    <div>
+                                        <input name="due_date" type="date" required ngModel value="card.due_datetime|date:'y-MM-dd'" />
+                                        <input name="due_time" type="time" required ngModel value="card.due_datetime|date:'hh:mm'" />
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-danger"
+                                            (click)="changeDueDatetimeStatus = 'hidden'"
+                                            (click)="$event.preventDefault()"
+                                            [disabled]="changeDueDatetimeStatus == 'waiting'"
+                                            > Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-success change_name" title="Edit {{card.name}} deadline"
+                                                (click)="changeDueDatetimeForm.ngSubmit.emit()"
+                                                (click)="changeDueDatetimeStatus = 'waiting'"
+                                                (click)="$event.preventDefault()"
+                                                [disabled]="!changeDueDatetimeForm.valid || changeDueDatetimeStatus == 'waiting'">
+                                            <span *ngIf="changeDueDatetimeStatus == 'waiting'" class="fa fa-spinner fa-spin"></span>
+                                            <span class="fa fa-calendar-times-o"></span> Change
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Blocking cards -->
                     <div class="card-blocking_cards card-section">
                         <h2>Blocking cards ({{card.blocking_cards.length}})</h2>
@@ -699,15 +740,15 @@
         </div>
 
         <!-- Stats -->
-        <div class="card-charts card-section">
+        <div class="card-charts card-section" *ngIf="card.comments.length > 0">
             <h2>Stats</h2>
             <div class="row">
-                <div class="col-sm-6">
+                <div class="col-sm-6" *ngIf="card.comments.length > 0">
                     <a href="{{card.charts.number_of_comments_by_member}}" title="Number of comments by member">
                         <img src="{{card.charts.number_of_comments_by_member}}" alt="Number of comments by member"/>
                     </a>
                 </div>
-                <div class="col-sm-6">
+                <div class="col-sm-6" *ngIf="card.comments.length > 0">
                     <a href="{{card.charts.number_of_comments}}" title="Evolution of number of comments of this card thru time">
                         <img src="{{card.charts.number_of_comments}}" alt="Evolution of number of comments of this card thru time"/>
                     </a>

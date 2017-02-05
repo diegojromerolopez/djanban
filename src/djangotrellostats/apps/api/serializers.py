@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from django.urls import reverse
+from django.conf import settings
 from crequest.middleware import CrequestMiddleware
 
 from djangotrellostats.apps.reports.models import CardReview
@@ -15,18 +16,7 @@ def serialize_board(board):
 
         card_list = []
         for card in list_.cards.all().order_by("position"):
-            card_json = {
-                "id": card.id,
-                "uuid": card.uuid,
-                "name": card.name,
-                "description": card.description,
-                "url": reverse("boards:view_card", args=(board.id, card.id,)),
-                "short_url": card.short_url,
-                "position": card.position,
-                "is_closed": card.is_closed,
-                "board": {"id": board.id, "uuid": board.uuid, "name": board.name,}
-            }
-            card_list.append(card_json)
+            card_list.append(basic_serialize_card(card))
 
         list_json["cards"] = card_list
 
@@ -46,7 +36,9 @@ def serialize_board(board):
 
 
 # Basic card serialization
-def basic_serialize_card(card):
+def basic_serialize_card(card, board=None):
+    if board is None:
+        board = card.board
     return {
         "id": card.id,
         "uuid": card.uuid,
@@ -56,7 +48,8 @@ def basic_serialize_card(card):
         "url": card.url,
         "short_url": card.short_url,
         "position": card.position,
-        "is_closed": card.is_closed
+        "is_closed": card.is_closed,
+        "board": {"id": board.id, "uuid": board.uuid, "name": board.name,}
     }
 
 

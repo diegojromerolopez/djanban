@@ -24,6 +24,7 @@
       '@angular/forms': 'npm:@angular/forms/bundles/forms.umd.js',
 
       // other libraries
+      'angular2-notifications': 'npm:angular2-notifications',
       'rxjs':                      'npm:rxjs',
       'angular-in-memory-web-api': 'npm:angular-in-memory-web-api/bundles/in-memory-web-api.umd.js',
       'dragula': 'npm:dragula',
@@ -51,6 +52,7 @@
       'crossvent': { main: 'crossvent.js', defaultExtension: 'js' },
       'custom-event': { main: 'index.js', defaultExtension: 'js' },
       'ng2-dragula': { main: 'ng2-dragula.js', defaultExtension: 'js' },
+      'angular2-notifications': { main: 'components.js', defaultExtension: 'js', format: 'cjs' }
     }
   });
 })(this);

@@ -16,8 +16,9 @@ var board_component_1 = require("../components/board/board.component");
 var dashboard_component_1 = require("../components/dashboard/dashboard.component");
 var card_component_1 = require("../components/card/card.component");
 var card_service_1 = require("../services/card.service");
-var ng2_dragula_1 = require("ng2-dragula/ng2-dragula");
 var member_service_1 = require("../services/member.service");
+var ng2_dragula_1 = require("ng2-dragula/ng2-dragula");
+var angular2_notifications_1 = require("angular2-notifications");
 var AppModule = (function () {
     function AppModule() {
     }
@@ -30,10 +31,11 @@ AppModule = __decorate([
             http_1.HttpModule,
             forms_1.FormsModule,
             app_routing_module_1.AppRoutingModule,
-            ng2_dragula_1.DragulaModule
+            ng2_dragula_1.DragulaModule,
+            angular2_notifications_1.SimpleNotificationsModule.forRoot()
         ],
         declarations: [app_component_1.AppComponent, dashboard_component_1.DashboardComponent, board_component_1.BoardComponent, card_component_1.CardComponent],
-        providers: [member_service_1.MemberService, board_service_1.BoardService, card_service_1.CardService],
+        providers: [member_service_1.MemberService, board_service_1.BoardService, card_service_1.CardService, angular2_notifications_1.NotificationsService],
         bootstrap: [app_component_1.AppComponent]
     })
 ], AppModule);

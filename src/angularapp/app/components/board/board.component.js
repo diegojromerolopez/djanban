@@ -17,8 +17,9 @@ var ng2_dragula_1 = require("ng2-dragula/ng2-dragula");
 var list_1 = require("../../models/list");
 var card_service_1 = require("../../services/card.service");
 var member_service_1 = require("../../services/member.service");
+var angular2_notifications_1 = require("angular2-notifications");
 var BoardComponent = (function () {
-    function BoardComponent(router, route, memberService, boardService, cardService, dragulaService) {
+    function BoardComponent(router, route, memberService, boardService, cardService, dragulaService, notificationsService) {
         var _this = this;
         this.router = router;
         this.route = route;
@@ -26,6 +27,7 @@ var BoardComponent = (function () {
         this.boardService = boardService;
         this.cardService = cardService;
         this.dragulaService = dragulaService;
+        this.notificationsService = notificationsService;
         this.newCardFormStatus = {};
         this.removeMemberStatus = {};
         this.addMemberStatus = {};
@@ -52,6 +54,7 @@ var BoardComponent = (function () {
             that.loadBoard(board_id);
         });
         this.loadMembers();
+        this.notificationsService.success("WELLCOME", "WOWOW");
     };
     BoardComponent.prototype.onCardDrop = function (parameters) {
         // Source list
@@ -172,14 +175,15 @@ BoardComponent = __decorate([
         selector: 'board',
         templateUrl: 'board.component.html',
         styleUrls: ['board.component.css'],
-        providers: [member_service_1.MemberService, board_service_1.BoardService, card_service_1.CardService, ng2_dragula_1.DragulaService]
+        providers: [member_service_1.MemberService, board_service_1.BoardService, card_service_1.CardService, ng2_dragula_1.DragulaService, angular2_notifications_1.NotificationsService]
     }),
     __metadata("design:paramtypes", [router_1.Router,
         router_2.ActivatedRoute,
         member_service_1.MemberService,
         board_service_1.BoardService,
         card_service_1.CardService,
-        ng2_dragula_1.DragulaService])
+        ng2_dragula_1.DragulaService,
+        angular2_notifications_1.NotificationsService])
 ], BoardComponent);
 exports.BoardComponent = BoardComponent;
 //# sourceMappingURL=board.component.js.map

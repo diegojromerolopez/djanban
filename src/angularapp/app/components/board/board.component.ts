@@ -9,6 +9,7 @@ import { List } from '../../models/list';
 import { CardService } from '../../services/card.service';
 import { Member } from '../../models/member';
 import { MemberService } from '../../services/member.service';
+import { NotificationsService } from 'angular2-notifications';
 
 
 @Component({
@@ -16,7 +17,7 @@ import { MemberService } from '../../services/member.service';
     selector: 'board',
     templateUrl: 'board.component.html',
     styleUrls: ['board.component.css'],
-    providers: [MemberService, BoardService, CardService, DragulaService]
+    providers: [MemberService, BoardService, CardService, DragulaService, NotificationsService]
 })
 
 export class BoardComponent implements OnInit {
@@ -38,6 +39,7 @@ export class BoardComponent implements OnInit {
         that.loadBoard(board_id);
       });
       this.loadMembers();
+      this.notificationsService.success("WELLCOME", "WOWOW");
     }
 
       constructor(
@@ -46,7 +48,8 @@ export class BoardComponent implements OnInit {
         private memberService: MemberService,
         private boardService: BoardService,
         private cardService: CardService,
-        private dragulaService: DragulaService
+        private dragulaService: DragulaService,
+        private notificationsService: NotificationsService
     ) {
 
       this.newCardFormStatus = {};

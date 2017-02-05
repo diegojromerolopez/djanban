@@ -81,6 +81,23 @@ var CardService = (function (_super) {
             .then(this.extractData)
             .catch(this.handleError);
     };
+    /** Change the due datetime (deadline) */
+    CardService.prototype.changeCardDueDatetime = function (card, due_datetime) {
+        console.log("changeCardDueDatetime");
+        console.log(due_datetime);
+        var change_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+        return this.http.put(change_card_url, { due_datetime: due_datetime })
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    CardService.prototype.removeCardDueDatetime = function (card) {
+        var change_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+        return this.http.put(change_card_url, { due_datetime: null })
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
     /** Change the status of the card to "active" (open or visible) */
     CardService.prototype.activeCard = function (card) {
         var is_closed = false;

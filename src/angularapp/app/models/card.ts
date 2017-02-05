@@ -37,4 +37,24 @@ export class Card {
     assign(this, card)
   }
 
+  
+  getDueDatetimeObject(): Date{
+    return new Date(this.due_datetime);
+  }
+  
+  public getLocalDueDatetime(): string{
+    let dueDatetimeObject = this.getDueDatetimeObject();
+    
+    let dateTimeFormatOptions = {
+        year: "2-digit", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit",
+        timeZoneName: "short",
+        timeZone: "Europe/Madrid"
+    };
+
+    let local_due_datetime =  Intl.DateTimeFormat("es-ES", dateTimeFormatOptions).format(dueDatetimeObject);
+    console.log(local_due_datetime);
+    return local_due_datetime;
+  }
+
 }

@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import importlib
 import os
+import pytz
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from trello.organization import Organization
@@ -153,6 +154,7 @@ LANGUAGE_CODE = settings_local.LANGUAGE_CODE
 
 TIME_ZONE = settings_local.TIME_ZONE
 Organization.TIMEZONE = TIME_ZONE
+PYTZ_TIME_ZONE = pytz.timezone(TIME_ZONE)
 
 if hasattr(settings_local, "DATE_FORMAT"):
     DATE_FORMAT = settings_local.DATE_FORMAT

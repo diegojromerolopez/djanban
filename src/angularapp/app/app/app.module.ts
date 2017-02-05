@@ -13,8 +13,11 @@ import { BoardComponent } from '../components/board/board.component';
 import { DashboardComponent } from '../components/dashboard/dashboard.component';
 import { CardComponent } from '../components/card/card.component';
 import { CardService } from '../services/card.service';
-import { DragulaModule } from 'ng2-dragula/ng2-dragula';
 import { MemberService } from '../services/member.service';
+
+
+import { DragulaModule } from 'ng2-dragula/ng2-dragula';
+import { SimpleNotificationsModule, NotificationsService } from 'angular2-notifications';
 
 
 @NgModule({
@@ -23,10 +26,11 @@ import { MemberService } from '../services/member.service';
     HttpModule,
     FormsModule, 
     AppRoutingModule,
-    DragulaModule
+    DragulaModule,
+    SimpleNotificationsModule.forRoot()
   ],
   declarations: [ AppComponent, DashboardComponent, BoardComponent, CardComponent ],
-  providers: [ MemberService, BoardService, CardService ],
+  providers: [ MemberService, BoardService, CardService, NotificationsService ],
   bootstrap:    [ AppComponent ]
 })
 

@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var core_1 = require("@angular/core");
 var router_1 = require("@angular/router");
 var board_service_1 = require("../../services/board.service");
+var card_1 = require("../../models/card");
 var card_service_1 = require("../../services/card.service");
 var CardComponent = (function () {
     function CardComponent(router, route, boardService, cardService) {
@@ -25,6 +26,8 @@ var CardComponent = (function () {
         this.statusCardStatus = "standby";
         this.changeLabelsStatus = "hidden";
         this.changeMembersStatus = "hidden";
+        this.changeDueDatetimeStatus = "hidden";
+        this.removeDueDatetimeStatus = "standby";
         this.changeSETimeStatus = "standby";
         this.changeDescriptionStatus = "hidden";
         this.newCommentStatus = "standby";
@@ -39,6 +42,7 @@ var CardComponent = (function () {
         this.removeRequirementStatus = {};
     }
     CardComponent.prototype.ngOnInit = function () {
+        this.now = Date();
         var that = this;
         this.route.params.subscribe(function (params) {
             var board_id = params["board_id"];
@@ -94,6 +98,31 @@ var CardComponent = (function () {
             // We have to remove the associated comment
             // Remember that comments with the format "blocked by <card_url_in_trello>" means card-blocking
             _this.card.comments = card_response.comments;
+        });
+    };
+    CardComponent.prototype.removeDueDatetime = function () {
+        var _this = this;
+        this.cardService.removeCardDueDatetime(this.card).then(function (card_response) {
+            _this.card.due_datetime = null;
+            _this.removeDueDatetimeStatus = "standby";
+        });
+    };
+    /** Set due datetime */
+    CardComponent.prototype.onChangeDueDatetime = function (due_date, due_time) {
+        var _this = this;
+        console.log(due_date, due_time);
+        var yymmdd = due_date.split("-");
+        var hhmm = due_time.split(":");
+        console.log(yymmdd);
+        console.log(hhmm);
+        var local_due_datetime = new Date(parseInt(yymmdd[0]), parseInt(yymmdd[1]) - 1, parseInt(yymmdd[2]), parseInt(hhmm[0]), parseInt(hhmm[1]));
+        var due_datetime = new Date(local_due_datetime.getUTCFullYear(), local_due_datetime.getUTCMonth(), local_due_datetime.getUTCDate(), local_due_datetime.getUTCHours(), local_due_datetime.getUTCMinutes(), local_due_datetime.getUTCSeconds());
+        console.log(parseInt(yymmdd[0]), parseInt(yymmdd[1]) - 1, parseInt(yymmdd[2]), parseInt(hhmm[0]), parseInt(hhmm[1]), 0, 0);
+        console.log(local_due_datetime);
+        console.log(due_datetime);
+        this.cardService.changeCardDueDatetime(this.card, due_datetime).then(function (card_response) {
+            _this.card.due_datetime = new Date(card_response.due_datetime);
+            _this.changeDueDatetimeStatus = "hidden";
         });
     };
     CardComponent.prototype.addBlockingCardRightCandidate = function (blockingCardId) {
@@ -245,7 +274,7 @@ var CardComponent = (function () {
     CardComponent.prototype.loadCard = function (board_id, card_id) {
         var _this = this;
         this.cardService.getCard(board_id, card_id).then(function (card) {
-            _this.card = card;
+            _this.card = new card_1.Card(card);
             // Inicialization of the status of the edition or deletion or the comments of this card
             for (var _i = 0, _a = _this.card.comments; _i < _a.length; _i++) {
                 var comment = _a[_i];

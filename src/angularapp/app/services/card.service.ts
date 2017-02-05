@@ -90,6 +90,25 @@ export class CardService extends DjangoTrelloStatsService {
                   .catch(this.handleError);
   }
 
+  /** Change the due datetime (deadline) */
+  changeCardDueDatetime(card: Card, due_datetime: Date): Promise<Card> {
+    console.log("changeCardDueDatetime");
+    console.log(due_datetime);
+    let change_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+    return this.http.put(change_card_url, {due_datetime: due_datetime})
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }
+
+  removeCardDueDatetime(card: Card): Promise<Card> {
+    let change_card_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+    return this.http.put(change_card_url, {due_datetime: null})
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }
+
   /** Change the status of the card to "active" (open or visible) */
   activeCard(card: Card): Promise<Card> {
     let is_closed = false;
