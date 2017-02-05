@@ -116,3 +116,9 @@ def set_is_closed(card, member):
 def set_due_datetime(card, member):
     trello_card = get_trello_card(card, member)
     return trello_card.set_due(card.due_datetime)
+
+
+# Remove due datetime
+def remove_due_datetime(card, member):
+    trello_card = get_trello_card(card, member)
+    return trello_card.remove_due()

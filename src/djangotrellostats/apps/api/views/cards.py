@@ -17,7 +17,7 @@ from djangotrellostats.apps.api.util import get_list_or_404, get_card_or_404, ge
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.models import Board, Card, CardComment, List
-from djangotrellostats.trello_api.cards import set_name, set_description, set_is_closed, set_due_datetime
+from djangotrellostats.trello_api.cards import set_name, set_description, set_is_closed, set_due_datetime, remove_due_datetime
 
 
 # Point of access to several actions
@@ -135,7 +135,7 @@ def change(request, board_id, card_id):
     elif "due_datetime" in put_params and put_params.get("due_datetime") is None:
         card.due_datetime = None
         card.save()
-        set_due_datetime(card, member)
+        remove_due_datetime(card, member)
     else:
         return HttpResponseBadRequest()
 
