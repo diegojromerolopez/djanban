@@ -49,7 +49,8 @@ def basic_serialize_card(card, board=None):
         "short_url": card.short_url,
         "position": card.position,
         "is_closed": card.is_closed,
-        "board": {"id": board.id, "uuid": board.uuid, "name": board.name,}
+        "board": {"id": board.id, "uuid": board.uuid, "name": board.name},
+        "labels": [serialize_label(label) for label in card.labels.exclude(name="").order_by("name")]
     }
 
 
@@ -80,10 +81,7 @@ def serialize_card(card):
         "estimated_time": card.estimated_time,
         "lead_time": card.lead_time,
         "cycle_time": card.cycle_time,
-        "labels": [
-            {"id": label.id, "uuid": label.uuid, "name": label.name, "color": label.color}
-            for label in card.labels.exclude(name="").order_by("name")
-        ],
+        "labels": [serialize_label(label) for label in card.labels.exclude(name="").order_by("name")],
         "board": {
             "id": board.id,
             "uuid": board.uuid,
@@ -98,10 +96,7 @@ def serialize_card(card):
                 }
                 for list_ in board.active_lists.order_by("position")
                 ],
-            "labels": [
-                {"id": label.id, "uuid": label.uuid, "name": label.name, "color": label.color}
-                for label in board.labels.exclude(name="").order_by("name")
-            ]
+            "labels": [serialize_label(label) for label in board.labels.exclude(name="").order_by("name")]
         },
         "list": serialize_list(card_list),
         "members": [serialize_member(member) for member in card.members.all().order_by("initials")],
@@ -143,6 +138,15 @@ def serialize_card(card):
     }
     return card_json
 
+
+# Serialize label
+def serialize_label(label):
+    return {
+        "id": label.id,
+        "uuid": label.uuid,
+        "name": label.name,
+        "color": label.color,
+    }
 
 # Serialize card review
 def serialize_card_review(review):
