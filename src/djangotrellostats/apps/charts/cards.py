@@ -188,12 +188,15 @@ def _avg_metric_time_by_month(request, board=None, metric="lead"):
             else:
                 raise ValueError("The metric must be 'lead' or 'cycle'")
 
-            metric_time_values.append(numpy.mean([card_metric(card) for card in cards_ending_this_month]))
-            if board:
-                for label in labels:
-                    label_cards = cards_ending_this_month.filter(labels=label)
-                    if label_cards.exists():
-                        label.metric_values.append(numpy.mean([card_metric(card) for card in label_cards]))
+            card_metric_value = filter(lambda v: v is not None, [card_metric(card) for card in cards_ending_this_month])
+            if len(card_metric_value) > 0:
+                metric_time_values.append(numpy.mean(card_metric_value))
+                if board:
+                    for label in labels:
+                        label_cards = cards_ending_this_month.filter(labels=label)
+                        if label_cards.exists():
+                            label_metric_value = [card_metric(card) for card in label_cards]
+                            label.metric_values.append(numpy.mean(filter(lambda v: v is not None, label_metric_value)))
 
         month_i += 1
         if month_i > 12:
