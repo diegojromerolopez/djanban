@@ -213,7 +213,7 @@ card.closed-card,
 
 .panel-heading.card_heading,
 .board .lists .list .cards .card .card_heading {
-    cursor: pointer;
+    cursor: move;
     display: block;
 }
 
