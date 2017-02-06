@@ -35,6 +35,8 @@ var BoardComponent = (function () {
             timeOut: 10000,
             pauseOnHover: true,
         };
+        // Visibility of the closed cards
+        this.closedCardsVisibility = "hidden";
         // Initialization of statuses
         this.newCardFormStatus = {};
         this.removeMemberStatus = {};

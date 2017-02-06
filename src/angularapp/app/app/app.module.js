@@ -5,6 +5,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var count_pipe_1 = require("./pipes/count.pipe");
 var core_1 = require("@angular/core");
 var platform_browser_1 = require("@angular/platform-browser");
 var forms_1 = require("@angular/forms");
@@ -20,6 +21,7 @@ var member_service_1 = require("../services/member.service");
 var ng2_dragula_1 = require("ng2-dragula/ng2-dragula");
 var angular2_notifications_1 = require("angular2-notifications");
 var localize_datetime_pipe_1 = require("./pipes/localize_datetime.pipe");
+var active_cards_pipe_1 = require("./pipes/active_cards.pipe");
 var AppModule = (function () {
     function AppModule() {
     }
@@ -35,7 +37,11 @@ AppModule = __decorate([
             ng2_dragula_1.DragulaModule,
             angular2_notifications_1.SimpleNotificationsModule.forRoot()
         ],
-        declarations: [app_component_1.AppComponent, localize_datetime_pipe_1.LocalizeDatetimePipe, dashboard_component_1.DashboardComponent, board_component_1.BoardComponent, card_component_1.CardComponent],
+        declarations: [
+            app_component_1.AppComponent,
+            localize_datetime_pipe_1.LocalizeDatetimePipe, active_cards_pipe_1.ActiveCardsPipe, count_pipe_1.CountPipe,
+            dashboard_component_1.DashboardComponent, board_component_1.BoardComponent, card_component_1.CardComponent
+        ],
         providers: [member_service_1.MemberService, board_service_1.BoardService, card_service_1.CardService, angular2_notifications_1.NotificationsService],
         bootstrap: [app_component_1.AppComponent]
     })

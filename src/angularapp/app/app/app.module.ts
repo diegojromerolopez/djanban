@@ -1,3 +1,4 @@
+import { CountPipe } from './pipes/count.pipe';
 import { NgModule }      from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule }   from '@angular/forms';
@@ -19,6 +20,7 @@ import { MemberService } from '../services/member.service';
 import { DragulaModule } from 'ng2-dragula/ng2-dragula';
 import { SimpleNotificationsModule, NotificationsService } from 'angular2-notifications';
 import { LocalizeDatetimePipe } from './pipes/localize_datetime.pipe';
+import { ActiveCardsPipe } from './pipes/active_cards.pipe';
 
 
 @NgModule({
@@ -30,7 +32,11 @@ import { LocalizeDatetimePipe } from './pipes/localize_datetime.pipe';
     DragulaModule,
     SimpleNotificationsModule.forRoot()
   ],
-  declarations: [ AppComponent, LocalizeDatetimePipe, DashboardComponent, BoardComponent, CardComponent ],
+  declarations: [
+    AppComponent,
+    LocalizeDatetimePipe, ActiveCardsPipe, CountPipe,
+    DashboardComponent, BoardComponent, CardComponent
+  ],
   providers: [ MemberService, BoardService, CardService, NotificationsService ],
   bootstrap:    [ AppComponent ]
 })

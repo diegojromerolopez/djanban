@@ -5,6 +5,21 @@
             <h1 class="board_name">
                 <a href="{{board.local_url}}" title="View board {{board.name}} details">{{board.name}}</a>
             </h1>
+            <!-- Show/Hide archived cards -->
+            <div class="toggle_is_closed">
+                <span *ngIf="closedCardsVisibility == 'showed'">
+                    <button class="btn btn-primary" (click)="closedCardsVisibility='hidden'">
+                        <span class="fa fa-eye-slash"></span>
+                        Hide archived cards
+                    </button>
+                </span>
+                <span *ngIf="closedCardsVisibility == 'hidden'">
+                    <button class="btn btn-primary" (click)="closedCardsVisibility='showed'">
+                        <span class="fa fa-eye"></span>
+                        Show archived cards
+                    </button>
+                </span>
+            </div>
         </div>
         <div class="members" *ngIf="members">
             <span class="members_header">
@@ -51,7 +66,9 @@
             <div class="list_name panel-heading cursor-pointer">
                 <div class="list_name">
                     <span class="list_name_name">
-                        <span>{{list.name}}</span> ({{list.cards.length}} tasks)
+                        <span>{{list.name}}</span>
+                        <span *ngIf="closedCardsVisibility == 'showed'">({{list.cards.length}} tasks)</span>
+                        <span *ngIf="closedCardsVisibility == 'hidden'">({{list.cards | active_cards | count }} tasks)</span>
                     </span>
                     <span class="move_list_handle" title="Move list"></span>
                     <div class="list_actions">
@@ -112,7 +129,9 @@
             <div [dragula]='"cards"' [dragulaModel]='list.cards'
                     id="card-list-{{list.id}}" class="cards" [attr.data-list]="list.id">
                     <div *ngFor="let card of list.cards"
-                            id="card-{{card.id}}" class="card panel panel-info board-card" [ngClass]="{'closed-card': card.is_closed }" [attr.data-card]="card.id">
+                            id="card-{{card.id}}" class="card panel board-card"
+                            [ngClass]="{'closed-card': card.is_closed, 'panel-info': !card.is_closed, 'panel-danger': card.is_closed, 'closed-card-showed': card.is_closed && closedCardsVisibility=='showed'}"
+                            [attr.data-card]="card.id">
                         <span class="panel-heading card_heading" [ngClass]="{'closed-card_heading': card.is_closed }">
                             <span (click)="onCardSelect(card)" class="card_name">
                                 <span class=card_name-name>{{card.name}} {{card.labels.length}}</span>

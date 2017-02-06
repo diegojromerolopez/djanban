@@ -33,6 +33,8 @@ export class BoardComponent implements OnInit {
     pauseOnHover: true,
   };
   
+  // Visibility of the closed cards
+  public closedCardsVisibility: string;
   // Status of the new card form. Stores if it is showed and if is waiting the server response
   public newCardFormStatus: {};
   // Status of the remove member action
@@ -62,6 +64,8 @@ export class BoardComponent implements OnInit {
     private dragulaService: DragulaService,
     private notificationsService: NotificationsService
 ) {
+    // Visibility of the closed cards
+    this.closedCardsVisibility = "hidden";
     // Initialization of statuses
     this.newCardFormStatus = {};
     this.removeMemberStatus = {};
