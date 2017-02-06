@@ -93,10 +93,13 @@ var BoardComponent = (function () {
             destination_position = (next_card.position - 10).toString();
         }
         // Move card to list
-        this.cardService.moveCard(moved_card, destination_list, destination_position).then(function (card) {
+        this.cardService.moveCard(moved_card, destination_list, destination_position)
+            .then(function (card) {
             //source_list.removeCard(moved_card);
             //destination_list.addCard(moved_card, destination_position);
             _this.notificationsService.success("Card moved successfully", card.name + " was moved to list " + destination_list.name + " sucessfully");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't move card " + moved_card.name + ". " + error_message);
         });
     };
     /** Action of the drop list event */
@@ -126,6 +129,8 @@ var BoardComponent = (function () {
                 var successNotificationMessage_2 = moved_list.name + " was sucessfully moved at the end of the board";
             }
             _this.notificationsService.success("List moved successfully", successNotificationMessage);
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't move list " + moved_list.name + ". " + error_message);
         });
     };
     /** Prepare board attributes, status, etc. when fetching the board from the server */
@@ -143,7 +148,10 @@ var BoardComponent = (function () {
         this.boardService.getBoard(board_id).then(function (board_response) {
             _this.prepareBoard(board_response);
             _this.notificationsService.success("Welcome to board " + _this.board.name, "Here you could manage all tasks. You can click no the notifications like this to close them.");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't load board. " + error_message);
         });
+        ;
     };
     /** Load all available members */
     BoardComponent.prototype.loadMembers = function () {
@@ -154,6 +162,8 @@ var BoardComponent = (function () {
                 var member = _a[_i];
                 _this.removeMemberStatus[member.id] = { waiting: false };
             }
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't load members. " + error_message);
         });
     };
     /** Move to the card view */
@@ -167,6 +177,9 @@ var BoardComponent = (function () {
             list_1.List.addCardToList(list, card_response, position);
             _this.newCardFormStatus[list.id] = { "show": false, "waiting": false };
             _this.notificationsService.success("New card created", card_response.name + " was successfully created.");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't add card to board " + list.name + " on board " + _this.board.name + ". " + error_message);
+            _this.newCardFormStatus[list.id] = { "show": true, "waiting": false };
         });
     };
     /** Action of the move all cards submit form */
@@ -180,6 +193,8 @@ var BoardComponent = (function () {
             this.cardService.moveAllListCards(this.board, sourceList, destinationList).then(function (board_response) {
                 _this.prepareBoard(board_response);
                 _this.notificationsService.success("Cards moved", numberOfCardsToMove + " cards from " + sourceList.name + " were moved to " + destinationList.name + ".");
+            }).catch(function (error_message) {
+                _this.notificationsService.error("Error", "Couldn't move all cards from " + sourceList.name + " to " + destinationList.name + " on board " + _this.board.name + ". " + error_message);
             });
         }
         else {
@@ -203,6 +218,8 @@ var BoardComponent = (function () {
                 _this.board.addMember(added_member);
                 _this.addMemberStatus = { show: false, waiting: false };
                 _this.notificationsService.success("Added member", member.extern_username + " was successfully added to " + _this.board.name + ".");
+            }).catch(function (error_message) {
+                _this.notificationsService.error("Error", "Couldn't add a new member to board " + _this.board.name + ". " + error_message);
             });
         }
     };

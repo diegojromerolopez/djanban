@@ -32,8 +32,7 @@ export class DjangoTrelloStatsService {
         try{
             if (error instanceof Response) {
                 const body = error.json() || '';
-                const err = body.error || JSON.stringify(body);
-                errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
+                errMsg = `${body.message} (${error.status} - ${error.statusText || ''}).`;
             } else {
                 errMsg = error.message ? error.message : error.toString();
             }

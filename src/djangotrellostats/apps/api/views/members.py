@@ -2,27 +2,20 @@
 
 from __future__ import unicode_literals, absolute_import
 
-import json
-
-from django.db import transaction
-from django.http import Http404, HttpResponseBadRequest
 from django.http import JsonResponse
-from django.urls import reverse
 
-from djangotrellostats.apps.api.http import HttpResponseMethodNotAllowed
-from djangotrellostats.apps.api.serializers import serialize_list, serialize_member
-from djangotrellostats.apps.api.util import get_board_or_404
-from djangotrellostats.apps.base.auth import get_user_boards
+from djangotrellostats.apps.api.http import JsonResponseMethodNotAllowed
+from djangotrellostats.apps.api.serializers import serialize_member
 from djangotrellostats.apps.base.decorators import member_required
-from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.members.models import Member
 
 
+# Get available members
 @member_required
 def get_members(request):
 
     if request.method != "GET":
-        return HttpResponseMethodNotAllowed()
+        return JsonResponseMethodNotAllowed({"message": "HTTP method not allowed."})
 
     members = Member.objects.all()
 

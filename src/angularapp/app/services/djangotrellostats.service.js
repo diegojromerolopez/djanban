@@ -26,8 +26,7 @@ var DjangoTrelloStatsService = (function () {
         try {
             if (error instanceof http_1.Response) {
                 var body = error.json() || '';
-                var err = body.error || JSON.stringify(body);
-                errMsg = error.status + " - " + (error.statusText || '') + " " + err;
+                errMsg = body.message + " (" + error.status + " - " + (error.statusText || '') + ").";
             }
             else {
                 errMsg = error.message ? error.message : error.toString();

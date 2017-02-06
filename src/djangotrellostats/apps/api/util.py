@@ -23,7 +23,7 @@ def get_card_or_404(request, board_id, card_id):
     try:
         board = get_board_or_404(request, board_id)
         return board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist):
+    except (Board.DoesNotExist, Card.DoesNotExist, Http404):
         raise Http404
 
 
@@ -34,7 +34,7 @@ def get_list_or_404(request, board_id, list_id):
     try:
         board = get_board_or_404(request, board_id)
         return board.active_lists.get(id=list_id)
-    except (Board.DoesNotExist, List.DoesNotExist):
+    except (Board.DoesNotExist, List.DoesNotExist, Http404):
         raise Http404
 
 

@@ -138,16 +138,14 @@ export class CardComponent implements OnInit  {
 
     /** Mark card as active */
     activeCard(): void{
-        this.cardService.activeCard(this.card).then(
-            updated_card => {
+        this.cardService.activeCard(this.card).then(updated_card => {
                 this.card.is_closed = false;
                 this.statusCardStatus = "standby";
-                this.notificationsService.success("Card actived", `${this.card.name} is now active.`);
-            },
-            error => {
-                this.notificationsService.error("Error", `Couldn't active ${this.card.name}.`);
-            }
-        );
+                this.notificationsService.success("Card activated", `${this.card.name} is now active.`);
+            }).catch(error_message => {
+                this.notificationsService.error("Error", `Couldn't activate ${this.card.name}. ${error_message}`);
+                this.statusCardStatus = "standby";
+            });
     }
 
     /** Mark card as closed (disabled) */
@@ -155,7 +153,10 @@ export class CardComponent implements OnInit  {
         this.cardService.closeCard(this.card).then(updated_card => {
             this.card.is_closed = true;
             this.statusCardStatus = "standby";
-            this.notificationsService.success("Card actived", `${this.card.name} is now archived. Remember if will not show up on the board.`);
+            this.notificationsService.success("Card archived", `${this.card.name} is now archived. Remember if will not show up on the board.`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't archive ${this.card.name}. ${error_message}`);
+            this.statusCardStatus = "standby";
         });
     }
 
@@ -165,6 +166,9 @@ export class CardComponent implements OnInit  {
             this.card = updated_card;
             this.changeLabelsStatus = "hidden";
             this.notificationsService.success("Labels changed", `${this.card.name} has now ${this.card.labels.length} labels.`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't change labels on ${this.card.name}. ${error_message}`);
+            this.changeLabelsStatus = "standby";
         });
     }
 
@@ -174,6 +178,9 @@ export class CardComponent implements OnInit  {
             this.card = updated_card;
             this.changeMembersStatus = "hidden";
             this.notificationsService.success("Members changed", `${this.card.name} has now ${this.card.members.length} members.`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't change members of ${this.card.name}. ${error_message}`);
+            this.changeMembersStatus = "showed";
         });
     }
 
@@ -182,6 +189,9 @@ export class CardComponent implements OnInit  {
             this.card.due_datetime = null;
             this.removeDueDatetimeStatus = "standby"; 
             this.notificationsService.success("Deadline removed", `${this.card.name} has no deadline.`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't remove the deadline of ${this.card.name}. ${error_message}`);
+            this.removeDueDatetimeStatus = "standby";
         });
     }
 
@@ -192,8 +202,11 @@ export class CardComponent implements OnInit  {
         let local_due_datetime = new Date(parseInt(yymmdd[0]), parseInt(yymmdd[1])-1, parseInt(yymmdd[2]), parseInt(hhmm[0]), parseInt(hhmm[1]));
         this.cardService.changeCardDueDatetime(this.card, local_due_datetime).then(card_response => {
             this.card.due_datetime = new Date(card_response.due_datetime);
-            this.changeDueDatetimeStatus = "hidden";    
+            this.changeDueDatetimeStatus = "hidden";
             this.notificationsService.success("Deadline added", `${this.card.name} has a new deadline.`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't set the deadline for ${this.card.name}. ${error_message}`);
+            this.changeDueDatetimeStatus = "showed";
         });
     }
 
@@ -214,6 +227,9 @@ export class CardComponent implements OnInit  {
             this.card.comments = card_response.comments;
             this.addBlockingCardStatus = "hidden";
             this.notificationsService.success("Blocking card removed", `${this.card.name} is now blocked by ${blockingCard.name} (leaving ${this.card.blocking_cards.length} blocking cards in total).`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't add blocking card to ${this.card.name}. ${error_message}`);
+            this.addBlockingCardStatus = "showed";
         });
     }
 
@@ -226,6 +242,9 @@ export class CardComponent implements OnInit  {
             // Remember that comments with the format "blocked by <card_url_in_trello>" means card-blocking
             this.card.comments = card_response.comments;
             this.notificationsService.success("Blocking card removed", `${this.card.name} is not blocked by ${blockingCard.name} (leaving ${this.card.blocking_cards.length} blocking cards in total).`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't remove ${blockingCard.name} blocking card of ${this.card.name}. ${error_message}`);
+            this.removeBlockingCardStatus[blockingCard.id] = "showed";
         });
     }
 
@@ -239,6 +258,9 @@ export class CardComponent implements OnInit  {
             this.editCommentStatus[review_comment.id] == 'standby';
             this.deleteCommentStatus[review_comment.id] = "standby";
             this.notificationsService.success("Blocking card added", `${this.card.name} has a new review (${this.card.blocking_cards.length} in total).`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't add review to ${this.card.name}. ${error_message}`);
+            this.newReviewStatus = "showed";
         });
     }
 
@@ -247,8 +269,11 @@ export class CardComponent implements OnInit  {
         this.cardService.deleteReview(this.card, review).then(card_response => {
             this.card.reviews = card_response.reviews;
             this.card.comments = card_response.comments;
-            this.newReviewStatus = "hidden";
+            delete this.deleteReviewStatus[review.id];
             this.notificationsService.success("Review deleted", `A review of ${this.card.name} was deleted. This card has now ${this.card.reviews.length} reviews.`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't delete review of ${this.card.name}. ${error_message}`);
+            this.deleteReviewStatus[review.id] = "showed";
         });
     }
 
@@ -263,6 +288,9 @@ export class CardComponent implements OnInit  {
                 this.removeRequirementStatus[requirement.id] = "standby";
                 this.notificationsService.success("Requirement added", `This card depends on the requirement ${requirement.name}.`);
             }
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't add requirement to ${this.card.name}. ${error_message}`);
+            this.addRequirementStatus = "showed";
         });
     }
 
@@ -275,6 +303,9 @@ export class CardComponent implements OnInit  {
             this.card.comments = card_response.comments;
             delete this.removeRequirementStatus[requirement.id];
             this.notificationsService.success("Requirement removed", `This card already does not depend on the requirement ${requirement.name}.`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't remove requirement from ${this.card.name}. ${error_message}`);
+            this.removeRequirementStatus[requirement.id] = "standby";
         });
     }
 
@@ -284,6 +315,9 @@ export class CardComponent implements OnInit  {
             this.card.name = name;
             this.changeNameStatus = "hidden";
             this.notificationsService.success("Name changed", `This card now is know as ${name}.`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't change the name of ${this.card.name}. ${error_message}`);
+            this.changeNameStatus = "showed";
         });
     }
 
@@ -293,6 +327,9 @@ export class CardComponent implements OnInit  {
             this.card.description = description;
             this.changeDescriptionStatus = "hidden";
             this.notificationsService.success("Description changed", `This card now has a new description.`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't change the description of ${this.card.name}. ${error_message}`);
+            this.changeDescriptionStatus = "showed";
         });
     }
 
@@ -306,6 +343,9 @@ export class CardComponent implements OnInit  {
             this.card = updated_card;
             this.changeSETimeStatus = "standby";
             this.notificationsService.success("New S/E time added", `S: ${spent_time} / E: ${estimated_time}.`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't submit a spent/estimated time to ${this.card.name}. ${error_message}`);
+            this.changeSETimeStatus = "standby";
         });
     }
     
@@ -313,7 +353,7 @@ export class CardComponent implements OnInit  {
     onSubmitChangeList(destination_list_id: number): void {
         // If the destination list is the same as the current list of the card, do nothing
         if(this.card.list.id == destination_list_id){
-            return;
+            this.notificationsService.error("Error", `${this.card.name} is already in ${this.card.list.name}`);
         }
         // Otherwise, get the list with that index and change the list
         for(let list_index in this.card.board.lists){
@@ -336,6 +376,9 @@ export class CardComponent implements OnInit  {
             this.editCommentStatus[comment.id] = "standby";
             this.deleteCommentStatus[comment.id] = "standby";
             this.notificationsService.success("New comment added", `${this.card.name} has a new comment (${this.card.comments.length} in total).`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't add a new comment to ${this.card.name}. ${error_message}`);
+            this.newCommentStatus = "standby";
         });
     }
 
@@ -345,6 +388,9 @@ export class CardComponent implements OnInit  {
             comment.content = new_content;
             this.editCommentStatus[comment.id] = "standby";
             this.notificationsService.success("Comment edited", `A comment of ${this.card.name} was edited.`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't edit a comment from ${this.card.name}. ${error_message}`);
+            this.editCommentStatus[comment.id] = "showed";
         });
     }
 
@@ -356,7 +402,10 @@ export class CardComponent implements OnInit  {
             delete this.editCommentStatus[comment.id];
             delete this.commentPreviousContent[comment.id];
             this.notificationsService.success("Comment deleted", `A comment of ${this.card.name} was deleted.`);
-        });
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't delete a comment from ${this.card.name}. ${error_message}`);
+            this.deleteCommentStatus[comment.id] = "showed";
+        });;
     }
 
     /** Navigation on the top of the page */
@@ -388,7 +437,9 @@ export class CardComponent implements OnInit  {
                 this.removeRequirementStatus[requirement.id] = "hidden";
             }
             this.notificationsService.success("Successful load", `${card.name} loaded successfully`);
-        });
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't load this card. ${error_message}`);
+        });;
     }
 
     loadBoard(board_id: number): void {
@@ -402,6 +453,8 @@ export class CardComponent implements OnInit  {
                     this.card_hash[card.id] = card;
                 }
             }
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't load this card's board data. ${error_message}`);
         });
     }
 

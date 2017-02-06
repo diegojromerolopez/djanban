@@ -7,11 +7,9 @@ import json
 from django.db import transaction
 from django.http import Http404, HttpResponseBadRequest
 from django.http import JsonResponse
-from django.urls import reverse
 
-from djangotrellostats.apps.api.http import HttpResponseMethodNotAllowed
-from djangotrellostats.apps.api.serializers import serialize_list, serialize_member, serialize_requirement, \
-    serialize_board
+from djangotrellostats.apps.api.http import JsonResponseMethodNotAllowed, JsonResponseNotFound
+from djangotrellostats.apps.api.serializers import serialize_member, serialize_board
 from djangotrellostats.apps.api.util import get_board_or_404
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
@@ -22,11 +20,11 @@ from djangotrellostats.apps.members.models import Member
 @member_required
 def get_boards(request):
     if request.method != "GET":
-        return HttpResponseMethodNotAllowed()
+        return JsonResponseMethodNotAllowed({"message": "HTTP method not allowed."})
     try:
         boards = get_user_boards(request.user)
     except Board.DoesNotExist:
-        raise Http404
+        return JsonResponseNotFound({"message": "Not found."})
 
     response_json = []
     for board in boards:
@@ -45,11 +43,11 @@ def get_boards(request):
 @member_required
 def get_board(request, board_id):
     if request.method != "GET":
-        return HttpResponseMethodNotAllowed()
+        return JsonResponseMethodNotAllowed({"message": "HTTP method not allowed."})
     try:
         board = get_user_boards(request.user).get(id=board_id)
     except Board.DoesNotExist:
-        raise Http404
+        return JsonResponseNotFound({"message": "Not found."})
 
     return JsonResponse(serialize_board(board))
 
@@ -59,7 +57,7 @@ def get_board(request, board_id):
 @transaction.atomic
 def add_member(request, board_id):
     if request.method != "PUT":
-        return HttpResponseMethodNotAllowed()
+        return JsonResponseMethodNotAllowed({"message": "HTTP method not allowed."})
 
     member = request.user.member
     put_body = json.loads(request.body)
@@ -69,7 +67,10 @@ def add_member(request, board_id):
 
     member_id = put_body.get("member")
 
-    board = get_board_or_404(request, board_id)
+    try:
+        board = get_board_or_404(request, board_id)
+    except Http404:
+        return JsonResponseNotFound({"message": "Board not found"})
 
     if board.members.filter(id=member_id).exists():
         return JsonResponse(serialize_member(board.members.get(id=member_id)))
@@ -78,7 +79,7 @@ def add_member(request, board_id):
         new_member = Member.objects.get(id=member_id)
         board.add_member(member=member, member_to_add=new_member)
     except Member.DoesNotExist:
-        raise Http404
+        return JsonResponseNotFound({"message": "Not found."})
 
     return JsonResponse(serialize_member(new_member))
 
@@ -88,13 +89,17 @@ def add_member(request, board_id):
 @transaction.atomic
 def remove_member(request, board_id, member_id):
     if request.method != "DELETE":
-        return HttpResponseMethodNotAllowed()
+        return JsonResponseMethodNotAllowed({"message": "HTTP method not allowed."})
 
     member = request.user.member
-    board = get_board_or_404(request, board_id)
+    try:
+        board = get_board_or_404(request, board_id)
+    except Http404:
+        return JsonResponseNotFound({"message": "Board not found"})
+
     try:
         member_to_remove = board.members.get(id=member_id)
         board.remove_member(member=member, member_to_remove=member_to_remove)
     except Member.DoesNotExist:
-        raise Http404
+        return JsonResponseNotFound({"message": "Member nor found."})
     return JsonResponse(serialize_member(member_to_remove))

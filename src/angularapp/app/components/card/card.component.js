@@ -71,9 +71,10 @@ var CardComponent = (function () {
         this.cardService.activeCard(this.card).then(function (updated_card) {
             _this.card.is_closed = false;
             _this.statusCardStatus = "standby";
-            _this.notificationsService.success("Card actived", _this.card.name + " is now active.");
-        }, function (error) {
-            _this.notificationsService.error("Error", "Couldn't active " + _this.card.name + ".");
+            _this.notificationsService.success("Card activated", _this.card.name + " is now active.");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't activate " + _this.card.name + ". " + error_message);
+            _this.statusCardStatus = "standby";
         });
     };
     /** Mark card as closed (disabled) */
@@ -82,7 +83,10 @@ var CardComponent = (function () {
         this.cardService.closeCard(this.card).then(function (updated_card) {
             _this.card.is_closed = true;
             _this.statusCardStatus = "standby";
-            _this.notificationsService.success("Card actived", _this.card.name + " is now archived. Remember if will not show up on the board.");
+            _this.notificationsService.success("Card archived", _this.card.name + " is now archived. Remember if will not show up on the board.");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't archive " + _this.card.name + ". " + error_message);
+            _this.statusCardStatus = "standby";
         });
     };
     /** Called when the change labels form is submitted */
@@ -92,6 +96,9 @@ var CardComponent = (function () {
             _this.card = updated_card;
             _this.changeLabelsStatus = "hidden";
             _this.notificationsService.success("Labels changed", _this.card.name + " has now " + _this.card.labels.length + " labels.");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't change labels on " + _this.card.name + ". " + error_message);
+            _this.changeLabelsStatus = "standby";
         });
     };
     /** Called when the change members form is submitted */
@@ -101,6 +108,9 @@ var CardComponent = (function () {
             _this.card = updated_card;
             _this.changeMembersStatus = "hidden";
             _this.notificationsService.success("Members changed", _this.card.name + " has now " + _this.card.members.length + " members.");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't change members of " + _this.card.name + ". " + error_message);
+            _this.changeMembersStatus = "showed";
         });
     };
     CardComponent.prototype.removeDueDatetime = function () {
@@ -109,6 +119,9 @@ var CardComponent = (function () {
             _this.card.due_datetime = null;
             _this.removeDueDatetimeStatus = "standby";
             _this.notificationsService.success("Deadline removed", _this.card.name + " has no deadline.");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't remove the deadline of " + _this.card.name + ". " + error_message);
+            _this.removeDueDatetimeStatus = "standby";
         });
     };
     /** Set due datetime */
@@ -121,6 +134,9 @@ var CardComponent = (function () {
             _this.card.due_datetime = new Date(card_response.due_datetime);
             _this.changeDueDatetimeStatus = "hidden";
             _this.notificationsService.success("Deadline added", _this.card.name + " has a new deadline.");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't set the deadline for " + _this.card.name + ". " + error_message);
+            _this.changeDueDatetimeStatus = "showed";
         });
     };
     CardComponent.prototype.addBlockingCardRightCandidate = function (blockingCardId) {
@@ -141,6 +157,9 @@ var CardComponent = (function () {
             _this.card.comments = card_response.comments;
             _this.addBlockingCardStatus = "hidden";
             _this.notificationsService.success("Blocking card removed", _this.card.name + " is now blocked by " + blockingCard.name + " (leaving " + _this.card.blocking_cards.length + " blocking cards in total).");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't add blocking card to " + _this.card.name + ". " + error_message);
+            _this.addBlockingCardStatus = "showed";
         });
     };
     /** Called when we remove a blocking card */
@@ -153,6 +172,9 @@ var CardComponent = (function () {
             // Remember that comments with the format "blocked by <card_url_in_trello>" means card-blocking
             _this.card.comments = card_response.comments;
             _this.notificationsService.success("Blocking card removed", _this.card.name + " is not blocked by " + blockingCard.name + " (leaving " + _this.card.blocking_cards.length + " blocking cards in total).");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't remove " + blockingCard.name + " blocking card of " + _this.card.name + ". " + error_message);
+            _this.removeBlockingCardStatus[blockingCard.id] = "showed";
         });
     };
     /** Called when adding a review. */
@@ -166,6 +188,9 @@ var CardComponent = (function () {
             _this.editCommentStatus[review_comment.id] == 'standby';
             _this.deleteCommentStatus[review_comment.id] = "standby";
             _this.notificationsService.success("Blocking card added", _this.card.name + " has a new review (" + _this.card.blocking_cards.length + " in total).");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't add review to " + _this.card.name + ". " + error_message);
+            _this.newReviewStatus = "showed";
         });
     };
     /** Called when deleting a review */
@@ -174,8 +199,11 @@ var CardComponent = (function () {
         this.cardService.deleteReview(this.card, review).then(function (card_response) {
             _this.card.reviews = card_response.reviews;
             _this.card.comments = card_response.comments;
-            _this.newReviewStatus = "hidden";
+            delete _this.deleteReviewStatus[review.id];
             _this.notificationsService.success("Review deleted", "A review of " + _this.card.name + " was deleted. This card has now " + _this.card.reviews.length + " reviews.");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't delete review of " + _this.card.name + ". " + error_message);
+            _this.deleteReviewStatus[review.id] = "showed";
         });
     };
     /** Called when adding a requirement. */
@@ -191,6 +219,9 @@ var CardComponent = (function () {
                 _this.removeRequirementStatus[requirement_1.id] = "standby";
                 _this.notificationsService.success("Requirement added", "This card depends on the requirement " + requirement_1.name + ".");
             }
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't add requirement to " + _this.card.name + ". " + error_message);
+            _this.addRequirementStatus = "showed";
         });
     };
     /** Remove a requirement of this card */
@@ -203,6 +234,9 @@ var CardComponent = (function () {
             _this.card.comments = card_response.comments;
             delete _this.removeRequirementStatus[requirement.id];
             _this.notificationsService.success("Requirement removed", "This card already does not depend on the requirement " + requirement.name + ".");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't remove requirement from " + _this.card.name + ". " + error_message);
+            _this.removeRequirementStatus[requirement.id] = "standby";
         });
     };
     /** Called when the card name change form is submitted */
@@ -212,6 +246,9 @@ var CardComponent = (function () {
             _this.card.name = name;
             _this.changeNameStatus = "hidden";
             _this.notificationsService.success("Name changed", "This card now is know as " + name + ".");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't change the name of " + _this.card.name + ". " + error_message);
+            _this.changeNameStatus = "showed";
         });
     };
     /** Called when the card description change form is submitted */
@@ -221,6 +258,9 @@ var CardComponent = (function () {
             _this.card.description = description;
             _this.changeDescriptionStatus = "hidden";
             _this.notificationsService.success("Description changed", "This card now has a new description.");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't change the description of " + _this.card.name + ". " + error_message);
+            _this.changeDescriptionStatus = "showed";
         });
     };
     /** Called when the card S/E form is submitted */
@@ -234,6 +274,9 @@ var CardComponent = (function () {
             _this.card = updated_card;
             _this.changeSETimeStatus = "standby";
             _this.notificationsService.success("New S/E time added", "S: " + spent_time + " / E: " + estimated_time + ".");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't submit a spent/estimated time to " + _this.card.name + ". " + error_message);
+            _this.changeSETimeStatus = "standby";
         });
     };
     /** Called when the change list  form is submitted */
@@ -241,7 +284,7 @@ var CardComponent = (function () {
         var _this = this;
         // If the destination list is the same as the current list of the card, do nothing
         if (this.card.list.id == destination_list_id) {
-            return;
+            this.notificationsService.error("Error", this.card.name + " is already in " + this.card.list.name);
         }
         // Otherwise, get the list with that index and change the list
         for (var list_index in this.card.board.lists) {
@@ -264,6 +307,9 @@ var CardComponent = (function () {
             _this.editCommentStatus[comment.id] = "standby";
             _this.deleteCommentStatus[comment.id] = "standby";
             _this.notificationsService.success("New comment added", _this.card.name + " has a new comment (" + _this.card.comments.length + " in total).");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't add a new comment to " + _this.card.name + ". " + error_message);
+            _this.newCommentStatus = "standby";
         });
     };
     /** Called when editing a comment */
@@ -273,6 +319,9 @@ var CardComponent = (function () {
             comment.content = new_content;
             _this.editCommentStatus[comment.id] = "standby";
             _this.notificationsService.success("Comment edited", "A comment of " + _this.card.name + " was edited.");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't edit a comment from " + _this.card.name + ". " + error_message);
+            _this.editCommentStatus[comment.id] = "showed";
         });
     };
     /** Called when deleting a comment */
@@ -284,7 +333,11 @@ var CardComponent = (function () {
             delete _this.editCommentStatus[comment.id];
             delete _this.commentPreviousContent[comment.id];
             _this.notificationsService.success("Comment deleted", "A comment of " + _this.card.name + " was deleted.");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't delete a comment from " + _this.card.name + ". " + error_message);
+            _this.deleteCommentStatus[comment.id] = "showed";
         });
+        ;
     };
     /** Navigation on the top of the page */
     CardComponent.prototype.onReturnToBoardSelect = function () {
@@ -318,7 +371,10 @@ var CardComponent = (function () {
                 _this.removeRequirementStatus[requirement.id] = "hidden";
             }
             _this.notificationsService.success("Successful load", card.name + " loaded successfully");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't load this card. " + error_message);
         });
+        ;
     };
     CardComponent.prototype.loadBoard = function (board_id) {
         var _this = this;
@@ -334,6 +390,8 @@ var CardComponent = (function () {
                     _this.card_hash[card.id] = card;
                 }
             }
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't load this card's board data. " + error_message);
         });
     };
     return CardComponent;

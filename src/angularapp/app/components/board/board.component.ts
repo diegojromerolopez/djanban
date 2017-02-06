@@ -118,11 +118,14 @@ export class BoardComponent implements OnInit {
     }
 
     // Move card to list
-    this.cardService.moveCard(moved_card, destination_list, destination_position).then(card => {
-      //source_list.removeCard(moved_card);
-      //destination_list.addCard(moved_card, destination_position);
-      this.notificationsService.success("Card moved successfully", `${card.name} was moved to list ${destination_list.name} sucessfully`);
-    });
+    this.cardService.moveCard(moved_card, destination_list, destination_position)
+      .then(card => {
+        //source_list.removeCard(moved_card);
+        //destination_list.addCard(moved_card, destination_position);
+        this.notificationsService.success("Card moved successfully", `${card.name} was moved to list ${destination_list.name} sucessfully`);
+      }).catch(error_message => {
+        this.notificationsService.error("Error", `Couldn't move card ${moved_card.name}. ${error_message}`);
+      });
   }
 
   /** Action of the drop list event */
@@ -152,6 +155,8 @@ export class BoardComponent implements OnInit {
       }
       this.notificationsService.success("List moved successfully", successNotificationMessage);
       
+    }).catch(error_message => {
+        this.notificationsService.error("Error", `Couldn't move list ${moved_list.name}. ${error_message}`);
     });
   }
 
@@ -169,7 +174,9 @@ export class BoardComponent implements OnInit {
       this.boardService.getBoard(board_id).then(board_response =>{
           this.prepareBoard(board_response);
           this.notificationsService.success(`Welcome to board ${this.board.name}`, "Here you could manage all tasks. You can click no the notifications like this to close them.");
-      });
+      }).catch(error_message => {
+        this.notificationsService.error("Error", `Couldn't load board. ${error_message}`);
+    });;
   }
 
   /** Load all available members */
@@ -179,6 +186,8 @@ export class BoardComponent implements OnInit {
       for(let member of this.members){
         this.removeMemberStatus[member.id] = {waiting: false};
       }
+    }).catch(error_message => {
+        this.notificationsService.error("Error", `Couldn't load members. ${error_message}`);
     });
   }
 
@@ -193,6 +202,9 @@ export class BoardComponent implements OnInit {
       List.addCardToList(list, card_response, position);
       this.newCardFormStatus[list.id] = {"show": false, "waiting": false};
       this.notificationsService.success("New card created",  `${card_response.name} was successfully created.`);
+    }).catch(error_message => {
+        this.notificationsService.error("Error", `Couldn't add card to board ${list.name} on board ${this.board.name}. ${error_message}`);
+        this.newCardFormStatus[list.id] = {"show": true, "waiting": false};
     });
   }
 
@@ -206,6 +218,8 @@ export class BoardComponent implements OnInit {
       this.cardService.moveAllListCards(this.board, sourceList, destinationList).then(board_response => {
         this.prepareBoard(board_response);
         this.notificationsService.success("Cards moved",  `${numberOfCardsToMove} cards from ${sourceList.name} were moved to ${destinationList.name}.`);
+      }).catch(error_message => {
+        this.notificationsService.error("Error", `Couldn't move all cards from ${sourceList.name} to ${destinationList.name} on board ${this.board.name}. ${error_message}`);
       });
     } else {
       this.notificationsService.error("Unable to move cards",  `There is something wrong with ${sourceList.name} or ${destinationList.name}.`);
@@ -228,6 +242,8 @@ export class BoardComponent implements OnInit {
         this.board.addMember(added_member);
         this.addMemberStatus = {show: false, waiting: false};
         this.notificationsService.success("Added member",  `${member.extern_username} was successfully added to ${this.board.name}.`);
+      }).catch(error_message => {
+        this.notificationsService.error("Error", `Couldn't add a new member to board ${this.board.name}. ${error_message}`);
       });
     }
   }
