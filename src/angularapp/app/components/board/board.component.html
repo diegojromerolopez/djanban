@@ -52,16 +52,16 @@
     <div class="board_menu">
         <!-- Show/Hide archived cards -->
         <div class="toggle_is_closed">
-            <span *ngIf="closedCardsVisibility == 'showed'">
-                <button class="btn btn-primary" (click)="closedCardsVisibility='hidden'">
+            <span *ngIf="closedItemsVisibility == 'showed'">
+                <button class="btn btn-primary" (click)="closedItemsVisibility='hidden'">
                     <span class="fa fa-eye-slash"></span>
-                    Hide archived cards
+                    Hide archived elements
                 </button>
             </span>
-            <span *ngIf="closedCardsVisibility == 'hidden'">
-                <button class="btn btn-primary" (click)="closedCardsVisibility='showed'">
+            <span *ngIf="closedItemsVisibility == 'hidden'">
+                <button class="btn btn-primary" (click)="closedItemsVisibility='showed'">
                     <span class="fa fa-eye"></span>
-                    Show archived cards
+                    Show archived elements
                 </button>
             </span>
         </div>
@@ -70,13 +70,24 @@
 
     <!-- Lists -->
     <div class="lists" [dragula]='"lists"' [dragulaModel]='list' [style.width.px]="board.lists.length * 420 + 80">
-        <div *ngFor="let list of board.lists" class="list panel panel-default" [attr.data-list]="list.id">
+        <div *ngFor="let list of board.lists" class="list panel panel-default" [attr.data-list]="list.id"
+            [ngClass]="{'closed-list': list.type == 'closed', 'closed-list-showed': list.type == 'closed' && closedItemsVisibility == 'showed', 'ignored-list': list.type == 'ignored'}">
             <div class="list_name panel-heading cursor-pointer">
                 <div class="list_name">
                     <span class="list_name_name">
-                        <span>{{list.name}}</span>
-                        <span *ngIf="closedCardsVisibility == 'showed'">({{list.cards.length}} tasks)</span>
-                        <span *ngIf="closedCardsVisibility == 'hidden'">({{list.cards | active_cards | count }} tasks)</span>
+                        <span>
+                            <span class="fa fa-times" *ngIf="list.type == 'ignored'" title='This list is ignored'></span>
+                            <span class="fa fa-book" *ngIf="list.type == 'backlog'" title='Task backlog'></span>
+                            <span class="fa fa-hourglass-start" *ngIf="list.type == 'ready_to_develop'" title='Tasks waiting to be started'></span>
+                            <span class="fa fa-hourglass-half" *ngIf="list.type == 'development'" title='Tasks in development'></span>
+                            <span class="fa fa-gavel" *ngIf="list.type == 'after_development_in_review'" title='Tasks being reviewed'></span>
+                            <span class="fa fa-upload" *ngIf="list.type == 'after_development_waiting_release'" title='Tasks waiting release'></span>
+                            <span class="fa fa-thumbs-o-up" *ngIf="list.type == 'done'" title='Tasks done'></span>
+                            <span class="fa fa-archive" *ngIf="list.type == 'closed'" title='Closed list'></span>
+                            {{list.name}}
+                        </span>
+                        <span *ngIf="closedItemsVisibility == 'showed'">({{list.cards.length}} tasks)</span>
+                        <span *ngIf="closedItemsVisibility == 'hidden'">({{list.cards | active_cards | count }} tasks)</span>
                     </span>
                     <span class="move_list_handle" title="Move list"></span>
                     <div class="list_actions">
@@ -138,11 +149,11 @@
                     id="card-list-{{list.id}}" class="cards" [attr.data-list]="list.id">
                     <div *ngFor="let card of list.cards"
                             id="card-{{card.id}}" class="card panel board-card"
-                            [ngClass]="{'closed-card': card.is_closed, 'panel-info': !card.is_closed, 'panel-danger': card.is_closed, 'closed-card-showed': card.is_closed && closedCardsVisibility=='showed'}"
+                            [ngClass]="{'closed-card': card.is_closed, 'panel-info': !card.is_closed, 'panel-danger': card.is_closed, 'closed-card-showed': card.is_closed && closedItemsVisibility=='showed'}"
                             [attr.data-card]="card.id">
                         <span class="panel-heading card_heading" [ngClass]="{'closed-card_heading': card.is_closed }">
                             <span (click)="onCardSelect(card)" class="card_name">
-                                <span class=card_name-name>{{card.name}} {{card.labels.length}}</span>
+                                <span class=card_name-name>{{card.name}}</span>
                             </span>
                             <a href="{{card.short_url}}" title="View card" class="card_action_view">
                                 <span class="fa fa-trello"></span>

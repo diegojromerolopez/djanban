@@ -36,7 +36,7 @@ var BoardComponent = (function () {
             pauseOnHover: true,
         };
         // Visibility of the closed cards
-        this.closedCardsVisibility = "hidden";
+        this.closedItemsVisibility = "hidden";
         // Initialization of statuses
         this.newCardFormStatus = {};
         this.removeMemberStatus = {};

@@ -34,7 +34,7 @@ export class BoardComponent implements OnInit {
   };
   
   // Visibility of the closed cards
-  public closedCardsVisibility: string;
+  public closedItemsVisibility: string;
   // Status of the new card form. Stores if it is showed and if is waiting the server response
   public newCardFormStatus: {};
   // Status of the remove member action
@@ -65,7 +65,7 @@ export class BoardComponent implements OnInit {
     private notificationsService: NotificationsService
 ) {
     // Visibility of the closed cards
-    this.closedCardsVisibility = "hidden";
+    this.closedItemsVisibility = "hidden";
     // Initialization of statuses
     this.newCardFormStatus = {};
     this.removeMemberStatus = {};

@@ -76,6 +76,22 @@ h1, h2, h3 {
     width: 400px;
 }
 
+/* Status of the list */
+.list.closed-list,
+.board .lists .list.closed-list {
+    display: none;
+}
+
+list.closed-list-showed,
+.board .lists .list.closed-list-showed {
+    display: block;
+}
+
+.list.ignored-list,
+.board .lists .list.ignored-list {
+    display: none;
+}
+
 .board .lists .list .list_name {
     display: block;
     overflow: hidden;
