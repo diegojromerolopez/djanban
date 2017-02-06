@@ -59,6 +59,12 @@ h1, h2, h3 {
     margin-bottom: 10px;
 }
 
+/* Board menu */
+.board .board_menu {
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
 /* Listas */
 .board .lists {
     overflow: hidden;
@@ -179,6 +185,13 @@ h1, h2, h3 {
     margin-right: 20px;
 }
 
+.board-card.closed-card-showed,
+.board .lists .list .cards .card.closed-card-showed {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+
 /* Labels in the card itself */
 .card_heading .card_heading-labels {
     display: block;
@@ -209,6 +222,11 @@ h1, h2, h3 {
 card.closed-card,
 .board .lists .list .cards .card.closed-card {
     display: none;
+}
+
+card.closed-card-showed,
+.board .lists .list .cards .card.closed-card-showed {
+    display: block;
 }
 
 .panel-heading.card_heading,

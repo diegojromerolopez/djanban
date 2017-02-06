@@ -5,22 +5,8 @@
             <h1 class="board_name">
                 <a href="{{board.local_url}}" title="View board {{board.name}} details">{{board.name}}</a>
             </h1>
-            <!-- Show/Hide archived cards -->
-            <div class="toggle_is_closed">
-                <span *ngIf="closedCardsVisibility == 'showed'">
-                    <button class="btn btn-primary" (click)="closedCardsVisibility='hidden'">
-                        <span class="fa fa-eye-slash"></span>
-                        Hide archived cards
-                    </button>
-                </span>
-                <span *ngIf="closedCardsVisibility == 'hidden'">
-                    <button class="btn btn-primary" (click)="closedCardsVisibility='showed'">
-                        <span class="fa fa-eye"></span>
-                        Show archived cards
-                    </button>
-                </span>
-            </div>
         </div>
+        <!-- Members -->
         <div class="members" *ngIf="members">
             <span class="members_header">
                 <h2>Members ({{board.members.length}})</h2>
@@ -61,6 +47,28 @@
             </div>
         </div>
     </div>
+
+    <!-- Menu of visibility of board -->
+    <div class="board_menu">
+        <!-- Show/Hide archived cards -->
+        <div class="toggle_is_closed">
+            <span *ngIf="closedCardsVisibility == 'showed'">
+                <button class="btn btn-primary" (click)="closedCardsVisibility='hidden'">
+                    <span class="fa fa-eye-slash"></span>
+                    Hide archived cards
+                </button>
+            </span>
+            <span *ngIf="closedCardsVisibility == 'hidden'">
+                <button class="btn btn-primary" (click)="closedCardsVisibility='showed'">
+                    <span class="fa fa-eye"></span>
+                    Show archived cards
+                </button>
+            </span>
+        </div>
+    </div>
+
+
+    <!-- Lists -->
     <div class="lists" [dragula]='"lists"' [dragulaModel]='list' [style.width.px]="board.lists.length * 420 + 80">
         <div *ngFor="let list of board.lists" class="list panel panel-default" [attr.data-list]="list.id">
             <div class="list_name panel-heading cursor-pointer">
