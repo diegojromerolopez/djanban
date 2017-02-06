@@ -20,12 +20,27 @@
                         {% endfor %}
                     </select>
                 </div>
+                {{selected_label}}
+                {{selected_board}}
                 <div class="form-group">
-                    <label for="select_board">Board</label>
-                    <select id="select_board" name="board_id" class="form-control">
+                    <label for="select_label">Board</label>
+                    {% if selected_label %}
+                        {{selected_board.name}}
+                    {% endif %}
+                    <select id="select_label" name="label_id" class="form-control">
                         <option value="">All</option>
                         {% for board in boards.all %}
-                            <option value="{{board.id}}" {% if selected_board.id == board.id %}selected="selected"{% endif %}>{{board.name}}</option>
+                            {# <option value="{{board.id}}" {% if selected_board.id == board.id %}selected="selected"{% endif %}>{{board.name}}</option> #}
+                            <optgroup label="{{board.name}}">
+                                <option value="all_from_board_{{board.id}}" {% if selected_label == None and selected_board.id == board.id %}selected="selected"{% endif %}>
+                                    All labels from {{board.name}}
+                                </option>
+                                {% for label in board.labels.all %}
+                                    {% if label.name != "" %}
+                                        <option value="{{label.id}}" {% if selected_label.id == label.id %}selected="selected"{% endif %}>{{label.name}}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </optgroup>
                         {% endfor %}
                     </select>
                 </div>

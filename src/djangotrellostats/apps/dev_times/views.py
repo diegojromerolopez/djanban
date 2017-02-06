@@ -10,11 +10,12 @@ from django.http.response import Http404, HttpResponse
 from django.shortcuts import render
 
 from djangotrellostats.apps.base.auth import get_user_boards, user_is_member
-from djangotrellostats.apps.boards.models import Board
+from djangotrellostats.apps.boards.models import Board, Label
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 from django.template import loader, Context
 import calendar
+import re
 
 
 # View spent time report
@@ -93,12 +94,25 @@ def _get_daily_spent_times_replacements(request):
     replacements["selected_member"] = selected_member
 
     # If we are filtering by board, filter by board_id
-    board_id = request.GET.get("board_id")
+    label_id = request.GET.get("label_id")
+    label = None
     board = None
-    if board_id:
-        board = get_user_boards(request.user).get(id=board_id)
-        replacements["selected_board"] = board
-        replacements["board"] = board
+    if label_id:
+        matches = re.match(r"all_from_board_(?P<board_id>\d+)", label_id)
+        if matches:
+            board = get_user_boards(request.user).get(id=matches.group("board_id"))
+            label = None
+            replacements["selected_label"] = label
+            replacements["label"] = label
+            replacements["selected_board"] = board
+            replacements["board"] = board
+        else:
+            boards = get_user_boards(request.user)
+            label = Label.objects.get(board__in=boards, id=label_id)
+            replacements["selected_label"] = label
+            replacements["label"] = label
+            replacements["selected_board"] = label.board
+            replacements["board"] = label.board
 
     daily_spent_times = spent_times["all"]
     replacements["week"] = request.GET.get('week') if request.GET.get('week') and request.GET.get('week') > 0 else None

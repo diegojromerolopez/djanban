@@ -22,7 +22,7 @@
     <div>Last updated: {{board.last_fetch_datetime|timesince}}</div>
     {% include "daily_spent_times/components/filter_form.html" with selected_member=selected_member %}
     <div class="text-right">
-        <a href="{% url 'dev_times:export_daily_spent_times' %}?start_date={{start_date|date:'Y-m-d'}}&end_date={{end_date|date:'Y-m-d'}}&week={% if week %}{{week}}{% endif %}&member_id={{selected_member.id}}&board_id={{board.id}}" class="btn btn-success">Export as CSV</a>
+        <a href="{% url 'dev_times:export_daily_spent_times' %}?start_date={{start_date|date:'Y-m-d'}}&end_date={{end_date|date:'Y-m-d'}}&week={% if week %}{{week}}{% endif %}&member_id={{selected_member.id}}&label_id=all_from_board_{{board.id}}" class="btn btn-success">Export as CSV</a>
     </div>
     {% include "daily_spent_times/components/list.html" %}
 {% endblock content %}
