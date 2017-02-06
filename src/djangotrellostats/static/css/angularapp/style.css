@@ -76,6 +76,10 @@ h1, h2, h3 {
     width: 400px;
 }
 
+.list_name_name .fa {
+    cursor: help;
+}
+
 /* Status of the list */
 .list.closed-list,
 .board .lists .list.closed-list {
