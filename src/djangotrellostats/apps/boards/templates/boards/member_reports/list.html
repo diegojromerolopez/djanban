@@ -1,5 +1,7 @@
 {% extends "boards/view.html" %}
 
+{% load template_extensions %}
+
 {% block page_title %}Members of {{board.name}}{% endblock %}
 
 {% block content %}
@@ -56,6 +58,7 @@
                 <tr>
                     <td>Initials</td>
                     <td>Name</td>
+                    <td>Role</td>
                     <td>Mood</td>
                     <td>Number of cards</td>
                     <td>Avg. card time</td>
@@ -70,6 +73,11 @@
                         <tr>
                             <td>{{member.initials}}</td>
                             <td>{{member.trello_username}}</td>
+                            <td>
+                                {% with member_role=member|call:"get_role"|arg:board %}
+                                    {{member_role.name}}
+                                {% endwith %}
+                            </td>
                             <td>
                                 {% with member_mood=member.mood %}
                                     {% if member_mood > 0 %}

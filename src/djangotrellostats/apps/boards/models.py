@@ -75,7 +75,7 @@ class Board(models.Model):
 
     last_fetch_datetime = models.DateTimeField(verbose_name=u"Last fetch datetime", default=None, null=True)
 
-    members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="boards")
+    members = models.ManyToManyField("members.Member", verbose_name=u"Members", related_name="boards")
 
     percentage_of_completion = models.DecimalField(
         verbose_name=u"Percentage of completion",
@@ -1056,7 +1056,7 @@ class CardComment(models.Model):
     # Card comment saving
     def save(self, *args, **kwargs):
         card = self.card
-
+        super(CardComment, self).save(*args, **kwargs)
         earlier_card_comment_exists = card.comments.filter(uuid=self.uuid).exists()
 
         if earlier_card_comment_exists:
@@ -1116,7 +1116,10 @@ class CardComment(models.Model):
             review_from_comment = self.review_from_comment
             # If there is a new review in this comment, add or update this review accordingly
             if review_from_comment:
-                CardReview.update_or_create(self, review_from_comment["reviewers"], review_from_comment.get("description"))
+                review_description = review_from_comment.get("description")
+                if review_description is None:
+                    review_description = ""
+                CardReview.update_or_create(self, review_from_comment["reviewers"], review_description)
 
             # If there is not a review, check if there was an earlier review and in that case, delete it
             elif self.card.reviews.filter(id=self.review.id).exists():
@@ -1150,6 +1153,8 @@ class CardComment(models.Model):
         if review_from_comment:
             reviewer_members = review_from_comment.get("reviewers")
             description = review_from_comment.get("description", "")
+            if description is None:
+                description = ""
             review = CardReview.create(self, reviewer_members, description)
             self.review = review
 

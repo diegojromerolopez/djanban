@@ -15,7 +15,7 @@ from djangotrellostats.apps.boards.models import Board, List
 from djangotrellostats.apps.fetch.fetchers.base import Fetcher
 from djangotrellostats.apps.fetch.fetchers.trello.cards import CardFetcher
 from djangotrellostats.apps.fetch.fetchers.trello.labels import LabelUpdater
-from djangotrellostats.apps.members.models import Member
+from djangotrellostats.apps.members.models import Member, MemberRole
 from djangotrellostats.apps.reports.models import ListReport, MemberReport
 from djangotrellostats.apps.workflows.models import WorkflowCardReport
 from djangotrellostats.trello_api.connector import TrelloConnector
@@ -101,10 +101,10 @@ class Initializer(TrelloConnector):
                     last_created_list.save()
 
                 # Fetch all members this board and associate to this board
-                self._fetch_members(board, trello_board)
+                self.fetch_members(board, trello_board)
 
     # Fetch members of this board
-    def _fetch_members(self, board, trello_board):
+    def fetch_members(self, board, trello_board):
         trello_members = trello_board.all_members()
 
         # For each member, check if he/she doesn't exist. In that case, create him/her
@@ -125,6 +125,16 @@ class Initializer(TrelloConnector):
             # Only add the board to the member if he/she has not it yet
             if not member.boards.filter(uuid=board.uuid).exists():
                 member.boards.add(board)
+
+            if self.debug:
+                print(u"Member {0} is {1}".format(member.trello_username, trello_member.member_type))
+            # Check if it has a role in this board
+            if not member.roles.filter(board=board).exists():
+                if self.debug:
+                    print("Creating role {0} for {1}".format(trello_member.member_type, board.name))
+                member_role, created = MemberRole.objects.get_or_create(board=board, type=trello_member.member_type)
+                member.roles.clear()
+                member_role.members.add(member)
 
     # Creates a new board from a non-saved board object
     def create_board(self, board, lists=None):
@@ -175,6 +185,7 @@ class BoardFetcher(Fetcher):
         self.initializer = Initializer(self.creator, debug=debug)
         self.trello_client = self.initializer.trello_client
         self.trello_board = TrelloBoard(client=self.trello_client, board_id=self.board.uuid)
+        self.initializer.fetch_members(board, self.trello_board)
         self.trello_board.fetch()
         self.debug = debug
 

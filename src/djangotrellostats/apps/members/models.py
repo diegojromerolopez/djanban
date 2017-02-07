@@ -184,3 +184,21 @@ class Member(models.Model):
             return 0.0
         return 1.0 * (happy_days - sad_days) / all_days
 
+    def get_role(self, board):
+        return self.roles.get(board=board)
+
+# Role a member has in a board
+class MemberRole(models.Model):
+    TYPE_CHOICES = (
+        ("admin", "Administrator"),
+        ("normal", "Normal"),
+        ("guest", "Guest")
+    )
+    type = models.CharField(verbose_name="Role a member has in a board", default="normal", max_length=32)
+    members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="roles")
+    board = models.ForeignKey("boards.Board", verbose_name=u"Boards", related_name="roles")
+
+    # Return the full name of the type
+    @property
+    def name(self):
+        return dict(MemberRole.TYPE_CHOICES)[self.type]
