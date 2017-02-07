@@ -127,13 +127,26 @@ class Initializer(TrelloConnector):
                 member.boards.add(board)
 
             if self.debug:
-                print(u"Member {0} is {1}".format(member.trello_username, trello_member.member_type))
-            # Check if it has a role in this board
+                print(u"Member {0} has role {1}".format(member.trello_username, trello_member.member_type))
+            # If this member has no role in this board, add the role to the member
             if not member.roles.filter(board=board).exists():
                 if self.debug:
                     print("Creating role {0} for {1}".format(trello_member.member_type, board.name))
                 member_role, created = MemberRole.objects.get_or_create(board=board, type=trello_member.member_type)
-                member.roles.clear()
+                member_role.members.add(member)
+
+            # If this member has a role but is different from the role he/she has in Trello,
+            # update his/her role
+            elif member.roles.get(board=board).type != trello_member.member_type:
+                if self.debug:
+                    print(
+                        "Updating {0}'s role from {1} to {2} in {3}".format(
+                            member.trello_username, member.roles.get(board=board).type,
+                            trello_member.member_type, board.name
+                        )
+                    )
+                member.roles.filter(board=board).clear()
+                member_role, created = MemberRole.objects.get_or_create(board=board, type=trello_member.member_type)
                 member_role.members.add(member)
 
     # Creates a new board from a non-saved board object
