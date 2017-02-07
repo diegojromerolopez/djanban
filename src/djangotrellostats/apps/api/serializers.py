@@ -41,6 +41,7 @@ def basic_serialize_card(card, board=None):
         board = card.board
     return {
         "id": card.id,
+        "creation_datetime": card.creation_datetime,
         "uuid": card.uuid,
         "name": card.name,
         "description": card.description,
@@ -48,9 +49,13 @@ def basic_serialize_card(card, board=None):
         "url": card.url,
         "short_url": card.short_url,
         "position": card.position,
+        "due_datetime": card.due_datetime,
         "is_closed": card.is_closed,
+        "spent_time": card.spent_time,
+        "estimated_time": card.estimated_time,
         "board": {"id": board.id, "uuid": board.uuid, "name": board.name},
-        "labels": [serialize_label(label) for label in card.labels.exclude(name="").order_by("name")]
+        "labels": [serialize_label(label) for label in card.labels.exclude(name="").order_by("name")],
+        "reviews": [serialize_card_review(review) for review in card.reviews.all().order_by("-creation_datetime")],
     }
 
 

@@ -87,7 +87,7 @@
                             <span class="fa fa-hourglass-half" *ngIf="list.type == 'development'" title='Tasks in development'></span>
                             <span class="fa fa-gavel" *ngIf="list.type == 'after_development_in_review'" title='Tasks being reviewed'></span>
                             <span class="fa fa-upload" *ngIf="list.type == 'after_development_waiting_release'" title='Tasks waiting release'></span>
-                            <span class="fa fa-thumbs-o-up" *ngIf="list.type == 'done'" title='Tasks done'></span>
+                            <span class="fa fa-hourglass-end" *ngIf="list.type == 'done'" title='Tasks done'></span>
                             <span class="fa fa-archive" *ngIf="list.type == 'closed'" title='Closed list'></span>
                             {{list.name}}
                         </span>
@@ -158,18 +158,30 @@
                             [attr.data-card]="card.id">
                         <span class="panel-heading card_heading" [ngClass]="{'closed-card_heading': card.is_closed }">
                             <span (click)="onCardSelect(card)" class="card_name">
-                                <span class=card_name-name>{{card.name}}</span>
+                                <span class=card_name-name>{{card.name}} <span *ngIf="card.reviews && card.reviews.length > 0" title="This task has been reviewed" class="fa fa-thumbs-up"></span> </span>
                             </span>
                             <a href="{{card.short_url}}" title="View card" class="card_action_view">
                                 <span class="fa fa-trello"></span>
                             </a>
-                            <a href="{{card.url}}" title="View card" class="card_action_view">
+                            <a href="{{card.local_url}}" title="View card" class="card_action_view">
                                 <span class="fa fa-eye"></span>
                             </a>
                             <span class="card_heading-labels" *ngIf="card.labels.length > 0">
                                 <span class="card_heading-label" *ngFor="let label of card.labels" [style.background]="label.color" title="{{label.name}}">
                                     {{label.name}}
                                 </span>
+                            </span>
+                            <span class="card_heading-se_time" *ngIf="card.spent_time || card.estimated_time">
+                                <span class="fa fa-clock-o"></span> 
+                                <span class="card_heading-spent_time" title="The team has spent {{card.spent_time | number:'1.1-2'}} hours in this task">
+                                    S: {{card.spent_time | number:'1.1-2'}}
+                                </span>
+                                <span class="card_heading-estimated_time" title="The team estimated a cost of {{card.estimated_time | number:'1.1-2'}} hours in this task">
+                                    E: {{card.estimated_time | number:'1.1-2'}}
+                                </span>
+                            </span>
+                            <span class="card_heading-deadline" *ngIf="card.due_datetime">
+                                <span class="fa fa-calendar-times-o"></span> {{card.due_datetime | localize_datetime}}
                             </span>
                         </span>
                     </div>

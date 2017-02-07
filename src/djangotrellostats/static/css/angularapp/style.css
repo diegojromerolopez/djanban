@@ -275,6 +275,21 @@ card.closed-card-showed,
     width: 30%
 }
 
+.card_heading-se_time {
+    display: block;
+    margin-top: 2px;
+}
+
+.card_heading-estimated_time,
+.card_heading-spent_time {
+    cursor: help
+}
+
+.card_heading-deadline {
+    display: block;
+    margin-top: 2px;
+}
+
 /* Card view */
 
 .card-view .card-section{
