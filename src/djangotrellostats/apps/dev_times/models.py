@@ -115,10 +115,10 @@ class DailySpentTime(models.Model):
 
     # Add a new amount of spent time to a member
     @staticmethod
-    def create_from_comment(comment):
+    def factory_from_comment(comment):
         card = comment.card
         board = card.board
-        spent_estimated_time = comment.spent_estimated_time
+        spent_estimated_time = comment.get_spent_estimated_time_from_content()
         date = spent_estimated_time["date"]
 
         weekday = date.strftime("%w")
@@ -152,7 +152,19 @@ class DailySpentTime(models.Model):
             description=spent_estimated_time["description"],
             member=comment.author, rate_amount=rate_amount
         )
-        daily_spent_time.save()
+        return daily_spent_time
+
+    @staticmethod
+    def create_from_comment(comment):
+        print "create from comment"
+        daily_spent_time = DailySpentTime.factory_from_comment(comment)
+        if comment.id:
+            print "create from comment comment.id"
+            daily_spent_time.save()
+        else:
+            print "create from comment comment.id IS NONE"
+            daily_spent_time.comment = None
+            daily_spent_time.save()
         return daily_spent_time
 
     # Set daily spent time from a card comment

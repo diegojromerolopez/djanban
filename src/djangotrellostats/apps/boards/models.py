@@ -958,8 +958,7 @@ class CardComment(models.Model):
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
     last_edition_datetime = models.DateTimeField(verbose_name=u"Last edition of the comment", default=None, null=True)
 
-    @property
-    def spent_estimated_time(self):
+    def get_spent_estimated_time_from_content(self):
         matches = re.match(Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, self.content, re.IGNORECASE)
         if matches:
             date = self.creation_datetime.date()
@@ -1056,7 +1055,6 @@ class CardComment(models.Model):
     # Card comment saving
     def save(self, *args, **kwargs):
         card = self.card
-        super(CardComment, self).save(*args, **kwargs)
         earlier_card_comment_exists = card.comments.filter(uuid=self.uuid).exists()
 
         if earlier_card_comment_exists:
@@ -1066,6 +1064,10 @@ class CardComment(models.Model):
             self._save_new(card)
 
         super(CardComment, self).save(*args, **kwargs)
+        if hasattr(self, "daily_spent_time") and self.daily_spent_time and self.daily_spent_time.id is None:
+            self.daily_spent_time.save()
+            # Update the spent and estimated time
+            card.update_spent_estimated_time()
 
     # Save an old comment
     def _save_old(self, card, earlier_card_comment):
@@ -1073,20 +1075,15 @@ class CardComment(models.Model):
         if self.content != earlier_card_comment.content:
 
             # Is it a spent/estimated time comment?
-            spent_estimated_time = self.spent_estimated_time
-            earlier_spent_estimated_time = earlier_card_comment.spent_estimated_time
+            spent_estimated_time = self.get_spent_estimated_time_from_content()
+            earlier_spent_estimated_time = earlier_card_comment.get_spent_estimated_time_from_content()
 
-            if (spent_estimated_time and earlier_spent_estimated_time) and\
-               (spent_estimated_time["spent_time"] != earlier_spent_estimated_time["spent_time"] or\
-                spent_estimated_time["estimated_time"] != earlier_spent_estimated_time["estimated_time"]):
-                # Update this Daily Spent Time that depends on this comment
-                if not earlier_card_comment.daily_spent_time:
-                    daily_spent_time = DailySpentTime.create_from_comment(self)
+            if spent_estimated_time:
+                if hasattr(self, "daily_spent_time"):
+                    self.daily_spent_time.set_from_comment(self)
                 else:
-                    daily_spent_time = earlier_card_comment.daily_spent_time
-                    daily_spent_time.set_from_comment(self)
-                    daily_spent_time.save()
-
+                    self.daily_spent_time = DailySpentTime.create_from_comment(self)
+                self.daily_spent_time.save()
                 # Update the spent and estimated time
                 card.update_spent_estimated_time()
 
@@ -1129,12 +1126,10 @@ class CardComment(models.Model):
     def _save_new(self, card):
 
         # Is it a spent/estimated time comment?
-        spent_estimated_time = self.spent_estimated_time
+        spent_estimated_time = self.get_spent_estimated_time_from_content()
         if spent_estimated_time:
             # Creation of Daily Spent Time that depends on this comment
-            DailySpentTime.create_from_comment(self)
-            # Update the spent and estimated time
-            card.update_spent_estimated_time()
+            self.daily_spent_time = DailySpentTime.create_from_comment(self)
 
         # Is it a blocking card comment?
         blocking_card = self.blocking_card_from_content
