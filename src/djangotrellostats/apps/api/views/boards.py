@@ -14,7 +14,7 @@ from djangotrellostats.apps.api.util import get_board_or_404
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.models import Board
-from djangotrellostats.apps.members.models import Member
+from djangotrellostats.apps.members.models import Member, MemberRole
 
 
 @member_required
@@ -75,9 +75,15 @@ def add_member(request, board_id):
     if board.members.filter(id=member_id).exists():
         return JsonResponse(serialize_member(board.members.get(id=member_id)))
 
+    member_type = put_body.get("member_type")
+    if not member_type or not member_type in ("admin", "normal", "guest"):
+        return JsonResponseNotFound({"message": "Member type not found"})
+
     try:
         new_member = Member.objects.get(id=member_id)
         board.add_member(member=member, member_to_add=new_member)
+        member_role, member_role_created = MemberRole.objects.get_or_create(board=board, type=member_type)
+        member_role.members.add(new_member)
     except Member.DoesNotExist:
         return JsonResponseNotFound({"message": "Not found."})
 

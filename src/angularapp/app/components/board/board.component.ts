@@ -239,10 +239,10 @@ export class BoardComponent implements OnInit {
     });
   }
 
-  onAddMemberSubmit(member_id: number):void {
+  onAddMemberSubmit(member_id: number, member_type: string):void {
     let member = this.members.find(function(member_i: Member){ return member_i.id == member_id; });
     if(member){
-      this.boardService.addMember(this.board, member).then(added_member => {
+      this.boardService.addMember(this.board, member, member_type).then(added_member => {
         this.board.addMember(added_member);
         this.addMemberStatus = {show: false, waiting: false};
         this.notificationsService.success("Added member",  `${member.extern_username} was successfully added to ${this.board.name}.`);

@@ -60,9 +60,9 @@ var BoardService = (function (_super) {
             .then(this.extractData)
             .catch(this.handleError);
     };
-    BoardService.prototype.addMember = function (board, member) {
+    BoardService.prototype.addMember = function (board, member, member_type) {
         var add_member_url = this.ADD_MEMBER_URL.replace("{id}", board.id.toString());
-        var put_body = { member: member.id };
+        var put_body = { member: member.id, member_type: member_type };
         console.log(put_body);
         return this.http.put(add_member_url, put_body)
             .toPromise()

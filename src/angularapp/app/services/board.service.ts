@@ -64,9 +64,9 @@ export class BoardService extends DjangoTrelloStatsService{
                   .catch(this.handleError);
   }
 
-  addMember(board: Board, member: Member): Promise<Member> {
+  addMember(board: Board, member: Member, member_type: string): Promise<Member> {
     let add_member_url = this.ADD_MEMBER_URL.replace("{id}", board.id.toString());
-    let put_body = {member: member.id};
+    let put_body = {member: member.id, member_type: member_type};
     console.log(put_body);
     return this.http.put(add_member_url, put_body)
                   .toPromise()

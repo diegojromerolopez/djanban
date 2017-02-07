@@ -5,4 +5,5 @@ export class Member {
     trello_username: string;
     extern_username: string;
     is_current_user: boolean;
+    roles_by_board: {};
 }

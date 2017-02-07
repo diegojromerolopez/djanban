@@ -212,11 +212,11 @@ var BoardComponent = (function () {
             _this.notificationsService.success("Removed member", member.extern_username + " was successfully removed from " + _this.board.name + ".");
         });
     };
-    BoardComponent.prototype.onAddMemberSubmit = function (member_id) {
+    BoardComponent.prototype.onAddMemberSubmit = function (member_id, member_type) {
         var _this = this;
         var member = this.members.find(function (member_i) { return member_i.id == member_id; });
         if (member) {
-            this.boardService.addMember(this.board, member).then(function (added_member) {
+            this.boardService.addMember(this.board, member, member_type).then(function (added_member) {
                 _this.board.addMember(added_member);
                 _this.addMemberStatus = { show: false, waiting: false };
                 _this.notificationsService.success("Added member", member.extern_username + " was successfully added to " + _this.board.name + ".");
