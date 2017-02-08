@@ -20,7 +20,7 @@ var member_service_1 = require("../../services/member.service");
 var angular2_notifications_1 = require("angular2-notifications");
 var BoardComponent = (function () {
     /** Constructor of BoardComponent: initialization of status and setting up the Dragula service */
-    function BoardComponent(router, route, memberService, boardService, cardService, dragulaService, notificationsService, zone, changeDetectorRef) {
+    function BoardComponent(router, route, memberService, boardService, cardService, dragulaService, notificationsService) {
         var _this = this;
         this.router = router;
         this.route = route;
@@ -29,8 +29,6 @@ var BoardComponent = (function () {
         this.cardService = cardService;
         this.dragulaService = dragulaService;
         this.notificationsService = notificationsService;
-        this.zone = zone;
-        this.changeDetectorRef = changeDetectorRef;
         // NotificationsService options
         this.notificationsOptions = {
             position: ["top", "right"],
@@ -253,9 +251,7 @@ BoardComponent = __decorate([
         board_service_1.BoardService,
         card_service_1.CardService,
         ng2_dragula_1.DragulaService,
-        angular2_notifications_1.NotificationsService,
-        core_1.NgZone,
-        core_1.ChangeDetectorRef])
+        angular2_notifications_1.NotificationsService])
 ], BoardComponent);
 exports.BoardComponent = BoardComponent;
 //# sourceMappingURL=board.component.js.map

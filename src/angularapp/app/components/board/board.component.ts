@@ -62,9 +62,7 @@ export class BoardComponent implements OnInit {
     private boardService: BoardService,
     private cardService: CardService,
     private dragulaService: DragulaService,
-    private notificationsService: NotificationsService,
-    private zone: NgZone,
-    private changeDetectorRef: ChangeDetectorRef
+    private notificationsService: NotificationsService
 ) {
     // Visibility of the closed cards
     this.closedItemsVisibility = "hidden";
