@@ -2,8 +2,10 @@
 
 from __future__ import unicode_literals
 
+import copy
 import datetime
 
+from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count
 from django.http.response import Http404, HttpResponse
@@ -69,7 +71,7 @@ def _get_daily_spent_times_replacements(request):
 
     replacements = {
         "member": request.user.member if user_is_member(request.user) else None,
-        "boards": Board.objects.all(),
+        "boards": get_user_boards(request.user),
         "members": Member.objects.all()
     }
 
@@ -114,6 +116,15 @@ def _get_daily_spent_times_replacements(request):
             replacements["selected_board"] = label.board
             replacements["board"] = label.board
 
+    board_id = request.GET.get("board_id")
+    if not label_id:
+        board = get_user_boards(request.user).get(id=board_id)
+        label = None
+        replacements["selected_label"] = label
+        replacements["label"] = label
+        replacements["selected_board"] = board
+        replacements["board"] = board
+
     daily_spent_times = spent_times["all"]
     replacements["week"] = request.GET.get('week') if request.GET.get('week') and request.GET.get('week') > 0 else None
     replacements["months"] = spent_times["per_month"]
@@ -154,7 +165,7 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
     start_date = None
     if start_date_:
         try:
-            start_date = datetime.datetime.strptime(start_date_, "%Y-%m-%d")
+            start_date = datetime.datetime.strptime(start_date_, "%Y-%m-%d").date()
             daily_spent_time_filter["date__gte"] = start_date
         except ValueError:
             start_date = None
@@ -163,7 +174,7 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
     end_date = None
     if end_date_:
         try:
-            end_date = datetime.datetime.strptime(end_date_, "%Y-%m-%d")
+            end_date = datetime.datetime.strptime(end_date_, "%Y-%m-%d").date()
             daily_spent_time_filter["date__lte"] = end_date
         except ValueError:
             end_date = None
@@ -190,18 +201,13 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
         if end_date is None:
             end_date = daily_spent_times[0].date
 
-        num_months = absolute_difference_between_months(start_date, end_date) + 1
-        months = []
-        year = start_date.year
-        for i in range(0, num_months):
-            month_index = start_date.month + i
-
-            # TODO: delete this condition if is not needed
-            if month_index > 12:
-                break
-
+        date_i = datetime.date(start_date.year, start_date.month, 1)
+        while date_i <= end_date:
+            month_index = date_i.month
+            year = date_i.year
             month_name = calendar.month_name[month_index]
-            daily_spent_times_in_month_i = daily_spent_times.filter(date__month=month_index).order_by("date")
+            daily_spent_times_in_month_i = daily_spent_times.filter(date__year=year, date__month=month_index).order_by(
+                "date")
 
             first_weekday, number_of_days_in_month = calendar.monthrange(year, month_index)
 
@@ -221,16 +227,11 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
                 "diff_time_sum": daily_spent_times_in_month_i.aggregate(sum=Sum("diff_time"))["sum"]
             }
             months.append(month)
-            if month == 12:
-                year += 1
+            date_i = (date_i + relativedelta(months=1))
 
     return {
         "all": daily_spent_times, "per_month": months, "start_date": start_date, "end_date": end_date, "board": board
     }
-
-
-def absolute_difference_between_months(d1, d2):
-    return abs((d1.year - d2.year) * 12 + d1.month - d2.month)
 
 
 # Computes the adjusted amount according to the factor each member has
