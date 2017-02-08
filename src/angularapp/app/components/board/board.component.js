@@ -20,7 +20,7 @@ var member_service_1 = require("../../services/member.service");
 var angular2_notifications_1 = require("angular2-notifications");
 var BoardComponent = (function () {
     /** Constructor of BoardComponent: initialization of status and setting up the Dragula service */
-    function BoardComponent(router, route, memberService, boardService, cardService, dragulaService, notificationsService) {
+    function BoardComponent(router, route, memberService, boardService, cardService, dragulaService, notificationsService, zone, changeDetectorRef) {
         var _this = this;
         this.router = router;
         this.route = route;
@@ -29,6 +29,8 @@ var BoardComponent = (function () {
         this.cardService = cardService;
         this.dragulaService = dragulaService;
         this.notificationsService = notificationsService;
+        this.zone = zone;
+        this.changeDetectorRef = changeDetectorRef;
         // NotificationsService options
         this.notificationsOptions = {
             position: ["top", "right"],
@@ -71,15 +73,17 @@ var BoardComponent = (function () {
     /** Action of the drop card event */
     BoardComponent.prototype.onCardDrop = function (parameters) {
         var _this = this;
+        console.log(parameters);
         // Source list
         var source_list_id = parameters[3]["dataset"]["list"];
-        var source_list = new list_1.List(this.board.getListById(parseInt(source_list_id)));
+        var source_list = this.board.getListById(parseInt(source_list_id));
         // Destination list
         var destination_list_id = parameters[2]["dataset"]["list"];
-        var destination_list = new list_1.List(this.board.getListById(parseInt(destination_list_id)));
+        var destination_list = this.board.getListById(parseInt(destination_list_id));
         // Card that has bee moved from source list to destination list
         var moved_card_id = parameters[1]["dataset"]["card"];
         var moved_card = destination_list.getCardById(parseInt(moved_card_id));
+        var old_moved_card_position = moved_card.position;
         // Next card in order in destination
         var next_card_in_destination_id = null;
         // If next card is null, the moved card is the last one of the list
@@ -94,13 +98,19 @@ var BoardComponent = (function () {
         if (next_card != null) {
             destination_position = (next_card.position - 10).toString();
         }
-        // Move card to list
+        if (source_list_id == destination_list_id) {
+            destination_list = null;
+        }
+        // Move card
+        // - To another list
+        // - In the same list up or down
         this.cardService.moveCard(moved_card, destination_list, destination_position)
-            .then(function (card) {
-            //source_list.removeCard(moved_card);
-            //destination_list.addCard(moved_card, destination_position);
-            _this.notificationsService.success("Card moved successfully", card.name + " was moved to list " + destination_list.name + " sucessfully");
+            .then(function (board_response) {
+            _this.prepareBoard(board_response);
+            var sucessMessage = destination_list ? moved_card.name + " was moved to list " + destination_list.name + " sucessfully" : "Change position of " + moved_card.name + " sucessfully";
+            _this.notificationsService.success("Card moved successfully", sucessMessage);
         }).catch(function (error_message) {
+            _this.loadBoard(_this.board.id);
             _this.notificationsService.error("Error", "Couldn't move card " + moved_card.name + ". " + error_message);
         });
     };
@@ -138,10 +148,13 @@ var BoardComponent = (function () {
     /** Prepare board attributes, status, etc. when fetching the board from the server */
     BoardComponent.prototype.prepareBoard = function (board_response) {
         this.board = new board_1.Board(board_response);
+        var list_i = 0;
         for (var _i = 0, _a = this.board.lists; _i < _a.length; _i++) {
             var list = _a[_i];
+            this.board.lists[list_i] = new list_1.List(list);
             this.newCardFormStatus[list.id] = { show: false, waiting: false };
             this.moveAllCardsStatus[list.id] = "hidden";
+            list_i += 1;
         }
     };
     /** Load board */
@@ -149,7 +162,6 @@ var BoardComponent = (function () {
         var _this = this;
         this.boardService.getBoard(board_id).then(function (board_response) {
             _this.prepareBoard(board_response);
-            _this.notificationsService.success("Welcome to board " + _this.board.name, "Here you could manage all tasks. You can click no the notifications like this to close them.");
         }).catch(function (error_message) {
             _this.notificationsService.error("Error", "Couldn't load board. " + error_message);
         });
@@ -241,7 +253,9 @@ BoardComponent = __decorate([
         board_service_1.BoardService,
         card_service_1.CardService,
         ng2_dragula_1.DragulaService,
-        angular2_notifications_1.NotificationsService])
+        angular2_notifications_1.NotificationsService,
+        core_1.NgZone,
+        core_1.ChangeDetectorRef])
 ], BoardComponent);
 exports.BoardComponent = BoardComponent;
 //# sourceMappingURL=board.component.js.map

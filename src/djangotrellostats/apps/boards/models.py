@@ -748,16 +748,28 @@ class Card(models.Model):
             move_card(self, member, destination_list)
 
         # Move to the required position
-        destination_list_cards = destination_list.active_cards
+        self.change_order(member, destination_position=destination_position, local_move_only=local_move_only)
+
+        # Delete all cached charts for this board
+        self.board.clean_cached_charts()
+
+    # Change the order of this card in the same list it currently is
+    @transaction.atomic
+    def change_order(self, member, destination_position="top", local_move_only=False):
+        destination_list_cards = self.list.active_cards
         if destination_list_cards.exists():
+            # Assigning position to the card
+            # If This card is on top, get the old top an move it down
             if destination_position == "top":
                 first_card_in_destination_list = destination_list_cards.order_by("position")[0]
                 destination_position_value = first_card_in_destination_list.position - 10
                 if destination_position_value < 0:
                     destination_position_value = 1
+            # If This card is on the bottom, get the old bottom an move it up
             elif destination_position == "bottom":
                 first_card_in_destination_list = destination_list_cards.order_by("-position")[0]
                 destination_position_value = first_card_in_destination_list.position + 10
+            # Otherwise do nothing
             else:
                 destination_position_value = destination_position
 
@@ -768,9 +780,6 @@ class Card(models.Model):
             # Call to Trello API to order the card
             if not local_move_only:
                 order_card(self, member, destination_position_value)
-
-        # Delete all cached charts for this board
-        self.board.clean_cached_charts()
 
     # Add spent/estimated time
     @transaction.atomic

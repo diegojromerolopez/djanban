@@ -221,16 +221,20 @@ def move_to_list(request, board_id, card_id):
     except Http404:
         return JsonResponseNotFound({"message": "Card not found."})
 
-    if not post_params.get("new_list"):
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
-
-    list_ = card.board.lists.get(id=post_params.get("new_list"))
-
+    # The new position of the card
     new_position = post_params.get("position", "top")
 
-    card.move(member, destination_list=list_, destination_position=new_position)
+    # If there is no new_list param, the card is going to be moved in the same list currently is
+    if post_params.get("new_list"):
+        list_ = card.board.lists.get(id=post_params.get("new_list"))
+        card.move(member, destination_list=list_, destination_position=new_position)
+    else:
+        print "X1"
+        print card.list.name
+        card.change_order(member, destination_position=new_position)
+        print "X2"
 
-    return JsonResponse(serialize_card(card))
+    return JsonResponse(serialize_board(card.board))
 
 
 # Creates a new comment

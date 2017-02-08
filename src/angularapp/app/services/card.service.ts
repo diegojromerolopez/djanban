@@ -238,9 +238,14 @@ export class CardService extends DjangoTrelloStatsService {
   }
 
   /** Move a card to another list */
-  moveCard(card: Card, new_list: List, position="top"): Promise<Card> {
+  moveCard(card: Card, new_list: List, position="top"): Promise<Board> {
     let move_list_url = this.prepareUrl(this.MOVE_CARD_URL, card);
-    return this.http.post(move_list_url, {new_list: new_list.id, position: position})
+    let post_body = {position: position};
+    if(new_list) {
+      post_body["new_list"] = new_list.id
+    }
+    
+    return this.http.post(move_list_url, post_body)
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);

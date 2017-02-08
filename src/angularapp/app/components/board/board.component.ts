@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Board } from '../../models/board';
 import { BoardService } from '../../services/board.service';
@@ -62,7 +62,9 @@ export class BoardComponent implements OnInit {
     private boardService: BoardService,
     private cardService: CardService,
     private dragulaService: DragulaService,
-    private notificationsService: NotificationsService
+    private notificationsService: NotificationsService,
+    private zone: NgZone,
+    private changeDetectorRef: ChangeDetectorRef
 ) {
     // Visibility of the closed cards
     this.closedItemsVisibility = "hidden";
@@ -92,18 +94,19 @@ export class BoardComponent implements OnInit {
 
   /** Action of the drop card event */
   private onCardDrop(parameters: any) {
-    
+    console.log(parameters);
     // Source list
     let source_list_id = parameters[3]["dataset"]["list"];
-    let source_list = new List(this.board.getListById(parseInt(source_list_id)));
+    let source_list = this.board.getListById(parseInt(source_list_id));
     
     // Destination list
     let destination_list_id = parameters[2]["dataset"]["list"];
-    let destination_list = new List(this.board.getListById(parseInt(destination_list_id)));
+    let destination_list = this.board.getListById(parseInt(destination_list_id));
 
     // Card that has bee moved from source list to destination list
     let moved_card_id = parameters[1]["dataset"]["card"];
     let moved_card = destination_list.getCardById(parseInt(moved_card_id));
+    let old_moved_card_position = moved_card.position;
 
     // Next card in order in destination
     let next_card_in_destination_id = null;
@@ -121,13 +124,20 @@ export class BoardComponent implements OnInit {
       destination_position = (next_card.position - 10).toString();
     }
 
-    // Move card to list
+    if(source_list_id == destination_list_id){
+      destination_list = null;
+    }
+
+    // Move card
+    // - To another list
+    // - In the same list up or down
     this.cardService.moveCard(moved_card, destination_list, destination_position)
-      .then(card => {
-        //source_list.removeCard(moved_card);
-        //destination_list.addCard(moved_card, destination_position);
-        this.notificationsService.success("Card moved successfully", `${card.name} was moved to list ${destination_list.name} sucessfully`);
+      .then(board_response => {
+        this.prepareBoard(board_response);
+        let sucessMessage = destination_list? `${moved_card.name} was moved to list ${destination_list.name} sucessfully`: `Change position of ${moved_card.name} sucessfully`
+        this.notificationsService.success("Card moved successfully", sucessMessage);
       }).catch(error_message => {
+        this.loadBoard(this.board.id);
         this.notificationsService.error("Error", `Couldn't move card ${moved_card.name}. ${error_message}`);
       });
   }
@@ -167,9 +177,12 @@ export class BoardComponent implements OnInit {
   /** Prepare board attributes, status, etc. when fetching the board from the server */
   private prepareBoard(board_response: Board){
       this.board = new Board(board_response);
+      let list_i = 0;
       for(let list of this.board.lists){
+        this.board.lists[list_i] = new List(list);
         this.newCardFormStatus[list.id] = {show: false, waiting: false};
         this.moveAllCardsStatus[list.id] = "hidden";
+        list_i += 1;
       }
   }
 
@@ -177,7 +190,6 @@ export class BoardComponent implements OnInit {
   loadBoard(board_id: number): void {
       this.boardService.getBoard(board_id).then(board_response =>{
           this.prepareBoard(board_response);
-          this.notificationsService.success(`Welcome to board ${this.board.name}`, "Here you could manage all tasks. You can click no the notifications like this to close them.");
       }).catch(error_message => {
         this.notificationsService.error("Error", `Couldn't load board. ${error_message}`);
     });;

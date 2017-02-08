@@ -215,7 +215,11 @@ var CardService = (function (_super) {
     CardService.prototype.moveCard = function (card, new_list, position) {
         if (position === void 0) { position = "top"; }
         var move_list_url = this.prepareUrl(this.MOVE_CARD_URL, card);
-        return this.http.post(move_list_url, { new_list: new_list.id, position: position })
+        var post_body = { position: position };
+        if (new_list) {
+            post_body["new_list"] = new_list.id;
+        }
+        return this.http.post(move_list_url, post_body)
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);
