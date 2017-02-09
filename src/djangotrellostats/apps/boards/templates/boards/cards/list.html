@@ -65,7 +65,7 @@
                                             {% if reviewers|length > 0 %}
                                                 <ul>
                                                     {% for reviewer in reviewers %}
-                                                        <li>{{reviewer.trello_username}}</li>
+                                                        <li>{{reviewer.external_username}}</li>
                                                     {% endfor %}
                                                 </ul>
                                             {% endif %}

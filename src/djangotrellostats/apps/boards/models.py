@@ -20,6 +20,7 @@ from isoweek import Week
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
 from djangotrellostats.apps.reports.models import CardMovement, CardReview
+
 from djangotrellostats.trello_api.boards import add_member, remove_member
 
 from djangotrellostats.trello_api.cards import move_card, move_list_cards, \
@@ -30,6 +31,9 @@ from djangotrellostats.trello_api.lists import move_list
 
 
 # Abstract model that represents the immutable objects
+from djangotrellostats.utils.custom_uuid import custom_uuid
+
+
 class ImmutableModel(models.Model):
     class Meta:
         abstract = True
@@ -504,13 +508,15 @@ class Board(models.Model):
     @transaction.atomic
     def remove_member(self, member, member_to_remove):
         self.members.remove(member_to_remove)
-        remove_member(self, member, member_to_remove)
+        if member.has_trello_profile:
+            remove_member(self, member, member_to_remove)
         return member_to_remove
 
     @transaction.atomic
     def add_member(self, member, member_to_add):
         self.members.add(member_to_add)
-        add_member(self, member, member_to_add)
+        if member.has_trello_profile:
+            add_member(self, member, member_to_add)
         return member_to_add
 
     # Delete all cached charts of this board
@@ -745,7 +751,8 @@ class Card(models.Model):
 
         # Call to trello API
         if not local_move_only:
-            move_card(self, member, destination_list)
+            if member.has_trello_profile:
+                move_card(self, member, destination_list)
 
         # Move to the required position
         self.change_order(member, destination_position=destination_position, local_move_only=local_move_only)
@@ -779,7 +786,8 @@ class Card(models.Model):
 
             # Call to Trello API to order the card
             if not local_move_only:
-                order_card(self, member, destination_position_value)
+                if member.has_trello_profile:
+                    order_card(self, member, destination_position_value)
 
     # Add spent/estimated time
     @transaction.atomic
@@ -845,7 +853,7 @@ class Card(models.Model):
     @transaction.atomic
     def add_review(self, member, reviewers, description=""):
         # Add the blocking card with the review format
-        member_usernames = ", ".join(["@{0}".format(reviewer.trello_username) for reviewer in reviewers])
+        member_usernames = ", ".join(["@{0}".format(reviewer.external_username) for reviewer in reviewers])
         if description:
             content = Card.COMMENT_REVIEWED_BY_MEMBERS_WITH_DESCRIPTION_PATTERN.format(
                 member_usernames=member_usernames,
@@ -879,11 +887,16 @@ class Card(models.Model):
     # Add a new comment to this card
     @transaction.atomic
     def add_comment(self, member, content):
-        # Add comment to Trello
-        comment_data = add_comment_to_card(self, member, content)
+
+        if member.has_trello_profile:
+            # Add comment to Trello
+            comment_data = add_comment_to_card(self, member, content)
+            comment_uuid = comment_data["id"]
+        else:
+            comment_uuid = custom_uuid()
 
         # Create comment locally using the id of the new comment in Trello
-        card_comment = CardComment(uuid=comment_data["id"], card=self, author=member, content=content,
+        card_comment = CardComment(uuid=comment_uuid, card=self, author=member, content=content,
                                    creation_datetime=timezone.now())
         card_comment.save()
 
@@ -897,10 +910,11 @@ class Card(models.Model):
     @transaction.atomic
     def edit_comment(self, member, comment, new_content):
         if member.uuid != comment.author.uuid:
-            raise AssertionError(u"This comment does not belong to {0}".format(member.trello_username))
+            raise AssertionError(u"This comment does not belong to {0}".format(member.external_username))
 
-        # Edit comment Trello
-        comment_data = edit_comment_of_card(self, member, comment, new_content)
+        # Edit comment Trello only if we have a trello profile
+        if member.has_trello_profile:
+            comment_data = edit_comment_of_card(self, member, comment, new_content)
 
         # Create comment locally using the id of the new comment in Trello
         comment.content = new_content
@@ -916,8 +930,9 @@ class Card(models.Model):
     # Delete an existing comment of this card
     @transaction.atomic
     def delete_comment(self, member, comment):
-        # Delete comment in Trello
-        delete_comment_of_card(self, member, comment)
+        # Delete comment in Trello only if we have a trello profile
+        if member.has_trello_profile:
+            delete_comment_of_card(self, member, comment)
         # Delete comment locally
         comment.delete()
         # Delete all cached charts for this board
@@ -931,14 +946,16 @@ class Card(models.Model):
         for label in labels:
             if not self.labels.filter(id=label.id).exists():
                 self.labels.add(label)
-                add_label_to_card(self, member, label)
+                if member.has_trello_profile:
+                    add_label_to_card(self, member, label)
 
         # Check if there is any label that needs to be removed
         label_ids = {label.id: label for label in labels}
         for card_label in self.labels.all():
             if card_label.id not in label_ids:
                 self.labels.remove(card_label)
-                remove_label_of_card(self, member, card_label)
+                if member.has_trello_profile:
+                    remove_label_of_card(self, member, card_label)
 
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
@@ -1023,7 +1040,7 @@ class CardComment(models.Model):
                 members = self.card.board.members.all()
             else:
                 cleaned_member_usernames = [member_username.replace("@", "") for member_username in member_usernames]
-                members = [member for member in self.card.board.members.filter(trello_username__in=cleaned_member_usernames)]
+                members = [member for member in self.card.board.members.filter(trello_member_profile__username__in=cleaned_member_usernames)]
             # Checkout the description of the review
             try:
                 description = matches.group("description")
@@ -1229,7 +1246,8 @@ class List(models.Model):
         card.creator = member # TODO: not a model attribute (yet)
 
         # Call Trello API to create the card in Trello's servers
-        trello_card = new_card(card, member=member, position=position)
+        if member.has_trello_profile:
+            trello_card = new_card(card, member=member, position=position)
 
         # Get TrelloCard attributes and assigned them to our new object Card
         card.uuid = trello_card.id
@@ -1250,7 +1268,8 @@ class List(models.Model):
         self.position = position
         self.save()
         # Call to trello API
-        move_list(self, member, position)
+        if member.has_trello_profile:
+            move_list(self, member, position)
 
     @transaction.atomic
     def move_cards(self, member, destination_list):
@@ -1261,7 +1280,8 @@ class List(models.Model):
         for card_to_move in cards_to_move:
             card_to_move.move(member, destination_list, destination_position="top", local_move_only=True)
         # Call to trello API
-        move_list_cards(member=member, source_list=self, destination_list=destination_list)
+        if member.has_trello_profile:
+            move_list_cards(member=member, source_list=self, destination_list=destination_list)
 
     # Return all cards that are not archived (closed)
     @property

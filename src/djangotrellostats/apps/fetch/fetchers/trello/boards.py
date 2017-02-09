@@ -15,7 +15,7 @@ from djangotrellostats.apps.boards.models import Board, List
 from djangotrellostats.apps.fetch.fetchers.base import Fetcher
 from djangotrellostats.apps.fetch.fetchers.trello.cards import CardFetcher
 from djangotrellostats.apps.fetch.fetchers.trello.labels import LabelUpdater
-from djangotrellostats.apps.members.models import Member, MemberRole
+from djangotrellostats.apps.members.models import Member, MemberRole, TrelloMemberProfile
 from djangotrellostats.apps.reports.models import ListReport, MemberReport
 from djangotrellostats.apps.workflows.models import WorkflowCardReport
 from djangotrellostats.trello_api.connector import TrelloConnector
@@ -112,22 +112,26 @@ class Initializer(TrelloConnector):
 
             # If the member does not exist, create it with empty Trello credentials
             try:
-                member = Member.objects.get(uuid=trello_member.id)
+                member = Member.objects.get(trello_member_profile__trello_id=trello_member.id)
                 if self.debug:
-                    print(u"Member {0} already existed ".format(member.trello_username))
+                    print(u"Member {0} already existed ".format(member.external_username))
             except Member.DoesNotExist:
-                member = Member(uuid=trello_member.id, trello_username=trello_member.username,
-                                initials=trello_member.initials)
+                member = Member(uuid=trello_member.id)
                 member.save()
+                trello_member_profile = TrelloMemberProfile(
+                    member=member, username=trello_member.username, initials=trello_member.initials
+                )
+                trello_member_profile.save()
+
                 if self.debug:
-                    print(u"Member {0} created".format(member.trello_username))
+                    print(u"Member {0} created".format(member.external_username))
 
             # Only add the board to the member if he/she has not it yet
             if not member.boards.filter(uuid=board.uuid).exists():
                 member.boards.add(board)
 
             if self.debug:
-                print(u"Member {0} has role {1}".format(member.trello_username, trello_member.member_type))
+                print(u"Member {0} has role {1}".format(member.external_username, trello_member.member_type))
             # If this member has no role in this board, add the role to the member
             if not member.roles.filter(board=board).exists():
                 if self.debug:
@@ -141,7 +145,7 @@ class Initializer(TrelloConnector):
                 if self.debug:
                     print(
                         "Updating {0}'s role from {1} to {2} in {3}".format(
-                            member.trello_username, member.roles.get(board=board).type,
+                            member.external_username, member.roles.get(board=board).type,
                             trello_member.member_type, board.name
                         )
                     )

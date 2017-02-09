@@ -11,7 +11,7 @@ from trello import ResourceUnavailable
 
 from djangotrellostats.apps.base.utils.datetime import localize_if_needed
 from djangotrellostats.apps.boards.models import Card, CardComment
-from djangotrellostats.apps.members.models import Member
+from djangotrellostats.apps.members.models import Member, TrelloMemberProfile
 from djangotrellostats.apps.reports.models import CardMovement
 
 
@@ -84,13 +84,14 @@ class CardFetcher(object):
                     try:
                         CardMovement.objects.get(board=self.board, card=card, type=movement_type,
                                                  source_list=source_list, destination_list=destination_list,
-                                                 datetime=movement_datetime, member__uuid=movement["idMemberCreator"])
+                                                 datetime=movement_datetime,
+                                                 member__trello_member_profile__trello_id=movement["idMemberCreator"])
 
                     except CardMovement.DoesNotExist:
                         try:
-                            member = self.board.members.get(uuid=movement["idMemberCreator"])
+                            member = self.board.members.get(trello_member_profile__trello_id=movement["idMemberCreator"])
                         except Member.DoesNotExist:
-                            member = Member.objects.get(uuid=movement["idMemberCreator"])
+                            member = Member.objects.get(trello_member_profile__trello_id=movement["idMemberCreator"])
 
                         card_movement = CardMovement(board=self.board, card=card, type=movement_type,
                                                      source_list=source_list, destination_list=destination_list,
@@ -144,20 +145,24 @@ class CardFetcher(object):
         for comment in card.trello_card.comments:
 
             # Author of the comment loaded using memoization
-            member_uuid = comment["idMemberCreator"]
-            if member_uuid not in member_dict:
+            trello_member_id = comment["idMemberCreator"]
+            if trello_member_id not in member_dict:
                 try:
-                    member_dict[member_uuid] = Member.objects.get(uuid=comment["idMemberCreator"])
+                    member_dict[trello_member_id] = Member.objects.get(trello_member_profile__trello_id=comment["idMemberCreator"])
                 # If the member doesn't exist, create it
                 except Member.DoesNotExist as e:
-                    deleted_member = Member(
-                        uuid=comment["idMemberCreator"], trello_username=comment["memberCreator"]["username"],
+                    deleted_member = Member(uuid=comment["idMemberCreator"])
+                    deleted_member.save()
+                    trello_member_profile = TrelloMemberProfile(
+                        member=deleted_member,
+                        username=comment["memberCreator"]["username"],
                         initials=comment["memberCreator"]["initials"]
                     )
-                    deleted_member.save()
-                    member_dict[member_uuid] = deleted_member
+                    trello_member_profile.save()
 
-            author = member_dict[member_uuid]
+                    member_dict[trello_member_id] = deleted_member
+
+            author = member_dict[trello_member_id]
 
             # Comment uuid
             uuid = comment["id"]
@@ -195,8 +200,8 @@ class CardFetcher(object):
         for comment_uuid, comment in card_deleted_comments.items():
             comment.delete()
 
-        for member_uuid, member in member_dict.items():
-            if not card.members.filter(uuid=member_uuid).exists():
+        for trello_member_id, member in member_dict.items():
+            if not card.members.filter(trello_member_profile__trello_id=trello_member_id).exists():
                 card.members.add(member)
 
         return card_comments
@@ -244,8 +249,8 @@ class CardFetcher(object):
 
         # Members
         card.members.clear()
-        for member_uuid in trello_card.idMembers:
-            card.members.add(Member.objects.get(uuid=member_uuid))
+        for trello_member_id in trello_card.idMembers:
+            card.members.add(Member.objects.get(trello_member_profile__trello_id=trello_member_id))
 
         return card
 

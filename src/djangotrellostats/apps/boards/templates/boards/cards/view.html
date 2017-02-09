@@ -114,7 +114,7 @@
                   {% if members|length > 0 %}
                     <ul>
                         {% for member_i in members %}
-                            <li>{{member_i.trello_username}}</li>
+                            <li>{{member_i.external_username}}</li>
                         {% endfor %}
                     </ul>
                   {% else %}
@@ -204,7 +204,7 @@
                               {% endif %}
                               from
                               <strong>{{movement.source_list.name}}</strong> to <strong>{{movement.destination_list.name}}</strong>
-                              at {{movement.datetime}} by {{movement.member.trello_username}}.
+                              at {{movement.datetime}} by {{movement.member.external_username}}.
                           </div>
                     </div>
                   {% endfor %}

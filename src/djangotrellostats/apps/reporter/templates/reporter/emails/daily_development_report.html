@@ -10,7 +10,7 @@
     <body>
         <div>
             <div>
-                <h1>{{developer.trello_username}}'s feelings on {{date|date}}</h1>
+                <h1>{{developer.external_username}}'s feelings on {{date|date}}</h1>
                 {% if developer_mood %}
                     Your mood today is:
                     <span class="smiley" style="font-size: 40px;">
@@ -29,10 +29,10 @@
             </div>
 
             <div>
-                <h1>{{developer.trello_username}}'s spent time in day {{date|date}}</h1>
+                <h1>{{developer.external_username}}'s spent time in day {{date|date}}</h1>
                     {% with developer_spent_time=developer|call:'get_spent_time'|arg:date|end_call %}
                         <p>
-                            <span><strong>{{developer.trello_username}}</strong></span>
+                            <span><strong>{{developer.external_username}}</strong></span>
                             <span>{{developer_spent_time|floatformat:"-2"}} hours</span>
                         </p>
                         <div>
@@ -56,7 +56,7 @@
             </div>
 
             <div>
-                <h1>{{developer.trello_username}}'s spent time in day {{date|date}} by board</h1>
+                <h1>{{developer.external_username}}'s spent time in day {{date|date}} by board</h1>
                 {% for board in developer.boards.all %}
                     {% if board.is_fetched %}
                         {% with developer_spent_time=developer|call:'get_spent_time'|arg:date|arg:board %}
@@ -64,7 +64,7 @@
                                 <div>
                                     <h2>{{board.name}}</h2>
                                     <p>
-                                        <span><strong>{{developer.trello_username}}</strong></span>
+                                        <span><strong>{{developer.external_username}}</strong></span>
                                         <span>{{developer_spent_time|floatformat:"-2"}} hours</span>
                                     </p>
                                 </div>
@@ -75,7 +75,7 @@
             </div>
 
             <div>
-                <h1>{{developer.trello_username}}'s spent time in day {{date|date}}</h1>
+                <h1>{{developer.external_username}}'s spent time in day {{date|date}}</h1>
                 <table>
                     <tr>
                         <td>Week day</td>

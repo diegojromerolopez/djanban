@@ -16,7 +16,7 @@
                     <select id="select_member" name="member_id" class="form-control">
                         <option value="">All members</option>
                         {% for member in members.all %}
-                            <option value="{{member.id}}" {% if selected_member.id == member.id %}selected="selected"{% endif %}>{{member.trello_username}}</option>
+                            <option value="{{member.id}}" {% if selected_member.id == member.id %}selected="selected"{% endif %}>{{member.external_username}}</option>
                         {% endfor %}
                     </select>
                 </div>

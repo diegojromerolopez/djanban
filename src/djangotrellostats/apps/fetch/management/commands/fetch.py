@@ -93,7 +93,8 @@ class Command(BaseCommand):
             except (IndexError, KeyError)as e:
                 self.stdout.write(self.style.ERROR("member_username is mandatory"))
                 raise AssertionError("member_username is mandatory")
-            self.members = Member.objects.filter(trello_username=member_trello_username)
+
+            self.members = Member.objects.filter(trello_member_profile__username=member_trello_username)
         else:
             self.members = Member.objects.all()
 
@@ -110,13 +111,13 @@ class Command(BaseCommand):
         for member in self.members:
             if member.is_initialized:
                 self.stdout.write(
-                    self.style.SUCCESS(u"# Fetching {0} boards".format(member.trello_username))
+                    self.style.SUCCESS(u"# Fetching {0} boards".format(member.external_username))
                 )
                 try:
                     self.fetch_member_boards(member)
                     member.fetch_ok = True
                     self.stdout.write(
-                        self.style.SUCCESS(u"All boards of {0} fetched successfully".format(member.trello_username))
+                        self.style.SUCCESS(u"All boards of {0} fetched successfully".format(member.external_username))
                     )
                 # If after two retries the exception persists, warn the administrators
                 except Exception as e:

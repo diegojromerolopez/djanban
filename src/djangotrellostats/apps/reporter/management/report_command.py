@@ -74,7 +74,7 @@ class ReportCommand(BaseCommand):
             "year": self.date.year,
             "administrator": administrator_user,
             "boards": Board.objects.all(),
-            "developer_members": Member.objects.filter(is_developer=True, on_holidays=False).order_by("trello_username"),
+            "developer_members": Member.objects.filter(is_developer=True, on_holidays=False).order_by("trello_member_profile__username"),
             "daily_spent_times": daily_spent_times,
         }
 

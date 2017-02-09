@@ -179,7 +179,7 @@ def view_gantt_chart(request, board_id):
                 "pClass": "gtask{0}".format(task_color),
                 "pLink": reverse("boards:view_card", args=(board_id, board_card.id)),
                 "pMile": 0,
-                "pRes": member.trello_username,
+                "pRes": member.external_username,
                 "pComp": completion_percentage,
                 "pGroup": 1 if blocked_cards.exists() else 0,
                 "pParent": parent_card,

@@ -252,7 +252,7 @@ export class BoardComponent implements OnInit {
     this.boardService.removeMember(this.board, member).then(deleted_member => {
       this.board.removeMember(member);
       this.removeMemberStatus[member.id] = {waiting: false};
-      this.notificationsService.success("Removed member",  `${member.extern_username} was successfully removed from ${this.board.name}.`);
+      this.notificationsService.success("Removed member",  `${member.external_username} was successfully removed from ${this.board.name}.`);
     });
   }
 
@@ -262,7 +262,7 @@ export class BoardComponent implements OnInit {
       this.boardService.addMember(this.board, member, member_type).then(added_member => {
         this.board.addMember(added_member);
         this.addMemberStatus = {show: false, waiting: false};
-        this.notificationsService.success("Added member",  `${member.extern_username} was successfully added to ${this.board.name}.`);
+        this.notificationsService.success("Added member",  `${member.external_username} was successfully added to ${this.board.name}.`);
       }).catch(error_message => {
         this.notificationsService.error("Error", `Couldn't add a new member to board ${this.board.name}. ${error_message}`);
       });

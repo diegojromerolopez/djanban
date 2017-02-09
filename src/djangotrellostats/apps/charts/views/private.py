@@ -169,7 +169,7 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
     start_of_week = week.monday()
     end_of_week = week.sunday()
 
-    chart_title = u"{0}'s spent time in week {1} ({2} - {3})".format(member.trello_username, week_of_year,
+    chart_title = u"{0}'s spent time in week {1} ({2} - {3})".format(member.external_username, week_of_year,
                                                                      start_of_week.strftime("%Y-%m-%d"),
                                                                      end_of_week.strftime("%Y-%m-%d"))
     board = None

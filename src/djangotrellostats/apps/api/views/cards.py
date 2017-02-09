@@ -268,7 +268,7 @@ def add_new_comment(request, board_id, card_id):
             "uuid": new_comment.uuid,
             "content": new_comment.content,
             "creation_datetime": new_comment.creation_datetime,
-            "author": {"id": author.id, "trello_username": author.trello_username, "initials": author.initials}
+            "author": {"id": author.id, "external_username": author.external_username, "initials": author.initials}
     })
 
 
@@ -492,7 +492,7 @@ def modify_comment(request, board_id, card_id, comment_id):
         "uuid": comment.uuid,
         "content": comment.content,
         "creation_datetime": comment.creation_datetime,
-        "author": {"id": author.id, "trello_username": author.trello_username, "initials": author.initials}
+        "author": {"id": author.id, "external_username": author.external_username, "initials": author.initials}
     })
 
 

@@ -25,7 +25,7 @@ def fetch(request):
 
     try:
         fetch_command = Command()
-        fetch_command.handle(member_trello_username=[member.trello_username])
+        fetch_command.handle(member_external_username=[member.external_username])
     except Exception as e:
         return render(request, "fetch/fetch_error.html", context={"exception_message": e})
 

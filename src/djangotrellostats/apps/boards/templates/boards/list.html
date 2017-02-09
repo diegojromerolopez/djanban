@@ -7,10 +7,10 @@
     <link href="{% static 'css/boards/list.css' %}" rel="stylesheet" />
 {% endblock css %}
 
-{% block page_title %}Boards of {{member.trello_username}}{% endblock %}
+{% block page_title %}Boards of {{member.external_username}}{% endblock %}
 
 {% block content %}
-    <h1>Boards of {{member.trello_username}}</h1>
+    <h1>Boards of {{member.external_username}}</h1>
     <div class="board_list">
         {% if member.has_trello_credentials %}
             <p>

@@ -202,7 +202,7 @@ def _number_of_interruptions_by_member(current_user, chart_title, interruption_m
     interruptions_chart.add(u"All interruptions", num_interruptions)
     for member_i in members:
         if sum(member_values[member_i.id]) > 0:
-            interruptions_chart.add(member_i.trello_username, member_values[member_i.id])
+            interruptions_chart.add(member_i.external_username, member_values[member_i.id])
 
     interruptions_chart.x_labels = days
 

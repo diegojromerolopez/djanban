@@ -61,7 +61,7 @@ class Command(daily_report.Command):
                     )
                 else:
                     self.stdout.write(
-                        self.style.WARNING(u"Developer {0} has no email".format(member.trello_username))
+                        self.style.WARNING(u"Developer {0} has no email".format(member.external_username))
                     )
 
         except Exception as e:

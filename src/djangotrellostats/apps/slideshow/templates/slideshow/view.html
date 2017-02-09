@@ -79,7 +79,7 @@
                 <div id="member-carousel" class="owl-carousel">
                     {% for member_i in members %}
                         {% if member_i.is_developer %}
-                            <img id="spent_time_by_day_of_the_week" src="{% url 'charts:spent_time_by_day_of_the_week' member_i.id %}" alt="Spent time by {{member_i.trello_username}}"/>
+                            <img id="spent_time_by_day_of_the_week" src="{% url 'charts:spent_time_by_day_of_the_week' member_i.id %}" alt="Spent time by {{member_i.external_username}}"/>
                         {% endif %}
                     {% endfor %}
                     <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>

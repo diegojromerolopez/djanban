@@ -9,7 +9,8 @@ from django.shortcuts import render
 from djangotrellostats.apps.base.auth import user_is_administrator, get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.members.decorators import administrator_required
-from djangotrellostats.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm, EditProfileForm, AdminEditProfileForm
+from djangotrellostats.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm, EditTrelloMemberProfileForm, AdminMemberForm, \
+    MemberForm
 from djangotrellostats.apps.members.models import Member
 
 
@@ -92,7 +93,6 @@ def change_password_to_member(request, member_id):
     return render(request, "members/give_access_to_member.html", replacements)
 
 
-# Change your user profile data
 @member_required
 def edit_profile(request, member_id):
     user = request.user
@@ -103,9 +103,9 @@ def edit_profile(request, member_id):
         return HttpResponseForbidden()
 
     # Only the administrator has permission of a full change of member attributes
-    Form = EditProfileForm
+    Form = MemberForm
     if user_is_administrator(user):
-        Form = AdminEditProfileForm
+        Form = AdminMemberForm
 
     member = Member.objects.get(id=member_id)
     if request.method == "POST":
@@ -120,3 +120,33 @@ def edit_profile(request, member_id):
 
     replacements = {"member": member, "form": form}
     return render(request, "members/edit_profile.html", replacements)
+
+
+# Change your user profile data
+@member_required
+def edit_trello_member_profile(request, member_id):
+    user = request.user
+    current_member = user.member
+    if not current_member.has_trello_member_profile:
+        return HttpResponseForbidden()
+
+    # Check if the current member is editing his/her profile or is an administrator
+    if current_member.id != int(member_id) and not user_is_administrator(user):
+        return HttpResponseForbidden()
+
+    # Only the administrator has permission of a full change of member attributes
+    Form = EditTrelloMemberProfileForm
+
+    member = Member.objects.get(id=member_id)
+    if request.method == "POST":
+
+        form = Form(request.POST, instance=member.trello_member_profile)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse("members:view_members"))
+
+    else:
+        form = Form(instance=member.trello_member_profile)
+
+    replacements = {"member": member, "form": form}
+    return render(request, "members/edit_trello_profile.html", replacements)

@@ -180,7 +180,7 @@ def serialize_card_comment(comment, board=None):
         "content": comment.content,
         "creation_datetime": comment.creation_datetime,
         "last_edition_datetime": comment.last_edition_datetime,
-        "author": {"id": author.id, "trello_username": author.trello_username, "initials": author.initials},
+        "author": {"id": author.id, "external_username": author.external_username, "initials": author.initials},
         "blocking_card": {
             "id": comment.blocking_card.id,
             "uuid": comment.blocking_card.uuid,
@@ -218,8 +218,7 @@ def serialize_member(member):
 
     member_json = {
         "id": member.id,
-        "trello_username": member.trello_username,
-        "extern_username": member.extern_username,
+        "external_username": member.external_username,
         "initials": member.initials,
         "is_current_user": True if current_member and member.id == current_member.id else False,
         "roles_by_board": {

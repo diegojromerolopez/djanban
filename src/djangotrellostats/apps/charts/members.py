@@ -41,10 +41,10 @@ def task_movements_by_member(movement_type="forward", board=None):
     if board:
         report_filter["board_id"] = board.id
 
-    members = Member.objects.all().order_by("initials")
+    members = Member.objects.all().order_by("id")
 
     for member in members:
-        member_name = member.trello_username
+        member_name = member.external_username
 
         member_report_filter = copy.deepcopy(report_filter)
         member_report_filter["member"] = member
@@ -115,9 +115,9 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
         boards = get_user_boards(current_user)
     else:
         boards = [board]
-    members = Member.objects.filter(boards__in=boards, is_developer=True).distinct().order_by("initials")
+    members = Member.objects.filter(boards__in=boards, is_developer=True).distinct().order_by("id")
     for member in members:
-        member_name = member.trello_username
+        member_name = member.external_username
         daily_spent_times = member.daily_spent_times.filter(**report_filter)
         spent_time = daily_spent_times.aggregate(Sum("spent_time"))["spent_time__sum"]
         if spent_time is None:
@@ -162,9 +162,9 @@ def avg_spent_time_by_weekday(current_user, board=None):
 
     spent_time_chart.x_labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
-    members = Member.objects.filter(boards__in=boards, is_developer=True).distinct().order_by("initials")
+    members = Member.objects.filter(boards__in=boards, is_developer=True).distinct().order_by("id")
     for member in members:
-        member_name = member.trello_username
+        member_name = member.external_username
         daily_spent_times = member.daily_spent_times.filter(**report_filter)
 
         # For each week day we got his/her average number of hours he/she works
@@ -227,7 +227,7 @@ def spent_time_by_week_evolution(board, show_interruptions=False):
     start_week = get_iso_week_of_year(start_working_date)
     end_week = get_iso_week_of_year(end_working_date)
 
-    members = board.members.filter(is_developer=True).order_by("initials")
+    members = board.members.filter(is_developer=True).order_by("id")
 
     member_values = {member.id:[] for member in members}
     member_values["all"] = []
@@ -276,7 +276,7 @@ def spent_time_by_week_evolution(board, show_interruptions=False):
 
     evolution_chart.x_labels = x_labels
     for member in members:
-        evolution_chart.add(member.trello_username, member_values[member.id])
+        evolution_chart.add(member.external_username, member_values[member.id])
 
     evolution_chart.add("All members", member_values["all"])
     if show_interruptions:
@@ -326,13 +326,13 @@ def number_of_comments(current_user, board=None, card=None):
     else:
         boards = get_user_boards(current_user)
 
-    members = Member.objects.filter(boards__in=boards).distinct().order_by("initials")
+    members = Member.objects.filter(boards__in=boards).distinct().order_by("id")
 
     total_number_of_comments = 0
     for member in members:
         member_number_of_comments = card_comments.filter(author=member).count()
         total_number_of_comments += member_number_of_comments
-        number_of_comments_chart.add(member.trello_username, member_number_of_comments)
+        number_of_comments_chart.add(member.external_username, member_number_of_comments)
 
     number_of_comments_chart.add("Total number of comments", total_number_of_comments)
 
@@ -375,13 +375,13 @@ def number_of_cards(current_user, board=None):
     else:
         boards = get_user_boards(current_user)
 
-    members = Member.objects.filter(boards__in=boards).distinct().order_by("initials")
+    members = Member.objects.filter(boards__in=boards).distinct().order_by("id")
 
     total_number_of_cards = 0
     for member in members:
         number_of_cards_by_member = cards.filter(members=member).count()
         total_number_of_cards += number_of_cards_by_member
-        number_of_cards_chart.add(member.trello_username, number_of_cards_by_member)
+        number_of_cards_chart.add(member.external_username, number_of_cards_by_member)
 
     number_of_cards_chart.add("Total number of cards", total_number_of_cards)
 
@@ -414,7 +414,7 @@ def spent_time(current_user, board=None):
         margin=0, human_readable=True
     )
 
-    members = Member.objects.filter(boards__in=boards).distinct().order_by("initials")
+    members = Member.objects.filter(boards__in=boards).distinct().order_by("id")
 
     spent_times = DailySpentTime.objects.filter(board__in=boards)
 
@@ -422,7 +422,7 @@ def spent_time(current_user, board=None):
     for member in members:
         member_spent_time_sum = spent_times.filter(member=member).aggregate(sum=Sum("spent_time"))["sum"]
         if member_spent_time_sum is not None and member_spent_time_sum > 0:
-            spent_time_chart.add(member.trello_username, member_spent_time_sum)
+            spent_time_chart.add(member.external_username, member_spent_time_sum)
             total_spent_time_sum += member_spent_time_sum
 
     spent_time_chart.add("Total spent time", total_spent_time_sum)

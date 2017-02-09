@@ -1,8 +1,8 @@
 {% extends "niko_niko_calendar/form.html" %}
 
-{% block page_title %}New mood measurement for {{member.trello_username}} on day {{date|date:"Y-m-d"}}{% endblock %}
+{% block page_title %}New mood measurement for {{member.external_username}} on day {{date|date:"Y-m-d"}}{% endblock %}
 
 {% block content %}
-    <h1>New mood measurement for {{member.trello_username}} on day {{date|date:"Y-m-d"}}</h1>
+    <h1>New mood measurement for {{member.external_username}} on day {{date|date:"Y-m-d"}}</h1>
     {% include "forms/form.html" %}
 {% endblock content %}

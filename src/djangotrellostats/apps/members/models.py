@@ -14,21 +14,9 @@ from isoweek import Week
 class Member(models.Model):
     DEFAULT_MAX_NUMBER_OF_BOARDS = 2
 
-    api_key = models.CharField(max_length=128, verbose_name=u"Trello API key", null=True, default=None, blank=True)
-
-    api_secret = models.CharField(max_length=128, verbose_name=u"Trello API secret", null=True, default=None, blank=True)
-
-    token = models.CharField(max_length=128, verbose_name=u"Trello token", null=True, default=None, blank=True)
-
-    token_secret = models.CharField(max_length=128, verbose_name=u"Trello token secret", null=True, default=None, blank=True)
-
-    uuid = models.CharField(max_length=128, verbose_name=u"Trello member uuid", unique=True)
-
-    trello_username = models.CharField(max_length=128, verbose_name=u"Trello username")
-
-    initials = models.CharField(max_length=8, verbose_name=u"User initials in Trello")
-
     user = models.OneToOneField(User, verbose_name=u"Associated user", related_name="member", null=True, default=None)
+
+    biography = models.TextField(verbose_name=u"Biography", blank=True, default="")
 
     is_developer = models.BooleanField(verbose_name=u"Is this member a developer?",
                                        help_text=u"Informs if this member is a developer and hence will receive reports"
@@ -63,15 +51,41 @@ class Member(models.Model):
     def __init__(self, *args, **kwargs):
         super(Member, self).__init__(*args, **kwargs)
 
+    @property
+    def has_trello_profile(self):
+        return hasattr(self, "trello_member_profile") and self.trello_member_profile
+
+    @property
+    def has_trello_member_profile(self):
+        return self.has_trello_profile
+
     # Has this uses credentials to make actions with the Trello API?
     @property
     def has_trello_credentials(self):
-        return self.is_initialized
+        return self.has_trello_profile and self.trello_member_profile.is_initialized
+
+    @property
+    def uuid(self):
+        if self.has_trello_profile:
+            return self.trello_member_profile.trello_id
+        return self.id
 
     # Alias very useful for now
     @property
-    def extern_username(self):
-        return self.trello_username
+    def external_username(self):
+        if self.has_trello_profile:
+            return self.trello_member_profile.username
+        if self.user:
+            return self.user.username
+        return "Member {0}".format(self.id)
+
+    @property
+    def initials(self):
+        if self.has_trello_profile:
+            return self.trello_member_profile.initials
+        if self.user:
+            return self.user.username
+        return "Member {0}".format(self.id)
 
     # Resets the password of the associated user of this member
     def reset_password(self, new_password=None):
@@ -85,11 +99,6 @@ class Member(models.Model):
         self.user.set_password(new_password)
         self.user.save()
         return new_password
-
-    # Informs if this member is initialized, that is, it has the credentials needed for connecting to trello.com
-    @property
-    def is_initialized(self):
-        return self.api_key and self.api_secret and self.token and self.token_secret
 
     # Returns cards that belongs to this member and are currently under development
     def get_current_development_cards(self, board=None):
@@ -187,6 +196,7 @@ class Member(models.Model):
     def get_role(self, board):
         return self.roles.get(board=board)
 
+
 # Role a member has in a board
 class MemberRole(models.Model):
     TYPE_CHOICES = (
@@ -202,3 +212,34 @@ class MemberRole(models.Model):
     @property
     def name(self):
         return dict(MemberRole.TYPE_CHOICES)[self.type]
+
+
+#
+class TrelloMemberProfile(models.Model):
+
+    api_key = models.CharField(max_length=128, verbose_name=u"Trello API key", null=True, default=None, blank=True)
+
+    api_secret = models.CharField(max_length=128, verbose_name=u"Trello API secret", null=True, default=None, blank=True)
+
+    token = models.CharField(max_length=128, verbose_name=u"Trello token", null=True, default=None, blank=True)
+
+    token_secret = models.CharField(max_length=128, verbose_name=u"Trello token secret", null=True, default=None, blank=True)
+
+    trello_id = models.CharField(max_length=128, verbose_name=u"Trello member id", unique=True)
+
+    username = models.CharField(max_length=128, verbose_name=u"Trello username")
+
+    initials = models.CharField(max_length=8, verbose_name=u"User initials in Trello")
+
+    member = models.OneToOneField(Member, verbose_name=u"Associated member", related_name="trello_member_profile", null=True, default=None)
+
+    # Informs if this member is initialized, that is, it has the credentials needed for connecting to trello.com
+    @property
+    def is_initialized(self):
+        return self.api_key and self.api_secret and self.token and self.token_secret
+
+    @property
+    def user(self):
+        if self.member:
+            return self.member.user
+        return None

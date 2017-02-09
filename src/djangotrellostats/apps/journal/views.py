@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from dal import autocomplete
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
@@ -28,8 +29,9 @@ def view(request, board_id):
 
     journal_entry_filter = {}
     # Filter by author
-    if request.GET.get("author") and board.members.filter(trello_username=request.GET.get("author")).exists():
-        journal_entry_filter["author"] = board.members.filter(trello_username=request.GET.get("author"))
+    author_get_param = request.GET.get("author")
+    if request.GET.get("author") and board.members.filter(Q(trello_member__username=author_get_param)|Q(username=author_get_param)).exists():
+        journal_entry_filter["author"] = board.members.filter(Q(trello_member__username=author_get_param)|Q(username=author_get_param))
     # Filter by tag
     if request.GET.get("tag"):
         journal_entry_filter["tags__name"] = request.GET.get("tag")

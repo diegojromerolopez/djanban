@@ -24,6 +24,6 @@ class NewDailyMemberMoodForm(models.ModelForm):
         if member.daily_member_moods.filter(date=date).exists():
             raise ValidationError(
                 u"Member {0} has already a mood measurement on day {1}".\
-                format(member.trello_username, date.strftime("%Y-%m-%d"))
+                format(member.external_username, date.strftime("%Y-%m-%d"))
             )
         return cleaned_data

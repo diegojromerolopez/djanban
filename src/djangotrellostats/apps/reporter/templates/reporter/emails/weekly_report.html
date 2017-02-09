@@ -12,7 +12,7 @@
                 <h1>Spent times in week {{year}}-W{{week}} by developer</h1>
                 {% for member in developer_members %}
                     <p>
-                        <span><strong>{{member.trello_username}}</strong></span>
+                        <span><strong>{{member.external_username}}</strong></span>
                         <span>{{member|call:'get_weekly_spent_time'|arg:week|arg:year|end_call|floatformat:"-2"}} hours</span>
                     </p>
                 {% endfor %}
@@ -27,7 +27,7 @@
                             {% for member in board.members.all %}
                                 {% if member.is_developer %}
                                     <p>
-                                        <span><strong>{{member.trello_username}}</strong></span>
+                                        <span><strong>{{member.external_username}}</strong></span>
                                         <span>{{member|call:'get_weekly_spent_time'|arg:week|arg:year|arg:board|floatformat:"-2"}} hours</span>
                                     </p>
                                 {% endif %}
@@ -57,7 +57,7 @@
                         <tr>
                             <td>{{daily_spent_time.weekday}}</td>
                             <td>{{daily_spent_time.date}}</td>
-                            <td>{{daily_spent_time.member.trello_username}}</td>
+                            <td>{{daily_spent_time.member.external_username}}</td>
                             <td>{{daily_spent_time.board.name}}</td>
                             <td>
                                 <a href="{{daily_spent_time.card.short_url}}" title="{{daily_spent_time.card.name}}">

@@ -31,7 +31,7 @@
                                   </div>
                                   <div class="panel-body">
                                       <div class="creation_datetime">
-                                        Created by <a href="{% url 'boards:journal:view' board.id %}?author={{journal_entry.author.trello_username}}">{{journal_entry.author.trello_username}}</a> <span class="cursor-help" title="Created at {{journal_entry.creation_datetime}}">{{journal_entry.creation_datetime|naturaltime}}</span>.
+                                        Created by <a href="{% url 'boards:journal:view' board.id %}?author={{journal_entry.author.external_username}}">{{journal_entry.author.external_username}}</a> <span class="cursor-help" title="Created at {{journal_entry.creation_datetime}}">{{journal_entry.creation_datetime|naturaltime}}</span>.
                                           {% if journal_entry.last_update_datetime != journal_entry.creation_datetime %}{{journal_entry.last_update_datetime}}{% endif %}
                                       </div>
                                       <div class="tags">

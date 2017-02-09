@@ -222,7 +222,7 @@ var BoardComponent = (function () {
         this.boardService.removeMember(this.board, member).then(function (deleted_member) {
             _this.board.removeMember(member);
             _this.removeMemberStatus[member.id] = { waiting: false };
-            _this.notificationsService.success("Removed member", member.extern_username + " was successfully removed from " + _this.board.name + ".");
+            _this.notificationsService.success("Removed member", member.external_username + " was successfully removed from " + _this.board.name + ".");
         });
     };
     BoardComponent.prototype.onAddMemberSubmit = function (member_id, member_type) {
@@ -232,7 +232,7 @@ var BoardComponent = (function () {
             this.boardService.addMember(this.board, member, member_type).then(function (added_member) {
                 _this.board.addMember(added_member);
                 _this.addMemberStatus = { show: false, waiting: false };
-                _this.notificationsService.success("Added member", member.extern_username + " was successfully added to " + _this.board.name + ".");
+                _this.notificationsService.success("Added member", member.external_username + " was successfully added to " + _this.board.name + ".");
             }).catch(function (error_message) {
                 _this.notificationsService.error("Error", "Couldn't add a new member to board " + _this.board.name + ". " + error_message);
             });

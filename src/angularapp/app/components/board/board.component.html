@@ -66,7 +66,7 @@
             <div *ngIf="addMemberStatus['show']" class="add_member">
                 <form (ngSubmit)="onAddMemberSubmit(addMemberForm.value.member, addMemberForm.value.member_type)" #addMemberForm="ngForm">
                     <select name="member" required ngModel>
-                        <option *ngFor="let member of members" value="{{member.id}}">{{member.extern_username}}</option>
+                        <option *ngFor="let member of members" value="{{member.id}}">{{member.external_username}}</option>
                     </select>
                     <select name="member_type" required ngModel>
                         <option value="normal">Normal</option>
@@ -86,7 +86,7 @@
             </div>
             <div *ngFor="let member of board.members">
                 <span class="member">
-                    <span class="member_name">{{member.extern_username}} ({{member.roles_by_board[board.id]}})</span>
+                    <span class="member_name">{{member.external_username}} ({{member.roles_by_board[board.id]}})</span>
                     <button *ngIf="!member.is_current_user" class="btn btn-primary"
                             (click)="removeMember(member)"
                             (click)="removeMemberStatus[member.id]['waiting'] = true"

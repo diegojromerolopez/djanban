@@ -33,7 +33,7 @@
             <h3>
                 {{completed_cards|length}} tasks were completed in {{week_of_year}}
                 ({{week_start_date|date:"Y-m-d"}} to {{week_end_date|date:"Y-m-d"}})
-                {% if selected_member %}by {{selected_member.trello_username}}{% endif %}
+                {% if selected_member %}by {{selected_member.external_username}}{% endif %}
             </h3>
         </div>
     </div>
@@ -61,7 +61,7 @@
                             <td>{{card.number_of_comments}}</td>
                             <td>
                                 {% for card_member in card.members.all %}
-                                    {{card_member.trello_username}}{% if forloop.revcounter0 > 1 %}, {% elif forloop.revcounter0 == 1 %} and {% endif %}
+                                    {{card_member.external_username}}{% if forloop.revcounter0 > 1 %}, {% elif forloop.revcounter0 == 1 %} and {% endif %}
                                 {% endfor %}
                             </td>
                             <td>{% if card.lead_time %}{{card.lead_time|floatformat:-2}}{% endif %}</td>

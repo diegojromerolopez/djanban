@@ -999,7 +999,7 @@ def number_of_comments(current_user, board=None, card=None):
     else:
         boards = get_user_boards(current_user)
 
-    members = Member.objects.filter(boards__in=boards).distinct().order_by("initials")
+    members = Member.objects.filter(boards__in=boards).distinct().order_by("id")
 
     number_of_comments_by_member = {member.id: [] for member in members}
     number_of_comments_list = []
@@ -1032,7 +1032,7 @@ def number_of_comments(current_user, board=None, card=None):
 
     for member in members:
         if sum(number_of_comments_by_member[member.id]) > 0:
-            number_of_comments_chart.add("{0}".format(member.trello_username), number_of_comments_by_member[member.id])
+            number_of_comments_chart.add("{0}".format(member.external_username), number_of_comments_by_member[member.id])
 
     number_of_comments_chart.add("All members", number_of_comments_list)
 

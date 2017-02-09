@@ -14,7 +14,7 @@
                   <div>Last activity: {{card.last_activity_datetime}}</div>
                   {% with card_members=card.members.all %}
                     {% if card_members|length > 0 %}
-                        <div>Members: {% for member in card_members %}<span title="{{member.trello_username}}" class="cursor-help">{{member.initials}}</span> {% endfor %}</div>
+                        <div>Members: {% for member in card_members %}<span title="{{member.external_username}}" class="cursor-help">{{member.initials}}</span> {% endfor %}</div>
                     {% endif %}
                   {% endwith %}
                   {% if card.spent_time %}<div>Spent time: {{card.spent_time|floatformat:-2}} hours</div>{% else %}{% endif %}

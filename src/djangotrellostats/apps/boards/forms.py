@@ -191,7 +191,7 @@ class WeekSummaryFilterForm(forms.Form):
             self.fields["week"].choices = [(week_i, week_i) for week_i in range(1, 53+1)]
 
         self.fields["member"].choices = [("all", "All")] +\
-            [(member.id, member.trello_username) for member in board.members.filter(is_developer=True)]
+            [(member.id, member.external_username) for member in board.members.filter(is_developer=True)]
 
         if initial is None:
             self.initial["year"] = year
