@@ -10,6 +10,7 @@ import { CardService } from '../../services/card.service';
 import { Member } from '../../models/member';
 import { MemberService } from '../../services/member.service';
 import { NotificationsService } from 'angular2-notifications';
+import { Label } from '../../models/label';
 
 
 @Component({
@@ -43,6 +44,9 @@ export class BoardComponent implements OnInit {
   public addMemberStatus: {};
   // Status of the form that moves all cards of a list at once
   public moveAllCardsStatus: {};
+  /** Label filter */
+  public labelFilter: Label[];
+  public labelFilterHash: {};
 
   /** First thing we have to do is loading both the board and all available members */
   ngOnInit(): void {
@@ -71,6 +75,9 @@ export class BoardComponent implements OnInit {
     this.removeMemberStatus = {};
     this.addMemberStatus = {};
     this.moveAllCardsStatus = {};
+    // Label filter: show only the cards that has a label here
+    this.labelFilter = [];
+    this.labelFilterHash = {};
 
     // Options of the drag and drop service
     dragulaService.setOptions('lists', {
@@ -260,6 +267,53 @@ export class BoardComponent implements OnInit {
         this.notificationsService.error("Error", `Couldn't add a new member to board ${this.board.name}. ${error_message}`);
       });
     }
+  }
+
+  /* Label filter */
+
+  cardInLabelFilter(card: Card): boolean {
+    // If there is no filter, card is always in the filter
+    if(this.labelFilter.length == 0){
+      return true;
+    }
+    // Otherwise, check if any of the labels of the card is in the filter
+    for(let label of card.labels){
+      if (label.id in this.labelFilterHash){
+        return true;
+      }
+    }
+    // If none of the labels of the car is in the filter, this card is filtered out
+    return false;
+  }
+
+  /** Return a list with the cards that are in the current label filter */
+  cardsInLabelFilter(cards: Card[], onlyActive: boolean): Card[]{
+    let filteredCards: Card[] = [];
+    for(let card of cards){
+      // A card is in the label filter if:
+      // We are selected open cards and this card is not closed OR we are not selecting only active cards
+      // and there is some label in the filter or the latter is empty.
+      if(((onlyActive && !card.is_closed) || !onlyActive) && this.cardInLabelFilter(card)){
+        filteredCards.push(card);
+      }
+    }
+    return filteredCards;
+  }
+
+  addLabelToLabelFilter(label_id: number): void {
+    let label = this.board.getLabelById(label_id)
+    if(this.labelFilter.findIndex(label_i => label_i.id == label_id)>=0){
+      return;
+    }
+    this.labelFilter.push(label);
+    this.labelFilterHash[label_id] = label;
+  }
+
+  removeLabelFromLabelFilter(label_id: number): void {
+    let label = this.board.getLabelById(label_id)
+    let labelIndex = this.labelFilter.findIndex(function(label_i:Label){ return label_i.id == label.id });
+    this.labelFilter = this.labelFilter.slice(0, labelIndex).concat(this.labelFilter.slice(labelIndex+1));
+    delete this.labelFilterHash[label_id];
   }
 
 }

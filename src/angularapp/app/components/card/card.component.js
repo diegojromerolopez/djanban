@@ -286,16 +286,21 @@ var CardComponent = (function () {
         if (this.card.list.id == destination_list_id) {
             this.notificationsService.error("Error", this.card.name + " is already in " + this.card.list.name);
         }
-        // Otherwise, get the list with that index and change the list
-        for (var list_index in this.card.board.lists) {
-            var list_i = this.card.board.lists[list_index];
+        var _loop_1 = function (list_index) {
+            var list_i = this_1.card.board.lists[list_index];
             if (list_i.id == destination_list_id) {
-                this.cardService.moveCard(this.card, list_i).then(function (updated_card) {
-                    _this.card = updated_card;
+                this_1.cardService.moveCard(this_1.card, list_i).then(function (board_response) {
+                    _this.board = board_response;
+                    _this.card.list = list_i;
                     _this.changeListStatus = "hidden";
                     _this.notificationsService.success("This card has been moved", _this.card.name + " is in " + _this.card.list.name + ".");
                 });
             }
+        };
+        var this_1 = this;
+        // Otherwise, get the list with that index and change the list
+        for (var list_index in this.card.board.lists) {
+            _loop_1(list_index);
         }
     };
     /** Called when creating new comment */

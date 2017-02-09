@@ -6,8 +6,56 @@
                 <a href="{{board.local_url}}" title="View board {{board.name}} details">{{board.name}}</a>
             </h1>
         </div>
+    </div>
+
+    <!-- Menu of visibility of board -->
+    <div class="board_menu row">
+        <div class="col-md-6">
+            <!-- Show/Hide archived cards -->
+            <div class="toggle_is_closed">
+                <span *ngIf="closedItemsVisibility == 'showed'">
+                    <button class="btn btn-primary" (click)="closedItemsVisibility='hidden'">
+                        <span class="fa fa-eye-slash"></span>
+                        Hide archived elements
+                    </button>
+                </span>
+                <span *ngIf="closedItemsVisibility == 'hidden'">
+                    <button class="btn btn-primary" (click)="closedItemsVisibility='showed'">
+                        <span class="fa fa-eye"></span>
+                        Show archived elements
+                    </button>
+                </span>
+            </div>
+            <!-- Filter cards by label -->
+            <div class="label_filter">
+                <h2>Label filter</h2>
+                <form #addLabelToFilterForm="ngForm">
+                    <select name="label" required ngModel>
+                        <option *ngFor="let label of board.labels" value={{label.id}} name="label">
+                            {{label.name}}
+                        </option>
+                    </select>
+                    <span>
+                        <button class="btn btn-primary"
+                                [disabled]="!addLabelToFilterForm.valid"
+                                (click)="addLabelToLabelFilter(addLabelToFilterForm.value.label)">Add</button>
+                    </span>
+                </form>
+                <div class=label-filter>
+                    <div class="row">
+                        <div *ngFor="let label of labelFilter" class="col-md-2 label-filter-item">
+                            <span class="label card-label" [ngStyle]="{'background-color': label.color}">{{label.name}}</span>
+                            <button class="btn btn-primary"
+                                    (click)=removeLabelFromLabelFilter(label.id)>
+                                <span class="fa fa-times"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Members -->
-        <div class="members" *ngIf="members">
+        <div class="members  col-md-3" *ngIf="members">
             <span class="members_header">
                 <h2>Members ({{board.members.length}})</h2>
                 <span class="btn btn-primary" (click)="addMemberStatus = {show: true, waiting: false}" title="Show add member form for board {{board.name}}">
@@ -53,28 +101,9 @@
         </div>
     </div>
 
-    <!-- Menu of visibility of board -->
-    <div class="board_menu">
-        <!-- Show/Hide archived cards -->
-        <div class="toggle_is_closed">
-            <span *ngIf="closedItemsVisibility == 'showed'">
-                <button class="btn btn-primary" (click)="closedItemsVisibility='hidden'">
-                    <span class="fa fa-eye-slash"></span>
-                    Hide archived elements
-                </button>
-            </span>
-            <span *ngIf="closedItemsVisibility == 'hidden'">
-                <button class="btn btn-primary" (click)="closedItemsVisibility='showed'">
-                    <span class="fa fa-eye"></span>
-                    Show archived elements
-                </button>
-            </span>
-        </div>
-    </div>
-
 
     <!-- Lists -->
-    <div class="lists" [dragula]='"lists"' [dragulaModel]='list' [style.width.px]="board.lists.length * 420 + 80">
+    <div class="lists" [dragula]='"lists"' [dragulaModel]='list' [style.width.px]="board.lists.length * 420 + 80" [ngClass]="{'label-filter': labelFilter.length > 0}">
         <div *ngFor="let list of board.lists" class="list panel panel-default" [attr.data-list]="list.id"
             [ngClass]="{'closed-list': list.type == 'closed', 'closed-list-showed': list.type == 'closed' && closedItemsVisibility == 'showed', 'ignored-list': list.type == 'ignored'}">
             <div class="list_name panel-heading cursor-pointer">
@@ -91,8 +120,7 @@
                             <span class="fa fa-archive" *ngIf="list.type == 'closed'" title='Closed list'></span>
                             {{list.name}}
                         </span>
-                        <span *ngIf="closedItemsVisibility == 'showed'">({{list.cards.length}} tasks)</span>
-                        <span *ngIf="closedItemsVisibility == 'hidden'">({{list.cards | active_cards | count }} tasks)</span>
+                        <span>({{cardsInLabelFilter(list.cards, closedItemsVisibility == 'hidden').length}} tasks)</span>
                     </span>
                     <span class="move_list_handle" title="Move list"></span>
                     <div class="list_actions">
@@ -154,7 +182,7 @@
                     id="card-list-{{list.id}}" class="cards" [attr.data-list]="list.id">
                     <div *ngFor="let card of list.cards"
                             id="card-{{card.id}}" class="card panel board-card"
-                            [ngClass]="{'closed-card': card.is_closed, 'panel-info': !card.is_closed, 'panel-danger': card.is_closed, 'closed-card-showed': card.is_closed && closedItemsVisibility=='showed'}"
+                            [ngClass]="{'closed-card': card.is_closed, 'panel-info': !card.is_closed, 'panel-danger': card.is_closed, 'closed-card-showed': card.is_closed && closedItemsVisibility=='showed', 'in-label-filter': cardInLabelFilter(card)}"
                             [attr.data-card]="card.id">
                         <span class="panel-heading card_heading" [ngClass]="{'closed-card_heading': card.is_closed }">
                             <span (click)="onCardSelect(card)" class="card_name">

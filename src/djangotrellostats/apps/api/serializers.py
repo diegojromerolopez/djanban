@@ -30,6 +30,7 @@ def serialize_board(board):
         "local_url": reverse("boards:view", args=(board.id,)),
         "lists": lists_json,
         "members": [serialize_member(member) for member in board.members.all().order_by("initials")],
+        "labels": [serialize_label(label) for label in board.labels.exclude(name="").order_by("name")],
         "requirements": [serialize_requirement(requirement) for requirement in board.requirements.all()],
     }
     return board_json

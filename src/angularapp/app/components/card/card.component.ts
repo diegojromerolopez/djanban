@@ -359,8 +359,9 @@ export class CardComponent implements OnInit  {
         for(let list_index in this.card.board.lists){
             let list_i = this.card.board.lists[list_index];
             if (list_i.id == destination_list_id) {
-                this.cardService.moveCard(this.card, list_i).then(updated_card => {
-                    this.card = updated_card;
+                this.cardService.moveCard(this.card, list_i).then(board_response => {
+                    this.board = board_response
+                    this.card.list = list_i;
                     this.changeListStatus = "hidden";
                     this.notificationsService.success("This card has been moved", `${this.card.name} is in ${this.card.list.name}.`);
                 });

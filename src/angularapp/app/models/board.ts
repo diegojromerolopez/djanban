@@ -20,6 +20,15 @@ export class Board {
     assign(this, board);
   }
 
+  public getLabelById(label_id: number): Label {
+    return this.labels.find(function(label_i){ return label_i.id == label_id; });
+  }
+
+  public removeLabel(label: Label): void {
+    let labelIndex = this.labels.findIndex(function(label_i:Label){ return label_i.id == label.id });
+    this.labels.slice(0, labelIndex).concat(this.labels.slice(labelIndex+1));
+  }
+
   public getListById(list_id: number) : List{
     return this.lists.find(function(list_i){ return list_i.id == list_id; });
   }

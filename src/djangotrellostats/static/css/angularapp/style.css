@@ -290,6 +290,38 @@ card.closed-card-showed,
     margin-top: 2px;
 }
 
+
+/* Label filter */
+.label_filter{
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.label_filter .row {
+    margin-top: 10px;
+}
+
+.label_filter .label-filter-item {
+    margin-bottom: 10px;
+}
+
+.label_filter .label-filter-item .label {
+    margin-right: 0;
+}
+
+.label_filter .row .col-md-2 {
+    float: left;
+    width: auto;
+}
+
+.board-card, .board .lists.label-filter .list .cards .card {
+    display: none;
+}
+
+.board-card, .board .lists.label-filter .list .cards .card.in-label-filter {
+    display: block;
+}
+
 /* Card view */
 
 .card-view .card-section{

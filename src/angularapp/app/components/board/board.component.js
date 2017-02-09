@@ -42,6 +42,9 @@ var BoardComponent = (function () {
         this.removeMemberStatus = {};
         this.addMemberStatus = {};
         this.moveAllCardsStatus = {};
+        // Label filter: show only the cards that has a label here
+        this.labelFilter = [];
+        this.labelFilterHash = {};
         // Options of the drag and drop service
         dragulaService.setOptions('lists', {
             moves: function (el, container, handle) {
@@ -234,6 +237,50 @@ var BoardComponent = (function () {
                 _this.notificationsService.error("Error", "Couldn't add a new member to board " + _this.board.name + ". " + error_message);
             });
         }
+    };
+    /* Label filter */
+    BoardComponent.prototype.cardInLabelFilter = function (card) {
+        // If there is no filter, card is always in the filter
+        if (this.labelFilter.length == 0) {
+            return true;
+        }
+        // Otherwise, check if any of the labels of the card is in the filter
+        for (var _i = 0, _a = card.labels; _i < _a.length; _i++) {
+            var label = _a[_i];
+            if (label.id in this.labelFilterHash) {
+                return true;
+            }
+        }
+        // If none of the labels of the car is in the filter, this card is filtered out
+        return false;
+    };
+    /** Return a list with the cards that are in the current label filter */
+    BoardComponent.prototype.cardsInLabelFilter = function (cards, onlyActive) {
+        var filteredCards = [];
+        for (var _i = 0, cards_1 = cards; _i < cards_1.length; _i++) {
+            var card = cards_1[_i];
+            // A card is in the label filter if:
+            // We are selected open cards and this card is not closed OR we are not selecting only active cards
+            // and there is some label in the filter or the latter is empty.
+            if (((onlyActive && !card.is_closed) || !onlyActive) && this.cardInLabelFilter(card)) {
+                filteredCards.push(card);
+            }
+        }
+        return filteredCards;
+    };
+    BoardComponent.prototype.addLabelToLabelFilter = function (label_id) {
+        var label = this.board.getLabelById(label_id);
+        if (this.labelFilter.findIndex(function (label_i) { return label_i.id == label_id; }) >= 0) {
+            return;
+        }
+        this.labelFilter.push(label);
+        this.labelFilterHash[label_id] = label;
+    };
+    BoardComponent.prototype.removeLabelFromLabelFilter = function (label_id) {
+        var label = this.board.getLabelById(label_id);
+        var labelIndex = this.labelFilter.findIndex(function (label_i) { return label_i.id == label.id; });
+        this.labelFilter = this.labelFilter.slice(0, labelIndex).concat(this.labelFilter.slice(labelIndex + 1));
+        delete this.labelFilterHash[label_id];
     };
     return BoardComponent;
 }());

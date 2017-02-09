@@ -4,6 +4,13 @@ var Board = (function () {
     function Board(board) {
         assign_1.assign(this, board);
     }
+    Board.prototype.getLabelById = function (label_id) {
+        return this.labels.find(function (label_i) { return label_i.id == label_id; });
+    };
+    Board.prototype.removeLabel = function (label) {
+        var labelIndex = this.labels.findIndex(function (label_i) { return label_i.id == label.id; });
+        this.labels.slice(0, labelIndex).concat(this.labels.slice(labelIndex + 1));
+    };
     Board.prototype.getListById = function (list_id) {
         return this.lists.find(function (list_i) { return list_i.id == list_id; });
     };
