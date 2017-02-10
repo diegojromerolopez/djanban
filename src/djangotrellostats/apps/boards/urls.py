@@ -36,6 +36,7 @@ urlpatterns = [
 
     url(r'^(?P<board_id>\d+)/cards/new/?$', cards.new, name="new_card"),
     url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)$', cards.view, name="view_card"),
+    url(r'^c/(?P<board_id>\d+)/(?P<card_uuid>[^/]+)$', cards.view_short_url, name="view_card_short_url"),
 
     # Move cards
     url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/move_forward/?$', cards.move_forward, name="move_card_forward"),

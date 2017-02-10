@@ -12,19 +12,21 @@ from djangotrellostats.apps.members.models import Member, TrelloMemberProfile
 
 
 # Register form
-class SignUpForm(forms.Form):
+class LocalSignUpForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
-        super(SignUpForm, self).__init__(*args, **kwargs)
+        super(LocalSignUpForm, self).__init__(*args, **kwargs)
         self.fields["first_name"] = forms.CharField(label=u"First name", max_length=64, required=True)
         self.fields["last_name"] = forms.CharField(label=u"Last name", max_length=64, required=True)
         self.fields["email"] = forms.EmailField(label=u"Email and username", max_length=64, required=True)
+
         self.fields["password1"] = forms.CharField(label=u"Password", widget=forms.PasswordInput(), max_length=16, required=True)
         self.fields["password2"] = forms.CharField(label=u"Repeat your password", widget=forms.PasswordInput(), max_length=16, required=True)
+
         self.fields["captcha"] = CaptchaField(label=u"Fill this captcha to sign up")
 
     def clean(self):
-        cleaned_data = super(SignUpForm, self).clean()
+        cleaned_data = super(LocalSignUpForm, self).clean()
         # Check if passwords are equal
         if cleaned_data.get("password1") != cleaned_data.get("password2"):
             raise ValidationError(u"Passwords don't match")
@@ -34,22 +36,6 @@ class SignUpForm(forms.Form):
             cleaned_data["username"] = cleaned_data["email"]
             if User.objects.filter(username=cleaned_data["username"]).exists():
                 raise ValidationError(u"You have already an user. Have you forgotten your password?")
-
-        # Get Trello remote data
-        trello_client = TrelloClient(
-            api_key=self.cleaned_data["api_key"], api_secret=self.cleaned_data["api_secret"],
-            token=self.cleaned_data["token"], token_secret=self.cleaned_data["token_secret"]
-        )
-
-        trello_member = TrelloMember(client=trello_client, member_id="me")
-        try:
-            trello_member.fetch()
-        except Exception:
-            raise ValidationError(u"Exception when dealing with Trello connection. Are your credentials right?")
-
-        self.cleaned_data["uuid"] = trello_member.id
-        self.cleaned_data["trello_username"] = trello_member.username
-        self.cleaned_data["initials"] = trello_member.initials
 
         return self.cleaned_data
 
@@ -70,6 +56,61 @@ class SignUpForm(forms.Form):
             member.user = user
             member.max_number_of_boards = Member.DEFAULT_MAX_NUMBER_OF_BOARDS
             member.save()
+
+        return member
+
+
+# Register form
+class TrelloSignUpForm(LocalSignUpForm):
+
+    def __init__(self, *args, **kwargs):
+        super(LocalSignUpForm, self).__init__(*args, **kwargs)
+
+        self.fields["api_key"] = forms.CharField(label=u"Trello's API key", max_length=64, required=True)
+        self.fields["api_secret"] = forms.CharField(label=u"Trello's API secret", max_length=64, required=True)
+        self.fields["token"] = forms.CharField(label=u"Trello's token", max_length=64, required=True)
+        self.fields["token_secret"] = forms.CharField(label=u"Trello's token secret", max_length=64, required=True)
+
+        self.order_fields(["first_name", "last_name", "email", "password1", "password2",
+                           "api_key", "api_secret", "token", "token_secret", "captcha"])
+
+    def clean(self):
+        cleaned_data = super(LocalSignUpForm, self).clean()
+
+        # Get Trello remote data
+        trello_client = TrelloClient(
+            api_key=self.cleaned_data["api_key"], api_secret=self.cleaned_data["api_secret"],
+            token=self.cleaned_data["token"], token_secret=self.cleaned_data["token_secret"]
+        )
+
+        trello_member = TrelloMember(client=trello_client, member_id="me")
+        try:
+            trello_member.fetch()
+        except Exception:
+            raise ValidationError(u"Exception when dealing with Trello connection. Are your credentials right?")
+
+        self.cleaned_data["uuid"] = trello_member.id
+        self.cleaned_data["trello_username"] = trello_member.username
+        self.cleaned_data["initials"] = trello_member.initials
+
+        return self.cleaned_data
+
+    def save(self, commit=False):
+        member = super(LocalSignUpForm, self).save(commit=True)
+
+        trello_member_profile = TrelloMemberProfile(
+            api_key=self.cleaned_data["api_key"],
+            api_secret=self.cleaned_data["api_secret"],
+            token=self.cleaned_data["token"],
+            token_secret=self.cleaned_data["token_secret"],
+            uuid=self.cleaned_data["uuid"],
+            username=self.cleaned_data["trello_username"],
+            initials=self.cleaned_data["initials"],
+        )
+
+        if commit:
+            trello_member_profile.member = member
+            trello_member_profile.save()
 
         return member
 

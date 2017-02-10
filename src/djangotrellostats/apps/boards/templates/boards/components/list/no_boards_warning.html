@@ -3,10 +3,17 @@
         <div class="panel panel-warning">
           <div class="panel-heading">You don't have boards yet</div>
           <div class="panel-body">
-            <p>Currently you have no boards loaded, do you want to load your boards?</p>
-            <form action="{% url 'boards:init_boards' %}" method="post">
-                <button type="submit" class="btn btn-primary">load boards</button>
-            </form>
+              {% if member.has_trello_profile %}
+                <p>Currently you have no boards loaded, do you want to load your boards?</p>
+                <form action="{% url 'boards:init_boards' %}" method="post">
+                    <button type="submit" class="btn btn-primary">load boards</button>
+                </form>
+              {% else %}
+                <p>Currently you have no boards, do you want to create one?</p>
+                <p>
+                    <a href="{% url 'boards:new' %}" title="New board" class="btn btn-primary btn-success"> New board</a>
+                </p>
+              {% endif %}
           </div>
         </div>
     </div>

@@ -218,6 +218,7 @@ class BoardFetcher(Fetcher):
                 self._create_card_reports()
 
                 self.board.last_fetch_datetime = timezone.now()
+                self.board.last_activity_datetime = self.board.last_fetch_datetime
                 self.board.save()
 
         except Exception as e:

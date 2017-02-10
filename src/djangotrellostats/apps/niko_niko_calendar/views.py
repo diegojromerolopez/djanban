@@ -28,7 +28,7 @@ def view_calendar(request):
         member = request.user.member
 
     boards = get_user_boards(request.user)
-    members = Member.objects.filter(boards__in=boards).distinct().filter(is_developer=True).order_by("initials")
+    members = Member.objects.filter(boards__in=boards).distinct().filter(is_developer=True).order_by("id")
 
     min_date = DailyMemberMood.objects.filter(member__in=members).aggregate(min_date=Min("date"))["min_date"]
     max_date = DailyMemberMood.objects.filter(member__in=members).aggregate(max_date=Max("date"))["max_date"]

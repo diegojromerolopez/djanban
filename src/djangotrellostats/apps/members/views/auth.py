@@ -9,15 +9,20 @@ from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template.loader import get_template
-from djangotrellostats.apps.members.forms import SignUpForm, ResetPasswordForm
+from djangotrellostats.apps.members.forms import TrelloSignUpForm, LocalSignUpForm, ResetPasswordForm
 
 
-# User registration
-@transaction.atomic
+# Local user registration
 def signup(request):
+    return render(request, "members/signup/main.html")
+
+
+# Local user registration
+@transaction.atomic
+def local_signup(request):
 
     if request.method == "POST":
-        form = SignUpForm(request.POST)
+        form = LocalSignUpForm(request.POST)
 
         if form.is_valid():
             member = form.save(commit=True)
@@ -27,9 +32,30 @@ def signup(request):
                 return HttpResponseRedirect(reverse("index"))
 
     else:
-        form = SignUpForm()
+        form = LocalSignUpForm()
 
-    return render(request, "members/signup.html", {"form": form})
+    return render(request, "members/signup/local_signup.html", {"form": form})
+
+
+
+# Trello user registration
+@transaction.atomic
+def trello_signup(request):
+
+    if request.method == "POST":
+        form = TrelloSignUpForm(request.POST)
+
+        if form.is_valid():
+            member = form.save(commit=True)
+            user = authenticate(username=member.user.username, password=form.data["password1"])
+            if user and user is not None:
+                django_login(request, user)
+                return HttpResponseRedirect(reverse("index"))
+
+    else:
+        form = TrelloSignUpForm()
+
+    return render(request, "members/signup/trello_signup.html", {"form": form})
 
 
 # Resets user password and send it to user

@@ -47,7 +47,7 @@ class CachedChart(models.Model):
     @staticmethod
     def _get(board, uuid):
         if board:
-            return CachedChart.objects.get(board=board, uuid=uuid, creation_datetime__gte=board.last_fetch_datetime)
+            return CachedChart.objects.get(board=board, uuid=uuid, creation_datetime__gte=board.last_activity_datetime)
 
         # In case there is no board, the charts are cached during 30 minutes
         return CachedChart.objects.get(board=None, uuid=uuid, creation_datetime__gte=timezone.now() - timedelta(minutes=30))

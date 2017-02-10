@@ -48,7 +48,9 @@ def user_is_visitor(user, board=None):
 # Return the boards of an user
 def get_user_boards(user, is_archived=False):
     if user_is_member(user):
-        return user.member.boards.filter(is_archived=is_archived).order_by("name")
+        user_boards = user.member.boards.filter(is_archived=is_archived).order_by("name")
+        print user_boards
+        return user_boards
 
     if user_is_visitor(user):
         return user.boards.filter(is_archived=is_archived).order_by("name")

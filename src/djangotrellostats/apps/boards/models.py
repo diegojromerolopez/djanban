@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 from django.db import models, transaction
 from django.db.models import Avg, Sum, Min, Max
 from django.db.models.query_utils import Q
+from django.urls import reverse
 from django.utils import timezone
 from isoweek import Week
 
@@ -161,7 +162,9 @@ class Board(models.Model):
 
     # Returns the date of the last fetch in an ISO format
     def get_human_fetch_datetime(self):
-        return self.last_fetch_datetime.strftime("%Y-%m-%d")
+        if self.last_fetch_datetime:
+            return self.last_fetch_datetime.strftime("%Y-%m-%d")
+        return self.last_activity_datetime.strftime("%Y-%m-%d")
 
     # Returns an hourly rate or None if this doesn't exist
     def get_date_hourly_rate(self, date):
@@ -197,7 +200,7 @@ class Board(models.Model):
         Returns: True if the board has data (cards, times...). False otherwise.
 
         """
-        return self.last_fetch_datetime is not None
+        return self.last_fetch_datetime is not None or not self.creator.has_trello_profile
 
     # Lists that are before development (backlog or ready to develop)
     def before_development_lists(self):
@@ -1248,12 +1251,28 @@ class List(models.Model):
         # Call Trello API to create the card in Trello's servers
         if member.has_trello_profile:
             trello_card = new_card(card, member=member, position=position)
+            card_uuid = trello_card.id
+            short_url = trello_card.shortUrl
+            url = trello_card.url
+            pos = trello_card.pos
+        else:
+            card_uuid = custom_uuid()
+            short_url = reverse("boards:view_card_short_url", args=(board.id, card_uuid))
+            url = reverse("boards:view_card_short_url", args=(board.id, card_uuid))
+            cards = self.active_cards.all()
+            if not cards.exists():
+                pos = 100000
+            else:
+                if position == "top":
+                    pos = cards.order_by("position")[0].position - 10
+                elif position == "bottom":
+                    pos = cards.order_by("-position")[0].position + 10
 
-        # Get TrelloCard attributes and assigned them to our new object Card
-        card.uuid = trello_card.id
-        card.short_url = trello_card.shortUrl
-        card.url = trello_card.url
-        card.position = trello_card.pos
+        # Set attributes and assigned them to our new object Card
+        card.uuid = card_uuid
+        card.short_url = short_url
+        card.url = url
+        card.position = pos
         card.creation_datetime = timezone.now()
         card.last_activity_datetime = timezone.now()
 

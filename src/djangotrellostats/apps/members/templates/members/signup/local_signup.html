@@ -1,0 +1,15 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Signup{% endblock %}
+
+{% block content %}
+    <h1>Local signup</h1>
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+                Please, fill in these fields with your data.
+            </p>
+        </div>
+    </div>
+    {% include "forms/form.html" %}
+{% endblock content %}

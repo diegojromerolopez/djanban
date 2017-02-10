@@ -12,11 +12,13 @@ from django.db import transaction
 from django.forms import models
 from djangotrellostats.apps.boards.models import Board, Card, List
 from djangotrellostats.apps.fetch.fetchers.trello.boards import Initializer
+from djangotrellostats.apps.members.models import MemberRole
 from djangotrellostats.trello_api.cards import new_card
 from djangotrellostats.trello_api.lists import new_list
 
 
 # Board edition form
+from djangotrellostats.utils.custom_uuid import custom_uuid
 from djangotrellostats.utils.week import number_of_weeks_of_year, get_iso_week_of_year
 
 
@@ -87,10 +89,24 @@ class NewBoardForm(models.ModelForm):
     def save(self, commit=True):
         if commit:
             with transaction.atomic():
-                initializer = Initializer(member=self.instance.creator)
-                lists = self.cleaned_data.get("lists")
-                initializer.create_board(self.instance, lists=lists)
-                super(NewBoardForm, self).save(commit=True)
+                if self.instance.creator.has_trello_profile:
+                    initializer = Initializer(member=self.instance.creator)
+                    lists = self.cleaned_data.get("lists")
+                    initializer.create_board(self.instance, lists=lists)
+                    super(NewBoardForm, self).save(commit=True)
+                else:
+                    self.instance.uuid = custom_uuid()
+                    self.instance.has_to_be_fetched = False
+                    self.instance.last_activity_datetime = timezone.now()
+                    super(NewBoardForm, self).save(commit=True)
+                    # Adding the creator as member of the board
+                    self.instance.members.add(self.instance.creator)
+                    # Adding the creator as admin of the board
+                    role, created = MemberRole.objects.get_or_create(board=self.instance, type="admin")
+                    role.members.add(self.instance.creator)
+                    self.instance.roles.add(role)
+
+
 
 
 # New list form
@@ -112,10 +128,14 @@ class NewListForm(models.ModelForm):
                 list_ = self.instance
 
                 # Call Trello API to create the list
-                trello_list = new_list(list_, member)
+                if current_user.member.has_trello_profile:
+                    trello_list = new_list(list_, member)
+                    list_uuid = trello_list.id
+                else:
+                    list_uuid = custom_uuid()
 
                 # Get TrelloList attributes and assigned them to our new object List
-                list_.uuid = trello_list.id
+                list_.uuid = list_uuid
                 list_.creation_datetime = timezone.now()
                 list_.last_activity_datetime = timezone.now()
 

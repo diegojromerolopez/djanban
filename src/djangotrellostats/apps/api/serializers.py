@@ -29,7 +29,7 @@ def serialize_board(board):
         "description": board.description,
         "local_url": reverse("boards:view", args=(board.id,)),
         "lists": lists_json,
-        "members": [serialize_member(member) for member in board.members.all().order_by("initials")],
+        "members": [serialize_member(member) for member in board.members.all().order_by("id")],
         "labels": [serialize_label(label) for label in board.labels.exclude(name="").order_by("name")],
         "requirements": [serialize_requirement(requirement) for requirement in board.requirements.all()],
     }
@@ -105,7 +105,7 @@ def serialize_card(card):
             "labels": [serialize_label(label) for label in board.labels.exclude(name="").order_by("name")]
         },
         "list": serialize_list(card_list),
-        "members": [serialize_member(member) for member in card.members.all().order_by("initials")],
+        "members": [serialize_member(member) for member in card.members.all().order_by("id")],
         "blocking_cards": [
             {
                 "id": blocking_card.id,

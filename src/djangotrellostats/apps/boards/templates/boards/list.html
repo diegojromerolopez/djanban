@@ -40,23 +40,27 @@
                                 {{board.name}}
                             </a>
                         </h2>
-                        {% if board.last_fetch_datetime %}
-                            <div>
-                                Last fetched on {{board.last_fetch_datetime}} ({{board.last_fetch_datetime|timesince}} ago)
-                            </div>
-                        {% else %}
-                            <div>
-                                Not fetched yet.
-                            </div>
+                        {% if member.has_trello_profile %}
+                            {% if board.last_fetch_datetime %}
+                                <div>
+                                    Last fetched on {{board.last_fetch_datetime}} ({{board.last_fetch_datetime|timesince}} ago)
+                                </div>
+                            {% else %}
+                                <div>
+                                    Not fetched yet.
+                                </div>
+                            {% endif %}
                         {% endif %}
                         <div>
                             <div>
-                                {% if board.has_to_be_fetched %}
-                                    <span class="fa fa-cloud-download"></span>Will be fetched.
-                                {% else %}
-                                    <span class="fa fa-times"></span>Will <strong>not</strong> be fetched.
-                                    {% if member %}
-                                        <a href="{% url 'boards:edit' board.id %}" title="Change board fetching settings">Change</a>.
+                                {% if member.has_trello_profile %}
+                                    {% if board.has_to_be_fetched %}
+                                        <span class="fa fa-cloud-download"></span>Will be fetched.
+                                    {% else %}
+                                        <span class="fa fa-times"></span>Will <strong>not</strong> be fetched.
+                                        {% if member %}
+                                            <a href="{% url 'boards:edit' board.id %}" title="Change board fetching settings">Change</a>.
+                                        {% endif %}
                                     {% endif %}
                                 {% endif %}
                             </div>

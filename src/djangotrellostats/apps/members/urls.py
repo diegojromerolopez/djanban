@@ -7,6 +7,9 @@ from djangotrellostats.apps.members.views import auth, main
 
 urlpatterns = [
     url(r'^signup/?$', auth.signup, name="signup"),
+    url(r'^signup/local/?$', auth.local_signup, name="local_signup"),
+    url(r'^signup/trello/?$', auth.trello_signup, name="trello_signup"),
+
     url(r'^reset_password/?$', auth.reset_password, name="reset_password"),
     url(r'^reset_password_success/?$', TemplateView.as_view(template_name="members/reset_password_success.html"),
         name="reset_password_success"),
