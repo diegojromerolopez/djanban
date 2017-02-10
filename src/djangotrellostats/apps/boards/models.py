@@ -2,36 +2,29 @@
 
 from __future__ import unicode_literals
 
+import copy
+import re
+from datetime import timedelta
 from decimal import Decimal
 
 import numpy
-import copy
-import re
 import shortuuid
-from datetime import timedelta
-
 from django.contrib.auth.models import User
 from django.db import models, transaction
 from django.db.models import Avg, Sum, Min, Max
 from django.db.models.query_utils import Q
 from django.urls import reverse
 from django.utils import timezone
+
 from isoweek import Week
 
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
 from djangotrellostats.apps.reports.models import CardMovement, CardReview
 
-from djangotrellostats.trello_api.boards import add_member, remove_member
-
-from djangotrellostats.trello_api.cards import move_card, move_list_cards, \
-    add_comment_to_card, edit_comment_of_card, delete_comment_of_card, \
-    remove_label_of_card, add_label_to_card, order_card, new_card
-
-from djangotrellostats.trello_api.lists import move_list
-
 
 # Abstract model that represents the immutable objects
+from djangotrellostats.remote_backends.factory import RemoteBackendConnectorFactory
 from djangotrellostats.utils.custom_uuid import custom_uuid
 
 
@@ -511,16 +504,23 @@ class Board(models.Model):
     @transaction.atomic
     def remove_member(self, member, member_to_remove):
         self.members.remove(member_to_remove)
-        if member.has_trello_profile:
-            remove_member(self, member, member_to_remove)
+        connector = RemoteBackendConnectorFactory.factory(member)
+        connector.remove_member(board=self, member_to_remove=member_to_remove)
         return member_to_remove
 
     @transaction.atomic
     def add_member(self, member, member_to_add):
         self.members.add(member_to_add)
-        if member.has_trello_profile:
-            add_member(self, member, member_to_add)
+        connector = RemoteBackendConnectorFactory.factory(member)
+        connector.add_member(board=self, member_to_add=member_to_add)
         return member_to_add
+
+    @transaction.atomic
+    def new_list(self, member, new_list):
+        connector = RemoteBackendConnectorFactory.factory(member)
+        new_list = connector.new_list(new_list)
+        new_list.save()
+        return new_list
 
     # Delete all cached charts of this board
     def clean_cached_charts(self):
@@ -531,7 +531,7 @@ class Board(models.Model):
     def save(self, *args, **kwargs):
         # Creation of public access code in case there is none present
         if not self.public_access_code:
-            self.public_access_code=shortuuid.ShortUUID().random(length=20).lower()
+            self.public_access_code = shortuuid.ShortUUID().random(length=20).lower()
         # Call to parent save method
         super(Board, self).save(*args, **kwargs)
 
@@ -754,14 +754,45 @@ class Card(models.Model):
 
         # Call to trello API
         if not local_move_only:
-            if member.has_trello_profile:
-                move_card(self, member, destination_list)
+            connector = RemoteBackendConnectorFactory.factory(member)
+            connector.move_card(card=self, destination_list=destination_list)
 
         # Move to the required position
         self.change_order(member, destination_position=destination_position, local_move_only=local_move_only)
 
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
+
+    # Change the order of this card in the same list it currently is
+    @transaction.atomic
+    def change_attribute(self, member, attribute, value):
+        connector = RemoteBackendConnectorFactory.factory(member)
+
+        if attribute == "name":
+            self.name = value
+            connector.set_card_name(value)
+
+        elif attribute == "description":
+            self.description = value
+            connector.set_card_description(value)
+
+        elif attribute == "is_closed":
+            self.is_closed = value
+            connector.set_card_is_closed(value)
+
+        elif attribute == "due_datetime":
+            if value is not None:
+                self.due_datetime = value
+                self.save()
+                connector.set_due_datetime(self, member)
+            else:
+                self.due_datetime = None
+                self.remove_due_datetime(self, member)
+
+        else:
+            raise AssertionError("Attribute {0} change not implemented choose one of name, description, is_closed or due_datetime")
+
+        self.save()
 
     # Change the order of this card in the same list it currently is
     @transaction.atomic
@@ -789,8 +820,8 @@ class Card(models.Model):
 
             # Call to Trello API to order the card
             if not local_move_only:
-                if member.has_trello_profile:
-                    order_card(self, member, destination_position_value)
+                connector = RemoteBackendConnectorFactory.factory(member)
+                connector.order_card(card=self, position=destination_position_value)
 
     # Add spent/estimated time
     @transaction.atomic
@@ -891,16 +922,12 @@ class Card(models.Model):
     @transaction.atomic
     def add_comment(self, member, content):
 
-        if member.has_trello_profile:
-            # Add comment to Trello
-            comment_data = add_comment_to_card(self, member, content)
-            comment_uuid = comment_data["id"]
-        else:
-            comment_uuid = custom_uuid()
-
         # Create comment locally using the id of the new comment in Trello
-        card_comment = CardComment(uuid=comment_uuid, card=self, author=member, content=content,
+        card_comment = CardComment(card=self, author=member, content=content,
                                    creation_datetime=timezone.now())
+
+        connector = RemoteBackendConnectorFactory.factory(member)
+        card_comment = connector.add_comment_to_card(card=self, comment=card_comment)
         card_comment.save()
 
         # Delete all cached charts for this board
@@ -915,13 +942,10 @@ class Card(models.Model):
         if member.uuid != comment.author.uuid:
             raise AssertionError(u"This comment does not belong to {0}".format(member.external_username))
 
-        # Edit comment Trello only if we have a trello profile
-        if member.has_trello_profile:
-            comment_data = edit_comment_of_card(self, member, comment, new_content)
-
-        # Create comment locally using the id of the new comment in Trello
         comment.content = new_content
-        comment.last_edition_datetime = timezone.now()
+
+        connector = RemoteBackendConnectorFactory.factory(member)
+        comment = connector.edit_comment_of_card(card=self, comment=comment)
         comment.save()
 
         # Delete all cached charts for this board
@@ -934,8 +958,8 @@ class Card(models.Model):
     @transaction.atomic
     def delete_comment(self, member, comment):
         # Delete comment in Trello only if we have a trello profile
-        if member.has_trello_profile:
-            delete_comment_of_card(self, member, comment)
+        connector = RemoteBackendConnectorFactory.factory(member)
+        connector.delete_comment_of_card(card=self, comment=comment)
         # Delete comment locally
         comment.delete()
         # Delete all cached charts for this board
@@ -944,21 +968,20 @@ class Card(models.Model):
     # Update labels of the card
     @transaction.atomic
     def update_labels(self, member, labels):
+        connector = RemoteBackendConnectorFactory.factory(member)
 
         # New labels
         for label in labels:
             if not self.labels.filter(id=label.id).exists():
                 self.labels.add(label)
-                if member.has_trello_profile:
-                    add_label_to_card(self, member, label)
+                connector.add_label_to_card(card=self, label=label)
 
         # Check if there is any label that needs to be removed
         label_ids = {label.id: label for label in labels}
         for card_label in self.labels.all():
             if card_label.id not in label_ids:
                 self.labels.remove(card_label)
-                if member.has_trello_profile:
-                    remove_label_of_card(self, member, card_label)
+                connector.remove_label_of_card(card=self, label=card_label)
 
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
@@ -1248,35 +1271,9 @@ class List(models.Model):
         card = Card(board=board, name=name, list=self)
         card.creator = member # TODO: not a model attribute (yet)
 
-        # Call Trello API to create the card in Trello's servers
-        if member.has_trello_profile:
-            trello_card = new_card(card, member=member, position=position)
-            card_uuid = trello_card.id
-            short_url = trello_card.shortUrl
-            url = trello_card.url
-            pos = trello_card.pos
-        else:
-            card_uuid = custom_uuid()
-            short_url = reverse("boards:view_card_short_url", args=(board.id, card_uuid))
-            url = reverse("boards:view_card_short_url", args=(board.id, card_uuid))
-            cards = self.active_cards.all()
-            if not cards.exists():
-                pos = 100000
-            else:
-                if position == "top":
-                    pos = cards.order_by("position")[0].position - 10
-                elif position == "bottom":
-                    pos = cards.order_by("-position")[0].position + 10
-
-        # Set attributes and assigned them to our new object Card
-        card.uuid = card_uuid
-        card.short_url = short_url
-        card.url = url
-        card.position = pos
-        card.creation_datetime = timezone.now()
-        card.last_activity_datetime = timezone.now()
-
-        # Now we can save the card and return it to the outside caller
+        # Update the remote backend
+        connector = RemoteBackendConnectorFactory.factory(member)
+        card = connector.new_card(card=card, labels=None, position=position)
         card.save()
 
         return card
@@ -1286,10 +1283,11 @@ class List(models.Model):
     def move(self, member, position):
         self.position = position
         self.save()
-        # Call to trello API
-        if member.has_trello_profile:
-            move_list(self, member, position)
 
+        connector = RemoteBackendConnectorFactory.factory(member)
+        connector.move_list(list=self, position=position)
+
+    # Moves all cards to other list (destination_list)
     @transaction.atomic
     def move_cards(self, member, destination_list):
         if self.id == destination_list.id:
@@ -1298,9 +1296,9 @@ class List(models.Model):
         cards_to_move = self.active_cards.all()
         for card_to_move in cards_to_move:
             card_to_move.move(member, destination_list, destination_position="top", local_move_only=True)
-        # Call to trello API
-        if member.has_trello_profile:
-            move_list_cards(member=member, source_list=self, destination_list=destination_list)
+        # Call to remote API
+        connector = RemoteBackendConnectorFactory.factory(member)
+        connector.move_list_cards(source_list=self, destination_list=destination_list)
 
     # Return all cards that are not archived (closed)
     @property

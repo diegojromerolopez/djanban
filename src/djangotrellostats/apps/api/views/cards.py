@@ -15,7 +15,6 @@ from djangotrellostats.apps.api.util import get_list_or_404, get_card_or_404, ge
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.models import Board, Card, CardComment, List
-from djangotrellostats.trello_api.cards import set_name, set_description, set_is_closed, set_due_datetime, remove_due_datetime
 
 
 # Point of access to several actions
@@ -121,30 +120,22 @@ def change(request, board_id, card_id):
     put_params = json.loads(request.body)
 
     if put_params.get("name"):
-        card.name = put_params.get("name")
-        card.save()
-        set_name(card, member)
+        card.change_attribute(member, attribute="name", value=put_params.get("name"))
 
     elif put_params.get("description"):
-        card.description = put_params.get("description")
-        card.save()
-        set_description(card, member)
+        card.change_attribute(member, attribute="description", value=put_params.get("name"))
 
     elif put_params.get("is_closed") is not None:
-        card.is_closed = put_params.get("is_closed")
-        card.save()
-        set_is_closed(card, member)
+        card.change_attribute(member, attribute="is_closed", value=put_params.get("name"))
 
     elif put_params.get("due_datetime"):
         due_datetime_str = put_params.get("due_datetime")
-        card.due_datetime = dateutil.parser.parse(due_datetime_str)
-        card.save()
-        set_due_datetime(card, member)
+        due_datetime = dateutil.parser.parse(due_datetime_str)
+        card.change_attribute(member, attribute="due_datetime", value=due_datetime)
 
     elif "due_datetime" in put_params and put_params.get("due_datetime") is None:
-        card.due_datetime = None
-        card.save()
-        remove_due_datetime(card, member)
+        card.change_attribute(member, attribute="due_datetime", value=None)
+
     else:
         return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
 
@@ -229,10 +220,7 @@ def move_to_list(request, board_id, card_id):
         list_ = card.board.lists.get(id=post_params.get("new_list"))
         card.move(member, destination_list=list_, destination_position=new_position)
     else:
-        print "X1"
-        print card.list.name
         card.change_order(member, destination_position=new_position)
-        print "X2"
 
     return JsonResponse(serialize_board(card.board))
 

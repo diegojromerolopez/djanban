@@ -18,7 +18,7 @@ from djangotrellostats.apps.fetch.fetchers.trello.labels import LabelUpdater
 from djangotrellostats.apps.members.models import Member, MemberRole, TrelloMemberProfile
 from djangotrellostats.apps.reports.models import ListReport, MemberReport
 from djangotrellostats.apps.workflows.models import WorkflowCardReport
-from djangotrellostats.trello_api.connector import TrelloConnector
+from djangotrellostats.remote_backends.trello.connector import TrelloConnector
 
 
 # Initialize boards

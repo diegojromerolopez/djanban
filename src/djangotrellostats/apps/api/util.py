@@ -2,19 +2,10 @@
 
 from __future__ import unicode_literals
 
-import json
-import re
-
-from django.db import transaction
 from django.http import Http404
-from django.http import HttpResponseBadRequest
-from django.http import JsonResponse
 
-from djangotrellostats.apps.api.serializers import serialize_card
 from djangotrellostats.apps.base.auth import get_user_boards
-from djangotrellostats.apps.base.decorators import member_required
-from djangotrellostats.apps.boards.models import Board, Card, CardComment, List
-from djangotrellostats.trello_api.cards import set_name, set_description
+from djangotrellostats.apps.boards.models import Board, Card, List
 
 
 # Returns the card with id card_id

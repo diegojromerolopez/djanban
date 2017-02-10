@@ -3,25 +3,21 @@
 from __future__ import unicode_literals, absolute_import
 
 from crequest.middleware import CrequestMiddleware
-
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils import timezone
-
 from django.db import transaction
 from django.forms import models
+from django.utils import timezone
+
 from djangotrellostats.apps.boards.models import Board, Card, List
 from djangotrellostats.apps.fetch.fetchers.trello.boards import Initializer
 from djangotrellostats.apps.members.models import MemberRole
-from djangotrellostats.trello_api.cards import new_card
-from djangotrellostats.trello_api.lists import new_list
+
+from djangotrellostats.utils.custom_uuid import custom_uuid
+from djangotrellostats.utils.week import get_iso_week_of_year
 
 
 # Board edition form
-from djangotrellostats.utils.custom_uuid import custom_uuid
-from djangotrellostats.utils.week import number_of_weeks_of_year, get_iso_week_of_year
-
-
 class EditBoardForm(models.ModelForm):
     class Meta:
         model = Board
@@ -107,8 +103,7 @@ class NewBoardForm(models.ModelForm):
                     self.instance.roles.add(role)
 
 
-
-
+# Deprecated: use new Full Board APP
 # New list form
 class NewListForm(models.ModelForm):
     class Meta:
@@ -124,20 +119,10 @@ class NewListForm(models.ModelForm):
                 if not hasattr(current_user, "member"):
                     raise AssertionError("Only members can create lists")
 
-                member = current_user.member
+                current_member = current_user.member
                 list_ = self.instance
 
-                # Call Trello API to create the list
-                if current_user.member.has_trello_profile:
-                    trello_list = new_list(list_, member)
-                    list_uuid = trello_list.id
-                else:
-                    list_uuid = custom_uuid()
-
-                # Get TrelloList attributes and assigned them to our new object List
-                list_.uuid = list_uuid
-                list_.creation_datetime = timezone.now()
-                list_.last_activity_datetime = timezone.now()
+                self.instance = self.instance.board.new_list(current_member, self.instance)
 
                 # Create the list
                 super(NewListForm, self).save(commit=True)
@@ -146,6 +131,7 @@ class NewListForm(models.ModelForm):
                 list_.board.clean_cached_charts()
 
 
+# Deprecated: use new Full Board APP
 # New card
 class NewCardForm(models.ModelForm):
     class Meta:
@@ -167,20 +153,24 @@ class NewCardForm(models.ModelForm):
     def save(self, commit=True):
         if commit:
             with transaction.atomic():
-                card = self.instance
-                # Call Trello API to create the card
-                trello_card = new_card(card, card.member, self.cleaned_data.get("labels"))
-                # Get TrelloCard attributes and assigned them to our new object Card
-                card.uuid = trello_card.id
-                card.short_url = trello_card.shortUrl
-                card.url = trello_card.url
-                card.position = trello_card.pos
-                card.creation_datetime = timezone.now()
-                card.last_activity_datetime = timezone.now()
+                board = self.instance.board
+                list_ = self.instance.list
+
+                # Getting the current member (current user)
+                current_request = CrequestMiddleware.get_request()
+                current_user = current_request.user
+                if not hasattr(current_user, "member"):
+                    raise AssertionError("Only members can create lists")
+
+                current_member = current_user.member
+                self.instance = list_.add_card(current_member, self.instance.name, position="bottom")
+
+                self.instance.creation_datetime = timezone.now()
+                self.instance.last_activity_datetime = timezone.now()
                 # Create the card
                 super(NewCardForm, self).save(commit=True)
                 # Clean cached charts for this board
-                card.board.clean_cached_charts()
+                board.clean_cached_charts()
 
 
 # Week summary filter
