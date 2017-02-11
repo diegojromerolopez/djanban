@@ -88,16 +88,3 @@ class CardReview(models.Model):
         except CardReview.DoesNotExist:
             return CardReview.create(card_comment, reviewers, description)
 
-
-# Stat report by list
-class ListReport(models.Model):
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="list_reports", null=True)
-    list = models.OneToOneField("boards.List", verbose_name=u"List", related_name="list_reports", unique=True)
-    forward_movements = models.PositiveIntegerField(verbose_name=u"Forward movements")
-    backward_movements = models.PositiveIntegerField(verbose_name=u"Backward movements")
-    avg_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4,
-                                        max_digits=12, default=None, null=True)
-    std_dev_card_time = models.DecimalField(verbose_name=u"Average time cards live in this list", decimal_places=4,
-                                            max_digits=12, default=None, null=True)
-
-

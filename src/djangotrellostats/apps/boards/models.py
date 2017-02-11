@@ -123,6 +123,10 @@ class Board(models.Model):
     def active_lists(self):
         return self.lists.exclude(Q(type="closed")|Q(type="ignored")).order_by("position")
 
+    @property
+    def active_cards(self):
+        return self.cards.filter(is_closed=False).order_by("position")
+
     # First list of this board
     @property
     def first_list(self):
@@ -591,13 +595,6 @@ class Card(models.Model):
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
     last_activity_datetime = models.DateTimeField(verbose_name=u"Last activity datetime")
 
-    forward_movements = models.PositiveIntegerField(verbose_name=u"Forward movements of this card", default=0)
-    backward_movements = models.PositiveIntegerField(verbose_name=u"Backward movements of this card", default=0)
-    time = models.DecimalField(verbose_name=u"Time this card is alive in the board",
-                               help_text=u"Time this card is alive in the board in seconds.",
-                               decimal_places=4, max_digits=12,
-                               default=0)
-
     spent_time = models.DecimalField(verbose_name=u"Spent time", decimal_places=4, max_digits=12, default=None,
                                      null=True)
 
@@ -608,6 +605,7 @@ class Card(models.Model):
                                      null=True)
     lead_time = models.DecimalField(verbose_name=u"Cycle time", decimal_places=4, max_digits=12, default=None,
                                     null=True)
+
     labels = models.ManyToManyField("boards.Label", related_name="cards")
     members = models.ManyToManyField("members.Member", related_name="cards")
     blocking_cards = models.ManyToManyField("boards.card", related_name="blocked_cards")
@@ -655,6 +653,45 @@ class Card(models.Model):
         return now - self.creation_datetime
 
     @property
+    def time_in_each_list(self):
+
+        time_by_list = {list_.id: 0 for list_ in self.board.active_lists.all()}
+
+        movements = self.movements.order_by("datetime")
+
+        card_last_action_datetime = self.creation_datetime
+
+        #  If there are no changes in the card, all its life has been in its creation list
+        if not movements.exists():
+            card_life_time = (timezone.now() - card_last_action_datetime).total_seconds()
+            time_by_list[self.list_id] += card_life_time
+
+        else:
+            # Changes in card are ordered to get the dates in order
+            last_list = None
+
+            # For each arrival to a list, its datetime will be used to compute the time this card is in
+            # that destination list
+            for movement in movements:
+
+                time_from_last_list_change = (movement.datetime - card_last_action_datetime).total_seconds()
+                time_by_list[movement.source_list_id] += time_from_last_list_change
+
+                # Our last action has been this movement
+                card_last_action_datetime = movement.datetime
+
+                # Store the last list
+                last_list = movement.destination_list
+
+            # Adding the number of seconds the card has been in its last column (until now)
+            # only if the last column is not "Done" column
+            if last_list.type != "done":
+                time_card_has_spent_in_list_until_now = (timezone.now() - card_last_action_datetime).total_seconds()
+                time_by_list[last_list.id] += time_card_has_spent_in_list_until_now\
+
+        return time_by_list
+
+    @property
     def has_started(self):
         return self.list.type in List.STARTED_CARD_LIST_TYPES
 
@@ -691,6 +728,16 @@ class Card(models.Model):
     @property
     def number_of_comments(self):
         return self.comments.all().count()
+
+    # Forward movements of this card
+    @property
+    def forward_movements(self):
+        return self.movements.filter(type="forward")
+
+    # Backward movements of this card
+    @property
+    def backward_movements(self):
+        return self.movements.filter(type="backward")
 
     # Returns the adjusted spent time according to the spent time factor defined in each member
     @property
@@ -1367,3 +1414,60 @@ class List(models.Model):
             return self.board.lists.filter(position__lt=self.position).order_by("-position")[0]
         except IndexError:
             raise List.DoesNotExist
+
+    # Forward movements that have this list as source
+    @property
+    def forward_movements_from_this_list(self):
+        return self.source_movements.all(type="forward")
+
+    # Backward movements that have this list as source
+    # Useful for measuring if this list is a bottleneck
+    @property
+    def backward_movements_from_this_list(self):
+        return self.source_movements.filter(type="backward")
+
+    def card_time_in_list(self, card):
+        card_time_in_list = 0
+
+        # If it is the first list, we have to add the time until the first movement
+        if self.is_first:
+            if card.movements.filter(source_list=self).exists():
+                card_first_movement = card.movements.filter(source_list=self).order_by("datetime")[0]
+                card_time_in_first_list = (card_first_movement.datetime - card.creation_datetime).seconds
+            else:
+                card_time_in_first_list = (timezone.now() - card.creation_datetime).seconds
+            card_time_in_list += card_time_in_first_list
+
+        # We add the difference in time for the pairs of movements in this list
+        # A pair is when this list is destination of a movement and the next movement is leaving this list
+        card_movements = card.movements.order_by("datetime")
+        for card_movement in card_movements.filter(destination_list=self):
+            next_movements = card_movements.filter(source_list=self)
+            if next_movements.exists():
+                card_time_in_list += (next_movements[0].datetime - card_movement.datetime).seconds
+            else:
+                card_time_in_list += (timezone.now() - card_movement.datetime).seconds
+
+        return card_time_in_list
+
+    # Average time the cards spend in this list
+    @property
+    def active_cards_times_in_list(self):
+        card_times_in_list = []
+        for card in self.board.active_cards:
+            card_times_in_list.append(self.card_time_in_list(card))
+        return card_times_in_list
+
+    def active_cards_time_in_list(self):
+        card_times = self.active_cards_times
+        return sum(card_times)
+
+    @property
+    def avg_card_time_in_list(self):
+        card_times = self.active_cards_times_in_list
+        return numpy.average(card_times, axis=0)
+
+    @property
+    def std_dev_card_time_in_list(self):
+        card_times = self.active_cards_times_in_list
+        return numpy.mean(card_times, axis=0)

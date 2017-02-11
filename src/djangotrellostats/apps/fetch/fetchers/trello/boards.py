@@ -2,10 +2,8 @@
 
 from __future__ import unicode_literals, absolute_import
 
-import math
 
 import dateutil.parser
-import numpy
 import shortuuid
 from django.db import transaction
 from django.utils import timezone
@@ -16,7 +14,6 @@ from djangotrellostats.apps.fetch.fetchers.base import Fetcher
 from djangotrellostats.apps.fetch.fetchers.trello.cards import CardFetcher
 from djangotrellostats.apps.fetch.fetchers.trello.labels import LabelUpdater
 from djangotrellostats.apps.members.models import Member, MemberRole, TrelloMemberProfile
-from djangotrellostats.apps.reports.models import ListReport
 from djangotrellostats.apps.workflows.models import WorkflowCardReport
 from djangotrellostats.remote_backends.trello.connector import TrelloConnector
 
@@ -249,10 +246,6 @@ class BoardFetcher(Fetcher):
 
         workflows = self.board.workflows.all()
 
-        # List reports
-        list_report_dict = {list_.uuid: ListReport(board=self.board, list=list_, forward_movements=0, backward_movements=0)
-                            for list_ in self.lists}
-
         # Card stats computation
         for card in self.cards:
 
@@ -260,14 +253,6 @@ class BoardFetcher(Fetcher):
             for list_ in self.lists:
                 list_uuid = list_.uuid
                 card_stats_by_list = card.trello_card.stats_by_list[list_uuid]
-
-                if not hasattr(list_report_dict[list_uuid], "times"):
-                    list_report_dict[list_uuid].times = []
-                list_report_dict[list_uuid].times.append(card_stats_by_list["time"])
-
-                # Update total forward and backward movements
-                list_report_dict[list_uuid].forward_movements += card_stats_by_list["forward_moves"]
-                list_report_dict[list_uuid].backward_movements += card_stats_by_list["backward_moves"]
 
             # Label assignment to each card
             label_uuids = trello_card.idLabels
@@ -284,12 +269,6 @@ class BoardFetcher(Fetcher):
                 for workflow in workflows:
                     self._fetch_workflow(workflow, [card])
 
-        # Average and std. deviation of time cards live in this list
-        for list_uuid, list_report in list_report_dict.items():
-            if hasattr(list_report, "times"):
-                list_report.avg_card_time = numpy.mean(list_report.times)
-                list_report.std_dev_card_time = numpy.std(list_report.times, axis=0)
-            list_report.save()
 
     # Return the actions of the board grouped by the uuid of each card
     def _fetch_trello_cards(self):

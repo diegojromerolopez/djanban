@@ -236,12 +236,7 @@ class CardFetcher(object):
         # Store the trello card data for ease of use
         card.trello_card = trello_card
 
-        # Forward and backward movements
-        card.forward_movements = trello_card.forward_movements
-        card.backward_movements = trello_card.backward_movements
-
         # Times
-        card.time = trello_card.time
         card.lead_time = trello_card.lead_time
         card.cycle_time = trello_card.cycle_time
 

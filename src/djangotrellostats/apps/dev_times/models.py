@@ -156,13 +156,10 @@ class DailySpentTime(models.Model):
 
     @staticmethod
     def create_from_comment(comment):
-        print "create from comment"
         daily_spent_time = DailySpentTime.factory_from_comment(comment)
         if comment.id:
-            print "create from comment comment.id"
             daily_spent_time.save()
         else:
-            print "create from comment comment.id IS NONE"
             daily_spent_time.comment = None
             daily_spent_time.save()
         return daily_spent_time

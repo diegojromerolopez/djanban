@@ -23,7 +23,7 @@ from djangotrellostats.apps.boards.models import Board, Card, CardComment, Label
 from djangotrellostats.apps.charts.models import CachedChart
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
-from djangotrellostats.apps.reports.models import ListReport, CardMovement
+from djangotrellostats.apps.reports.models import CardMovement
 
 
 # Average card lead time
@@ -234,11 +234,11 @@ def avg_time_by_list(board, workflow=None):
                                                  print_zeroes=False,
                                                  human_readable=True)
 
-    list_reports = ListReport.objects.filter(list__board=board)
+    lists = board.active_lists.all()
     if workflow:
-        list_reports = list_reports.filter(Q(list__in=workflow.lists.all()))
-    for list_report in list_reports:
-        avg_time_by_list_chart.add(u"{0}".format(list_report.list.name), list_report.avg_card_time)
+        lists = workflow.lists.all()
+    for list_ in lists:
+        avg_time_by_list_chart.add(u"{0}".format(list_.name), list_.avg_card_time_in_list)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=avg_time_by_list_chart.render(is_unicode=True))
     return chart.render_django_response()
@@ -262,11 +262,11 @@ def avg_std_dev_time_by_list(board, workflow=None):
                                                  print_zeroes=False,
                                                  human_readable=True)
 
-    list_reports = ListReport.objects.filter(list__board=board)
+    lists = board.active_lists.all()
     if workflow:
-        list_reports = list_reports.filter(Q(list__in=workflow.lists.all()))
-    for list_report in list_reports:
-        avg_time_by_list_chart.add(u"{0}".format(list_report.list.name), list_report.std_dev_card_time)
+        lists = workflow.lists.all()
+    for list_ in lists:
+        avg_time_by_list_chart.add(u"{0}".format(list_.name), list_.std_dev_card_time_in_list)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=avg_time_by_list_chart.render(is_unicode=True))
     return chart.render_django_response()
