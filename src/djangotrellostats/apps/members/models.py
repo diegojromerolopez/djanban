@@ -10,13 +10,17 @@ import numpy
 from django.contrib.auth.models import User
 from django.db import models
 from django.db import transaction
-from django.db.models import Sum, Avg
+from django.db.models import Sum, Avg, Q
 from django.utils import timezone
 from isoweek import Week
+
+from djangotrellostats.apps.base.auth import get_user_boards
 
 
 class Member(models.Model):
     DEFAULT_MAX_NUMBER_OF_BOARDS = 2
+
+    creator = models.ForeignKey("members.Member", related_name="created_members", null=True, default=None, blank=True)
 
     user = models.OneToOneField(User, verbose_name=u"Associated user", related_name="member", null=True, default=None)
 
@@ -51,14 +55,24 @@ class Member(models.Model):
         default=None, null=True
     )
 
+    is_public = models.BooleanField(verbose_name=u"Check this if you want other members to add you to their boards",
+                                    default=False, blank=True)
+
     # Constructor for Member
     def __init__(self, *args, **kwargs):
         super(Member, self).__init__(*args, **kwargs)
 
+    # A native member is one that has no Trello profile
+    @property
+    def is_native(self):
+        return not self.has_trello_profile
+
+    # Inform if this member was fetched from Trello (alias method).
     @property
     def has_trello_profile(self):
         return hasattr(self, "trello_member_profile") and self.trello_member_profile
 
+    # Inform if this member was fetched from Trello
     @property
     def has_trello_member_profile(self):
         return self.has_trello_profile
@@ -90,6 +104,28 @@ class Member(models.Model):
         if self.user:
             return self.user.username
         return "Member {0}".format(self.id)
+
+    # Return the members this member can see. That is:
+    # - Members of one of his/her boards.
+    # - Members created by this member.
+    # - Public members.
+    @property
+    def viewable_members(self):
+        boards = []
+        if self.user:
+            boards = get_user_boards(self.user)
+        return Member.objects.filter(Q(boards__in=boards) | Q(creator=self) | Q(is_public=True)).distinct()
+
+    @property
+    def team_mates(self):
+        boards = get_user_boards(self.user)
+        return Member.objects.filter(boards__in=boards).distinct().order_by("name")
+
+    # Get members that work with this user
+    @staticmethod
+    def get_user_team_mates(user):
+        boards = get_user_boards(user)
+        return Member.objects.filter(boards__in=boards).distinct().order_by("name")
 
     # Resets the password of the associated user of this member
     def reset_password(self, new_password=None):
@@ -227,30 +263,36 @@ class Member(models.Model):
     def get_backward_movements_for_board(self, board):
         return self.card_movements.filter(type="backward", board=board).count()
 
+    # Average lead time of the cards of this member
     @property
     def avg_card_lead_time(self):
         return self.active_cards.aggregate(avg=Avg("lead_time"))["avg"]
 
+    # Average spent time of the cards of this member
     @property
     def avg_card_spent_time(self):
         return self.active_cards.aggregate(avg=Avg("spent_time"))["avg"]
 
+    # Average estimated time of the cards of this member
     @property
     def avg_card_estimated_time(self):
         return self.active_cards.aggregate(avg=Avg("estimated_time"))["avg"]
 
+    # Standard deviation of the lead time of the cards of this member
     @property
     def std_dev_card_lead_time(self):
         values = [float(card_i.lead_time) for card_i in self.active_cards.exclude(lead_time=None)]
         std_dev_time = numpy.nanstd(values)
         return std_dev_time
 
+    # Standard deviation of the spent time of the cards of this member
     @property
     def std_dev_card_spent_time(self):
         values = [float(card_i.spent_time) for card_i in self.active_cards.exclude(spent_time=None)]
         std_dev_time = numpy.nanstd(values)
         return std_dev_time
 
+    # Standard deviation of the estimated time of the cards of this member
     @property
     def std_dev_card_estimated_time(self):
         values = [float(card_i.estimated_time) for card_i in self.active_cards.exclude(estimated_time=None)]

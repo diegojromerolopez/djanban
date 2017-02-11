@@ -13,6 +13,8 @@ urlpatterns = [
     url(r'^reset_password/?$', auth.reset_password, name="reset_password"),
     url(r'^reset_password_success/?$', TemplateView.as_view(template_name="members/reset_password_success.html"),
         name="reset_password_success"),
+
+    url(r'^new/?$', main.new, name="new"),
     url(r'^view_members/?$', main.view_members, name="view_members"),
     url(r'^give_access/(?P<member_id>\d+)?$', main.give_access_to_member, name="give_access"),
     url(r'^change_password/(?P<member_id>\d+)?$', main.change_password_to_member, name="change_password"),

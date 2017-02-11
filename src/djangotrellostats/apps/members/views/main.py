@@ -3,10 +3,11 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http.response import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render
 
-from djangotrellostats.apps.base.auth import user_is_administrator, get_user_boards
+from djangotrellostats.apps.base.auth import user_is_administrator, get_user_boards, user_is_member
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.members.decorators import administrator_required
 from djangotrellostats.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm, EditTrelloMemberProfileForm, AdminMemberForm, \
@@ -26,9 +27,15 @@ def dashboard(request):
 # List of members
 @login_required
 def view_members(request):
-    boards = get_user_boards(request.user)
-    members = Member.objects.filter(boards__in=boards).distinct()
-    member = request.user.member
+    current_user = request.user
+    boards = get_user_boards(current_user)
+    if user_is_member(current_user):
+        member = request.user.member
+        members = Member.objects.filter(Q(boards__in=boards) | Q(creator=current_user.member) | Q(is_public=True)).distinct()
+    else:
+        member = None
+        members = Member.objects.filter(boards__in=boards).distinct()
+
     replacements = {
         "member": member,
         "members": members,
@@ -36,6 +43,25 @@ def view_members(request):
     }
     return render(request, "members/list.html", replacements)
 
+
+@member_required
+def new(request):
+    user = request.user
+    current_member = user.member
+
+    member = Member(creator=current_member, is_public=False)
+    if request.method == "POST":
+
+        form = MemberForm(request.POST, instance=member)
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect(reverse("members:view_members"))
+
+    else:
+        form = MemberForm(instance=member)
+
+    replacements = {"member": member, "form": form}
+    return render(request, "members/new.html", replacements)
 
 # Give a password an create an user for a member if this member does not have an user yet
 @member_required

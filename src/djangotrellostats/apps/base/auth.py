@@ -2,7 +2,6 @@
 from django.conf import settings
 
 from djangotrellostats.apps.boards.models import Card
-from djangotrellostats.apps.members.models import Member
 
 
 def member_is_administrator(member):
@@ -66,9 +65,3 @@ def get_user_board_cards(user, is_archived=False):
         return Card.objects.filter(board__visitors=user, board__is_archived=is_archived)
 
     raise ValueError(u"This user is not valid")
-
-
-# Get members that work with this user
-def get_user_team_mates(user):
-    boards = get_user_boards(user)
-    return Member.objects.filter(boards__in=boards).distinct().order_by("name")

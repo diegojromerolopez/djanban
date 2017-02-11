@@ -12,7 +12,7 @@ from django.db.models import Min, Max, Sum
 from django.utils import timezone
 from django.template.defaultfilters import slugify
 
-from djangotrellostats.apps.base.auth import get_user_boards, get_user_team_mates
+from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.charts.models import CachedChart
 from djangotrellostats.apps.dev_environment.models import Interruption
 from djangotrellostats.apps.members.models import Member
@@ -78,7 +78,7 @@ def _number_of_interruptions(current_user, board, chart_title, interruption_meas
         boards = [board]
     else:
         boards = get_user_boards(current_user)
-        interruptions_filter["member__in"] = get_user_team_mates(current_user)
+        interruptions_filter["member__in"] = Member.get_user_team_mates(current_user)
 
     board_values = {board.id: [] for board in boards}
 
@@ -243,7 +243,7 @@ def _interruption_measurement_by_month(current_user, chart_title, interruption_m
     if board:
         interruptions_filter["board"] = board
     else:
-        interruptions_filter["member__in"] = get_user_team_mates(current_user)
+        interruptions_filter["member__in"] = Member.get_user_team_mates(current_user)
 
     interruptions = Interruption.objects.filter(**interruptions_filter).order_by("datetime")
 

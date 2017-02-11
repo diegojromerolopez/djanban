@@ -17,7 +17,8 @@ def get_members(request):
     if request.method != "GET":
         return JsonResponseMethodNotAllowed({"message": "HTTP method not allowed."})
 
-    members = Member.objects.all()
+    current_member = request.user.member
+    members = current_member.viewable_members
 
     response_json = []
     for member in members:

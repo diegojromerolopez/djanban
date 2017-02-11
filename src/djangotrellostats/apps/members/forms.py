@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth.models import User
@@ -120,7 +123,7 @@ class MemberForm(models.ModelForm):
 
     class Meta:
         model = Member
-        fields = ["biography"]
+        fields = ["biography", "is_public"]
 
     def __init__(self, *args, **kwargs):
         super(MemberForm, self).__init__(*args, **kwargs)
@@ -134,9 +137,10 @@ class MemberForm(models.ModelForm):
         self.order_fields(["first_name", "last_name", "email", "password", "password", "biography"])
 
         # Default values
-        self.initial["first_name"] = self.instance.user.first_name
-        self.initial["last_name"] = self.instance.user.last_name
-        self.initial["email"] = self.instance.user.email
+        if self.instance.user:
+            self.initial["first_name"] = self.instance.user.first_name
+            self.initial["last_name"] = self.instance.user.last_name
+            self.initial["email"] = self.instance.user.email
 
     def clean(self):
         cleaned_data = super(MemberForm, self).clean()
@@ -155,7 +159,7 @@ class MemberForm(models.ModelForm):
 
         return self.cleaned_data
 
-    def save(self, commit=False):
+    def save(self, commit=True):
         if not self.instance.user:
             user = User()
         else:
@@ -182,7 +186,7 @@ class AdminMemberForm(MemberForm):
     class Meta(MemberForm.Meta):
         model = Member
         fields = ["biography", "is_developer", "on_holidays", "minimum_working_hours_per_day",
-                  "minimum_working_hours_per_week", "spent_time_factor"]
+                  "minimum_working_hours_per_week", "spent_time_factor", "is_public"]
 
     def __init__(self, *args, **kwargs):
         super(AdminMemberForm, self).__init__(*args, **kwargs)
@@ -223,7 +227,7 @@ class TrelloMemberProfileForm(models.ModelForm):
 
         return self.cleaned_data
 
-    def save(self, commit=False):
+    def save(self, commit=True):
         super(TrelloMemberProfileForm, self).save(commit=False)
 
         if commit:
