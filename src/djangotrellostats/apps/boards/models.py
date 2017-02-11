@@ -1274,6 +1274,7 @@ class Label(models.Model):
             default_labels.append(label)
         return default_labels
 
+
 # List of the task board
 class List(models.Model):
     LIST_TYPES = ("ignored", "backlog", "ready_to_develop", "development",
