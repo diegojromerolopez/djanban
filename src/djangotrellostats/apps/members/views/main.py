@@ -44,6 +44,7 @@ def view_members(request):
     return render(request, "members/list.html", replacements)
 
 
+# Create a new member
 @member_required
 def new(request):
     user = request.user
@@ -62,6 +63,7 @@ def new(request):
 
     replacements = {"member": member, "form": form}
     return render(request, "members/new.html", replacements)
+
 
 # Give a password an create an user for a member if this member does not have an user yet
 @member_required
