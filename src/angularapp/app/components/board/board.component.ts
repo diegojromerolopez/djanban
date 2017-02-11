@@ -195,6 +195,7 @@ export class BoardComponent implements OnInit {
   loadBoard(board_id: number): void {
       this.boardService.getBoard(board_id).then(board_response =>{
           this.prepareBoard(board_response);
+          this.notificationsService.success("Loaded successfully", "Board loaded successfully");
       }).catch(error_message => {
         this.notificationsService.error("Error", `Couldn't load board. ${error_message}`);
     });;

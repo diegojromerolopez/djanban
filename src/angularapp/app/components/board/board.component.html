@@ -1,4 +1,10 @@
 <simple-notifications [options]="notificationsOptions"></simple-notifications>
+
+<div *ngIf="!board" class="loading-app-message">
+    <span class="fa fa-spin fa-spinner"></span>
+    <span class="loading-app-message-text">Loading board, please wait...</span>
+</div>
+
 <div *ngIf="board" class="board">
     <div class="header">
         <div class="board_name">
