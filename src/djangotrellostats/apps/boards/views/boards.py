@@ -15,7 +15,7 @@ from django.shortcuts import render, get_object_or_404
 
 from djangotrellostats.apps.base.auth import user_is_member, get_user_boards, user_is_visitor
 from djangotrellostats.apps.base.decorators import member_required
-from djangotrellostats.apps.boards.forms import EditBoardForm, NewBoardForm, NewListForm
+from djangotrellostats.apps.boards.forms import EditBoardForm, NewBoardForm, NewListForm, LabelForm
 from djangotrellostats.apps.boards.models import List, Board, Label
 from djangotrellostats.apps.boards.stats import avg, std_dev
 from djangotrellostats.apps.fetch.fetchers.trello.boards import Initializer, BoardFetcher
@@ -87,6 +87,29 @@ def create_default_labels(request, board_id):
     Label.create_default_labels(board)
 
     return HttpResponseRedirect(reverse("boards:view_label_report", args=(board_id,)))
+
+
+@member_required
+def edit_label(request, board_id, label_id):
+    member = request.user.member
+    board = member.boards.get(id=board_id)
+
+    try:
+        label = board.labels.get(id=label_id)
+    except Label.DoesNotExist:
+        raise Http404
+
+    if request.method == "POST":
+        form = LabelForm(request.POST, instance=label)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse("boards:view_label_report", args=(board_id,)))
+
+    else:
+        form = LabelForm(instance=label)
+
+    replacements = {"board": board, "member": member, "form": form, "label": label}
+    return render(request, "boards/labels/edit.html", replacements)
 
 
 # View boards of current user

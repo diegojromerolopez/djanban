@@ -1,0 +1,17 @@
+{% extends "boards/view.html" %}
+
+{% load staticfiles %}
+
+{% block js %}
+    {{block.super}}
+    <script src="{% static 'js/libs/jscolor/jscolor.min.js' %}"></script>
+    <script src="{% static 'js/libs/colors.min.js' %}"></script>
+    <script src="{% static 'js/boards/labels/edit.js' %}"></script>
+{% endblock js %}
+
+{% block page_title %}Edit label {{label.name}}{% endblock %}
+
+{% block content %}
+    <h1>Edit label {{label.name}}</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}

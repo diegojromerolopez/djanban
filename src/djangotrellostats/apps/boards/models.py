@@ -1223,16 +1223,16 @@ class CardComment(models.Model):
 class Label(models.Model):
 
     NATIVE_LABEL_NAMES = [
-        ("Aqua", "#00FFFF"),
-        ("Aquamarine", "#7FFFD4"),
-        ("Green", "#61bd4f"),
-        ("Yellow", "#f2d600"),
-        ("Orange", "#ffab4a"),
-        ("Red", "#eb5a46"),
-        ("Brown", "#89609E"),
-        ("Blue", "#0079bf"),
-        ("Black", "#000000"),
-        ("DarkRed", "#8B0000")
+        ("Aqua", "00FFFF"),
+        ("Aquamarine", "7FFFD4"),
+        ("Green", "61bd4f"),
+        ("Yellow", "f2d600"),
+        ("Orange", "ffab4a"),
+        ("Red", "eb5a46"),
+        ("Brown", "89609E"),
+        ("Blue", "0079bf"),
+        ("Black", "000000"),
+        ("DarkRed", "8B0000")
     ]
 
     class Meta:

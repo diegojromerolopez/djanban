@@ -55,6 +55,8 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/workflow_card_report/(?P<workflow_id>\d+)/?$', boards.view_workflow_card_report, name="view_workflow_card_report"),
 
     url(r'^(?P<board_id>\d+)/labels/?$', boards.view_label_report, name="view_label_report"),
+    url(r'^(?P<board_id>\d+)/label/(?P<label_id>\d+)?$', boards.edit_label, name="edit_label"),
+
     url(r'^(?P<board_id>\d+)/members/?$', boards.view_member_report, name="view_member_report"),
 
     url(r'^(?P<board_id>\d+)/fetch/?$', boards.fetch, name="fetch"),

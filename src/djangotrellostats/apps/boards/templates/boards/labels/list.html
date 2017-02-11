@@ -32,17 +32,21 @@
                     <td>Avg. spent card time</td>
                     <td>Avg. cycle time</td>
                     <td>Avg. lead time</td>
+                    <td>Actions</td>
                 </tr>
                 {% for label in labels %}
                     <tr>
                         <td class="label-name-td" >
-                            <span class="label-name" style="background:{{label.color}};">{{label.name}}</span>
+                            <span class="label-name" style="background:#{{label.color}};">{{label.name}}</span>
                         </td>
                         <td>{{label.cards.all.count}}</td>
                         <td>{{label.avg_estimated_time|floatformat:"-2"}}</td>
                         <td>{{label.avg_spent_time|floatformat:"-2"}}</td>
                         <td>{{label.avg_cycle_time|floatformat:"-2"}}</td>
                         <td>{{label.avg_lead_time|floatformat:"-2"}}</td>
+                        <td>
+                            <a href="{% url 'boards:edit_label' board.id label.id %}" class="btn btn-primary">Edit</a>
+                        </td>
                     </tr>
                 {% endfor %}
             </table>

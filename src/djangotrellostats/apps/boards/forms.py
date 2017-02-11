@@ -121,6 +121,23 @@ class NewListForm(models.ModelForm):
                 list_.board.clean_cached_charts()
 
 
+class LabelForm(models.ModelForm):
+    class Meta:
+        model = Label
+        fields = ["name", "color"]
+
+    def __init__(self, *args, **kwargs):
+        super(LabelForm, self).__init__(*args, **kwargs)
+
+        self.fields["color"].widget.attrs["class"] = "jscolor"
+
+    def clean_color(self):
+        try:
+            int(self.cleaned_data.get("color"), 16)
+        except ValueError:
+            raise ValidationError("This color is not an hexadecimal number")
+        return self.cleaned_data.get("color")
+
 # Deprecated: use new Full Board APP
 # New card
 class NewCardForm(models.ModelForm):
