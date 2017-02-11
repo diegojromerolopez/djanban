@@ -149,7 +149,7 @@ class Initializer(TrelloConnector):
                             trello_member.member_type, board.name
                         )
                     )
-                member.roles.filter(board=board).clear()
+                member.roles.clear()
                 member_role, created = MemberRole.objects.get_or_create(board=board, type=trello_member.member_type)
                 member_role.members.add(member)
 

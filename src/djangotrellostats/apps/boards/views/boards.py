@@ -16,7 +16,7 @@ from django.shortcuts import render, get_object_or_404
 from djangotrellostats.apps.base.auth import user_is_member, get_user_boards, user_is_visitor
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.forms import EditBoardForm, NewBoardForm, NewListForm
-from djangotrellostats.apps.boards.models import List, Board
+from djangotrellostats.apps.boards.models import List, Board, Label
 from djangotrellostats.apps.boards.stats import avg, std_dev
 from djangotrellostats.apps.fetch.fetchers.trello.boards import Initializer, BoardFetcher
 from djangotrellostats.utils.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
@@ -67,6 +67,26 @@ def sync(request):
         return HttpResponseRedirect(reverse("boards:view_boards"))
 
     return render(request, "boards/sync.html", {"member": member})
+
+
+@member_required
+def create_default_labels(request, board_id):
+    member = request.user.member
+
+    # Only members with credentials can sync their boards
+    if member.has_trello_profile:
+        return HttpResponseRedirect(reverse("boards:view", args=(board_id,)))
+
+    if request.method != "POST":
+        return HttpResponseRedirect(reverse("boards:view", args=(board_id,)))
+
+    board = get_user_boards(request.user).get(id=board_id)
+    if board.labels.all().exists():
+        return HttpResponseRedirect(reverse("boards:view", args=(board_id,)))
+
+    Label.create_default_labels(board)
+
+    return HttpResponseRedirect(reverse("boards:view_label_report", args=(board_id,)))
 
 
 # View boards of current user

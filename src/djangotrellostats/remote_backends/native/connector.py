@@ -4,11 +4,8 @@ from __future__ import unicode_literals, absolute_import
 
 from collections import namedtuple
 
-
-# Establishes a connection with Trello API
-from time import timezone
-
 from django.urls import reverse
+from django.utils import timezone
 
 from djangotrellostats.utils.custom_uuid import custom_uuid
 
@@ -20,6 +17,17 @@ class NativeConnector(object):
 
     def reconnect(self):
         pass
+
+    # Create a new board
+    def new_board(self, board):
+        board.uuid = custom_uuid()
+        board.has_to_be_fetched = False
+        board.last_activity_datetime = timezone.now()
+        return board
+
+    def new_label(self, label):
+        label.uuid = custom_uuid()
+        return label
 
     # Add existing member to this board
     def add_member(self, board, member_to_add, member_type="normal"):
@@ -57,9 +65,9 @@ class NativeConnector(object):
             position = 100000
         else:
             if position == "top":
-                position = cards.order_by("position")[0].position - 10
+                position = cards.order_by("position")[0].position - 1000
             elif position == "bottom":
-                position = cards.order_by("-position")[0].position + 10
+                position = cards.order_by("-position")[0].position + 1000
 
         card.position = position
         card.creation_datetime = timezone.now()

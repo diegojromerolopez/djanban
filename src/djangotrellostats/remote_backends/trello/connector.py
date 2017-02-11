@@ -8,6 +8,7 @@ from django.utils import timezone
 from trello import TrelloClient
 from trello import Card as TrelloCard
 from trello import List as TrelloList
+from trello import Board as TrelloBoard
 
 
 # Establishes a connection with Trello API
@@ -49,6 +50,18 @@ class TrelloConnector(object):
         trello_card = TrelloCard(parent=trello_board, card_id=card.uuid)
         return trello_card
 
+    # Board operations
+
+    # Create a new board
+    def new_board(self, board):
+        # Connect to Trello and save the new board
+        trello_board = TrelloBoard(client=self.trello_client)
+        trello_board.name = board.name
+        trello_board.description = board.description
+        trello_board.save()
+        board.uuid = trello_board.id
+        return board
+
     # Member operations
 
     # Add existing member to this board
@@ -80,6 +93,7 @@ class TrelloConnector(object):
         trello_board = self.get_trello_board(new_list.board)
         trello_list = trello_board.add_list(new_list.name, pos=new_list.position)
         new_list.uuid = trello_list.id
+        new_list.position = trello_list.pos
         new_list.creation_datetime = timezone.now()
         new_list.last_activity_datetime = timezone.now()
         return new_list

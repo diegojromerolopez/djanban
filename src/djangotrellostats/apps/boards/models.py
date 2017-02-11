@@ -501,6 +501,17 @@ class Board(models.Model):
         self.is_archived = False
         self.save()
 
+    # Create a new board
+    @staticmethod
+    def new(member, board):
+        connector = RemoteBackendConnectorFactory.factory(member)
+        connector.new_board(board)
+
+
+
+
+
+    # Remove a member from this board
     @transaction.atomic
     def remove_member(self, member, member_to_remove):
         self.members.remove(member_to_remove)
@@ -508,6 +519,7 @@ class Board(models.Model):
         connector.remove_member(board=self, member_to_remove=member_to_remove)
         return member_to_remove
 
+    # Add a new member to this board
     @transaction.atomic
     def add_member(self, member, member_to_add):
         self.members.add(member_to_add)
@@ -515,6 +527,7 @@ class Board(models.Model):
         connector.add_member(board=self, member_to_add=member_to_add)
         return member_to_add
 
+    # Create a new list
     @transaction.atomic
     def new_list(self, member, new_list):
         connector = RemoteBackendConnectorFactory.factory(member)
@@ -1209,6 +1222,19 @@ class CardComment(models.Model):
 # Label of the task board
 class Label(models.Model):
 
+    NATIVE_LABEL_NAMES = [
+        ("Aqua", "#00FFFF"),
+        ("Aquamarine", "#7FFFD4"),
+        ("Green", "#61bd4f"),
+        ("Yellow", "#f2d600"),
+        ("Orange", "#ffab4a"),
+        ("Red", "#eb5a46"),
+        ("Brown", "#89609E"),
+        ("Blue", "#0079bf"),
+        ("Black", "#000000"),
+        ("DarkRed", "#8B0000")
+    ]
+
     class Meta:
         verbose_name = "label"
         verbose_name_plural = "labels"
@@ -1239,6 +1265,14 @@ class Label(models.Model):
         avg_lead_time = self.cards.filter(**kwargs).aggregate(Avg("lead_time"))["lead_time__avg"]
         return avg_lead_time
 
+    @staticmethod
+    def create_default_labels(board):
+        default_labels = []
+        for label_name in Label.NATIVE_LABEL_NAMES:
+            label = Label(name=label_name[0], color=label_name[1], uuid=custom_uuid(), board=board)
+            label.save()
+            default_labels.append(label)
+        return default_labels
 
 # List of the task board
 class List(models.Model):

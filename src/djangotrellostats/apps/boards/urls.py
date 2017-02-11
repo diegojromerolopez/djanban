@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/view/?$', boards.view, name="view"),
 
     url(r'^(?P<board_id>\d+)/edit/?$', boards.edit, name="edit"),
+    url(r'^(?P<board_id>\d+)/create-default-labels/?$', boards.create_default_labels, name="create_default_labels"),
     url(r'^(?P<board_id>\d+)/archive/?$', boards.archive, name="archive"),
     url(r'^(?P<board_id>\d+)/unarchive/?$', boards.unarchive, name="unarchive"),
     url(r'^(?P<board_id>\d+)/lists/?$', boards.view_lists, name="view_lists"),

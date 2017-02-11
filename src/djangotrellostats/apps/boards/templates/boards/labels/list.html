@@ -2,6 +2,7 @@
 
 {% load staticfiles %}
 
+
 {% block css %}
     {{block.super}}
     <link href="{% static 'css/boards/labels/view.css' %}" rel="stylesheet" />
@@ -13,7 +14,14 @@
     <h1>Labels of {{board.name}}</h1>
     <div>Last updated: {{board.get_human_fetch_datetime}}</div>
     {% if labels|length == 0 %}
-        There are no labels in this board. Have you tried to fetch the labels?
+        There are no labels in this board.
+        {% if member.has_trello_profile %}
+            Have you tried to fetch the labels?
+        {% else %}
+            <form action="{% url 'boards:create_default_labels' board.id %}" method="post">
+                <button class="btn btn-primary" type="submit">Create default labels</button>
+            </form>
+        {% endif %}
     {% else %}
         <div class="panel">
             <table class="table">

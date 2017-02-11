@@ -9,9 +9,10 @@ from django.db import transaction
 from django.forms import models
 from django.utils import timezone
 
-from djangotrellostats.apps.boards.models import Board, Card, List
+from djangotrellostats.apps.boards.models import Board, Card, List, Label
 from djangotrellostats.apps.fetch.fetchers.trello.boards import Initializer
 from djangotrellostats.apps.members.models import MemberRole
+from djangotrellostats.remote_backends.factory import RemoteBackendConnectorFactory
 
 from djangotrellostats.utils.custom_uuid import custom_uuid
 from djangotrellostats.utils.week import get_iso_week_of_year
@@ -65,42 +66,31 @@ class NewBoardForm(models.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(NewBoardForm, self).__init__(*args, **kwargs)
-        for i in range(1, NewBoardForm.MAX_NUM_LISTS+1):
-            self.fields["list_{0}".format(i)] = forms.CharField(
-                label=u"List {0}".format(i),
-                help_text=u"Name of list {0} in this new board. Optional.".format(i),
-                required=False)
 
     def clean(self):
         cleaned_data = super(NewBoardForm, self).clean()
-        list_names = []
-        for i in range(1, NewBoardForm.MAX_NUM_LISTS+1):
-            field_name = "list_{0}".format(i)
-            field_value = cleaned_data.get(field_name)
-            if field_value:
-                list_names.append(field_value)
-        cleaned_data["lists"] = list_names
         return cleaned_data
 
     def save(self, commit=True):
         if commit:
             with transaction.atomic():
-                if self.instance.creator.has_trello_profile:
-                    initializer = Initializer(member=self.instance.creator)
-                    lists = self.cleaned_data.get("lists")
-                    initializer.create_board(self.instance, lists=lists)
-                    super(NewBoardForm, self).save(commit=True)
-                else:
-                    self.instance.uuid = custom_uuid()
-                    self.instance.has_to_be_fetched = False
-                    self.instance.last_activity_datetime = timezone.now()
-                    super(NewBoardForm, self).save(commit=True)
-                    # Adding the creator as member of the board
-                    self.instance.members.add(self.instance.creator)
-                    # Adding the creator as admin of the board
-                    role, created = MemberRole.objects.get_or_create(board=self.instance, type="admin")
-                    role.members.add(self.instance.creator)
-                    self.instance.roles.add(role)
+                # Getting the current member (current user)
+                current_request = CrequestMiddleware.get_request()
+                current_user = current_request.user
+                if not hasattr(current_user, "member"):
+                    raise AssertionError("Only members can create lists")
+                current_member = current_user.member
+
+                connector = RemoteBackendConnectorFactory.factory(current_member)
+                self.instance = connector.new_board(self.instance)
+                self.instance.creator = current_member
+                super(NewBoardForm, self).save(commit=True)
+
+                # Adding the creator as admin of the board
+                self.instance.members.add(current_member)
+                role, created = MemberRole.objects.get_or_create(board=self.instance, type="admin")
+                role.members.add(self.instance.creator)
+                self.instance.roles.add(role)
 
 
 # Deprecated: use new Full Board APP

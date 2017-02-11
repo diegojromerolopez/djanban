@@ -12,18 +12,20 @@
 {% block content %}
     <h1>Boards of {{member.external_username}}</h1>
     <div class="board_list">
-        {% if member.has_trello_credentials %}
-            <p>
-                <a class="btn btn-warning" href="{% url 'boards:new' %}" title="New board">New board</a>
+
+        <p>
+            <a class="btn btn-warning" href="{% url 'boards:new' %}" title="New board">New board</a>
+            {% if member.has_trello_credentials %}
                 <a class="btn btn-warning" href="{% url 'boards:sync' %}" title="New board">Synchronize from Trello</a>
-                {% if archived_boards|length > 0 %}
-                    <a class="btn btn-info"
-                       href="{% url 'boards:view_archived_boards' %}" title="View archived boards">View archived boards ({{archived_boards|length}})</a>
-                {% else %}
-                    There are no archived boards.
-                {% endif %}
-            </p>
-        {% endif %}
+            {% endif %}
+            {% if archived_boards|length > 0 %}
+                <a class="btn btn-info"
+                   href="{% url 'boards:view_archived_boards' %}" title="View archived boards">View archived boards ({{archived_boards|length}})</a>
+            {% else %}
+                There are no archived boards.
+            {% endif %}
+        </p>
+
         {% if boards|length == 0 %}
             {% if request.user.member %}
                 {% include "boards/components/list/no_boards_warning.html" %}
