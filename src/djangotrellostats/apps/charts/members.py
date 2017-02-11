@@ -15,7 +15,6 @@ from djangotrellostats.apps.charts.models import CachedChart
 from djangotrellostats.apps.dev_environment.models import Interruption
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
-from djangotrellostats.apps.reports.models import MemberReport
 from djangotrellostats.utils.week import number_of_weeks_of_year, get_iso_week_of_year
 
 
@@ -49,29 +48,22 @@ def task_movements_by_member(movement_type="forward", board=None):
         member_report_filter = copy.deepcopy(report_filter)
         member_report_filter["member"] = member
 
-        try:
-            # Depending on if the member report is filtered by board or not we only have to get the forward and
-            # backward movements of a report or sum all the members report of this user
-            if board:
-                member_report = MemberReport.objects.get(**member_report_filter)
-                forward_movements = member_report.forward_movements
-                backward_movements = member_report.backward_movements
 
-            else:
-                member_reports = MemberReport.objects.filter(**member_report_filter)
-                forward_movements = member_reports \
-                    .aggregate(forward_movements_sum=Sum("forward_movements"))["forward_movements_sum"]
-                backward_movements = member_reports \
-                    .aggregate(backward_movements_sum=Sum("backward_movements"))["backward_movements_sum"]
+        # Depending on if the member report is filtered by board or not we only have to get the forward and
+        # backward movements of a report or sum all the members report of this user
+        if board:
+            forward_movements = member.forward_movements
+            backward_movements = member.backward_movements
+        else:
+            forward_movements = member.get_forward_movements_for_board(board)
+            backward_movements = member.get_backward_movements_for_board(board)
 
-            if movement_type == "forward":
-                member_chart.add(u"{0}'s tasks forward movements".format(member_name), forward_movements)
+        if movement_type == "forward":
+            member_chart.add(u"{0}'s tasks forward movements".format(member_name), forward_movements)
 
-            elif movement_type == "backward":
-                member_chart.add(u"{0}'s tasks backward movements".format(member_name), backward_movements)
+        elif movement_type == "backward":
+            member_chart.add(u"{0}'s tasks backward movements".format(member_name), backward_movements)
 
-        except MemberReport.DoesNotExist:
-            pass
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=member_chart.render(is_unicode=True))
     return chart.render_django_response()

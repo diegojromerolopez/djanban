@@ -3,10 +3,14 @@
 from __future__ import unicode_literals
 
 from datetime import timedelta
+
+import math
+
+import numpy
 from django.contrib.auth.models import User
 from django.db import models
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Sum, Avg
 from django.utils import timezone
 from isoweek import Week
 
@@ -194,7 +198,64 @@ class Member(models.Model):
         return 1.0 * (happy_days - sad_days) / all_days
 
     def get_role(self, board):
-        return self.roles.get(board=board)
+        try:
+            return self.roles.get(board=board)
+        except MemberRole.DoesNotExist:
+            member_role, created = MemberRole.objects.get_or_create(type="normal", board=board)
+            member_role.members.add(self)
+        return member_role
+
+    @property
+    def active_cards(self):
+        return self.cards.filter(is_closed=False).order_by("position")
+
+    @property
+    def number_of_cards(self):
+        return self.active_cards.count()
+
+    @property
+    def forward_movements(self):
+        return self.card_movements.filter(type="forward").count()
+
+    @property
+    def backward_movements(self):
+        return self.card_movements.filter(type="backward").count()
+
+    def get_forward_movements_for_board(self, board):
+        return self.card_movements.filter(type="forward", board=board).count()
+
+    def get_backward_movements_for_board(self, board):
+        return self.card_movements.filter(type="backward", board=board).count()
+
+    @property
+    def avg_card_lead_time(self):
+        return self.active_cards.aggregate(avg=Avg("lead_time"))["avg"]
+
+    @property
+    def avg_card_spent_time(self):
+        return self.active_cards.aggregate(avg=Avg("spent_time"))["avg"]
+
+    @property
+    def avg_card_estimated_time(self):
+        return self.active_cards.aggregate(avg=Avg("estimated_time"))["avg"]
+
+    @property
+    def std_dev_card_lead_time(self):
+        values = [float(card_i.lead_time) for card_i in self.active_cards.exclude(lead_time=None)]
+        std_dev_time = numpy.nanstd(values)
+        return std_dev_time
+
+    @property
+    def std_dev_card_spent_time(self):
+        values = [float(card_i.spent_time) for card_i in self.active_cards.exclude(spent_time=None)]
+        std_dev_time = numpy.nanstd(values)
+        return std_dev_time
+
+    @property
+    def std_dev_card_estimated_time(self):
+        values = [float(card_i.estimated_time) for card_i in self.active_cards.exclude(estimated_time=None)]
+        std_dev_time = numpy.nanstd(values)
+        return std_dev_time
 
 
 # Role a member has in a board

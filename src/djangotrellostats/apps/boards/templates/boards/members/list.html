@@ -7,7 +7,7 @@
 {% block content %}
     <h1>Members of {{board.name}}</h1>
     <div>Last updated: {{board.get_human_fetch_datetime}}</div>
-    {% if member_reports|length == 0 %}
+    {% if members|length == 0 %}
         There are no members in this board.
     {% else %}
         <div class="row">
@@ -68,37 +68,37 @@
                     <td>Avg. spent card time</td>
                     <td>Std. Dev. spent card time</td>
                 </tr>
-                {% for member_report in member_reports %}
-                    {% with member=member_report.member %}
-                        <tr>
-                            <td>{{member.initials}}</td>
-                            <td>{{member.external_username}}</td>
-                            <td>
-                                {% with member_role=member|call:"get_role"|arg:board %}
-                                    {{member_role.name}}
-                                {% endwith %}
-                            </td>
-                            <td>
-                                {% with member_mood=member.mood %}
-                                    {% if member_mood > 0 %}
-                                        <span class="fa fa-smile-o"></span>
-                                    {% elif member_mood < 0 %}
-                                        <span class="fa fa-frown-o"></span>
-                                    {% else %}
-                                        <span class="fa fa-meh-o"></span>
-                                    {% endif %}
-                                    {{member_mood}}
-                                {% endwith %}
-                            </td>
-                            <td>{{member_report.number_of_cards}}</td>
-                            <td>{{member_report.avg_card_time|floatformat:"-2"}}</td>
-                            <td>{{member_report.std_dev_card_time|floatformat:"-2"}}</td>
-                            <td>{{member_report.avg_card_estimated_time|floatformat:"-2"}}</td>
-                            <td>{{member_report.std_dev_card_estimated_time|floatformat:"-2"}}</td>
-                            <td>{{member_report.avg_card_spent_time|floatformat:"-2"}}</td>
-                            <td>{{member_report.std_dev_card_spent_time|floatformat:"-2"}}</td>
-                        </tr>
-                    {% endwith %}
+                {% for member in members %}
+                    <tr>
+                        <td>{{member.initials}}</td>
+                        <td>{{member.external_username}}</td>
+                        <td>
+                            {% with member_role=member|call:"get_role"|arg:board %}
+                                {{member_role.name}}
+                            {% endwith %}
+                        </td>
+                        <td>
+                            {% with member_mood=member.mood %}
+                                {% if member_mood > 0 %}
+                                    <span class="fa fa-smile-o"></span>
+                                {% elif member_mood < 0 %}
+                                    <span class="fa fa-frown-o"></span>
+                                {% else %}
+                                    <span class="fa fa-meh-o"></span>
+                                {% endif %}
+                                {{member_mood}}
+                            {% endwith %}
+                        </td>
+                        {% with number_of_cards=member.number_of_cards %}
+                            <td>{{number_of_cards}}</td>
+                            <td>{% if number_of_cards > 0 %}{{member.avg_card_lead_time|floatformat:"-2"}}{% endif %}</td>
+                            <td>{% if number_of_cards > 0 %}{{member.std_dev_card_lead_time|floatformat:"-2"}}{% endif %}</td>
+                            <td>{% if number_of_cards > 0 %}{{member.avg_card_estimated_time|floatformat:"-2"}}{% endif %}</td>
+                            <td>{% if number_of_cards > 0 %}{{member.std_dev_card_estimated_time|floatformat:"-2"}}{% endif %}</td>
+                            <td>{% if number_of_cards > 0 %}{{member.avg_card_spent_time|floatformat:"-2"}}{% endif %}</td>
+                            <td>{% if number_of_cards > 0 %}{{member.std_dev_card_spent_time|floatformat:"-2"}}{% endif %}</td>
+                        {% endwith %}
+                    </tr>
                 {% endfor %}
             </table>
         </div>

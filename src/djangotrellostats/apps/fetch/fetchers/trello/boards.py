@@ -16,7 +16,7 @@ from djangotrellostats.apps.fetch.fetchers.base import Fetcher
 from djangotrellostats.apps.fetch.fetchers.trello.cards import CardFetcher
 from djangotrellostats.apps.fetch.fetchers.trello.labels import LabelUpdater
 from djangotrellostats.apps.members.models import Member, MemberRole, TrelloMemberProfile
-from djangotrellostats.apps.reports.models import ListReport, MemberReport
+from djangotrellostats.apps.reports.models import ListReport
 from djangotrellostats.apps.workflows.models import WorkflowCardReport
 from djangotrellostats.remote_backends.trello.connector import TrelloConnector
 
@@ -253,9 +253,6 @@ class BoardFetcher(Fetcher):
         list_report_dict = {list_.uuid: ListReport(board=self.board, list=list_, forward_movements=0, backward_movements=0)
                             for list_ in self.lists}
 
-        # Member report
-        member_report_dict = {member.uuid: MemberReport(board=self.board, member=member) for member in self.members}
-
         # Card stats computation
         for card in self.cards:
 
@@ -282,53 +279,6 @@ class BoardFetcher(Fetcher):
             num_trello_card_members = card.members.all().count()
             for member in card.members.all():
                 member_uuid = member.uuid
-                # Member reports
-                try:
-                    member_report = member_report_dict[member_uuid]
-                # If there is no member report, it implies that this member left the board
-                # Create a new empty member report for this old member
-                except KeyError:
-                    lost_member = Member.objects.get(uuid=member_uuid)
-                    lost_member_report = MemberReport(board=self.board, member=lost_member)
-                    lost_member_report.save()
-                    member_report_dict[member_uuid] = lost_member_report
-
-                # Increment the number of cards of the member report
-                member_report.number_of_cards += 1
-
-                # Forward movements of the cards
-                if member_report.forward_movements is None:
-                    member_report.forward_movements = 0
-                member_report.forward_movements += math.ceil(1. * card.forward_movements / 1. * num_trello_card_members)
-
-                # Backward movements of the cards
-                if member_report.backward_movements is None:
-                    member_report.backward_movements = 0
-                member_report.backward_movements += math.ceil(
-                    1. * card.backward_movements / 1. * num_trello_card_members)
-
-                # Inform this member report has data and must be saved
-                member_report.present = True
-
-                # Card time
-                if not hasattr(member_report, "card_times"):
-                    member_report.card_times = []
-                if card.time is not None:
-                    member_report.card_times.append(card.time)
-
-                # Card spent time
-                if not hasattr(member_report, "card_spent_times"):
-                    member_report.card_spent_times = []
-                card_member_spent_time = card.get_spent_time_by_member(member)
-                if card_member_spent_time is not None:
-                    member_report.card_spent_times.append(card_member_spent_time)
-
-                # Card estimated time
-                if not hasattr(member_report, "card_estimated_times"):
-                    member_report.card_estimated_times = []
-                card_member_estimated_time = card.get_estimated_time_by_member(member)
-                if card_member_estimated_time is not None:
-                    member_report.card_estimated_times.append(card_member_estimated_time)
 
                 # Workflow card reports
                 for workflow in workflows:
@@ -340,26 +290,6 @@ class BoardFetcher(Fetcher):
                 list_report.avg_card_time = numpy.mean(list_report.times)
                 list_report.std_dev_card_time = numpy.std(list_report.times, axis=0)
             list_report.save()
-
-        # Average and std. deviation of card times by member
-        for member_uuid, member_report in member_report_dict.items():
-            if hasattr(member_report, "present") and member_report.present:
-                # Average and std deviation of the time of member cards
-                if len(member_report.card_times) > 0:
-                    member_report.avg_card_time = numpy.mean(member_report.card_times)
-                    member_report.std_dev_card_time = numpy.std(member_report.card_times)
-
-                # Average and std deviation of the spent time of member cards
-                if len(member_report.card_spent_times) > 0:
-                    member_report.avg_card_spent_time = numpy.mean(member_report.card_spent_times)
-                    member_report.std_dev_card_spent_time = numpy.std(member_report.card_spent_times)
-
-                # Average and std deviation of the estimated time of member cards
-                if len(member_report.card_estimated_times) > 0:
-                    member_report.avg_card_estimated_time = numpy.mean(member_report.card_estimated_times)
-                    member_report.std_dev_card_estimated_time = numpy.std(member_report.card_estimated_times)
-
-                member_report.save()
 
     # Return the actions of the board grouped by the uuid of each card
     def _fetch_trello_cards(self):

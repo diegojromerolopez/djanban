@@ -525,17 +525,16 @@ def view_member_report(request, board_id):
     except Board.DoesNotExist:
         raise Http404
 
-    member_reports = board.member_reports.all()
     week_of_year = get_week_of_year()
 
     replacements = {
         "member": member,
         "board": board,
-        "member_reports": member_reports,
+        "members": board.members.all(),
         "week_of_year": week_of_year,
         "weeks_of_year": get_weeks_of_year_since_one_year_ago()
     }
-    return render(request, "boards/member_reports/list.html", replacements)
+    return render(request, "boards/members/list.html", replacements)
 
 
 # Change list type. Remember a list can be "development" or "done" list
