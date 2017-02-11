@@ -8,7 +8,12 @@
         <div>Last updated: {{board.get_human_fetch_datetime}}</div>
     {% endif %}
     {% if cards|length == 0 %}
-        There are no cards in this board. Have you tried to fetch the cards?
+        There are no cards in this board.
+        {% if member.has_trello_profile %}
+            Have you tried to fetch the cards?
+        {% else %}
+            Create a new card in the board using the <a href="{% url 'boards:view_dashboard' board.id %}">full task board</a>.
+        {% endif %}
     {% else %}
         <div class="row">
             <div class="col-md-12">
