@@ -20,6 +20,8 @@ export class Card {
   position: number;
   short_url: string;
   is_closed: boolean;
+  number_of_forward_movements?: number;
+  number_of_backward_movements?: number;
   spent_time?: number;
   cycle_time?: number;
   lead_time?: number;

@@ -595,6 +595,9 @@ class Card(models.Model):
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
     last_activity_datetime = models.DateTimeField(verbose_name=u"Last activity datetime")
 
+    number_of_forward_movements = models.PositiveIntegerField(verbose_name=u"Number of forward movements", default=0)
+    number_of_backward_movements = models.PositiveIntegerField(verbose_name=u"Number of backward movements", default=0)
+
     spent_time = models.DecimalField(verbose_name=u"Spent time", decimal_places=4, max_digits=12, default=None,
                                      null=True)
 
@@ -807,6 +810,10 @@ class Card(models.Model):
             source_list=self.list, destination_list=destination_list, datetime=timezone.now()
         )
         card_movement.save()
+
+        # Update movement count
+        # Remember that this card saves the movement count in its attributes
+        self.update_movement_count(commit=False)
 
         # Move the card
         self.list = destination_list
@@ -1045,6 +1052,13 @@ class Card(models.Model):
 
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
+
+    # Updates the number of movements of this card
+    def update_movement_count(self, commit=True):
+        self.number_of_forward_movements = self.forward_movements.count()
+        self.number_of_backward_movements = self.backward_movements.count()
+        if commit:
+            self.save()
 
 
 # Each one of the comments made by members in each card

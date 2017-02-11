@@ -29,19 +29,19 @@
             <!-- Filter cards by label -->
             <div class="label_filter">
                 <h2>Label filter</h2>
-                <form #addLabelToFilterForm="ngForm">
-                    <select name="label" required ngModel>
-                        <option *ngFor="let label of board.labels" value={{label.id}} name="label">
-                            {{label.name}}
-                        </option>
-                    </select>
-                    <span>
-                        <button class="btn btn-primary"
-                                [disabled]="!addLabelToFilterForm.valid"
-                                (click)="addLabelToLabelFilter(addLabelToFilterForm.value.label)">Add</button>
-                    </span>
-                </form>
-                <div class=label-filter>
+                <div *ngIf="board.labels.length > 0">
+                    <form #addLabelToFilterForm="ngForm">
+                        <select name="label" required ngModel>
+                            <option *ngFor="let label of board.labels" value={{label.id}} name="label">
+                                {{label.name}}
+                            </option>
+                        </select>
+                        <span>
+                            <button class="btn btn-primary"
+                                    [disabled]="!addLabelToFilterForm.valid"
+                                    (click)="addLabelToLabelFilter(addLabelToFilterForm.value.label)">Add</button>
+                        </span>
+                    </form>
                     <div class="row">
                         <div *ngFor="let label of labelFilter" class="col-md-2 label-filter-item">
                             <span class="label card-label" [ngStyle]="{'background-color': label.color}">{{label.name}}</span>
@@ -51,6 +51,9 @@
                             </button>
                         </div>
                     </div>
+                </div>
+                <div *ngIf="board.labels.length == 0">
+                    This board has no labels.
                 </div>
             </div>
         </div>
@@ -207,6 +210,11 @@
                                 <span class="card_heading-estimated_time" title="The team estimated a cost of {{card.estimated_time | number:'1.1-2'}} hours in this task">
                                     E: {{card.estimated_time | number:'1.1-2'}}
                                 </span>
+                            </span>
+                            <span class="card_heading-movements" *ngIf="card.number_of_forward_movements > 0 || card.number_of_backward_movements > 0">
+                                <span class="fa fa-arrows"></span> 
+                                <span class="fa fa-arrow-right"></span>: {{card.number_of_forward_movements}}
+                                <span class="fa fa-arrow-left"></span>: {{card.number_of_backward_movements}}
                             </span>
                             <span class="card_heading-deadline" *ngIf="card.due_datetime">
                                 <span class="fa fa-calendar-times-o"></span> {{card.due_datetime | localize_datetime}}

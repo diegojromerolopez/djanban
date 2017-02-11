@@ -54,6 +54,8 @@ def basic_serialize_card(card, board=None):
         "is_closed": card.is_closed,
         "spent_time": card.spent_time,
         "estimated_time": card.estimated_time,
+        "number_of_forward_movements": card.number_of_forward_movements,
+        "number_of_backward_movements": card.number_of_backward_movements,
         "board": {"id": board.id, "uuid": board.uuid, "name": board.name},
         "labels": [serialize_label(label) for label in card.labels.exclude(name="").order_by("name")],
         "reviews": [serialize_card_review(review) for review in card.reviews.all().order_by("-creation_datetime")],

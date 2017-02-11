@@ -5,6 +5,14 @@
     overflow: hidden;
     width: auto;
 }
+
+/* Header with spent time */
+#board_spent_time span.label {
+    color: white;
+    font-size: 1em;
+    font-weight: normal;
+}
+
 /* Dashboard */
 .dashboard {
     margin-left: auto;
@@ -210,6 +218,11 @@ list.closed-list-showed,
     color: #a94442;
     background-color: #f2dede;
     border-color: #ebccd1;
+}
+
+.card_heading-movements {
+    display: block;
+    margin-top: 2px;
 }
 
 /* Labels in the card itself */
