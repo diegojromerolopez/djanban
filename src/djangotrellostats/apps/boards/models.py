@@ -90,8 +90,13 @@ class Board(models.Model):
 
     show_on_slideshow = models.BooleanField(
         verbose_name=u"Should this board be shown on the slideshow?",
-        help_text=u"Mark this checkbox if you want to show this board in the slideshow",
+        help_text=u"Select this checkbox if you want to show this board in the slideshow",
         default=False)
+
+    header_image = models.ImageField(
+        verbose_name=u"Header image", default=None, null=True, blank=True,
+        help_text=u"Header image for this board. Optional."
+    )
 
     visitors = models.ManyToManyField(User, verbose_name=u"Visitors of this board", related_name="boards", blank=True)
 

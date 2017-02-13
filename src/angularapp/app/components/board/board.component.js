@@ -163,7 +163,7 @@ var BoardComponent = (function () {
         var _this = this;
         this.boardService.getBoard(board_id).then(function (board_response) {
             _this.prepareBoard(board_response);
-            _this.notificationsService.success("Loaded successfully", "Board loaded successfully");
+            _this.notificationsService.success("Loaded successfully", "Board loaded successfully", { timeOut: 3000 });
         }).catch(function (error_message) {
             _this.notificationsService.error("Error", "Couldn't load board. " + error_message);
         });

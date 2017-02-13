@@ -3,7 +3,12 @@
 <div id="header">
     <div id="header_logo">
         <a href="{% url 'index' %}" title="Go to index">
-            <img id="header_image" src="{% static 'img/logo.png' %}" alt="Trello Stats Logo" />
+            {# 393 x 123 image #}
+            {% if board and board.header_image %}
+                <img id="header_image" src="{{board.header_image.url}}" alt="{{board.name}}'s logo" />
+            {% else %}
+                <img id="header_image" src="{% static 'img/logo.png' %}" alt="Trello Stats Logo" />
+            {% endif %}
         </a>
     </div>
     {% if user %}

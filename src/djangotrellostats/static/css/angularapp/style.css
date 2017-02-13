@@ -331,7 +331,8 @@ card.closed-card-showed,
     display: none;
 }
 
-.board-card, .board .lists.label-filter .list .cards .card.in-label-filter {
+.board-card, .board .lists.label-filter .list .cards .card.in-label-filter.active-card,
+.board-card, .board .lists.label-filter .list .cards .card.in-label-filter.closed-card-showed {
     display: block;
 }
 

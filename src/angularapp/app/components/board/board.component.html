@@ -191,7 +191,7 @@
                     id="card-list-{{list.id}}" class="cards" [attr.data-list]="list.id">
                     <div *ngFor="let card of list.cards"
                             id="card-{{card.id}}" class="card panel board-card"
-                            [ngClass]="{'closed-card': card.is_closed, 'panel-info': !card.is_closed, 'panel-danger': card.is_closed, 'closed-card-showed': card.is_closed && closedItemsVisibility=='showed', 'in-label-filter': cardInLabelFilter(card)}"
+                            [ngClass]="{'closed-card': card.is_closed, 'active-card': !card.is_closed, 'panel-info': !card.is_closed, 'panel-danger': card.is_closed, 'closed-card-showed': card.is_closed && closedItemsVisibility=='showed', 'in-label-filter': cardInLabelFilter(card)}"
                             [attr.data-card]="card.id">
                         <span class="panel-heading card_heading" [ngClass]="{'closed-card_heading': card.is_closed }">
                             <span (click)="onCardSelect(card)" class="card_name">

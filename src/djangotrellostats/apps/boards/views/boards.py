@@ -334,7 +334,7 @@ def edit(request, board_id):
     board = member.boards.get(id=board_id)
 
     if request.method == "POST":
-        form = EditBoardForm(request.POST, instance=board)
+        form = EditBoardForm(request.POST, request.FILES, instance=board)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse("boards:view", args=(board_id,)))

@@ -30,4 +30,5 @@ urlpatterns = [
 
     url(r'^captcha/', include('captcha.urls')),
 
-] + static(settings.ANGULAR_URL, document_root=settings.ANGULAR_ROOT)
+] + static(settings.ANGULAR_URL, document_root=settings.ANGULAR_ROOT)\
+  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
