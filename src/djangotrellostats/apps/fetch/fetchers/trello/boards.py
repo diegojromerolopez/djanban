@@ -113,7 +113,7 @@ class Initializer(TrelloConnector):
                 if self.debug:
                     print(u"Member {0} already existed ".format(member.external_username))
             except Member.DoesNotExist:
-                member = Member()
+                member = Member(creator=self.member)
                 member.save()
                 trello_member_profile = TrelloMemberProfile(
                     trello_id=trello_member.id,

@@ -4,82 +4,84 @@
 {% block page_title %}Members{% endblock %}
 
 {% block content %}
-    {% if member.is_native %}
-        <div class="row">
-            <div class="col-md-12">
-                <a href="{% url 'members:new' %}" class="btn btn-primary" title="Create new member on this platform">New member</a>
+    {% with current_member=request.user.member %}
+        {% if member.is_native %}
+            <div class="row">
+                <div class="col-md-12">
+                    <a href="{% url 'members:new' %}" class="btn btn-primary" title="Create new member on this platform">New member</a>
+                </div>
             </div>
-        </div>
-    {% endif %}
-    {% if developers|length == 0 %}
-            {% include "members/components/no_developers_warning.html" %}
         {% endif %}
-        <div class="row">
-            <div class="col-md-12">
-                <div class="panel">
-                    <table class="table">
-                        <tr>
-                            <td>Initials</td>
-                            <td>Remote username</td>
-                            <td>Email and this site's username</td>
-                            <td>Is developer?</td>
-                            <td>On holidays?</td>
-                            <td>Has access?</td>
-                            <td>Actions</td>
-                        </tr>
-                        {% for member in members %}
+        {% if developers|length == 0 %}
+                {% include "members/components/no_developers_warning.html" %}
+            {% endif %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel">
+                        <table class="table">
                             <tr>
-                                <td>{{member.initials}}</td>
-                                <td>{% if member.has_trello_profile %}{{member.external_username}}{% else %}None{% endif %}</td>
-                                <td>{% if member.user %}{{member.user.username}}{% endif %}</td>
-                                <td>{% if member.is_developer %}Yes{% else %}No{% endif %}</td>
-                                <td>{% if member.on_holidays %}Yes{% else %}No{% endif %}</td>
-                                <td>
-                                    {% if member.user %}
-                                    Yes {% if member.id == request.user.member.id %}(That's you){% endif %}
-                                    {% else %}
-                                    No
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if member.user %}
-                                        {% if member.id == request.user.member.id or request.user|user_is_administrator %}
+                                <td>Initials</td>
+                                <td>Remote username</td>
+                                <td>Email and this site's username</td>
+                                <td>Is developer?</td>
+                                <td>On holidays?</td>
+                                <td>Has access?</td>
+                                <td>Actions</td>
+                            </tr>
+                            {% for member in members %}
+                                <tr>
+                                    <td>{{member.initials}}</td>
+                                    <td>{% if member.has_trello_profile %}{{member.external_username}}{% else %}None{% endif %}</td>
+                                    <td>{% if member.user %}{{member.user.username}}{% endif %}</td>
+                                    <td>{% if member.is_developer %}Yes{% else %}No{% endif %}</td>
+                                    <td>{% if member.on_holidays %}Yes{% else %}No{% endif %}</td>
+                                    <td>
+                                        {% if member.user %}
+                                        Yes {% if member.id == request.user.member.id %}(That's you){% endif %}
+                                        {% else %}
+                                        No
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if member.user %}
+                                            {% if member.creator.id == current_member.id or request.user|user_is_administrator or member.id == current_member.id %}
                                                 <a class="btn btn-primary" href="{% url 'members:change_password' member.id %}"
                                                        title="Change password to user {{member.external_username}}">
                                                     <span class="fa fa-key "></span>
                                                         Change password
                                                 </a>
+                                            {% endif %}
+
+                                        {% else %}
+                                            {% if member.creator.id == current_member.id or request.user|user_is_administrator %}
+                                                <a class="btn btn-primary" href="{% url 'members:give_access' member.id %}"
+                                                   title="Give access to {{member.external_username}}">
+                                                   <span class="fa fa-unlock"></span>
+                                                    Give access
+                                                </a>
+                                            {% endif %}
                                         {% endif %}
 
-                                    {% else %}
-                                        {% if request.user|user_is_administrator %}
-                                            <a class="btn btn-primary" href="{% url 'members:give_access' member.id %}"
-                                               title="Give access to {{member.external_username}}">
-                                               <span class="fa fa-unlock"></span>
-                                                Give access
+                                        {% if member.creator.id == current_member.id or request.user|user_is_administrator or member.id == current_member.id %}
+                                            <a class="btn btn-primary" href="{% url 'members:edit_profile' member.id %}"
+                                                       title="Edit personal details">
+                                                    <span class="fa fa-user"></span>
+                                                        Profile
                                             </a>
+                                            {% if member.has_trello_profile %}
+                                                <a class="btn btn-primary" href="{% url 'members:edit_trello_member_profile' member.id %}"
+                                                           title="Edit trello profile details">
+                                                        <span class="fa fa-trello"></span>
+                                                            Trello profile
+                                                </a>
+                                            {% endif %}
                                         {% endif %}
-                                    {% endif %}
-
-                                    {% if member.id == request.user.member.id or request.user|user_is_administrator %}
-                                        <a class="btn btn-primary" href="{% url 'members:edit_profile' member.id %}"
-                                                   title="Edit personal details">
-                                                <span class="fa fa-user"></span>
-                                                    Profile
-                                        </a>
-                                        {% if member.has_trello_profile %}
-                                            <a class="btn btn-primary" href="{% url 'members:edit_trello_member_profile' member.id %}"
-                                                       title="Edit trello profile details">
-                                                    <span class="fa fa-trello"></span>
-                                                        Trello profile
-                                            </a>
-                                        {% endif %}
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </table>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
+    {% endwith %}
 {% endblock content %}
