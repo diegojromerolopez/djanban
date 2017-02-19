@@ -18,7 +18,7 @@ from djangotrellostats.apps.base.auth import get_user_boards
 
 
 class Member(models.Model):
-    DEFAULT_MAX_NUMBER_OF_BOARDS = 2
+    DEFAULT_MAX_NUMBER_OF_BOARDS = None
 
     creator = models.ForeignKey("members.Member", related_name="created_members", null=True, default=None, blank=True)
 
