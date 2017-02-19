@@ -128,14 +128,16 @@ def edit_profile(request, member_id):
 
     member = Member.objects.get(id=member_id)
 
+    current_user_is_admin_for_this_member = current_member.id != member.creator_id or user_is_administrator(user)
+
     # Check if the current member is editing his/her profile or the current member is his/her creator or
     # is an administrator
-    if current_member.id != int(member_id) and current_member.id != member.creator_id and not user_is_administrator(user):
+    if current_member.id != int(member_id) and not current_user_is_admin_for_this_member:
         return HttpResponseForbidden()
 
     # Only the administrator has permission of a full change of member attributes
     Form = MemberForm
-    if user_is_administrator(user):
+    if current_user_is_admin_for_this_member:
         Form = AdminMemberForm
 
     if request.method == "POST":
@@ -162,7 +164,7 @@ def edit_trello_member_profile(request, member_id):
     if current_member.id != int(member_id) and current_member.id != member.creator_id and not user_is_administrator(user):
         return HttpResponseForbidden()
 
-    # Only the administrator has permission of a full change of member attributes
+    # Edition of Trello Profile
     Form = EditTrelloMemberProfileForm
 
     if request.method == "POST":
