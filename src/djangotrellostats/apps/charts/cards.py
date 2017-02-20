@@ -744,7 +744,7 @@ def time_scatterplot(current_user, time_metric_name="Time", board=None,
     cards = Card.objects.filter(board__in=boards, is_closed=False, list__type="done").order_by("id")
 
     i = 0
-    while month_i <= end_month and year_i <= end_year:
+    while (year_i == end_year and month_i <= end_month) or year_i < end_year:
 
         card_values = []
         cards_by_month = cards.filter(
@@ -834,7 +834,7 @@ def time_vs_spent_time(current_user, time_metric_name="Time", board=None,
     cards = Card.objects.filter(board__in=boards, is_closed=False, list__type="done").order_by("id")
 
     i = 0
-    while month_i <= end_month and year_i <= end_year:
+    while (year_i == end_year and month_i <= end_month) or year_i < end_year:
 
         card_values = []
         cards_by_month = cards.filter(
@@ -923,7 +923,7 @@ def time_box(current_user, time_metric_name="Time", board=None,
     cards = Card.objects.filter(board__in=boards, is_closed=False, list__type="done").order_by("id")
 
     i = 0
-    while month_i <= end_month and year_i <= end_year:
+    while (year_i == end_year and month_i <= end_month) or year_i < end_year:
 
         card_values = []
         cards_by_month = cards.filter(
