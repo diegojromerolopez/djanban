@@ -178,11 +178,7 @@ def view_gantt_chart(request, board_id):
             end_date = start_date + timedelta(days=1)
 
         # Color of task
-        task_color = "black"
-        labels = board_card.labels.all()
-        if labels.exists():
-            main_label = labels[0]
-            task_color = main_label.color
+        task_color = "blue"
 
         # Percentage of completion of the task
         if board_card.list.type == "development":
@@ -208,11 +204,11 @@ def view_gantt_chart(request, board_id):
                 dependant_cards += ",".format(blocked_card.id)
             dependant_cards = dependant_cards[:-1]
 
-        members = board_card.members.all()[:1]
+        members = board_card.members.all()
         for member in members:
             card = {
                 "pID": board_card.id,
-                "pName": board_card.name,
+                "pName": "{0}".format(board_card.short_url, member.external_username),
                 "pStart": start_date.strftime("%Y-%m-%d"),
                 "pEnd": end_date.strftime("%Y-%m-%d"),
                 "pClass": "gtask{0}".format(task_color),
@@ -225,7 +221,9 @@ def view_gantt_chart(request, board_id):
                 "pOpen": 0,
                 "pDepend": dependant_cards,
                 "pCaption": board_card.name,
-                "pNotes": board_card.description
+                "pNotes": "{0}\\\n{1}".format(
+                    board_card.name, board_card.description.replace("\n", "\\\n")
+                )
             }
             cards.append(card)
 
