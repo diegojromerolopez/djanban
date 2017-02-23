@@ -35,7 +35,9 @@ class Initializer(TrelloConnector):
 
         # For each Trello board, create a new board if it doesn't exist or update the board if it already exists
         for trello_board in trello_boards:
-            if board_uuid is None or board_uuid == trello_board.id:
+            # Fetch only active boards (those that are not archived in Trello)
+            board_is_active = not trello_board.closed
+            if (board_uuid is None or board_uuid == trello_board.id) and board_is_active:
                 board_already_exists = Board.objects.filter(uuid=trello_board.id).exists()
                 if not board_already_exists:
                     board_name = trello_board.name

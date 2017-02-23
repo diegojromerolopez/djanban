@@ -63,7 +63,7 @@
                                <span class="fa fa-usd"></span> HRs
                            </a>
                         </li>
-                        {% if request.user.member.is_initialized %}
+                        {% if member.has_trello_credentials %}
                             <li role="presentation" {% if url_name == "fetch_boards" %}class="active"{% endif %}>
                                 <a href="{% url 'fetch:fetch_boards' %}" title="Fetch all boards">
                                     <span class="fa fa-download"></span>

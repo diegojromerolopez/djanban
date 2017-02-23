@@ -101,7 +101,7 @@
                                     <span class="fa fa-certificate"></span> Ag. Rating
                                 </a>
                             </li>
-                        {% if member %}
+                        {% if member and member.has_trello_credentials %}
                             {% if board.has_to_be_fetched %}
                                 <li {% if url_name == "fetch" %}class="active"{% endif %}>
                                     <a href="{% url 'boards:fetch' board.id %}" title="Fetch board {{board.name}}">
