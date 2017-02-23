@@ -58,6 +58,7 @@ def basic_serialize_card(card, board=None):
         "number_of_backward_movements": card.number_of_backward_movements,
         "board": {"id": board.id, "uuid": board.uuid, "name": board.name},
         "labels": [serialize_label(label) for label in card.labels.exclude(name="").order_by("name")],
+        "members": [serialize_member(member) for member in card.members.all().order_by("id")],
         "reviews": [serialize_card_review(review) for review in card.reviews.all().order_by("-creation_datetime")],
     }
 
@@ -223,6 +224,7 @@ def serialize_member(member):
         "external_username": member.external_username,
         "initials": member.initials,
         "is_current_user": True if current_member and member.id == current_member.id else False,
+        "gravatar_url": member.gravatar_url,
         "roles_by_board": {
             member_role.board_id: member_role.type for member_role in member.roles.all()
         }

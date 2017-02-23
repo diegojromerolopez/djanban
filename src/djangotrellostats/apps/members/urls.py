@@ -20,4 +20,5 @@ urlpatterns = [
     url(r'^change_password/(?P<member_id>\d+)?$', main.change_password_to_member, name="change_password"),
     url(r'^edit/(?P<member_id>\d+)/??$', main.edit_profile, name="edit_profile"),
     url(r'^edit/trello/(?P<member_id>\d+)/??$', main.edit_trello_member_profile, name="edit_trello_member_profile"),
+
 ]

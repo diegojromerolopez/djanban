@@ -29,6 +29,10 @@
     padding: 20px;
 }
 
+img.avatar {
+    border-radius: 5px;
+}
+
 /* Task board */
 h1, h2, h3 {
     margin: 0;

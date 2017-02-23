@@ -2,15 +2,20 @@
 
 from __future__ import unicode_literals
 
+from PIL import Image, ImageDraw, ImageFont
+
+from django.conf import settings
 from datetime import timedelta
 
-import math
+import hashlib
 
 import numpy
 from django.contrib.auth.models import User
+from django.core.files import File
 from django.db import models
 from django.db import transaction
 from django.db.models import Sum, Avg, Q
+from django.urls import reverse
 from django.utils import timezone
 from isoweek import Week
 
@@ -23,6 +28,8 @@ class Member(models.Model):
     creator = models.ForeignKey("members.Member", related_name="created_members", null=True, default=None, blank=True)
 
     user = models.OneToOneField(User, verbose_name=u"Associated user", related_name="member", null=True, default=None)
+
+    default_avatar = models.ImageField(verbose_name=u"Default avatar", null=True, default=None)
 
     biography = models.TextField(verbose_name=u"Biography", blank=True, default="")
 
@@ -116,10 +123,10 @@ class Member(models.Model):
             boards = get_user_boards(self.user)
         return Member.objects.filter(Q(boards__in=boards) | Q(creator=self) | Q(is_public=True)).distinct()
 
+    # Get member companions of the same boards
     @property
     def team_mates(self):
-        boards = get_user_boards(self.user)
-        return Member.objects.filter(boards__in=boards).distinct().order_by("name")
+        return Member.get_user_team_mates(self.user)
 
     # Get members that work with this user
     @staticmethod
@@ -262,6 +269,38 @@ class Member(models.Model):
 
     def get_backward_movements_for_board(self, board):
         return self.card_movements.filter(type="backward", board=board).count()
+
+    # Returns the Gravatar URL
+    @property
+    def gravatar_url(self, size=30):
+        if not self.default_avatar:
+            self.create_default_avatar()
+        if self.user:
+            return "http://www.gravatar.com/avatar/{0}?s={1}&d={2}".format(
+                hashlib.md5(self.user.email.encode('utf-8')).hexdigest(),
+                size,
+                self.default_avatar.url
+            )
+        return self.default_avatar.url
+
+    # Create default avatar
+    def create_default_avatar(self):
+
+        initials = self.initials
+
+        font = ImageFont.truetype(settings.BASE_DIR + "/fonts/vera.ttf", size=15)
+
+        canvas = Image.new('RGB', (30, 30), (255, 255, 255))
+        draw = ImageDraw.Draw(canvas)
+        draw.text((4, 8), initials, (0, 0, 0), font=font)
+
+        filename = "{0}.png".format(initials)
+        path = "/tmp/{0}".format(filename)
+
+        canvas.save(path, "PNG")
+
+        with open(path, "rb") as avatar_image:
+            self.default_avatar.save(filename, File(avatar_image))
 
     # Average lead time of the cards of this member
     @property

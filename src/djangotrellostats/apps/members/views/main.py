@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Q
-from django.http.response import HttpResponseRedirect, HttpResponseForbidden
+from django.http.response import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
 from django.shortcuts import render
 
 from djangotrellostats.apps.base.auth import user_is_administrator, get_user_boards, user_is_member

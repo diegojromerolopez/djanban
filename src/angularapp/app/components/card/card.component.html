@@ -403,7 +403,10 @@
                         <h2>Members ({{card.members.length}})</h2>
                         
                         <ul *ngIf="card.members.length > 0">
-                            <li *ngFor="let member_i of card.members">{{member_i.trello_username}}</li>
+                            <li *ngFor="let member_i of card.members">
+                                <img class="avatar" src="{{member_i.gravatar_url}}" alt="Gravatar image of {{member_i.external_username}}" />
+                                <span>{{member_i.external_username}}</span>
+                            </li>
                         </ul>
                         <div *ngIf="card.members.length == 0">
                             <em>This task has no assigned members.</em>
@@ -414,7 +417,7 @@
                             <form (ngSubmit)="onChangeMembers(changeMembersForm.value.members)" #changeMembersForm="ngForm">
                                 <select name="members" multiple required ngModel>
                                     <option *ngFor="let member of board.members" [value]="member.id" [selected]="cardHasMember(member)?true:false">
-                                        {{member.trello_username}}
+                                        {{member.external_username}}
                                     </option>
                                 </select>
                                 <div>
