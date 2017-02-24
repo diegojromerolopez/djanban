@@ -273,14 +273,17 @@ class Member(models.Model):
     # Returns the Gravatar URL
     @property
     def gravatar_url(self, size=30):
+        # Create avatar if it doesn't exist
         if not self.default_avatar:
             self.create_default_avatar()
+        # If the member has an user and therefore, an email, get its gravatar
         if self.user:
             return "http://www.gravatar.com/avatar/{0}?s={1}&d={2}".format(
                 hashlib.md5(self.user.email.encode('utf-8')).hexdigest(),
                 size,
                 self.default_avatar.url
             )
+        # Otherwise, get its default avatar URL
         return self.default_avatar.url
 
     # Create default avatar
