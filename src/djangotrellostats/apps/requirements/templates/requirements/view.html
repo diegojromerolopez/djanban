@@ -91,7 +91,7 @@
                                                   {% with pending_cards=requirement.pending_cards %}
                                                         {% if pending_cards|length > 0 %}
                                                           {% for card in pending_cards %}
-                                                            {% include "cards/components/card.html" %}
+                                                            {% include "boards/components/view/full_board_card.html" %}
                                                           {% endfor %}
                                                         {% else %}
                                                             Congratulations! You have no pending cards.
@@ -125,7 +125,7 @@
                                                   {% with done_cards=requirement.done_cards %}
                                                     {% if done_cards|length > 0 %}
                                                         {% for card in done_cards %}
-                                                            {% include "cards/components/card.html" %}
+                                                            {% include "boards/components/view/full_board_card.html" %}
                                                           {% endfor %}
                                                     {% else %}
                                                         Sorry there are no done cards.
