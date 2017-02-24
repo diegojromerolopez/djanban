@@ -5,6 +5,11 @@
                 <a class="navbar-brand" href="{% url 'boards:view' board.id %}" title="Go to {{board.name}} dashboard">
                     {{board.name|truncatechars:20}}
                 </a>
+                {% if board.url %}
+                    <a class="navbar-brand" href="{{board.url}}" title="View this board in Trello">
+                        <span class="fa fa-trello"></span>
+                    </a>
+                {% endif %}
             </div>
             {% if board.estimated_number_of_hours %}
                 {% with board_spent_time=board.get_spent_time %}

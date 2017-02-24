@@ -20,6 +20,7 @@ urlpatterns = [
 
     url(r'^(?P<board_public_access_code>.+)/public_view/?$', boards.public_view, name="public_view"),
     url(r'^(?P<board_id>\d+)/view/?$', boards.view, name="view"),
+    url(r'^(?P<board_id>\d+)/view/?$', boards.view, name="view_board"),
 
     url(r'^(?P<board_id>\d+)/edit/?$', boards.edit, name="edit"),
     url(r'^(?P<board_id>\d+)/create-default-labels/?$', boards.create_default_labels, name="create_default_labels"),

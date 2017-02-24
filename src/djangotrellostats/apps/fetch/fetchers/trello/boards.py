@@ -44,13 +44,17 @@ class Initializer(TrelloConnector):
                     board = Board(uuid=trello_board.id, name=board_name, description=trello_board.description,
                                   last_activity_datetime=trello_board.date_last_activity,
                                   public_access_code=shortuuid.ShortUUID().random(length=20).lower(),
-                                  creator=self.member)
+                                  creator=self.member, url=trello_board.url)
                     board.save()
                     if self.debug:
                         print("Board {0} successfully created".format(board_name))
                 else:
                     board = Board.objects.get(uuid=trello_board.id)
                     board_is_updated = False
+                    # Change in URL
+                    if board.url != trello_board.url:
+                        board.url = trello_board.url
+                        board_is_updated = True
                     # Change in name
                     if board.name != trello_board.name:
                         board.name = trello_board.name
@@ -62,6 +66,8 @@ class Initializer(TrelloConnector):
                     # Board needs updating
                     if board_is_updated:
                         board.save()
+                    print "CHOCKAPICK"
+                    print board.url
                     # Board name
                     board_name = board.name
 
@@ -217,6 +223,8 @@ class BoardFetcher(Fetcher):
                 self._fetch_cards(debug=debug)
                 self._create_card_reports()
 
+                if self.board.url != self.trello_board.url:
+                    self.board.url = self.trello_board.url
                 self.board.last_fetch_datetime = timezone.now()
                 self.board.last_activity_datetime = self.board.last_fetch_datetime
                 self.board.save()

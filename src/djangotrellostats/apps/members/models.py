@@ -132,7 +132,7 @@ class Member(models.Model):
     @staticmethod
     def get_user_team_mates(user):
         boards = get_user_boards(user)
-        return Member.objects.filter(boards__in=boards).distinct().order_by("name")
+        return Member.objects.filter(boards__in=boards).distinct().order_by("id")
 
     # Resets the password of the associated user of this member
     def reset_password(self, new_password=None):
@@ -251,6 +251,18 @@ class Member(models.Model):
     @property
     def active_cards(self):
         return self.cards.filter(is_closed=False).order_by("position")
+
+    # Is the member in downtime?
+    @property
+    def is_in_downtime(self):
+        return not self.active_cards.filter(Q(list__type="development")|Q(list__type="ready_to_develop")).exists()
+
+    @property
+    def last_work_datetime(self):
+        try:
+            return not self.daily_spent_times.all().order_by("-id")[0].comment.creation_datetime
+        except IndexError:
+            return None
 
     @property
     def number_of_cards(self):

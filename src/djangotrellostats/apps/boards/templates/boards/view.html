@@ -31,7 +31,14 @@
 {% block content %}
     {% if board.is_ready and board.is_fetched %}
         <div class="board-title-container">
-            <h1 class="board-title">{{board.name}}</h1>
+            <h1 class="board-title">
+                {{board.name}}
+                {% if board.url %}
+                    <a href="{{board.url}}" title="View this board in Trello">
+                        <span class="fa fa-trello"></span>
+                    </a>
+                {% endif %}
+            </h1>
 
             {% with mood_value=board.mood_value %}
                 <div class="board-mood cursor-help" title="This is the mood of the project, a subjective measurement of how the developers feel">

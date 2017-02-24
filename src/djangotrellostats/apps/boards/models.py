@@ -118,6 +118,9 @@ class Board(models.Model):
         max_length=32, default="FFFFFF"
     )
 
+    # External or source URL
+    url = models.CharField(max_length=255, verbose_name=u"URL of the board", null=True, default=None)
+
     def __unicode__(self):
         return self.name
 
@@ -698,6 +701,13 @@ class Card(models.Model):
                 time_by_list[last_list.id] += time_card_has_spent_in_list_until_now\
 
         return time_by_list
+
+    @property
+    def ready_to_develop_datetime(self):
+        arrivals_to_ready_to_develop_list = self.movements.filter(destination_list__type="ready_to_develop").order_by("datetime")
+        if arrivals_to_ready_to_develop_list.exists():
+            return arrivals_to_ready_to_develop_list[0].datetime
+        return self.creation_datetime
 
     @property
     def has_started(self):

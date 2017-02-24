@@ -1,3 +1,5 @@
+{% load humanize %}
+
 <h1>
     {% if member %}
         {{member.external_username}}'s dashboard
@@ -13,34 +15,128 @@
 </div>
 
 {% if member.is_developer %}
-    <div>
-        <h2>Work</h2>
-        <div class="row">
-            <div class="col-md-12">
-                {% with today_member_spent_time=member.get_today_spent_time %}
-                    Today you've worked <strong>{{today_member_spent_time|floatformat:-2}} hours</strong>.
-                    {% if today_member_spent_time >= 7 %}
-                        <strong>Congratulations. That's a great success.</strong>
-                    {% endif %}
-                {% endwith %}
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Work</h2>
+            <div class="row">
+                <div class="col-md-12">
+                    {% with today_member_spent_time=member.get_today_spent_time %}
+                        Today you've worked <strong>{{today_member_spent_time|floatformat:-2}} hours</strong>.
+                        {% if today_member_spent_time >= 7 %}
+                            <strong>Congratulations. That's a great success.</strong>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                <div class="col-md-12">
+                    {% with yesterday_member_spent_time=member.get_yesterday_spent_time %}
+                        Yesterday you worked <strong>{{yesterday_member_spent_time|floatformat:-2}} hours</strong>.
+                        {% if yesterday_member_spent_time >= 7 %}
+                            <strong>Congratulations. That's a great success. Keep the good work on!</strong>
+                        {% endif %}
+                    {% endwith %}
+                </div>
             </div>
-            <div class="col-md-12">
-                {% with yesterday_member_spent_time=member.get_yesterday_spent_time %}
-                    Yesterday you worked <strong>{{yesterday_member_spent_time|floatformat:-2}} hours</strong>.
-                    {% if yesterday_member_spent_time >= 7 %}
-                        <strong>Congratulations. That's a great success. Keep the good work on!</strong>
-                    {% endif %}
-                {% endwith %}
-            </div>
+        </div>
+        <div class="col-md-3">
+            <h2>Downtime</h2>
+            {% if member.is_developer and member.is_in_downtime %}
+                <div>You are on downtime since {{member.last_work_datetime}}</div>
+            {% endif %}
+            {% for member_i in downtime_developers %}
+                <div>{{member_i.external_username}} is in downtime since {{member_i.last_work_datetime}}.</div>
+            {% empty %}
+                {% if member.is_developer and member.is_in_downtime %}
+                    <div>No other developers are in downtime.</div>
+                {% else %}
+                    <div>No developers are in downtime.</div>
+                {% endif %}
+            {% endfor %}
         </div>
     </div>
 
-    <h2>Projects summary</h2>
-    {% for board in member.boards.all %}
-        {% if not board.is_archived and board.is_ready and board.is_fetched %}
-            {% include "index/components/board.html" %}
-        {% endif %}
-    {% endfor %}
+    <h2>Status</h2>
+    <div class="row">
+        <div class="col-md-8">
+            <h3>Current projects</h3>
+            {% for board in member.boards.all %}
+                {% if not board.is_archived and board.is_ready and board.is_fetched %}
+                    {% include "index/components/board.html" %}
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div class="col-md-4">
+            <h3>Pending cards</h3>
+            {% if pending_red_cards|length > 0 %}
+                <div>
+                    <h3 class="red_cards_title">High priority ({{pending_red_cards|length}})</h3>
+                    {% for red_card in pending_red_cards %}
+                        <div class="panel panel-danger red_card">
+                              <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <a href="{% url 'boards:view_card' red_card.board_id red_card.id %}" title="View card">
+                                        {{red_card.name}}
+                                    </a>
+                                    <a href="{{red_card.url}}" title="View card in trello">
+                                        <span class="fa fa-trello"></span>
+                                    </a>
+                                </h4>
+                              </div>
+                              <div class="panel-body">
+                                Since {{red_card.ready_to_develop_datetime|naturaltime}} waiting in <a href="{% url 'boards:view_board' red_card.board_id %}">{{red_card.board.name}}</a>
+                              </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if pending_orange_cards|length > 0 %}
+                <div>
+                    <h3 class="orange_cards_title">Medium priority ({{orange_orange_cards|length}})</h3>
+                    {% for orange_card in pending_orange_cards %}
+                        <div class="panel panel-danger orange_card">
+                              <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <a href="{% url 'boards:view_card' orange_card.board_id orange_card.id %}" title="View card">
+                                        {{orange_card.name}}
+                                    </a>
+                                    <a href="{{orange_card.url}}" title="View card in trello">
+                                        <span class="fa fa-trello"></span>
+                                    </a>
+                                </h4>
+                              </div>
+                              <div class="panel-body">
+                                Since {{orange_card.ready_to_develop_datetime|naturaltime}} waiting in <a href="{% url 'boards:view_board' orange_card.board_id %}">{{orange_card.board.name}}</a>
+                              </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if pending_yellow_cards|length > 0 %}
+                <div>
+                    <h3 class="yellow_cards_title">Low priority ({{pending_yellow_cards|length}})</h3>
+                    {% for yellow_card in pending_yellow_cards %}
+                        <div class="panel panel-warning yellow_card">
+                              <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <a href="{% url 'boards:view_card' yellow_card.board_id yellow_card.id %}" title="View card">
+                                        {{yellow_card.name}}
+                                    </a>
+                                    <a href="{{yellow_card.url}}" title="View card in trello">
+                                        <span class="fa fa-trello"></span>
+                                    </a>
+                                </h4>
+                              </div>
+                              <div class="panel-body">
+                                Since {{yellow_card.ready_to_develop_datetime|naturaltime}} waiting in <a href="{% url 'boards:view_board' yellow_card.board_id %}">{{yellow_card.board.name}}</a>
+                              </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
 
     {% include "index/components/task_board/board.html" %}
     {% include "members/components/tasks_in_development_boards.html" %}

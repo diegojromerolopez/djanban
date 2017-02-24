@@ -8,6 +8,7 @@
     {{block.super}}
     <link href="{% static 'css/boards/view.css' %}" rel="stylesheet" />
     <link href="{% static 'css/index/full_task_board.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/index/toggle_pending_cards.css' %}" rel="stylesheet" />
 {% endblock %}
 
 {% block js %}
@@ -20,6 +21,7 @@
     <script type="text/javascript" src="{% static 'js/index/spent_time_by_day_of_the_week.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/boards/view/spent_time_by_week.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/boards/view/full_task_board.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/index/toggle_pending_cards.js' %}"></script>
 {% endblock %}
 
 {% block content %}

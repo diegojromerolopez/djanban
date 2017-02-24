@@ -1,5 +1,5 @@
  <div class="row">
-    <div class="col-md-8 center-block">
+    <div class="col-md-12 center-block">
         <div class="panel panel-{% if board.estimated_number_of_hours and board.current_percentage_of_completion > board.percentage_of_completion %}danger{% else %}success{% endif %}">
           <a class="panel-heading btn-block" href="{% url 'boards:view' board.id %}" title="View {{board.name}}">
                 {{board.name}}
