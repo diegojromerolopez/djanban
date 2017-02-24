@@ -47,15 +47,23 @@ export class BoardComponent implements OnInit {
   /** Label filter */
   public labelFilter: Label[];
   public labelFilterHash: {};
+  /** Is the board reloading its content? */
+  public reloading: boolean;
 
   /** First thing we have to do is loading both the board and all available members */
   ngOnInit(): void {
+    this.reloadBoard();
+  }
+
+  /** Reload the board */
+  reloadBoard(): void {
+    this.reloading = true;
     let that = this;
     this.route.params.subscribe(params => {
       let board_id = params["board_id"];
       that.loadBoard(board_id);
     });
-    this.loadMembers();
+    this.loadMembers(); 
   }
 
   /** Constructor of BoardComponent: initialization of status and setting up the Dragula service */
@@ -78,6 +86,8 @@ export class BoardComponent implements OnInit {
     // Label filter: show only the cards that has a label here
     this.labelFilter = [];
     this.labelFilterHash = {};
+    
+    this.reloading = false;
 
     // Options of the drag and drop service
     dragulaService.setOptions('lists', {
@@ -196,6 +206,7 @@ export class BoardComponent implements OnInit {
       this.boardService.getBoard(board_id).then(board_response =>{
           this.prepareBoard(board_response);
           this.notificationsService.success("Loaded successfully", "Board loaded successfully", {timeOut: 3000});
+          this.reloading = false;
       }).catch(error_message => {
         this.notificationsService.error("Error", `Couldn't load board. ${error_message}`);
     });;

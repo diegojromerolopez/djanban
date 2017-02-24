@@ -45,6 +45,7 @@ var BoardComponent = (function () {
         // Label filter: show only the cards that has a label here
         this.labelFilter = [];
         this.labelFilterHash = {};
+        this.reloading = false;
         // Options of the drag and drop service
         dragulaService.setOptions('lists', {
             moves: function (el, container, handle) {
@@ -64,6 +65,11 @@ var BoardComponent = (function () {
     }
     /** First thing we have to do is loading both the board and all available members */
     BoardComponent.prototype.ngOnInit = function () {
+        this.reloadBoard();
+    };
+    /** Reload the board */
+    BoardComponent.prototype.reloadBoard = function () {
+        this.reloading = true;
         var that = this;
         this.route.params.subscribe(function (params) {
             var board_id = params["board_id"];
@@ -164,6 +170,7 @@ var BoardComponent = (function () {
         this.boardService.getBoard(board_id).then(function (board_response) {
             _this.prepareBoard(board_response);
             _this.notificationsService.success("Loaded successfully", "Board loaded successfully", { timeOut: 3000 });
+            _this.reloading = false;
         }).catch(function (error_message) {
             _this.notificationsService.error("Error", "Couldn't load board. " + error_message);
         });

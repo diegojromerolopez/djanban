@@ -108,6 +108,15 @@
                 </span>
             </div>
         </div>
+        <!-- Actions -->
+        <div class="col-md-1">
+            <span   class="btn btn-primary"
+                    (click)="reloading=true"
+                    (click)="reloadBoard()">
+                <span class="fa fa-refresh fa-2x" *ngIf="!reloading"></span>
+                <span class="fa fa-refresh fa-2x fa-spin" *ngIf="reloading"></span>
+            </span>
+        </div>
     </div>
 
 
