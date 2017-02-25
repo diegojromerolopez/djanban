@@ -49,13 +49,6 @@ class Member(models.Model):
         verbose_name=u"Minimum number of hours this developer should complete per week",
         default=None, null=True, blank=True)
 
-    spent_time_factor = models.DecimalField(
-        decimal_places=2, max_digits=5,
-        verbose_name=u"Factor that needs to be multiplied on the spent time price for this member",
-        help_text=u"Modify this value whe this member cost8needs to be adjusted by a factor",
-        default=1
-    )
-
     max_number_of_boards = models.PositiveIntegerField(
         verbose_name=u"Max number of boards",
         help_text=u"Maximum number of boards this member can fetch. If null, unlimited number of boards",
@@ -68,6 +61,24 @@ class Member(models.Model):
     # Constructor for Member
     def __init__(self, *args, **kwargs):
         super(Member, self).__init__(*args, **kwargs)
+
+    # Adjust spent time according to the factor specified by date intervals
+    def adjust_daily_spent_time(self, daily_spent_time, attribute="spent_time"):
+        date = daily_spent_time.date
+        adjusted_value = getattr(daily_spent_time, attribute)
+        if adjusted_value is None:
+            return 0
+
+        for spent_time_factor in self.spent_time_factors.all():
+            if (spent_time_factor.start_date is None and spent_time_factor.end_date is None) or\
+                    (spent_time_factor.start_date <= date and spent_time_factor.end_date is None) or \
+                    (spent_time_factor.start_date <= date <= spent_time_factor.end_date):
+                original_value = getattr(daily_spent_time, attribute)
+                adjusted_value = original_value * spent_time_factor.factor
+                print "{0} {1} * {2} = {3}".format(self.external_username, original_value, spent_time_factor.factor, adjusted_value)
+                return adjusted_value
+
+        return adjusted_value
 
     # A native member is one that has no Trello profile
     @property
@@ -258,9 +269,16 @@ class Member(models.Model):
         return not self.active_cards.filter(Q(list__type="development")|Q(list__type="ready_to_develop")).exists()
 
     @property
+    def first_work_datetime(self):
+        try:
+            return self.daily_spent_times.all().order_by("id")[0].comment.creation_datetime
+        except IndexError:
+            return None
+
+    @property
     def last_work_datetime(self):
         try:
-            return not self.daily_spent_times.all().order_by("-id")[0].comment.creation_datetime
+            return self.daily_spent_times.all().order_by("-id")[0].comment.creation_datetime
         except IndexError:
             return None
 
@@ -352,6 +370,20 @@ class Member(models.Model):
         values = [float(card_i.estimated_time) for card_i in self.active_cards.exclude(estimated_time=None)]
         std_dev_time = numpy.nanstd(values)
         return std_dev_time
+
+
+# Spent factors of each member
+class SpentTimeFactor(models.Model):
+    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="spent_time_factors")
+    name = models.CharField(verbose_name=u"Name of this factor", max_length=128, default="", blank=True)
+    start_date = models.DateField(verbose_name=u"Start date of this factor")
+    end_date = models.DateField(verbose_name=u"End date of this factor", null=True, default=None, blank=True)
+    factor = models.DecimalField(
+        decimal_places=2, max_digits=5,
+        verbose_name=u"Factor that needs to be multiplied on the spent time price for this member",
+        help_text=u"Modify this value whe this member cost needs to be adjusted by a factor",
+        default=1
+    )
 
 
 # Role a member has in a board

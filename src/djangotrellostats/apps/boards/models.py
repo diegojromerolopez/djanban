@@ -284,10 +284,9 @@ class Board(models.Model):
         adjusted_spent_time = 0
         for member_i in members:
             daily_spent_times_filter["member"] = member_i
-            spent_time = self.daily_spent_times.filter(**daily_spent_times_filter).aggregate(sum=Sum("spent_time"))["sum"]
-            if spent_time is not None:
-                member_adjusted_spent_time = member_i.spent_time_factor * spent_time
-                adjusted_spent_time += member_adjusted_spent_time
+            daily_spent_times = self.daily_spent_times.filter(**daily_spent_times_filter)
+            for daily_spent_time in daily_spent_times:
+                adjusted_spent_time += member_i.adjust_daily_spent_time(daily_spent_time, attribute="spent_time")
 
         return adjusted_spent_time
 
@@ -356,11 +355,13 @@ class Board(models.Model):
         # Getting the spent time of that month for each member
         adjusted_spent_time = 0
         for member in self.members.filter(is_developer=True):
-            member_spent_time = self.get_monthly_spent_time(month=end_working_month,
-                                                            year=end_working_year,
-                                                            member=member)
-            adjusted_member_spent_time = member_spent_time * member.spent_time_factor
-            adjusted_spent_time += adjusted_member_spent_time
+            daily_spent_times = self.daily_spent_times.filter(
+                date__month=end_working_month,
+                date__year=end_working_year,
+                member=member
+            )
+            for daily_spent_time in daily_spent_times:
+                adjusted_spent_time += member.adjust_daily_spent_time(daily_spent_time, "spent_time")
 
         return adjusted_spent_time
 
@@ -409,11 +410,9 @@ class Board(models.Model):
         adjusted_developed_value = 0
         for member in self.members.all():
             daily_spent_times_filter["member"] = member
-            developed_value = self.daily_spent_times.filter(**daily_spent_times_filter).aggregate(sum=Sum("rate_amount"))["sum"]
-            if developed_value is not None:
-                member_adjusted_developed_value = member.spent_time_factor * developed_value
-                adjusted_developed_value += member_adjusted_developed_value
-
+            daily_spent_times = self.daily_spent_times.filter(**daily_spent_times_filter)
+            for daily_spent_time in daily_spent_times:
+                adjusted_developed_value += member.adjust_daily_spent_time(daily_spent_time, "rate_amount")
         return adjusted_developed_value
 
     # Informs what is the first day the team worked in this project
@@ -762,10 +761,9 @@ class Card(models.Model):
     def adjusted_spent_time(self):
         adjusted_spent_time = 0
         for member in self.members.all():
-            spent_time = self.daily_spent_times.filter(member=member).aggregate(sum=Sum("spent_time"))["sum"]
-            if spent_time is not None:
-                member_adjusted_spent_time = member.spent_time_factor * spent_time
-                adjusted_spent_time += member_adjusted_spent_time
+            daily_spent_times = self.daily_spent_times.filter(member=member)
+            for daily_spent_time in daily_spent_times:
+                adjusted_spent_time += member.adjust_daily_spent_time(daily_spent_time, "spent_time")
 
         return adjusted_spent_time
 

@@ -11,7 +11,7 @@ from django.forms import models
 from trello import TrelloClient
 from trello.member import Member as TrelloMember
 
-from djangotrellostats.apps.members.models import Member, TrelloMemberProfile
+from djangotrellostats.apps.members.models import Member, TrelloMemberProfile, SpentTimeFactor
 
 
 # Register form
@@ -186,7 +186,7 @@ class AdminMemberForm(MemberForm):
     class Meta(MemberForm.Meta):
         model = Member
         fields = ["biography", "is_developer", "on_holidays", "minimum_working_hours_per_day",
-                  "minimum_working_hours_per_week", "spent_time_factor", "is_public"]
+                  "minimum_working_hours_per_week", "is_public"]
 
     def __init__(self, *args, **kwargs):
         super(AdminMemberForm, self).__init__(*args, **kwargs)
@@ -287,3 +287,20 @@ class ResetPasswordForm(forms.Form):
             raise ValidationError(u"Member does not exist, the username or email is wrong")
 
         return cleaned_data
+
+
+# Spent time factor form
+class SpentTimeFactorForm(ModelForm):
+    class Meta:
+        model = SpentTimeFactor
+        fields = ("name", "start_date", "end_date", "factor")
+
+    def __init__(self, *args, **kwargs):
+        super(SpentTimeFactorForm, self).__init__(*args, **kwargs)
+        self.fields["start_date"].widget = forms.DateInput()
+        self.fields["end_date"].widget = forms.DateInput()
+
+
+# Delete a spent time form
+class DeleteSpentTimeForm(forms.Form):
+    confirmed = forms.BooleanField(label=u"Confirm the deletion of this spent time factor")

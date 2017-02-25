@@ -31,7 +31,7 @@
                        </a>
                     </li>
                     {% if member %}
-                        <li role="presentation" {% if url_name == "view_members" %}class="active"{% endif %}>
+                        <li role="presentation" {% if url_name == "view_members" or url_name == "view_spent_time_factors" %}class="active"{% endif %}>
                             <a href="{% url 'members:view_members' %}" title="View members">
                                 <span class="fa fa-users"></span> Members
                             </a>

@@ -251,12 +251,9 @@ def _adjusted_daily_spent_time_attribute_sum(daily_spent_times, attribute="spent
     for daily_spent_time in daily_spent_times:
         if not daily_spent_time.member_id in member_dict:
             member_dict[daily_spent_time.member_id] = daily_spent_time.member
+
         member = member_dict[daily_spent_time.member_id]
-        daily_spent_time_value = getattr(daily_spent_time, attribute)
-        if daily_spent_time_value is None:
-            daily_spent_time_value = 0
-        if member.spent_time_factor != 1:
-            adjusted_value_sum += daily_spent_time_value * member.spent_time_factor
-        else:
-            adjusted_value_sum += daily_spent_time_value
+
+        adjusted_value_sum += member.adjust_daily_spent_time(daily_spent_time, attribute)
+
     return adjusted_value_sum

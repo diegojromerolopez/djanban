@@ -1,0 +1,14 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}New spent time factor of member {{member.external_username}}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6 center-block">
+            <h1>New spent time factor of member {{member.external_username}}</h1>
+            <div class="large-form">
+                {% include "forms/form.html" %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

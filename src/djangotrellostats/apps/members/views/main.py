@@ -154,7 +154,7 @@ def edit_profile(request, member_id):
         form = Form(instance=member)
 
     replacements = {"member": member, "form": form}
-    return render(request, "members/edit_profile.html", replacements)
+    return render(request, "members/edit.html", replacements)
 
 
 # Change your user profile data
@@ -182,3 +182,14 @@ def edit_trello_member_profile(request, member_id):
 
     replacements = {"member": member, "form": form}
     return render(request, "members/edit_trello_profile.html", replacements)
+
+
+# Assert if current member can edit this member
+def _assert_current_member_can_edit_member(current_member, member):
+    current_user_is_admin_for_this_member = current_member.id != member.creator_id or user_is_administrator(current_member.user)
+
+    # Check if the current member is editing his/her profile or the current member is his/her creator or
+    # is an administrator
+    if current_member.id != member.id and not current_user_is_admin_for_this_member:
+        raise AssertionError()
+    return True

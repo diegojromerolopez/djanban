@@ -3,7 +3,7 @@
 from django.conf.urls import url
 from django.views.generic import TemplateView
 
-from djangotrellostats.apps.members.views import auth, main
+from djangotrellostats.apps.members.views import auth, main, spent_time_factors
 
 urlpatterns = [
     url(r'^signup/?$', auth.signup, name="signup"),
@@ -16,9 +16,18 @@ urlpatterns = [
 
     url(r'^new/?$', main.new, name="new"),
     url(r'^view_members/?$', main.view_members, name="view_members"),
-    url(r'^give_access/(?P<member_id>\d+)?$', main.give_access_to_member, name="give_access"),
-    url(r'^change_password/(?P<member_id>\d+)?$', main.change_password_to_member, name="change_password"),
-    url(r'^edit/(?P<member_id>\d+)/??$', main.edit_profile, name="edit_profile"),
-    url(r'^edit/trello/(?P<member_id>\d+)/??$', main.edit_trello_member_profile, name="edit_trello_member_profile"),
+
+    url(r'^(?P<member_id>\d+)/give_access/?$', main.give_access_to_member, name="give_access"),
+    url(r'^(?P<member_id>\d+)/change_password/?$', main.change_password_to_member, name="change_password"),
+
+    # Member profile
+    url(r'^(?P<member_id>\d+)/edit/?$', main.edit_profile, name="edit_profile"),
+    url(r'^(?P<member_id>\d+)/edit/trello/?$', main.edit_trello_member_profile, name="edit_trello_member_profile"),
+
+    # Spent time factors
+    url(r'^(?P<member_id>\d+)/spent_time_factors/?$', spent_time_factors.view_list, name="view_spent_time_factors"),
+    url(r'^(?P<member_id>\d+)/spent_time_factors/add/?$', spent_time_factors.add, name="new_spent_time_factor"),
+    url(r'^(?P<member_id>\d+)/spent_time_factors/(?P<spent_time_factor_id>\d+)/?$', spent_time_factors.edit, name="edit_spent_time_factor"),
+    url(r'^(?P<member_id>\d+)/spent_time_factors/(?P<spent_time_factor_id>\d+)/delete/?$', spent_time_factors.delete, name="delete_spent_time_factor"),
 
 ]

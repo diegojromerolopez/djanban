@@ -76,6 +76,12 @@
                                                 </a>
                                             {% endif %}
                                         {% endif %}
+                                        {% if member.is_developer %}
+                                            <a class="btn btn-primary" href="{% url 'members:view_spent_time_factors' member.id %}">
+                                                <span class="fa fa-clock-o"></span>
+                                                Spent time factors ({{member.spent_time_factors.all|length}})
+                                            </a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}

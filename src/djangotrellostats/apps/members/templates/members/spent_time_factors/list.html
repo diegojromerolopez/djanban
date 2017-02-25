@@ -1,0 +1,65 @@
+{% extends "base/base.html" %}
+{% load member_auth %}
+
+{% block page_title %}Spent time factors of {{member.external_username}}{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Spent time factors of {{member.external_username}}</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <a href="{% url 'members:view_members' %}" class="btn btn-primary" title="New spent time factor">
+                <span class="fa fa-arrow-left"></span> Go back to member list
+            </a>
+        </div>
+        <div class="col-md-2">
+            <a href="{% url 'members:new_spent_time_factor' member.id %}" class="btn btn-primary" title="New spent time factor">
+                New spent time factor
+            </a>
+        </div>
+    </div>
+
+    {% if spent_time_factors|length == 0 %}
+        <div class="row">
+            <div class="col-md-12">
+                {{member.external_username}} has no spent time factors.
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel">
+                    <table class="table">
+                        <tr>
+                            <td>Name</td>
+                            <td>Date interval</td>
+                            <td>Factor</td>
+                            <td>Actions</td>
+                        </tr>
+                        {% for spent_time_factor in spent_time_factors %}
+                            <tr>
+                                <td>{{spent_time_factor.name}}</td>
+                                <td>{{spent_time_factor.start_date}} - {% if spent_time_factor.end_date %}{{spent_time_factor.end_date}}{% else %}Now{% endif %}</td>
+                                <td>{{spent_time_factor.factor}}x</td>
+                                <td>
+                                    <a href="{% url 'members:edit_spent_time_factor' member.id spent_time_factor.id %}" class="btn btn-primary" title="Edit this spent time factor">
+                                        Edit
+                                    </a>
+                                    <a href="{% url 'members:delete_spent_time_factor' member.id spent_time_factor.id %}" class="btn btn-primary" title="Delete this spent time factor">
+                                        Delete
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock content %}
