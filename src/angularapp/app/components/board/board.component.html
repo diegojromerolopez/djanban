@@ -95,7 +95,10 @@
             </div>
             <div *ngFor="let member of board.members">
                 <span class="member">
-                    <span class="member_name">{{member.external_username}} ({{member.roles_by_board[board.id]}})</span>
+                    <span class="member_name">
+                        <img src="{{member.gravatar_url}}" class="avatar" alt="{{member.external_username}}"/>
+                        <span class="member_role">({{member.roles_by_board[board.id]}})</span>
+                    </span>
                     <button *ngIf="!member.is_current_user" class="btn btn-primary"
                             (click)="removeMember(member)"
                             (click)="removeMemberStatus[member.id]['waiting'] = true"
@@ -118,7 +121,6 @@
             </span>
         </div>
     </div>
-
 
     <!-- Lists -->
     <div class="lists" [dragula]='"lists"' [dragulaModel]='list' [style.width.px]="board.lists.length * 420 + 80" [ngClass]="{'label-filter': labelFilter.length > 0}">

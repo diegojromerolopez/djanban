@@ -374,6 +374,16 @@ card.closed-card-showed,
     margin-bottom: 5px;
 }
 
+/* Members */
+.card-section.card-members {
+
+}
+
+.card-section.card-members ul {
+    list-style-type: none;
+    padding: 0;
+}
+
 /* Reviews */
 .card-reviews {
 
