@@ -38,6 +38,9 @@
                         <span class="fa fa-trello"></span>
                     </a>
                 {% endif %}
+                <a href="{% url 'boards:view_dashboard' board.id %}" title="View full board for {{board.name}}">
+                    <span class="fa fa-navicon fa-rotate-90"></span>
+                </a>
             </h1>
 
             {% with mood_value=board.mood_value %}
@@ -91,7 +94,6 @@
 
         {% include "boards/components/view/summary.html" %}
 
-
             <div class="row">
                 <div class="col-md-12">
                     <h2>Tasks</h2>
@@ -123,8 +125,6 @@
 
             {% include "boards/components/view/blocked_tasks.html" %}
         {% endif %}
-
-        {% include "boards/components/view/full_board.html" %}
 
         {% if member or visitor %}
             {% include "boards/components/view/charts.html" %}

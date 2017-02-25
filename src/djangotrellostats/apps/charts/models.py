@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+import random
 from datetime import timedelta
 
 import shortuuid
@@ -49,8 +50,13 @@ class CachedChart(models.Model):
         if board:
             return CachedChart.objects.get(board=board, uuid=uuid, creation_datetime__gte=board.last_activity_datetime)
 
-        # In case there is no board, the charts are cached during 30 minutes
-        return CachedChart.objects.get(board=None, uuid=uuid, creation_datetime__gte=timezone.now() - timedelta(minutes=30))
+        # In case there is no board, the charts are cached during 30 minutes with a random delay to avoid
+        # having all charts loading at the same time
+        life_of_this_cache_chart_in_seconds = 1800 + random.randint(0, 600)
+        return CachedChart.objects.get(
+            board=None, uuid=uuid,
+            creation_datetime__gte=timezone.now() - timedelta(seconds=life_of_this_cache_chart_in_seconds)
+        )
 
     # Create a new cached chart
     @staticmethod

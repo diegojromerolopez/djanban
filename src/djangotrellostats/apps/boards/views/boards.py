@@ -273,7 +273,6 @@ def view(request, board_id):
         raise Http404
 
     week_of_year = get_week_of_year()
-    lists = board.lists.exclude(Q(type="ignored") | Q(type="closed")).order_by("position")
 
     # Next cards by due date
     next_due_date_cards = board.cards\
@@ -293,7 +292,6 @@ def view(request, board_id):
         "url_prefix": "http://{0}".format(settings.DOMAIN),
         "board": board,
         "next_due_date_cards": next_due_date_cards,
-        "lists": lists,
         "requirement": requirement,
         "requirements": requirements,
         "week_of_year": week_of_year,

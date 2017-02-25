@@ -276,17 +276,17 @@ class Board(models.Model):
             else:
                 daily_spent_times_filter["date"] = date
 
-        if member is None:
-            members = self.members.filter(is_developer=True)
-        else:
-            members = [member]
-
         adjusted_spent_time = 0
-        for member_i in members:
-            daily_spent_times_filter["member"] = member_i
-            daily_spent_times = self.daily_spent_times.filter(**daily_spent_times_filter)
-            for daily_spent_time in daily_spent_times:
-                adjusted_spent_time += member_i.adjust_daily_spent_time(daily_spent_time, attribute="spent_time")
+        if member:
+            daily_spent_times_filter["member"] = member
+
+        daily_spent_times = self.daily_spent_times.filter(**daily_spent_times_filter)
+        member_dict = {}
+        for daily_spent_time in daily_spent_times:
+            if daily_spent_time.member_id not in member_dict:
+                member_dict[daily_spent_time.member_id] = daily_spent_time.member
+            member_i = member_dict[daily_spent_time.member_id]
+            adjusted_spent_time += member_i.adjust_daily_spent_time(daily_spent_time, attribute="spent_time")
 
         return adjusted_spent_time
 
@@ -408,11 +408,13 @@ class Board(models.Model):
                 daily_spent_times_filter["date"] = date
 
         adjusted_developed_value = 0
-        for member in self.members.all():
-            daily_spent_times_filter["member"] = member
-            daily_spent_times = self.daily_spent_times.filter(**daily_spent_times_filter)
-            for daily_spent_time in daily_spent_times:
-                adjusted_developed_value += member.adjust_daily_spent_time(daily_spent_time, "rate_amount")
+        daily_spent_times = self.daily_spent_times.filter(**daily_spent_times_filter)
+        member_dict = {}
+        for daily_spent_time in daily_spent_times:
+            if daily_spent_time.member_id not in member_dict:
+                member_dict[daily_spent_time.member_id] = daily_spent_time.member
+            member = member_dict[daily_spent_time.member_id]
+            adjusted_developed_value += member.adjust_daily_spent_time(daily_spent_time, "rate_amount")
         return adjusted_developed_value
 
     # Informs what is the first day the team worked in this project
@@ -517,10 +519,6 @@ class Board(models.Model):
     def new(member, board):
         connector = RemoteBackendConnectorFactory.factory(member)
         connector.new_board(board)
-
-
-
-
 
     # Remove a member from this board
     @transaction.atomic
