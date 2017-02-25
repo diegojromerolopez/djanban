@@ -75,7 +75,7 @@ class Member(models.Model):
                     (spent_time_factor.start_date <= date <= spent_time_factor.end_date):
                 original_value = getattr(daily_spent_time, attribute)
                 adjusted_value = original_value * spent_time_factor.factor
-                print "{0} {1} * {2} = {3}".format(self.external_username, original_value, spent_time_factor.factor, adjusted_value)
+                #print "{0} {1} * {2} = {3}".format(self.external_username, original_value, spent_time_factor.factor, adjusted_value)
                 return adjusted_value
 
         return adjusted_value
