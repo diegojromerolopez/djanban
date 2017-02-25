@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django.forms import models
+from django.utils import timezone
 from trello import TrelloClient
 from trello.member import Member as TrelloMember
 
@@ -294,11 +295,17 @@ class SpentTimeFactorForm(ModelForm):
     class Meta:
         model = SpentTimeFactor
         fields = ("name", "start_date", "end_date", "factor")
+        widgets = {
+            'start_date': forms.SelectDateWidget(),
+            'end_date': forms.SelectDateWidget(empty_label=u"Until now"),
+        }
 
     def __init__(self, *args, **kwargs):
         super(SpentTimeFactorForm, self).__init__(*args, **kwargs)
-        self.fields["start_date"].widget = forms.DateInput()
-        self.fields["end_date"].widget = forms.DateInput()
+        current_year = timezone.now().year
+        available_years = [year_i for year_i in range(current_year-40, current_year+1)]
+        self.fields["start_date"].widget.years = available_years
+        self.fields["end_date"].widget.years = available_years
 
 
 # Delete a spent time form
