@@ -93,7 +93,7 @@
                 <div>
                     <h3 class="orange_cards_title">Medium priority ({{orange_orange_cards|length}})</h3>
                     {% for orange_card in pending_orange_cards %}
-                        <div class="panel panel-danger orange_card">
+                        <div class="panel panel-danger panel-orange orange_card">
                               <div class="panel-heading">
                                 <h4 class="panel-title">
                                     <a href="{% url 'boards:view_card' orange_card.board_id orange_card.id %}" title="View card">

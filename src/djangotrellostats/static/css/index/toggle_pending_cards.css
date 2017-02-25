@@ -30,3 +30,10 @@
 .orange_cards_title {
     background-color: orange;
 }
+
+
+.panel-orange > .panel-heading {
+    color: white;
+    background-color: #FFA500;
+    border-color: #f2ebde;
+}
