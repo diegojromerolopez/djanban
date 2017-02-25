@@ -1,4 +1,23 @@
 
+#toggle_month_order .btn-title {
+    display: inline-block;
+    margin-top: -10px;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+#toggle_month_order .fa {
+
+}
+
+img.avatar {
+    border-radius: 5px;
+}
+
+.cursor-help {
+    cursor: help;
+}
+
 td.date{
     width: 10%;
 }

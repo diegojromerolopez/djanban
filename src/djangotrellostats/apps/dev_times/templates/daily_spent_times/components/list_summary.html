@@ -1,0 +1,18 @@
+<div class="panel panel-default">
+    <div class="panel-heading">Summary for this period of time</div>
+    <div class="panel-body">
+        <div>Sum of spent time {% if selected_member %}of {{selected_member.external_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}:
+            {{spent_time_sum|floatformat:"-2"}}
+            {% if selected_member and week and selected_member.minimum_working_hours_per_week %}
+            /
+            {{selected_member.minimum_working_hours_per_week}}
+            {% endif %}
+            hours
+        </div>
+        <div>Adjusted sum of spent time {% if selected_member %}of {{selected_member.external_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{adjusted_spent_time_sum|floatformat:"2"}} hours </div>
+        <div>Sum of value {% if selected_member %}of {{selected_member.external_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{spent_time_amount_sum|floatformat:"2"}} ¤</div>
+        <div>Adjusted sum of value {% if selected_member %}of {{selected_member.external_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{adjusted_amount_sum|floatformat:"2"}} ¤</div>
+        <div>Sum of estimated time {% if selected_member %}of {{selected_member.external_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{estimated_time_sum|floatformat:"-2"}} hours</div>
+        <div>Difference {% if selected_member %}of {{selected_member.external_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}: {{diff_time_sum|floatformat:"-2"}} hours</div>
+    </div>
+</div>
