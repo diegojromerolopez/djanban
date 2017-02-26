@@ -1,5 +1,5 @@
 {% load template_extensions %}
-
+MMMMMMMMMM
 {% if board.estimated_number_of_hours %}
     {% with current_percentage_of_completion=board.current_percentage_of_completion %}
         <div class="panel panel-{% if current_percentage_of_completion == board.percentage_of_completion %}warning{% elif current_percentage_of_completion < board.percentage_of_completion %}success{% else %}danger{% endif %}">

@@ -1,0 +1,18 @@
+<div id="{{block_id}}">
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var context = {};
+            {% for context_item_name, context_item_value in context.items %}
+                context[context_item_name] = context_item_value;
+            {% endfor %}
+            var post_data = {
+                path: "{{template_path}}",
+                context: context
+            };
+            $.post("{% url 'async_include:get_template' %}", post_data, function(response_data){
+                //$("#{{block_id}}").html(response_data);
+            });
+        });
+    </script>
+    <span class="fa fa-spinner fa-spin fa-2x"></span>
+</div>

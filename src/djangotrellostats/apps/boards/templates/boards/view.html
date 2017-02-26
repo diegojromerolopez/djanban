@@ -2,6 +2,7 @@
 
 {% load template_extensions %}
 {% load staticfiles %}
+{% load async_include %}
 
 {% block page_title %}{{board.name}}{% endblock %}
 
@@ -115,6 +116,10 @@
             {% include "boards/components/view/number_of_spent_hours.html" %}
 
             {% include "boards/components/view/current_percentage_of_completion.html" %}
+
+XXXXXXXXXXX
+            {% async_include "boards/components/view/current_percentage_of_completion.html" %}
+YYYYYYYYYYYY
 
         {% endif %}
 
