@@ -47,6 +47,7 @@ DATE_INPUT_FORMATS = ('%Y-%m-%d', '%Y/%m/%d', '%d-%m-%Y', '%d/%m/%Y')
 # Application definition
 
 INSTALLED_APPS = [
+    'async_include',
     'captcha',
     'ckeditor',
     'ckeditor_uploader',
@@ -64,7 +65,6 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'djangotrellostats.apps.agility_rating',
     'djangotrellostats.apps.api',
-    'djangotrellostats.apps.async_include',
     'djangotrellostats.apps.base',
     'djangotrellostats.apps.boards',
     'djangotrellostats.apps.charts',

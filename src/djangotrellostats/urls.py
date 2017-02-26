@@ -26,7 +26,7 @@ urlpatterns = [
     url(r'^visitors/', include('djangotrellostats.apps.visitors.urls', namespace="visitors")),
     url(r'^niko-niko-calendar/', include('djangotrellostats.apps.niko_niko_calendar.urls', namespace="niko_niko_calendar")),
 
-    url(r'^async_include/', include('djangotrellostats.apps.async_include.urls', namespace="async_include")),
+    url(r'^async_include/', include('async_include.urls', namespace="async_include")),
 
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
 

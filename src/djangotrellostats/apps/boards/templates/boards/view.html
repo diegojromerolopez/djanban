@@ -93,7 +93,7 @@
             </div>
         {% endif %}
 
-        {% include "boards/components/view/summary.html" %}
+        {% async_include "boards/components/view/summary.html" board=board member=member next_due_date_cards=next_due_date_cards %}
 
             <div class="row">
                 <div class="col-md-12">
@@ -113,19 +113,15 @@
 
         {% if board.estimated_number_of_hours %}
 
-            {% include "boards/components/view/number_of_spent_hours.html" %}
+            {% async_include "boards/components/view/number_of_spent_hours.html" board=board member=member %}
 
-            {% include "boards/components/view/current_percentage_of_completion.html" %}
-
-XXXXXXXXXXX
-            {% async_include "boards/components/view/current_percentage_of_completion.html" %}
-YYYYYYYYYYYY
+            {% async_include "boards/components/view/current_percentage_of_completion.html" board=board member=member %}
 
         {% endif %}
 
         {% if member %}
             {% if member.is_developer %}
-                {% include "boards/components/view/tasks_in_development.html" %}
+                {% async_include "boards/components/view/tasks_in_development.html" board=board member=member %}
             {% endif %}
 
             {% include "boards/components/view/blocked_tasks.html" %}
