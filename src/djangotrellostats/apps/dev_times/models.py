@@ -45,6 +45,22 @@ class DailySpentTime(models.Model):
                                     decimal_places=4, max_digits=12,
                                     default=None, null=True)
 
+    @property
+    def day(self):
+        return self.date.day
+
+    @property
+    def month(self):
+        return self.date.month
+
+    @property
+    def year(self):
+        return self.date.year
+
+    @property
+    def iso_date(self):
+        return self.date.isoformat()
+
     # Returns the adjusted spent time for this measurement
     def adjusted_spent_time(self):
         member = self.member

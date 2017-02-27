@@ -212,19 +212,22 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
             first_weekday, number_of_days_in_month = calendar.monthrange(year, month_index)
 
             month = {
-                "first_day": datetime.date(year, month_index, 1),
-                "last_day": datetime.date(year, month_index, number_of_days_in_month),
-                "name": month_name,
-                "number": month_index,
-                "year": year,
-                "i": month_index,
                 "daily_spent_times": daily_spent_times_in_month_i,
-                "rate_amount_sum": daily_spent_times_in_month_i.aggregate(sum=Sum("rate_amount"))["sum"],
-                "adjusted_amount_sum": _adjusted_amount_sum(daily_spent_times_in_month_i),
-                "spent_time_sum": daily_spent_times_in_month_i.aggregate(sum=Sum("spent_time"))["sum"],
-                'adjusted_spent_time_sum': _adjusted_spent_time_sum(daily_spent_times_in_month_i),
-                "estimated_time_sum": daily_spent_times_in_month_i.aggregate(sum=Sum("estimated_time"))["sum"],
-                "diff_time_sum": daily_spent_times_in_month_i.aggregate(sum=Sum("diff_time"))["sum"]
+                "values":{
+                    "first_day": datetime.date(year, month_index, 1).isoformat(),
+                    "last_day": datetime.date(year, month_index, number_of_days_in_month).isoformat(),
+                    "name": month_name,
+                    "number": month_index,
+                    "year": year,
+                    "i": month_index,
+
+                    "rate_amount_sum": float(daily_spent_times_in_month_i.aggregate(sum=Sum("rate_amount"))["sum"]),
+                    "adjusted_amount_sum": float(_adjusted_amount_sum(daily_spent_times_in_month_i)),
+                    "spent_time_sum": float(daily_spent_times_in_month_i.aggregate(sum=Sum("spent_time"))["sum"]),
+                    'adjusted_spent_time_sum': float(_adjusted_spent_time_sum(daily_spent_times_in_month_i)),
+                    "estimated_time_sum": float(daily_spent_times_in_month_i.aggregate(sum=Sum("estimated_time"))["sum"]),
+                    "diff_time_sum": float(daily_spent_times_in_month_i.aggregate(sum=Sum("diff_time"))["sum"])
+                }
             }
             months.append(month)
             date_i = (date_i + relativedelta(months=1))

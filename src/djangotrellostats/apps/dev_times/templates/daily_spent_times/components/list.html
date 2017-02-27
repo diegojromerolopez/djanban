@@ -20,11 +20,11 @@
             </span>
         </p>
 
-        <table id="daily_spent_times" class="table table-responsive">
+        <div class="months">
             {% for month in months %}
-                {% include "daily_spent_times/components/month.html" %}
+                {% async_include "daily_spent_times/components/month.html" month=month.values daily_spent_times=month.daily_spent_times num_daily_spent_times=month.daily_spent_times.count %}
             {% endfor %}
-        </table>
+        </div>
     </div>
 
     {# Summary #}
