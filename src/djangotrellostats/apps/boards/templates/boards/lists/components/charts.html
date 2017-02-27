@@ -1,19 +1,19 @@
 <div class="row">
     <div class="col-sm-6">
         <a href="{% url 'charts:avg_time_by_list' board.id %}" title="Average time a card is in each list">
-            <img src="{% url 'charts:avg_time_by_list' board.id %}" alt="Average time a card is in each list"/>
+            <img class="ajax-img" data-src="{% url 'charts:avg_time_by_list' board.id %}" alt="Average time a card is in each list"/>
         </a>
     </div>
     <div class="col-sm-6">
         <a href="{% url 'charts:avg_std_dev_time_by_list' board.id %}" title="Average std. dev. time a card is in each list">
-            <img src="{% url 'charts:avg_std_dev_time_by_list' board.id %}" alt="Average std. dev. time a card is in each list"/>
+            <img class="ajax-img" data-src="{% url 'charts:avg_std_dev_time_by_list' board.id %}" alt="Average std. dev. time a card is in each list"/>
         </a>
     </div>
 </div>
 <div class="row">
     <div class="col-sm-12">
         <a href="{% url 'charts:card_age' board.id %}" title="Card age per list">
-            <img src="{% url 'charts:card_age' board.id %}" alt="Card age per list"/>
+            <img class="ajax-img" data-src="{% url 'charts:card_age' board.id %}" alt="Card age per list"/>
         </a>
     </div>
 </div>

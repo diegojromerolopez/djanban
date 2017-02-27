@@ -20,8 +20,7 @@
                 </div>
                 <a href="{% url 'charts:requirement_burndown' board.id requirement.code  %}" title="Requirement {{requirement.code}} burndown for board {{board.name}}">
                     <img id="requirement_burndown"
-                         data-src="{% url 'charts:requirement_burndown' board.id  requirement.code  %}"
-                         src="{% url 'charts:requirement_burndown' board.id  requirement.code  %}"
+                         class="ajax-img" data-src="{% url 'charts:requirement_burndown' board.id  requirement.code  %}"
                          alt="Requirement {{requirement.code}} burndown for board {{board.name}}"/>
                 </a>
                 {% else %}
@@ -33,7 +32,7 @@
             <div class="col-sm-{% if requirements|length > 0 %}6{% else %}12{% endif %}">
                 {% if board.estimated_number_of_hours > 0 %}
                     <a href="{% url 'charts:burndown' board.id %}" title="Burndown according to board estimates">
-                        <img id="burndown" src="{% url 'charts:burndown' board.id %}" data-src="{% url 'charts:burndown' board.id %}" alt="Burndown of board {{board.name}}"/>
+                        <img class="ajax-img" data-src="{% url 'charts:burndown' board.id %}" alt="Burndown of board {{board.name}}"/>
                     </a>
                 {% else %}
                     Set the estimated numbers of hours to see the burndown chart.
@@ -54,15 +53,13 @@
                 </div>
                 <a href="{% url 'charts:spent_time_by_week' week_of_year board.id  %}" title="Spent time by member">
                     <img id="spent_time_by_week"
-                         data-src="{% url 'charts:spent_time_by_week' week_of_year board.id  %}"
-                         src="{% url 'charts:spent_time_by_week' week_of_year board.id  %}"
+                         class="ajax-img" data-src="{% url 'charts:spent_time_by_week' week_of_year board.id  %}"
                          alt="Spent time by member"/>
                 </a>
             </div>
             <div class="col-sm-6">
                 <a href="{% url 'charts:spent_time_by_week_evolution' board.id %}" title="Evolution of spent time">
-                    <img data-src="{% url 'charts:spent_time_by_week_evolution' board.id %}"
-                         src="{% url 'charts:spent_time_by_week_evolution' board.id %}"
+                    <img class="ajax-img" data-src="{% url 'charts:spent_time_by_week_evolution' board.id %}"
                          alt="Evolution of spent time"/>
                 </a>
             </div>
@@ -72,8 +69,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:avg_spent_time_by_weekday' board.id %}" title="Average spent time per weekday by member">
                     <img
-                            data-src="{% url 'charts:avg_spent_time_by_weekday' board.id %}"
-                            src="{% url 'charts:avg_spent_time_by_weekday' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:avg_spent_time_by_weekday' board.id %}"
                             alt="Average spent time per weekday by member"
                     />
                 </a>
@@ -81,8 +77,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:spent_time_by_week_evolution' board.id %}?show_interruptions=1" title="Evolution of spent time">
                     <img
-                            data-src="{% url 'charts:spent_time_by_week_evolution' board.id %}?show_interruptions=1"
-                            src="{% url 'charts:spent_time_by_week_evolution' board.id %}?show_interruptions=1"
+                            class="ajax-img" data-src="{% url 'charts:spent_time_by_week_evolution' board.id %}?show_interruptions=1"
                             alt="Evolution of spent time"
                     />
                 </a>
@@ -93,8 +88,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:avg_time_by_list' board.id %}" title="Average time a card is in each list">
                     <img
-                            data-src="{% url 'charts:avg_time_by_list' board.id %}"
-                            src="{% url 'charts:avg_time_by_list' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:avg_time_by_list' board.id %}"
                             alt="Average time a card is in each list"
                     />
                 </a>
@@ -102,8 +96,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:avg_std_dev_time_by_list' board.id %}" title="Average std. dev. time a card is in each list">
                     <img
-                            data-src="{% url 'charts:avg_std_dev_time_by_list' board.id %}"
-                            src="{% url 'charts:avg_std_dev_time_by_list' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:avg_std_dev_time_by_list' board.id %}"
                             alt="Average std. dev. time a card is in each list"
                     />
                 </a>
@@ -117,7 +110,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" title="Tasks worked on by month">
                     <img
-                            data-src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}"
                             src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}"
                             alt="Tasks worked on by month"
                     />
@@ -126,8 +119,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:number_of_cards_worked_on_by_week' board.id %}" title="Tasks worked on by week">
                     <img
-                            data-src="{% url 'charts:number_of_cards_worked_on_by_week' board.id %}"
-                            src="{% url 'charts:number_of_cards_worked_on_by_week' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:number_of_cards_worked_on_by_week' board.id %}"
                             alt="Tasks worked on by week"
                     />
                 </a>
@@ -137,8 +129,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:cumulative_list_evolution' board.id %}" title="Evolution of number of tasks by list">
                     <img
-                            data-src="{% url 'charts:cumulative_list_evolution' board.id %}"
-                            src="{% url 'charts:cumulative_list_evolution' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:cumulative_list_evolution' board.id %}"
                             alt="Evolution of number of tasks by list"
                     />
                 </a>
@@ -146,8 +137,7 @@
              <div class="col-sm-6">
                 <a href="{% url 'charts:cumulative_card_evolution' board.id %}" title="Evolution of number of tasks thru time">
                     <img
-                            data-src="{% url 'charts:cumulative_card_evolution' board.id %}"
-                            src="{% url 'charts:cumulative_card_evolution' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:cumulative_card_evolution' board.id %}"
                             alt="Evolution of number of tasks thru time"
                     />
                 </a>
@@ -160,8 +150,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:task_forward_movements_by_member' board.id %}" title="Task forward movements by member">
                     <img
-                            data-src="{% url 'charts:task_forward_movements_by_member' board.id %}"
-                            src="{% url 'charts:task_forward_movements_by_member' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:task_forward_movements_by_member' board.id %}"
                             alt="Task forward movements by member"
                     />
                 </a>
@@ -169,8 +158,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:task_backward_movements_by_member' board.id %}" title="Task backward movements by member">
                     <img
-                            data-src="{% url 'charts:task_backward_movements_by_member' board.id %}"
-                            src="{% url 'charts:task_backward_movements_by_member' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:task_backward_movements_by_member' board.id %}"
                             alt="Task backward movements by member"
                     />
                 </a>
@@ -183,8 +171,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:avg_lead_time' board.id %}" title="Average lead time">
                     <img
-                            data-src="{% url 'charts:avg_lead_time' board.id %}"
-                            src="{% url 'charts:avg_lead_time' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:avg_lead_time' board.id %}"
                             alt="Average lead time"
                     />
                 </a>
@@ -192,8 +179,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:avg_lead_time_by_month' board.id %}" title="Average lead time by month">
                     <img
-                            data-src="{% url 'charts:avg_lead_time_by_month' board.id %}"
-                            src="{% url 'charts:avg_lead_time_by_month' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:avg_lead_time_by_month' board.id %}"
                             alt="Average lead time by month"
                     />
                 </a>
@@ -204,8 +190,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:avg_cycle_time' board.id %}" title="Average cycle time">
                     <img
-                            data-src="{% url 'charts:avg_cycle_time' board.id %}"
-                            src="{% url 'charts:avg_cycle_time' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:avg_cycle_time' board.id %}"
                             alt="Average cycle time"
                     />
                 </a>
@@ -213,8 +198,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:avg_cycle_time_by_month' board.id %}" title="Average cycle time by month">
                     <img
-                            data-src="{% url 'charts:avg_cycle_time_by_month' board.id %}"
-                            src="{% url 'charts:avg_cycle_time_by_month' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:avg_cycle_time_by_month' board.id %}"
                             alt="Average cycle time by month"
                     />
                 </a>
@@ -225,8 +209,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:avg_spent_time' board.id %}" title="Average spent time">
                     <img
-                            data-src="{% url 'charts:avg_spent_time' board.id %}"
-                            src="{% url 'charts:avg_spent_time' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:avg_spent_time' board.id %}"
                             alt="Average spent time"
                     />
                 </a>
@@ -234,8 +217,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:avg_spent_time_by_month' board.id %}" title="Average spent time by month">
                     <img
-                            data-src="{% url 'charts:avg_spent_time_by_month' board.id %}"
-                            src="{% url 'charts:avg_spent_time_by_month' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:avg_spent_time_by_month' board.id %}"
                             alt="Average spent time by month"
                     />
                 </a>
@@ -246,8 +228,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:avg_estimated_time' board.id %}" title="Average estimated time">
                     <img
-                            data-src="{% url 'charts:avg_estimated_time' board.id %}"
-                            src="{% url 'charts:avg_estimated_time' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:avg_estimated_time' board.id %}"
                             alt="Average estimated time"
                     />
                 </a>
@@ -255,8 +236,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:avg_estimated_time_by_month' board.id %}" title="Average estimated time by month">
                     <img
-                            data-src="{% url 'charts:avg_estimated_time_by_month' board.id %}"
-                            src="{% url 'charts:avg_estimated_time_by_month' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:avg_estimated_time_by_month' board.id %}"
                             alt="Average estimated time by month"
                     />
                 </a>
@@ -267,8 +247,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:number_of_comments_by_member' board.id %}" title="Number of comments by member">
                     <img
-                            data-src="{% url 'charts:number_of_comments_by_member' board.id %}"
-                            src="{% url 'charts:number_of_comments_by_member' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:number_of_comments_by_member' board.id %}"
                             alt="Number of comments by member"
                     />
                 </a>
@@ -276,8 +255,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:number_of_comments' board.id %}" title="Evolution of number of comments thru time">
                     <img
-                            data-src="{% url 'charts:number_of_comments' board.id %}"
-                            src="{% url 'charts:number_of_comments' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:number_of_comments' board.id %}"
                             alt="Evolution of number of comment thru time"
                     />
                 </a>
@@ -293,8 +271,7 @@
                         <div class="col-sm-6">
                             <a href="{% url 'charts:number_of_code_errors' 'month' board.id 'python' %}" title="Python code quality by month">
                                 <img
-                                        data-src="{% url 'charts:number_of_code_errors' 'month' board.id 'python' %}"
-                                        src="{% url 'charts:number_of_code_errors' 'month' board.id 'python' %}"
+                                        class="ajax-img" data-src="{% url 'charts:number_of_code_errors' 'month' board.id 'python' %}"
                                         alt="Python code quality by month"
                                 />
                             </a>
@@ -302,8 +279,7 @@
                         <div class="col-sm-6">
                             <a href="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'python' %}" title="Number of errors of Python code per LOC by month">
                                 <img
-                                        data-src="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'python' %}"
-                                        src="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'python' %}"
+                                        class="ajax-img" data-src="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'python' %}"
                                         alt="Number of errors of Python code per LOC by month"
                                 />
                             </a>
@@ -315,8 +291,7 @@
                         <div class="col-sm-6">
                             <a href="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}" title="PHP code quality by month">
                                 <img
-                                        data-src="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}"
-                                        src="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}"
+                                        class="ajax-img" data-src="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}"
                                         alt="PHP code quality by month"
                                 />
                             </a>
@@ -324,8 +299,7 @@
                         <div class="col-sm-6">
                             <a href="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}" title="Number of errors of PHP code per LOC by month">
                                 <img
-                                        data-src="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}"
-                                        src="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}"
+                                        class="ajax-img" data-src="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}"
                                         alt="Number of errors of PHP code per LOC by month"
                                 />
                             </a>
@@ -341,8 +315,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:interruptions' board.id %}" title="Interruptions">
                     <img
-                            data-src="{% url 'charts:interruptions' board.id %}"
-                            src="{% url 'charts:interruptions' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:interruptions' board.id %}"
                             alt="Interruptions"
                     />
                 </a>
@@ -350,8 +323,7 @@
             <div class="col-sm-6">
                 <a href="{% url 'charts:interruptions_by_month' board.id %}" title="Interruptions by month">
                     <img
-                            data-src="{% url 'charts:interruptions_by_month' board.id %}"
-                            src="{% url 'charts:interruptions_by_month' board.id %}"
+                            class="ajax-img" data-src="{% url 'charts:interruptions_by_month' board.id %}"
                             alt="Interruptions by month"
                     />
                 </a>

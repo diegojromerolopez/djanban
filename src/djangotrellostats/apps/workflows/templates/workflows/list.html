@@ -70,12 +70,12 @@
                                 <div class="row">
                                     <div class="col-sm-6">
                                         <a href="{% url 'charts:avg_time_by_list' board.id workflow.id %}" title="Average time a card is in each list">
-                                            <img src="{% url 'charts:avg_time_by_list' board.id workflow.id %}" alt="Average time a card is in each list"/>
+                                            <img class="ajax-img" data-src="{% url 'charts:avg_time_by_list' board.id workflow.id %}" alt="Average time a card is in each list"/>
                                         </a>
                                     </div>
                                     <div class="col-sm-6">
                                         <a href="{% url 'charts:avg_std_dev_time_by_list' board.id workflow.id %}" title="Average std. dev. time a card is in each list">
-                                            <img src="{% url 'charts:avg_std_dev_time_by_list' board.id workflow.id %}" alt="Average std. dev. time a card is in each list"/>
+                                            <img class="ajax-img" data-src="{% url 'charts:avg_std_dev_time_by_list' board.id workflow.id %}" alt="Average std. dev. time a card is in each list"/>
                                         </a>
                                     </div>
                                 </div>

@@ -70,7 +70,7 @@
 
                                     <div>
                                         <a href="{% url 'charts:view_agility_rating' board.id %}" title="{{board.name}} agility rating">
-                                            <img src="{% url 'charts:view_agility_rating' board.id %}" alt="{{board.name}} agility rating"/>
+                                            <img class="ajax-img" data-src="{% url 'charts:view_agility_rating' board.id %}" alt="{{board.name}} agility rating"/>
                                         </a>
                                     </div>
                                </div>

@@ -31,7 +31,10 @@
                                 </select>
                             </div>
                             <a href="{% url 'charts:requirement_burndown' board.id requirements.0.code  %}" title="Requirement {{requirements.0.code}} burndown for board {{board.name}}">
-                                <img id="requirement_burndown" src="{% url 'charts:requirement_burndown' board.id  requirements.0.code  %}" alt="Requirement {{requirements.0.code}} burndown for board {{board.name}}"/>
+                                <img id="requirement_burndown"
+                                     class="ajax-img" data-src="{% url 'charts:requirement_burndown' board.id  requirements.0.code  %}"
+                                     alt="Requirement {{requirements.0.code}} burndown for board {{board.name}}"
+                                />
                             </a>
                         </div>
 
@@ -39,7 +42,10 @@
                         <div class="col-sm-6">
                             {% if board.estimated_number_of_hours > 0 %}
                                 <a href="{% url 'charts:burndown' board.id %}" title="Burndown according to board estimates">
-                                    <img id="burndown" src="{% url 'charts:burndown' board.id %}" alt="Burndown of board {{board.name}}"/>
+                                    <img id="burndown"
+                                         class="ajax-img" data-src="{% url 'charts:burndown' board.id %}"
+                                         alt="Burndown of board {{board.name}}"
+                                    />
                                 </a>
                             {% else %}
                                 Set the estimated numbers of hours to see the burndown chart.

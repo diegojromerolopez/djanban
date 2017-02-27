@@ -5,44 +5,44 @@
                 {% if board.last_fetch_datetime and board.is_fetched and board.is_ready %}
                     {% include "boards/components/view/number_of_spent_hours.html" %}
                     {% include "boards/components/view/current_percentage_of_completion.html" %}
-                    <img src="{% url 'charts:burndown' board.id %}" alt="Burndown for board {{board.name}}"/>
-                    <img src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" alt="Tasks worked on by month"/>
-                    <img src="{% url 'charts:cumulative_list_evolution' board.id %}" alt="Evolution of number of tasks by list"/>
-                    <img src="{% url 'charts:avg_spent_time_by_month' board.id %}" alt="Average spent time by month"/>
-                    <img src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
+                    <img class="ajax-img" data-src="{% url 'charts:burndown' board.id %}" alt="Burndown for board {{board.name}}"/>
+                    <img class="ajax-img" data-src="{% url 'charts:number_of_cards_worked_on_by_month' board.id %}" alt="Tasks worked on by month"/>
+                    <img class="ajax-img" data-src="{% url 'charts:cumulative_list_evolution' board.id %}" alt="Evolution of number of tasks by list"/>
+                    <img class="ajax-img" data-src="{% url 'charts:avg_spent_time_by_month' board.id %}" alt="Average spent time by month"/>
+                    <img class="ajax-img" data-src="{% url 'charts:task_backward_movements_by_member' board.id %}" alt="Task backward movements by member"/>
                     {% if board.has_python_assessment_report %}
-                        <img src="{% url 'charts:number_of_code_errors' 'month' board.id 'python' %}" alt="Code quality by month"/>
-                        <img src="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'python' %}" alt="Code quality per LOC by month"/>
+                        <img class="ajax-img" data-src="{% url 'charts:number_of_code_errors' 'month' board.id 'python' %}" alt="Code quality by month"/>
+                        <img class="ajax-img" data-src="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'python' %}" alt="Code quality per LOC by month"/>
                     {% endif %}
                     {% if board.has_php_assessment_report %}
-                        <img src="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}" alt="Code quality by month"/>
-                        <img src="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'php' %}" alt="Code quality per LOC by month"/>
+                        <img class="ajax-img" data-src="{% url 'charts:number_of_code_errors' 'month' board.id 'php' %}" alt="Code quality by month"/>
+                        <img class="ajax-img" data-src="{% url 'charts:number_of_code_errors_per_loc' 'month' board.id 'php' %}" alt="Code quality per LOC by month"/>
                     {% endif %}
                 {% endif %}
             {% endfor %}
-            <img src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
+            <img class="ajax-img" data-src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
             {% for member_i in members %}
                 {% if member_i.is_developer %}
-                    <img id="spent_time_by_day_of_the_week" src="{% url 'charts:spent_time_by_day_of_the_week' member_i.id %}" alt="Spent time by {{member_i.external_username}}"/>
+                    <img id="spent_time_by_day_of_the_week" class="ajax-img" data-src="{% url 'charts:spent_time_by_day_of_the_week' member_i.id %}" alt="Spent time by {{member_i.external_username}}"/>
                 {% endif %}
             {% endfor %}
-            <img id="spent_time_by_week" src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
-            <img src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
+            <img id="spent_time_by_week" class="ajax-img" data-src="{% url 'charts:spent_time_by_week' %}" alt="Spent time by member"/>
+            <img class="ajax-img" data-src="{% url 'charts:task_backward_movements_by_member' %}" alt="Task backward movements by member"/>
             {% if interruptions|length > 0 %}
-                <img src="{% url 'charts:interruptions' %}" alt="Interruptions" />
-                <img src="{% url 'charts:evolution_of_interruptions' %}" alt="Evolution of interruptions" />
-                <img src="{% url 'charts:interruptions_by_month' %}" alt="Task backward movements by member"/>
+                <img class="ajax-img" data-src="{% url 'charts:interruptions' %}" alt="Interruptions" />
+                <img class="ajax-img" data-src="{% url 'charts:evolution_of_interruptions' %}" alt="Evolution of interruptions" />
+                <img class="ajax-img" data-src="{% url 'charts:interruptions_by_month' %}" alt="Task backward movements by member"/>
                 {% for board in boards %}
                     {% if board.last_fetch_datetime and board.is_fetched and board.is_ready %}
                         {% if board.interruptions.all.exist %}
-                            <img src="{% url 'charts:interruptions_by_month' board.id %}" alt="Interruptions by month"/>
+                            <img class="ajax-img" data-src="{% url 'charts:interruptions_by_month' board.id %}" alt="Interruptions by month"/>
                         {% endif %}
                     {% endif %}
                 {% endfor %}
             {% endif %}
             {% if noise_measurements|length > 0 %}
-                <img src="{% url 'charts:noise_level' %}" alt="Average spent time"/>
-                <img src="{% url 'charts:subjective_noise_level' %}" alt="Average spent time"/>
+                <img class="ajax-img" data-src="{% url 'charts:noise_level' %}" alt="Average spent time"/>
+                <img class="ajax-img" data-src="{% url 'charts:subjective_noise_level' %}" alt="Average spent time"/>
             {% endif %}
         </div>
     </div>

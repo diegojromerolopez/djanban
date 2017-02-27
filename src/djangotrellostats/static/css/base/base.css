@@ -1,3 +1,8 @@
+a:hover,
+a {
+    text-decoration: none;
+}
+
 #header_logo{
     width: 100%;
 }
@@ -55,6 +60,27 @@
 
 .cursor-help {
     cursor: help
+}
+
+h1 a .fa,
+h1 a:hover .fa,
+a .img-loader-spinner.fa:hover,
+a .img-loader-spinner.fa {
+    color: black;
+}
+
+.async_included-spinner,
+.img-loader-spinner {
+    display: block;
+    text-align: center;
+}
+
+#content_menu .async_included-spinner {
+    display: inline;
+}
+
+.ajax-img {
+    display: none;
 }
 
 .inline-block{

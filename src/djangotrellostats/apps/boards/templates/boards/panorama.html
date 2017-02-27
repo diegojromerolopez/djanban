@@ -13,12 +13,12 @@
         </div>
         <div class="col-sm-6">
             <a href="{% url 'charts:number_of_cards_worked_on_by_month' %}" title="Tasks worked on by month">
-                <img src="{% url 'charts:number_of_cards_worked_on_by_month' %}" alt="Tasks worked on by month"/>
+                <img class="ajax-img" data-src="{% url 'charts:number_of_cards_worked_on_by_month' %}" alt="Tasks worked on by month"/>
             </a>
         </div>
         <div class="col-sm-6">
             <a href="{% url 'charts:number_of_cards_worked_on_by_week' %}" title="Tasks worked on by week">
-                <img src="{% url 'charts:number_of_cards_worked_on_by_week' %}" alt="Tasks worked on by week"/>
+                <img class="ajax-img" data-src="{% url 'charts:number_of_cards_worked_on_by_week' %}" alt="Tasks worked on by week"/>
             </a>
         </div>
     </div>
@@ -29,12 +29,12 @@
         </div>
         <div class="col-sm-6">
             <a href="{% url 'charts:cumulative_list_type_evolution' 'all' %}" title="Evolution of number of tasks by list">
-                <img src="{% url 'charts:cumulative_list_type_evolution' 'all' %}" alt="Evolution of number of tasks by list"/>
+                <img class="ajax-img" data-src="{% url 'charts:cumulative_list_type_evolution' 'all' %}" alt="Evolution of number of tasks by list"/>
             </a>
         </div>
          <div class="col-sm-6">
             <a href="{% url 'charts:cumulative_card_evolution' 'all' %}" title="Evolution of number of tasks thru time">
-                <img src="{% url 'charts:cumulative_card_evolution' 'all' %}" alt="Evolution of number of tasks thru time"/>
+                <img class="ajax-img" data-src="{% url 'charts:cumulative_card_evolution' 'all' %}" alt="Evolution of number of tasks thru time"/>
             </a>
         </div>
     </div>
@@ -45,17 +45,17 @@
         </div>
         <div class="col-sm-4">
             <a href="{% url 'charts:time_scatterplot' 'lead_time'  %}" title="Lead time scatterplot">
-                <img src="{% url 'charts:time_scatterplot' 'lead_time' %}" alt="Lead time scatterplot" />
+                <img class="ajax-img" data-src="{% url 'charts:time_scatterplot' 'lead_time' %}" alt="Lead time scatterplot" />
             </a>
         </div>
         <div class="col-sm-4">
             <a href="{% url 'charts:time_scatterplot' 'cycle_time'  %}" title="Cycle time scatterplot">
-                <img src="{% url 'charts:time_scatterplot' 'cycle_time'  %}" alt="Cycle time scatterplot" />
+                <img class="ajax-img" data-src="{% url 'charts:time_scatterplot' 'cycle_time'  %}" alt="Cycle time scatterplot" />
             </a>
         </div>
         <div class="col-sm-4">
             <a href="{% url 'charts:time_scatterplot' 'spent_time'  %}" title="Spent time scatterplot">
-                <img src="{% url 'charts:time_scatterplot' 'spent_time'  %}" alt="Spent time scatterplot" />
+                <img class="ajax-img" data-src="{% url 'charts:time_scatterplot' 'spent_time'  %}" alt="Spent time scatterplot" />
             </a>
         </div>
     </div>
@@ -66,17 +66,17 @@
         </div>
         <div class="col-sm-4">
             <a href="{% url 'charts:time_box' 'lead_time'  %}" title="Lead time box chart">
-                <img src="{% url 'charts:time_box' 'lead_time' %}" alt="Lead time box chart" />
+                <img class="ajax-img" data-src="{% url 'charts:time_box' 'lead_time' %}" alt="Lead time box chart" />
             </a>
         </div>
         <div class="col-sm-4">
             <a href="{% url 'charts:time_box' 'cycle_time'  %}" title="Cycle time box chart">
-                <img src="{% url 'charts:time_box' 'cycle_time'  %}" alt="Cycle time box chart" />
+                <img class="ajax-img" data-src="{% url 'charts:time_box' 'cycle_time'  %}" alt="Cycle time box chart" />
             </a>
         </div>
         <div class="col-sm-4">
             <a href="{% url 'charts:time_box' 'spent_time'  %}" title="Spent time box chart">
-                <img src="{% url 'charts:time_box' 'spent_time'  %}" alt="Spent time box chart" />
+                <img class="ajax-img" data-src="{% url 'charts:time_box' 'spent_time'  %}" alt="Spent time box chart" />
             </a>
         </div>
     </div>
@@ -87,12 +87,12 @@
         </div>
         <div class="col-sm-6">
             <a href="{% url 'charts:time_vs_spent_time' 'lead_time'  %}" title="Lead time vs spent time">
-                <img src="{% url 'charts:time_vs_spent_time' 'lead_time' %}" alt="Lead time vs spent time" />
+                <img class="ajax-img" data-src="{% url 'charts:time_vs_spent_time' 'lead_time' %}" alt="Lead time vs spent time" />
             </a>
         </div>
         <div class="col-sm-6">
             <a href="{% url 'charts:time_vs_spent_time' 'cycle_time'  %}" title="Cycle time vs spent time">
-                <img src="{% url 'charts:time_vs_spent_time' 'cycle_time'  %}" alt="Cycle time vs spent time" />
+                <img class="ajax-img" data-src="{% url 'charts:time_vs_spent_time' 'cycle_time'  %}" alt="Cycle time vs spent time" />
             </a>
         </div>
     </div>
@@ -103,17 +103,17 @@
         </div>
         <div class="col-sm-4">
             <a href="{% url 'charts:completion_histogram' 'all' 'lead_time' %}" title="Completion lead time histogram">
-                <img src="{% url 'charts:completion_histogram' 'all'  'lead_time' %}" alt="Completion lead time histogram" />
+                <img class="ajax-img" data-src="{% url 'charts:completion_histogram' 'all'  'lead_time' %}" alt="Completion lead time histogram" />
             </a>
         </div>
         <div class="col-sm-4">
             <a href="{% url 'charts:completion_histogram' 'all'  'cycle_time' %}" title="Completion cycle time histogram">
-                <img src="{% url 'charts:completion_histogram' 'all' 'cycle_time' %}" alt="Completion cycle time histogram" />
+                <img class="ajax-img" data-src="{% url 'charts:completion_histogram' 'all' 'cycle_time' %}" alt="Completion cycle time histogram" />
             </a>
         </div>
         <div class="col-sm-4">
             <a href="{% url 'charts:completion_histogram' 'all' 'spent_time' 'hours' %}" title="Completion spent time histogram">
-                <img src="{% url 'charts:completion_histogram' 'all' 'spent_time' 'hours' %}" alt="Completion spent time histogram" />
+                <img class="ajax-img" data-src="{% url 'charts:completion_histogram' 'all' 'spent_time' 'hours' %}" alt="Completion spent time histogram" />
             </a>
         </div>
     </div>
@@ -124,12 +124,12 @@
         </div>
         <div class="col-sm-6">
             <a href="{% url 'charts:avg_spent_time' %}" title="Average spent time">
-                <img src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
+                <img class="ajax-img" data-src="{% url 'charts:avg_spent_time' %}" alt="Average spent time"/>
             </a>
         </div>
         <div class="col-sm-6">
             <a href="{% url 'charts:avg_spent_time_by_month' %}" title="Average spent time by month">
-                <img src="{% url 'charts:avg_spent_time_by_month' %}" alt="Average spent time by month"/>
+                <img class="ajax-img" data-src="{% url 'charts:avg_spent_time_by_month' %}" alt="Average spent time by month"/>
             </a>
         </div>
     </div>
@@ -140,12 +140,12 @@
         </div>
         <div class="col-sm-6">
             <a href="{% url 'charts:avg_estimated_time' %}" title="Average estimated time">
-                <img src="{% url 'charts:avg_estimated_time' %}" alt="Average estimated time"/>
+                <img class="ajax-img" data-src="{% url 'charts:avg_estimated_time' %}" alt="Average estimated time"/>
             </a>
         </div>
         <div class="col-sm-6">
             <a href="{% url 'charts:avg_estimated_time_by_month' %}" title="Average estimated time by month">
-                <img src="{% url 'charts:avg_estimated_time_by_month' %}" alt="Average estimated time by month"/>
+                <img class="ajax-img" data-src="{% url 'charts:avg_estimated_time_by_month' %}" alt="Average estimated time by month"/>
             </a>
         </div>
     </div>
@@ -156,12 +156,12 @@
         </div>
         <div class="col-sm-6">
             <a href="{% url 'charts:avg_lead_time' %}" title="Average lead time">
-                <img src="{% url 'charts:avg_lead_time' %}" alt="Average lead time"/>
+                <img class="ajax-img" data-src="{% url 'charts:avg_lead_time' %}" alt="Average lead time"/>
             </a>
         </div>
         <div class="col-sm-6">
             <a href="{% url 'charts:avg_lead_time_by_month' %}" title="Average lead time by month">
-                <img src="{% url 'charts:avg_lead_time_by_month' %}" alt="Average lead time by month"/>
+                <img class="ajax-img" data-src="{% url 'charts:avg_lead_time_by_month' %}" alt="Average lead time by month"/>
             </a>
         </div>
     </div>
@@ -172,12 +172,12 @@
         </div>
         <div class="col-sm-6">
             <a href="{% url 'charts:avg_cycle_time' %}" title="Average cycle time">
-                <img src="{% url 'charts:avg_cycle_time' %}" alt="Average cycle time"/>
+                <img class="ajax-img" data-src="{% url 'charts:avg_cycle_time' %}" alt="Average cycle time"/>
             </a>
         </div>
         <div class="col-sm-6">
             <a href="{% url 'charts:avg_cycle_time_by_month' %}" title="Average cycle time by month">
-                <img src="{% url 'charts:avg_cycle_time_by_month' %}" alt="Average cycle time by month"/>
+                <img class="ajax-img" data-src="{% url 'charts:avg_cycle_time_by_month' %}" alt="Average cycle time by month"/>
             </a>
         </div>
     </div>
