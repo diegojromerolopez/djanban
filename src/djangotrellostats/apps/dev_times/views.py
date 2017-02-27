@@ -2,22 +2,21 @@
 
 from __future__ import unicode_literals
 
-import copy
+import calendar
 import datetime
+import re
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count
-from django.http.response import Http404, HttpResponse
+from django.db.models import Sum
+from django.http.response import HttpResponse
 from django.shortcuts import render
+from django.template import loader, Context
 
 from djangotrellostats.apps.base.auth import get_user_boards, user_is_member
-from djangotrellostats.apps.boards.models import Board, Label
+from djangotrellostats.apps.boards.models import Label
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
-from django.template import loader, Context
-import calendar
-import re
 
 
 # View spent time report
@@ -117,7 +116,7 @@ def _get_daily_spent_times_replacements(request):
             replacements["board"] = label.board
 
     board_id = request.GET.get("board_id")
-    if not label_id:
+    if not label_id and board_id:
         board = get_user_boards(request.user).get(id=board_id)
         label = None
         replacements["selected_label"] = label
@@ -128,12 +127,6 @@ def _get_daily_spent_times_replacements(request):
     daily_spent_times = spent_times["all"]
     replacements["week"] = request.GET.get('week') if request.GET.get('week') and request.GET.get('week') > 0 else None
     replacements["months"] = spent_times["per_month"]
-    replacements["spent_time_sum"] = daily_spent_times.aggregate(Sum("spent_time"))["spent_time__sum"]
-    replacements["adjusted_spent_time_sum"] = _adjusted_spent_time_sum(daily_spent_times)
-    replacements["spent_time_amount_sum"] = daily_spent_times.aggregate(Sum("rate_amount"))["rate_amount__sum"]
-    replacements["adjusted_amount_sum"] = _adjusted_amount_sum(daily_spent_times)
-    replacements["estimated_time_sum"] = daily_spent_times.aggregate(Sum("estimated_time"))["estimated_time__sum"]
-    replacements["diff_time_sum"] = daily_spent_times.aggregate(Sum("diff_time"))["diff_time__sum"]
 
     return {"queryset": daily_spent_times, "replacements": replacements}
 
@@ -180,7 +173,7 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
             end_date = None
 
     # Week
-    if week and week > 0:
+    if week and int(week) > 0:
         daily_spent_time_filter["week_of_year"] = week
 
     # Board
@@ -211,6 +204,13 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
 
             first_weekday, number_of_days_in_month = calendar.monthrange(year, month_index)
 
+            rate_amount_sum = daily_spent_times_in_month_i.aggregate(sum=Sum("rate_amount"))["sum"]
+            adjusted_amount_sum = _adjusted_amount_sum(daily_spent_times_in_month_i)
+            spent_time_sum =  daily_spent_times_in_month_i.aggregate(sum=Sum("spent_time"))["sum"]
+            adjusted_spent_time_sum = _adjusted_spent_time_sum(daily_spent_times_in_month_i)
+            estimated_time_sum = daily_spent_times_in_month_i.aggregate(sum=Sum("estimated_time"))["sum"]
+            diff_time_sum = daily_spent_times_in_month_i.aggregate(sum=Sum("diff_time"))["sum"]
+
             month = {
                 "daily_spent_times": daily_spent_times_in_month_i,
                 "values":{
@@ -221,12 +221,12 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
                     "year": year,
                     "i": month_index,
 
-                    "rate_amount_sum": float(daily_spent_times_in_month_i.aggregate(sum=Sum("rate_amount"))["sum"]),
-                    "adjusted_amount_sum": float(_adjusted_amount_sum(daily_spent_times_in_month_i)),
-                    "spent_time_sum": float(daily_spent_times_in_month_i.aggregate(sum=Sum("spent_time"))["sum"]),
-                    'adjusted_spent_time_sum': float(_adjusted_spent_time_sum(daily_spent_times_in_month_i)),
-                    "estimated_time_sum": float(daily_spent_times_in_month_i.aggregate(sum=Sum("estimated_time"))["sum"]),
-                    "diff_time_sum": float(daily_spent_times_in_month_i.aggregate(sum=Sum("diff_time"))["sum"])
+                    "rate_amount_sum": float(rate_amount_sum) if rate_amount_sum else None,
+                    "adjusted_amount_sum": float(adjusted_amount_sum) if adjusted_amount_sum else None,
+                    "spent_time_sum": float(spent_time_sum) if spent_time_sum else None,
+                    'adjusted_spent_time_sum': float(adjusted_spent_time_sum) if adjusted_spent_time_sum else None,
+                    "estimated_time_sum": float(estimated_time_sum) if estimated_time_sum else None,
+                    "diff_time_sum": float(diff_time_sum) if diff_time_sum else None
                 }
             }
             months.append(month)

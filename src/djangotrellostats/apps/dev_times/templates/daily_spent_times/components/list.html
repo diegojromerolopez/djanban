@@ -1,12 +1,12 @@
 {% load async_include %}
 
 {% if months|length == 0 %}
-    There are no times for this member.
+    There are no times for this selection.
 {% else %}
     {# Summary #}
     <div class="row">
         <div class="col-md-12">
-            {% include "daily_spent_times/components/list_summary.html" %}
+            {% async_include "daily_spent_times/components/list_summary.html" user=request.user start_date=request.GET.start_date end_date=request.GET.end_date week=request.GET.week selected_board=selected_board %}
         </div>
     </div>
 
@@ -30,7 +30,7 @@
     {# Summary #}
     <div class="row">
         <div class="col-md-12">
-            {% include "daily_spent_times/components/list_summary.html" %}
+            {% async_include "daily_spent_times/components/list_summary.html" user=request.user start_date=request.GET.start_date end_date=request.GET.end_date week=request.GET.week selected_board=selected_board %}
         </div>
     </div>
 {% endif %}
