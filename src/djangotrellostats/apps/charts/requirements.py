@@ -33,7 +33,8 @@ def _requirement_burndown(board, requirement):
     chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
 
     burndown_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
-                                print_zeroes=False, fill=False, human_readable=True, x_label_rotation=45)
+                                x_labels_major_count=30, show_minor_x_labels=False,
+                                print_zeroes=False, fill=False, human_readable=True, x_label_rotation=65)
 
     # Estimated number of hours
     estimated_number_of_hours = requirement.estimated_number_of_hours
@@ -93,6 +94,7 @@ def _burndown_by_requirement(board):
     chart_title += u" as of {1}".format(board.name, board.get_human_fetch_datetime())
 
     burndown_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
+                                x_labels_major_count=30, show_minor_x_labels=False,
                                 print_zeroes=False, fill=False, human_readable=True, x_label_rotation=45)
 
     # Estimated number of hours

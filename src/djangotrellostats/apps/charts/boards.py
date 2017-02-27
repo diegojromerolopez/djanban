@@ -26,6 +26,7 @@ def burndown(board, show_interruptions=False):
     chart_title += u" as of {1}".format(board.name, board.get_human_fetch_datetime())
 
     burndown_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
+                                x_labels_major_count=30, show_minor_x_labels=False,
                                 print_zeroes=False, fill=False, human_readable=True, x_label_rotation=65)
 
     # Estimated number of hours
