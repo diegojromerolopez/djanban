@@ -1,0 +1,21 @@
+{% with board_spent_time=board.get_spent_time %}
+    {% with board_adjusted_spent_time=board.get_adjusted_spent_time %}
+        <div id="board_spent_time">
+            <span class="navbar-text label {% if board_adjusted_spent_time < board.estimated_number_of_hours %}label-success{% elif board_adjusted_spent_time == board.estimated_number_of_hours %}label-warning{% else %}label-danger{% endif %}">
+                <strong>Spent time</strong>:
+                <span class="cursor-help" title="Actual spent time until now ({{board_spent_time|floatformat:-2}} hours)">
+                    {{board_spent_time|floatformat:-2}}
+                </span>
+                {% if board_spent_time != board_adjusted_spent_time %}
+                    (<span class="cursor-help" title="Adjusted spent time until now ({{board_adjusted_spent_time|floatformat:-2}} hours)">
+                        {{board_adjusted_spent_time|floatformat:-2}} adjusted
+                    </span>)
+                {% endif %}
+                hours of
+                <strong class="cursor-help" title="Maximum spent time allowed by budget ({{board.estimated_number_of_hours|floatformat:-2}} hours were paid by client)">
+                    {{board.estimated_number_of_hours|floatformat:-2}}
+                </strong> hours
+            </span>
+        </div>
+    {% endwith %}
+{% endwith %}
