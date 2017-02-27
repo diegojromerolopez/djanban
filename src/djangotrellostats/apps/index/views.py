@@ -57,6 +57,7 @@ def index(request):
         "boards": boards,
         "week_of_year": week_of_year,
         "member": member,
+        "developers": member.team_mates.filter(is_developer=True),
         "downtime_developers": [dev for dev in member.team_mates.filter(is_developer=True) if dev.is_in_downtime],
         "pending_red_cards": Card.objects.filter(board__in=boards, list__type="ready_to_develop", is_closed=False, labels__color="red").order_by("board__name", "name"),
         "pending_orange_cards": Card.objects.filter(board__in=boards, list__type="ready_to_develop", is_closed=False, labels__color="orance").order_by("board__name", "name"),
