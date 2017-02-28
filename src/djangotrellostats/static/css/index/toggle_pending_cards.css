@@ -1,3 +1,12 @@
+
+.pending_cards_by_label {
+
+}
+
+.pending_cards_by_label > div {
+    height: auto;
+}
+
 .red_cards_title,
 .yellow_cards_title,
 .orange_cards_title {
@@ -36,4 +45,11 @@
     color: white;
     background-color: #FFA500;
     border-color: #f2ebde;
+}
+
+.red_cards
+.orange_cards,
+.yellow_cards {
+    height: 100vh;
+    overflow: scroll;
 }
