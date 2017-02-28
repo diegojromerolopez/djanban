@@ -16,7 +16,7 @@ def serialize_board(board):
 
         card_list = []
         for card in list_.cards.all().order_by("position"):
-            card_list.append(basic_serialize_card(card))
+            card_list.append(basic_serialize_card(card=card, board=board))
 
         list_json["cards"] = card_list
 
