@@ -1,9 +1,10 @@
 {% load humanize %}
+{% load async_included %}
 
 <div class="pending_cards_by_label">
-    {% if pending_red_cards %}
+    {% if pending_red_cards|length > 0 %}
         <div>
-            <h3 class="red_cards_title">High priority</h3>
+            <h3 class="red_cards_title">High priority {{pending_red_cards|length}}</h3>
             <div class="red_cards">
                 {% for red_card in pending_red_cards %}
                     <div class="panel panel-danger red_card">
@@ -26,9 +27,9 @@
         </div>
     {% endif %}
 
-    {% if pending_orange_cards %}
+    {% if pending_orange_cards|length > 0 %}
         <div>
-            <h3 class="orange_cards_title">Medium priority</h3>
+            <h3 class="orange_cards_title">Medium priority ({{pending_orange_cards|length}})</h3>
             <div class="orange_cards">
                 {% for orange_card in pending_orange_cards %}
                     <div class="panel panel-danger panel-orange orange_card">
@@ -51,9 +52,9 @@
         </div>
     {% endif %}
 
-    {% if pending_yellow_cards %}
+    {% if pending_yellow_cards|length > 0 %}
         <div>
-            <h3 class="yellow_cards_title">Low priority</h3>
+            <h3 class="yellow_cards_title">Low priority ({{pending_yellow_cards|length}})</h3>
             <div class="yellow_cards">
                 {% for yellow_card in pending_yellow_cards %}
                     <div class="panel panel-warning yellow_card">
