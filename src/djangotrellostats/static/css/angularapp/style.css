@@ -255,6 +255,13 @@ list.closed-list-showed,
                  -1px 1px 0 black;
 }
 
+/* Members of the card */
+.card_heading .card_heading-members {
+    display: block;
+    margin-top: 2px;
+    overflow: hidden;
+}
+
 /* Status of the card */
 card.closed-card,
 .board .lists .list .cards .card.closed-card {
