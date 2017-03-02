@@ -10,13 +10,24 @@ from djangotrellostats.apps.reports.models import CardReview
 
 
 def serialize_board(board):
+    cards = board.cards.all().\
+        order_by("list", "position")
+
+    cache = {
+        "serialized_members": {member.id: serialize_member(member) for member in board.members.all()}
+    }
+
+    cards_by_list = {list_.id: [] for list_ in board.active_lists.order_by("position")}
+    for card in cards:
+        cards_by_list[card.list_id].append(card)
+
     lists_json = []
     for list_ in board.active_lists.order_by("position"):
         list_json = serialize_list(list_)
 
         card_list = []
-        for card in list_.cards.all().order_by("position"):
-            card_list.append(basic_serialize_card(card=card, board=board))
+        for card in cards_by_list[list_.id]:
+            card_list.append(basic_serialize_card(card=card, board=board, cache=cache))
 
         list_json["cards"] = card_list
 
@@ -37,9 +48,15 @@ def serialize_board(board):
 
 
 # Basic card serialization
-def basic_serialize_card(card, board=None):
+def basic_serialize_card(card, board=None, cache=None):
     if board is None:
         board = card.board
+
+    def _serialize_member(member_):
+        if type(cache) is dict and "serialized_members" in cache and member_.id in cache["serialized_members"]:
+            return cache["serialized_members"][member_.id]
+        return serialize_member(member_)
+
     return {
         "id": card.id,
         "creation_datetime": card.creation_datetime,
@@ -58,8 +75,8 @@ def basic_serialize_card(card, board=None):
         "number_of_backward_movements": card.number_of_backward_movements,
         "board": {"id": board.id, "uuid": board.uuid, "name": board.name},
         "labels": [serialize_label(label) for label in card.labels.exclude(name="").order_by("name")],
-        "members": [serialize_member(member) for member in card.members.all().order_by("id")],
-        "reviews": [serialize_card_review(review) for review in card.reviews.all().order_by("-creation_datetime")],
+        "members": [_serialize_member(member) for member in card.members.all().order_by("id")],
+        "reviews": [serialize_card_review(review, cache) for review in card.reviews.all().order_by("-creation_datetime")],
     }
 
 
@@ -157,13 +174,20 @@ def serialize_label(label):
         "color": label.color,
     }
 
+
 # Serialize card review
-def serialize_card_review(review):
+def serialize_card_review(review, cache=None):
+
+    def _serialize_member(member_):
+        if type(cache) is dict and "serialized_members" in cache and member_.id in cache["serialized_members"]:
+            return cache["serialized_members"][member_.id]
+        return serialize_member(member_)
+
     return {
         "id": review.id,
         "creation_datetime": review.creation_datetime,
         "description": review.description,
-        "reviewers": [serialize_member(reviewer) for reviewer in review.reviewers.all()]
+        "reviewers": [_serialize_member(reviewer) for reviewer in review.reviewers.all()]
     }
 
 
