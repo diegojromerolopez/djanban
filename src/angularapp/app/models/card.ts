@@ -20,6 +20,7 @@ export class Card {
   position: number;
   short_url: string;
   is_closed: boolean;
+  number_of_comments?: number;
   number_of_forward_movements?: number;
   number_of_backward_movements?: number;
   spent_time?: number;
@@ -30,6 +31,7 @@ export class Card {
   labels?: Label[];
   comments?: CardComment[];
   members?: Member[];
+  number_of_reviews?: number;
   reviews?: CardReview[];
   charts?: {};
   blocking_cards?: Card[];

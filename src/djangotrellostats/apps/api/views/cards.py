@@ -10,7 +10,7 @@ from django.db import transaction
 from django.http import JsonResponse, Http404
 
 from djangotrellostats.apps.api.http import JsonResponseBadRequest, JsonResponseMethodNotAllowed, JsonResponseNotFound
-from djangotrellostats.apps.api.serializers import serialize_card, serialize_board
+from djangotrellostats.apps.api.serializers import Serializer
 from djangotrellostats.apps.api.util import get_list_or_404, get_card_or_404, get_board_or_404
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
@@ -55,7 +55,8 @@ def _add_card(request, board_id):
 
     new_card = list_.add_card(member=member, name=put_params.get("name"), position=put_params.get("position"))
 
-    return JsonResponse(serialize_card(new_card))
+    serializer = Serializer(board=new_card.board)
+    return JsonResponse(serializer.serialize_card(new_card))
 
 
 # Move all cards from a list to another
@@ -87,7 +88,8 @@ def _move_all_list_cards(request, board_id):
     # Move the cards
     source_list.move_cards(member=member, destination_list=destination_list)
 
-    return JsonResponse(serialize_board(board))
+    serializer = Serializer(board=board)
+    return JsonResponse(serializer.serialize_board())
 
 
 
@@ -100,7 +102,8 @@ def get_card(request, board_id, card_id):
         card = get_card_or_404(request, board_id, card_id)
     except Http404:
         return JsonResponseNotFound({"message": "Card not found."})
-    card_json = serialize_card(card)
+    serializer = Serializer(board=card.board)
+    card_json = serializer.serialize_card(card)
     return JsonResponse(card_json)
 
 
@@ -139,7 +142,8 @@ def change(request, board_id, card_id):
     else:
         return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
 
-    return JsonResponse(serialize_card(card))
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card(card))
 
 
 # Change the labels of the card
@@ -167,7 +171,8 @@ def change_labels(request, board_id, card_id):
             label = board.labels.get(id=label_id)
             card.labels.add(label)
 
-    return JsonResponse(serialize_card(card))
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card(card))
 
 
 @member_required
@@ -194,7 +199,8 @@ def change_members(request, board_id, card_id):
             member = board.members.get(id=member_id)
             card.members.add(member)
 
-    return JsonResponse(serialize_card(card))
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card(card))
 
 
 # Change list
@@ -222,7 +228,8 @@ def move_to_list(request, board_id, card_id):
     else:
         card.change_order(member, destination_position=new_position)
 
-    return JsonResponse(serialize_board(card.board))
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_board())
 
 
 # Creates a new comment
@@ -249,15 +256,9 @@ def add_new_comment(request, board_id, card_id):
 
     # Otherwise, add the comment
     new_comment = card.add_comment(member, comment_content)
-    author = new_comment.author
 
-    return JsonResponse({
-            "id": new_comment.id,
-            "uuid": new_comment.uuid,
-            "content": new_comment.content,
-            "creation_datetime": new_comment.creation_datetime,
-            "author": {"id": author.id, "external_username": author.external_username, "initials": author.initials}
-    })
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card_comment(new_comment))
 
 
 # Add S/E time to card
@@ -306,7 +307,8 @@ def add_se_time(request, board_id, card_id):
 
     card.add_spent_estimated_time(member, spent_time, estimated_time, days_ago, description)
 
-    return JsonResponse(serialize_card(card))
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card(card))
 
 
 # Add a new blocking card to this card
@@ -328,7 +330,8 @@ def add_blocking_card(request, board_id, card_id):
         return JsonResponseNotFound({"message": "Not found."})
 
     card.add_blocking_card(member, blocking_card)
-    return JsonResponse(serialize_card(card))
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card(card))
 
 
 # Remove a blocking card to this card
@@ -346,7 +349,8 @@ def remove_blocking_card(request, board_id, card_id, blocking_card_id):
         return JsonResponseNotFound({"message": "Not found."})
 
     card.remove_blocking_card(member, blocking_card)
-    return JsonResponse(serialize_card(card))
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card(card))
 
 
 # Add a new review
@@ -373,7 +377,8 @@ def add_new_review(request, board_id, card_id):
 
     card.add_review(member, reviewers=reviewers, description=description)
 
-    return JsonResponse(serialize_card(card))
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card(card))
 
 
 # Delete a review
@@ -392,7 +397,8 @@ def delete_review(request, board_id, card_id, review_id):
         return JsonResponseNotFound({"message": "Not found."})
 
     card.delete_review(member, review)
-    return JsonResponse(serialize_card(card))
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card(card))
 
 
 # Add a requirement to the card
@@ -421,7 +427,8 @@ def add_requirement(request, board_id, card_id):
 
     card.add_requirement(member, requirement)
 
-    return JsonResponse(serialize_card(card))
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card(card))
 
 
 # Remove a requirement of the card
@@ -440,7 +447,8 @@ def remove_requirement(request, board_id, card_id, requirement_id):
         return JsonResponseNotFound({"message": "Not found."})
 
     card.remove_requirement(member, requirement)
-    return JsonResponse(serialize_card(card))
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card(card))
 
 
 # Delete or update a comment
@@ -473,15 +481,8 @@ def modify_comment(request, board_id, card_id, comment_id):
     else:
         return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
 
-    author = comment.author
-
-    return JsonResponse({
-        "id": comment.id,
-        "uuid": comment.uuid,
-        "content": comment.content,
-        "creation_datetime": comment.creation_datetime,
-        "author": {"id": author.id, "external_username": author.external_username, "initials": author.initials}
-    })
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card_comment(comment))
 
 
 # Edit comment

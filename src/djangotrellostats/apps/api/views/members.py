@@ -5,9 +5,8 @@ from __future__ import unicode_literals, absolute_import
 from django.http import JsonResponse
 
 from djangotrellostats.apps.api.http import JsonResponseMethodNotAllowed
-from djangotrellostats.apps.api.serializers import serialize_member
+from djangotrellostats.apps.api.serializers import Serializer
 from djangotrellostats.apps.base.decorators import member_required
-from djangotrellostats.apps.members.models import Member
 
 
 # Get available members
@@ -20,8 +19,10 @@ def get_members(request):
     current_member = request.user.member
     members = current_member.viewable_members
 
+    serializer = Serializer()
+
     response_json = []
     for member in members:
-        response_json.append(serialize_member(member))
+        response_json.append(serializer.serialize_member(member))
 
     return JsonResponse(response_json, safe=False)

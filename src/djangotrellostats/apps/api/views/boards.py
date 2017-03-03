@@ -9,7 +9,7 @@ from django.http import Http404, HttpResponseBadRequest
 from django.http import JsonResponse
 
 from djangotrellostats.apps.api.http import JsonResponseMethodNotAllowed, JsonResponseNotFound
-from djangotrellostats.apps.api.serializers import serialize_member, serialize_board
+from djangotrellostats.apps.api.serializers import Serializer
 from djangotrellostats.apps.api.util import get_board_or_404
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
@@ -49,7 +49,8 @@ def get_board(request, board_id):
     except Board.DoesNotExist:
         return JsonResponseNotFound({"message": "Not found."})
 
-    return JsonResponse(serialize_board(board))
+    serializer = Serializer(board=board)
+    return JsonResponse(serializer.serialize_board())
 
 
 # Add a member to a board
@@ -72,8 +73,10 @@ def add_member(request, board_id):
     except Http404:
         return JsonResponseNotFound({"message": "Board not found"})
 
+    serializer = Serializer(board=board)
+
     if board.members.filter(id=member_id).exists():
-        return JsonResponse(serialize_member(board.members.get(id=member_id)))
+        return JsonResponse(serializer.serialize_member(board.members.get(id=member_id)))
 
     member_type = put_body.get("member_type")
     if not member_type or not member_type in ("admin", "normal", "guest"):
@@ -87,7 +90,7 @@ def add_member(request, board_id):
     except Member.DoesNotExist:
         return JsonResponseNotFound({"message": "Not found."})
 
-    return JsonResponse(serialize_member(new_member))
+    return JsonResponse(serializer.serialize_member(new_member))
 
 
 # Delete member from board
@@ -108,4 +111,6 @@ def remove_member(request, board_id, member_id):
         board.remove_member(member=member, member_to_remove=member_to_remove)
     except Member.DoesNotExist:
         return JsonResponseNotFound({"message": "Member nor found."})
-    return JsonResponse(serialize_member(member_to_remove))
+
+    serializer = Serializer(board=board)
+    return JsonResponse(serializer.serialize_member(member_to_remove))

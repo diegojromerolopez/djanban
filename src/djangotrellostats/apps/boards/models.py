@@ -595,6 +595,8 @@ class Card(models.Model):
     description = models.TextField(verbose_name=u"Description of the card")
     is_closed = models.BooleanField(verbose_name=u"Is this card closed?", default=False)
     position = models.PositiveIntegerField(verbose_name=u"Position in the list")
+    number_of_comments = models.PositiveIntegerField(verbose_name=u"Number of comments of this card", default=0)
+    number_of_reviews = models.PositiveIntegerField(verbose_name=u"Number of reviews of this card", default=0)
 
     due_datetime = models.DateTimeField(verbose_name=u"Deadline", blank=True, null=True, default=None)
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
@@ -739,11 +741,6 @@ class Card(models.Model):
     def is_done(self):
         return self.list.type == "done"
 
-    # Return the number of comments of a card
-    @property
-    def number_of_comments(self):
-        return self.comments.all().count()
-
     # Forward movements of this card
     @property
     def forward_movements(self):
@@ -785,6 +782,11 @@ class Card(models.Model):
     def update_spent_estimated_time(self):
         self.spent_time = self.get_spent_time()
         self.estimated_time = self.get_estimated_time()
+        self.save()
+
+    # Update number of card reviews of this card
+    def update_number_of_card_reviews(self):
+        self.number_of_reviews = self.reviews.all().count()
         self.save()
 
     # Move this card to the next list
@@ -1008,6 +1010,10 @@ class Card(models.Model):
         card_comment = connector.add_comment_to_card(card=self, comment=card_comment)
         card_comment.save()
 
+        # Increment the number of comments
+        self.number_of_comments += 1
+        self.save()
+
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
 
@@ -1035,11 +1041,17 @@ class Card(models.Model):
     # Delete an existing comment of this card
     @transaction.atomic
     def delete_comment(self, member, comment):
-        # Delete comment in Trello only if we have a trello profile
+        # Delete remote comment
         connector = RemoteBackendConnectorFactory.factory(member)
         connector.delete_comment_of_card(card=self, comment=comment)
+
         # Delete comment locally
         comment.delete()
+
+        # Decrement the number of comments
+        self.number_of_comments -= 1
+        self.save()
+
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
 
@@ -1201,10 +1213,16 @@ class CardComment(models.Model):
             self._save_new(card)
 
         super(CardComment, self).save(*args, **kwargs)
+
+        # If this comment contains S/E time, update the spent and estimated times of the parent card
         if hasattr(self, "daily_spent_time") and self.daily_spent_time and self.daily_spent_time.id is None:
             self.daily_spent_time.save()
             # Update the spent and estimated time
             card.update_spent_estimated_time()
+
+        # If this comment is a review, update the card reviews of the parent card
+        if hasattr(self, "review") and self.review:
+            card.update_number_of_card_reviews()
 
     # Save an old comment
     def _save_old(self, card, earlier_card_comment):
@@ -1496,3 +1514,73 @@ class List(models.Model):
     def std_dev_card_time_in_list(self):
         card_times = self.active_cards_times_in_list
         return numpy.mean(card_times, axis=0)
+
+
+# Relationship between card and its members
+class CardMemberRelationship(models.Model):
+    class Meta:
+        managed = False
+        db_table = "boards_card_members"
+
+    id = models.IntegerField(primary_key=True)
+    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="card_member_relationships")
+    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="card_member_relationships")
+
+    # Return a dict of members by card
+    @staticmethod
+    def get_members_by_card(board, member_cache=None):
+        if member_cache is None:
+            member_cache = {}
+
+        members_by_card = {}
+        card_member_relationships = CardMemberRelationship.objects.filter(card__board=board)
+        for card_member_relationship in card_member_relationships:
+
+            card_id = card_member_relationship.card_id
+            member_id = card_member_relationship.member_id
+
+            if card_id not in members_by_card:
+                members_by_card[card_id] = []
+
+            if member_id not in member_cache:
+                member_cache[member_id] = card_member_relationship.member
+
+            member = member_cache[card_member_relationship.member_id]
+            members_by_card[card_member_relationship.card_id].append(member)
+
+        return members_by_card
+
+
+# Relationship between card and its labels
+class CardLabelRelationship(models.Model):
+    class Meta:
+        managed = False
+        db_table = "boards_card_labels"
+
+    id = models.IntegerField(primary_key=True)
+    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="card_label_relationships")
+    label = models.ForeignKey("boards.Label", verbose_name=u"Label", related_name="card_label_relationships")
+
+    # Return a dict of labels by card
+    @staticmethod
+    def get_labels_by_card(board, label_cache=None):
+        if label_cache is None:
+            label_cache = {}
+
+        labels_by_card = {}
+        card_label_relationships = CardLabelRelationship.objects.filter(card__board=board)
+        for card_label_relationship in card_label_relationships:
+
+            card_id = card_label_relationship.card_id
+            label_id = card_label_relationship.label_id
+
+            if card_id not in labels_by_card:
+                labels_by_card[card_id] = []
+
+            if label_id not in label_cache:
+                label_cache[label_id] = card_label_relationship.label
+
+            label = label_cache[card_label_relationship.label_id]
+            labels_by_card[card_label_relationship.card_id].append(label)
+
+        return labels_by_card

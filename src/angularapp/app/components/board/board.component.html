@@ -206,7 +206,7 @@
                             [attr.data-card]="card.id">
                         <span class="panel-heading card_heading" [ngClass]="{'closed-card_heading': card.is_closed }">
                             <span (click)="onCardSelect(card)" class="card_name">
-                                <span class=card_name-name>{{card.name}} <span *ngIf="card.reviews && card.reviews.length > 0" title="This task has been reviewed" class="fa fa-thumbs-up"></span> </span>
+                                <span class=card_name-name>{{card.name}}</span>
                             </span>
                             <a href="{{card.short_url}}" title="View card" class="card_action_view">
                                 <span class="fa fa-trello"></span>
@@ -219,25 +219,42 @@
                                     {{label.name}}
                                 </span>
                             </span>
-                            <span class="card_heading-members">
-                                <span *ngFor="let card_member of card.members">
-                                    <img class="avatar" src="{{card_member.gravatar_url}}"  alt="{{card_member.external_username}}" />
+                            
+                            <span class="card_heading-properties">
+                                <span class="card_heading-se_time" *ngIf="card.spent_time || card.estimated_time">
+                                    <span class="fa fa-clock-o"></span> 
+                                    <span class="card_heading-spent_time" title="The team has spent {{card.spent_time | number:'1.1-2'}} hours in this task">
+                                        S: {{card.spent_time | number:'1.1-2'}}
+                                    </span>
+                                    <span class="card_heading-estimated_time" title="The team estimated a cost of {{card.estimated_time | number:'1.1-2'}} hours in this task">
+                                        E: {{card.estimated_time | number:'1.1-2'}}
+                                    </span>
+                                </span>
+                                <span class="card_heading-reviews">
+                                    <span *ngIf="card.number_of_reviews && card.number_of_reviews > 0" title="This task has been reviewed" class="cursor-help">
+                                        <span class="fa fa-thumbs-up"></span>
+                                        {{card.number_of_reviews}}
+                                    </span>
+                                    <span *ngIf="card.number_of_reviews == 0" title="This task has not been reviewed yet" class="cursor-help">
+                                        <span class="fa fa-thumbs-down"></span>
+                                    </span>
+                                </span>
+                                <span class="card_heading-comments cursor-help" title="This task has {{card.number_of_comments}} comments">
+                                    <span class="fa fa-comments"></span>
+                                    {{card.number_of_comments}}
+                                </span>
+                                <span class="card_heading-movements" *ngIf="card.number_of_forward_movements > 0 || card.number_of_backward_movements > 0">
+                                    <span class="fa fa-arrows"></span> 
+                                    <span class="fa fa-arrow-right"></span>: {{card.number_of_forward_movements}}
+                                    <span class="fa fa-arrow-left"></span>: {{card.number_of_backward_movements}}
+                                </span>
+                                <span class="card_heading-members">
+                                    <span *ngFor="let card_member of card.members">
+                                        <img class="avatar" src="{{card_member.gravatar_url}}"  alt="{{card_member.external_username}}" />
+                                    </span>
                                 </span>
                             </span>
-                            <span class="card_heading-se_time" *ngIf="card.spent_time || card.estimated_time">
-                                <span class="fa fa-clock-o"></span> 
-                                <span class="card_heading-spent_time" title="The team has spent {{card.spent_time | number:'1.1-2'}} hours in this task">
-                                    S: {{card.spent_time | number:'1.1-2'}}
-                                </span>
-                                <span class="card_heading-estimated_time" title="The team estimated a cost of {{card.estimated_time | number:'1.1-2'}} hours in this task">
-                                    E: {{card.estimated_time | number:'1.1-2'}}
-                                </span>
-                            </span>
-                            <span class="card_heading-movements" *ngIf="card.number_of_forward_movements > 0 || card.number_of_backward_movements > 0">
-                                <span class="fa fa-arrows"></span> 
-                                <span class="fa fa-arrow-right"></span>: {{card.number_of_forward_movements}}
-                                <span class="fa fa-arrow-left"></span>: {{card.number_of_backward_movements}}
-                            </span>
+                            
                             <span class="card_heading-deadline" *ngIf="card.due_datetime">
                                 <span class="fa fa-calendar-times-o"></span> {{card.due_datetime | localize_datetime}}
                             </span>

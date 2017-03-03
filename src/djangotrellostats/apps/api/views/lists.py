@@ -10,7 +10,7 @@ from django.http import HttpResponseBadRequest, JsonResponse, Http404
 
 from djangotrellostats.apps.api.http import HttpResponseMethodNotAllowed, JsonResponseBadRequest, \
     JsonResponseMethodNotAllowed, JsonResponseNotFound
-from djangotrellostats.apps.api.serializers import serialize_list
+from djangotrellostats.apps.api.serializers import Serializer
 from djangotrellostats.apps.api.util import get_list_or_404
 from djangotrellostats.apps.base.decorators import member_required
 
@@ -40,4 +40,6 @@ def move_list(request, board_id, list_id):
         return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
 
     list_.move(member, position)
-    return JsonResponse(serialize_list(list_))
+
+    serializer = Serializer(board=list_.board)
+    return JsonResponse(serializer.serialize_list(list_))

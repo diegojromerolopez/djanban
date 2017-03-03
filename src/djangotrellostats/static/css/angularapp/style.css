@@ -224,11 +224,6 @@ list.closed-list-showed,
     border-color: #ebccd1;
 }
 
-.card_heading-movements {
-    display: block;
-    margin-top: 2px;
-}
-
 /* Labels in the card itself */
 .card_heading .card_heading-labels {
     display: block;
@@ -257,9 +252,10 @@ list.closed-list-showed,
 
 /* Members of the card */
 .card_heading .card_heading-members {
-    display: block;
-    margin-top: 2px;
+    display: inline-block;
+    float: right;
     overflow: hidden;
+    vertical-align: middle;
 }
 
 /* Status of the card */
@@ -299,9 +295,26 @@ card.closed-card-showed,
     width: 30%
 }
 
-.card_heading-se_time {
+.card_heading-properties {
     display: block;
     margin-top: 2px;
+    overflow: hidden;
+}
+
+.card_heading-se_time {
+    display: inline-block;
+}
+
+.card_heading-reviews {
+    display: inline-block;
+}
+
+.card_heading-comments {
+    display: inline-block;
+}
+
+.card_heading-movements {
+    display: inline-block;
 }
 
 .card_heading-estimated_time,
