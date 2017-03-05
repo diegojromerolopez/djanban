@@ -443,7 +443,9 @@ class Board(models.Model):
             return first_card_movement.date()
         elif first_spent_time_date:
             return first_spent_time_date
-        return first_card_movement
+        if first_card_movement:
+            return first_card_movement.date()
+        return None
 
     # Informs what is the last day the team has been working in this project
     def get_working_end_date(self):
@@ -455,7 +457,9 @@ class Board(models.Model):
             return last_card_movement.date()
         elif last_spent_time_date:
             return last_spent_time_date
-        return last_card_movement
+        if last_card_movement:
+            return last_card_movement.date()
+        return None
 
     # Has this project assessed Python code?
     @property
