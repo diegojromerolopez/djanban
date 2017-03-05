@@ -49,6 +49,9 @@ export class BoardComponent implements OnInit {
   public labelFilterHash: {};
   /** Is the board reloading its content? */
   public reloading: boolean;
+  /** All cards of this board */
+  public cardSearchOptions: any;
+  public selectedCardId?: number;
 
   /** First thing we have to do is loading both the board and all available members */
   ngOnInit(): void {
@@ -193,11 +196,17 @@ export class BoardComponent implements OnInit {
   private prepareBoard(board_response: Board){
       this.board = new Board(board_response);
       let list_i = 0;
+      let cards:Card[] = [];
       for(let list of this.board.lists){
         this.board.lists[list_i] = new List(list);
         this.newCardFormStatus[list.id] = {show: false, waiting: false};
         this.moveAllCardsStatus[list.id] = "hidden";
+        cards = cards.concat(this.board.lists[list_i].cards);
         list_i += 1;
+      }
+      this.cardSearchOptions = [];
+      for(let card of cards){
+        this.cardSearchOptions.push({value: card.id, label: card.name})
       }
   }
 
@@ -227,6 +236,11 @@ export class BoardComponent implements OnInit {
   /** Move to the card view */
   onCardSelect(card: Card): void {
     this.router.navigate([this.board.id, 'card', card.id]);
+  }
+
+  /** Move to the card view */
+  onCardIdSelect(cardId: number): void {
+    this.router.navigate([this.board.id, 'card', cardId]);
   }
 
   /* Controls for card creation form */

@@ -6,6 +6,7 @@
 </div>
 
 <div *ngIf="board" class="board">
+
     <div class="header">
         <div class="board_name">
             <h1 class="board_name">
@@ -16,7 +17,27 @@
 
     <!-- Menu of visibility of board -->
     <div class="board_menu row">
-        <div class="col-md-6">
+
+        <div class="card_search col-md-3">
+            <h2><span class="fa fa-search"></span> Search cards</h2>
+            <div class="row">
+                <div class="col-md-10">
+                    <ng-select
+                        [options]="cardSearchOptions"
+                        [(ngModel)]="selectedCardId"
+                        placeholder="Select one of the cards"
+                        notFoundMsg="None of the cards match your search">
+                    </ng-select>
+                    <button class="btn btn-primary"
+                        *ngIf="selectedCardId"
+                        (click)="onCardIdSelect(selectedCardId)">
+                        View card
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
             <!-- Show/Hide archived cards -->
             <div class="toggle_is_closed">
                 <span *ngIf="closedItemsVisibility == 'showed'">

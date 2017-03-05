@@ -33,7 +33,8 @@
       'ticky': 'npm:ticky',
       'crossvent': 'npm:crossvent/src',
       'custom-event': 'npm:custom-event',
-      'ng2-dragula': 'npm:ng2-dragula'
+      'ng2-dragula': 'npm:ng2-dragula',
+      'angular2-select': 'npm:angular2-select'
     },
     baseURL: '/ng/',
     // packages tells the System loader how to load when no filename and/or no extension
@@ -52,7 +53,8 @@
       'crossvent': { main: 'crossvent.js', defaultExtension: 'js' },
       'custom-event': { main: 'index.js', defaultExtension: 'js' },
       'ng2-dragula': { main: 'ng2-dragula.js', defaultExtension: 'js' },
-      'angular2-notifications': { main: 'components.js', defaultExtension: 'js', format: 'cjs' }
+      'angular2-notifications': { main: 'components.js', defaultExtension: 'js', format: 'cjs' },
+      'angular2-select': {main: 'index.js', defaultExtension: 'js'}
     }
   });
 })(this);

@@ -21,7 +21,7 @@ import { DragulaModule } from 'ng2-dragula/ng2-dragula';
 import { SimpleNotificationsModule, NotificationsService } from 'angular2-notifications';
 import { LocalizeDatetimePipe } from './pipes/localize_datetime.pipe';
 import { ActiveCardsPipe } from './pipes/active_cards.pipe';
-
+import {SelectModule} from 'angular2-select';
 
 @NgModule({
   imports: [ 
@@ -30,6 +30,7 @@ import { ActiveCardsPipe } from './pipes/active_cards.pipe';
     FormsModule, 
     AppRoutingModule,
     DragulaModule,
+    SelectModule,
     SimpleNotificationsModule.forRoot()
   ],
   declarations: [

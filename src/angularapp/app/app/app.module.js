@@ -22,6 +22,7 @@ var ng2_dragula_1 = require("ng2-dragula/ng2-dragula");
 var angular2_notifications_1 = require("angular2-notifications");
 var localize_datetime_pipe_1 = require("./pipes/localize_datetime.pipe");
 var active_cards_pipe_1 = require("./pipes/active_cards.pipe");
+var angular2_select_1 = require("angular2-select");
 var AppModule = (function () {
     function AppModule() {
     }
@@ -35,6 +36,7 @@ AppModule = __decorate([
             forms_1.FormsModule,
             app_routing_module_1.AppRoutingModule,
             ng2_dragula_1.DragulaModule,
+            angular2_select_1.SelectModule,
             angular2_notifications_1.SimpleNotificationsModule.forRoot()
         ],
         declarations: [

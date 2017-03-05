@@ -156,12 +156,19 @@ var BoardComponent = (function () {
     BoardComponent.prototype.prepareBoard = function (board_response) {
         this.board = new board_1.Board(board_response);
         var list_i = 0;
+        var cards = [];
         for (var _i = 0, _a = this.board.lists; _i < _a.length; _i++) {
             var list = _a[_i];
             this.board.lists[list_i] = new list_1.List(list);
             this.newCardFormStatus[list.id] = { show: false, waiting: false };
             this.moveAllCardsStatus[list.id] = "hidden";
+            cards = cards.concat(this.board.lists[list_i].cards);
             list_i += 1;
+        }
+        this.cardSearchOptions = [];
+        for (var _b = 0, cards_1 = cards; _b < cards_1.length; _b++) {
+            var card = cards_1[_b];
+            this.cardSearchOptions.push({ value: card.id, label: card.name });
         }
     };
     /** Load board */
@@ -192,6 +199,10 @@ var BoardComponent = (function () {
     /** Move to the card view */
     BoardComponent.prototype.onCardSelect = function (card) {
         this.router.navigate([this.board.id, 'card', card.id]);
+    };
+    /** Move to the card view */
+    BoardComponent.prototype.onCardIdSelect = function (cardId) {
+        this.router.navigate([this.board.id, 'card', cardId]);
     };
     /* Controls for card creation form */
     BoardComponent.prototype.onNewCardSubmit = function (list, name, position) {
@@ -265,8 +276,8 @@ var BoardComponent = (function () {
     /** Return a list with the cards that are in the current label filter */
     BoardComponent.prototype.cardsInLabelFilter = function (cards, onlyActive) {
         var filteredCards = [];
-        for (var _i = 0, cards_1 = cards; _i < cards_1.length; _i++) {
-            var card = cards_1[_i];
+        for (var _i = 0, cards_2 = cards; _i < cards_2.length; _i++) {
+            var card = cards_2[_i];
             // A card is in the label filter if:
             // We are selected open cards and this card is not closed OR we are not selecting only active cards
             // and there is some label in the filter or the latter is empty.
