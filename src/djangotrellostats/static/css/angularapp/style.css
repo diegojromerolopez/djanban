@@ -53,6 +53,19 @@ h1, h2, h3 {
     text-decoration: none;
 }
 
+/* Search */
+.card_search {
+
+}
+
+.card_search button {
+    margin-top: 5px;
+}
+
+.card_search ng-select > div {
+    border-radius: 5px;
+}
+
 /* Members */
 .board .members .members_header {
     display: block;
@@ -70,6 +83,45 @@ h1, h2, h3 {
 .board .members form select {
     margin-bottom: 10px;
 }
+
+.board .members .member_container {
+    display: inline-block;
+    margin-right: 10px;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #f5f5f5;
+    border: 1px solid transparent;
+    border-color: #ddd;
+}
+
+.board .members .member_container .member {
+    display: inline-block;
+    height: 55px;
+    overflow: hidden;
+}
+
+.board .members .member_container .member .member_name {
+    display: inline-block;
+}
+
+.board .members .member_container .member .member_name img {
+    display: block;
+}
+
+.board .members .member_container .member .member_name .member_role {
+    display: block;
+}
+
+.board .members .member_container .member button {
+    margin-top: 0;
+    line-height: 1em;
+    width: 1em;
+}
+
+.board .members .member_container .member button .fa.fa-ban{
+    margin-left: -5px;
+}
+
 
 /* Board menu */
 .board .board_menu {

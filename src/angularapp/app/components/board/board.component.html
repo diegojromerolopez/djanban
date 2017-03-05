@@ -31,6 +31,7 @@
                     <button class="btn btn-primary"
                         *ngIf="selectedCardId"
                         (click)="onCardIdSelect(selectedCardId)">
+                        <span class="fa fa-sticky-note-o"></span>
                         View card
                     </button>
                 </div>
@@ -85,7 +86,7 @@
             </div>
         </div>
         <!-- Members -->
-        <div class="members  col-md-3" *ngIf="members">
+        <div class="members  col-md-5" *ngIf="members">
             <span class="members_header">
                 <h2>Members ({{board.members.length}})</h2>
                 <span class="btn btn-primary" (click)="addMemberStatus = {show: true, waiting: false}" title="Show add member form for board {{board.name}}">
@@ -114,7 +115,7 @@
                     </div>
                 </form>
             </div>
-            <div *ngFor="let member of board.members">
+            <div *ngFor="let member of board.members" class="member_container">
                 <span class="member">
                     <span class="member_name">
                         <img src="{{member.gravatar_url}}" class="avatar" alt="{{member.external_username}}"/>
