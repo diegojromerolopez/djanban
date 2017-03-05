@@ -64,12 +64,21 @@ class Member(models.Model):
 
     # Adjust spent time according to the factor specified by date intervals
     def adjust_daily_spent_time(self, daily_spent_time, attribute="spent_time"):
+
+        return Member.adjust_daily_spent_time_from_spent_time_factors(
+            daily_spent_time=daily_spent_time,
+            spent_time_factors=self.spent_time_factors.all(),
+            attribute=attribute)
+
+    # Adjust spent time according to the spent time factors passed as parameters
+    @staticmethod
+    def adjust_daily_spent_time_from_spent_time_factors(daily_spent_time, spent_time_factors, attribute="spent_time"):
         date = daily_spent_time.date
         adjusted_value = getattr(daily_spent_time, attribute)
         if adjusted_value is None:
             return 0
 
-        for spent_time_factor in self.spent_time_factors.all():
+        for spent_time_factor in spent_time_factors:
             if (spent_time_factor.start_date is None and spent_time_factor.end_date is None) or\
                     (spent_time_factor.start_date <= date and spent_time_factor.end_date is None) or \
                     (spent_time_factor.start_date <= date <= spent_time_factor.end_date):

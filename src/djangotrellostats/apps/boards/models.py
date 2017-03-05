@@ -19,6 +19,7 @@ from django.utils import timezone
 from isoweek import Week
 
 from djangotrellostats.apps.dev_times.models import DailySpentTime
+from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
 from djangotrellostats.apps.reports.models import CardMovement, CardReview
 
@@ -281,12 +282,27 @@ class Board(models.Model):
             daily_spent_times_filter["member"] = member
 
         daily_spent_times = self.daily_spent_times.filter(**daily_spent_times_filter)
+
+        spent_time_factors_by_member_id = {}
         member_dict = {}
+
+        # For each daily spent time, we have to compute its adjusted value getting the right interval of dates of the
+        # spent time factors of the corresponding member
         for daily_spent_time in daily_spent_times:
+
+            # Use memoization to improve member spent time factor fetch
             if daily_spent_time.member_id not in member_dict:
                 member_dict[daily_spent_time.member_id] = daily_spent_time.member
-            member_i = member_dict[daily_spent_time.member_id]
-            adjusted_spent_time += member_i.adjust_daily_spent_time(daily_spent_time, attribute="spent_time")
+                spent_time_factors_by_member_id[daily_spent_time.member_id] = daily_spent_time.member.spent_time_factors.all()
+
+            # Compute the adjusted spent time for this measurement (daily spent time)
+            adjusted_spent_time_for_daily_spent_time = Member.adjust_daily_spent_time_from_spent_time_factors(
+                daily_spent_time=daily_spent_time,
+                spent_time_factors=spent_time_factors_by_member_id[daily_spent_time.member_id],
+                attribute="spent_time"
+            )
+
+            adjusted_spent_time += adjusted_spent_time_for_daily_spent_time
 
         return adjusted_spent_time
 
@@ -655,6 +671,11 @@ class Card(models.Model):
     def get_estimated_time_by_member(self, member):
         return self.daily_spent_times.filter(member=member).\
             aggregate(estimated_time_sum=Sum("estimated_time"))["estimated_time_sum"]
+
+    # Return the cards of the boards of an user
+    @staticmethod
+    def get_user_cards(user, is_archived=False):
+        return Card.objects.filter(Q(board__members__user=user)|Q(board__visitors=user), board__is_archived=is_archived)
 
     # Age of this card as a timedelta
     @property
