@@ -17,12 +17,12 @@
 
 {% block js %}
     {{block.super}}
-    <script class="ajax-img" data-src="{% static 'js/libs/owl-carousel/owl.carousel.js' %}"></script>
+    <script src="{% static 'js/libs/owl-carousel/owl.carousel.js' %}"></script>
     <script type="text/javascript">
         RELOAD_FREQUENCY = 1800;
     </script>
-    <script class="ajax-img" data-src="{% static 'js/slideshow/carousel.js' %}"></script>
-    <script class="ajax-img" data-src="{% static 'js/slideshow/reload.js' %}"></script>
+    <script src="{% static 'js/slideshow/carousel.js' %}"></script>
+    <script src="{% static 'js/slideshow/reload.js' %}"></script>
 
 {% endblock js %}
 
