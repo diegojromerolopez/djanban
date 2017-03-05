@@ -3,16 +3,17 @@
 from __future__ import unicode_literals
 
 import copy
+import datetime
 
 import pygal
-from django.db.models import Avg, Min, Count
+from django.db.models import Avg, Min, Count, Max
 from django.utils import timezone
 
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.boards.models import Card
 from djangotrellostats.apps.charts.models import CachedChart
 from djangotrellostats.apps.dev_times.models import DailySpentTime
-from djangotrellostats.utils.week import number_of_weeks_of_year, get_iso_week_of_year
+from djangotrellostats.utils.week import number_of_weeks_of_year, get_iso_week_of_year, start_of_week_of_year
 
 
 # Average spent times
@@ -148,10 +149,11 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
     if board:
         labels = board.labels.all()
 
-    date_i = copy.deepcopy(
-        DailySpentTime.objects.filter(**daily_spent_time_filter).aggregate(min_date=Min("date"))["min_date"]
-    )
-    if date_i is None:
+    end_date= DailySpentTime.objects.filter(**daily_spent_time_filter).aggregate(max_date=Max("date"))["max_date"]
+
+    date_i = DailySpentTime.objects.filter(**daily_spent_time_filter).aggregate(min_date=Min("date"))["min_date"]
+
+    if date_i is None or end_date is None:
         return period_measurement_chart.render_django_response()
 
     month_i = date_i.month
@@ -171,21 +173,22 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
     label_measurement_titles = {label.id: [] for label in labels}
     label_measurement_values = {label.id: [] for label in labels}
 
-    first_loop = True
-    period_measurement = None
-    while first_loop or (period_measurement is not None and period_measurement > 0):
+    end_loop = False
+    while not end_loop:
         if period == "month":
             period_filter = {"date__month": month_i, "date__year": year_i}
             measurement_title = u"{0}-{1}".format(year_i, month_i)
             label_measurement_title_suffix = u"{0}-{1}".format(year_i, month_i)
+            end_loop = datetime.datetime.strptime('{0}-{1}-1'.format(year_i, month_i), '%Y-%m-%d').date() > end_date
         elif period == "week":
             period_filter = {"week_of_year": week_i, "date__year": year_i}
             measurement_title = u"{0}W{1}".format(year_i, week_i)
             label_measurement_title_suffix = u"{0}W{1}".format(year_i, week_i)
+            print label_measurement_title_suffix
+            end_loop = start_of_week_of_year(week=week_i, year=year_i) > end_date
         else:
             raise ValueError(u"Period {0} not valid. Only 'month' or 'week' is valid".format(period))
 
-        first_loop = False
         period_times = DailySpentTime.objects.filter(**daily_spent_time_filter).\
             filter(**period_filter)
 
@@ -204,17 +207,17 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
                         label_measurement_titles[label.id].append(measurement_title)
                         label_measurement_values[label.id].append(label_measurement)
 
-            if period == "month":
-                month_i += 1
-                if month_i > 12:
-                    month_i = 1
-                    year_i += 1
+        if period == "month":
+            month_i += 1
+            if month_i > 12:
+                month_i = 1
+                year_i += 1
 
-            elif period == "week":
-                week_i += 1
-                if week_i > number_of_weeks_of_year(year_i):
-                    week_i = 1
-                    year_i += 1
+        elif period == "week":
+            week_i += 1
+            if week_i > number_of_weeks_of_year(year_i):
+                week_i = 1
+                year_i += 1
 
     # Weeks there is any measurement
     period_measurement_chart.x_labels = measurement_titles

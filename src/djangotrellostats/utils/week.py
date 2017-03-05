@@ -1,5 +1,10 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 from datetime import timedelta, date
 from django.utils import timezone
+
+from isoweek import Week
 
 
 # Return the iso week of year of a date
@@ -32,3 +37,13 @@ def get_weeks_of_year_since_one_year_ago(date=None):
 # Number of weeks for a given year
 def number_of_weeks_of_year(year):
     return int(date(year, 12, 31).strftime("%W"))
+
+
+def start_of_week_of_year(week, year):
+    week = Week(year, week)
+    return week.monday()
+
+
+def end_of_week_of_year(week, year):
+    week = Week(year, week)
+    return week.sunday()
