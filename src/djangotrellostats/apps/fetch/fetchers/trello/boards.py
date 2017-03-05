@@ -66,8 +66,6 @@ class Initializer(TrelloConnector):
                     # Board needs updating
                     if board_is_updated:
                         board.save()
-                    print "CHOCKAPICK"
-                    print board.url
                     # Board name
                     board_name = board.name
 

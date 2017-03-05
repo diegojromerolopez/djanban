@@ -566,7 +566,7 @@ class Board(models.Model):
 
     # Delete all cached charts of this board
     def clean_cached_charts(self):
-        self.cached_charts.all().delete()
+        self.cached_charts.all().update(is_expired=True)
 
     # Save this board:
     # Assigns a new public_access_code if is not present

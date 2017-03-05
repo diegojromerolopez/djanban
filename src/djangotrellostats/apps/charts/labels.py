@@ -184,7 +184,6 @@ def _daily_spent_times_by_period(board=None, time_measurement="spent_time", oper
             period_filter = {"week_of_year": week_i, "date__year": year_i}
             measurement_title = u"{0}W{1}".format(year_i, week_i)
             label_measurement_title_suffix = u"{0}W{1}".format(year_i, week_i)
-            print label_measurement_title_suffix
             end_loop = start_of_week_of_year(week=week_i, year=year_i) > end_date
         else:
             raise ValueError(u"Period {0} not valid. Only 'month' or 'week' is valid".format(period))
