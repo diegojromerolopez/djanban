@@ -38,6 +38,8 @@ def burndown(board, show_interruptions=False):
 
     # Remaining time is needed for making the burndown chart
     if remaining_time is None:
+        x_labels = ["Start"]
+        burndown_chart.x_labels = x_labels
         return burndown_chart.render_django_response()
 
     # Start and end working date in this board
