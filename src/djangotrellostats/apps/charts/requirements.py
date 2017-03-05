@@ -78,7 +78,7 @@ def _requirement_burndown(board, requirement):
     burndown_chart.add(u"Burndown of {0}".format(requirement.code), remaining_time_values)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=burndown_chart.render(is_unicode=True))
-    return chart
+    return chart.render_django_response()
 
 
 # Burndown for all requirements
@@ -138,7 +138,7 @@ def _burndown_by_requirement(board):
     burndown_chart.x_labels = x_labels
     burndown_chart.add(u"Burndown according to {0} requirements".format(board.name), remaining_time_values)
 
-    svg_chart = CachedChart.make(board=board, uuid=chart_uuid, svg=burndown_chart.render(is_unicode=True))
-    return svg_chart
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=burndown_chart.render(is_unicode=True))
+    return chart.render_django_response()
 
 

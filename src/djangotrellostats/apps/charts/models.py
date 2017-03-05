@@ -60,7 +60,7 @@ class CachedChart(models.Model):
     @staticmethod
     def _get(board, uuid):
         return CachedChart.objects.get(
-            board=None, uuid=uuid, is_expired=False,
+            board=board, uuid=uuid, is_expired=False,
             creation_datetime__gte=CachedChart.chart_life_datetime_limit(board)
         )
 
@@ -92,11 +92,11 @@ class CachedChart(models.Model):
 
     @staticmethod
     def expire(uuid, board=None):
-        CachedChart.filter(uuid=uuid, board=board).update(is_expired=True)
+        CachedChart.objects.filter(uuid=uuid, board=board).update(is_expired=True)
 
     @staticmethod
     def expire_all(board=None):
-        CachedChart.filter(board=board).update(is_expired=True)
+        CachedChart.objects.filter(board=board).update(is_expired=True)
 
     # Render a django response
     def render_django_response(self):

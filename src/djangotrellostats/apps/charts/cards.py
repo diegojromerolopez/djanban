@@ -967,6 +967,7 @@ def number_of_comments(current_user, board=None, card=None):
         current_user.id, board.id if board else "None", card.id if card else "None"
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
+    print chart
     if chart:
         return chart
 
