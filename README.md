@@ -18,6 +18,8 @@ strategic decisions like:
 - What's the lead and cycle time of each project tasks?
 - Is the project on time according to its percentage of completion?
 
+Want to see it running in your computer? It's easy. [Read how](#test)
+
 # How doest it work?
 
 First you have to sign up with your Trello API credentials. Initialize your boards and customize the type of each board list.
@@ -191,7 +193,7 @@ Run this command once a day to assess the code quality of your GitLab repositori
 python src/manage.py assess_code_quality
 ```
 
-# Test
+# Test 
 
 Want to test this web application?
 
