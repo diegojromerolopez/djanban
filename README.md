@@ -81,12 +81,6 @@ Or in MacOS (using brew):
 brew install homebrew/php/phpmd
 ```
 
-## virtualenv-pythonw-osx (only for desktop app in MacOS)
-
-virtualenv-pythonw-osx is a package that allows the conversion of a virtualenv to a MacOS app.
-
-[virtualenv-pythonw-osx](https://github.com/gldnspud/virtualenv-pythonw-osx)
-
 # Configuration
 
 ## Local settings
@@ -137,53 +131,6 @@ DATE_FORMAT = "<LOCAL DATE FORMAT IN TEMPLATES>"
 DATETIME_FORMAT = "<LOCAL DATETIME FORMAT IN TEMPLATES>"
 
 ```
-
-## Desktop app local settings
-
-Copy this code and create a **settings_local_desktop_app.py** file in your server in **src**.
- 
- ```python
-# -*- coding: utf-8 -*-
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '<whatever string you want>'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-LANGUAGE_CODE = '<language code>'
-TIME_ZONE = "<TIME ZONE>"
-
-EMAIL_USE_TLS = <USE TLS?>
-EMAIL_HOST = '<email host>'
-EMAIL_PORT = <email host portr>
-EMAIL_HOST_USER = '<email host user>'
-EMAIL_HOST_PASSWORD = '<email host user password>'
-DEFAULT_FROM_EMAIL = '<email host user from email>'
-
-# Date format that will be used in templates, by default is Y-m-d. Optional.
-DATE_FORMAT = "<LOCAL DATE FORMAT IN TEMPLATES>"
-
-# Datetime format that will be used in templates, by default is Y-m-d H:i. Optional.
-DATETIME_FORMAT = "<LOCAL DATETIME FORMAT IN TEMPLATES>"
-```
-
-The sqlite database will be created in **resources/database/djangotrellostats.db** if it doesn't exist.
-
-Run the desktop app by running **run_desktop_app.sh** script. That script will make all the set up for this project.
-
-### Linux
-
-Checkout the dockerfile and test if it works. Work in Progress.
- 
-### MacOS
-
-The MacOS version uses [Virtualenv Pythonw OSX](https://github.com/gldnspud/virtualenv-pythonw-osx).
-
-You'll have to write your password on this script request to create the rightfull .PythonApp directory inside your virtualenv.
-
-Don't worry, the script needs to complete the conversion of the virtualenv to a MacOS app.
- 
 
 ## Sign up
 
@@ -243,6 +190,22 @@ Run this command once a day to assess the code quality of your GitLab repositori
 ```python
 python src/manage.py assess_code_quality
 ```
+
+# Test
+
+Want to test this web application?
+
+Run this commands in your terminal:
+
+```sh
+#! /bin/bash
+sudo apt-get -y install git python python-dev virtualenv build-essential libssl-dev libffi-dev libmysqlclient-dev libxml2-dev libxslt1-dev
+git clone https://github.com/diegojromerolopez/django-trello-stats
+cd django-trello-stats
+./runserver.sh
+```
+
+And open your favorite web browser in the address https://localhost:8000
 
 # Board interfaces
 

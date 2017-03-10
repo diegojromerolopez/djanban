@@ -15,9 +15,7 @@ DEBUG = True
 
 DOMAIN = "localhost"
 ALLOWED_HOSTS = [DOMAIN]
-PORT = "80"
-if DEBUG is True and DOMAIN == "localhost":
-    PORT = "8000"
+PORT = "8000"
 
 DATABASES = {
     'default': {

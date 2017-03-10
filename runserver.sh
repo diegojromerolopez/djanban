@@ -9,7 +9,7 @@ if [ ! -d ./src/venv ]; then
 fi
 
 if [ ! -f ./src/djangotrellostats/settings_local.py ]; then
-    cp ./src/djangotrellostats/settings_local.dply.py ./src/djangotrellostats/settings_local.py
+    cp ./src/djangotrellostats/settings_local.runserver.py ./src/djangotrellostats/settings_local.py
 fi
 
 ./venv/bin/python ./src/manage.py migrate
