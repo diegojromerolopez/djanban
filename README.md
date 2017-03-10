@@ -18,7 +18,19 @@ strategic decisions like:
 - What's the lead and cycle time of each project tasks?
 - Is the project on time according to its percentage of completion?
 
-**Want to see it running in your computer?** It's easy. [Read how](https://github.com/diegojromerolopez/django-trello-stats#test)
+**Want to see it running in your computer?** It's easy:
+
+Run this commands in your terminal:
+
+```sh
+sudo apt-get -y install git python python-dev virtualenv build-essential\ 
+    libssl-dev libffi-dev libmysqlclient-dev libxml2-dev libxslt1-dev
+git clone https://github.com/diegojromerolopez/django-trello-stats
+cd django-trello-stats
+./runserver.sh
+```
+
+And open your web browser in the address http://localhost:8000
 
 # How doest it work?
 
