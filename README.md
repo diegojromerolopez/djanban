@@ -198,8 +198,8 @@ Want to test this web application?
 Run this commands in your terminal:
 
 ```sh
-#! /bin/bash
-sudo apt-get -y install git python python-dev virtualenv build-essential libssl-dev libffi-dev libmysqlclient-dev libxml2-dev libxslt1-dev
+sudo apt-get -y install git python python-dev virtualenv build-essential\ 
+    libssl-dev libffi-dev libmysqlclient-dev libxml2-dev libxslt1-dev
 git clone https://github.com/diegojromerolopez/django-trello-stats
 cd django-trello-stats
 ./runserver.sh
