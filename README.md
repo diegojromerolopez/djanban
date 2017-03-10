@@ -44,17 +44,20 @@ Don't use the feature of assigning times to other members of the team because it
 
 [This library](https://github.com/sarumont/py-trello) is free software and I've collaborated with Py-Trello team to include all features required for Django-Trello-Stats.
 
-## virtualenv-pythonw-osx
+## System packages
 
-virtualenv-pythonw-osx is a package that allows the conversion of a virtualenv to a MacOS app.
+Run this command to install all the needed packages for this project in Ubuntu/Debian.
 
-[virtualenv-pythonw-osx](https://github.com/gldnspud/virtualenv-pythonw-osx)
+```sh
+sudo apt-get -y install git python python-dev virtualenv build-essential libssl-dev libffi-dev\
+   libmysqlclient-dev libxml2-dev libxslt1-dev
+```
 
 ## Other packages
 
 Django, python-mysql and more packages specified in **requirements.txt**.
 
-## External requirements
+## External requirements (optional)
 
 ### cloc
 
@@ -77,6 +80,12 @@ Or in MacOS (using brew):
 ```sh
 brew install homebrew/php/phpmd
 ```
+
+## virtualenv-pythonw-osx (only for desktop app in MacOS)
+
+virtualenv-pythonw-osx is a package that allows the conversion of a virtualenv to a MacOS app.
+
+[virtualenv-pythonw-osx](https://github.com/gldnspud/virtualenv-pythonw-osx)
 
 # Configuration
 
