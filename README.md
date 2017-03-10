@@ -18,7 +18,7 @@ strategic decisions like:
 - What's the lead and cycle time of each project tasks?
 - Is the project on time according to its percentage of completion?
 
-Want to see it running in your computer? It's easy. [Read how](#test)
+**Want to see it running in your computer?** It's easy. [Read how](https://github.com/diegojromerolopez/django-trello-stats#test)
 
 # How doest it work?
 
