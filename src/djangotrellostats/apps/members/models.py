@@ -417,7 +417,10 @@ class TrelloMemberProfile(models.Model):
 
     api_key = models.CharField(max_length=128, verbose_name=u"Trello API key", null=True, default=None, blank=True)
 
-    api_secret = models.CharField(max_length=128, verbose_name=u"Trello API secret", null=True, default=None, blank=True)
+    api_secret = models.CharField(max_length=128,
+                                  verbose_name=u"Trello API secret (obsolete)",
+                                  help_text=u"Trello API secret. Deprecated and not used. This field will be removed.",
+                                  null=True, default=None, blank=True)
 
     token = models.CharField(max_length=128, verbose_name=u"Trello token", null=True, default=None, blank=True)
 

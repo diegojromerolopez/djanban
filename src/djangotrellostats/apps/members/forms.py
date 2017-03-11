@@ -71,19 +71,18 @@ class TrelloSignUpForm(LocalSignUpForm):
         super(TrelloSignUpForm, self).__init__(*args, **kwargs)
 
         self.fields["api_key"] = forms.CharField(label=u"Trello's API key", max_length=64, required=True)
-        self.fields["api_secret"] = forms.CharField(label=u"Trello's API secret", max_length=64, required=True)
         self.fields["token"] = forms.CharField(label=u"Trello's token", max_length=64, required=True)
         self.fields["token_secret"] = forms.CharField(label=u"Trello's token secret", max_length=64, required=True)
 
         self.order_fields(["first_name", "last_name", "email", "password1", "password2",
-                           "api_key", "api_secret", "token", "token_secret", "captcha"])
+                           "api_key", "token", "token_secret", "captcha"])
 
     def clean(self):
         cleaned_data = super(TrelloSignUpForm, self).clean()
 
         # Get Trello remote data
         trello_client = TrelloClient(
-            api_key=self.cleaned_data["api_key"], api_secret=self.cleaned_data["api_secret"],
+            api_key=self.cleaned_data["api_key"], api_secret="xxx",
             token=self.cleaned_data["token"], token_secret=self.cleaned_data["token_secret"]
         )
 
@@ -104,7 +103,7 @@ class TrelloSignUpForm(LocalSignUpForm):
 
         trello_member_profile = TrelloMemberProfile(
             api_key=self.cleaned_data["api_key"],
-            api_secret=self.cleaned_data["api_secret"],
+            api_secret="xxx",
             token=self.cleaned_data["token"],
             token_secret=self.cleaned_data["token_secret"],
             trello_id=self.cleaned_data["uuid"],
