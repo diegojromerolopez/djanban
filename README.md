@@ -27,7 +27,7 @@ sudo apt-get -y install git python python-dev virtualenv build-essential\
     libssl-dev libffi-dev libmysqlclient-dev libxml2-dev libxslt1-dev
 git clone https://github.com/diegojromerolopez/django-trello-stats
 cd django-trello-stats
-./runserver.sh
+./start_local_server.sh
 ```
 
 And open your web browser in the address http://localhost:8000
@@ -216,7 +216,7 @@ sudo apt-get -y install git python python-dev virtualenv build-essential\
     libssl-dev libffi-dev libmysqlclient-dev libxml2-dev libxslt1-dev
 git clone https://github.com/diegojromerolopez/django-trello-stats
 cd django-trello-stats
-./runserver.sh
+./start_local_server.sh
 ```
 
 And open your favorite web browser in the address https://localhost:8000
