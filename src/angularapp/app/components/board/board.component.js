@@ -287,6 +287,18 @@ var BoardComponent = (function () {
         }
         return filteredCards;
     };
+    /** Return a list with the active cards */
+    BoardComponent.prototype.activeCards = function (cards) {
+        var activeCards = [];
+        for (var _i = 0, cards_3 = cards; _i < cards_3.length; _i++) {
+            var card = cards_3[_i];
+            // Filter out closed cards
+            if (!card.is_closed) {
+                activeCards.push(card);
+            }
+        }
+        return activeCards;
+    };
     BoardComponent.prototype.addLabelToLabelFilter = function (label_id) {
         var label = this.board.getLabelById(label_id);
         if (this.labelFilter.findIndex(function (label_i) { return label_i.id == label_id; }) >= 0) {

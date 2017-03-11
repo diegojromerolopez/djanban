@@ -150,26 +150,33 @@
             [ngClass]="{'closed-list': list.type == 'closed', 'closed-list-showed': list.type == 'closed' && closedItemsVisibility == 'showed', 'ignored-list': list.type == 'ignored'}">
             <div class="list_name panel-heading cursor-pointer">
                 <div class="list_name">
-                    <span class="list_name_name">
-                        <span>
-                            <span class="fa fa-times" *ngIf="list.type == 'ignored'" title='This list is ignored'></span>
-                            <span class="fa fa-book" *ngIf="list.type == 'backlog'" title='Task backlog'></span>
-                            <span class="fa fa-hourglass-start" *ngIf="list.type == 'ready_to_develop'" title='Tasks waiting to be started'></span>
-                            <span class="fa fa-hourglass-half" *ngIf="list.type == 'development'" title='Tasks in development'></span>
-                            <span class="fa fa-gavel" *ngIf="list.type == 'after_development_in_review'" title='Tasks being reviewed'></span>
-                            <span class="fa fa-upload" *ngIf="list.type == 'after_development_waiting_release'" title='Tasks waiting release'></span>
-                            <span class="fa fa-hourglass-end" *ngIf="list.type == 'done'" title='Tasks done'></span>
-                            <span class="fa fa-archive" *ngIf="list.type == 'closed'" title='Closed list'></span>
-                            {{list.name}}
+                    <div class="list_name_first_line">
+                        <span class="list_name_name">
+                            <span>
+                                <span class="fa fa-times" *ngIf="list.type == 'ignored'" title='This list is ignored'></span>
+                                <span class="fa fa-book" *ngIf="list.type == 'backlog'" title='Task backlog'></span>
+                                <span class="fa fa-hourglass-start" *ngIf="list.type == 'ready_to_develop'" title='Tasks waiting to be started'></span>
+                                <span class="fa fa-hourglass-half" *ngIf="list.type == 'development'" title='Tasks in development'></span>
+                                <span class="fa fa-gavel" *ngIf="list.type == 'after_development_in_review'" title='Tasks being reviewed'></span>
+                                <span class="fa fa-upload" *ngIf="list.type == 'after_development_waiting_release'" title='Tasks waiting release'></span>
+                                <span class="fa fa-hourglass-end" *ngIf="list.type == 'done'" title='Tasks done'></span>
+                                <span class="fa fa-archive" *ngIf="list.type == 'closed'" title='Closed list'></span>
+                                {{list.name}}
+                            </span>
                         </span>
-                    </span>
-                    <span class="move_list_handle" title="Move list"></span>
+                        <span class="move_list_handle" title="Move list"></span>
+                    </div>
+                    <div class="showing_cards">
+                        Showing {{cardsInLabelFilter(list.cards, closedItemsVisibility == 'hidden').length}} tasks.
+                    </div>
                     <div class="list_wip_limit">
-                        <span><strong>{{cardsInLabelFilter(list.cards, closedItemsVisibility == 'hidden').length}}</strong> tasks.</span>
+                        <span>
+                            <strong> {{activeCards(list.cards).length}}</strong> active tasks.
+                        </span>
                         <span *ngIf="list.wip_limit">
                             <span class="list_wip_limit_name">WIP Limit is <strong>{{list.wip_limit}}</strong> tasks</span>
-                            <span *ngIf="list.cards.length > list.wip_limit"><span class="fa fa-times"></span></span>
-                            <span *ngIf="list.cards.length <= list.wip_limit"><span class="fa fa-check"></span></span>
+                            <span *ngIf="activeCards(list.cards).length > list.wip_limit"><span class="fa fa-hand-paper-o fa-2x cursor-help" title="Too much multitasking. Don't introduce new tasks in this list."></span></span>
+                            <span *ngIf="activeCards(list.cards).length <= list.wip_limit"><span class="fa fa-check fa-2x cursor-help" title="You can introduce new tasks in this list."></span></span>
                         </span>
                         <span *ngIf="!list.wip_limit">
                             <span class="list_wip_limit_name"><strong>No</strong> WIP Limit</span>
@@ -184,7 +191,8 @@
                             <button class="move_cards_button btn btn-primary"
                                     (click)="moveAllCardsStatus[list.id]='showed'"
                                     *ngIf="list.cards.length > 0"
-                                    [disabled]="moveAllCardsStatus[list.id]=='waiting'">
+                                    [disabled]="moveAllCardsStatus[list.id]=='waiting'"
+                                    title="Move all cards of list {{list.name}}">
                                 <span class="fa fa-backward"></span>
                                 Cards
                                 <span class="fa fa-forward"></span>

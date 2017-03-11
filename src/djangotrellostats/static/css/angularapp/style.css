@@ -140,6 +140,11 @@ h1, h2, h3 {
     width: 400px;
 }
 
+.list_name_first_line {
+    margin-bottom: 5px;
+    overflow: hidden;
+}
+
 .list_name_name .fa {
     cursor: help;
 }
@@ -229,6 +234,10 @@ list.closed-list-showed,
     display: block;
     float: left;
     margin-right: 10px;
+}
+
+.showing_cards {
+    margin-bottom: 0;
 }
 
 .list_wip_limit {

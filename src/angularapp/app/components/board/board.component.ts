@@ -326,6 +326,21 @@ export class BoardComponent implements OnInit {
     return filteredCards;
   }
 
+
+  /** Return a list with the active cards */
+  activeCards(cards: Card[]): Card[]{
+    let activeCards: Card[] = [];
+    for(let card of cards){
+      // Filter out closed cards
+      if(!card.is_closed){
+        activeCards.push(card);
+      }
+    }
+    return activeCards;
+  }
+
+  
+
   addLabelToLabelFilter(label_id: number): void {
     let label = this.board.getLabelById(label_id)
     if(this.labelFilter.findIndex(label_i => label_i.id == label_id)>=0){
