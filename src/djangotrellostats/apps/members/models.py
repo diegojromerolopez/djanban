@@ -14,12 +14,12 @@ from django.contrib.auth.models import User
 from django.core.files import File
 from django.db import models
 from django.db import transaction
-from django.db.models import Sum, Avg, Q
+from django.db.models import Sum, Avg, Q, Count
 from django.urls import reverse
 from django.utils import timezone
 from isoweek import Week
 
-from djangotrellostats.apps.base.auth import get_user_boards
+from djangotrellostats.apps.base.auth import get_user_boards, get_member_boards
 
 
 class Member(models.Model):
@@ -271,6 +271,19 @@ class Member(models.Model):
     @property
     def active_cards(self):
         return self.cards.filter(is_closed=False).order_by("position")
+
+    def all_boards_in_downtime(self):
+        resumed_boards = get_member_boards(self).\
+            annotate(num_resumed_cards=Count(
+                    models.Case(
+                        models.When(cards__is_closed=False, cards__list__type="development",  then=1),
+                        models.When(cards__is_closed=False, cards__list__type="ready_to_develop",  then=1),
+                        default=0,
+                        output_field=models.IntegerField()
+                    ))
+            ).\
+            filter(num_resumed_cards__gt=0)
+        return not resumed_boards.exists()
 
     # Is the member in downtime?
     @property

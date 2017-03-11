@@ -190,6 +190,11 @@ class Board(models.Model):
 
         return None
 
+    # Is the board in downtime?
+    @property
+    def is_in_downtime(self):
+        return not self.active_cards.filter(Q(list__type="development") | Q(list__type="ready_to_develop")).exists()
+
     def is_ready(self):
         """
         Informs if this board is ready to be fetched.

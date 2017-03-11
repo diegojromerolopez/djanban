@@ -40,18 +40,39 @@
         </div>
         <div class="col-md-3">
             <h2>Downtime</h2>
-            {% if member.is_developer and member.is_in_downtime %}
-                <div>You are on downtime since {{member.last_work_datetime}}</div>
-            {% endif %}
-            {% for member_i in downtime_developers %}
-                <div>{{member_i.external_username}} is in downtime since {{member_i.last_work_datetime}}.</div>
-            {% empty %}
-                {% if member.is_developer and member.is_in_downtime %}
-                    <div>No other developers are in downtime.</div>
-                {% else %}
-                    <div>No developers are in downtime.</div>
+            {% with all_boards_in_downtime=member.all_boards_in_downtime %}
+                {% if all_boards_in_downtime %}
+                    <div class="panel panel-danger">
+                      <div class="panel-heading">Downtime in all your boards</div>
+                      <div class="panel-body">
+                        There are no tasks in pending to develop or in development state in any of your boards.
+                      </div>
+                    </div>
                 {% endif %}
-            {% endfor %}
+
+                {% if member.is_developer and member.is_in_downtime %}
+                    <div>
+                        You are on downtime since {{member.last_work_datetime}}.
+                        {% if not all_boards_in_downtime %}
+                            There are pending or in development cards you can help working with.
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% for member_i in downtime_developers %}
+                    <div>
+                        {{member_i.external_username}} is in downtime since {{member_i.last_work_datetime}}.
+                        {% if not all_boards_in_downtime %}
+                            Assign him/her one of the pending or in development tasks.
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    {% if member.is_developer and member.is_in_downtime %}
+                        <div>No other developers are in downtime.</div>
+                    {% else %}
+                        <div>No developers are in downtime.</div>
+                    {% endif %}
+                {% endfor %}
+            {% endwith %}
         </div>
     </div>
 
