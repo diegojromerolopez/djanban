@@ -2,7 +2,11 @@
     <div class="col-md-12 center-block">
         <div class="panel panel-{% if board.estimated_number_of_hours and board.current_percentage_of_completion > board.percentage_of_completion %}danger{% else %}success{% endif %}">
           <a class="panel-heading btn-block" href="{% url 'boards:view' board.id %}" title="View {{board.name}}">
-                {{board.name}}
+                <h4 class="board-name-container">
+                    <img class="board-identicon" src="{% url 'boards:view_identicon' board.id 40 40 %}"
+                         alt="Identicon of board {{board.name}}"/>
+                    <span class="board-name">{{board.name}}</span>
+                </h4>
           </a>
           <div class="panel-body">
               {% with spent_time=board.get_spent_time %}

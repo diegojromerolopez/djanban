@@ -94,11 +94,24 @@ class Board(models.Model):
         help_text=u"Select this checkbox if you want to show this board in the slideshow",
         default=False)
 
+    # Image that appears in the header of the board views
     header_image = models.ImageField(
         verbose_name=u"Header image", default=None, null=True, blank=True,
         help_text=u"Header image for this board. Optional."
     )
 
+    identicon = models.ImageField(
+        verbose_name=u"Identicon", default=None, null=True, blank=True,
+        help_text=u"Identicon for this board. It is automatically generated and stored."
+    )
+
+    identicon_hash = models.CharField(max_length=256,
+                                      verbose_name=u"Identicon hash",
+                                      help_text=u"Identicon hash used to know when to update it",
+                                      default="", blank=True)
+
+
+    # Users that can view the board stats and other parameters but cannot change anything
     visitors = models.ManyToManyField(User, verbose_name=u"Visitors of this board", related_name="boards", blank=True)
 
     # Last time the mood for this project was computed.

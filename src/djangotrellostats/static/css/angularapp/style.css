@@ -6,6 +6,18 @@
     width: auto;
 }
 
+/* Identicon in the menu */
+#content_menu .board-identicon {
+    display: inline-block;
+    height: 20px;
+    vertical-align: middle;
+    width: 20px;
+}
+
+#content_menu .board-name {
+    display: inline-block;
+}
+
 /* Header with spent time */
 #board_spent_time span.label {
     color: white;

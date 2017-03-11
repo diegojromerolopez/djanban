@@ -4,7 +4,9 @@
         <div class="container-fluid">
             <div class="navbar-header">
                 <a class="navbar-brand" href="{% url 'boards:view' board.id %}" title="Go to {{board.name}} dashboard">
-                    {{board.name|truncatechars:20}}
+                    <img class="board-identicon d-inline-block" src="{% url 'boards:view_identicon' board.id %}"
+                         alt="Identicon of board {{board.name}}"/>
+                    <span class="board-name d-inline-block">{{board.name|truncatechars:20}}</span>
                 </a>
                 {% if board.url %}
                     <a class="navbar-brand" href="{{board.url}}" title="View this board in Trello">

@@ -62,6 +62,10 @@ a {
     cursor: help
 }
 
+.d-inline-block {
+    display: inline-block;
+}
+
 h1 a .fa,
 h1 a:hover .fa,
 a .img-loader-spinner.fa:hover,

@@ -2,15 +2,19 @@
 
 from __future__ import unicode_literals, absolute_import
 
+import hashlib
 import time
 
 from datetime import timedelta
+
+import pydenticon
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.http.response import Http404
+from django.http.response import Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 
 from djangotrellostats.apps.base.auth import user_is_member, get_user_boards, user_is_visitor
@@ -340,6 +344,49 @@ def edit(request, board_id):
 
     replacements = {"board": board, "member": member, "form": form}
     return render(request, "boards/edit.html", replacements)
+
+
+@login_required
+def view_identicon(request, board_id, width=40, height=40):
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
+
+    # List of colors taken from example http://pydenticon.readthedocs.io/en/0.3/usage.html#instantiating-a-generator
+    foreground = [
+        "#{0}".format(board.title_color),
+        "rgb(45,79,255)",
+        "rgb(254,180,44)",
+        "rgb(226,121,234)",
+        "rgb(30,179,253)",
+        "rgb(232,77,65)",
+        "rgb(49,203,115)",
+        "rgb(141,69,170)"
+    ]
+
+    # Background color taken from example http://pydenticon.readthedocs.io/en/0.3/usage.html#instantiating-a-generator
+    background = u"#{0}".format(board.background_color)
+
+    identicon_hash = hashlib.sha1(board.name.encode('utf-8')).hexdigest()
+
+    # If the identicon is already stored, return it
+    if identicon_hash == board.identicon_hash:
+        return HttpResponseRedirect(board.identicon.url)
+
+    # Otherwise, its generation is needed
+    board.identicon_hash = identicon_hash
+
+    generator = pydenticon.Generator(5, 5, digest=hashlib.sha1,
+                                     foreground=foreground, background=background)
+
+    identicon_png = generator.generate(board.name, int(width), int(height), output_format="png")
+
+    board.identicon.save(u"{0}".format(identicon_hash), ContentFile(identicon_png))
+    board.save()
+    return HttpResponseRedirect(board.identicon.url)
+
+
 
 
 # View lists of a board

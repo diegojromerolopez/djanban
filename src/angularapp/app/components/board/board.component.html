@@ -10,7 +10,10 @@
     <div class="header">
         <div class="board_name">
             <h1 class="board_name">
-                <a href="{{board.local_url}}" title="View board {{board.name}} details">{{board.name}}</a>
+                <a href="{{board.local_url}}" title="View board {{board.name}} details">
+                    <img class="board-identicon" src="{{board.identicon_url}}" alt="Identicon of board {{board.name}}"/>
+                    <span>{{board.name}}</span>
+                </a>
             </h1>
         </div>
     </div>

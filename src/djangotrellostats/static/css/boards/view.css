@@ -3,6 +3,17 @@
     margin-bottom: 20px;
 }
 
+#content_menu .board-identicon {
+    display: inline-block;
+    height: 20px;
+    vertical-align: middle;
+    width: 20px;
+}
+
+#content_menu .board-name {
+    display: inline-block;
+}
+
 .board-title-container {
 
 }

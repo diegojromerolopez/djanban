@@ -10,6 +10,7 @@ export class Board {
   uuid: string;
   name: string;
   description: string;
+  identicon_url: string;
   local_url?: string;
   lists?: List[];
   labels?: Label[];

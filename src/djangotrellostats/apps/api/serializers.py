@@ -79,6 +79,7 @@ class Serializer(object):
             "name": self.board.name,
             "description": self.board.description,
             "local_url": reverse("boards:view", args=(self.board.id,)),
+            "identicon_url": reverse("boards:view_identicon", args=(self.board.id, 40, 40)),
             "lists": lists_json,
             "members": [self.serialized_members_by_id[member.id] for member in self.board.members.all().order_by("id")],
             "labels": [self.serialized_labels_by_id[label.id] for label in self.board.labels.exclude(name="").order_by("name")],

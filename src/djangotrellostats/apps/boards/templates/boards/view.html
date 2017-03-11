@@ -33,7 +33,8 @@
     {% if board.is_ready and board.is_fetched %}
         <div class="board-title-container">
             <h1 class="board-title">
-                {{board.name}}
+                <img class="board-identicon" src="{% url 'boards:view_identicon' board.id 40 40 %}" alt="Identicon of board {{board.name}}"/>
+                <span class="board-name">{{board.name}}</span>
                 {% if board.url %}
                     <a href="{{board.url}}" title="View this board in Trello">
                         <span class="fa fa-trello"></span>

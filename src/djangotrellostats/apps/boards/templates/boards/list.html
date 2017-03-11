@@ -39,7 +39,8 @@
                         <h2 style="background-color:#{{board.background_color}}; color:#{{board.title_color}};">
                             <a class="view_board"
                                href="{% url 'boards:view' board.id %}" title="View board {{board.name}}">
-                                {{board.name}}
+                                <img class="board-identicon" src="{% url 'boards:view_identicon' board.id 40 40 %}" alt="Identicon of board {{board.name}}"/>
+                                <span class="board-name">{{board.name}}</span>
                             </a>
                         </h2>
                         {% if member.has_trello_profile %}
