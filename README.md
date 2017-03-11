@@ -32,7 +32,7 @@ cd django-trello-stats
 
 And open your web browser in the address http://localhost:8000
 
-# How doest it work?
+# How does it work?
 
 First you have to sign up with your Trello API credentials. Initialize your boards and customize the type of each board list.
 
