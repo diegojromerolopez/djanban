@@ -98,6 +98,17 @@ class TrelloConnector(object):
         new_list.last_activity_datetime = timezone.now()
         return new_list
 
+    # Edit a list
+    def edit_list(self, edited_list):
+        trello_board = self.get_trello_board(edited_list.board)
+        trello_list = trello_board.get_list(edited_list.uuid)
+        # If there is a change in the name, push the change
+        if trello_list.name != edited_list.name:
+            trello_list.set_name(edited_list.name)
+        # If there is a change in the position, push the change
+        if trello_list.pos != edited_list.position:
+            trello_list.set_pos(edited_list.position)
+
     # Card operations
 
     # Creates a new card

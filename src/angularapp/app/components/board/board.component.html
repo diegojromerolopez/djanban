@@ -162,9 +162,20 @@
                             <span class="fa fa-archive" *ngIf="list.type == 'closed'" title='Closed list'></span>
                             {{list.name}}
                         </span>
-                        <span>({{cardsInLabelFilter(list.cards, closedItemsVisibility == 'hidden').length}} tasks)</span>
                     </span>
                     <span class="move_list_handle" title="Move list"></span>
+                    <div class="list_wip_limit">
+                        <span><strong>{{cardsInLabelFilter(list.cards, closedItemsVisibility == 'hidden').length}}</strong> tasks.</span>
+                        <span *ngIf="list.wip_limit">
+                            <span class="list_wip_limit_name">WIP Limit is <strong>{{list.wip_limit}}</strong> tasks</span>
+                            <span *ngIf="list.cards.length > list.wip_limit"><span class="fa fa-times"></span></span>
+                            <span *ngIf="list.cards.length <= list.wip_limit"><span class="fa fa-check"></span></span>
+                        </span>
+                        <span *ngIf="!list.wip_limit">
+                            <span class="list_wip_limit_name"><strong>No</strong> WIP Limit</span>
+                            <span class="fa fa-check"></span>
+                        </span>
+                    </div>
                     <div class="list_actions">
                         <span (click)="newCardFormStatus[list.id]['show'] = true" class="btn btn-primary list_name_new_card" title="New card in list {{list.name}}">
                             <span class="fa fa-plus"></span> Card

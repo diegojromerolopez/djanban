@@ -51,6 +51,10 @@ class NativeConnector(object):
         new_list.last_activity_datetime = timezone.now()
         return new_list
 
+    # Edit a list
+    def edit_list(self, edited_list):
+        pass
+
     # Card operations
 
     # Creates a new card

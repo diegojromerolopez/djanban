@@ -144,16 +144,7 @@ class Serializer(object):
                 "id": self.board.id,
                 "uuid": self.board.uuid,
                 "name": self.board.name,
-                "lists": [
-                    {
-                        "id": list_.id,
-                        "name": list_.name,
-                        "uuid": list_.uuid,
-                        "type": list_.type,
-                        "position": list_.position
-                    }
-                    for list_ in self.board.active_lists.order_by("position")
-                    ],
+                "lists": [self.serialize_list(list_) for list_ in self.board.active_lists.order_by("position")],
                 "labels": [self.serialize_label(label) for label in self.board.labels.exclude(name="").order_by("name")]
             },
             "list": self.serialize_list(card_list),
@@ -167,21 +158,15 @@ class Serializer(object):
                     "url": reverse("boards:view_card", args=(self.board.id, blocking_card.id,)),
                     "short_url": blocking_card.short_url,
                     "position": blocking_card.position,
-                    "list": {
-                        "id": blocking_card.list.id,
-                        "name": blocking_card.list.name,
-                        "uuid": blocking_card.list.uuid,
-                        "type": blocking_card.list.type,
-                        "position": blocking_card.list.position
-                    }
+                    "list": self.serialize_list(blocking_card.list)
                 }
                 for blocking_card in card.blocking_cards.order_by("creation_datetime")
                 ],
             "movements": [
                 {
                     "id": movement.id,
-                    "source_list": {"id": movement.source_list.id, "name": movement.source_list.name},
-                    "destination_list": {"id": movement.destination_list.id, "name": movement.destination_list.name},
+                    "source_list": self.serialize_list(movement.source_list),
+                    "destination_list": self.serialize_list(movement.destination_list),
                     "datetime": movement.datetime,
                     "member": self.serialize_member(movement.member)
                 }
@@ -252,7 +237,8 @@ class Serializer(object):
             "name": list_.name,
             "uuid": list_.uuid,
             "type": list_.type,
-            "position": list_.position
+            "position": list_.position,
+            "wip_limit": list_.wip_limit
         }
         return list_json
 

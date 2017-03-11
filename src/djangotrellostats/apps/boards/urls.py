@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/unarchive/?$', boards.unarchive, name="unarchive"),
     url(r'^(?P<board_id>\d+)/lists/?$', boards.view_lists, name="view_lists"),
     url(r'^(?P<board_id>\d+)/lists/new/?$', boards.new_list, name="new_list"),
+    url(r'^(?P<board_id>\d+)/lists/(?P<list_id>\d+)/?$', boards.edit_list, name="edit_list"),
 
     url(r'^(?P<board_id>\d+)/delete/?$', boards.delete, name="delete"),
 

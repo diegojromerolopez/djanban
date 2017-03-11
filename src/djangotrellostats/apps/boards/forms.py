@@ -93,12 +93,11 @@ class NewBoardForm(models.ModelForm):
                 self.instance.roles.add(role)
 
 
-# Deprecated: use new Full Board APP
 # New list form
 class NewListForm(models.ModelForm):
     class Meta:
         model = List
-        fields = ["name", "type"]
+        fields = ["name", "type", "wip_limit"]
 
     def save(self, commit=True):
         if commit:
@@ -121,24 +120,57 @@ class NewListForm(models.ModelForm):
                 list_.board.clean_cached_charts()
 
 
-class LabelForm(models.ModelForm):
+class EditListForm(models.ModelForm):
     class Meta:
-        model = Label
-        fields = ["name", "color"]
+        model = List
+        fields = ["name", "type", "wip_limit"]
 
     def __init__(self, *args, **kwargs):
-        super(LabelForm, self).__init__(*args, **kwargs)
+        super(EditListForm, self).__init__(*args, **kwargs)
+        current_list = self.instance
+        lists = current_list.board.lists.order_by("position")
 
-        self.fields["color"].widget.attrs["class"] = "jscolor"
+        if lists.exists():
+            self.fields["list_to_be_swapped_with"] = models.ChoiceField(
+                label="Swap this list position with",
+                choices=[(list_i.id, list_i.name) for list_i in lists],
+                required=True
+            )
+            self.fields["list_to_be_swapped_with"].initial = current_list.id
 
-    def clean_color(self):
-        try:
-            int(self.cleaned_data.get("color"), 16)
-        except ValueError:
-            raise ValidationError("This color is not an hexadecimal number")
-        return self.cleaned_data.get("color")
+    def save(self, commit=True):
+        if commit:
+            with transaction.atomic():
+                # Getting the current member (current user)
+                current_request = CrequestMiddleware.get_request()
+                current_user = current_request.user
+                if not hasattr(current_user, "member"):
+                    raise AssertionError("Only members can edit lists")
 
-# Deprecated: use new Full Board APP
+                current_member = current_user.member
+
+                board = self.instance.board
+
+                # Position of the list
+                # Should we have to swap the list with any other?
+                if self.cleaned_data.get("list_to_be_swapped_with") is not None\
+                        and self.cleaned_data.get("list_to_be_swapped_with") != self.instance.id:
+                    list_to_be_swapped_with_id = self.cleaned_data.get("list_to_be_swapped_with")
+                    list_to_be_swapped_with = board.lists.get(id=list_to_be_swapped_with_id)
+                    list_to_be_swapped_with_position = list_to_be_swapped_with.position
+                    list_to_be_swapped_with.position = self.instance.position
+                    self.instance.position = list_to_be_swapped_with_position
+                    list_to_be_swapped_with.save()
+
+                self.instance = board.edit_list(current_member, self.instance)
+
+                # Edit the list
+                super(EditListForm, self).save(commit=True)
+
+                # Clean cached charts for this lists' board
+                self.instance.board.clean_cached_charts()
+
+
 # New card
 class NewCardForm(models.ModelForm):
     class Meta:
@@ -178,6 +210,24 @@ class NewCardForm(models.ModelForm):
                 super(NewCardForm, self).save(commit=True)
                 # Clean cached charts for this board
                 board.clean_cached_charts()
+
+
+class LabelForm(models.ModelForm):
+    class Meta:
+        model = Label
+        fields = ["name", "color"]
+
+    def __init__(self, *args, **kwargs):
+        super(LabelForm, self).__init__(*args, **kwargs)
+
+        self.fields["color"].widget.attrs["class"] = "jscolor"
+
+    def clean_color(self):
+        try:
+            int(self.cleaned_data.get("color"), 16)
+        except ValueError:
+            raise ValidationError("This color is not an hexadecimal number")
+        return self.cleaned_data.get("color")
 
 
 # Week summary filter

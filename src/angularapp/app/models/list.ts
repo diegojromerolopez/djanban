@@ -7,6 +7,7 @@ export class List {
   name: string;
   type: string;
   position: number;
+  wip_limit?: number;
   cards?: Card[];
 
   public constructor(list: List){

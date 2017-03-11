@@ -564,6 +564,13 @@ class Board(models.Model):
         new_list.save()
         return new_list
 
+    @transaction.atomic
+    def edit_list(self, member, edited_list):
+        connector = RemoteBackendConnectorFactory.factory(member)
+        connector.edit_list(edited_list)
+        edited_list.save()
+        return edited_list
+
     # Delete all cached charts of this board
     def clean_cached_charts(self):
         self.cached_charts.all().update(is_expired=True)
@@ -1405,11 +1412,14 @@ class List(models.Model):
         ("done", "Done"),
         ("closed", "Closed"),
     )
-    name = models.CharField(max_length=128, verbose_name=u"Name of the board")
+    name = models.CharField(max_length=128, verbose_name=u"Name of the list")
     uuid = models.CharField(max_length=128, verbose_name=u"External id of the list", unique=True)
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="lists")
     type = models.CharField(max_length=64, choices=LIST_TYPE_CHOICES, default="ready_to_develop")
     position = models.PositiveIntegerField(verbose_name=u"Position of this list in the board", default=0)
+    wip_limit = models.PositiveIntegerField(verbose_name=u"Maximum WIP limit of this list",
+                                            help_text=u"Maximum number of cards that should be in this list",
+                                            default=None, null=True, blank=True)
 
     # Adds a new card
     @transaction.atomic
