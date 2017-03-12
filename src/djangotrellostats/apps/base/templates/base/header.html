@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load boards %}
 
 <div id="header">
     <div id="header_logo">
@@ -22,12 +23,12 @@
                 {% if user and user.is_authenticated %}
                     <li role="presentation" {% if url_name == "view_boards" %}class="active"{% endif %}>
                        <a href="{% url 'boards:view_boards' %}" title="View my boards">
-                           <span class="fa fa-tasks"></span> Projects
+                           <span class="fa fa-tasks"></span>
                        </a>
                     </li>
                     <li role="presentation" {% if url_name == "view_board_panorama" %}class="active"{% endif %}>
                        <a href="{% url 'boards:view_board_panorama' %}" title="View project summary">
-                           <span class="fa fa-line-chart"></span> Summary
+                           <span class="fa fa-line-chart"></span>
                        </a>
                     </li>
                     {% if member %}
@@ -38,12 +39,12 @@
                         </li>
                         <li role="presentation" {% if url_namespace == "dev_environment"  %}class="active"{% endif %}>
                             <a href="{% url 'dev_environment:index' %}" title="View software development environment">
-                                <span class="fa fa-building-o"></span> Dev. environment
+                                <span class="fa fa-building-o"></span> Env.
                             </a>
                         </li>
                         <li role="presentation" {% if url_namespace == "niko_niko_calendar" %}class="active"{% endif %}>
                             <a href="{% url 'niko_niko_calendar:view_calendar' %}" title="View Niko-niko calendar">
-                                <span class="fa fa-calendar"></span> Niko-niko calendar
+                                <span class="fa fa-calendar"></span> Niko-niko cal.
                             </a>
                         </li>
                     {% endif %}
@@ -74,25 +75,57 @@
                     {% with member=request.user.member %}
                         {% if member.is_developer %}
                             <li role="presentation">
-                                {% with num_cards_in_development=member.get_current_development_cards|length %}
-                                    <a href="{% url 'index' %}" title="You have {{num_cards_in_development}} cards in development. See them in index">
-                                        <span class="fa fa-clone"></span> {{num_cards_in_development}}
-                                    </a>
-                                {% endwith %}
+
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+                                   role="button" aria-haspopup="true" aria-expanded="false" title="Last 10 comments of your boards">
+                                   Last comments <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    {% last_comments 10 as last_comments %}
+                                    {% for last_comment in last_comments %}
+                                        {% with card=last_comment.card %}
+                                            {% with board=card.board %}
+                                                <li class="last_comment">
+                                                    <div class="panel panel-info">
+                                                      <div class="panel-heading">
+                                                          <div class="board_name">
+                                                                <img class="small-identicon" src="{% url 'boards:view_identicon' board.id %}" alt="{{board.name}}" />
+                                                                <a href="{% url 'boards:view_board' board.id %}">{{board.name}}</a>
+                                                          </div>
+                                                          <div class="action">
+                                                                <img src="{{last_comment.author.gravatar_url}}" alt="last_comment.author.initials"/> commented in
+                                                                <a href="{% url 'boards:view_card' board.id card.id %}">{{card.name}}</a>
+                                                          </div>
+                                                      </div>
+                                                      <div class="panel-body">
+                                                         <div class="comment_content">{{last_comment.content}}</div>
+                                                          {# <a href="{% url 'boards:view_card' board.id card.id %}#comment-{{last_comment.id}}">See comment in context</a>#}
+                                                      </div>
+                                                    </div>
+
+                                                </li>
+                                            {% endwith %}
+                                        {% endwith %}
+                                    {% endfor %}
+                                </ul>
                             </li>
                             <li role="presentation">
                                 {% with last_cards_in_development=member.get_last_development_cards %}
                                     {% if last_cards_in_development|length > 0 %}
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Last cards worked on">
-                                            Last cards <span class="caret"></span>
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+                                           role="button" aria-haspopup="true" aria-expanded="false" title="Last cards worked on">
+                                            Last cards I worked on ({{last_cards_in_development|length}}) <span class="caret"></span>
                                         </a>
                                         <ul class="dropdown-menu dropdown-menu-right">
                                             {% for last_card_in_development in last_cards_in_development %}
-                                                <li>
-                                                    <a href="{{last_card_in_development.short_url}}" title="{{last_card_in_development.name}}">
-                                                        {{last_card_in_development.board.name}} - {{last_card_in_development.name|truncatechars:30}} is the last task worked on
-                                                    </a>
-                                                </li>
+                                                {% with board=last_card_in_development.board %}
+                                                    <li>
+                                                        <a href="{% url 'boards:view_card' board.id last_card_in_development.id %}" title="{{last_card_in_development.name}}">
+                                                            <img src="{% url 'boards:view_identicon' board.id %}" alt="{{board.name}}" />
+                                                            {{board.name}} - {{last_card_in_development.name|truncatechars:30}} is the last task worked on
+                                                        </a>
+                                                    </li>
+                                                {% endwith %}
                                             {% endfor %}
                                         </ul>
                                     {% endif %}

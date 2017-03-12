@@ -163,6 +163,7 @@
                                 <div *ngFor="let comment of card.comments">
                                     <div class="card-comments-comment panel panel-info">
                                         <div class="panel-heading">
+                                            <!--<span id="comment-{{comment.id}}" class="fa fa-link"></span>-->
                                             Comment made by {{comment.author.initials}}
                                             (
                                                 <span title="Comment made by {{comment.creation_datetime | localize_datetime}}">{{comment.creation_datetime | localize_datetime}}</span>
