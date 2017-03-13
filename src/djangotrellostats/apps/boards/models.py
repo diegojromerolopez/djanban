@@ -1561,12 +1561,16 @@ class List(models.Model):
     @property
     def avg_card_time_in_list(self):
         card_times = self.active_cards_times_in_list
-        return numpy.average(card_times, axis=0)
+        if len(card_times) > 0:
+            return numpy.average(card_times, axis=0)
+        return 0
 
     @property
     def std_dev_card_time_in_list(self):
         card_times = self.active_cards_times_in_list
-        return numpy.mean(card_times, axis=0)
+        if len(card_times) > 0:
+            return numpy.mean(card_times, axis=0)
+        return 0
 
 
 # Relationship between card and its members

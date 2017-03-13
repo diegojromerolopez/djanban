@@ -35,9 +35,13 @@
                     {% endfor %}
                 </tbody>
             </table>
-            {% if board.is_fetched %}
+            {% if board.is_fetched and board.is_ready %}
                 <h2>List stats</h2>
-                {% include "boards/lists/components/charts.html" %}
+                {% if board.active_cards.count > 0 %}
+                    {% include "boards/lists/components/charts.html" %}
+                {% else %}
+                    This board has no cards yet.
+                {% endif %}
             {% endif %}
         {% endif %}
     </div>

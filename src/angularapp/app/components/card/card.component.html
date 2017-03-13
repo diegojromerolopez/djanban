@@ -50,7 +50,14 @@
                     <!-- Show/Change Spent/Estimtated time -->
                     <div class="card-spent_estimated_time card-section">
                         <h2>Spent/Estimated time</h2>
-                        <div>{{card.spent_time}}/{{card.estimated_time}} hours</div>
+                        <div>
+                            <span *ngIf="!card.spent_time">0</span>
+                            <span *ngIf="card.spent_time">{{card.spent_time}}</span>
+                            /
+                            <span *ngIf="!card.estimated_time">0</span>
+                            <span *ngIf="card.estimated_time">{{card.estimated_time}}</span>
+                            hours
+                        </div>
                         <form (ngSubmit)="onSubmitSETimeForm(SETimeForm.value)" #SETimeForm="ngForm">
                             <select name="date" ngModel>
                                 <option value="now" selected="selected">Now</option>
