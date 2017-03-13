@@ -23,6 +23,7 @@ strategic decisions like:
 Run this commands in your terminal:
 
 ```sh
+sudo apt-get update
 sudo apt-get -y install git python python-dev virtualenv build-essential\ 
     libssl-dev libffi-dev libmysqlclient-dev libxml2-dev libxslt1-dev
 git clone https://github.com/diegojromerolopez/django-trello-stats

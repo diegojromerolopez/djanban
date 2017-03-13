@@ -1,6 +1,7 @@
 #! /bin/bash
 
 # Make sure we have the needed packages installed
+sudo apt-get update
 sudo apt-get -y install git python python-dev virtualenv build-essential libssl-dev libffi-dev libmysqlclient-dev libxml2-dev libxslt1-dev
 
 if [ ! -d ./src/venv ]; then
