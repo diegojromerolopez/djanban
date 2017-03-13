@@ -14,7 +14,7 @@
     </div>
     {% if user %}
         {% with url_name=request.resolver_match.url_name url_namespace=request.resolver_match.namespace %}
-            <ul class="nav nav-tabs">
+            <ul class="nav nav-tabs ">
                 <li role="presentation" {% if url_name == "index" and url_namespace == "" %}class="active"{% endif %}>
                     <a href="{% url 'index' %}" title="Go to index">
                         <span class="fa fa-home"></span>
@@ -80,7 +80,7 @@
                                    role="button" aria-haspopup="true" aria-expanded="false" title="Last 10 comments of your boards">
                                    Last comments <span class="caret"></span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-right">
+                                <ul class="dropdown-menu dropdown-menu-right last_comments">
                                     {% last_comments 10 as last_comments %}
                                     {% for last_comment in last_comments %}
                                         {% with card=last_comment.card %}
@@ -116,7 +116,7 @@
                                            role="button" aria-haspopup="true" aria-expanded="false" title="Last cards worked on">
                                             Last cards I worked on ({{last_cards_in_development|length}}) <span class="caret"></span>
                                         </a>
-                                        <ul class="dropdown-menu dropdown-menu-right">
+                                        <ul class="dropdown-menu dropdown-menu-right last_cards">
                                             {% for last_card_in_development in last_cards_in_development %}
                                                 {% with board=last_card_in_development.board %}
                                                     <li>

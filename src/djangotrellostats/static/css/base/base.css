@@ -14,12 +14,18 @@ a {
     height: 133px;
 }
 
-.last_comment .panel-info {
+#header ul.last_cards,
+#header ul.last_comments {
+    max-height: 450px;
+    overflow: scroll;
+}
+
+#header .last_comments .last_comment .panel-info {
     margin: 10px;
     white-space: nowrap;
 }
 
-.last_comment .panel-info .board_name {
+#header .last_comments .last_comment .panel-info .board_name {
     margin-bottom: 10px;
 }
 
