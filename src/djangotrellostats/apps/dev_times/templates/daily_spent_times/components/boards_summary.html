@@ -1,0 +1,36 @@
+{% load template_extensions %}
+
+<div class="panel panel-default">
+    <div class="panel-heading">Summary for all boards</div>
+    <div class="panel-body">
+        <table class="table table-striped table-responsive">
+            <thead>
+                <tr>
+                    <th>Board</th>
+                    <th>Spent time (h.)</th>
+                    <th>Adj. spent time (h.)</th>
+                    <th>Developed value (¤)</th>
+                    <th>Adj. Dev. value (¤)</th>
+                </tr>
+            </thead>
+            {% for board in boards %}
+                {% with board_spent_time=board|call:'get_spent_time'|arg:date_interval|end_call %}
+                    {% if board_spent_time > 0 %}
+                        <tr>
+                            <th>
+                                <a href="{% url 'boards:view' board.id %}" title="View board {{board.name}}">
+                                    <span><img src="{% url 'boards:view_identicon' board.id %}" alt="Identicon of {{board.name}}"/></span>
+                                    <span>{{board.name}}</span>
+                                </a>
+                            </th>
+                            <td>{{board_spent_time|floatformat:-2}}</td>
+                            <td>{{board|call:'get_adjusted_spent_time'|arg:date_interval|end_call|floatformat:-2}}</td>
+                            <td>{{board|call:'get_developed_value'|arg:date_interval|end_call|floatformat:-2}}</td>
+                            <td>{{board|call:'get_adjusted_developed_value'|arg:date_interval|end_call|floatformat:-2}}</td>
+                        </tr>
+                    {% endif %}
+                {% endwith %}
+            {% endfor %}
+        </table>
+    </div>
+</div>

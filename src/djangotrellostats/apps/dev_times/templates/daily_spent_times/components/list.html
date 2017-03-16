@@ -10,6 +10,11 @@
         </div>
     </div>
 
+    {# Summary in the case of all boards #}
+    {% if board == None %}
+        {% async_include "daily_spent_times/components/boards_summary.html" boards=boards date_interval=date_interval %}
+    {% endif %}
+
     {# Times per month #}
     <div class="panel">
         <p>

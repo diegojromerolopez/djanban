@@ -417,7 +417,7 @@ class Board(models.Model):
     # Returns the spent time.
     # If date parameter is present, computes the spent time on a given date for this board
     # Otherwise, computes the total spent time for this board
-    def get_developed_value(self, date=None):
+    def get_developed_value(self, date=None, member=None):
         daily_spent_times_filter = {}
         if date:
             if type(date) == tuple or type(date) == list:
@@ -426,13 +426,16 @@ class Board(models.Model):
             else:
                 daily_spent_times_filter["date"] = date
 
+        if member:
+            daily_spent_times_filter["member"] = member
+
         developed_value = self.daily_spent_times.filter(**daily_spent_times_filter).aggregate(sum=Sum("rate_amount"))["sum"]
         if developed_value is None:
             return 0
         return developed_value
 
     # Returns the adjusted developed value according to the spent time factor defined in each member
-    def get_adjusted_developed_value(self, date=None):
+    def get_adjusted_developed_value(self, date=None, member=None):
         daily_spent_times_filter = {}
         if date:
             if type(date) == tuple or type(date) == list:
@@ -442,6 +445,9 @@ class Board(models.Model):
                 daily_spent_times_filter["date"] = date
 
         adjusted_developed_value = 0
+        if member:
+            daily_spent_times_filter["member"] = member
+
         daily_spent_times = self.daily_spent_times.filter(**daily_spent_times_filter)
         member_dict = {}
         for daily_spent_time in daily_spent_times:

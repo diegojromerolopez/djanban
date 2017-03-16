@@ -6,6 +6,7 @@ import calendar
 import datetime
 import re
 
+from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
@@ -80,6 +81,7 @@ def _get_daily_spent_times_replacements(request):
         try:
             start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d")
             replacements["start_date"] = start_date
+            replacements["date_interval"] = [start_date, timezone.now().date()]
         except ValueError:
             start_date = None
 
@@ -89,6 +91,7 @@ def _get_daily_spent_times_replacements(request):
         try:
             end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d")
             replacements["end_date"] = end_date
+            replacements["date_interval"][1] = end_date
         except ValueError:
             end_date = None
 
@@ -213,14 +216,13 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
 
             month = {
                 "daily_spent_times": daily_spent_times_in_month_i,
-                "values":{
+                "values": {
                     "first_day": datetime.date(year, month_index, 1).isoformat(),
                     "last_day": datetime.date(year, month_index, number_of_days_in_month).isoformat(),
                     "name": month_name,
                     "number": month_index,
                     "year": year,
                     "i": month_index,
-
                     "rate_amount_sum": float(rate_amount_sum) if rate_amount_sum else None,
                     "adjusted_amount_sum": float(adjusted_amount_sum) if adjusted_amount_sum else None,
                     "spent_time_sum": float(spent_time_sum) if spent_time_sum else None,
@@ -232,9 +234,12 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
             months.append(month)
             date_i = (date_i + relativedelta(months=1))
 
-    return {
-        "all": daily_spent_times, "per_month": months, "start_date": start_date, "end_date": end_date, "board": board
+    replacements = {
+        "all": daily_spent_times, "per_month": months,
+        "start_date": start_date, "end_date": end_date,
+        "board": board
     }
+    return replacements
 
 
 # Computes the adjusted amount according to the factor each member has
