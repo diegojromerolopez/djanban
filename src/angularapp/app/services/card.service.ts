@@ -26,7 +26,7 @@ import 'rxjs/add/operator/toPromise';
 export class CardService extends DjangoTrelloStatsService {
 
 
-  private ADD_CARD_URL = '/api/board/{board_id}/card';
+  private ADD_CARD_URL = "/api/board/{board_id}/card";
   private ADD_SE_URL = "/api/board/{board_id}/card/{card_id}/time";
   private ADD_COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment";
   private COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
@@ -68,6 +68,15 @@ export class CardService extends DjangoTrelloStatsService {
     let add_se_url = this.prepareUrl(this.ADD_SE_URL, card);
     let post_body = {date: date, spent_time: spent_time, estimated_time: estimated_time, description: description};
     return this.http.post(add_se_url, post_body)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }
+
+  changeCardValue(card: Card, value?: number){
+    let change_value_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+    let put_body = {value: value};
+    return this.http.put(change_value_url, put_body)
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);

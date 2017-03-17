@@ -24,7 +24,7 @@ var CardService = (function (_super) {
     __extends(CardService, _super);
     function CardService(http) {
         var _this = _super.call(this, http) || this;
-        _this.ADD_CARD_URL = '/api/board/{board_id}/card';
+        _this.ADD_CARD_URL = "/api/board/{board_id}/card";
         _this.ADD_SE_URL = "/api/board/{board_id}/card/{card_id}/time";
         _this.ADD_COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment";
         _this.COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
@@ -62,6 +62,14 @@ var CardService = (function (_super) {
         var add_se_url = this.prepareUrl(this.ADD_SE_URL, card);
         var post_body = { date: date, spent_time: spent_time, estimated_time: estimated_time, description: description };
         return this.http.post(add_se_url, post_body)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    CardService.prototype.changeCardValue = function (card, value) {
+        var change_value_url = this.prepareUrl(this.CHANGE_CARD_URL, card);
+        var put_body = { value: value };
+        return this.http.put(change_value_url, put_body)
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);

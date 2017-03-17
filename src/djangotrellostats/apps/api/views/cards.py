@@ -139,6 +139,12 @@ def change(request, board_id, card_id):
     elif "due_datetime" in put_params and put_params.get("due_datetime") is None:
         card.change_attribute(member, attribute="due_datetime", value=None)
 
+    elif "value" in put_params:
+        card_value = put_params.get("value")
+        if card_value == "":
+            card_value = None
+        card.change_value(member=member, value=card_value)
+
     else:
         return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
 

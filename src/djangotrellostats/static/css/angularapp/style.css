@@ -440,6 +440,15 @@ card.closed-card-showed,
 
 /* Card view */
 
+/* Value of the card */
+input#value {
+    width: 200px;
+}
+
+button.change_value {
+
+}
+
 .card-view .card-section{
     margin-bottom: 20px;
     margin-top: 20px;

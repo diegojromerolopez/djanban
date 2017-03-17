@@ -2,11 +2,12 @@
 
 from __future__ import unicode_literals
 
+from django.db.models import Q
 from django.urls import reverse
 from django.conf import settings
 from crequest.middleware import CrequestMiddleware
 
-from djangotrellostats.apps.boards.models import CardMemberRelationship, CardLabelRelationship
+from djangotrellostats.apps.boards.models import CardMemberRelationship, CardLabelRelationship, Card
 from djangotrellostats.apps.reports.models import CardReview
 
 
@@ -53,7 +54,7 @@ class Serializer(object):
         self._init_member_cache()
         self._init_label_cache()
 
-        cards = self.board.cards.all().\
+        cards = self.board.cards.exclude(Q(list__type="closed")|Q(list__type="ignored")).\
             order_by("list", "position")
 
         cards_by_list = {list_.id: [] for list_ in self.board.active_lists.order_by("position")}
@@ -131,6 +132,7 @@ class Serializer(object):
             "url": card.url,
             "short_url": card.short_url,
             "position": card.position,
+            "value": card.value,
             "number_of_comments": card.number_of_comments,
             "comments": comments_json,
             "is_closed": card.is_closed,
@@ -209,6 +211,11 @@ class Serializer(object):
         except CardReview.DoesNotExist:
             review = None
 
+        try:
+            valued_card = comment.valued_card
+        except Card.DoesNotExist:
+            valued_card = None
+
         serialized_author = self.serialized_members_by_id[comment.author_id]
         comment_json = {
             "id": comment.id,
@@ -224,8 +231,17 @@ class Serializer(object):
                 "description": comment.blocking_card.description,
                 "url": reverse("boards:view_card", args=(self.board.id, comment.blocking_card.id,)),
                 "short_url": comment.blocking_card.short_url,
-                "position": comment.blocking_card.position,
+                "position": comment.blocking_card.position
             } if comment.blocking_card else None,
+            "valued_card": {
+                "id": valued_card.id,
+                "uuid": valued_card.uuid,
+                "name": valued_card.name,
+                "description": valued_card.description,
+                "url": reverse("boards:view_card", args=(self.board.id, valued_card.id,)),
+                "short_url": valued_card.short_url,
+                "position": valued_card.position
+            } if valued_card else None,
             "review": self.serialize_card_review(review) if review else None,
             "requirement": self.serialize_requirement(comment.requirement) if comment.requirement else None
         }

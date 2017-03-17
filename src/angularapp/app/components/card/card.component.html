@@ -47,9 +47,31 @@
                 
                 <div class="col-md-8">
 
-                    <!-- Show/Change Spent/Estimtated time -->
+                    <!-- Show/Change value -->
+                    <div class="card-value card-section">
+                        <h2>
+                            <span class="fa fa-diamond"></span>
+                            <span class="card-value current_value" *ngIf="card.value == null">Not valuated</span>
+                            <span class="card-value current_value" *ngIf="card.value != null">Value is {{card.value}}</span>
+                        </h2>
+                        <form (ngSubmit)="onSubmitValueForm(ValueForm.value.value)" #ValueForm="ngForm">
+                            <input id="value" type="number" name="value" ngModel placeholder="Introduce the new value"/>
+                            <button type="submit" class="btn btn-success change_value" title="Edit value for {{card.name}}"
+                                    (click)="ValueForm.ngSubmit.emit()"
+                                    (click)="changeValueStatus = 'waiting'"
+                                    [disabled]="!ValueForm.valid || changeValueStatus == 'waiting' || card.value == ValueForm.value.value">
+                                <span *ngIf="changeValueStatus == 'waiting'" class="fa fa-spinner fa-spin"></span>
+                                <span class="fa fa-diamond-o"></span> Change value
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Show/Change Spent/Estimated time -->
                     <div class="card-spent_estimated_time card-section">
-                        <h2>Spent/Estimated time</h2>
+                        <h2>
+                            <span class="fa fa-clock-o"></span>
+                            Spent/Estimated time
+                        </h2>
                         <div>
                             <span *ngIf="!card.spent_time">0</span>
                             <span *ngIf="card.spent_time">{{card.spent_time}}</span>
@@ -171,14 +193,21 @@
                                     <div class="card-comments-comment panel panel-info">
                                         <div class="panel-heading">
                                             <!--<span id="comment-{{comment.id}}" class="fa fa-link"></span>-->
-                                            Comment made by {{comment.author.initials}}
-                                            (
-                                                <span title="Comment made by {{comment.creation_datetime | localize_datetime}}">{{comment.creation_datetime | localize_datetime}}</span>
-                                                <span *ngIf="comment.last_edition_datetime" title="Comment edited {{comment.creation_datetime | localize_datetime}}">{{comment.last_edited_datetime | localize_datetime}}</span>
-                                                )
+                                            <img class="avatar cursor-help" src="{{comment.author.gravatar_url}}"
+                                                 alt="Gravatar image of {{comment.author.external_username}}"
+                                                 title="Comment made by {{comment.author.initials}}"/>
+                                            
+                                            <span title="Comment made by {{comment.creation_datetime | localize_datetime}}">
+                                                wrote this comment at <strong>{{comment.creation_datetime | localize_datetime}}</strong>
+                                            </span>
+                                            <span *ngIf="comment.last_edition_datetime"
+                                                 title="Comment edited {{comment.last_edition_datetime | localize_datetime}}">
+                                                 and updated it at <strong>{{comment.last_edition_datetime | localize_datetime}}</strong>
+                                            </span>
+                                                
                                         </div>
 
-                                        <div *ngIf="editCommentStatus[comment.id] == 'standby' || comment.review || comment.blocking_card" class="panel-body">
+                                        <div *ngIf="editCommentStatus[comment.id] == 'standby' || comment.review || comment.blocking_card || comment.valued_card" class="panel-body">
                                             {{comment.content}}
                                         </div>
                                         
@@ -186,7 +215,7 @@
                                             I don't want have to worry about updating the blocking cards.
                                             If you want to edit/delete a blocking card comment, use the blocking card menu
                                         -->
-                                        <div *ngIf="!comment.blocking_card && !comment.review && !comment.requirement">
+                                        <div *ngIf="!comment.blocking_card && !comment.review && !comment.requirement && !comment.valued_card">
                                             <!-- Comment edition -->
                                             <div class="comment-edit" *ngIf="deleteCommentStatus[comment.id] == 'standby'" [ngClass]="{'showed': editCommentStatus[comment.id] == 'showed' }">
                                                 <span *ngIf="editCommentStatus[comment.id] == 'standby'"
@@ -269,7 +298,10 @@
 
                     <!-- Movements of this card -->
                     <div class="card-movements card-section">
-                        <h2>Movements ({{card.movements.length}})</h2>
+                        <h2>
+                            <span class="fa fa-arrows"></span> 
+                            Movements ({{card.movements.length}})
+                        </h2>
                         <div *ngIf="card.movements.length > 0">
                             <div *ngFor="let movement of card.movements">
                                 <div class="card-movements-movement panel panel-info">
@@ -544,7 +576,11 @@
 
                     <!-- Reviews -->
                     <div class="card-reviews card-section">
-                        <h2>Reviews ({{card.reviews.length}}) <span *ngIf="card.reviews.length > 0" class="fa fa-thumbs-up"></span></h2>
+                        <h2>
+                            Reviews ({{card.reviews.length}})
+                            <span *ngIf="card.reviews.length > 0" class="fa fa-thumbs-up"></span>
+                            <span *ngIf="card.reviews.length == 0" class="fa fa-thumbs-down"></span>
+                        </h2>
                         <!-- New review -->
                         <button class="btn btn-primary"
                                 *ngIf="newReviewStatus=='hidden'"

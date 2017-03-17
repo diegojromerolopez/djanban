@@ -636,6 +636,9 @@ class Card(models.Model):
 
     COMMENT_REVIEWED_BY_MEMBERS_FINDALL_REGEX = r"@[\w\d]+"
 
+    COMMENT_VALUATED_CARD_REGEX = r"^task\s+valued\s+on\s+(?P<value>\d+)$"
+    COMMENT_VALUATED_CARD_PATTERN = "task valued on {value}"
+
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
     list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")
 
@@ -648,6 +651,7 @@ class Card(models.Model):
     position = models.PositiveIntegerField(verbose_name=u"Position in the list")
     number_of_comments = models.PositiveIntegerField(verbose_name=u"Number of comments of this card", default=0)
     number_of_reviews = models.PositiveIntegerField(verbose_name=u"Number of reviews of this card", default=0)
+    value = models.PositiveIntegerField(verbose_name=u"Value of this card for the client", blank=True, default=None, null=True)
 
     due_datetime = models.DateTimeField(verbose_name=u"Deadline", blank=True, null=True, default=None)
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
@@ -667,6 +671,8 @@ class Card(models.Model):
     lead_time = models.DecimalField(verbose_name=u"Cycle time", decimal_places=4, max_digits=12, default=None,
                                     null=True)
 
+    valuation_comment = models.OneToOneField("boards.CardComment", related_name="valued_card",
+                                             blank=True, default=None, null=True)
     labels = models.ManyToManyField("boards.Label", related_name="cards")
     members = models.ManyToManyField("members.Member", related_name="cards")
     blocking_cards = models.ManyToManyField("boards.card", related_name="blocked_cards")
@@ -925,6 +931,9 @@ class Card(models.Model):
                 self.due_datetime = None
                 self.remove_due_datetime(self, member)
 
+        elif attribute == "value":
+            self.change_value(member, value)
+
         else:
             raise AssertionError("Attribute {0} change not implemented choose one of name, description, is_closed or due_datetime")
 
@@ -1054,6 +1063,30 @@ class Card(models.Model):
         comment = self.comments.get(requirement=requirement)
         self.delete_comment(member, comment)
 
+    # Changing the value of this card
+    @transaction.atomic
+    def change_value(self, member, value):
+
+        try:
+            valuation_comment = self.valuation_comment
+        except CardComment.DoesNotExist:
+            valuation_comment = None
+
+        if value is not None:
+            comment_content = Card.COMMENT_VALUATED_CARD_PATTERN.format(value=value)
+            if valuation_comment is not None:
+                # Edition of comment with the valuation of this card
+                self.edit_comment(member, comment=valuation_comment, new_content=comment_content)
+                self.value = value
+            else:
+                # Creation of comment with the valuation of this card
+                self.valuation_comment = self.add_comment(member, comment_content)
+            self.save()
+        else:
+            if valuation_comment is not None:
+                self.delete_comment(member, comment=valuation_comment)
+                self.save()
+
     # Add a new comment to this card
     @transaction.atomic
     def add_comment(self, member, content):
@@ -1083,6 +1116,7 @@ class Card(models.Model):
             raise AssertionError(u"This comment does not belong to {0}".format(member.external_username))
 
         comment.content = new_content
+        comment.last_edition_datetime = timezone.now()
 
         connector = RemoteBackendConnectorFactory.factory(member)
         comment = connector.edit_comment_of_card(card=self, comment=comment)
@@ -1232,18 +1266,27 @@ class CardComment(models.Model):
 
         return None
 
+    # Return the card value associated to this comment extracted from its content.
+    @property
+    def card_value_from_content(self):
+        matches = re.match(Card.COMMENT_VALUATED_CARD_REGEX, self.content, re.IGNORECASE)
+        if matches:
+            value = matches.group("value")
+            return value
+        return None
+
     def delete(self, *args, **kwargs):
         super(CardComment, self).delete(*args, **kwargs)
 
         # If the comment is a spent/estimated measure it should be updated
-        spent_estimated_time = self.spent_estimated_time
+        spent_estimated_time = self.get_spent_estimated_time_from_content()
         if spent_estimated_time:
             self.card.daily_spent_times.filter(spent_time=spent_estimated_time["spent_time"],
                                           estimated_time=spent_estimated_time["estimated_time"]).delete()
             self.card.update_spent_estimated_time()
 
         # If the comment is a blocking card mention, and is going to be deleted, delete it
-        blocking_card = self.blocking_card
+        blocking_card = self.blocking_card_from_content
         if blocking_card:
             self.card.blocking_cards.remove(blocking_card)
 
@@ -1256,6 +1299,17 @@ class CardComment(models.Model):
         review = self.review
         if review:
             self.card.reviews.filter(id=review.id).delete()
+
+        # If the comment is a valuation of the card, and is going to be deleted, assign
+        # None the value of the card
+        try:
+            valued_card = self.valued_card
+            if valued_card:
+                valued_card.value = None
+                valued_card.valuation_comment = None
+                valued_card.save()
+        except Card.DoesNotExist:
+            pass
 
     # Card comment saving
     def save(self, *args, **kwargs):
@@ -1277,8 +1331,15 @@ class CardComment(models.Model):
             card.update_spent_estimated_time()
 
         # If this comment is a review, update the card reviews of the parent card
-        if hasattr(self, "review") and self.review:
+        elif hasattr(self, "review") and self.review:
             card.update_number_of_card_reviews()
+
+        # If the value given by the comment is different than the current value of the card, update it
+        elif hasattr(self, "card_value"):
+            card_value = getattr(self, "card_value")
+            card.value = card_value
+            card.valuation_comment = self
+            card.save()
 
     # Save an old comment
     def _save_old(self, card, earlier_card_comment):
@@ -1330,8 +1391,13 @@ class CardComment(models.Model):
                 CardReview.update_or_create(self, review_from_comment["reviewers"], review_description)
 
             # If there is not a review, check if there was an earlier review and in that case, delete it
-            elif self.card.reviews.filter(id=self.review.id).exists():
+            elif self.review and self.card.reviews.filter(id=self.review.id).exists():
                 self.card.reviews.filter(id=self.review.id).delete()
+
+            # Is it a valued card comment?
+            card_value_from_comment = self.card_value_from_content
+            if card_value_from_comment is not None:
+                self.card_value = card_value_from_comment
 
     # Save a new comment
     def _save_new(self, card):
@@ -1363,6 +1429,11 @@ class CardComment(models.Model):
                 description = ""
             review = CardReview.create(self, reviewer_members, description)
             self.review = review
+
+        # Is it a valued card comment?
+        card_value_from_comment = self.card_value_from_content
+        if card_value_from_comment is not None:
+            self.card_value = card_value_from_comment
 
 
 # Label of the task board

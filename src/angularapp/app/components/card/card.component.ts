@@ -57,6 +57,9 @@ export class CardComponent implements OnInit  {
     private removeDueDatetimeStatus: string;
     private changeDueDatetimeStatus: string;
     
+    // Status of the change value form
+    private changeValueStatus: string;
+
     private changeSETimeStatus: string;
     private changeDescriptionStatus: string;
     private newCommentStatus: string;
@@ -346,6 +349,22 @@ export class CardComponent implements OnInit  {
         }).catch(error_message => {
             this.notificationsService.error("Error", `Couldn't submit a spent/estimated time to ${this.card.name}. ${error_message}`);
             this.changeSETimeStatus = "standby";
+        });
+    }
+
+    /** Called when the card change value form is submitted */
+    onSubmitValueForm(value?: number) {
+        this.cardService.changeCardValue(this.card, value).then(updated_card => {
+            this.card = updated_card;
+            this.changeValueStatus = "standby";
+            if(updated_card.value == null){
+                this.notificationsService.success("Value deleted", `Value of ${this.card.name} has been deleted`);   
+            }else{
+                this.notificationsService.success("Value changed to", `${value}`);
+            }
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't change the value of ${this.card.name}. ${error_message}`);
+            this.changeValueStatus = "standby";
         });
     }
     

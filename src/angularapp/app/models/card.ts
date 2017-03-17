@@ -18,6 +18,7 @@ export class Card {
   local_url: string;
   url: string;
   position: number;
+  value?: number;
   short_url: string;
   is_closed: boolean;
   number_of_comments?: number;

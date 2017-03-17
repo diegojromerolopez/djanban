@@ -12,6 +12,7 @@ export class CardComment {
   last_edition_datetime?: Date;
   author: Member;
   blocking_card?: Card;
+  valued_card?: Card;
   review?: CardReview;
   requirement?: Requirement;
 }

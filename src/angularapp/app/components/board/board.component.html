@@ -265,6 +265,10 @@
                             </span>
                             
                             <span class="card_heading-properties">
+                                <span class="card_value" *ngIf="card.value != null">
+                                    <span class="fa fa-diamond"></span> 
+                                    <span class="card_value-value">{{card.value}}</span> 
+                                </span>
                                 <span class="card_heading-se_time" *ngIf="card.spent_time || card.estimated_time">
                                     <span class="fa fa-clock-o"></span> 
                                     <span class="card_heading-spent_time" title="The team has spent {{card.spent_time | number:'1.1-2'}} hours in this task">

@@ -279,6 +279,23 @@ var CardComponent = (function () {
             _this.changeSETimeStatus = "standby";
         });
     };
+    /** Called when the card change value form is submitted */
+    CardComponent.prototype.onSubmitValueForm = function (value) {
+        var _this = this;
+        this.cardService.changeCardValue(this.card, value).then(function (updated_card) {
+            _this.card = updated_card;
+            _this.changeValueStatus = "standby";
+            if (updated_card.value == null) {
+                _this.notificationsService.success("Value deleted", "Value of " + _this.card.name + " has been deleted");
+            }
+            else {
+                _this.notificationsService.success("Value changed to", "" + value);
+            }
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't change the value of " + _this.card.name + ". " + error_message);
+            _this.changeValueStatus = "standby";
+        });
+    };
     /** Called when the change list  form is submitted */
     CardComponent.prototype.onSubmitChangeList = function (destination_list_id) {
         var _this = this;
