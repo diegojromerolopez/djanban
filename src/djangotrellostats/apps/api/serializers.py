@@ -101,6 +101,7 @@ class Serializer(object):
             "url": card.url,
             "short_url": card.short_url,
             "position": card.position,
+            "value": card.value,
             "due_datetime": card.due_datetime,
             "is_closed": card.is_closed,
             "spent_time": card.spent_time,

@@ -43,6 +43,7 @@
                 <table class="table">
                     <tr>
                         <td>Name</td>
+                        <td>Value</td>
                         <td>Closed?</td>
                         <td>List</td>
                         <td>Comments</td>
@@ -61,6 +62,7 @@
                                     {{card.name}}
                                 </a>
                             </td>
+                            <td>{% if card.value != None %}{{card.value}}{% else %}Not set{% endif %}</td>
                             <td>{% if card.is_closed %}Yes{% else %}No{% endif %}</td>
                             <td>{{card.list.name}}</td>
                             <td>{{card.number_of_comments}}</td>
