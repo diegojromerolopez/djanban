@@ -267,7 +267,7 @@
                             <span class="card_heading-properties">
                                 <span class="card_value" *ngIf="card.value != null">
                                     <span class="fa fa-diamond"></span> 
-                                    <span class="card_value-value">{{card.value}}</span> 
+                                    <span class="card_value-value cursor-help" title="This card has been valued in {{card.value}}">{{card.value}}</span> 
                                 </span>
                                 <span class="card_heading-se_time" *ngIf="card.spent_time || card.estimated_time">
                                     <span class="fa fa-clock-o"></span> 
