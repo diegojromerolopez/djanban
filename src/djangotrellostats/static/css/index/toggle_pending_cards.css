@@ -53,3 +53,9 @@
     height: 100vh;
     overflow: scroll;
 }
+
+/* Identicons in pending prioritized cards must be smaller 20px */
+.pending_cards_by_label img.board-identicon {
+    height: 20px;
+    width: 20px;
+}

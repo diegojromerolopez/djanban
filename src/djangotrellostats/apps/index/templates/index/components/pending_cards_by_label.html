@@ -4,13 +4,14 @@
 <div class="pending_cards_by_label">
     {% if pending_red_cards|length > 0 %}
         <div>
-            <h3 class="red_cards_title">High priority {{pending_red_cards|length}}</h3>
+            <h3 class="red_cards_title">High priority ({{pending_red_cards|length}})</h3>
             <div class="red_cards">
                 {% for red_card in pending_red_cards %}
                     <div class="panel panel-danger red_card">
                           <div class="panel-heading">
                             <h4 class="panel-title">
                                 <a href="{% url 'boards:view_card' red_card.board_id red_card.id %}" title="View card">
+                                    <img class="board-identicon" src="{% url 'boards:view_identicon' red_card.board_id %}" alt="Identicon of board of {{red_card.name}}" />
                                     {{red_card.name}}
                                 </a>
                                 <a href="{{red_card.url}}" title="View card in trello">
@@ -36,6 +37,7 @@
                           <div class="panel-heading">
                             <h4 class="panel-title">
                                 <a href="{% url 'boards:view_card' orange_card.board_id orange_card.id %}" title="View card">
+                                    <img class="board-identicon" src="{% url 'boards:view_identicon' orange_card.board_id %}" alt="Identicon of board of {{orange_card.name}}" />
                                     {{orange_card.name}}
                                 </a>
                                 <a href="{{orange_card.url}}" title="View card in trello">
@@ -61,6 +63,7 @@
                           <div class="panel-heading">
                             <h4 class="panel-title">
                                 <a href="{% url 'boards:view_card' yellow_card.board_id yellow_card.id %}" title="View card">
+                                    <img class="board-identicon" src="{% url 'boards:view_identicon' yellow_card.board_id %}" alt="Identicon of board of {{yellow_card.name}}" />
                                     {{yellow_card.name}}
                                 </a>
                                 <a href="{{yellow_card.url}}" title="View card in trello">
