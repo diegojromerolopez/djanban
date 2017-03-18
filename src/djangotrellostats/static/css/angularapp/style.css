@@ -18,6 +18,11 @@
     display: inline-block;
 }
 
+.last_comment .comment_content {
+    overflow-wrap: break-word;
+    width: 250px;
+}
+
 /* Header with spent time */
 #board_spent_time span.label {
     color: white;

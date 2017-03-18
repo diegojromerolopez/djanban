@@ -3,6 +3,7 @@ a {
     text-decoration: none;
 }
 
+/* Header Menu */
 #header_logo{
     width: 100%;
 }
@@ -29,6 +30,10 @@ a {
     margin-bottom: 10px;
 }
 
+#header .last_comments .last_comment .comment_content {
+    overflow-wrap: break-word;
+    width: 250px;
+}
 
 .center-block {
     float: none;
