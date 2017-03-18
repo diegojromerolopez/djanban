@@ -31,6 +31,11 @@
     margin-bottom: 10px;
 }
 
+#content_menu ul.last_comments {
+    max-height: 450px;
+    overflow: scroll;
+}
+
 /* Header with spent time */
 #board_spent_time span.label {
     color: white;

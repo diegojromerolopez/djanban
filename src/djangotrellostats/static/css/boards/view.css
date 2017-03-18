@@ -22,6 +22,11 @@
     margin-bottom: 10px;
 }
 
+#content_menu ul.last_comments {
+    max-height: 450px;
+    overflow: scroll;
+}
+
 .board-title-container {
 
 }
