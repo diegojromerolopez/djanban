@@ -72,7 +72,7 @@
                         </li>
                         {% if member %}
 
-                            {% async_include "boards/components/view/menu_last_comments.html" board=board html__tag='li' %}
+                            {% async_include "boards/components/view/menu_last_comments.html" board=board html__tag='li' request__frequency=600 %}
 
                             <li {% if url_namespace == "boards:repositories" %}class="active"{% endif %}>
                                 <a href="{% url 'boards:repositories:view_repositories' board.id %}" title="View code repositories of project {{board.name}}">

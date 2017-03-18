@@ -4,7 +4,9 @@
 {% with last_comments=board.last_comments %}
     {% with number_of_last_comments=last_comments|length %}
         <a href="#" class="dropdown-toggle" data-toggle="dropdown"
-           role="button" aria-haspopup="true" aria-expanded="false" title="Last comments for board {{board.name}}">
+           role="button" aria-haspopup="true" aria-expanded="false"
+           title="Last comments for board {{board.name}}"
+        >
             <span class="fa fa-comments"></span>
            Last comments ({{number_of_last_comments}})<span class="caret"></span>
         </a>
