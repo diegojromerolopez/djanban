@@ -55,8 +55,11 @@ class Member(models.Model):
         default=None, null=True
     )
 
-    is_public = models.BooleanField(verbose_name=u"Check this if you want other members to add you to their boards",
-                                    default=False, blank=True)
+    is_public = models.BooleanField(
+        verbose_name=u"Is this member public?",
+        help_text=u"If checked, this user will be seen by other members and they will be able to add it to their boards",
+        default=False, blank=True
+    )
 
     # Constructor for Member
     def __init__(self, *args, **kwargs):
@@ -392,6 +395,24 @@ class Member(models.Model):
         values = [float(card_i.estimated_time) for card_i in self.active_cards.exclude(estimated_time=None)]
         std_dev_time = numpy.nanstd(values)
         return std_dev_time
+
+    @property
+    def first_name(self):
+        if self.user:
+            return self.user.first_name
+        return None
+
+    @property
+    def last_name(self):
+        if self.user:
+            return self.user.last_name
+        return None
+
+    @property
+    def email(self):
+        if self.user:
+            return self.user.email
+        return None
 
 
 # Spent factors of each member

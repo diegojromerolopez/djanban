@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.db.models import Q
 from django.http.response import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
 from django.shortcuts import render
@@ -19,6 +20,9 @@ from djangotrellostats.apps.members.models import Member
 
 
 # User dashboard
+from djangotrellostats.apps.members.views.emailer import send_new_member_email
+
+
 @member_required
 def dashboard(request):
     member = request.user.member
@@ -58,7 +62,10 @@ def new(request):
 
         form = MemberForm(request.POST, instance=member)
         if form.is_valid():
-            form.save(commit=True)
+            with transaction.atomic():
+                form.save(commit=True)
+                member_password = form.cleaned_data.get("password")
+                send_new_member_email(member, member_password)
             return HttpResponseRedirect(reverse("members:view_members"))
 
     else:

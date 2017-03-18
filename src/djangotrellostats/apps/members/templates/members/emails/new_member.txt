@@ -1,0 +1,9 @@
+Dear {{member.first_name}}
+
+{{member.creator.first_name}} has created this user for you.
+
+Ask your password to {{member.creator.first_name}} and login in Django Trello Stats {% url 'base:login' %}.
+
+Once you are logged don't forget to change your password.
+
+Best regards.

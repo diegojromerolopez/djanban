@@ -132,7 +132,7 @@ class MemberForm(models.ModelForm):
         self.fields["email"] = forms.EmailField(label=u"Email and username", max_length=64, required=True)
         self.fields["password1"] = forms.CharField(label=u"Password", widget=forms.PasswordInput(), max_length=16,
                                                    required=True)
-        self.fields["password2"] = forms.CharField(label=u"Repeat your password", widget=forms.PasswordInput(),
+        self.fields["password2"] = forms.CharField(label=u"Repeat the password", widget=forms.PasswordInput(),
                                                    max_length=16, required=True)
         self.order_fields(["first_name", "last_name", "email", "password", "password", "biography"])
 

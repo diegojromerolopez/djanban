@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to DjangoTrelloStats</title>
+</head>
+<body>
+    <div id="content">
+        <p>Dear {{member.first_name}}</p>
+
+        <p>{{member.creator.first_name}} has created this user for you.</p>
+
+        <p>Your user is this email and your password is <strong>{{password}}</strong>.</p>
+
+        <p><a href="{% url 'base:login' %}">Login in Django Trello Stats</a>.</p>
+
+        <p>Once you are logged don't forget to change your password.</p>
+
+        <p>Best regards.</p>
+    </div>
+</body>
+</html>
