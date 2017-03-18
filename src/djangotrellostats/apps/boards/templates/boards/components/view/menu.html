@@ -62,25 +62,28 @@
                         </li>
                         <li {% if url_name == "view_member_report" %}class="active"{% endif %}>
                             <a href="{% url 'boards:view_member_report' board.id %}" title="Members of board {{board.name}}">
-                                <span class="fa fa-users"></span> Members
+                                <span class="fa fa-users"></span>
                             </a>
                         </li>
                         <li {% if url_name == "view_daily_spent_times" %}class="active"{% endif %}>
                             <a href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}" title="Spent times of board {{board.name}}">
-                                <span class="fa fa-clock-o"></span> Spent times
+                                <span class="fa fa-clock-o"></span> S/E Time
                             </a>
                         </li>
                         {% if member %}
+
+                            {% async_include "boards/components/view/menu_last_comments.html" board=board html__tag='li' %}
+
                             <li {% if url_namespace == "boards:repositories" %}class="active"{% endif %}>
                                 <a href="{% url 'boards:repositories:view_repositories' board.id %}" title="View code repositories of project {{board.name}}">
-                                    <span class="fa fa-code-fork"></span> Repositories
+                                    <span class="fa fa-code-fork"></span> Repos.
                                 </a>
                             </li>
                         {% endif %}
                         {% if member %}
                             <li {% if url_namespace == "boards:workflows" %}class="active"{% endif %}>
                                 <a href="{% url 'boards:workflows:view_list' board.id %}" title="View workflows of board {{board.name}}">
-                                    <span class="fa fa-wrench"></span> Workflows
+                                    <span class="fa fa-wrench"></span> WF
                                 </a>
                             </li>
                         {% endif %}
@@ -93,7 +96,7 @@
                             {% if board.has_to_be_fetched %}
                                 <li {% if url_name == "fetch" %}class="active"{% endif %}>
                                     <a href="{% url 'boards:fetch' board.id %}" title="Fetch board {{board.name}}">
-                                        <span class="fa fa-download"></span> Fetch
+                                        <span class="fa fa-download"></span>
                                     </a>
                                 </li>
                             {%  endif %}

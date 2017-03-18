@@ -175,9 +175,15 @@ class Board(models.Model):
     def number_of_done_tasks(self):
         return self.cards.filter(is_closed=False, list__type="done").count()
 
+    # Number of comments
     @property
     def number_of_comments(self):
         return CardComment.objects.filter(card__is_closed=False, card__board=self).count()
+
+    # Last 30 comments
+    def last_comments(self, number_of_comments=30):
+        return CardComment.objects.filter(card__board=self).\
+                   order_by("-last_edition_datetime", "-creation_datetime")[:number_of_comments]
 
     # Returns the date of the last fetch in an ISO format
     def get_human_fetch_datetime(self):

@@ -20,7 +20,15 @@
 
 .last_comment .comment_content {
     overflow-wrap: break-word;
-    width: 250px;
+    width: 450px;
+}
+
+#content_menu ul.last_board_comments.dropdown-menu-right {
+    width: 450px;
+}
+
+#content_menu .last_comments .last_comment .panel-info .board_name {
+    margin-bottom: 10px;
 }
 
 /* Header with spent time */

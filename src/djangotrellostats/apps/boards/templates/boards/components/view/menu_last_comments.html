@@ -1,0 +1,44 @@
+{% load async_included %}
+{% load humanize %}
+
+{% with last_comments=board.last_comments %}
+    {% with number_of_last_comments=last_comments|length %}
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+           role="button" aria-haspopup="true" aria-expanded="false" title="Last comments for board {{board.name}}">
+            <span class="fa fa-comments"></span>
+           Last comments ({{number_of_last_comments}})<span class="caret"></span>
+        </a>
+        {% if number_of_last_comments > 0 %}
+            <ul class="dropdown-menu dropdown-menu-right last_comments last_board_comments">
+                {% for last_comment in last_comments %}
+                    {% with card=last_comment.card %}
+                        <li class="last_comment">
+                            <div class="panel panel-info">
+                              <div class="panel-heading">
+                                  <div class="board_name">
+                                        <img class="small-identicon" src="{% url 'boards:view_identicon' board.id %}" alt="{{board.name}}" />
+                                        <a href="{% url 'boards:view_board' board.id %}">{{board.name}}</a>
+                                  </div>
+                                  <div class="action">
+                                      <img src="{{last_comment.author.gravatar_url}}" alt="last_comment.author.initials"/>
+                                        {% if last_comment.last_edition_datetime %}
+                                            edited his/her comment on
+                                            <a href="{% url 'boards:view_card' board.id card.id %}" title="{{card.name}}" class="underlined">{{card.name}}</a> {{last_comment.last_edition_datetime|naturaltime}}
+                                        {% else %}
+                                            commented in
+                                            <a href="{% url 'boards:view_card' board.id card.id %}" title="{{card.name}}" class="underlined">{{card.name}}</a> {{last_comment.creation_datetime|naturaltime}}
+                                        {% endif %}
+                                  </div>
+                              </div>
+                              <div class="panel-body">
+                                 <div class="comment_content">{{last_comment.content}}</div>
+                                  {# <a href="{% url 'boards:view_card' board.id card.id %}#comment-{{last_comment.id}}">See comment in context</a>#}
+                              </div>
+                            </div>
+                        </li>
+                    {% endwith %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+{% endwith %}

@@ -14,6 +14,14 @@
     display: inline-block;
 }
 
+#content_menu ul.last_board_comments.dropdown-menu-right {
+    width: 450px;
+}
+
+#content_menu .last_comments .last_comment .panel-info .board_name {
+    margin-bottom: 10px;
+}
+
 .board-title-container {
 
 }

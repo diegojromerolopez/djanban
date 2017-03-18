@@ -32,7 +32,7 @@ a {
 
 #header .last_comments .last_comment .comment_content {
     overflow-wrap: break-word;
-    width: 250px;
+    width: 450px;
 }
 
 .center-block {
@@ -49,6 +49,10 @@ a {
 
 .center-text{
     text-align: center;
+}
+
+.underlined {
+    text-decoration: underline;
 }
 
 #content{
