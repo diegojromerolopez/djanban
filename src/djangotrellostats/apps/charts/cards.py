@@ -15,7 +15,7 @@ import pytz
 from decimal import Decimal
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg, Min, Q, Count, Max
+from django.db.models import Avg, Min, Q, Count, Max, Sum
 from django.utils import timezone
 
 from djangotrellostats.apps.base.auth import get_user_boards
@@ -185,6 +185,7 @@ def _avg_metric_time_by_month(request, board=None, metric="lead"):
                     if card_.estimated_time is None:
                         return 0
                     return card_.estimated_time
+
             else:
                 raise ValueError("The metric must be 'lead' or 'cycle'")
 
@@ -528,9 +529,6 @@ def cumulative_card_evolution(current_user, board=None, day_step=1):
     # Number of done cards by label
     done_card_values_by_label = {label.id: [] for label in labels}
 
-    # Done lists
-    done_lists = List.objects.filter(board__in=boards, type="done")
-
     num_created_card_values = []
     num_done_card_values = []
 
@@ -550,7 +548,7 @@ def cumulative_card_evolution(current_user, board=None, day_step=1):
 
         # Cards that were moved to this list before the date
         done_cards = CardMovement.objects.filter(board__in=boards,
-                                                 destination_list__in=done_lists,
+                                                 destination_list__type="done",
                                                  datetime__lte=datetime_i)
 
         # Number of cards that were moved to this list before the date
@@ -592,6 +590,112 @@ def cumulative_card_evolution(current_user, board=None, day_step=1):
                 cumulative_chart.add("Done {0} cards in {1}".format(label.name, label.board.name), done_card_values_by_label[label.id])
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=cumulative_chart.render(is_unicode=True))
+    return chart.render_django_response()
+
+
+# Cumulative developed card value throug time
+def cumulative_value_evolution(current_user, board=None, day_step=1):
+    return _value_evolution(current_user=current_user, board=board, cumulative=True, day_step=day_step)
+
+
+# Evolution of developed card value through time
+def value_evolution(current_user, board=None, day_step=1):
+    return _value_evolution(current_user=current_user, board=board, cumulative=False, day_step=day_step)
+
+
+# Evolution of developed card value by member
+def value_evolution_by_member(current_user, board=None, day_step=1):
+    return _value_evolution(current_user=current_user, board=board, cumulative=False, day_step=day_step, by_member=True)
+
+
+# Evolution of developed card value through time
+def _value_evolution(current_user, board=None, cumulative=False, day_step=1, by_member=False):
+    # Caching
+    chart_uuid = "cards.value_evolution-{0}-{1}-{2}-{3}".format(
+        board.id if board else "all",
+        "cumulative" if cumulative else "",
+        day_step,
+        "by_member" if by_member else ""
+    )
+
+    chart = CachedChart.get(board=board, uuid=chart_uuid)
+    if chart:
+        return chart
+
+    if board:
+        boards = [board]
+    else:
+        boards = get_user_boards(current_user)
+
+    if cumulative:
+        chart_title = u"Cumulative evolution of developed card value{0}as of {1}".format(" by member " if by_member else " ", timezone.now())
+    else:
+        chart_title = u"Evolution of developed card value{0}as of {1}".format(" by member " if by_member else " ", timezone.now())
+
+    if board:
+        chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
+
+    card_value_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
+                                  print_zeroes=False, fill=False,
+                                  x_labels_major_every=3, show_only_major_dots=True,
+                                  show_minor_x_labels=False,
+                                  human_readable=True, x_label_rotation=65)
+
+    start_working_date = numpy.min(filter(None, [board_i.get_working_start_date() for board_i in boards]))
+    end_working_date = numpy.max(filter(None, [board_i.get_working_end_date() for board_i in boards]))
+    if start_working_date is None or end_working_date is None:
+        return card_value_chart.render_django_response()
+
+    local_timezone = pytz.timezone(settings.TIME_ZONE)
+
+    if cumulative:
+        def developed_value_sum(date_, member_=None):
+            datetime_ = local_timezone.localize(datetime.combine(date_, time.min))
+            card_movement_filter = {"board__in": boards, "destination_list__type": "done", "datetime__lte": datetime_}
+            if member_:
+                card_movement_filter["card__members"] = member_
+            return CardMovement.objects.filter(**card_movement_filter).\
+                aggregate(sum_of_developed_value=Sum("card__value"))["sum_of_developed_value"]
+    else:
+        def developed_value_sum(date_, member_=None):
+            min_datetime_ = local_timezone.localize(datetime.combine(date_, time.min))
+            max_datetime_ = local_timezone.localize(datetime.combine(date_, time.max))
+            card_movement_filter = {
+                "board__in": boards, "destination_list__type": "done",
+                "datetime__gte": min_datetime_, "datetime__lte": max_datetime_
+            }
+            if member_:
+                card_movement_filter["card__members"] = member_
+            return CardMovement.objects.filter(**card_movement_filter).\
+                aggregate(sum_of_developed_value=Sum("card__value"))["sum_of_developed_value"]
+
+    date_i = copy.deepcopy(start_working_date)
+    card_values = []
+    x_labels = []
+
+    members = Member.objects.filter(boards__in=boards, is_developer=True).distinct().order_by("id")
+    card_values_by_member = {member_i.id: [] for member_i in members}
+
+    while date_i <= end_working_date:
+        sum_of_developed_value = developed_value_sum(date_i)
+        if sum_of_developed_value is not None:
+            x_labels.append(date_i)
+            card_values.append(sum_of_developed_value)
+            if by_member:
+                for member in members:
+                    member_developed_value = card_values.append(sum_of_developed_value, member)
+                    if member_developed_value is not None:
+                        card_values_by_member[member.id].append(member_developed_value)
+        date_i += timedelta(days=day_step)
+
+    card_value_chart.x_labels = x_labels
+    card_value_chart.add("Team developed value", card_values)
+
+    if by_member:
+        for member in members:
+            card_value_chart.add("{0}".format(member.external_username), card_values_by_member[member.id])
+
+    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=card_value_chart.render(is_unicode=True))
     return chart.render_django_response()
 
 

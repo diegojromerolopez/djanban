@@ -258,6 +258,47 @@ def cumulative_card_evolution(request, board_id="all", day_step=1):
 
 
 @login_required
+def card_value_evolution(request, board_id="all", day_step=1):
+    if board_id != "all":
+        board = get_user_boards(request.user).get(id=board_id)
+    else:
+        board = None
+
+    if day_step is None:
+        day_step = 1
+
+    day_step = min(int(day_step), 30)
+    return cards.value_evolution(request.user, board, day_step)
+
+
+@login_required
+def card_value_evolution_by_member(request, board_id="all", day_step=1):
+    if board_id != "all":
+        board = get_user_boards(request.user).get(id=board_id)
+    else:
+        board = None
+
+    if day_step is None:
+        day_step = 1
+
+    day_step = min(int(day_step), 30)
+    return cards.value_evolution_by_member(request.user, board, day_step)
+
+@login_required
+def cumulative_card_value_evolution(request, board_id="all", day_step=1):
+    if board_id != "all":
+        board = get_user_boards(request.user).get(id=board_id)
+    else:
+        board = None
+
+    if day_step is None:
+        day_step = 1
+
+    day_step = min(int(day_step), 30)
+    return cards.cumulative_value_evolution(request.user, board, day_step)
+
+
+@login_required
 def number_of_comments(request, board_id=None, card_id=None):
     board = None
     card = None

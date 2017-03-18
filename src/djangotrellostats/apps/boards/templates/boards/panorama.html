@@ -38,7 +38,32 @@
             </a>
         </div>
     </div>
-    
+
+    <div class="row">
+        <div class="col-sm-12">
+            <h3>Developed value of tasks</h3>
+        </div>
+        <div class="col-sm-12">
+            <div class="row">
+                <div class="col-sm-4">
+                    <a href="{% url 'charts:cumulative_card_value_evolution' 'all' %}" title="Cumulative card value evolution">
+                        <img class="ajax-img" data-src="{% url 'charts:cumulative_card_value_evolution' 'all' %}" alt="Cumulative card value evolution"/>
+                    </a>
+                </div>
+                <div class="col-sm-4">
+                    <a href="{% url 'charts:card_value_evolution' 'all' %}" title="Evolution of developed value">
+                        <img class="ajax-img" data-src="{% url 'charts:card_value_evolution' 'all' %}" alt="Card value evolution"/>
+                    </a>
+                </div>
+                <div class="col-sm-4">
+                    <a href="{% url 'charts:card_value_evolution_by_member' 'all' %}" title="Evolution of developed value by member">
+                        <img class="ajax-img" data-src="{% url 'charts:card_value_evolution_by_member' 'all' %}" alt="Card value evolution by member"/>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-sm-12">
             <h3>Scatterplot of card lead, cycle and spent time</h3>

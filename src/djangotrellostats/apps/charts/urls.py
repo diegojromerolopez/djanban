@@ -141,6 +141,14 @@ urlpatterns = [
     url(r'^cumulative_card_evolution/(?P<board_id>\d+|all)(/(?P<day_step>[\d]+))?$', private.cumulative_card_evolution,
         name="cumulative_card_evolution"),
 
+    # Evolution of value
+    url(r'^cumulative_card_value_evolution/(?P<board_id>\d+|all)(/(?P<day_step>[\d]+))?$',
+        private.cumulative_card_value_evolution, name="cumulative_card_value_evolution"),
+    url(r'^card_value_evolution/(?P<board_id>\d+|all)(/(?P<day_step>[\d]+))?$',
+        private.card_value_evolution, name="card_value_evolution"),
+    url(r'^card_value_evolution_by_member/(?P<board_id>\d+|all)(/(?P<day_step>[\d]+))?$',
+        private.card_value_evolution_by_member, name="card_value_evolution_by_member"),
+
     # Evolution of number of comments
     url(r'^number_of_comments/?$',private.number_of_comments, name="number_of_comments"),
     url(r'^number_of_comments/(?P<board_id>[\d]+)/?$',private.number_of_comments, name="number_of_comments"),
