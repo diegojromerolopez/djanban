@@ -430,7 +430,7 @@ export class CardComponent implements OnInit  {
 
     deleteAttachment(attachment: CardAttachment){
         this.deleteAttachmentStatus[attachment.id] = "waiting"
-        this.cardService.deleteAttachment(this.card, attachment).then(attachment => {
+        this.cardService.deleteAttachment(this.card, attachment).then(deleted_attachment => {
             this.card.attachments.splice(this.card.attachments.indexOf(attachment), 1);
             delete this.deleteAttachmentStatus[attachment.id];
             this.notificationsService.success("Attachment deleted", `${this.card.name} has had one of its attachments deleted (${this.card.number_of_attachments} in total).`);

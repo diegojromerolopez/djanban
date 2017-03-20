@@ -1123,6 +1123,16 @@ class Card(models.Model):
         attached_file = File(uploaded_file)
         if uploaded_file_name is None:
             uploaded_file_name = uploaded_file.name
+
+        # If there is already a file named uploaded_file_name, put
+        if CardAttachment.objects.filter(file=uploaded_file_name).exists():
+            matches = re.match("^(?P<filename>.+)(?P<extension>\.[\w\d]+)", uploaded_file_name)
+            if matches:
+                filename = matches.group("filename")
+                extension = matches.group("extension")
+                now = timezone.now()
+                uploaded_file_name = "{0}-{1}{2}".format(filename, now.isoformat(), extension)
+
         attachment.file.save(uploaded_file_name, attached_file)
         return self.add_attachment(member, attachment)
 
@@ -1130,10 +1140,6 @@ class Card(models.Model):
     @transaction.atomic
     def delete_attachment(self, member, attachment):
         # Delete remote attachment
-        connector = RemoteBackendConnectorFactory.factory(member)
-        connector.delete_attachment_of_card(card=self, attachment=attachment)
-
-        # Delete attachment remotely
         connector = RemoteBackendConnectorFactory.factory(member)
         connector.delete_attachment_of_card(card=self, attachment=attachment)
 

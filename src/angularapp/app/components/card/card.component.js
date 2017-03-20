@@ -362,7 +362,7 @@ var CardComponent = (function () {
     CardComponent.prototype.deleteAttachment = function (attachment) {
         var _this = this;
         this.deleteAttachmentStatus[attachment.id] = "waiting";
-        this.cardService.deleteAttachment(this.card, attachment).then(function (attachment) {
+        this.cardService.deleteAttachment(this.card, attachment).then(function (deleted_attachment) {
             _this.card.attachments.splice(_this.card.attachments.indexOf(attachment), 1);
             delete _this.deleteAttachmentStatus[attachment.id];
             _this.notificationsService.success("Attachment deleted", _this.card.name + " has had one of its attachments deleted (" + _this.card.number_of_attachments + " in total).");

@@ -21,6 +21,9 @@ from djangotrellostats.apps.boards.models import Board, Card, CardComment, List,
 
 
 # Point of access to several actions
+from djangotrellostats.utils.custom_uuid import custom_uuid
+
+
 @member_required
 def modify_cards(request, board_id):
     # Create a new card
@@ -261,7 +264,7 @@ def add_attachment(request, board_id, card_id):
 
     with tempfile.TemporaryFile() as uploaded_file:
         uploaded_file.write(uploaded_file_content)
-        uploaded_file_name = request.GET.get("uploaded_file_name", "xxx")
+        uploaded_file_name = request.GET.get("uploaded_file_name", custom_uuid())
         attachment = card.add_new_attachment(member, uploaded_file, uploaded_file_name)
 
     serializer = Serializer(board=card.board)
