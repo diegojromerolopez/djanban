@@ -14,6 +14,8 @@ import { Member } from '../../models/member';
 import { CardReview } from '../../models/review';
 import { Requirement } from '../../models/requirement';
 import { NotificationsService } from 'angular2-notifications';
+import { FileUploader } from 'ng2-file-upload';
+import { CardAttachment } from '../../models/attachment';
 
 
 @Component({
@@ -67,6 +69,14 @@ export class CardComponent implements OnInit  {
     // Blocking card statuses
     private addBlockingCardStatus: string;
     private removeBlockingCardStatus: {};
+
+    // File uploader
+    private ATTACHMENT_UPLOAD_URL = '/api/board/{board_id}/card/{card_id}/attachment/add';
+    public fileUploader: FileUploader;
+    public hasBaseDropZoneOver: boolean = false;
+    public hasAnotherDropZoneOver: boolean = false;
+    private deleteAttachmentStatus: {};
+    private lockFileUploader: boolean = false;
 
     // Review statuses
     private newReviewStatus: string;
@@ -129,6 +139,12 @@ export class CardComponent implements OnInit  {
         this.deleteReviewStatus = { };
         this.addRequirementStatus = "hidden";
         this.removeRequirementStatus = { };
+
+        this.deleteAttachmentStatus = { };
+
+        this.lockFileUploader = false;
+        this.hasBaseDropZoneOver = false;
+        this.hasAnotherDropZoneOver = false;
     }
 
     cardHasLabel(label: Label): boolean {
@@ -388,6 +404,42 @@ export class CardComponent implements OnInit  {
         }
     }
 
+    public fileOverFileUploaderDropZone(e: any):void {
+        this.hasBaseDropZoneOver = e;
+        for(let queuedFile of this.fileUploader.queue){
+            if(!queuedFile.isReady && !queuedFile.isUploading && !queuedFile.isSuccess){
+                queuedFile.onComplete = (response:string, status:number, headers:any)=> {
+                    let attachment = JSON.parse(response);
+                    this.card.attachments = [attachment].concat(this.card.attachments);
+                    this.deleteAttachmentStatus[attachment.id] = "standby";
+                    queuedFile.remove();
+                    this.lockFileUploader = false;
+                    this.notificationsService.success("Attachment added", `${this.card.name} has a new attachment (${this.card.number_of_attachments} in total).`);
+                };
+                queuedFile.onError = (response:string, status:number, headers:any)=> {
+                    this.lockFileUploader = false;
+                    this.notificationsService.error("Error", `Couldn't add attachment to ${this.card.name}`);
+                };
+                this.fileUploader.options.url = this.ATTACHMENT_UPLOAD_URL + "?uploaded_file_name=" + queuedFile.file.name;
+                queuedFile.url = this.ATTACHMENT_UPLOAD_URL + "?uploaded_file_name=" + queuedFile.file.name;
+                this.lockFileUploader = true;
+                queuedFile.upload();
+            }
+        }
+    }
+
+    deleteAttachment(attachment: CardAttachment){
+        this.deleteAttachmentStatus[attachment.id] = "waiting"
+        this.cardService.deleteAttachment(this.card, attachment).then(attachment => {
+            this.card.attachments.splice(this.card.attachments.indexOf(attachment), 1);
+            delete this.deleteAttachmentStatus[attachment.id];
+            this.notificationsService.success("Attachment deleted", `${this.card.name} has had one of its attachments deleted (${this.card.number_of_attachments} in total).`);
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Couldn't delete attachment of ${this.card.name}. ${error_message}`);
+            this.deleteAttachmentStatus[attachment.id] = "standby";
+        });
+    }
+
     /** Called when creating new comment */
     onSubmitNewComment(comment_content: string): void {
         this.cardService.addNewComment(this.card, comment_content).then(comment => {
@@ -456,6 +508,11 @@ export class CardComponent implements OnInit  {
             for(let requirement of this.card.requirements){
                 this.removeRequirementStatus[requirement.id] = "hidden";
             }
+            // Initialization of file uploader
+            this.ATTACHMENT_UPLOAD_URL = this.ATTACHMENT_UPLOAD_URL.replace("{board_id}", board_id.toString()).replace("{card_id}", card_id.toString());
+            this.fileUploader = new FileUploader({url: this.ATTACHMENT_UPLOAD_URL, disableMultipart: true});
+
+            // Show that card is loaded all right
             this.notificationsService.success("Successful load", `${card.name} loaded successfully`);
         }).catch(error_message => {
             this.notificationsService.error("Error", `Couldn't load this card. ${error_message}`);

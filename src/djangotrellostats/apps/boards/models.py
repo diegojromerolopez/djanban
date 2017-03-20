@@ -10,6 +10,7 @@ from decimal import Decimal
 import numpy
 import shortuuid
 from django.contrib.auth.models import User
+from django.core.files import File
 from django.db import models, transaction
 from django.db.models import Avg, Sum, Min, Max
 from django.db.models.query_utils import Q
@@ -819,6 +820,11 @@ class Card(models.Model):
     def backward_movements(self):
         return self.movements.filter(type="backward")
 
+    # Number of attachments
+    @property
+    def number_of_attachments(self):
+        return self.attachments.all().count()
+
     # Returns the adjusted spent time according to the spent time factor defined in each member
     @property
     def adjusted_spent_time(self):
@@ -1093,6 +1099,47 @@ class Card(models.Model):
                 self.delete_comment(member, comment=valuation_comment)
                 self.save()
 
+                # Add a new comment to this card
+
+    # Adds a new attachment to this card
+    @transaction.atomic
+    def add_attachment(self, member, attachment):
+
+        # Create comment locally using the id of the new comment in Trello
+        attachment.card = self
+
+        connector = RemoteBackendConnectorFactory.factory(member)
+        attachment = connector.add_attachment_to_card(card=self, attachment=attachment)
+        attachment.save()
+
+        # Returning the attachment because it can be needed
+        return attachment
+
+    # Adds a new attachment to this card
+    @transaction.atomic
+    def add_new_attachment(self, member, uploaded_file, uploaded_file_name=None):
+        attachment = CardAttachment(card=self, uuid=custom_uuid(),
+                                    uploader=member, is_cover=False, creation_datetime=timezone.now())
+        attached_file = File(uploaded_file)
+        if uploaded_file_name is None:
+            uploaded_file_name = uploaded_file.name
+        attachment.file.save(uploaded_file_name, attached_file)
+        return self.add_attachment(member, attachment)
+
+    # Delete an existing attachment of this card
+    @transaction.atomic
+    def delete_attachment(self, member, attachment):
+        # Delete remote attachment
+        connector = RemoteBackendConnectorFactory.factory(member)
+        connector.delete_attachment_of_card(card=self, attachment=attachment)
+
+        # Delete attachment remotely
+        connector = RemoteBackendConnectorFactory.factory(member)
+        connector.delete_attachment_of_card(card=self, attachment=attachment)
+
+        # Delete attachment locally
+        attachment.delete()
+
     # Add a new comment to this card
     @transaction.atomic
     def add_comment(self, member, content):
@@ -1178,6 +1225,33 @@ class Card(models.Model):
         self.number_of_backward_movements = self.backward_movements.count()
         if commit:
             self.save()
+
+
+# Card attachment
+class CardAttachment(models.Model):
+    class Meta:
+        verbose_name = "Card attachment"
+        verbose_name_plural = "Card attachments"
+        index_together = (
+            ("card", "creation_datetime", "uploader"),
+            ("uploader", "card", "creation_datetime"),
+            ("card", "uploader", "creation_datetime"),
+            ("creation_datetime", "card", "uploader"),
+        )
+
+    uuid = models.CharField(max_length=128, verbose_name=u"External id of this attachment", unique=True)
+    card = models.ForeignKey("boards.Card", verbose_name=u"Card this attachment belongs to",
+                             related_name="attachments")
+    uploader = models.ForeignKey("members.Member", verbose_name=u"Member uploader of this attachment",
+                                 related_name="attachments")
+    file = models.FileField(verbose_name=u"File content")
+    is_cover = models.BooleanField(
+        verbose_name=u"Is this file the cover of the card?",
+        help_text="Is this file the cover of the card? "
+                  "If it is the cover, it will be used as a the header image of the card.",
+        default=True
+    )
+    creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
 
 
 # Each one of the comments made by members in each card

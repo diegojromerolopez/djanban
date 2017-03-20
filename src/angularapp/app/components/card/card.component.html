@@ -166,6 +166,52 @@
                         </div>
                     </div>
 
+                    <!-- Attached files -->
+                    <div class="Files card-section">
+                        <h2>Files</h2>
+
+                        <div *ngIf="!lockFileUploader">
+                            <div ng2FileDrop
+                                [ngClass]="{'file-over': hasBaseDropZoneOver}"
+                                (fileOver)="fileOverFileUploaderDropZone($event)"
+                                [uploader]="fileUploader"
+                                class="well file-drop-zone">
+                                Upload new files here
+                            </div>
+                        </div>
+
+                        <div *ngIf="lockFileUploader">
+                            <div class="well locked-file-drop-zone">
+                                <span class="fa fa-spinner fa-spin"></span>
+                                <span class="text">
+                                    Wait until the upload is finished
+                                </span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div *ngFor="let card_attachment of card.attachments" class="panel panel-default">
+                                <div class="panel-body">
+                                    <strong>{{card_attachment.filename}}</strong>
+                                    <a href="{{card_attachment.url}}"
+                                        class="btn btn-primary"
+                                        title="Donwload {{card_attachment.filename}}">
+                                        <span class="fa fa-download"></span>
+                                        Download
+                                    </a>
+                                    <button
+                                        class="btn btn-danger"
+                                        title="Delete {{card_attachment.filename}}"
+                                        (click)="deleteAttachment(card_attachment)"
+                                        [disabled]="deleteAttachmentStatus[card_attachment.id] == 'waiting'">
+                                        <span *ngIf="deleteAttachmentStatus[card_attachment.id] == 'waiting'" class="fa fa-spinner fa-spin"></span>
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Comments -->
                     <div class="card-comments card-section">
                         <h2>Comments ({{card.comments.length}})</h2>

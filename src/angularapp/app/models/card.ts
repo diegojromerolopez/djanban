@@ -6,6 +6,7 @@ import { Label } from './label';
 import { assign } from 'rxjs/util/assign';
 import { CardReview } from './review';
 import { Requirement } from './requirement';
+import { CardAttachment } from './attachment';
 
 
 export class Card {
@@ -21,6 +22,7 @@ export class Card {
   value?: number;
   short_url: string;
   is_closed: boolean;
+  number_of_attachments?: number;
   number_of_comments?: number;
   number_of_forward_movements?: number;
   number_of_backward_movements?: number;
@@ -30,6 +32,7 @@ export class Card {
   board?: Board;
   list?: List;
   labels?: Label[];
+  attachments?: CardAttachment[];
   comments?: CardComment[];
   members?: Member[];
   number_of_reviews?: number;
@@ -42,7 +45,6 @@ export class Card {
     assign(this, card)
   }
 
-  
   getDueDatetimeObject(): Date{
     return new Date(this.due_datetime);
   }

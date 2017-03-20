@@ -291,6 +291,10 @@
                                     <span class="fa fa-comments"></span>
                                     {{card.number_of_comments}}
                                 </span>
+                                <span class="card_heading-attachments cursor-help" title="This task has {{card.number_of_attachments}} attached files">
+                                    <span class="fa fa-paperclip"></span>
+                                    {{card.number_of_attachments}}
+                                </span>
                                 <span class="card_heading-movements" *ngIf="card.number_of_forward_movements > 0 || card.number_of_backward_movements > 0">
                                     <span class="fa fa-arrows"></span> 
                                     <span class="fa fa-arrow-right"></span>: {{card.number_of_forward_movements}}

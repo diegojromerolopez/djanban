@@ -4,17 +4,20 @@ from __future__ import unicode_literals
 
 import json
 import re
+import tempfile
 
 import dateutil
+from django.core.files.base import ContentFile
 from django.db import transaction
 from django.http import JsonResponse, Http404
+from django.utils import timezone
 
 from djangotrellostats.apps.api.http import JsonResponseBadRequest, JsonResponseMethodNotAllowed, JsonResponseNotFound
 from djangotrellostats.apps.api.serializers import Serializer
 from djangotrellostats.apps.api.util import get_list_or_404, get_card_or_404, get_board_or_404
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
-from djangotrellostats.apps.boards.models import Board, Card, CardComment, List
+from djangotrellostats.apps.boards.models import Board, Card, CardComment, List, CardAttachment
 
 
 # Point of access to several actions
@@ -236,6 +239,54 @@ def move_to_list(request, board_id, card_id):
 
     serializer = Serializer(board=card.board)
     return JsonResponse(serializer.serialize_board())
+
+
+# Creates a new attachment
+@member_required
+@transaction.atomic
+def add_attachment(request, board_id, card_id):
+    if request.method != "POST":
+        return JsonResponseMethodNotAllowed({"message": "HTTP method not allowed."})
+
+    member = request.user.member
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        card = board.cards.get(id=card_id)
+    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+        return JsonResponseNotFound({"message": "Not found."})
+
+    uploaded_file_content = request.body
+    if uploaded_file_content is None:
+        return JsonResponseNotFound({"message": "No file sent."})
+
+    with tempfile.TemporaryFile() as uploaded_file:
+        uploaded_file.write(uploaded_file_content)
+        uploaded_file_name = request.GET.get("uploaded_file_name", "xxx")
+        attachment = card.add_new_attachment(member, uploaded_file, uploaded_file_name)
+
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card_attachment(attachment))
+
+
+# Deletes an attachment
+@member_required
+@transaction.atomic
+def delete_attachment(request, board_id, card_id, attachment_id):
+    if request.method != "DELETE":
+        return JsonResponseMethodNotAllowed({"message": "HTTP method not allowed."})
+
+    member = request.user.member
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        card = board.cards.get(id=card_id)
+        attachment = card.attachments.get(id=attachment_id)
+    except (Board.DoesNotExist, Card.DoesNotExist, CardAttachment.DoesNotExist) as e:
+        return JsonResponseNotFound({"message": "Not found."})
+
+    card.delete_attachment(member, attachment)
+
+    serializer = Serializer(board=card.board)
+    return JsonResponse(serializer.serialize_card_attachment(attachment))
 
 
 # Creates a new comment

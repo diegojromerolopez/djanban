@@ -19,6 +19,7 @@ var card_component_1 = require("../components/card/card.component");
 var card_service_1 = require("../services/card.service");
 var member_service_1 = require("../services/member.service");
 var ng2_dragula_1 = require("ng2-dragula/ng2-dragula");
+var ng2_file_upload_1 = require("ng2-file-upload");
 var angular2_notifications_1 = require("angular2-notifications");
 var localize_datetime_pipe_1 = require("./pipes/localize_datetime.pipe");
 var active_cards_pipe_1 = require("./pipes/active_cards.pipe");
@@ -36,6 +37,7 @@ AppModule = __decorate([
             forms_1.FormsModule,
             app_routing_module_1.AppRoutingModule,
             ng2_dragula_1.DragulaModule,
+            ng2_file_upload_1.FileUploadModule,
             angular2_select_1.SelectModule,
             angular2_notifications_1.SimpleNotificationsModule.forRoot()
         ],

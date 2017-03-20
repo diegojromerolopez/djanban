@@ -34,7 +34,8 @@
       'crossvent': 'npm:crossvent/src',
       'custom-event': 'npm:custom-event',
       'ng2-dragula': 'npm:ng2-dragula',
-      'angular2-select': 'npm:angular2-select'
+      'angular2-select': 'npm:angular2-select',
+      'ng2-file-upload': 'npm:ng2-file-upload'
     },
     baseURL: '/ng/',
     // packages tells the System loader how to load when no filename and/or no extension
@@ -54,7 +55,8 @@
       'custom-event': { main: 'index.js', defaultExtension: 'js' },
       'ng2-dragula': { main: 'ng2-dragula.js', defaultExtension: 'js' },
       'angular2-notifications': { main: 'components.js', defaultExtension: 'js', format: 'cjs' },
-      'angular2-select': {main: 'index.js', defaultExtension: 'js'}
+      'angular2-select': {main: 'index.js', defaultExtension: 'js'},
+      'ng2-file-upload': {main: 'index.js', defaultExtension: 'js'}
     }
   });
 })(this);

@@ -14,6 +14,7 @@ var board_service_1 = require("../../services/board.service");
 var card_1 = require("../../models/card");
 var card_service_1 = require("../../services/card.service");
 var angular2_notifications_1 = require("angular2-notifications");
+var ng2_file_upload_1 = require("ng2-file-upload");
 var CardComponent = (function () {
     function CardComponent(router, route, boardService, cardService, notificationsService) {
         this.router = router;
@@ -27,6 +28,11 @@ var CardComponent = (function () {
             timeOut: 10000,
             pauseOnHover: true,
         };
+        // File uploader
+        this.ATTACHMENT_UPLOAD_URL = '/api/board/{board_id}/card/{card_id}/attachment/add';
+        this.hasBaseDropZoneOver = false;
+        this.hasAnotherDropZoneOver = false;
+        this.lockFileUploader = false;
         this.commentPreviousContent = {};
         this.card_hash = {};
         this.changeNameStatus = "hidden";
@@ -48,6 +54,10 @@ var CardComponent = (function () {
         this.deleteReviewStatus = {};
         this.addRequirementStatus = "hidden";
         this.removeRequirementStatus = {};
+        this.deleteAttachmentStatus = {};
+        this.lockFileUploader = false;
+        this.hasBaseDropZoneOver = false;
+        this.hasAnotherDropZoneOver = false;
     }
     CardComponent.prototype.ngOnInit = function () {
         this.now = Date();
@@ -320,6 +330,47 @@ var CardComponent = (function () {
             _loop_1(list_index);
         }
     };
+    CardComponent.prototype.fileOverFileUploaderDropZone = function (e) {
+        var _this = this;
+        this.hasBaseDropZoneOver = e;
+        var _loop_2 = function (queuedFile) {
+            if (!queuedFile.isReady && !queuedFile.isUploading && !queuedFile.isSuccess) {
+                queuedFile.onComplete = function (response, status, headers) {
+                    var attachment = JSON.parse(response);
+                    _this.card.attachments = [attachment].concat(_this.card.attachments);
+                    _this.deleteAttachmentStatus[attachment.id] = "standby";
+                    queuedFile.remove();
+                    _this.lockFileUploader = false;
+                    _this.notificationsService.success("Attachment added", _this.card.name + " has a new attachment (" + _this.card.number_of_attachments + " in total).");
+                };
+                queuedFile.onError = function (response, status, headers) {
+                    _this.lockFileUploader = false;
+                    _this.notificationsService.error("Error", "Couldn't add attachment to " + _this.card.name);
+                };
+                this_2.fileUploader.options.url = this_2.ATTACHMENT_UPLOAD_URL + "?uploaded_file_name=" + queuedFile.file.name;
+                queuedFile.url = this_2.ATTACHMENT_UPLOAD_URL + "?uploaded_file_name=" + queuedFile.file.name;
+                this_2.lockFileUploader = true;
+                queuedFile.upload();
+            }
+        };
+        var this_2 = this;
+        for (var _i = 0, _a = this.fileUploader.queue; _i < _a.length; _i++) {
+            var queuedFile = _a[_i];
+            _loop_2(queuedFile);
+        }
+    };
+    CardComponent.prototype.deleteAttachment = function (attachment) {
+        var _this = this;
+        this.deleteAttachmentStatus[attachment.id] = "waiting";
+        this.cardService.deleteAttachment(this.card, attachment).then(function (attachment) {
+            _this.card.attachments.splice(_this.card.attachments.indexOf(attachment), 1);
+            delete _this.deleteAttachmentStatus[attachment.id];
+            _this.notificationsService.success("Attachment deleted", _this.card.name + " has had one of its attachments deleted (" + _this.card.number_of_attachments + " in total).");
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Couldn't delete attachment of " + _this.card.name + ". " + error_message);
+            _this.deleteAttachmentStatus[attachment.id] = "standby";
+        });
+    };
     /** Called when creating new comment */
     CardComponent.prototype.onSubmitNewComment = function (comment_content) {
         var _this = this;
@@ -392,6 +443,10 @@ var CardComponent = (function () {
                 var requirement = _g[_f];
                 _this.removeRequirementStatus[requirement.id] = "hidden";
             }
+            // Initialization of file uploader
+            _this.ATTACHMENT_UPLOAD_URL = _this.ATTACHMENT_UPLOAD_URL.replace("{board_id}", board_id.toString()).replace("{card_id}", card_id.toString());
+            _this.fileUploader = new ng2_file_upload_1.FileUploader({ url: _this.ATTACHMENT_UPLOAD_URL, disableMultipart: true });
+            // Show that card is loaded all right
             _this.notificationsService.success("Successful load", card.name + " loaded successfully");
         }).catch(function (error_message) {
             _this.notificationsService.error("Error", "Couldn't load this card. " + error_message);

@@ -106,6 +106,7 @@ class Serializer(object):
             "is_closed": card.is_closed,
             "spent_time": card.spent_time,
             "estimated_time": card.estimated_time,
+            "number_of_attachments": card.number_of_attachments,
             "number_of_comments": card.number_of_comments,
             "number_of_forward_movements": card.number_of_forward_movements,
             "number_of_backward_movements": card.number_of_backward_movements,
@@ -143,6 +144,11 @@ class Serializer(object):
             "estimated_time": card.estimated_time,
             "lead_time": card.lead_time,
             "cycle_time": card.cycle_time,
+            "number_of_attachments": card.number_of_attachments,
+            "attachments": [
+                self.serialize_card_attachment(attachment)
+                for attachment in card.attachments.all().order_by("-creation_datetime")
+            ],
             "labels": [self.serialize_label(label) for label in card.labels.exclude(name="").order_by("name")],
             "board": {
                 "id": self.board.id,
@@ -194,14 +200,19 @@ class Serializer(object):
             "color": label.color,
         }
 
-    # Serialize card review
-    def serialize_card_review(self, review):
-        return {
-            "id": review.id,
-            "creation_datetime": review.creation_datetime,
-            "description": review.description,
-            "reviewers": [self.serialized_members_by_id[reviewer.id] for reviewer in review.reviewers.all()]
+    # Serialize card attachment
+    def serialize_card_attachment(self, attachment):
+        self._init_member_cache()
+        serialized_uploader = self.serialized_members_by_id[attachment.uploader_id]
+        attachment_json = {
+            "id": attachment.id,
+            "uuid": attachment.uuid,
+            "uploader": serialized_uploader,
+            "filename": attachment.file.name,
+            "url": attachment.file.url,
+            "creation_datetime": attachment.creation_datetime,
         }
+        return attachment_json
 
     # Serialize card comment
     def serialize_card_comment(self, comment):
@@ -247,6 +258,15 @@ class Serializer(object):
             "requirement": self.serialize_requirement(comment.requirement) if comment.requirement else None
         }
         return comment_json
+
+    # Serialize card review
+    def serialize_card_review(self, review):
+        return {
+            "id": review.id,
+            "creation_datetime": review.creation_datetime,
+            "description": review.description,
+            "reviewers": [self.serialized_members_by_id[reviewer.id] for reviewer in review.reviewers.all()]
+        }
 
     # List serialization
     def serialize_list(self, list_):

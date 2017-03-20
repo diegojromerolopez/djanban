@@ -6,6 +6,7 @@ import { Headers, RequestOptions } from '@angular/http';
 
 
 import { Observable }     from 'rxjs/Observable';
+import { CardAttachment } from '../models/attachment';
 import { Requirement } from '../models/requirement';
 import { CardReview } from '../models/review';
 import { Label } from '../models/label';
@@ -42,7 +43,7 @@ export class CardService extends DjangoTrelloStatsService {
   private DELETE_REVIEW_URL = '/api/board/{board_id}/card/{card_id}/review/{review_id}';
   private ADD_REQUIREMENT_URL = '/api/board/{board_id}/card/{card_id}/requirement';
   private REMOVE_REQUIREMENT_URL = '/api/board/{board_id}/card/{card_id}/requirement/{requirement_id}';
-  
+  private DELETE_ATTACHMENT_URL = '/api/board/{board_id}/card/{card_id}/attachment/{attachment_id}'
 
   constructor (http: Http) {
     super(http);
@@ -210,6 +211,14 @@ export class CardService extends DjangoTrelloStatsService {
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);    
+  }
+
+  deleteAttachment(card: Card, attachment: CardAttachment){
+    let delete_attachment_url = this.prepareUrl(this.DELETE_ATTACHMENT_URL, card).replace("{attachment_id}", attachment.id.toString());
+    return this.http.delete(delete_attachment_url)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
   }
 
   addNewComment(card: Card, comment_content: string) : Promise<CardComment> {

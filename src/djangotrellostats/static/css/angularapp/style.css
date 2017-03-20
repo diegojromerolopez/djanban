@@ -583,6 +583,24 @@ button.change_value {
     margin-bottom: 5px;
 }
 
+/* File Upload Drop Zone */
+.file-drop-zone {
+    border: dotted 3px lightgray;
+    text-align: center;
+    font-size: 1.3em;
+}
+
+.locked-file-drop-zone {
+    border: 3px lightgray;
+    cursor: progress;
+    text-align: center;
+    font-size: 1.3em;
+}
+
+.file-over {
+    border: dotted 3px red;
+}
+
 /* Comments */
 .card_detail .comments {
 

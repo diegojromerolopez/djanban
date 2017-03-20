@@ -90,6 +90,15 @@ class NativeConnector(object):
     def move_list_cards(self, source_list, destination_list):
         pass
 
+    def add_attachment_to_card(self, card, attachment):
+        attachment.card = card
+        attachment.uuid = custom_uuid()
+        attachment.creation_datetime = timezone.now()
+        return attachment
+
+    def delete_attachment_of_card(self, card, attachment):
+        return attachment
+
     # Add comment to a card
     def add_comment_to_card(self, card, comment):
         comment.uuid = custom_uuid()

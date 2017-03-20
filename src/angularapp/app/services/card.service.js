@@ -40,6 +40,7 @@ var CardService = (function (_super) {
         _this.DELETE_REVIEW_URL = '/api/board/{board_id}/card/{card_id}/review/{review_id}';
         _this.ADD_REQUIREMENT_URL = '/api/board/{board_id}/card/{card_id}/requirement';
         _this.REMOVE_REQUIREMENT_URL = '/api/board/{board_id}/card/{card_id}/requirement/{requirement_id}';
+        _this.DELETE_ATTACHMENT_URL = '/api/board/{board_id}/card/{card_id}/attachment/{attachment_id}';
         return _this;
     }
     /**
@@ -185,6 +186,13 @@ var CardService = (function (_super) {
     CardService.prototype.removeRequirement = function (card, requirement) {
         var remove_requirement_url = this.prepareUrl(this.REMOVE_REQUIREMENT_URL, card).replace("{requirement_id}", requirement.id.toString());
         return this.http.delete(remove_requirement_url)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    CardService.prototype.deleteAttachment = function (card, attachment) {
+        var delete_attachment_url = this.prepareUrl(this.DELETE_ATTACHMENT_URL, card).replace("{attachment_id}", attachment.id.toString());
+        return this.http.delete(delete_attachment_url)
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);

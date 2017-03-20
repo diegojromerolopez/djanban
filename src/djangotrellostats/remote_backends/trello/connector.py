@@ -2,13 +2,16 @@
 
 from __future__ import unicode_literals, absolute_import
 
+import os
 from collections import namedtuple
 
+from django.conf import settings
 from django.utils import timezone
 from trello import TrelloClient
 from trello import Card as TrelloCard
 from trello import List as TrelloList
 from trello import Board as TrelloBoard
+
 
 
 # Establishes a connection with Trello API
@@ -162,6 +165,19 @@ class TrelloConnector(object):
         FakeTrelloList = namedtuple("FakeTrelloList", ["id", "board"])
         fake_trello_destination_list = FakeTrelloList(id=destination_list.uuid, board=fake_trello_board)
         return trello_list.move_all_cards(fake_trello_destination_list)
+
+    # Add attachment to card
+    def add_attachment_to_card(self, card, attachment):
+        trello_card = self.get_trello_card(card)
+        trello_attachment_data = trello_card.attach(name=attachment.file.name, file=attachment.file)
+        attachment.uuid = trello_attachment_data["id"]
+        return attachment
+
+    # Delete attachment of card
+    def delete_attachment_of_card(self, card, attachment):
+        trello_card = self.get_trello_card(card)
+        trello_card.remove_attachment(attachment.uuid)
+        return attachment
 
     # Add comment to a card
     def add_comment_to_card(self, card, comment):

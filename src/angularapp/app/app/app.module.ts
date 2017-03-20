@@ -18,10 +18,11 @@ import { MemberService } from '../services/member.service';
 
 
 import { DragulaModule } from 'ng2-dragula/ng2-dragula';
+import { FileUploadModule } from 'ng2-file-upload';
 import { SimpleNotificationsModule, NotificationsService } from 'angular2-notifications';
 import { LocalizeDatetimePipe } from './pipes/localize_datetime.pipe';
 import { ActiveCardsPipe } from './pipes/active_cards.pipe';
-import {SelectModule} from 'angular2-select';
+import { SelectModule } from 'angular2-select';
 
 @NgModule({
   imports: [ 
@@ -30,6 +31,7 @@ import {SelectModule} from 'angular2-select';
     FormsModule, 
     AppRoutingModule,
     DragulaModule,
+    FileUploadModule,
     SelectModule,
     SimpleNotificationsModule.forRoot()
   ],
