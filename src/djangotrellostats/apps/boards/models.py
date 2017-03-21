@@ -8,9 +8,11 @@ from datetime import timedelta
 from decimal import Decimal
 
 import numpy
+import requests
 import shortuuid
 from django.contrib.auth.models import User
 from django.core.files import File
+from django.core.files.base import ContentFile
 from django.db import models, transaction
 from django.db.models import Avg, Sum, Min, Max
 from django.db.models.query_utils import Q
@@ -1250,7 +1252,9 @@ class CardAttachment(models.Model):
                              related_name="attachments")
     uploader = models.ForeignKey("members.Member", verbose_name=u"Member uploader of this attachment",
                                  related_name="attachments")
-    file = models.FileField(verbose_name=u"File content")
+    external_file_url = models.CharField(verbose_name=u"External file URL", max_length=1024, default="", blank=True)
+    external_file_name = models.CharField(verbose_name=u"External file name", max_length=128, default="", blank=True)
+    file = models.FileField(verbose_name=u"File content", null=True, blank=True, default=None)
     is_cover = models.BooleanField(
         verbose_name=u"Is this file the cover of the card?",
         help_text="Is this file the cover of the card? "
@@ -1259,6 +1263,13 @@ class CardAttachment(models.Model):
     )
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
 
+    def fetch_external_file(self):
+        if self.external_file_url and not self.file:
+            if self.external_file_name == "":
+                self.external_file_name = custom_uuid()
+            file_content_request = requests.get(self.external_file_url)
+            self.file.save(self.external_file_name, ContentFile(file_content_request.text))
+            self.save()
 
 # Each one of the comments made by members in each card
 class CardComment(models.Model):

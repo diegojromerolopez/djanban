@@ -5,6 +5,7 @@ from __future__ import unicode_literals, absolute_import
 import tempfile
 from collections import namedtuple
 from datetime import datetime
+from dateutil import parser as dateparser
 
 import pytz
 from django.conf import settings
@@ -152,17 +153,23 @@ class CardFetcher(object):
 
             try:
                 card_attachment = card.attachments.get(uuid=uuid)
-                if card_attachment.creation_datetime != trello_attachment["date"]:
-                    file_content_request = requests.get(trello_attachment["url"])
-                    card_attachment.file.save(trello_attachment["name"], ContentFile(file_content_request.text))
+                trello_attachment_creation_date = dateparser.parse(trello_attachment["date"])
+                # If there has been any change in the file or even the URL has changed
+                if card_attachment.creation_datetime != trello_attachment_creation_date or\
+                        card_attachment.external_file_name != trello_attachment["url"]:
+                    card_attachment.file = None
+                    card_attachment.external_file_name = trello_attachment["name"]
+                    card_attachment.external_file_url = trello_attachment["url"]
                 del card_deleted_attachments[uuid]
             except CardAttachment.DoesNotExist:
                 card_attachment = CardAttachment(uuid=uuid, card=card, uploader=uploader)
-                card_attachment.creation_datetime = localize_if_needed(trello_attachment["date"])
-                file_content_request = requests.get(trello_attachment["url"])
-                card_attachment.file.save(trello_attachment["name"], ContentFile(file_content_request.text))
+                card_attachment.file = None
+                card_attachment.external_file_name = trello_attachment["name"]
+                card_attachment.external_file_url = trello_attachment["url"]
 
             card_attachments.append(card_attachment)
+
+            card_attachment.creation_datetime = localize_if_needed(trello_attachment_creation_date)
             card_attachment.save()
 
         # Delete all card attachments that are not present in trello.com

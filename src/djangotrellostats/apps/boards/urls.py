@@ -45,6 +45,9 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)$', cards.view, name="view_card"),
     url(r'^c/(?P<board_id>\d+)/(?P<card_uuid>[^/]+)$', cards.view_short_url, name="view_card_short_url"),
 
+    # Download attachment
+    url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/attachments/(?P<attachment_id>\d+)/?$', cards.download_attachment, name="download_attachment"),
+
     # Move cards
     url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/move_forward/?$', cards.move_forward, name="move_card_forward"),
     url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/move_backward/?$', cards.move_backward, name="move_card_backward"),

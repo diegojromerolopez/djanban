@@ -17,7 +17,7 @@ from isoweek import Week
 from djangotrellostats.apps.base.auth import user_is_member, get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.forms import NewCardForm, WeekSummaryFilterForm
-from djangotrellostats.apps.boards.models import List, Board, Card, CardComment, Label
+from djangotrellostats.apps.boards.models import List, Board, Card, CardComment, Label, CardAttachment
 from djangotrellostats.apps.boards.stats import avg, std_dev
 from djangotrellostats.utils.week import get_iso_week_of_year, get_week_of_year
 
@@ -106,6 +106,26 @@ def _move(request, board_id, card_id, movement_type="forward"):
         raise Http404
 
     return HttpResponseRedirect(reverse("boards:view_card", args=(board_id, card_id)))
+
+
+# Download card attachment
+@member_required
+def download_attachment(request, board_id, card_id, attachment_id):
+    if request.method != "GET":
+        raise Http404
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        card = board.cards.get(id=card_id)
+        attachment = card.attachments.get(id=attachment_id)
+    except (Board.DoesNotExist, Card.DoesNotExist, CardAttachment.DoesNotExist) as e:
+        raise Http404
+
+    print attachment.file
+    if not attachment.file:
+        print "sdfasfs"
+        attachment.fetch_external_file()
+
+    return HttpResponseRedirect(attachment.file.url)
 
 
 # Add new comment to a card

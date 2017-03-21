@@ -208,8 +208,9 @@ class Serializer(object):
             "id": attachment.id,
             "uuid": attachment.uuid,
             "uploader": serialized_uploader,
-            "filename": attachment.file.name,
-            "url": attachment.file.url,
+            "filename": attachment.file.name if attachment.file else attachment.external_file_name,
+            #"url": attachment.file.url,
+            "url": reverse("boards:download_attachment", args=(self.board.id, attachment.card_id, attachment.id)),
             "creation_datetime": attachment.creation_datetime,
         }
         return attachment_json
