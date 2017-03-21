@@ -242,7 +242,7 @@ class BoardFetcher(Fetcher):
 
     # Return the Trello Cards
     def _fetch_cards(self, debug=False):
-        trello_cards = self.trello_board.all_cards()
+        trello_cards = self._fetch_trello_cards()
 
         trello_movements_by_card = self._fetch_trello_card_movements_by_card()
         trello_comments_by_card = self._fetch_trello_comments_by_card()
@@ -259,9 +259,6 @@ class BoardFetcher(Fetcher):
         for card in self.cards:
 
             trello_card = card.trello_card
-            for list_ in self.lists:
-                list_uuid = list_.uuid
-                card_stats_by_list = card.trello_card.stats_by_list[list_uuid]
 
             # Label assignment to each card
             label_uuids = trello_card.idLabels
@@ -270,14 +267,9 @@ class BoardFetcher(Fetcher):
             for card_label in card_labels:
                 card.labels.add(card_label)
 
-            num_trello_card_members = card.members.all().count()
-            for member in card.members.all():
-                member_uuid = member.uuid
-
-                # Workflow card reports
-                for workflow in workflows:
-                    self._fetch_workflow(workflow, [card])
-
+            # Workflow card reports
+            for workflow in workflows:
+                self._fetch_workflow(workflow, [card])
 
     # Return the actions of the board grouped by the uuid of each card
     def _fetch_trello_cards(self):
@@ -293,6 +285,7 @@ class BoardFetcher(Fetcher):
         filters = {
             'filter': 'all',
             'fields': 'all',
+            'attachments': "true"
         }
 
         # While there are more than 1000 cards, make another request for the previous 1000 cards

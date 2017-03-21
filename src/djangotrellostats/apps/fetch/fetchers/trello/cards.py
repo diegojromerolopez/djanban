@@ -2,17 +2,20 @@
 
 from __future__ import unicode_literals, absolute_import
 
+import tempfile
 from collections import namedtuple
 from datetime import datetime
 
 import pytz
 from django.conf import settings
+from django.core.files.base import ContentFile
 from trello import ResourceUnavailable
 
 from djangotrellostats.apps.base.utils.datetime import localize_if_needed
-from djangotrellostats.apps.boards.models import Card, CardComment
+from djangotrellostats.apps.boards.models import Card, CardComment, CardAttachment
 from djangotrellostats.apps.members.models import Member, TrelloMemberProfile
 from djangotrellostats.apps.reports.models import CardMovement
+import requests
 
 
 # Fetch a card
@@ -115,12 +118,58 @@ class CardFetcher(object):
         # Creates the Card object
         card = self._create_from_trello_card(trello_card)
 
+        # Create attachments
+        CardFetcher._create_attachments(card)
+
         # Creation of the comments
-        comments = CardFetcher._create_comments(card)
+        CardFetcher._create_comments(card)
+
+        # There is some bug in Django that needs to be resolved in the OneToOne relationships
+        if not hasattr(card, "valuation_comment"):
+            card.valuation_comment = None
 
         card.update_spent_estimated_time()
 
         return card
+
+    # Create attachments of the card
+    @staticmethod
+    def _create_attachments(card):
+        card_attachments = []
+        card_deleted_attachments = {attachment.uuid: attachment for attachment in card.attachments.all()}
+        member_dict = {}
+
+        for trello_attachment in card.trello_card.attachments:
+            uuid = trello_attachment.id
+
+            try:
+                trello_member_id = trello_attachment.idMember
+                if trello_member_id not in member_dict:
+                    member_dict[trello_member_id] = Member.objects.get(trello_member_profile__trello_id=trello_member_id)
+                uploader = member_dict[trello_member_id]
+            except Member.DoesNotExist:
+                uploader = card.creator
+
+            try:
+                card_attachment = card.attachments.get(uuid=uuid)
+                if card_attachment.creation_datetime != trello_attachment.date:
+                    file_content_request = requests.get(trello_attachment.url)
+                    card_attachment.file.save(trello_attachment.name, ContentFile(file_content_request.text))
+                del card_deleted_attachments[uuid]
+            except CardAttachment.DoesNotExist:
+                card_attachment = CardAttachment(uuid=uuid, card=card, uploader=uploader)
+                card_attachment.creation_datetime = localize_if_needed(trello_attachment.date)
+                file_content_request = requests.get(trello_attachment.url)
+                card_attachment.file.save(trello_attachment.name, ContentFile(file_content_request.text))
+
+            card_attachments.append(card_attachment)
+            card_attachment.save()
+
+        # Delete all card attachments that are not present in trello.com
+        for attachment_uuid, attachment in card_deleted_attachments.items():
+            attachment.delete()
+
+        return card_attachments
 
     # Create comments of the card
     @staticmethod
