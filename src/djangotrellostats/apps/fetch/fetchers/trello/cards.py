@@ -140,10 +140,10 @@ class CardFetcher(object):
         member_dict = {}
 
         for trello_attachment in card.trello_card.attachments:
-            uuid = trello_attachment.id
+            uuid = trello_attachment["id"]
 
             try:
-                trello_member_id = trello_attachment.idMember
+                trello_member_id = trello_attachment["idMember"]
                 if trello_member_id not in member_dict:
                     member_dict[trello_member_id] = Member.objects.get(trello_member_profile__trello_id=trello_member_id)
                 uploader = member_dict[trello_member_id]
@@ -152,15 +152,15 @@ class CardFetcher(object):
 
             try:
                 card_attachment = card.attachments.get(uuid=uuid)
-                if card_attachment.creation_datetime != trello_attachment.date:
-                    file_content_request = requests.get(trello_attachment.url)
-                    card_attachment.file.save(trello_attachment.name, ContentFile(file_content_request.text))
+                if card_attachment.creation_datetime != trello_attachment["date"]:
+                    file_content_request = requests.get(trello_attachment["url"])
+                    card_attachment.file.save(trello_attachment["name"], ContentFile(file_content_request.text))
                 del card_deleted_attachments[uuid]
             except CardAttachment.DoesNotExist:
                 card_attachment = CardAttachment(uuid=uuid, card=card, uploader=uploader)
-                card_attachment.creation_datetime = localize_if_needed(trello_attachment.date)
-                file_content_request = requests.get(trello_attachment.url)
-                card_attachment.file.save(trello_attachment.name, ContentFile(file_content_request.text))
+                card_attachment.creation_datetime = localize_if_needed(trello_attachment["date"])
+                file_content_request = requests.get(trello_attachment["url"])
+                card_attachment.file.save(trello_attachment["name"], ContentFile(file_content_request.text))
 
             card_attachments.append(card_attachment)
             card_attachment.save()
