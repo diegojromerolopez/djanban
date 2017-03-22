@@ -15,4 +15,4 @@ fi
 
 ./venv/bin/python ./src/manage.py migrate
 
-./venv/bin/python ./src/manage.py runserver
+./venv/bin/python ./src/manage.py runserver --insecure

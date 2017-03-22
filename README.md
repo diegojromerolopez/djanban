@@ -115,12 +115,17 @@ SECRET_KEY = '<whatever string you want>'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Set your email to be notified when a 500 error happens
+ADMINS = (
+    ("Your name", "youremail@example.com"),
+)
+
 DOMAIN = "<your domain>"
 ALLOWED_HOSTS = [DOMAIN]
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.<dbms>',
         'NAME': '<database name>',
         'USER': '<user>',
         'PASSWORD': '<password>',
@@ -138,6 +143,7 @@ EMAIL_PORT = <email host portr>
 EMAIL_HOST_USER = '<email host user>'
 EMAIL_HOST_PASSWORD = '<email host user password>'
 DEFAULT_FROM_EMAIL = '<email host user from email>'
+SERVER_EMAIL = '<email host user from email>'
 
 # Date format that will be used in templates, by default is Y-m-d. Optional.
 DATE_FORMAT = "<LOCAL DATE FORMAT IN TEMPLATES>"
