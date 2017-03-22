@@ -1271,6 +1271,7 @@ class CardAttachment(models.Model):
             self.file.save(self.external_file_name, ContentFile(file_content_request.text))
             self.save()
 
+
 # Each one of the comments made by members in each card
 class CardComment(models.Model):
 

@@ -6,6 +6,9 @@ from django.contrib import admin
 from djangotrellostats.apps.index import views as index_views
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve as serve_static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
 
 
 urlpatterns = [
@@ -34,3 +37,11 @@ urlpatterns = [
 
 ] + static(settings.ANGULAR_URL, document_root=settings.ANGULAR_ROOT)\
   + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if not settings.DEBUG:
+    urlpatterns += [
+        url(r'^media/(?P<path>.*)$', serve_static, { 'document_root': settings.MEDIA_ROOT, }),
+        url(r'^static/(?P<path>.*)$', serve_static, { 'document_root': settings.STATIC_ROOT })
+    ]
+
+

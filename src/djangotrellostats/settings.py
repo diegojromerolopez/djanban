@@ -37,6 +37,10 @@ DOMAIN = settings_local.DOMAIN
 PORT = settings_local.PORT
 ALLOWED_HOSTS = settings_local.ALLOWED_HOSTS
 
+ADMINS = []
+if hasattr(settings_local, "ADMINS"):
+    ADMINS = settings_local.ADMINS
+
 SITE_ID = 1
 
 # Administrator group
@@ -182,6 +186,7 @@ EMAIL_PORT = settings_local.EMAIL_PORT
 EMAIL_HOST_USER = settings_local.EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = settings_local.EMAIL_HOST_PASSWORD
 DEFAULT_FROM_EMAIL = settings_local.DEFAULT_FROM_EMAIL
+SERVER_EMAIL = settings_local.SERVER_EMAIL
 
 # HTTPS configuration
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
