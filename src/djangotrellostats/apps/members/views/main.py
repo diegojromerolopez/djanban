@@ -161,7 +161,7 @@ def edit_profile(request, member_id):
         form = Form(instance=member)
 
     replacements = {"member": member, "form": form}
-    return render(request, "members/edit.html", replacements)
+    return render(request, "members/edit_profile.html", replacements)
 
 
 # Change your user profile data
