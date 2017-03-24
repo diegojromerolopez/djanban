@@ -2,20 +2,17 @@
 
 from __future__ import unicode_literals
 
-from PIL import Image, ImageDraw, ImageFont
-
-from django.conf import settings
+import hashlib
+import os
 from datetime import timedelta
 
-import hashlib
-
 import numpy
+from PIL import Image, ImageDraw, ImageFont
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files import File
 from django.db import models
-from django.db import transaction
 from django.db.models import Sum, Avg, Q, Count
-from django.urls import reverse
 from django.utils import timezone
 from isoweek import Week
 
@@ -353,7 +350,7 @@ class Member(models.Model):
         draw.text((4, 8), initials, (0, 0, 0), font=font)
 
         filename = "{0}.png".format(initials)
-        path = "/tmp/{0}".format(filename)
+        path = os.path.join(settings.TMP_DIR, "{0}".format(filename))
 
         canvas.save(path, "PNG")
 
