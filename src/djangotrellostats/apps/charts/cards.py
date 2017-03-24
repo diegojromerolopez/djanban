@@ -355,6 +355,10 @@ def cumulative_flow_diagram(board, day_step=1):
                                   show_minor_x_labels=False,
                                   human_readable=True, x_label_rotation=65)
 
+    # If there are no cards, return the empty chart
+    if not board.active_cards.all().exists():
+        return cumulative_chart.render_django_response()
+
     start_working_date = board.get_working_start_date()
     end_working_date = board.get_working_end_date()
     if start_working_date is None or end_working_date is None:
@@ -424,6 +428,9 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=1):
         boards = [board]
     else:
         boards = get_user_boards(current_user)
+
+    if Card.objects.filter(board__in=boards).exists():
+        return cumulative_chart.render_django_response()
 
     start_working_date = numpy.min(filter(None, [board_i.get_working_start_date() for board_i in boards]))
     end_working_date = numpy.max(filter(None, [board_i.get_working_end_date() for board_i in boards]))
@@ -512,6 +519,11 @@ def cumulative_card_evolution(current_user, board=None, day_step=1):
     cumulative_chart.x_labels_major_every = 7
     cumulative_chart.show_only_major_dots = True
 
+    # If there are no cards, return the empty chart
+    if not Card.objects.filter(board__in=boards).exists():
+        return cumulative_chart.render_django_response()
+
+    # If there have no been work, return the empty chart
     start_working_date = numpy.min(filter(None, [board_i.get_working_start_date() for board_i in boards]))
     end_working_date = numpy.max(filter(None, [board_i.get_working_end_date() for board_i in boards]))
     if start_working_date is None or end_working_date is None:
