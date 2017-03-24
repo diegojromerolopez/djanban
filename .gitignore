@@ -13,9 +13,7 @@ env3/
 venv/
 venv.desktop_app/
 venv3/
-build/
 develop-eggs/
-dist/
 downloads/
 src/angularapp/node_modules/*
 eggs/
