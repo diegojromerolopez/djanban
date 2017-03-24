@@ -20,7 +20,7 @@ strategic decisions like:
 
 ## Demo site
 
-[https://djangotrellostats.pythonanywhere.com/](Python Anywhere Demo)
+![Python Anywhere Demo](https://djangotrellostats.pythonanywhere.com/)
 
 Sign up in this site or use user test@mailinator.com and password **test**.
 
