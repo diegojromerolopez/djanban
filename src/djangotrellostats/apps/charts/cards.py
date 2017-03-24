@@ -429,7 +429,7 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=1):
     else:
         boards = get_user_boards(current_user)
 
-    if Card.objects.filter(board__in=boards).exists():
+    if not Card.objects.filter(board__in=boards, is_closed=False).exists():
         return cumulative_chart.render_django_response()
 
     start_working_date = numpy.min(filter(None, [board_i.get_working_start_date() for board_i in boards]))
@@ -441,10 +441,10 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=1):
     list_type_values = {list_type: [] for list_type in List.LIST_TYPES}
 
     # Cards of current user boards
-    cards = Card.objects.filter(board__in=boards)
+    cards = Card.objects.filter(board__in=boards, is_closed=False)
 
     # Card movements of current user boards
-    card_movements = CardMovement.objects.filter(board__in=boards)
+    card_movements = CardMovement.objects.filter(board__in=boards, card__is_closed=False)
 
     x_labels = []
 
@@ -520,7 +520,7 @@ def cumulative_card_evolution(current_user, board=None, day_step=1):
     cumulative_chart.show_only_major_dots = True
 
     # If there are no cards, return the empty chart
-    if not Card.objects.filter(board__in=boards).exists():
+    if not Card.objects.filter(board__in=boards, is_closed=False).exists():
         return cumulative_chart.render_django_response()
 
     # If there have no been work, return the empty chart
