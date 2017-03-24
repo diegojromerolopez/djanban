@@ -18,7 +18,17 @@ strategic decisions like:
 - What's the lead and cycle time of each project tasks?
 - Is the project on time according to its percentage of completion?
 
-**Want to see it running in your computer?** It's easy:
+## Demo site
+
+[https://djangotrellostats.pythonanywhere.com/](Python Anywhere Demo)
+
+Sign up in this site or use user test@mailinator.com and password **test**.
+
+Note: don't store any sensible information or file you would like to keep
+because database is recreated each few hours.
+
+
+## Want to see it running in your computer? It's easy:
 
 Run this commands in your terminal:
 
