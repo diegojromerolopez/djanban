@@ -357,11 +357,13 @@ def cumulative_flow_diagram(board, day_step=1):
 
     # If there are no cards, return the empty chart
     if not board.active_cards.all().exists():
+        cumulative_chart = pygal.Line(title=chart_title)
         return cumulative_chart.render_django_response()
 
     start_working_date = board.get_working_start_date()
     end_working_date = board.get_working_end_date()
     if start_working_date is None or end_working_date is None:
+        cumulative_chart = pygal.Line(title=chart_title)
         return cumulative_chart.render_django_response()
 
     # Y-Axis
@@ -430,11 +432,13 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=1):
         boards = get_user_boards(current_user)
 
     if not Card.objects.filter(board__in=boards, is_closed=False).exists():
+        cumulative_chart = pygal.Line(title=chart_title)
         return cumulative_chart.render_django_response()
 
     start_working_date = numpy.min(filter(None, [board_i.get_working_start_date() for board_i in boards]))
     end_working_date = numpy.max(filter(None, [board_i.get_working_end_date() for board_i in boards]))
     if start_working_date is None or end_working_date is None:
+        cumulative_chart = pygal.Line(title=chart_title)
         return cumulative_chart.render_django_response()
 
     # Y-Axis
