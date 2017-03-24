@@ -24,7 +24,7 @@
           window.APP_URL_PREFIX = "http://{{DOMAIN}}:{{PORT}}/static/angularapps/taskboard/";
           window.API_URL_PREFIX = "http://{{DOMAIN}}:{{PORT}}/api/";
 
-          System.import(window.APP_URL_PREFIX + 'app/main').catch(function(err){
+          System.import(window.APP_URL_PREFIX + 'app/main.js').catch(function(err){
               console.error(err);
           });
         </script>
