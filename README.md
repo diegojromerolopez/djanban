@@ -364,7 +364,7 @@ This project uses [Trello API](https://developers.trello.com/) to help users of 
 
 The license of this project is [MIT](LICENSE) and the logos have been created with [Mark Maker](http://emblemmatic.org/markmaker).
 
-# Questions? Suggestions?
+# Questions? Suggestions? Need some help?
 
 Don't hesitate to contact me, write me to diegojREMOVETHISromeroREMOVETHISlopez@REMOVETHISgmail.REMOVETHIScom.
 
