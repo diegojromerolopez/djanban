@@ -6,7 +6,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATABASE_PATH = os.path.join(BASE_DIR, "../resources/database/djangotrellostats.db")
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = u'sdfjasñldfkjsadflñkasjdfksdjf'
+SECRET_KEY = u'sdfjaxsldfkjsadflxkasjdfksdjf'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

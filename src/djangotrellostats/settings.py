@@ -102,6 +102,7 @@ MIDDLEWARE_CLASSES = (
 # Based on the tutorial that integrates Django with Angular
 # (https://4sw.in/blog/2016/django-angular2-tutorial-part-2/)
 ANGULAR_URL = '/ng/'
+ANGULAR_URL_REGEX = r'^ng/(?P<path>.*)$'
 ANGULAR_ROOT = os.path.join(BASE_DIR, 'angularapp/')
 
 ROOT_URLCONF = 'djangotrellostats.urls'
