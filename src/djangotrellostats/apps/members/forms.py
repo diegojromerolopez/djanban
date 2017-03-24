@@ -117,10 +117,8 @@ class TrelloSignUpForm(LocalSignUpForm):
 
         return member
 
-
 # Edition of the Member
 class MemberForm(models.ModelForm):
-
     class Meta:
         model = Member
         fields = ["biography", "is_public"]
@@ -131,16 +129,10 @@ class MemberForm(models.ModelForm):
         self.fields["last_name"] = forms.CharField(label=u"Last name", max_length=64, required=True)
         self.fields["email"] = forms.EmailField(label=u"Email and username", max_length=64, required=True)
         self.fields["password1"] = forms.CharField(label=u"Password", widget=forms.PasswordInput(), max_length=16,
-                                                   required=True)
+                                                   required=False)
         self.fields["password2"] = forms.CharField(label=u"Repeat the password", widget=forms.PasswordInput(),
-                                                   max_length=16, required=True)
+                                                   max_length=16, required=False)
         self.order_fields(["first_name", "last_name", "email", "password", "password", "biography"])
-
-        # Default values
-        if self.instance.user:
-            self.initial["first_name"] = self.instance.user.first_name
-            self.initial["last_name"] = self.instance.user.last_name
-            self.initial["email"] = self.instance.user.email
 
     def clean(self):
         cleaned_data = super(MemberForm, self).clean()
@@ -151,13 +143,7 @@ class MemberForm(models.ModelForm):
         if cleaned_data.get("password1"):
             cleaned_data["password"] = cleaned_data.get("password1")
 
-        if cleaned_data.get("email"):
-            # Check if username is unique
-            cleaned_data["username"] = cleaned_data["email"]
-            if User.objects.filter(username=cleaned_data["username"]).exists():
-                raise ValidationError(u"You have already an user. Have you forgotten your password?")
-
-        return self.cleaned_data
+        return cleaned_data
 
     def save(self, commit=True):
         if not self.instance.user:
@@ -167,7 +153,7 @@ class MemberForm(models.ModelForm):
 
         user.first_name = self.cleaned_data.get("first_name")
         user.last_name = self.cleaned_data.get("last_name")
-        user.username = self.cleaned_data.get("username")
+        user.username = self.cleaned_data.get("username", self.cleaned_data.get("email"))
         user.email = self.cleaned_data.get("email")
 
         if self.cleaned_data.get("password"):
@@ -181,15 +167,67 @@ class MemberForm(models.ModelForm):
         return self.instance
 
 
-# Administrator edits a member profile
-class AdminMemberForm(MemberForm):
+# Edition of the Member
+class NewMemberForm(MemberForm):
+
+    class Meta:
+        model = Member
+        fields = ["biography", "is_public"]
+
+    def __init__(self, *args, **kwargs):
+        super(MemberForm, self).__init__(*args, **kwargs)
+        self.fields["password1"].required = True
+        self.fields["password2"].required = True
+
+
+    def clean(self):
+        cleaned_data = super(MemberForm, self).clean()
+
+        if cleaned_data.get("email"):
+            # Check if username is unique
+            cleaned_data["username"] = cleaned_data["email"]
+            if User.objects.filter(username=cleaned_data["username"]).exists():
+                raise ValidationError(u"You have already an user. Have you forgotten your password?")
+
+        return self.cleaned_data
+
+
+# Edition of member data
+class EditMemberForm(MemberForm):
+    def __init__(self, *args, **kwargs):
+        super(EditMemberForm, self).__init__(*args, **kwargs)
+        self.fields["password1"].required = False
+        self.fields["password2"].required = False
+
+        self.initial["first_name"] = self.instance.user.first_name
+        self.initial["last_name"] = self.instance.user.last_name
+        self.initial["email"] = self.instance.user.email
+
+
+# Administrator creates a member profile
+class NewAdminMemberForm(NewMemberForm):
     class Meta(MemberForm.Meta):
         model = Member
         fields = ["biography", "is_developer", "on_holidays", "minimum_working_hours_per_day",
                   "minimum_working_hours_per_week", "is_public"]
 
     def __init__(self, *args, **kwargs):
-        super(AdminMemberForm, self).__init__(*args, **kwargs)
+        super(NewAdminMemberForm, self).__init__(*args, **kwargs)
+
+        self.order_fields(["first_name", "last_name", "email", "password", "password", "biography",
+                           "is_developer", "on_holidays", "minimum_working_hours_per_day",
+                           "minimum_working_hours_per_week", "spent_time_factor"])
+
+
+# Administrator edits a member profile
+class EditAdminMemberForm(EditMemberForm):
+    class Meta(MemberForm.Meta):
+        model = Member
+        fields = ["biography", "is_developer", "on_holidays", "minimum_working_hours_per_day",
+                  "minimum_working_hours_per_week", "is_public"]
+
+    def __init__(self, *args, **kwargs):
+        super(EditAdminMemberForm, self).__init__(*args, **kwargs)
 
         self.order_fields(["first_name", "last_name", "email", "password", "password", "biography",
                            "is_developer", "on_holidays", "minimum_working_hours_per_day",

@@ -2,19 +2,12 @@
 
 from __future__ import unicode_literals
 
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db.models import Q
-from django.http.response import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
+from django.http.response import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 
-from djangotrellostats.apps.base.auth import user_is_administrator, get_user_boards, user_is_member
 from djangotrellostats.apps.base.decorators import member_required
-from djangotrellostats.apps.members.decorators import administrator_required
-from djangotrellostats.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm, EditTrelloMemberProfileForm, AdminMemberForm, \
-    MemberForm, SpentTimeFactorForm, DeleteSpentTimeForm
+from djangotrellostats.apps.members.forms import SpentTimeFactorForm, DeleteSpentTimeForm
 from djangotrellostats.apps.members.models import Member, SpentTimeFactor
 from djangotrellostats.apps.members.views.main import _assert_current_member_can_edit_member
 

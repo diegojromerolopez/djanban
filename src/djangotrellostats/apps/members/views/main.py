@@ -14,8 +14,8 @@ from django.shortcuts import render
 from djangotrellostats.apps.base.auth import user_is_administrator, get_user_boards, user_is_member
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.members.decorators import administrator_required
-from djangotrellostats.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm, EditTrelloMemberProfileForm, AdminMemberForm, \
-    MemberForm
+from djangotrellostats.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm,\
+    EditTrelloMemberProfileForm, EditMemberForm, NewMemberForm, EditAdminMemberForm
 from djangotrellostats.apps.members.models import Member
 
 
@@ -60,7 +60,7 @@ def new(request):
     member = Member(creator=current_member, is_public=False)
     if request.method == "POST":
 
-        form = MemberForm(request.POST, instance=member)
+        form = NewMemberForm(request.POST, instance=member)
         if form.is_valid():
             with transaction.atomic():
                 form.save(commit=True)
@@ -69,7 +69,7 @@ def new(request):
             return HttpResponseRedirect(reverse("members:view_members"))
 
     else:
-        form = MemberForm(instance=member)
+        form = NewMemberForm(instance=member)
 
     replacements = {"member": member, "form": form}
     return render(request, "members/new.html", replacements)
@@ -146,9 +146,9 @@ def edit_profile(request, member_id):
         return HttpResponseForbidden()
 
     # Only the administrator has permission of a full change of member attributes
-    Form = MemberForm
+    Form = EditMemberForm
     if current_user_is_admin_for_this_member:
-        Form = AdminMemberForm
+        Form = EditAdminMemberForm
 
     if request.method == "POST":
 
