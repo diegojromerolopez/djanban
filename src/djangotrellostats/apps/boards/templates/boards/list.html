@@ -72,7 +72,7 @@
                             </a>
 
                             {% if board.is_ready and board.is_fetched and member %}
-                                <a class="btn btn-primary" href="{% url 'boards:view_dashboard' board.id %}" title="View full card board of {{board.name}}">
+                                <a class="btn btn-primary" href="{% url 'boards:view_taskboard' board.id %}" title="View full card board of {{board.name}}">
                                     <span class="fa fa-navicon fa-rotate-90"></span> Full card board
                                 </a>
                             {% endif %}

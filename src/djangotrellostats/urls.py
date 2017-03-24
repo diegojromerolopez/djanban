@@ -35,14 +35,14 @@ urlpatterns = [
 
     url(r'^captcha/', include('captcha.urls')),
 
-] + static(settings.ANGULAR_URL, document_root=settings.ANGULAR_ROOT)\
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)\
   + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if not settings.DEBUG:
     urlpatterns += [
         url(r'^media/(?P<path>.*)$', serve_static, { 'document_root': settings.MEDIA_ROOT, }),
         url(r'^static/(?P<path>.*)$', serve_static, { 'document_root': settings.STATIC_ROOT }),
-        url(settings.ANGULAR_URL_REGEX, serve_static, { 'document_root': settings.ANGULAR_ROOT })
+        #url(settings.ANGULAR_URL_REGEX, serve_static, { 'document_root': settings.ANGULAR_ROOT })
     ]
 
 

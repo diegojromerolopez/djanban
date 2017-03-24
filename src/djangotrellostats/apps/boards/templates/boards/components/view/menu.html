@@ -34,8 +34,8 @@
                     {% endif %}
                     {% if board.is_ready and board.is_fetched %}
                         {% if member %}
-                            <li {% if url_name == "view_dashboard" %}class="active"{% endif %}>
-                                <a href="{% url 'boards:view_dashboard' board.id %}" title="Full board for {{board.name}}">
+                            <li {% if url_name == "view_taskboard" %}class="active"{% endif %}>
+                                <a href="{% url 'boards:view_taskboard' board.id %}" title="Full board for {{board.name}}">
                                     <span class="fa fa-navicon fa-rotate-90"></span>
                                 </a>
                             </li>

@@ -94,7 +94,8 @@ urlpatterns = [
 
     # Routing with catch-em-all pattern useful for allowing loading push-state URLs
     # Read https://www.metaltoad.com/blog/url-routing-decoupled-app-angular-2-and-django for more information.
-    url(r'^dashboard/(?P<board_id>\d+)(/(?P<path>.*))?/$', boards.view_dashboard, name="dashboard"),
-    url(r'^dashboard/(?P<board_id>\d+)(/(?P<path>.*))?/$', boards.view_dashboard, name="view_dashboard"),
+    url(r'^dashboard/(?P<board_id>\d+)(/(?P<path>.*))?/$', boards.view_taskboard, name="dashboard"),
+    url(r'^dashboard/(?P<board_id>\d+)(/(?P<path>.*))?/$', boards.view_taskboard, name="view_dashboard"),
+    url(r'^dashboard/(?P<board_id>\d+)(/(?P<path>.*))?/$', boards.view_taskboard, name="view_taskboard"),
 
 ]

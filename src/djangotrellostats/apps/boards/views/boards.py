@@ -242,7 +242,7 @@ def view_gantt_chart(request, board_id):
 
 # Dynamic task board view
 @member_required
-def view_dashboard(request, board_id, path=""):
+def view_taskboard(request, board_id, path=""):
     try:
         board = get_user_boards(request.user).get(id=board_id)
         member = None
@@ -258,7 +258,7 @@ def view_dashboard(request, board_id, path=""):
         "DOMAIN": settings.DOMAIN,
         "PORT": settings.PORT
     }
-    return render(request, "boards/view_dashboard.html", replacements)
+    return render(request, "boards/view_taskboard.html", replacements)
 
 
 # View board

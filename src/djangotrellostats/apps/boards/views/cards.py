@@ -228,14 +228,14 @@ def add_spent_estimated_time(request, board_id, card_id):
 # View card
 @login_required
 def view(request, board_id, card_id):
-    return HttpResponseRedirect(reverse("boards:view_dashboard", args=(board_id, "/card/{0}".format(card_id))))
+    return HttpResponseRedirect(reverse("boards:view_taskboard", args=(board_id, "/card/{0}".format(card_id))))
 
 
 @login_required
 def view_short_url(request, board_id, card_uuid):
     board = get_user_boards(request.user).get(id=board_id)
     card = board.cards.get(uuid=card_uuid)
-    return HttpResponseRedirect(reverse("boards:view_dashboard", args=(board.id,"/card/{0}".format(card.id))))
+    return HttpResponseRedirect(reverse("boards:view_taskboard", args=(board.id,"/card/{0}".format(card.id))))
 
 
 # View card report
