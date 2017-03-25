@@ -304,13 +304,9 @@ of this requirement.
 
 # Permissions
 
-There is a group called 'Administrators' that can manage the passwords and the access of other members.
-
-The name of this group can be changed by modifying **ADMINISTRATOR_GROUP** setting in **djangotrellostats/settings.py**.
-
-This group will be automatically created and you have to populate it with the administrator member users.
-
 There is no use of django permissions yet.
+
+Only board creators have especial permissions with the board they created.  
 
 # Reports
 
