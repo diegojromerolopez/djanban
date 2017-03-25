@@ -63,12 +63,16 @@ class Member(models.Model):
         super(Member, self).__init__(*args, **kwargs)
 
     # Adjust spent time according to the factor specified by date intervals
-    def adjust_daily_spent_time(self, daily_spent_time, attribute="spent_time"):
+    def adjust_daily_spent_time(self, daily_spent_time, attribute="spent_time", spent_time_factors=None):
+
+        if spent_time_factors is None:
+            spent_time_factors = self.spent_time_factors.all()
 
         return Member.adjust_daily_spent_time_from_spent_time_factors(
             daily_spent_time=daily_spent_time,
-            spent_time_factors=self.spent_time_factors.all(),
-            attribute=attribute)
+            spent_time_factors=spent_time_factors,
+            attribute=attribute
+        )
 
     # Adjust spent time according to the spent time factors passed as parameters
     @staticmethod
@@ -182,16 +186,17 @@ class Member(models.Model):
 
     # Returns the number of hours this member has develop today
     def get_today_spent_time(self, board=None):
-        # Note that only if the member is a developer can his/her spent time computed
-        if not self.is_developer:
-            raise AssertionError(u"This member is not a developer")
-        # We assume that we will not be working on holidays ever
-        if self.on_holidays:
-            return 0
         # Getting the spent time for today
         now = timezone.now()
         today = now.date()
         return self.get_spent_time(today, board)
+
+    # Returns the number of hours this member has develop today
+    def get_today_adjusted_spent_time(self, board=None):
+        # Getting the adjusted spent time for today
+        now = timezone.now()
+        today = now.date()
+        return self.get_adjusted_spent_time(today, board)
 
     # Returns the number of hours this member developed yesterday
     def get_yesterday_spent_time(self, board=None):
@@ -199,6 +204,13 @@ class Member(models.Model):
         today = now.date()
         yesterday = today - timedelta(days=1)
         return self.get_spent_time(yesterday, board)
+
+    # Returns the number of adjusted hours this member developed yesterday
+    def get_yesterday_adjusted_spent_time(self, board=None):
+        now = timezone.now()
+        today = now.date()
+        yesterday = today - timedelta(days=1)
+        return self.get_adjusted_spent_time(yesterday, board)
 
     # Returns the number of hours this member has develop on a given date
     def get_spent_time(self, date, board=None):
@@ -212,7 +224,21 @@ class Member(models.Model):
         if board is not None:
             spent_time_on_date_filter["board"] = board
 
-        return self._get_spent_time_sum_from_filter(spent_time_on_date_filter)
+        return self._sum_spent_time_from_filter(spent_time_on_date_filter)
+
+    # Returns the number of adjusted hours this member has develop on a given date
+    def get_adjusted_spent_time(self, date, board=None):
+        # Note that only if the member is a developer can his/her spent time computed
+        if not self.is_developer:
+            raise AssertionError(u"This member is not a developer")
+
+        spent_time_on_date_filter = {"date": date}
+
+        # If we pass the board, only this board spent times will be given
+        if board is not None:
+            spent_time_on_date_filter["board"] = board
+
+        return self._sum_adjusted_spent_time_from_filter(spent_time_on_date_filter)
 
     # Returns the number of hours this member has develop on a given week
     def get_weekly_spent_time(self, week, year, board=None):
@@ -224,26 +250,64 @@ class Member(models.Model):
         if board is not None:
             spent_time_on_week_filter["board"] = board
 
-        return self._get_spent_time_sum_from_filter(spent_time_on_week_filter)
+        return self._sum_spent_time_from_filter(spent_time_on_week_filter)
 
-    # Returns the number of hours this member has develop on a given month
-    def get_monthly_spent_time(self, month, year, board=None):
-        spent_time_on_week_filter = {"date__month": month, "date__year": year}
+    # Returns the number of adjusted hours this member has develop on a given week
+    def get_weekly_adjusted_spent_time(self, week, year, board=None):
+        start_date = Week(year, week).monday()
+        end_date = Week(year, week).friday()
+        spent_time_on_week_filter = {"date__gte": start_date, "date__lte": end_date}
 
         # If we pass the board, only this board spent times will be given
         if board is not None:
             spent_time_on_week_filter["board"] = board
 
-        return self._get_spent_time_sum_from_filter(spent_time_on_week_filter)
+        return self._sum_adjusted_spent_time_from_filter(spent_time_on_week_filter)
+
+    # Returns the number of hours this member has develop on a given month
+    def get_monthly_spent_time(self, month, year, board=None):
+        spent_time_on_month_filter = {"date__month": month, "date__year": year}
+
+        # If we pass the board, only this board spent times will be given
+        if board is not None:
+            spent_time_on_month_filter["board"] = board
+
+        return self._sum_spent_time_from_filter(spent_time_on_month_filter)
+
+    # Returns the number of adjusted hours this member has develop on a given month
+    def get_monthly_adjusted_spent_time(self, month, year, board=None):
+        spent_time_on_month_filter = {"date__month": month, "date__year": year}
+
+        # If we pass the board, only this board spent times will be given
+        if board is not None:
+            spent_time_on_month_filter["board"] = board
+
+        return self._sum_adjusted_spent_time_from_filter(spent_time_on_month_filter)
+
+    # Returns the sum of this member's number of spent time for the daily spent filter passed as parameter
+    def _sum_spent_time_from_filter(self, daily_spent_time_filter):
+        daily_spent_times = self.daily_spent_times.filter(**daily_spent_time_filter)
+        return Member._sum_spent_time(daily_spent_times)
+
+    # Returns the sum of this member's number of adjusted spent time for the daily spent filter passed as parameter
+    def _sum_adjusted_spent_time_from_filter(self, daily_spent_time_filter):
+        daily_spent_times = self.daily_spent_times.filter(**daily_spent_time_filter)
+        spent_time_factors = self.spent_time_factors.all()
+        adjusted_spent_time_sum = 0
+        for daily_spent_time in daily_spent_times:
+            adjusted_spent_time_sum += self.adjust_daily_spent_time(
+                daily_spent_time, attribute="spent_time", spent_time_factors=spent_time_factors
+            )
+        return adjusted_spent_time_sum
 
     # Returns the number of hours this member has develop given a filter
-    def _get_spent_time_sum_from_filter(self, spent_time_filter):
-        spent_time_on_date = self.daily_spent_times.filter(**spent_time_filter). \
+    @staticmethod
+    def _sum_spent_time(daily_spent_times):
+        spent_time = daily_spent_times. \
             aggregate(sum=Sum("spent_time"))["sum"]
-
-        if spent_time_on_date is None:
+        if spent_time is None:
             return 0
-        return spent_time_on_date
+        return spent_time
 
     # Destroy boards created by this member
     def delete_current_data(self):

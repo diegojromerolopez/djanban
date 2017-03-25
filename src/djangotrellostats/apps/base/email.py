@@ -2,18 +2,16 @@
 
 from __future__ import unicode_literals
 
-from django.contrib.auth.models import Group
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
+from djangotrellostats.apps.reports.models import ReportRecipient
 
 
 # Warn administrators of an error
 def warn_administrators(subject, message):
     email_subject = u"[DjangoTrelloStats] [Warning] {0}".format(subject)
-
-    administrator_group = Group.objects.get(name=settings.ADMINISTRATOR_GROUP)
-    administrator_users = administrator_group.user_set.all()
-    for administrator_user in administrator_users:
+    report_recipients = ReportRecipient.objects.filter(is_active=True, send_errors=True)
+    for report_recipient in report_recipients:
         email_message = EmailMultiAlternatives(email_subject, message, settings.EMAIL_HOST_USER,
-                                               [administrator_user.email])
+                                               [report_recipient.email])
         email_message.send()

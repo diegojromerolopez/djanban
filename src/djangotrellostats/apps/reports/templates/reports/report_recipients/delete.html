@@ -1,0 +1,16 @@
+{% extends "base/base.html" %}
+
+{% load staticfiles %}
+
+{% block page_title %}Delete {{report_recipient.email}}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6 center-block">
+            <h1>Delete report recipient {{report_recipient.email}}</h1>
+            <div class="large-form">
+                {% include "forms/form.html" %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

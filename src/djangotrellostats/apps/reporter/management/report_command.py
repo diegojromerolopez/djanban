@@ -1,7 +1,9 @@
+
+from __future__ import unicode_literals
 import datetime
 
 from django.conf import settings
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand
 from django.template.loader import get_template
@@ -9,7 +11,8 @@ from django.utils import timezone
 
 from djangotrellostats.apps.boards.models import Board
 from djangotrellostats.apps.members.models import Member
-from djangotrellostats.utils.week import get_iso_week_of_year
+from djangotrellostats.apps.reports.models import ReportRecipient
+from djangotrellostats.utils.week import get_iso_week_of_year, start_of_week_of_year, end_of_week_of_year
 
 
 class ReportCommand(BaseCommand):
@@ -51,29 +54,32 @@ class ReportCommand(BaseCommand):
                      txt_template_path, html_template_path, csv_file_name):
 
         # This report will be sent to each one of the administrators
-        administrator_group = Group.objects.get(name=settings.ADMINISTRATOR_GROUP)
-        administrator_users = administrator_group.user_set.all()
-        for administrator_user in administrator_users:
+        report_recipients = ReportRecipient.objects.filter(is_active=True)
+        for report_recipient in report_recipients:
             self.send_report(
-                daily_spent_times, administrator_user, subject,
+                daily_spent_times, report_recipient, subject,
                 txt_template_path, html_template_path, csv_file_name
             )
-            self.stdout.write(self.style.SUCCESS(u"Report sent to {0}".format(administrator_user.email)))
-        return administrator_users
+            self.stdout.write(self.style.SUCCESS(u"Report sent to {0}".format(report_recipient.email)))
+        return report_recipients
 
     # Send a report to one administrator user
-    def send_report(self, daily_spent_times, administrator_user, subject,
+    def send_report(self, daily_spent_times, report_recipient, subject,
                     txt_template_path, html_template_path, csv_file_name):
 
         week = get_iso_week_of_year(self.date)
+        start_week_date = start_of_week_of_year(week, self.date.year)
+        end_week_date = end_of_week_of_year(week, self.date.year)
         replacements = {
+            "start_week_date": start_week_date,
+            "end_week_date": end_week_date,
             "date": self.date,
             "day": self.date.day,
             "week": week,
             "month": self.date.month,
             "year": self.date.year,
-            "administrator": administrator_user,
-            "boards": Board.objects.all(),
+            "report_recipient": report_recipient,
+            "boards": report_recipient.boards.all(),
             "developer_members": Member.objects.filter(is_developer=True, on_holidays=False).order_by("trello_member_profile__username"),
             "daily_spent_times": daily_spent_times,
         }
@@ -83,7 +89,7 @@ class ReportCommand(BaseCommand):
 
         csv_report = get_template('daily_spent_times/csv.txt').render({"spent_times": daily_spent_times})
 
-        message = EmailMultiAlternatives(subject, txt_message, settings.EMAIL_HOST_USER, [administrator_user.email])
+        message = EmailMultiAlternatives(subject, txt_message, settings.EMAIL_HOST_USER, [report_recipient.email])
         message.attach_alternative(html_message, "text/html")
         message.attach(csv_file_name, csv_report, 'text/csv')
         message.send()

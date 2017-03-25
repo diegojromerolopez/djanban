@@ -37,6 +37,11 @@
                                 <span class="fa fa-users"></span> Members
                             </a>
                         </li>
+                        <li role="presentation" {% if url_namespace == "reports" %}class="active"{% endif %}>
+                            <a href="{% url 'reports:view_report_recipients' %}" title="View report recipients">
+                                <span class="fa fa-at"></span>
+                            </a>
+                        </li>
                         <li role="presentation" {% if url_namespace == "dev_environment"  %}class="active"{% endif %}>
                             <a href="{% url 'dev_environment:index' %}" title="View software development environment">
                                 <span class="fa fa-building-o"></span> Env.

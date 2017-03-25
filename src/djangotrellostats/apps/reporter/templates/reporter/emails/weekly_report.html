@@ -4,44 +4,59 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Weekly report for {{administrator_user.username}}</title>
+        <title>Weekly report for {{report_recipient.full_name}}</title>
     </head>
     <body>
         <div>
-            <div>
-                <h1>Spent times in week {{year}}-W{{week}} by developer</h1>
+            <div style="margin-bottom: 1.2em">
+                <h1>Spent times in week {{year}}-W{{week}} ({{start_week_date}} to {{end_week_date}}) by developer</h1>
                 {% for member in developer_members %}
-                    <p>
-                        <span><strong>{{member.external_username}}</strong></span>
-                        <span>{{member|call:'get_weekly_spent_time'|arg:week|arg:year|end_call|floatformat:"-2"}} hours</span>
-                    </p>
+                    {% with member_spent_time=member|call:'get_monthly_spent_time'|arg:month|arg:year|end_call %}
+                        {% if member_spent_time > 0 %}
+                            <div style="margin-bottom: 1em">
+                                <h2>{{member.external_username}}</h2>
+                                <span>{{member_spent_time|floatformat:"-2"}} hours</span>
+                                <span><strong>{{member|call:'get_weekly_adjusted_spent_time'|arg:week|arg:year|end_call|floatformat:"-2"}} hours</strong></span>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
                 {% endfor %}
             </div>
 
-            <div>
+            <div style="margin-bottom: 1.2em">
                 <h1>Spent times in week {{year}}-W{{week}} by board</h1>
                 {% for board in boards %}
-                    {% if board.is_fetched %}
-                        <div>
-                            <h2>{{board.name}}</h2>
-                            {% for member in board.members.all %}
-                                {% if member.is_developer %}
-                                    <p>
-                                        <span><strong>{{member.external_username}}</strong></span>
-                                        <span>{{member|call:'get_weekly_spent_time'|arg:week|arg:year|arg:board|floatformat:"-2"}} hours</span>
-                                    </p>
-                                {% endif %}
-                            {% endfor %}
-                            <p>
-                                <span>Total spent time for {{board.name}}</span>
-                                <span> {{board|call:'get_weekly_spent_time'|arg:week|arg:year|floatformat:"-2"}} hours</span>
-                            </p>
-                        </div>
-                    {% endif %}
+                    {% with board_spent_time=board|call:'get_weekly_spent_time'|arg:week|arg:year|end_call %}
+                        {% if board.is_fetched and not board.is_archived and board_spent_time > 0 %}
+                            <div>
+                                <h2>{{board.name}}</h2>
+                                {% for member in board.members.all %}
+                                    {% with member_spent_time=board|call:'get_weekly_spent_time'|arg:week|arg:year|arg:member|end_call %}
+                                        {% if member.is_developer and member_spent_time > 0 %}
+                                            <div style="margin-bottom: 1em">
+                                                <h3>{{member.external_username}}</h3>
+                                                <span>{{member_spent_time|floatformat:"-2"}} hours</span>
+                                                <span><strong>{{member|call:'get_weekly_adjusted_spent_time'|arg:week|arg:year|arg:board|end_call|floatformat:"-2"}} adjusted hours</strong></span>
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+                                <div style="margin-bottom: 1em">
+                                    <span>Total spent time for {{board.name}}</span>
+                                    <span> {{board_spent_time|floatformat:"-2"}} hours</span>
+                                    <span>
+                                        <strong>
+                                            {{board|call:'get_weekly_adjusted_spent_time'|arg:week|arg:year|end_call|floatformat:"-2"}} adjusted hours
+                                        </strong>
+                                    </span>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
                 {% endfor %}
             </div>
 
-            <div>
+            <div style="margin-bottom: 1.2em">
                 <h1>Spent times in week {{year}}-W{{week}}</h1>
                 <table>
                     <tr>

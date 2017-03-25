@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import time
 
 from djangotrellostats.apps.dev_times.models import DailySpentTime
@@ -23,16 +25,16 @@ class Command(ReportCommand):
         html_template_path = 'reporter/emails/monthly_report.html'
         csv_file_name = 'spent_times-for-month-{0}-{1}.csv'.format(year, month)
 
-        administrator_users = self.send_reports(daily_spent_times, subject,
+        report_recipient = self.send_reports(daily_spent_times, subject,
                                                 txt_template_path, html_template_path, csv_file_name)
         self.stdout.write(
-            self.style.SUCCESS(u"Monthly reports sent to {0} administrators".format(administrator_users.count())))
+            self.style.SUCCESS(u"Monthly reports sent to {0} administrators".format(report_recipient.count())))
 
         end = time.time()
         elapsed_time = end - start
 
         self.stdout.write(
             self.style.SUCCESS(u"Monthly reports for month {0}/{1} sent successfully to {2} in {3} s".format(
-                year, month, administrator_users.count(), elapsed_time)
+                year, month, report_recipient.count(), elapsed_time)
             )
         )

@@ -1,0 +1,89 @@
+{% extends "base/base.html" %}
+{% load member_auth %}
+
+{% load staticfiles %}
+
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'css/reports/report_recipients/list.css' %}" rel="stylesheet" />
+{% endblock css %}
+
+{% block page_title %}Report recipients{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Report recipients</h1>
+            <p>Each day, month or week a development report will be send to these recipients for the associated boards of each one.</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <a class="btn btn-primary" href="{% url 'reports:new_report_recipient' %}"
+                   title="New report recipient">
+                <span class="fa fa-plus"></span>
+                    New
+            </a>
+        </div>
+    </div>
+    {% if report_recipients|length == 0 %}
+            There are no report recipients
+    {% else %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel">
+                    <table class="table">
+                        <tr>
+                            <td>First name</td>
+                            <td>Last name</td>
+                            <td>Email</td>
+                            <td>Active?</td>
+                            <td>Boards</td>
+                            <td>Actions</td>
+                        </tr>
+                        {% for report_recipient in report_recipients %}
+                            <tr class="report_recipient">
+                                <td>{{report_recipient.first_name}}</td>
+                                <td>{{report_recipient.last_name}}</td>
+                                <td>{{report_recipient.email}}</td>
+                                <td>{% if report_recipient.is_active %}Yes{% else %}No{% endif %}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Boards
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu boards">
+                                            {% for board in report_recipient.boards.all %}
+                                                {% if board.id in user_boards_ids %}
+                                                    <li>
+                                                        <a href="{% url 'boards:view_board' board.id %}">
+                                                            <img class="board-identicon" src="{% url 'boards:view_identicon' board.id %}" alt="Identicon of board {{board.name}}"/>
+                                                            <span>{{board.name}}</span>
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a class="btn btn-primary" href="{% url 'reports:edit_report_recipient' report_recipient.id %}"
+                                           title="Edit report recipient for email {{report_recipient.email}}">
+                                        <span class="fa fa-pencil"></span>
+                                            Edit
+                                    </a>
+                                    <a class="btn btn-danger" href="{% url 'reports:delete_report_recipient' report_recipient.id %}"
+                                           title="Delete report recipient for email {{report_recipient.email}}">
+                                        <span class="fa fa-trash"></span>
+                                            Delete
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock content %}

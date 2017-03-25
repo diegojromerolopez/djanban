@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import time
 
 from isoweek import Week
@@ -30,16 +32,16 @@ class Command(ReportCommand):
         html_template_path = 'reporter/emails/weekly_report.html'
         csv_file_name = 'spent_times-for-month-{0}W{1}.csv'.format(year, week)
 
-        administrator_users = self.send_reports(daily_spent_times, subject,
+        report_recipient = self.send_reports(daily_spent_times, subject,
                                                 txt_template_path, html_template_path, csv_file_name)
         self.stdout.write(
-            self.style.SUCCESS(u"Weekly reports sent to {0} administrators".format(administrator_users.count())))
+            self.style.SUCCESS(u"Weekly reports sent to {0} administrators".format(report_recipient.count())))
 
         end = time.time()
         elapsed_time = end - start
 
         self.stdout.write(
             self.style.SUCCESS(u"Weekly reports for week {0}/W{1} sent successfully to {2} in {3} s".format(
-                year, week, administrator_users.count(), elapsed_time)
+                year, week, report_recipient.count(), elapsed_time)
             )
         )

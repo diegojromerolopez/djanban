@@ -88,3 +88,24 @@ class CardReview(models.Model):
         except CardReview.DoesNotExist:
             return CardReview.create(card_comment, reviewers, description)
 
+
+# Recipient of periodic reports
+class ReportRecipient(models.Model):
+    first_name = models.CharField(verbose_name=u"Name of this recipient", blank=True, default="", max_length=128)
+    last_name = models.CharField(verbose_name=u"Last name of this recipient", blank=True, default="", max_length=128)
+    email = models.EmailField(verbose_name=u"Email of the recipient", unique=True)
+    boards = models.ManyToManyField("boards.Board", verbose_name=u"Boards", related_name="report_recipients")
+    is_active = models.BooleanField(
+        verbose_name="Is active?", help_text=u"Only active report recipients will be notified", default=True, blank=True
+    )
+    send_errors = models.BooleanField(
+        verbose_name="Send platform errors?",
+        help_text=u"Only report recipients with this option enabled will receive 500 error notifications",
+        default=False, blank=True
+    )
+
+    @property
+    def full_name(self):
+        if self.first_name and self.last_name:
+            return u"{0} {1}".format(self.first_name, self.last_name)
+        return self.email

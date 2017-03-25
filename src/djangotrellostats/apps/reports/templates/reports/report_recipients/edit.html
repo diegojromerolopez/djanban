@@ -1,0 +1,21 @@
+{% extends "base/base.html" %}
+
+{% load staticfiles %}
+
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'css/reports/report_recipients/form.css' %}" rel="stylesheet" />
+{% endblock css %}
+
+{% block page_title %}Edit {{report_recipient.email}}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6 center-block">
+            <h1>Edit report recipient {{report_recipient.email}}</h1>
+            <div class="large-form">
+                {% include "forms/form.html" %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

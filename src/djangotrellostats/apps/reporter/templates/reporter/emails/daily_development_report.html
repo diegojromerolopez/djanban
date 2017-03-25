@@ -31,10 +31,10 @@
             <div>
                 <h1>{{developer.external_username}}'s spent time in day {{date|date}}</h1>
                     {% with developer_spent_time=developer|call:'get_spent_time'|arg:date|end_call %}
-                        <p>
-                            <span><strong>{{developer.external_username}}</strong></span>
-                            <span>{{developer_spent_time|floatformat:"-2"}} hours</span>
-                        </p>
+                        <div>
+                            <p>{{developer_spent_time|floatformat:"-2"}} hours</p>
+                            <p>{{developer|call:'get_adjusted_spent_time'|arg:date|end_call|floatformat:"-2"}} adjusted hours</p>
+                        </div>
                         <div>
                             <div>
                                 <strong style="font-size: 2em;">Thank you for your work and dedication.</strong>
@@ -58,15 +58,15 @@
             <div>
                 <h1>{{developer.external_username}}'s spent time in day {{date|date}} by board</h1>
                 {% for board in developer.boards.all %}
-                    {% if board.is_fetched %}
+                    {% if board.is_fetched and not board.is_archived %}
                         {% with developer_spent_time=developer|call:'get_spent_time'|arg:date|arg:board %}
                             {% if developer_spent_time > 0 %}
                                 <div>
                                     <h2>{{board.name}}</h2>
-                                    <p>
-                                        <span><strong>{{developer.external_username}}</strong></span>
-                                        <span>{{developer_spent_time|floatformat:"-2"}} hours</span>
-                                    </p>
+                                    <div>
+                                        <p>{{developer_spent_time|floatformat:"-2"}} hours</p>
+                                        <p>{{developer|call:'get_adjusted_spent_time'|arg:date|arg:board|floatformat:"-2"}} adjusted hours</p>
+                                    </div>
                                 </div>
                             {% endif %}
                         {% endwith %}

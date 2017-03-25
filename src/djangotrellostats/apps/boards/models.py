@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 import copy
 import re
 from datetime import timedelta
+import datetime
+from dateutil.relativedelta import relativedelta
 from decimal import Decimal
 
 import numpy
@@ -334,11 +336,13 @@ class Board(models.Model):
         return adjusted_spent_time
 
     # Return the spent time on a given week of a year
-    def get_weekly_spent_time(self, week, year):
+    def get_weekly_spent_time(self, week, year, member=None):
         # Get the date interval for the given week
         start_date = Week(year, week).monday()
         end_date = Week(year, week).friday()
         spent_time_on_week_filter = {"date__gte": start_date, "date__lte": end_date}
+        if member:
+            spent_time_on_week_filter["member"] = member
         # Filter the daily spent times and sum their spent time
         spent_time = self.daily_spent_times.filter(**spent_time_on_week_filter).aggregate(sum=Sum("spent_time"))["sum"]
         # As usual, a None value means 0
@@ -346,6 +350,14 @@ class Board(models.Model):
             return 0
         # Otherwise, return the sum of spent times for the given week
         return spent_time
+
+    # Return the adjusted spent time on a given week of a year
+    def get_weekly_adjusted_spent_time(self, week, year, member=None):
+        # Get the date interval for the given week
+        start_date = Week(year, week).monday()
+        end_date = Week(year, week).friday()
+        # Get the adjusted time of that days
+        return self.get_adjusted_spent_time(date=(start_date, end_date), member=member)
 
     # Average spent time in this project per week
     @property
@@ -422,6 +434,12 @@ class Board(models.Model):
         if spent_time is None:
             return 0
         return spent_time
+
+    # Return the adjusted spent time in this month
+    def get_monthly_adjusted_spent_time(self, month, year, member=None):
+        first_day_of_month = datetime.date(year=year, month=month, day=1)
+        last_day_of_month = first_day_of_month + relativedelta(months=1) - timedelta(days=1)
+        return self.get_adjusted_spent_time(date=(first_day_of_month, last_day_of_month), member=member)
 
     # Returns the spent time.
     # If date parameter is present, computes the spent time on a given date for this board

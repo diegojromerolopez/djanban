@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^hourly_rates/', include('djangotrellostats.apps.hourly_rates.urls', namespace="hourly_rates")),
     url(r'^fetch/', include('djangotrellostats.apps.fetch.urls', namespace="fetch")),
     url(r'^environment/', include('djangotrellostats.apps.dev_environment.urls', namespace="dev_environment")),
+    url(r'^reports/', include('djangotrellostats.apps.reports.urls', namespace="reports")),
     url(r'^slideshow/', include('djangotrellostats.apps.slideshow.urls', namespace="slideshow")),
     url(r'^visitors/', include('djangotrellostats.apps.visitors.urls', namespace="visitors")),
     url(r'^niko-niko-calendar/', include('djangotrellostats.apps.niko_niko_calendar.urls', namespace="niko_niko_calendar")),
