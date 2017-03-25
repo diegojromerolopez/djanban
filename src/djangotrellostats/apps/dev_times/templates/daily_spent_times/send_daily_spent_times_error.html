@@ -1,0 +1,41 @@
+{% extends "base/base.html" %}
+
+{% load template_extensions %}
+{% load motivation_tags %}
+{% load staticfiles %}
+
+{% block page_title %}
+    Error when sending daily spent times
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-7 center-block">
+            <div class="panel panel-danger">
+              <div class="panel-heading">Error when sending daily spent times </div>
+              <div class="panel-body">
+                  <p>
+                    Spent time in days
+                    {% if board %}in board {{board.name}}{% endif %}
+                    {% if label %}for cards labeled as {{label.name}}{% endif %}
+                    {% if start_date and end_date %}
+                        from {{start_date|date}} to {{end_date|date}}
+                    {% elif start_date %}
+                        from {{start_date|date}} to now
+                    {% elif end_date %}
+                        until {{end_date|date}}
+                    {% else %}
+                    {% endif %}
+                    {% if member %}
+                    for {{member.external_username}}'s tasks
+                    {% endif %}
+                      could not be sent to {{email}} because some error happened.
+                  </p>
+              </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}

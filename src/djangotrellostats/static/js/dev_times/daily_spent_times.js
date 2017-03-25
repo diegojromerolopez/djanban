@@ -45,4 +45,31 @@ $(document).ready(function(){
     /* We want descendant order by default */
     //$("#toggle_month_order").click();
 
+    /* Send email by ajax */
+    $("form#send_daily_spent_times").submit(function(e){
+        let url = $(this).attr("action")+"?ajax=1"; // the script where you handle the form input.
+        let $form = $(this);
+        $form.find("button").prop("disabled", true);
+        $form.find(".fa-spinner").show();
+
+        $.ajax({
+               type: "POST",
+               url: url,
+               data: $form.serialize(),
+               success: function(data)
+               {
+                   $form.find("button").prop("disabled", false);
+                   $form.find(".fa-spinner").hide();
+                   $("#send_daily_spent_times_ok").html("<span>Data sent successfully</span>").show().delay(6000).fadeOut("slow");
+               },
+               error: function(data){
+                    $form.find("button").prop("disabled", false);
+                    $form.find(".fa-spinner").hide();
+                    $("#send_daily_spent_times_error").html("<span>Data could not be sent successfully</span>").show().delay(6000).fadeOut("slow");
+               }
+        });
+
+        e.preventDefault()
+    });
+
 });

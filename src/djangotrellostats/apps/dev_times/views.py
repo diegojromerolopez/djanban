@@ -6,11 +6,13 @@ import calendar
 import datetime
 import re
 
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
-from django.http.response import HttpResponse
+from django.db.models import Sum, Q
+from django.http.response import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
 from django.template import loader, Context
 
@@ -18,6 +20,7 @@ from djangotrellostats.apps.base.auth import get_user_boards, user_is_member
 from djangotrellostats.apps.boards.models import Label
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
+from django.template.loader import get_template
 
 
 # View spent time report
@@ -59,6 +62,108 @@ def export_daily_spent_times(request):
     return response
 
 
+# Export daily spent report in CSV format
+@login_required
+def send_daily_spent_times(request):
+    if request.method != "POST":
+        raise Http404
+
+    current_user = request.user
+    current_user_boards = get_user_boards(current_user)
+
+    recipient_email = request.POST.get("email")
+    if not re.match(r"[^@]+@[^@]+", recipient_email):
+        return JsonResponse({"message": "Invalid email"})
+
+    daily_spent_times_filter = {}
+
+    # Start date
+    start_date_str = request.POST.get("start_date")
+    start_date = None
+    if start_date_str:
+        try:
+            start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d")
+            daily_spent_times_filter["date__gte"] = start_date
+        except ValueError:
+            start_date = None
+
+    # End date
+    end_date_str = request.POST.get("end_date")
+    end_date = None
+    if end_date_str:
+        try:
+            end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d")
+            daily_spent_times_filter["date__lte"] = end_date
+        except ValueError:
+            end_date = None
+
+    # Week
+    week = request.POST.get('week') if request.POST.get('week') and request.POST.get('week') > 0 else None
+    if week:
+        daily_spent_times_filter["week"] = week
+
+    # Label
+    label = None
+    board = None
+    label_str = request.POST.get("label")
+    matches = re.match(r"all_from_board_(?P<board_id>\d+)", label_str)
+    if matches and current_user_boards.filter(id=matches.group("board_id")).exists():
+        label = None
+        board = current_user_boards.get(id=matches.group("board_id"))
+        daily_spent_times_filter["board"] = board
+
+    elif Label.objects.filter(id=label_str).exists():
+        label = Label.objects.get(id=label_str)
+        board = label.board
+        daily_spent_times_filter["board"] = board
+        daily_spent_times_filter["card__labels"] = label
+
+    # Member
+    member = None
+    if user_is_member(current_user):
+        current_user_members = Member.objects.filter(Q(boards__in=current_user_boards)|Q(id=current_user.member.id)).distinct()
+    else:
+        current_user_members = Member.objects.filter(boards__in=current_user_boards).distinct()
+    if request.POST.get("member") and current_user_members.filter(id=request.POST.get("member")).exists():
+        member = current_user_members.get(id=request.POST.get("member"))
+        daily_spent_times_filter["member"] = member
+
+    daily_spent_times = DailySpentTime.objects.filter(**daily_spent_times_filter)
+
+    replacements = {
+        "email": recipient_email,
+        "daily_spent_times": daily_spent_times,
+        "week": week,
+        "start_date": start_date,
+        "end_date": end_date,
+        "label": label,
+        "board": board,
+        "member": member
+    }
+
+    report_subject = get_template('daily_spent_times/emails/send_daily_spent_times_subject.txt').render(replacements)
+
+    txt_message = get_template("daily_spent_times/emails/send_daily_spent_times.txt").render(replacements)
+    html_message = get_template("daily_spent_times/emails/send_daily_spent_times.html").render(replacements)
+
+    csv_report = get_template('daily_spent_times/csv.txt').render({"spent_times": daily_spent_times})
+    csv_file_name = "custom_report_for_{0}.csv".format(recipient_email)
+
+    try:
+        message = EmailMultiAlternatives(report_subject, txt_message, settings.EMAIL_HOST_USER, [recipient_email])
+        message.attach_alternative(html_message, "text/html")
+        message.attach(csv_file_name, csv_report, 'text/csv')
+        message.send()
+
+        if request.GET.get("ajax"):
+            return JsonResponse({"message": "Spent times sent successfully"})
+        return render(request, "daily_spent_times/send_daily_spent_times_ok.html", replacements)
+    except Exception:
+        if request.GET.get("ajax"):
+            return JsonResponse({"message": "Error when sending data"}, status=500)
+        return render(request, "daily_spent_times/send_daily_spent_times_error.html", replacements)
+
+
 # Return the filtered queryset and the replacements given the GET parameters
 def _get_daily_spent_times_replacements(request):
 
@@ -85,7 +190,7 @@ def _get_daily_spent_times_replacements(request):
         except ValueError:
             start_date = None
 
-    # Start date
+    # End date
     end_date_str = request.GET.get("end_date")
     if end_date_str:
         try:
@@ -98,7 +203,7 @@ def _get_daily_spent_times_replacements(request):
     replacements["selected_member"] = selected_member
 
     # If we are filtering by board, filter by board_id
-    label_id = request.GET.get("label_id")
+    label_id = request.GET.get("label_id", request.GET.get("label"))
     label = None
     board = None
     if label_id:
@@ -118,7 +223,7 @@ def _get_daily_spent_times_replacements(request):
             replacements["selected_board"] = label.board
             replacements["board"] = label.board
 
-    board_id = request.GET.get("board_id")
+    board_id = request.GET.get("board_id", request.GET.get("board"))
     if not label_id and board_id:
         board = get_user_boards(request.user).get(id=board_id)
         label = None
@@ -144,13 +249,13 @@ def _get_daily_spent_times_from_request(request):
     spent_times = _get_daily_spent_times_queryset(current_user, selected_member,
                                                   request.GET.get("start_date"), request.GET.get("end_date"),
                                                   request.GET.get('week'),
-                                                  request.GET.get("board_id"))
+                                                  request.GET.get("label_id"))
 
     return spent_times
 
 
 # Return the filtered queryset and the replacements given the GET parameters
-def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, end_date_, week, board_id):
+def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, end_date_, week, label_id):
     daily_spent_time_filter = {}
 
     # Member filter
@@ -179,11 +284,21 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
     if week and int(week) > 0:
         daily_spent_time_filter["week_of_year"] = week
 
-    # Board
+    # Label
+    label = None
     board = None
-    if board_id and get_user_boards(current_user).filter(id=board_id).exists():
-        daily_spent_time_filter["board_id"] = board_id
-        board = get_user_boards(current_user).get(id=board_id)
+    current_user_boards = get_user_boards(current_user)
+    matches = re.match(r"all_from_board_(?P<board_id>\d+)", label_id)
+    if matches and current_user_boards.filter(id=matches.group("board_id")).exists():
+        label = None
+        board = current_user_boards.get(id=matches.group("board_id"))
+        daily_spent_time_filter["board"] = board
+
+    elif Label.objects.filter(id=label_id, board__in=current_user_boards).exists():
+        label = Label.objects.get(id=label_id)
+        board = label.board
+        daily_spent_time_filter["board"] = board
+        daily_spent_time_filter["card__labels"] = label
 
     # Daily Spent Times
     daily_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).order_by("-date")

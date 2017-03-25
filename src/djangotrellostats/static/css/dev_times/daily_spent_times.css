@@ -10,6 +10,27 @@
 
 }
 
+.row.actions {
+    margin-bottom: 10px;
+}
+
+form#daily_spent_times_filter {
+    padding-bottom: 20px;
+}
+
+form#send_daily_spent_times {
+    width: 450px;
+    display: inline-block;
+}
+
+#send_daily_spent_times_ok,
+#send_daily_spent_times_error {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 1.2em;
+}
+
 img.avatar {
     border-radius: 5px;
 }

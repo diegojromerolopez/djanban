@@ -1,7 +1,7 @@
 <div class="panel">
     <div class="row">
         <div class="col-md-10 center-block">
-            <form action="{% url 'dev_times:view_daily_spent_times' %}" method="get" class="form-inline">
+            <form id="daily_spent_times_filter" action="{% url 'dev_times:view_daily_spent_times' %}" method="get" class="form-inline">
                 <div class="form-group">
                     <span>Date interval</span>
                     <input type="date" name="start_date" class="form-control" {% if start_date %}value="{{start_date|date:'Y-m-d'}}"{% endif %}/>

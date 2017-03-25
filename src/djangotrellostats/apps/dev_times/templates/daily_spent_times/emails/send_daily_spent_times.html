@@ -1,0 +1,60 @@
+{% load template_extensions %}
+{% load motivation_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Custom report for {{email}}</title>
+    </head>
+    <body>
+        <div>
+            <div>
+                <h1>
+                    Spent time
+                    {% if board %}in board {{board.name}}{% endif %}
+                    {% if label %}for cards labeled as {{label.name}}{% endif %}
+                    {% if start_date and end_date %}
+                        from {{start_date|date}} to {{end_date|date}}
+                    {% elif start_date %}
+                        from {{start_date|date}} to now
+                    {% elif end_date %}
+                        until {{end_date|date}}
+                    {% else %}
+                    {% endif %}
+                    {% if member %}
+                    for {{member.external_username}}'s tasks
+                    {% endif %}
+                </h1>
+                {% if daily_spent_times|length == 0 %}
+                    No spent time.
+                {% else %}
+                    <table>
+                        <tr>
+                            <td>Week day</td>
+                            <td>Board</td>
+                            <td>Description</td>
+                            <td>Spent time (h.)</td>
+                            <td>Adjusted spent time (h.)</td>
+                            <td>Estimated time (h.)</td>
+                        </tr>
+                        {% for daily_spent_time in daily_spent_times %}
+                            <tr>
+                                <td>{{daily_spent_time.weekday}}</td>
+                                <td>{{daily_spent_time.board.name}}</td>
+                                <td>
+                                    <a href="{{daily_spent_time.card.short_url}}" title="{{daily_spent_time.card.name}}">
+                                        {{daily_spent_time.description|truncatechars:40}}
+                                    </a>
+                                </td>
+                                <td>{{daily_spent_time.spent_time|floatformat:"-2"}}</td>
+                                <td>{{daily_spent_time.adjusted_spent_time|floatformat:"-2"}}</td>
+                                <td>{{daily_spent_time.estimated_time|floatformat:"-2"}}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </body>
+</html>
