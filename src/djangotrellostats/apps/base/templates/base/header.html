@@ -80,11 +80,11 @@
                     {% endif %}
                     {% with member=request.user.member %}
                         {% if member.is_developer %}
-                            {% async_include "base/components/header/last_comments.html" html__tag="li" %}
+                            {% async_include "base/components/header/last_comments.html" html__tag="li" request__frequency=820 %}
 
-                            {% async_include "base/components/header/last_cards_in_development.html" member=member html__tag="li" %}
+                            {% async_include "base/components/header/last_cards_in_development.html" member=member html__tag="li" request__frequency=800 %}
 
-                            {% async_include "base/components/header/last_notifications.html" member=member html__tag="li" %}
+                            {% async_include "base/components/header/last_notifications.html" member=member html__tag="li" request__frequency=620 %}
                         {% endif %}
                     {% endwith %}
                     <li class="dropdown">
