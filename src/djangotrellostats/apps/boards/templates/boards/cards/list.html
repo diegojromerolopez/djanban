@@ -1,6 +1,12 @@
 {% extends "boards/view.html" %}
+{% load staticfiles %}
 
 {% block page_title %}Cards of {{board.name}}{% endblock %}
+
+{% block js %}
+    {{block.super}}
+    <script src="{% static 'js/boards/cards/list/export_csv.js' %}"></script>
+{% endblock js %}
 
 {% block content %}
     <h1>Cards of {{board.name}}</h1>
@@ -38,7 +44,13 @@
             </div>
             <div class="panel col-md-12">
                 <div>
-                    <a href="{% url 'boards:export_card_report' board.id %}" class="btn btn-success">Export as CSV</a>
+                    <a id="export_cards"
+                       href="{% url 'boards:export_card_report' board.id %}"
+                       class="btn btn-success">
+                        <span class="fa fa-spin fa-spinner" style="display: none;"></span>
+                        <span class="fa fa-arrow-down"></span>
+                        Export as CSV
+                    </a>
                 </div>
                 <table class="table">
                     <tr>

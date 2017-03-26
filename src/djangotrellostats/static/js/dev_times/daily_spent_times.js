@@ -47,7 +47,7 @@ $(document).ready(function(){
 
     /* Send email by ajax */
     $("form#send_daily_spent_times").submit(function(e){
-        let url = $(this).attr("action")+"?ajax=1"; // the script where you handle the form input.
+        let url = $(this).attr("action")+"?ajax=1";
         let $form = $(this);
         $form.find("button").prop("disabled", true);
         $form.find(".fa-spinner").show();
