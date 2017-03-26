@@ -26,6 +26,7 @@ from isoweek import Week
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
+from djangotrellostats.apps.notifications.models import Notification
 from djangotrellostats.apps.reports.models import CardMovement, CardReview
 
 
@@ -934,6 +935,9 @@ class Card(models.Model):
         # Move to the required position
         self.change_order(member, destination_position=destination_position, local_move_only=local_move_only)
 
+        # Notify the movement to members
+        Notification.move_card(mover=member, card=self, board=self.board)
+
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
 
@@ -1457,6 +1461,8 @@ class CardComment(models.Model):
             card.valuation_comment = self
             card.save()
 
+        Notification.add_card_comment(self, card)
+
     # Save an old comment
     def _save_old(self, card, earlier_card_comment):
 
@@ -1550,6 +1556,8 @@ class CardComment(models.Model):
         card_value_from_comment = self.card_value_from_content
         if card_value_from_comment is not None:
             self.card_value = card_value_from_comment
+
+        Notification.add_card_comment(card=card, card_comment=self)
 
 
 # Label of the task board

@@ -184,6 +184,10 @@ class Member(models.Model):
         development_cards = self.get_current_development_cards(board=board)
         return development_cards.order_by("-last_activity_datetime")
 
+    # Return the last notifications (10 by default)
+    def get_last_unread_notifications(self, number=10):
+        return self.received_notifications.filter(is_read=False).order_by("-creation_datetime")[:number]
+
     # Returns the number of hours this member has develop today
     def get_today_spent_time(self, board=None):
         # Getting the spent time for today

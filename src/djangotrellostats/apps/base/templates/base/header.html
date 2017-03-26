@@ -49,7 +49,7 @@
                         </li>
                         <li role="presentation" {% if url_namespace == "niko_niko_calendar" %}class="active"{% endif %}>
                             <a href="{% url 'niko_niko_calendar:view_calendar' %}" title="View Niko-niko calendar">
-                                <span class="fa fa-calendar"></span> Niko-niko cal.
+                                <span class="fa fa-calendar"></span> Niko^2 cal.
                             </a>
                         </li>
                     {% endif %}
@@ -83,7 +83,8 @@
 
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"
                                    role="button" aria-haspopup="true" aria-expanded="false" title="Last 10 comments of your boards">
-                                   Last comments <span class="caret"></span>
+                                    <span class="fa fa-comments">
+                                    <span class="caret"></span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-right last_comments">
                                     {% last_comments 10 as last_comments %}
@@ -130,6 +131,39 @@
                                                             {{board.name}} - {{last_card_in_development.name|truncatechars:30}} is the last task worked on
                                                         </a>
                                                     </li>
+                                                {% endwith %}
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endwith %}
+                            </li>
+                            <li role="presentation">
+                                {% with notifications=member.get_last_unread_notifications %}
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+                                       role="button" aria-haspopup="true" aria-expanded="false" title="Last cards worked on">
+                                        <span class="fa {% if notifications|length > 0 %}fa-bell{% else %}fa-bell-slash-o{% endif %}"></span>
+                                    </a>
+                                    {% if notifications|length > 0 %}
+                                        <ul class="dropdown-menu dropdown-menu-right notifications">
+                                            {% for notification in notifications %}
+                                                {% with board=notification.board %}
+                                                    {% if notification.card %}
+                                                        <a href="{% url 'boards:view_card' board.id notification.card %}" title="{{notification.card.name}}">
+                                                            <li id="notification_{{notification.id}}" data-notification="{{notification.id}}">
+                                                                {{notification.description}}
+                                                            </li>
+                                                        </a>
+                                                    {% elif board %}
+                                                        <a href="{% url 'boards:view_board' board.id %}" title="{{board.name}}">
+                                                            <li id="notification_{{notification.id}}" data-notification="{{notification.id}}">
+                                                                {{notification.description}}
+                                                            </li>
+                                                        </a>
+                                                    {% else %}
+                                                        <li id="notification_{{notification.id}}" data-notification="{{notification.id}}">
+                                                            {{notification.description}}
+                                                        </li>
+                                                    {% endif %}
                                                 {% endwith %}
                                             {% endfor %}
                                         </ul>
