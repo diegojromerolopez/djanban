@@ -1461,7 +1461,8 @@ class CardComment(models.Model):
             card.valuation_comment = self
             card.save()
 
-        Notification.add_card_comment(self, card)
+        if not earlier_card_comment_exists:
+            Notification.add_card_comment(self, card)
 
     # Save an old comment
     def _save_old(self, card, earlier_card_comment):
@@ -1556,8 +1557,6 @@ class CardComment(models.Model):
         card_value_from_comment = self.card_value_from_content
         if card_value_from_comment is not None:
             self.card_value = card_value_from_comment
-
-        Notification.add_card_comment(card=card, card_comment=self)
 
 
 # Label of the task board

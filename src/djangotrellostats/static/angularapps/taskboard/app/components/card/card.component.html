@@ -217,8 +217,9 @@
                         <h2>Comments ({{card.comments.length}})</h2>
                         <div>
                             <form (ngSubmit)="onSubmitNewComment(NewCommentForm.value.comment)" #NewCommentForm="ngForm">
-                                <textarea name="comment" placeholder="Insert your comment here..." required ngModel [disabled]="newCommentStatus == 'waiting'"></textarea>
-                                <button type="submit" class="btn btn-success" title="Add new comment to this card"
+                                <textarea name="comment" placeholder="Insert your comment here..." required
+                                          [(ngModel)]="newCommentContent" [disabled]="newCommentStatus == 'waiting'"></textarea>
+                                <button type="submit" class="btn btn-success add_comment" title="Add new comment to this card"
                                         (click)="NewCommentForm.ngSubmit.emit()"
                                         (click)="newCommentStatus = 'waiting'"
                                         (click)="$event.preventDefault()"
@@ -229,6 +230,23 @@
                                     Send
                                     <span class="fa fa-comment-o"></span>
                                 </button>
+                                <!-- Add mention -->
+                                <div class="dropdown add_mention" *ngIf="board">
+                                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                        Mention
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                                        <li *ngFor="let member of board.members"
+                                            (click)="newCommentContent = (newCommentContent?newCommentContent:'') + ' @' +  member.external_username + ' '"
+                                        >
+                                            <img class="avatar cursor-help" src="{{member.gravatar_url}}"
+                                                    alt="Gravatar image of {{member.external_username}}"
+                                                    title="Comment made by {{member.initials}}"/>
+                                            <span>{{member.external_username}}</span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </form>
                             
                             <div *ngIf="card.comments.length == 0">

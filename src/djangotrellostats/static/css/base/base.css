@@ -16,7 +16,8 @@ a {
 }
 
 #header ul.last_cards,
-#header ul.last_comments {
+#header ul.last_comments,
+#header ul.notifications {
     max-height: 450px;
     overflow: scroll;
 }
@@ -33,6 +34,19 @@ a {
 #header .last_comments .last_comment .comment_content {
     overflow-wrap: break-word;
     width: 450px;
+}
+
+#header ul.dropdown-menu.notifications {
+
+}
+
+#header ul.dropdown-menu.notifications li {
+    width: 300px;
+}
+
+#header ul.dropdown-menu.notifications li a {
+    padding-bottom: 20px;
+    padding-top: 20px;
 }
 
 .center-block {

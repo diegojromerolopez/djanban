@@ -409,6 +409,18 @@ card.closed-card-showed,
     display: inline-block;
 }
 
+.card-comments form button.add_comment {
+    display: inline-block;
+}
+
+.card-comments .add_mention {
+    display: inline-block;
+}
+
+.card-comments .add_mention li {
+    cursor: pointer;
+}
+
 .card_heading-movements {
     display: inline-block;
 }

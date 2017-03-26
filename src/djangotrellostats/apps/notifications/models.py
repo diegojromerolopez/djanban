@@ -63,7 +63,7 @@ class Notification(models.Model):
             Notification(
                 board=board, card=card, card_comment=card_comment,
                 sender=card_comment.author, receiver=member,
-                description="{0}: Mention of {1} in comment {2}".format(board.name, member.external_username, card_comment.name)
+                description="{0}: Mention of {1} in comment {2}".format(board.name, member.external_username, card.name)
             ).save()
 
     # Add card movement notifications

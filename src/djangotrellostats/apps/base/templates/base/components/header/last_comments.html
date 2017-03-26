@@ -1,0 +1,35 @@
+{% load boards %}
+
+<a href="#" class="dropdown-toggle" data-toggle="dropdown"
+       role="button" aria-haspopup="true" aria-expanded="false" title="Last 10 comments of your boards">
+    <span class="fa fa-comments">
+    <span class="caret"></span>
+</a>
+<ul class="dropdown-menu dropdown-menu-right last_comments">
+    {% last_comments 10 as last_comments %}
+    {% for last_comment in last_comments %}
+        {% with card=last_comment.card %}
+            {% with board=card.board %}
+                <li class="last_comment">
+                    <div class="panel panel-info">
+                      <div class="panel-heading">
+                          <div class="board_name">
+                                <img class="small-identicon" src="{% url 'boards:view_identicon' board.id %}" alt="{{board.name}}" />
+                                <a href="{% url 'boards:view_board' board.id %}">{{board.name}}</a>
+                          </div>
+                          <div class="action">
+                                <img src="{{last_comment.author.gravatar_url}}" alt="last_comment.author.initials"/> commented in
+                                <a href="{% url 'boards:view_card' board.id card.id %}">{{card.name}}</a>
+                          </div>
+                      </div>
+                      <div class="panel-body">
+                         <div class="comment_content">{{last_comment.content}}</div>
+                          {# <a href="{% url 'boards:view_card' board.id card.id %}#comment-{{last_comment.id}}">See comment in context</a>#}
+                      </div>
+                    </div>
+
+                </li>
+            {% endwith %}
+        {% endwith %}
+    {% endfor %}
+</ul>

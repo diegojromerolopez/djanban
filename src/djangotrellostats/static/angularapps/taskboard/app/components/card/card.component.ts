@@ -86,6 +86,9 @@ export class CardComponent implements OnInit  {
     private addRequirementStatus: string;
     private removeRequirementStatus: {};
 
+    // New comment content
+    private newCommentContent: string;
+
     /**
      * Stores the status of the edition of each comment: standby (standby),
      * asking confirmation (asking) and waiting server response (waiting)
@@ -132,6 +135,7 @@ export class CardComponent implements OnInit  {
         this.newCommentStatus = "standby";
         this.addBlockingCardStatus = "hidden";
         this.newReviewStatus = "hidden";
+        this.newCommentContent = "";
         this.editCommentStatus = { };
         this.commentPreviousContent = { }
         this.deleteCommentStatus = { };
@@ -444,11 +448,13 @@ export class CardComponent implements OnInit  {
     onSubmitNewComment(comment_content: string): void {
         this.cardService.addNewComment(this.card, comment_content).then(comment => {
             this.card.comments = [comment].concat(this.card.comments);
+            this.newCommentContent = "";
             this.newCommentStatus = "standby"; 
             this.editCommentStatus[comment.id] = "standby";
             this.deleteCommentStatus[comment.id] = "standby";
             this.notificationsService.success("New comment added", `${this.card.name} has a new comment (${this.card.comments.length} in total).`);
         }).catch(error_message => {
+            this.newCommentContent = "";
             this.notificationsService.error("Error", `Couldn't add a new comment to ${this.card.name}. ${error_message}`);
             this.newCommentStatus = "standby";
         });

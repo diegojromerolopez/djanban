@@ -1,0 +1,21 @@
+
+{% with last_cards_in_development=member.get_last_development_cards %}
+    {% if last_cards_in_development|length > 0 %}
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+           role="button" aria-haspopup="true" aria-expanded="false" title="Last cards worked on">
+            Last cards I worked on ({{last_cards_in_development|length}}) <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-right last_cards">
+            {% for last_card_in_development in last_cards_in_development %}
+                {% with board=last_card_in_development.board %}
+                    <li>
+                        <a href="{% url 'boards:view_card' board.id last_card_in_development.id %}" title="{{last_card_in_development.name}}">
+                            <img src="{% url 'boards:view_identicon' board.id %}" alt="{{board.name}}" />
+                            {{board.name}} - {{last_card_in_development.name|truncatechars:30}} is the last task worked on
+                        </a>
+                    </li>
+                {% endwith %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
