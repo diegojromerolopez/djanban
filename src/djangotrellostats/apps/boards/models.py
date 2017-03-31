@@ -1,48 +1,30 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 import copy
+from isoweek import Week
+import numpy
 import re
+import requests
+import shortuuid
 from datetime import timedelta
 import datetime
 from dateutil.relativedelta import relativedelta
 from decimal import Decimal
-
-import numpy
-import requests
-import shortuuid
 from django.contrib.auth.models import User
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.db import models, transaction
 from django.db.models import Avg, Sum, Min, Max
 from django.db.models.query_utils import Q
-from django.urls import reverse
 from django.utils import timezone
-
-from isoweek import Week
-
 from djangotrellostats.apps.dev_times.models import DailySpentTime
 from djangotrellostats.apps.members.models import Member
 from djangotrellostats.apps.niko_niko_calendar.models import DailyMemberMood
 from djangotrellostats.apps.notifications.models import Notification
 from djangotrellostats.apps.reports.models import CardMovement, CardReview
-
-
-# Abstract model that represents the immutable objects
 from djangotrellostats.remote_backends.factory import RemoteBackendConnectorFactory
 from djangotrellostats.utils.custom_uuid import custom_uuid
-
-
-class ImmutableModel(models.Model):
-    class Meta:
-        abstract = True
-
-    def save(self, *args, **kwargs):
-        if self.id is not None:
-            raise ValueError(u"This model does not allow edition")
-        super(ImmutableModel, self).save(*args, **kwargs)
 
 
 # Task board
