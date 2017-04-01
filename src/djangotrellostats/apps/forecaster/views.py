@@ -54,7 +54,8 @@ def test_forecaster(request):
     for test_card in test_cards:
         test_card_estimated_spent_time = float(forecaster.estimate_spent_time(test_card))
         test_card.estimated_spent_time = Decimal(test_card_estimated_spent_time).quantize(Decimal('1.000'))
-        test_card.error = abs(test_card.spent_time - test_card.estimated_spent_time)
+        test_card.diff = test_card.spent_time - test_card.estimated_spent_time
+        test_card.error = abs(test_card.diff)
         total_error += test_card.error
         test_card_errors.append(test_card.error)
 

@@ -38,43 +38,41 @@ class Regressor(object):
 
     def _get_data_frame(self):
         data_dict = [self._get_card_data(card) for card in self.cards]
-        return pd.DataFrame(data_dict)
+        df = pd.DataFrame(data_dict)
+        df.convert_objects(convert_numeric=True)
+        return df
 
     def _get_card_data(self, card):
         card_data = {
-            "card_spent_time": card.spent_time if card.spent_time else Decimal("0"),
-            "card_age": Decimal(card.age.seconds / 3600.0).quantize(Decimal("1.000")),
-            "num_forward_movements": card.number_of_forward_movements,
-            "num_backward_movements": card.number_of_backward_movements,
-            "num_comments": card.number_of_comments,
-            "num_blocking_cards": Decimal(card.blocking_cards.count()),
-            "card_value": card.value if card.value else Decimal("0"),
-            "length_name": Decimal(len(card.name)),
-            "length_description": Decimal(len(card.description)),
-            "num_members": Decimal(card.members.count()),
-            "num_labels": Decimal(card.labels.count()),
-            "has_red_label": Decimal(1) if card.labels.filter(color="red") else Decimal(0),
-            "has_orange_label": Decimal(1) if card.labels.filter(color="orange") else Decimal(0),
-            "has_yellow_label": Decimal(1) if card.labels.filter(color="yellow") else Decimal(0)
+            "card_spent_time": float(card.spent_time) if card.spent_time else 0,
+            "card_age": float(Decimal(card.age.seconds / 3600.0).quantize(Decimal("1.000"))),
+            "num_forward_movements": float(card.number_of_forward_movements),
+            "num_backward_movements": float(card.number_of_backward_movements),
+            "num_comments": float(card.number_of_comments),
+            "num_blocking_cards": card.blocking_cards.count(),
+            "card_value": float(card.value) if card.value else 0,
+            "length_name": len(card.name),
+            "length_description": len(card.description),
+            "num_members": card.members.count(),
+            "num_labels": card.labels.count(),
+            "has_red_label": 1 if card.labels.filter(color="red") else 0,
+            "has_orange_label": 1 if card.labels.filter(color="orange") else 0,
+            "has_yellow_label": 1 if card.labels.filter(color="yellow") else 0
         }
-
-        float_card_data = {}
-        for card_attr, card_datum in card_data.items():
-            float_card_data[card_attr] = float(card_datum)
 
         # Member that work in this card
         for card_member in card.members.all():
-            float_card_data[card_member.external_username] = 1
+            card_data[card_member.external_username] = 1
         for member in self.members:
             if not member.external_username in card_data:
-                float_card_data[member.external_username] = 0
+                card_data[member.external_username] = 0
 
         # Creation list type
         for list_type in List.LIST_TYPES:
-            float_card_data["creation_list_type_{0}".format(list_type)] = 0
+            card_data["creation_list_type_{0}".format(list_type)] = 0
 
         creation_list = card.creation_list
         if creation_list:
-            float_card_data["creation_list_type_{0}".format(creation_list.type)] = 1
+            card_data["creation_list_type_{0}".format(creation_list.type)] = 1
 
-        return float_card_data
+        return card_data
