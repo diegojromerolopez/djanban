@@ -735,6 +735,12 @@ class Card(models.Model):
         return now - self.creation_datetime
 
     @property
+    def creation_list(self):
+        if self.movements.filter(type="forward").order_by("datetime").exists():
+            return self.movements.filter(type="forward").order_by("datetime")[0].source_list
+        return None
+
+    @property
     def time_in_each_list(self):
 
         time_by_list = {list_.id: 0 for list_ in self.board.active_lists.all()}

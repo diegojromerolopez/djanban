@@ -8,7 +8,9 @@ from django.shortcuts import render
 
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.boards.models import Card
-from djangotrellostats.apps.forecaster.linear_regression import LinearRegressor
+from djangotrellostats.apps.forecaster.regressor import Regressor
+from djangotrellostats.apps.members.models import Member
+import numpy as np
 
 
 @login_required
@@ -22,6 +24,8 @@ def test_forecaster(request):
         board = boards.get(id=request.GET.get("board"))
         cards = cards.filter(board=board)
 
+    members = Member.objects.filter(boards__in=boards).distinct()
+
     method = request.GET.get("method")
 
     replacements = {
@@ -31,11 +35,11 @@ def test_forecaster(request):
     # Forecasting method selection
     try:
         forecaster = None
-        if method == "linear_regression":
-            forecaster = LinearRegressor(cards)
+        if method == "osl":
+            forecaster = Regressor(cards, members)
         else:
             replacements["error"] = "Method {0} not recognized".format(method)
-            return render(request, "forecaster/test.html", {"error": replacements})
+            return render(request, "forecaster/test.html", replacements)
     except AssertionError as e:
         replacements["error"] = e
         return render(request, "forecaster/test.html", replacements)
@@ -46,14 +50,23 @@ def test_forecaster(request):
     # Test if the method is adjusted at least to the same data
     test_cards = forecaster.cards
     total_error = 0
+    test_card_errors = []
     for test_card in test_cards:
-        test_card.estimated_spent_time = Decimal(forecaster.estimate_spent_time(test_card)).quantize(Decimal('1.000'))
+        test_card_estimated_spent_time = float(forecaster.estimate_spent_time(test_card))
+        test_card.estimated_spent_time = Decimal(test_card_estimated_spent_time).quantize(Decimal('1.000'))
         test_card.error = abs(test_card.spent_time - test_card.estimated_spent_time)
         total_error += test_card.error
+        test_card_errors.append(test_card.error)
+
+    avg_error = np.mean(test_card_errors)
+    std_dev_error = np.std(test_card_errors)
 
     # Template replacements
     replacements.update({
-        "test_cards": test_cards, "total_error": total_error,
+        "test_cards": test_cards,
+        "total_error": total_error,
+        "avg_error": avg_error,
+        "std_dev_error": std_dev_error,
         "forecaster": forecaster
     })
     return render(request, "forecaster/test.html", replacements)

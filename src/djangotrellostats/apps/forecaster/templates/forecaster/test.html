@@ -1,6 +1,6 @@
 {% extends "base/base.html" %}
 
-{% block page_title %}Linear regression test{% endblock %}
+{% block page_title %}Regression test{% endblock %}
 
 
 {% block content %}
@@ -11,7 +11,7 @@
                 <label>
                     <span>Method</span>
                     <select name="method">
-                        <option value="linear_regression" {% if method == 'linear_regression' %}selected="selected"{% endif %}>Linear regression</option>
+                        <option value="osl" {% if method == 'osl' %}selected="selected"{% endif %}>OSL regression</option>
                     </select>
                 </label>
                 <label>
@@ -33,13 +33,13 @@
     <div class="row">
         <div class="col-md-12">
             <h1>Forecaster test</h1>
-            {% if method == "linear_regression" %}
+            {% if method == "osl" %}
                 <p>
-                    {% if method == "linear_regression" %}
-                    <strong>Linear regression</strong>
+                    {% if method == "osl" %}
+                    <strong>OSL regression</strong>
                     {% endif %}
                 </p>
-                <p>Test completed successfully with an error of {{total_error}} hours</p>
+                <p>Test completed successfully with a total error of {{total_error|floatformat:4}} hours (avg error is {{avg_error|floatformat:4}}, std. dev. is {{std_dev_error|floatformat:4}})</p>
                 <p>{{forecaster.cards|length}} cards used in the regression</p>
                 <p>{{test_cards|length}} cards used as test</p>
                 {% if test_cards|length > 0 %}
@@ -78,7 +78,7 @@
                                 </tr>
                             {% endfor %}
                             <tr>
-                                <td colspan="4">Total error</td>
+                                <td colspan="5">Total error</td>
                                 <td>{{total_error}}</td>
                             </tr>
                         </tbody>
