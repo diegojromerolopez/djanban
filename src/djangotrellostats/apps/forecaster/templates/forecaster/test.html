@@ -1,0 +1,94 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Linear regression test{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Select your forecaster method</h1>
+            <form method="get" action="{% url 'forecaster:test' %}">
+                <label>
+                    <span>Method</span>
+                    <select name="method">
+                        <option value="linear_regression" {% if method == 'linear_regression' %}selected="selected"{% endif %}>Linear regression</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Board</span>
+                    <select name="board">
+                        <option value="" {% if not board %}selected="selected"{% endif %}>All</option>
+                        {% for board_i in boards %}
+                            <option value="{{board_i.id}}" {% if board.id == board_i.id %}selected="selected"{% endif %}>{{board_i.name}}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button class="btn btn-primary" type="submit">
+                    Select method
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Forecaster test</h1>
+            {% if method == "linear_regression" %}
+                <p>
+                    {% if method == "linear_regression" %}
+                    <strong>Linear regression</strong>
+                    {% endif %}
+                </p>
+                <p>Test completed successfully with an error of {{total_error}} hours</p>
+                <p>{{forecaster.cards|length}} cards used in the regression</p>
+                <p>{{test_cards|length}} cards used as test</p>
+                {% if test_cards|length > 0 %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <td>Board</td>
+                                <td>Id</td>
+                                <td>Name</td>
+                                <td>Real spent time</td>
+                                <td>Estimated spent time</td>
+                                <td>Error</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for test_card in test_cards %}
+                                <tr>
+                                    <td>
+                                        {{test_card.board.name}}
+                                    </td>
+                                    <td>
+                                        {{test_card.id}}
+                                    </td>
+                                    <td>
+                                        {{test_card.name|truncatechars:20}}
+                                    </td>
+                                    <td>
+                                        {{test_card.spent_time}}
+                                    </td>
+                                    <td>
+                                        {{test_card.estimated_spent_time}}
+                                    </td>
+                                    <td>
+                                        {{test_card.error}}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            <tr>
+                                <td colspan="4">Total error</td>
+                                <td>{{total_error}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No test cards found</p>
+                {% endif %}
+            {% else %}
+                Error. Method not recognized.
+            {% endif %}
+        </div>
+    </div>
+{% endblock content %}
