@@ -8,7 +8,7 @@ from django.shortcuts import render
 
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.boards.models import Card
-from djangotrellostats.apps.forecaster.regressor import Regressor
+from djangotrellostats.apps.forecaster.regression import OLS, GLS, WLS, GLSAR, QuantReg
 from djangotrellostats.apps.members.models import Member
 import numpy as np
 
@@ -23,8 +23,9 @@ def test_forecaster(request):
     if request.GET.get("board") and boards.filter(id=request.GET.get("board")).exists():
         board = boards.get(id=request.GET.get("board"))
         cards = cards.filter(board=board)
-
-    members = Member.objects.filter(boards__in=boards).distinct()
+        members = board.members.all()
+    else:
+        members = Member.objects.filter(boards__in=boards).distinct()
 
     method = request.GET.get("method")
 
@@ -35,8 +36,16 @@ def test_forecaster(request):
     # Forecasting method selection
     try:
         forecaster = None
-        if method == "osl":
-            forecaster = Regressor(cards, members)
+        if method == "ols":
+            forecaster = OLS(cards, members)
+        elif method == "gls":
+            forecaster = GLS(cards, members)
+        elif method == "wls":
+            forecaster = WLS(cards, members)
+        elif method == "glsar":
+            forecaster = GLSAR(cards, members)
+        elif method == "quantreg":
+            forecaster = QuantReg(cards, members)
         else:
             replacements["error"] = "Method {0} not recognized".format(method)
             return render(request, "forecaster/test.html", replacements)
@@ -64,6 +73,7 @@ def test_forecaster(request):
 
     # Template replacements
     replacements.update({
+        "summary": forecaster.result.summary(),
         "test_cards": test_cards,
         "total_error": total_error,
         "avg_error": avg_error,

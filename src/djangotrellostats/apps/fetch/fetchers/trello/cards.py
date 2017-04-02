@@ -151,9 +151,9 @@ class CardFetcher(object):
             except Member.DoesNotExist:
                 uploader = card.creator
 
+            trello_attachment_creation_date = dateparser.parse(trello_attachment["date"])
             try:
                 card_attachment = card.attachments.get(uuid=uuid)
-                trello_attachment_creation_date = dateparser.parse(trello_attachment["date"])
                 # If there has been any change in the file or even the URL has changed
                 if card_attachment.creation_datetime != trello_attachment_creation_date or\
                         card_attachment.external_file_name != trello_attachment["url"]:

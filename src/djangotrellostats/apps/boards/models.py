@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.db import models, transaction
-from django.db.models import Avg, Sum, Min, Max
+from django.db.models import Avg, Sum, Min, Max, F
 from django.db.models.query_utils import Q
 from django.utils import timezone
 from djangotrellostats.apps.dev_times.models import DailySpentTime
@@ -98,7 +98,6 @@ class Board(models.Model):
                                       help_text=u"Identicon hash used to know when to update it",
                                       default="", blank=True)
 
-
     # Users that can view the board stats and other parameters but cannot change anything
     visitors = models.ManyToManyField(User, verbose_name=u"Visitors of this board", related_name="boards", blank=True)
 
@@ -163,10 +162,15 @@ class Board(models.Model):
     def number_of_done_tasks(self):
         return self.cards.filter(is_closed=False, list__type="done").count()
 
+    # Comments of this board
+    @property
+    def card_comments(self):
+        return CardComment.objects.filter(card__board=self)
+
     # Number of comments
     @property
     def number_of_comments(self):
-        return CardComment.objects.filter(card__is_closed=False, card__board=self).count()
+        return self.card_comments.filter(card__is_closed=False).count()
 
     # Last 30 comments
     def last_comments(self, number_of_comments=30):
@@ -178,6 +182,26 @@ class Board(models.Model):
         if self.last_fetch_datetime:
             return self.last_fetch_datetime.strftime("%Y-%m-%d")
         return self.last_activity_datetime.strftime("%Y-%m-%d")
+
+    @property
+    def start_datetime(self):
+        first_card_creation_datetime = self.cards.all().aggregate(min=Min("creation_datetime"))["min"]
+        return first_card_creation_datetime
+
+    @property
+    def end_datetime(self):
+        last_arrival_to_done_datetime = self.card_movements.filter(destination_list__type="done").aggregate(max=Max("datetime"))["max"]
+        last_comment_datetime = self.card_comments.aggregate(max=Max("creation_datetime"))["max"]
+        last_card_creation_datetime = self.cards.all().aggregate(max=Max("creation_datetime"))["max"]
+        if last_arrival_to_done_datetime and last_comment_datetime and last_card_creation_datetime:
+            return max(last_arrival_to_done_datetime, last_comment_datetime, last_card_creation_datetime)
+        elif last_arrival_to_done_datetime and last_comment_datetime:
+            return max(last_arrival_to_done_datetime, last_comment_datetime)
+        elif last_comment_datetime:
+            return last_comment_datetime
+        elif last_card_creation_datetime:
+            return last_card_creation_datetime
+        return self.creation_datetime
 
     # Returns an hourly rate or None if this doesn't exist
     def get_date_hourly_rate(self, date):
@@ -660,6 +684,9 @@ class Card(models.Model):
     is_closed = models.BooleanField(verbose_name=u"Is this card closed?", default=False)
     position = models.PositiveIntegerField(verbose_name=u"Position in the list")
     number_of_comments = models.PositiveIntegerField(verbose_name=u"Number of comments of this card", default=0)
+    number_of_mentioned_members = models.PositiveIntegerField(
+        verbose_name=u"Number of mentioned members in the comments of this card", default=0
+    )
     number_of_reviews = models.PositiveIntegerField(verbose_name=u"Number of reviews of this card", default=0)
     value = models.PositiveIntegerField(verbose_name=u"Value of this card for the client", blank=True, default=None, null=True)
 
@@ -735,11 +762,20 @@ class Card(models.Model):
         return now - self.creation_datetime
 
     @property
+    def age_in_board(self):
+        last_board_action_datetime = self.board.end_datetime
+        return last_board_action_datetime - self.creation_datetime
+
+    # List where this card was created
+    # It is computed as the source of the first movement
+    @property
     def creation_list(self):
         if self.movements.filter(type="forward").order_by("datetime").exists():
             return self.movements.filter(type="forward").order_by("datetime")[0].source_list
         return None
 
+    # Get the time this card has passed in each list
+    # Returns a dict with pairs list_id, time this card has passed in that list (in seconds)
     @property
     def time_in_each_list(self):
 
@@ -780,6 +816,15 @@ class Card(models.Model):
         return time_by_list
 
     @property
+    def time_in_each_list_type(self):
+        list_type_by_id = {list_.id: list_.type for list_ in self.board.active_lists.all()}
+        time_by_list_type = {list_type: 0 for list_type in List.LIST_TYPES}
+        time_by_list = self.time_in_each_list
+        for list_id, time_in_list in time_by_list.items():
+            time_by_list_type[list_type_by_id[list_id]] +=time_in_list
+        return time_by_list_type
+
+    @property
     def ready_to_develop_datetime(self):
         arrivals_to_ready_to_develop_list = self.movements.filter(destination_list__type="ready_to_develop").order_by("datetime")
         if arrivals_to_ready_to_develop_list.exists():
@@ -792,16 +837,22 @@ class Card(models.Model):
 
     @property
     def start_datetime(self):
-        arrivals_to_in_development_list = self.movements.filter(destination_list__type="development").order_by("datetime")
-        if arrivals_to_in_development_list.exists():
-            return arrivals_to_in_development_list[0].datetime
+        first_arrival_to_in_development_datetime = \
+            self.movements.filter(destination_list__type="development").aggregate(min=Min("datetime"))["min"]
+        if first_arrival_to_in_development_datetime:
+            return first_arrival_to_in_development_datetime
         return self.creation_datetime
 
     @property
     def end_datetime(self):
-        arrivals_to_done_list = self.movements.filter(destination_list__type="done").order_by("-datetime")
-        if arrivals_to_done_list.exists():
-            return arrivals_to_done_list[0].datetime
+        last_arrival_to_done_datetime = self.movements.filter(destination_list__type="done").aggregate(max=Max("datetime"))["max"]
+        last_comment_datetime = self.comments.aggregate(max=Max("creation_datetime"))["max"]
+        if last_arrival_to_done_datetime and last_comment_datetime:
+            return max(last_arrival_to_done_datetime, last_comment_datetime)
+        elif last_arrival_to_done_datetime:
+            return last_arrival_to_done_datetime
+        elif last_comment_datetime:
+            return last_comment_datetime
         return self.creation_datetime
 
     # Is there any other card that blocks this card?
@@ -1285,6 +1336,8 @@ class CardAttachment(models.Model):
 # Each one of the comments made by members in each card
 class CardComment(models.Model):
 
+    COMMENT_MENTIONED_MEMBERS_FINDALL_REGEX = r"@[\w\d]+"
+
     class Meta:
         verbose_name = "Card comment"
         verbose_name_plural = "Card comments"
@@ -1299,6 +1352,8 @@ class CardComment(models.Model):
     card = models.ForeignKey("boards.Card", verbose_name=u"Card this comment belongs to", related_name="comments")
     author = models.ForeignKey("members.Member", verbose_name=u"Member author of this comment", related_name="comments")
     content = models.TextField(verbose_name=u"Content of the comment")
+    mentioned_members = models.ManyToManyField("members.Member", verbose_name=u"Mentioned members in this comment", related_name="mentioning_comments")
+    number_of_mentioned_members = models.PositiveIntegerField(verbose_name=u"Number of mentioned members", default=0)
     blocking_card = models.ForeignKey("boards.Card", verbose_name=u"Blocking card this comment belongs to", related_name="blocking_comments", null=True, default=None)
     review = models.OneToOneField("reports.CardReview", verbose_name=u"Card review this comment represents", related_name="comment", null=True, default=None)
     requirement = models.ForeignKey("requirements.Requirement", verbose_name=u"Requirement this comment belongs to", related_name="card_comments", null=True, default=None)
@@ -1383,6 +1438,41 @@ class CardComment(models.Model):
             return value
         return None
 
+    # Update mentioned members
+    def update_mentioned_members(self):
+        member_mentions = re.findall(CardComment.COMMENT_MENTIONED_MEMBERS_FINDALL_REGEX, self.content, re.IGNORECASE)
+        if len(member_mentions) == 0:
+            return None
+
+        # Checking if there are any mentioned members
+        cleaned_member_usernames = [member_username.replace("@", "") for member_username in member_mentions]
+        # If all the board is mentioned, ignore other mentions. Everyone in this board is mention
+        if "board" in cleaned_member_usernames:
+            mentioned_members = self.card.board.members.all()
+        # Otherwise, get the particular mentioned members
+        else:
+            mentioned_members = [
+                member for member in
+                self.card.board.members.filter(
+                    Q(trello_member_profile__username__in=cleaned_member_usernames)|
+                    Q(user__username__in=cleaned_member_usernames)
+                )
+            ]
+        # Clear all old mentions
+        earlier_number_of_mentioned_members = self.mentioned_members.count()
+        self.mentioned_members.clear()
+        # Add new mentioned members
+        for mentioned_member in mentioned_members:
+            self.mentioned_members.add(mentioned_member)
+        # Update the number of mentioned members
+        CardComment.objects.filter(id=self.id).update(number_of_mentioned_members=len(mentioned_members))
+        # Update the number of mentioned members
+        Card.objects.filter(id=self.card_id)\
+            .update(
+                number_of_mentioned_members=
+                F("number_of_mentioned_members")-earlier_number_of_mentioned_members+len(mentioned_members)
+            )
+
     def delete(self, *args, **kwargs):
         super(CardComment, self).delete(*args, **kwargs)
 
@@ -1449,6 +1539,10 @@ class CardComment(models.Model):
             card.valuation_comment = self
             card.save()
 
+        # Update mentioned members in case there is any of them
+        self.update_mentioned_members()
+
+        # Notify there is a new comment
         if not earlier_card_comment_exists:
             Notification.add_card_comment(self, card)
 

@@ -11,7 +11,11 @@
                 <label>
                     <span>Method</span>
                     <select name="method">
-                        <option value="osl" {% if method == 'osl' %}selected="selected"{% endif %}>OSL regression</option>
+                        <option value="ols" {% if method == 'ols' %}selected="selected"{% endif %}>OLS regression</option>
+                        <option value="gls" {% if method == 'gls' %}selected="selected"{% endif %}>GLS regression</option>
+                        <option value="wls" {% if method == 'wls' %}selected="selected"{% endif %}>WLS regression</option>
+                        <option value="glsar" {% if method == 'glsar' %}selected="selected"{% endif %}>GLSAR regression</option>
+                        <option value="quantreg" {% if method == 'quantreg' %}selected="selected"{% endif %}>Quantile regression </option>
                     </select>
                 </label>
                 <label>
@@ -33,15 +37,18 @@
     <div class="row">
         <div class="col-md-12">
             <h1>Forecaster test</h1>
-            {% if method == "osl" %}
+            {% if method == "ols" or method == "gls" or method == "wls" or method == "glsar" or method == "quantreg" %}
                 <p>
-                    {% if method == "osl" %}
-                    <strong>OSL regression</strong>
+                    {% if method == "ols" or method == "gls" or method == "wls" or method == "glsar" or method == "quantreg" %}
+                        <strong>{{method}} regression</strong>
                     {% endif %}
                 </p>
                 <p>Test completed successfully with a total error of {{total_error|floatformat:4}} hours (avg error is {{avg_error|floatformat:4}}, std. dev. is {{std_dev_error|floatformat:4}})</p>
                 <p>{{forecaster.cards|length}} cards used in the regression</p>
                 <p>{{test_cards|length}} cards used as test</p>
+                <pre>
+                    {{summary}}
+                </pre>
                 {% if test_cards|length > 0 %}
                     <table class="table table-striped">
                         <thead>
