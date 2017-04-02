@@ -12,8 +12,9 @@
                     <span>Method</span>
                     <select name="method">
                         <option value="ols" {% if method == 'ols' %}selected="selected"{% endif %}>OLS regression</option>
-                        <option value="gls" {% if method == 'gls' %}selected="selected"{% endif %}>GLS regression</option>
                         <option value="wls" {% if method == 'wls' %}selected="selected"{% endif %}>WLS regression</option>
+                        {#<option value="gee" {% if method == 'gee' %}selected="selected"{% endif %}>GEE regression</option>#}
+                        <option value="gls" {% if method == 'gls' %}selected="selected"{% endif %}>GLS regression</option>
                         <option value="glsar" {% if method == 'glsar' %}selected="selected"{% endif %}>GLSAR regression</option>
                         <option value="quantreg" {% if method == 'quantreg' %}selected="selected"{% endif %}>Quantile regression </option>
                     </select>
@@ -37,9 +38,9 @@
     <div class="row">
         <div class="col-md-12">
             <h1>Forecaster test</h1>
-            {% if method == "ols" or method == "gls" or method == "wls" or method == "glsar" or method == "quantreg" %}
+            {% if method == "ols" or method == "gee" or method == "gls" or method == "wls" or method == "glsar" or method == "quantreg" %}
                 <p>
-                    {% if method == "ols" or method == "gls" or method == "wls" or method == "glsar" or method == "quantreg" %}
+                    {% if method == "ols" or method == "gee" or method == "gls" or method == "wls" or method == "glsar" or method == "quantreg" %}
                         <strong>{{method}} regression</strong>
                     {% endif %}
                 </p>

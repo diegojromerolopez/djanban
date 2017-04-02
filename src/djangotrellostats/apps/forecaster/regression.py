@@ -5,7 +5,8 @@ import re
 from decimal import Decimal
 
 import pandas as pd
-import statsmodels.formula.api as sm
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
 
 from djangotrellostats.apps.boards.models import List
 
@@ -128,7 +129,7 @@ class OLS(Regressor):
     def run(self):
         df = self._get_data_frame()
         formula = self.get_formula()
-        self.result = sm.ols(formula=formula, data=df).fit()
+        self.result = smf.ols(formula=formula, data=df).fit()
 
 
 # Produce a linear regression of the spent time of the cards of the boards
@@ -141,20 +142,7 @@ class GLS(OLS):
     def run(self):
         df = self._get_data_frame()
         formula = self.get_formula()
-        self.result = sm.gls(formula=formula, data=df).fit()
-
-
-# Produce a linear regression of the spent time of the cards of the boards
-# that are passed as parameter to this class using Generalized Least Squares method
-class WLS(OLS):
-
-    def __init__(self, cards, members=None):
-        super(WLS, self).__init__(cards, members)
-
-    def run(self):
-        df = self._get_data_frame()
-        formula = self.get_formula()
-        self.result = sm.wls(formula=formula, data=df).fit()
+        self.result = smf.gls(formula=formula, data=df).fit()
 
 
 # Produce a linear regression of the spent time of the cards of the boards
@@ -167,7 +155,7 @@ class GLSAR(OLS):
     def run(self):
         df = self._get_data_frame()
         formula = self.get_formula()
-        self.result = sm.glsar(formula=formula, data=df).fit()
+        self.result = smf.glsar(formula=formula, data=df).fit()
 
 
 # Produce a linear regression of the spent time of the cards of the boards
@@ -191,4 +179,17 @@ class QuantReg(OLS):
     def run(self):
         df = self._get_data_frame()
         formula = self.get_formula()
-        self.result = sm.quantreg(formula=formula, data=df).fit()
+        self.result = smf.quantreg(formula=formula, data=df).fit()
+
+
+# Produce a linear regression of the spent time of the cards of the boards
+# that are passed as parameter to this class using Weighted Least Squares method
+class WLS(OLS):
+
+    def __init__(self, cards, members=None):
+        super(WLS, self).__init__(cards, members)
+
+    def run(self):
+        df = self._get_data_frame()
+        formula = self.get_formula()
+        self.result = smf.wls(formula=formula, data=df).fit()
