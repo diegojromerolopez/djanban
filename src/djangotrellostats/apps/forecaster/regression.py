@@ -7,6 +7,7 @@ from decimal import Decimal
 import pandas as pd
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
+import statsmodels
 
 from djangotrellostats.apps.boards.models import List
 
@@ -26,7 +27,22 @@ class Regressor(object):
             raise AssertionError(u"There are no cards")
 
     def get_formula(self):
-        raise NotImplementedError("get_formula is not implemented")
+        formula = """
+            card_spent_time ~ card_age + num_time_measurements +
+            num_forward_movements + num_backward_movements +
+            num_comments + name_num_words + name_length + description_num_words + description_length +
+            num_members + num_mentioned_members
+        """
+        for member in self.members:
+            formula += " + {0}".format(member.external_username)
+        # Creation list type
+        for list_type in List.LIST_TYPES:
+            formula += " + creation_list_type_{0}".format(list_type)
+        # Time this card has spent per list type
+        for list_type in List.LIST_TYPES:
+            formula += "+ time_in_list_type_{0}".format(list_type)
+
+        return formula
 
     def run(self):
         raise NotImplementedError("run is not implemented")
@@ -108,24 +124,6 @@ class OLS(Regressor):
     def __init__(self, cards, members=None):
         super(OLS, self).__init__(cards, members)
 
-    def get_formula(self):
-        formula = """
-            card_spent_time ~ card_age + num_time_measurements +
-            num_forward_movements + num_backward_movements +
-            num_comments + name_num_words + name_length + description_num_words + description_length +
-            num_members + num_mentioned_members
-        """
-        for member in self.members:
-            formula += " + {0}".format(member.external_username)
-        # Creation list type
-        for list_type in List.LIST_TYPES:
-            formula += " + creation_list_type_{0}".format(list_type)
-        # Time this card has spent per list type
-        for list_type in List.LIST_TYPES:
-            formula += "+ time_in_list_type_{0}".format(list_type)
-
-        return formula
-
     def run(self):
         df = self._get_data_frame()
         formula = self.get_formula()
@@ -134,7 +132,7 @@ class OLS(Regressor):
 
 # Produce a linear regression of the spent time of the cards of the boards
 # that are passed as parameter to this class using Generalized Least Squares method
-class GLS(OLS):
+class GLS(Regressor):
 
     def __init__(self, cards, members=None):
         super(GLS, self).__init__(cards, members)
@@ -147,7 +145,7 @@ class GLS(OLS):
 
 # Produce a linear regression of the spent time of the cards of the boards
 # that are passed as parameter to this class using Generalized Least Squares method
-class GLSAR(OLS):
+class GLSAR(Regressor):
 
     def __init__(self, cards, members=None):
         super(GLSAR, self).__init__(cards, members)
@@ -160,7 +158,7 @@ class GLSAR(OLS):
 
 # Produce a linear regression of the spent time of the cards of the boards
 # that are passed as parameter to this class using quantile regression model.
-class QuantReg(OLS):
+class QuantReg(Regressor):
 
     def __init__(self, cards, members=None):
         super(QuantReg, self).__init__(cards, members)
@@ -184,7 +182,7 @@ class QuantReg(OLS):
 
 # Produce a linear regression of the spent time of the cards of the boards
 # that are passed as parameter to this class using Weighted Least Squares method
-class WLS(OLS):
+class WLS(Regressor):
 
     def __init__(self, cards, members=None):
         super(WLS, self).__init__(cards, members)
@@ -193,3 +191,4 @@ class WLS(OLS):
         df = self._get_data_frame()
         formula = self.get_formula()
         self.result = smf.wls(formula=formula, data=df).fit()
+
