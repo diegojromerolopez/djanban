@@ -6,6 +6,7 @@ from decimal import Decimal
 from djangotrellostats.apps.boards.models import List
 
 
+# Card serializer used in the DataFrame creation
 class CardSerializer(object):
 
     def __init__(self, card, members):

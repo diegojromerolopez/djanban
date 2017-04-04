@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import re
-from decimal import Decimal
-
 import pandas as pd
-import statsmodels.api as sm
 import statsmodels.formula.api as smf
-import statsmodels
 
 from djangotrellostats.apps.boards.models import List
 from djangotrellostats.apps.forecaster.models import Forecaster
-
-
-# Execute a regression to the passed cards
 from djangotrellostats.apps.forecaster.serializer import CardSerializer
 
 
+# Regressor class. It is used to build regression models.
+# Execute a regression to the passed cards
 class Regressor(object):
 
+    # Construct the Regressor
+    # Board is optional
     def __init__(self, board, cards, members=None):
         self.board = board
         self.result = None
@@ -31,6 +27,7 @@ class Regressor(object):
         if not self.cards.exists():
             raise AssertionError(u"There are no cards")
 
+    # Returns the formula used in the regression
     def get_formula(self):
         formula = """
             card_spent_time ~ card_age + num_time_measurements +
@@ -49,9 +46,13 @@ class Regressor(object):
 
         return formula
 
+    # Fit the regression model
+    # Reimplement this method in successive regression models
     def fit(self, df, formula):
         raise NotImplementedError("Call here to statsmodels fit")
 
+    # Execute the regression
+    # If save parameter is passed, save the regression model in database
     def run(self, save=True):
         df = self._get_data_frame()
         formula = self.get_formula()
@@ -63,15 +64,19 @@ class Regressor(object):
             )
         return self.result
 
+    # Direct estimation from computed results
+    # Use only in tests
     def estimate_spent_time(self, card):
         return self.result.predict([self._get_card_data(card)])
 
+    # Convert all the cards in a Panda DataFrame
     def _get_data_frame(self):
         data_dict = [self._get_card_data(card) for card in self.cards]
         df = pd.DataFrame(data_dict)
         df.convert_objects(convert_numeric=True)
         return df
 
+    # Serialize card for DataFrame creation
     def _get_card_data(self, card):
         serializer = CardSerializer(card, self.members)
         return serializer.serialize()

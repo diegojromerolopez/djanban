@@ -14,6 +14,7 @@ from django.utils import timezone
 from djangotrellostats.apps.forecaster.serializer import CardSerializer
 
 
+# Forecaster model. Provide save and load functionality used to store and retrieve regression models.
 class Forecaster(models.Model):
     board = models.ForeignKey(
         "boards.Board", related_name="forecasters", verbose_name=u"Board of this forecaster",
@@ -23,9 +24,11 @@ class Forecaster(models.Model):
     formula = models.TextField(verbose_name=u"Formula")
     results_file = models.FileField(verbose_name=u"Field with the statsmodels results")
 
+    # Retrieve the RegressionResults statsmodels object from database
     def get_regression_results(self):
         return sm.load(self.results_file.path)
 
+    # Create a forecaster from a RegressionResults object
     @staticmethod
     def create_from_regression_results(board, model, formula, results):
         now = timezone.now()
@@ -54,10 +57,8 @@ class Forecaster(models.Model):
         regression_results = self.get_regression_results()
         return float(regression_results.predict([self._get_card_data(card)]))
 
+    # Serialize card data
     def _get_card_data(self, card):
-        if self.board:
-            members = self.board.members.all()
-        else:
-            members = card.members.all()
+        members = card.board.members.all()
         serializer = CardSerializer(card, members)
         return serializer.serialize()

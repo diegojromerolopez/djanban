@@ -5,11 +5,16 @@ from djangotrellostats.apps.forecaster.views.api import estimate
 
 urlpatterns = [
 
-    # Linear regression
+    # Index
     url(r'^$', index, name="index"),
+
+    # Regression test
     url(r'^test$', test_forecaster, name="test"),
+
+    # Regression model construction
     url(r'^build$', build_forecaster, name="build"),
 
-
+    # API that returns all estimations
     url(r'^api/estimate/(?P<card_id>\d+)$', estimate, name="estimate"),
+
 ]
