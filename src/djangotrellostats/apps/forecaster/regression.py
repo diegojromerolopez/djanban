@@ -9,17 +9,30 @@ from djangotrellostats.apps.forecaster.models import Forecaster
 from djangotrellostats.apps.forecaster.serializer import CardSerializer
 
 
+# Regression models that exist in this module
+REGRESSION_MODELS = (
+    ("ols", "OLS Regression"),
+    ("wls", "WLS Regression"),
+    ("gls", "GLS Regression"),
+    ("glsar", "GLSAR Regression"),
+    ("quantreg", "Quantile Regression")
+)
+
+
 # Regressor class. It is used to build regression models.
 # Execute a regression to the passed cards
 class Regressor(object):
 
     # Construct the Regressor
     # Board is optional
-    def __init__(self, board, cards, members=None):
+    def __init__(self, member, board, cards, forecaster_name, members=None):
+        self.member = member
         self.board = board
-        self.result = None
+        self.results = None
+        # We are going to make the regression with the active done cards that have consumed some time
         self.cards = cards\
             .filter(is_closed=False, spent_time__gt=0, list__type="done")
+        self.forecaster_name = forecaster_name
         if members:
             self.members = members
         else:
@@ -56,18 +69,15 @@ class Regressor(object):
     def run(self, save=True):
         df = self._get_data_frame()
         formula = self.get_formula()
-        self.result = self.fit(df, formula)
+        self.results = self.fit(df, formula)
         if save:
-            model_name = self.__class__.__name__
-            Forecaster.create_from_regression_results(
-                board=self.board, model=model_name, formula=formula, results=self.result
-            )
-        return self.result
+            Forecaster.create_from_regressor(self, name=self.forecaster_name)
+        return self.results
 
     # Direct estimation from computed results
     # Use only in tests
     def estimate_spent_time(self, card):
-        return self.result.predict([self._get_card_data(card)])
+        return self.results.predict([self._get_card_data(card)])
 
     # Convert all the cards in a Panda DataFrame
     def _get_data_frame(self):
@@ -82,10 +92,13 @@ class Regressor(object):
         return serializer.serialize()
 
 
-
 # Produce a linear regression of the spent time of the cards of the boards
 # that are passed as parameter to this class using Ordinary Least Squares method
 class OLS(Regressor):
+    def get_formula(self):
+        formula = super(OLS, self).get_formula()
+        formula += " + 1"
+        return formula
 
     def fit(self, df, formula):
         return smf.ols(formula=formula, data=df).fit()

@@ -1,55 +1,52 @@
 {% extends "base/base.html" %}
 
+{% load humanize %}
+
 {% block page_title %}Regression test{% endblock %}
 
 
 {% block content %}
     <div class="row">
         <div class="col-md-12">
-            <h1>Select your forecaster method</h1>
-            <form method="get" action="{% url 'forecaster:test' %}">
-                <label>
-                    <span>Method</span>
-                    <select name="method">
-                        <option value="ols" {% if method == 'ols' %}selected="selected"{% endif %}>OLS regression</option>
-                        <option value="wls" {% if method == 'wls' %}selected="selected"{% endif %}>WLS regression</option>
-                        {#<option value="gee" {% if method == 'gee' %}selected="selected"{% endif %}>GEE regression</option>#}
-                        <option value="gls" {% if method == 'gls' %}selected="selected"{% endif %}>GLS regression</option>
-                        <option value="glsar" {% if method == 'glsar' %}selected="selected"{% endif %}>GLSAR regression</option>
-                        <option value="quantreg" {% if method == 'quantreg' %}selected="selected"{% endif %}>Quantile regression </option>
-                    </select>
-                </label>
-                <label>
-                    <span>Board</span>
-                    <select name="board">
-                        <option value="" {% if not board %}selected="selected"{% endif %}>All</option>
-                        {% for board_i in boards %}
-                            <option value="{{board_i.id}}" {% if board.id == board_i.id %}selected="selected"{% endif %}>{{board_i.name}}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                <button class="btn btn-primary" type="submit">
-                    Select method
-                </button>
-            </form>
+            <h1>Confirm you want to test forecast {{forecast.name}}</h1>
+            <p>
+                <a href="{% url 'forecaster:index' %}" class="btn btn-primary">
+                   <span class="fa fa-arrow-left"></span>
+               </a>
+            </p>
+            {% include "forms/form.html" %}
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <h1>Forecaster test</h1>
-            {% if method == "ols" or method == "gee" or method == "gls" or method == "wls" or method == "glsar" or method == "quantreg" %}
-                <p>
-                    {% if method == "ols" or method == "gee" or method == "gls" or method == "wls" or method == "glsar" or method == "quantreg" %}
-                        <strong>{{method}} regression</strong>
-                    {% endif %}
-                </p>
-                <p>Test completed successfully with a total error of {{total_error|floatformat:4}} hours (avg error is {{avg_error|floatformat:4}}, std. dev. is {{std_dev_error|floatformat:4}})</p>
-                <p>{{forecaster.cards|length}} cards used in the regression</p>
-                <p>{{test_cards|length}} cards used as test</p>
-                <pre>
-                    {{summary}}
-                </pre>
+    {% if test_cards %}
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Forecaster {{forecaster.name}} test</h1>
+                <div>
+                   <h2>Type</h2>
+                   {% if forecaster.board %}
+                        Board: {{forecaster.board.name}}
+                   {% elif forecaster.member %}
+                        Member: {{forecaster.member.external_username}}
+                   {% else %}
+                        No restriction (all boards and members)
+                   {% endif %}
+                </div>
+                <div>
+                    <h2>Model</h2>
+                    {{forecaster.model}}
+                </div>
+                <div>
+                    <h2>Formula</h2>
+                    {{forecaster.formula}}
+                </div>
+                <div>
+                    <h2>Last updated</h2>
+                    {{forecaster.last_update_datetime|naturaltime}}
+                    ({{forecaster.last_update_datetime}})
+                </div>
+                <div>Test completed successfully with a total error of {{total_error|floatformat:4}} hours (avg error is {{avg_error|floatformat:4}}, std. dev. is {{std_dev_error|floatformat:4}})</div>
+                <div>{{test_cards|length}} cards used as test</div>
                 {% if test_cards|length > 0 %}
                     <table class="table table-striped">
                         <thead>
@@ -57,6 +54,7 @@
                                 <td>Board</td>
                                 <td>Id</td>
                                 <td>Name</td>
+                                <td>Members</td>
                                 <td>Real spent time</td>
                                 <td>Estimated spent time</td>
                                 <td>Diff</td>
@@ -74,6 +72,11 @@
                                     </td>
                                     <td>
                                         {{test_card.name|truncatechars:20}}
+                                    </td>
+                                    <td>
+                                        {% for member in test_card.members.all %}
+                                            {{member.external_username}}
+                                        {% endfor %}
                                     </td>
                                     <td>
                                         {{test_card.spent_time}}
@@ -98,9 +101,7 @@
                 {% else %}
                     <p>No test cards found</p>
                 {% endif %}
-            {% else %}
-                Error. Method not recognized.
-            {% endif %}
+            </div>
         </div>
-    </div>
+    {% endif %}
 {% endblock content %}

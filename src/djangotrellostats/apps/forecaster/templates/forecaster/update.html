@@ -1,0 +1,20 @@
+{% extends "base/base.html" %}
+
+{% load staticfiles %}
+
+{% block page_title %}Update forecaster #{{object.id}}{% endblock %}
+
+{% block content %}
+    <h1>Update forecaster #{{forecaster.id}}</h1>
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+                <a href="{% url 'forecaster:index' %}" class="btn btn-primary">
+                   <span class="fa fa-arrow-left"></span>
+               </a>
+            </p>
+            <p>Please, confirm you want to update forecaster #{{forecaster.id}} ({{forecaster.last_update_datetime}})</p>
+        </div>
+    </div>
+    {% include "forms/form.html" %}
+{% endblock content %}

@@ -1,0 +1,56 @@
+{% extends "base/base.html" %}
+
+{% load humanize %}
+{% load staticfiles %}
+
+{% block page_title %}Forecaster #{{forecaster.id}}{% endblock %}
+
+{% block content %}
+    <h1>Forecaster {{forecaster.name}} (#{{forecaster.id}})</h1>
+    <div class="row">
+        <div class="col-md-12">
+            <div>
+                <a href="{% url 'forecaster:index' %}" class="btn btn-primary">
+                   <span class="fa fa-arrow-left"></span>
+               </a>
+               <a href="{% url 'forecaster:update' forecaster.id %}" class="btn btn-primary">
+                   <span class="fa fa-refresh"></span>
+                   Update
+               </a>
+               <a href="{% url 'forecaster:delete' forecaster.id %}" class="btn btn-danger">
+                   <span class="fa fa-trash"></span>
+                   Delete
+               </a>
+            </div>
+            <div>
+               <h2>Type</h2>
+               {% if forecaster.board %}
+                    Board: {{forecaster.board.name}}
+               {% elif forecaster.member %}
+                    Member: {{forecaster.member.external_username}}
+               {% else %}
+                    No restriction (all boards and members)
+               {% endif %}
+            </div>
+            <div>
+                <h2>Model</h2>
+                {{forecaster.model}}
+            </div>
+            <div>
+                <h2>Formula</h2>
+                {{forecaster.formula}}
+            </div>
+            <div>
+                <h2>Summary</h2>
+                <pre>
+                {{forecaster.summary}}
+                </pre>
+            </div>
+            <div>
+                <h2>Last updated</h2>
+                {{forecaster.last_update_datetime|naturaltime}}
+                ({{forecaster.last_update_datetime}})
+            </div>
+        </div>
+    </div>
+{% endblock content %}

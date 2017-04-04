@@ -1,0 +1,43 @@
+{% extends "base/base.html" %}
+
+{% load staticfiles %}
+
+{% block page_title %}Delete forecaster #{{object.id}}{% endblock %}
+
+{% block content %}
+    <h1>Delete forecaster #{{object.id}}</h1>
+    <p>
+        <a href="{% url 'forecaster:index' %}" class="btn btn-primary">
+           <span class="fa fa-arrow-left"></span>
+       </a>
+    </p>
+
+    <div class="row">
+        <div class="col-md-12">
+            <p>Please, confirm you want to delete forecaster {{object.name}} (#{{object.id}})</p>
+            <div>
+               <h2>Type</h2>
+               {% if forecaster.board %}
+                    Board: {{forecaster.board.name}}
+               {% elif forecaster.member %}
+                    Member: {{forecaster.member.external_username}}
+               {% else %}
+                    No restriction (all boards and members)
+               {% endif %}
+            </div>
+            <div>
+                <h2>Model</h2>
+                {{object.model}}
+            </div>
+            <div>
+                <h2>Formula</h2>
+                {{object.formula}}
+            </div>
+            <div>
+                <h2>Last updated</h2>
+                {{object.last_update_datetime}}
+            </div>
+        </div>
+    </div>
+    {% include "forms/form.html" %}
+{% endblock content %}

@@ -1,0 +1,22 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Regression test{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Create new forecaster</h1>
+            <p>
+                <a href="{% url 'forecaster:index' %}" class="btn btn-primary">
+                   <span class="fa fa-arrow-left"></span>
+               </a>
+            </p>
+
+            <div class="row">
+                <div class="col-md-12">
+                    {% include "forms/form.html" %}
+                </div>
+            </div>
+    </div>
+{% endblock content %}
