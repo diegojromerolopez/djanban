@@ -14,6 +14,12 @@ import numpy as np
 
 
 @login_required
+def index(request):
+    replacements = {}
+    return render(request, "forecaster/index.html", replacements)
+
+
+@login_required
 def test_forecaster(request):
     cards = Card.objects.all()
 
@@ -35,26 +41,26 @@ def test_forecaster(request):
 
     # Forecasting method selection
     try:
-        forecaster = None
         if method == "ols":
-            forecaster = OLS(cards, members)
+            ForecasterClass = OLS
         elif method == "gls":
-            forecaster = GLS(cards, members)
+            ForecasterClass = GLS
         elif method == "wls":
-            forecaster = WLS(cards, members)
+            ForecasterClass = WLS
         elif method == "glsar":
-            forecaster = GLSAR(cards, members)
+            ForecasterClass = GLSAR
         elif method == "quantreg":
-            forecaster = QuantReg(cards, members)
+            ForecasterClass = QuantReg
         else:
             replacements["error"] = "Method {0} not recognized".format(method)
-            return render(request, "forecaster/test.html", replacements)
+            return render(request, "forecaster/compute.html", replacements)
+        forecaster = ForecasterClass(board=board, cards=cards, members=members)
     except AssertionError as e:
         replacements["error"] = e
         return render(request, "forecaster/test.html", replacements)
 
     # Run the forecasting method
-    forecaster.run()
+    forecaster.run(save=False)
 
     # Test if the method is adjusted at least to the same data
     test_cards = forecaster.cards
@@ -81,3 +87,54 @@ def test_forecaster(request):
         "forecaster": forecaster
     })
     return render(request, "forecaster/test.html", replacements)
+
+
+@login_required
+def build_forecaster(request):
+    cards = Card.objects.all()
+
+    # Board selection
+    boards = get_user_boards(request.user)
+    board = None
+    if request.GET.get("board") and boards.filter(id=request.GET.get("board")).exists():
+        board = boards.get(id=request.GET.get("board"))
+        cards = cards.filter(board=board)
+        members = board.members.all()
+    else:
+        members = Member.objects.filter(boards__in=boards).distinct()
+
+    method = request.GET.get("method")
+
+    replacements = {
+        "boards": boards, "method": method, "board": board,
+    }
+
+    # Forecasting method selection
+    try:
+        if method == "ols":
+            ForecasterClass = OLS
+        elif method == "gls":
+            ForecasterClass = GLS
+        elif method == "wls":
+            ForecasterClass = WLS
+        elif method == "glsar":
+            ForecasterClass = GLSAR
+        elif method == "quantreg":
+            ForecasterClass = QuantReg
+        else:
+            replacements["error"] = "Method {0} not recognized".format(method)
+            return render(request, "forecaster/compute.html", replacements)
+        forecaster = ForecasterClass(board=board, cards=cards, members=members)
+    except AssertionError as e:
+        replacements["error"] = e
+        return render(request, "forecaster/compute.html", replacements)
+
+    # Run the forecasting method
+    forecaster.run(save=True)
+
+    # Template replacements
+    replacements.update({
+        "summary": forecaster.result.summary(),
+        "forecaster": forecaster
+    })
+    return render(request, "forecaster/compute.html", replacements)

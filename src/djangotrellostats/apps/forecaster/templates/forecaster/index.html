@@ -1,0 +1,14 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Regression test{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Forecaster actions</h1>
+            <a href="{% url 'forecaster:test' %}">Test</a>
+            <a href="{% url 'forecaster:build' %}">Build forecaster</a>
+        </div>
+    </div>
+{% endblock content %}
