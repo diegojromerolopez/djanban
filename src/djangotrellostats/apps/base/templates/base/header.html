@@ -35,7 +35,7 @@
                     {% if member %}
                         <li role="presentation" {% if url_name == "view_members" or url_name == "view_spent_time_factors" %}class="active"{% endif %}>
                             <a href="{% url 'members:view_members' %}" title="View members">
-                                <span class="fa fa-users"></span> Members
+                                <span class="fa fa-users"></span>
                             </a>
                         </li>
                         <li role="presentation" {% if url_namespace == "reports" %}class="active"{% endif %}>
@@ -60,6 +60,11 @@
                         </a>
                     </li>
                     {% if member %}
+                        <li role="presentation" {% if url_namespace == "forecaster" %}class="active"{% endif %}>
+                            <a href="{% url 'forecaster:index' %}" title="Forecasts">
+                                <span class="fa fa-cloud"></span> Forecasts
+                            </a>
+                        </li>
                         <li role="presentation" {% if url_namespace == "visitors" %}class="active"{% endif %}>
                             <a href="{% url 'visitors:view_list' %}" title="Visitors">
                                 <span class="fa fa-smile-o"></span> Visitors

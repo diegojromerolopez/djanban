@@ -17,8 +17,9 @@ from djangotrellostats.apps.forecaster.models import Forecaster
 
 @member_required
 def index(request):
+    member = request.user.member
     forecasters = Forecaster.objects.all().order_by("board", "model")
-    replacements = {"forecasters": forecasters}
+    replacements = {"forecasters": forecasters, "member": member}
     return render(request, "forecaster/index.html", replacements)
 
 
@@ -29,9 +30,15 @@ class ForecasterDelete(DeleteView):
     template_name = "forecaster/delete.html"
     pk_url_kwarg = "forecaster_id"
 
+    def get_context_data(self, *args, **kwargs):
+        context = super(ForecasterDelete, self).get_context_data(*args, **kwargs)
+        context["member"] = self.request.user.member
+        return context
+
 
 @member_required
 def build_forecaster(request):
+    member = request.user.member
     if request.method == "POST":
         form = BuildForecasterForm(request.POST)
         if form.is_valid():
@@ -40,12 +47,13 @@ def build_forecaster(request):
     else:
         form = BuildForecasterForm()
 
-    return render(request, "forecaster/build.html", {"form": form})
+    return render(request, "forecaster/build.html", {"form": form, "member": member})
 
 
 # Test a forecaster
 @member_required
 def test_forecaster(request, forecaster_id):
+    member = request.user.member
     forecaster = get_object_or_404(Forecaster, id=forecaster_id)
     if request.method == "POST":
         form = TestForecasterForm(request.POST)
@@ -65,18 +73,19 @@ def test_forecaster(request, forecaster_id):
             std_dev_error = np.std(test_card_errors)
             replacements = {
                 "form": form, "forecaster": forecaster, "test_cards": test_cards,
-                "total_error": total_error, "avg_error": avg_error, "std_dev_error": std_dev_error
+                "total_error": total_error, "avg_error": avg_error, "std_dev_error": std_dev_error, "member": member
             }
             return render(request, "forecaster/test.html", replacements)
     else:
         form = TestForecasterForm()
 
-    return render(request, "forecaster/test.html", {"form": form})
+    return render(request, "forecaster/test.html", {"form": form, "member": member})
 
 
 # Update a forecaster
 @member_required
 def update_forecaster(request, forecaster_id):
+    member = request.user.member
     forecaster = get_object_or_404(Forecaster, id=forecaster_id)
     if request.method == "POST":
         form = UpdateForecasterForm(request.POST)
@@ -86,11 +95,12 @@ def update_forecaster(request, forecaster_id):
     else:
         form = UpdateForecasterForm()
 
-    return render(request, "forecaster/update.html", {"form": form, "forecaster": forecaster})
+    return render(request, "forecaster/update.html", {"form": form, "forecaster": forecaster, "member": member})
 
 
 # View a forecaster
 @member_required
 def view_forecaster(request, forecaster_id):
+    member = request.user.member
     forecaster = get_object_or_404(Forecaster, id=forecaster_id)
-    return render(request, "forecaster/view.html", {"forecaster": forecaster})
+    return render(request, "forecaster/view.html", {"forecaster": forecaster, "member": member})
