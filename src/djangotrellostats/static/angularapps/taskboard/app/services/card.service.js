@@ -26,6 +26,7 @@ var CardService = (function (_super) {
         var _this = _super.call(this, http) || this;
         _this.ADD_CARD_URL = "/api/board/{board_id}/card";
         _this.ADD_SE_URL = "/api/board/{board_id}/card/{card_id}/time";
+        _this.UPDATE_FORECASTS = "/api/board/{board_id}/card/{card_id}/forecasts";
         _this.ADD_COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment";
         _this.COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
         _this.MOVE_CARD_URL = "/api/board/{board_id}/card/{card_id}/list";
@@ -63,6 +64,14 @@ var CardService = (function (_super) {
         var add_se_url = this.prepareUrl(this.ADD_SE_URL, card);
         var post_body = { date: date, spent_time: spent_time, estimated_time: estimated_time, description: description };
         return this.http.post(add_se_url, post_body)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    };
+    CardService.prototype.updateForecasts = function (card) {
+        var update_forecasts_url = this.prepareUrl(this.UPDATE_FORECASTS, card);
+        var post_body = {};
+        return this.http.post(update_forecasts_url, post_body)
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);

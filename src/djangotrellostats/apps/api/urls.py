@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/labels/?$', cards.change_labels, name="change_labels"),
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/members/?$', cards.change_members, name="change_members"),
 
+    url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/forecasts/?$', cards.update_forecasts, name="update_forecasts"),
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/time/?$', cards.add_se_time, name="add_se_time"),
 
     url(r'^board/(?P<board_id>\d+)/card/(?P<card_id>\d+)/?$', cards.change, name="change"),

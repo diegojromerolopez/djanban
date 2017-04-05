@@ -65,6 +65,9 @@ export class CardComponent implements OnInit  {
     private changeSETimeStatus: string;
     private changeDescriptionStatus: string;
     private newCommentStatus: string;
+
+    // Status of the forecast updater
+    private updateForecastsStatus: string;
     
     // Blocking card statuses
     private addBlockingCardStatus: string;
@@ -131,6 +134,7 @@ export class CardComponent implements OnInit  {
         this.changeDueDatetimeStatus = "hidden";
         this.removeDueDatetimeStatus = "standby"
         this.changeSETimeStatus = "standby";
+        this.updateForecastsStatus = "standby";
         this.changeDescriptionStatus = "hidden";
         this.newCommentStatus = "standby";
         this.addBlockingCardStatus = "hidden";
@@ -369,6 +373,17 @@ export class CardComponent implements OnInit  {
         }).catch(error_message => {
             this.notificationsService.error("Error", `Couldn't submit a spent/estimated time to ${this.card.name}. ${error_message}`);
             this.changeSETimeStatus = "standby";
+        });
+    }
+
+    /** Get (and update if needed) this card's forecasts */
+    updateForecasts(){
+        this.cardService.updateForecasts(this.card).then(forecasts => {
+            this.card.forecasts = forecasts;
+            this.updateForecastsStatus = "standby";
+        }).catch(error_message => {
+            this.notificationsService.error("Error", `Unable to update ${this.card.name}'s forecasts. ${error_message}`);
+            this.updateForecastsStatus = "standby";
         });
     }
 

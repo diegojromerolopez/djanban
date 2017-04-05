@@ -113,6 +113,29 @@
                             </button>
                         </form>
                     </div>
+
+                    <!-- Forecast -->
+                    <div class="card-estimated_spent_time card-section">
+                        <h2>Estimations</h2>
+                        <div *ngIf="card.forecasts">
+                            <ul>
+                                <li *ngFor="let forecast of card.forecasts">
+                                    {{forecast.name}} (<em>{{forecast.model}}</em> model):
+                                    <strong>{{forecast.estimated_spent_time}} hours</strong>
+                                    (last update at {{forecast.last_update_datetime | localize_datetime }})
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary"
+                                    (click)="updateForecasts()"
+                                    (click)="updateForecastsStatus='waiting'"
+                                    [disabled]="updateForecastsStatus == 'waiting'">
+                                    <span *ngIf="updateForecastsStatus == 'waiting'" class="fa fa-spinner fa-spin"></span>
+                                Update forecasts
+                            </button>
+                        </div>
+                    </div>
                     
                     <!-- Cycle time -->
                     <div *ngIf="card.cycle_time">

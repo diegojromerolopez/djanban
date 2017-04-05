@@ -43,10 +43,12 @@ var CardComponent = (function () {
         this.changeDueDatetimeStatus = "hidden";
         this.removeDueDatetimeStatus = "standby";
         this.changeSETimeStatus = "standby";
+        this.updateForecastsStatus = "standby";
         this.changeDescriptionStatus = "hidden";
         this.newCommentStatus = "standby";
         this.addBlockingCardStatus = "hidden";
         this.newReviewStatus = "hidden";
+        this.newCommentContent = "";
         this.editCommentStatus = {};
         this.commentPreviousContent = {};
         this.deleteCommentStatus = {};
@@ -289,6 +291,17 @@ var CardComponent = (function () {
             _this.changeSETimeStatus = "standby";
         });
     };
+    /** Get (and update if needed) this card's forecasts */
+    CardComponent.prototype.updateForecasts = function () {
+        var _this = this;
+        this.cardService.updateForecasts(this.card).then(function (forecasts) {
+            _this.card.forecasts = forecasts;
+            _this.updateForecastsStatus = "standby";
+        }).catch(function (error_message) {
+            _this.notificationsService.error("Error", "Unable to update " + _this.card.name + "'s forecasts. " + error_message);
+            _this.updateForecastsStatus = "standby";
+        });
+    };
     /** Called when the card change value form is submitted */
     CardComponent.prototype.onSubmitValueForm = function (value) {
         var _this = this;
@@ -376,11 +389,13 @@ var CardComponent = (function () {
         var _this = this;
         this.cardService.addNewComment(this.card, comment_content).then(function (comment) {
             _this.card.comments = [comment].concat(_this.card.comments);
+            _this.newCommentContent = "";
             _this.newCommentStatus = "standby";
             _this.editCommentStatus[comment.id] = "standby";
             _this.deleteCommentStatus[comment.id] = "standby";
             _this.notificationsService.success("New comment added", _this.card.name + " has a new comment (" + _this.card.comments.length + " in total).");
         }).catch(function (error_message) {
+            _this.newCommentContent = "";
             _this.notificationsService.error("Error", "Couldn't add a new comment to " + _this.card.name + ". " + error_message);
             _this.newCommentStatus = "standby";
         });

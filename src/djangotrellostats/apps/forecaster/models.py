@@ -67,6 +67,9 @@ class Forecaster(models.Model):
             )
         forecaster.save()
 
+        # Delete all current forecasts (if we were updating the forecaster)
+        forecaster.forecasts.all().delete()
+
         return forecaster
 
     @property
@@ -78,11 +81,34 @@ class Forecaster(models.Model):
             cards = cards.filter(members=self.member)
         return cards
 
-    # Estimate card spent time
+    # Make an estimation of a card
+    # Returns the estimated spent time of this card according to this forecaster's model
     def estimate_spent_time(self, card):
         if not hasattr(self, "_regression_results"):
             self._regression_results = self.get_regression_results()
-        return float(self._regression_results.predict([self._get_card_data(card)]))
+        estimate_spent_time = float(self._regression_results.predict([self._get_card_data(card)]))
+        return estimate_spent_time
+
+    # Make a forecast of a card
+    # Returns a Forecast object with the estimated spent time of this card according to this forecaster's model
+    def make_forecast(self, card):
+
+        # If Forecast object exists, return it
+        try:
+            return Forecast.objects.get(forecaster=self, card=card, last_update_datetime__gte=self.last_update_datetime)
+        # Otherwise,
+        except Forecast.DoesNotExist:
+            # Try getting an old forecast and updating it if it exists
+            try:
+                forecast = Forecast.objects.get(forecaster=self, card=card)
+            # If it doesn't exist, create a new one
+            except Forecast.DoesNotExist:
+                forecast = Forecast(forecaster=self, card=card)
+
+            forecast.last_update_datetime = timezone.now()
+            forecast.estimated_spent_time = self.estimate_spent_time(card)
+            forecast.save()
+        return forecast
 
     # Set last_update datetime when saving a Forecaster
     def save(self, *args, **kwargs):
@@ -94,3 +120,19 @@ class Forecaster(models.Model):
         members = card.board.members.all()
         serializer = CardSerializer(card, members)
         return serializer.serialize()
+
+
+# Estimation of spent time for a card
+class Forecast(models.Model):
+    class Meta:
+        unique_together = (
+            ("forecaster", "card")
+        )
+
+    forecaster = models.ForeignKey(
+        "forecaster.Forecaster", related_name="forecasts",
+        verbose_name=u"Spent time for this forecast"
+    )
+    card = models.ForeignKey("boards.Card", related_name="forecasts", verbose_name=u"Card for this forecast")
+    estimated_spent_time = models.DecimalField(verbose_name=u"Estimated spent time", decimal_places=4, max_digits=12)
+    last_update_datetime = models.DateTimeField(verbose_name=u"Date this estimation was done")

@@ -145,6 +145,9 @@ class Serializer(object):
             "lead_time": card.lead_time,
             "cycle_time": card.cycle_time,
             "number_of_attachments": card.number_of_attachments,
+            "forecasts": [
+                self.serialize_forecast(forecast) for forecast in card.forecasts.all().order_by("-last_update_datetime")
+            ],
             "attachments": [
                 self.serialize_card_attachment(attachment)
                 for attachment in card.attachments.all().order_by("-creation_datetime")
@@ -267,6 +270,17 @@ class Serializer(object):
             "creation_datetime": review.creation_datetime,
             "description": review.description,
             "reviewers": [self.serialized_members_by_id[reviewer.id] for reviewer in review.reviewers.all()]
+        }
+
+    # Serialize card forecast
+    def serialize_forecast(self, forecast):
+        forecaster = forecast.forecaster
+        return {
+            "id": forecast.id,
+            "model": forecaster.model,
+            "name": forecaster.name,
+            "estimated_spent_time": forecast.estimated_spent_time,
+            "last_update_datetime": forecast.last_update_datetime
         }
 
     # List serialization

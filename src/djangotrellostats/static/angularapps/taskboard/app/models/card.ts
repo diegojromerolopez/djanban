@@ -7,6 +7,7 @@ import { assign } from 'rxjs/util/assign';
 import { CardReview } from './review';
 import { Requirement } from './requirement';
 import { CardAttachment } from './attachment';
+import { Forecast } from './forecast';
 
 
 export class Card {
@@ -32,6 +33,7 @@ export class Card {
   board?: Board;
   list?: List;
   labels?: Label[];
+  forecasts?: Forecast[];
   attachments?: CardAttachment[];
   comments?: CardComment[];
   members?: Member[];

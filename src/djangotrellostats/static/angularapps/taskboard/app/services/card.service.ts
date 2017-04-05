@@ -29,6 +29,7 @@ export class CardService extends DjangoTrelloStatsService {
 
   private ADD_CARD_URL = "/api/board/{board_id}/card";
   private ADD_SE_URL = "/api/board/{board_id}/card/{card_id}/time";
+  private UPDATE_FORECASTS = "/api/board/{board_id}/card/{card_id}/forecasts";
   private ADD_COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment";
   private COMMENT_URL = "/api/board/{board_id}/card/{card_id}/comment/{comment_id}";
   private MOVE_CARD_URL = "/api/board/{board_id}/card/{card_id}/list";
@@ -69,6 +70,15 @@ export class CardService extends DjangoTrelloStatsService {
     let add_se_url = this.prepareUrl(this.ADD_SE_URL, card);
     let post_body = {date: date, spent_time: spent_time, estimated_time: estimated_time, description: description};
     return this.http.post(add_se_url, post_body)
+                  .toPromise()
+                  .then(this.extractData)
+                  .catch(this.handleError);
+  }
+
+  updateForecasts(card: Card){
+    let update_forecasts_url = this.prepareUrl(this.UPDATE_FORECASTS, card);
+    let post_body = {};
+    return this.http.post(update_forecasts_url, post_body)
                   .toPromise()
                   .then(this.extractData)
                   .catch(this.handleError);

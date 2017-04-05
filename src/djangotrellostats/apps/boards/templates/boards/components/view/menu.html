@@ -66,7 +66,7 @@
                             </a>
                         </li>
                         <li {% if url_name == "view_daily_spent_times" %}class="active"{% endif %}>
-                            <a href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}" title="Spent times of board {{board.name}}">
+                            <a href="{% url 'dev_times:view_daily_spent_times' %}?label_id=all_from_board_{{board.id}}" title="Spent times of board {{board.name}}">
                                 <span class="fa fa-clock-o"></span> S/E Time
                             </a>
                         </li>

@@ -8,7 +8,9 @@ import tempfile
 
 import dateutil
 from django.core.files.base import ContentFile
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
+from django.db.models import Q
 from django.http import JsonResponse, Http404
 from django.utils import timezone
 
@@ -21,6 +23,7 @@ from djangotrellostats.apps.boards.models import Board, Card, CardComment, List,
 
 
 # Point of access to several actions
+from djangotrellostats.apps.forecaster.models import Forecaster
 from djangotrellostats.utils.custom_uuid import custom_uuid
 
 
@@ -369,6 +372,32 @@ def add_se_time(request, board_id, card_id):
 
     serializer = Serializer(board=card.board)
     return JsonResponse(serializer.serialize_card(card))
+
+
+# Create a new estimation for a card
+@member_required
+def update_forecasts(request, board_id, card_id):
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+        card = board.cards.get(id=card_id)
+    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+        return JsonResponseNotFound({"message": "Not found."})
+
+    available_card_forecasters = Forecaster.objects.filter(
+        (Q(board=None) & Q(member=None)) |
+        (Q(board=card.board) & Q(member=None)) |
+        (Q(board=None) & Q(member__in=card.members.all()))
+    )
+
+    serializer = Serializer(board=card.board)
+
+    estimations = []
+    for forecaster in available_card_forecasters:
+
+        forecast = forecaster.make_forecast(card=card)
+        estimations.append(serializer.serialize_forecast(forecast))
+
+    return JsonResponse(estimations, safe=False, encoder=DjangoJSONEncoder)
 
 
 # Add a new blocking card to this card

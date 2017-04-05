@@ -246,10 +246,16 @@ def _get_daily_spent_times_from_request(request):
     if request.GET.get("member_id"):
         selected_member = Member.objects.get(id=request.GET.get("member_id"))
 
-    spent_times = _get_daily_spent_times_queryset(current_user, selected_member,
-                                                  request.GET.get("start_date"), request.GET.get("end_date"),
-                                                  request.GET.get('week'),
-                                                  request.GET.get("label_id"))
+    if request.GET.get("label_id"):
+        label_id = request.GET.get("label_id")
+    elif request.GET.get("board_id"):
+        label_id = "all_from_board_{0}".format(request.GET.get("board_id"))
+    else:
+        label_id = None
+    spent_times = _get_daily_spent_times_queryset(
+        current_user, selected_member,
+        request.GET.get("start_date"), request.GET.get("end_date"), request.GET.get('week'), label_id
+    )
 
     return spent_times
 
@@ -288,17 +294,18 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
     label = None
     board = None
     current_user_boards = get_user_boards(current_user)
-    matches = re.match(r"all_from_board_(?P<board_id>\d+)", label_id)
-    if matches and current_user_boards.filter(id=matches.group("board_id")).exists():
-        label = None
-        board = current_user_boards.get(id=matches.group("board_id"))
-        daily_spent_time_filter["board"] = board
+    if label_id:
+        matches = re.match(r"all_from_board_(?P<board_id>\d+)", label_id)
+        if matches and current_user_boards.filter(id=matches.group("board_id")).exists():
+            label = None
+            board = current_user_boards.get(id=matches.group("board_id"))
+            daily_spent_time_filter["board"] = board
 
-    elif Label.objects.filter(id=label_id, board__in=current_user_boards).exists():
-        label = Label.objects.get(id=label_id)
-        board = label.board
-        daily_spent_time_filter["board"] = board
-        daily_spent_time_filter["card__labels"] = label
+        elif Label.objects.filter(id=label_id, board__in=current_user_boards).exists():
+            label = Label.objects.get(id=label_id)
+            board = label.board
+            daily_spent_time_filter["board"] = board
+            daily_spent_time_filter["card__labels"] = label
 
     # Daily Spent Times
     daily_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).order_by("-date")
