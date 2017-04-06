@@ -10,6 +10,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic.edit import DeleteView
 
+from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.forecaster.forms import UpdateForecasterForm, BuildForecasterForm, TestForecasterForm
 from djangotrellostats.apps.forecaster.models import Forecaster
@@ -18,7 +19,14 @@ from djangotrellostats.apps.forecaster.models import Forecaster
 @member_required
 def index(request):
     member = request.user.member
-    forecasters = Forecaster.objects.all().order_by("board", "model")
+    forecasters = Forecaster.objects.all()
+    if request.GET.get("board"):
+        boards = get_user_boards(request.user)
+        if boards.filter(id=request.GET.get("board")).exists():
+            board = boards.get(id=request.GET.get("board"))
+            forecasters.filter(board=board)
+
+    forecasters = forecasters.order_by("board", "model")
     replacements = {"forecasters": forecasters, "member": member}
     return render(request, "forecaster/index.html", replacements)
 
