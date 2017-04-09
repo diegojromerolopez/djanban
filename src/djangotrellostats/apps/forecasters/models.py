@@ -34,7 +34,7 @@ class Forecaster(models.Model):
     formula = models.TextField(verbose_name=u"Formula")
     summary = models.TextField(verbose_name=u"Summary", blank=True, default="")
     results_file = models.FileField(verbose_name=u"Field with the statsmodels results")
-    creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_forecasters")
+    last_updater = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="updated_forecasters")
     last_update_datetime = models.DateTimeField(verbose_name=u"Last update datetime")
 
     # Retrieve the RegressionResults statsmodels object from database
@@ -68,7 +68,7 @@ class Forecaster(models.Model):
             raise ValueError("User needs to be member to create a forecaster")
         current_member = current_user.member
 
-        forecaster.creator = current_member
+        forecaster.last_updater = current_member
         forecaster.name = name
         forecaster.summary = results.summary()
 
@@ -134,7 +134,7 @@ class Forecaster(models.Model):
         boards = get_user_boards(user)
         teammates = Member.get_user_team_mates(user)
         forecasters = Forecaster.objects.filter(
-            Q(creator=member) |
+            Q(last_updater=member) |
             Q(board__in=boards) |
             Q(member__in=list(teammates)+[member])
         )

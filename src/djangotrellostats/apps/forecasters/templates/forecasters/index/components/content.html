@@ -24,7 +24,6 @@
                        <td>Name</td>
                        <td>Type</td>
                        <td>Model</td>
-                       <td>Formula</td>
                        <td>Last update</td>
                        <td>Actions</td>
                    </tr>
@@ -48,7 +47,6 @@
                                {% endif %}
                            </td>
                            <td>{{forecaster.model}}</td>
-                           <td>{{forecaster.formula|truncatechars:50}}</td>
                            <td>{{forecaster.last_update_datetime}}</td>
                            <td>
                                <a href="{% url 'forecasters:view' forecaster.id %}" class="btn btn-primary">
