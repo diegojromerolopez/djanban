@@ -123,7 +123,7 @@ def update_forecaster(request, forecaster_id):
         form = UpdateForecasterForm(request.POST)
         if form.is_valid():
             form.save(forecaster)
-            return HttpResponseRedirect(reverse("forecaster:index"))
+            return HttpResponseRedirect(reverse("forecasters:index"))
     else:
         form = UpdateForecasterForm()
 
