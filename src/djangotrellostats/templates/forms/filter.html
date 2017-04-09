@@ -1,0 +1,17 @@
+
+<form action="{{action}}" method="get" class="filter">
+    <div class="non_field_errors">{{form.non_field_errors}}</div>
+    {% for field in form %}
+        <div class="field-container {% if field.is_hidden %}hidden{% endif %} form-group">
+            <label for="{{field.id_for_label}}">{{field.label}}</label>
+            <div class="field input-group">{{field}}</div>
+            <div class="help_text">{{field.help_text}}</div>
+            <div class="errors">
+                {% for error in field.errors %}
+                    <div class="error">{{error}}</div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+    <button type="submit" name="save" value="Send" class="btn btn-success">Filter</button>
+</form>

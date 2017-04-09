@@ -7,8 +7,11 @@
 {% block content %}
     <h1>Delete forecaster #{{object.id}}</h1>
     <p>
-        <a href="{% url 'forecaster:index' %}" class="btn btn-primary">
-           <span class="fa fa-arrow-left"></span>
+       <a href="{% url 'forecasters:index' %}" class="btn btn-primary">
+           <span class="fa fa-arrow-left"></span> List
+       </a>
+       <a href="{% url 'forecasters:view' forecaster.id %}" class="btn btn-primary">
+           <span class="fa fa-eye"></span> {{forecaster.name}}
        </a>
     </p>
 

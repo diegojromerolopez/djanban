@@ -105,6 +105,14 @@ a {
     display: inline-block;
 }
 
+.inline-block{
+    display: inline-block;
+}
+
+.d-block {
+    display: block;
+}
+
 .small-identicon {
     height: 20px;
     width: 20px;
@@ -131,9 +139,7 @@ a .img-loader-spinner.fa {
     display: none;
 }
 
-.inline-block{
-    display: inline-block;
-}
+
 
 @media (max-width: 391px) {
     #header_image{

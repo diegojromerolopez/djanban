@@ -5,8 +5,8 @@ import pandas as pd
 import statsmodels.formula.api as smf
 
 from djangotrellostats.apps.boards.models import List
-from djangotrellostats.apps.forecaster.models import Forecaster
-from djangotrellostats.apps.forecaster.serializer import CardSerializer
+from djangotrellostats.apps.forecasters.models import Forecaster
+from djangotrellostats.apps.forecasters.serializer import CardSerializer
 
 
 # Regression models that exist in this module

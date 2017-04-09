@@ -4,15 +4,19 @@ from __future__ import unicode_literals
 import os
 
 import shortuuid
+from crequest.middleware import CrequestMiddleware
 from django.conf import settings
 from django.core.files import File
 from django.db import models, transaction
 
 import statsmodels.api as sm
+from django.db.models import Q
 from django.utils import timezone
 
+from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.boards.models import Card
-from djangotrellostats.apps.forecaster.serializer import CardSerializer
+from djangotrellostats.apps.forecasters.serializer import CardSerializer
+from djangotrellostats.apps.members.models import Member
 
 
 # Forecaster model. Provide save and load functionality used to store and retrieve regression models.
@@ -30,6 +34,7 @@ class Forecaster(models.Model):
     formula = models.TextField(verbose_name=u"Formula")
     summary = models.TextField(verbose_name=u"Summary", blank=True, default="")
     results_file = models.FileField(verbose_name=u"Field with the statsmodels results")
+    creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_forecasters")
     last_update_datetime = models.DateTimeField(verbose_name=u"Last update datetime")
 
     # Retrieve the RegressionResults statsmodels object from database
@@ -57,6 +62,13 @@ class Forecaster(models.Model):
         except Forecaster.DoesNotExist:
             forecaster = Forecaster(member=member, board=board, model=model, formula=formula)
 
+        current_request = CrequestMiddleware.get_request()
+        current_user = current_request.user
+        if not hasattr(current_user, "member"):
+            raise ValueError("User needs to be member to create a forecaster")
+        current_member = current_user.member
+
+        forecaster.creator = current_member
         forecaster.name = name
         forecaster.summary = results.summary()
 
@@ -115,6 +127,19 @@ class Forecaster(models.Model):
         self.last_update_datetime = timezone.now()
         super(Forecaster, self).save(*args, **kwargs)
 
+    # Get all forecasters accessible for a particular member of this application
+    @staticmethod
+    def get_all_from_member(member):
+        user = member.user
+        boards = get_user_boards(user)
+        teammates = Member.get_user_team_mates(user)
+        forecasters = Forecaster.objects.filter(
+            Q(creator=member) |
+            Q(board__in=boards) |
+            Q(member__in=list(teammates)+[member])
+        )
+        return forecasters
+
     # Serialize card data
     def _get_card_data(self, card):
         members = card.board.members.all()
@@ -130,7 +155,7 @@ class Forecast(models.Model):
         )
 
     forecaster = models.ForeignKey(
-        "forecaster.Forecaster", related_name="forecasts",
+        "forecasters.Forecaster", related_name="forecasts",
         verbose_name=u"Spent time for this forecast"
     )
     card = models.ForeignKey("boards.Card", related_name="forecasts", verbose_name=u"Card for this forecast")

@@ -23,7 +23,7 @@ from djangotrellostats.apps.boards.models import Board, Card, CardComment, List,
 
 
 # Point of access to several actions
-from djangotrellostats.apps.forecaster.models import Forecaster
+from djangotrellostats.apps.forecasters.models import Forecaster
 from djangotrellostats.utils.custom_uuid import custom_uuid
 
 

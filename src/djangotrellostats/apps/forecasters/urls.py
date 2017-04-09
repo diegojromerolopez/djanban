@@ -1,6 +1,6 @@
 from django.conf.urls import url, include
 
-from djangotrellostats.apps.forecaster.views.admin import index, test_forecaster, build_forecaster,\
+from djangotrellostats.apps.forecasters.views.admin import index, test_forecaster, build_forecaster,\
     ForecasterDelete, update_forecaster, view_forecaster
 
 urlpatterns = [

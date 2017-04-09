@@ -280,7 +280,8 @@ class Serializer(object):
             "model": forecaster.model,
             "name": forecaster.name,
             "estimated_spent_time": forecast.estimated_spent_time,
-            "last_update_datetime": forecast.last_update_datetime
+            "last_update_datetime": forecast.last_update_datetime,
+            "forecaster_url": reverse("forecasters:view", args=(forecast.id,))
         }
 
     # List serialization

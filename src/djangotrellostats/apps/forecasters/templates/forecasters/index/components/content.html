@@ -1,0 +1,79 @@
+<div class="row">
+    <div class="col-md-12">
+        <h1>Forecasters</h1>
+        <div>
+            <a href="{% url 'forecasters:build' %}" class="btn btn-primary">
+                <span class="fa fa-plus"></span>
+                Build forecaster
+            </a>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        {% include "forms/filter.html" %}
+    </div>
+</div>
+{% if forecasters|length > 0 %}
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped">
+                <thead>
+                   <tr>
+                       <td>Id.</td>
+                       <td>Name</td>
+                       <td>Type</td>
+                       <td>Model</td>
+                       <td>Formula</td>
+                       <td>Last update</td>
+                       <td>Actions</td>
+                   </tr>
+                </thead>
+                <tbody>
+                    {% for forecaster in forecasters %}
+                        <tr>
+                            <td>
+                                {{forecaster.id}}
+                            </td>
+                            <td>
+                                {{forecaster.name}}
+                            </td>
+                            <td>
+                               {% if forecaster.board %}
+                                    Board: {{forecaster.board.name}}
+                               {% elif forecaster.member %}
+                                    Member: {{forecaster.member.external_username}}
+                               {% else %}
+                                    No restriction (all boards and members)
+                               {% endif %}
+                           </td>
+                           <td>{{forecaster.model}}</td>
+                           <td>{{forecaster.formula|truncatechars:50}}</td>
+                           <td>{{forecaster.last_update_datetime}}</td>
+                           <td>
+                               <a href="{% url 'forecasters:view' forecaster.id %}" class="btn btn-primary">
+                                   <span class="fa fa-eye"></span>
+                                   View
+                               </a>
+                               <a href="{% url 'forecasters:test' forecaster.id %}" class="btn btn-primary">
+                                   <span class="fa fa-wrench"></span>
+                                   Test
+                               </a>
+                               <a href="{% url 'forecasters:update' forecaster.id %}" class="btn btn-primary">
+                                   <span class="fa fa-refresh"></span>
+                                   Update
+                               </a>
+                               <a href="{% url 'forecasters:delete' forecaster.id %}" class="btn btn-danger">
+                                   <span class="fa fa-trash"></span>
+                                   Delete
+                               </a>
+                           </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% else %}
+    No forecasters created.
+{% endif %}

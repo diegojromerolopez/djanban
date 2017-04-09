@@ -60,8 +60,8 @@
                         </a>
                     </li>
                     {% if member %}
-                        <li role="presentation" {% if url_namespace == "forecaster" %}class="active"{% endif %}>
-                            <a href="{% url 'forecaster:index' %}" title="Forecasts">
+                        <li role="presentation" {% if url_namespace == "forecasters" %}class="active"{% endif %}>
+                            <a href="{% url 'forecasters:index' %}" title="Forecasts">
                                 <span class="fa fa-cloud"></span> Forecasts
                             </a>
                         </li>

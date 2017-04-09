@@ -118,11 +118,18 @@
                     <div class="card-estimated_spent_time card-section">
                         <h2>Estimations</h2>
                         <div *ngIf="card.forecasts">
-                            <ul>
-                                <li *ngFor="let forecast of card.forecasts">
-                                    {{forecast.name}} (<em>{{forecast.model}}</em> model):
-                                    <strong>{{forecast.estimated_spent_time}} hours</strong>
-                                    (last update at {{forecast.last_update_datetime | localize_datetime }})
+                            <ul class=forecasts>
+                                <li *ngFor="let forecast of card.forecasts" class="forecast">
+                                    <h3 class="d-block">{{forecast.name}}</h3>
+                                    <span class="d-block"><em>{{forecast.model}}</em> model</span>
+                                    <span class="d-block">
+                                        <strong>{{forecast.estimated_spent_time}} hours</strong>
+                                        (last update at {{forecast.last_update_datetime | localize_datetime }})
+                                        <a href={{forecast.forecaster_url}} title="View forecaster details" class="btn btn-primary">
+                                            <span class="fa fa-eye"></span>
+                                            View forecaster details
+                                        </a>
+                                    </span>
                                 </li>
                             </ul>
                         </div>
@@ -132,6 +139,7 @@
                                     (click)="updateForecastsStatus='waiting'"
                                     [disabled]="updateForecastsStatus == 'waiting'">
                                     <span *ngIf="updateForecastsStatus == 'waiting'" class="fa fa-spinner fa-spin"></span>
+                                    <span class="fa fa-wrench"></span>
                                 Update forecasts
                             </button>
                         </div>

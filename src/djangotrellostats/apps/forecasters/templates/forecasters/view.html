@@ -10,14 +10,14 @@
     <div class="row">
         <div class="col-md-12">
             <div>
-                <a href="{% url 'forecaster:index' %}" class="btn btn-primary">
-                   <span class="fa fa-arrow-left"></span>
+                <a href="{% url 'forecasters:index' %}" class="btn btn-primary">
+                   <span class="fa fa-arrow-left"></span> List
                </a>
-               <a href="{% url 'forecaster:update' forecaster.id %}" class="btn btn-primary">
+               <a href="{% url 'forecasters:update' forecaster.id %}" class="btn btn-primary">
                    <span class="fa fa-refresh"></span>
                    Update
                </a>
-               <a href="{% url 'forecaster:delete' forecaster.id %}" class="btn btn-danger">
+               <a href="{% url 'forecasters:delete' forecaster.id %}" class="btn btn-danger">
                    <span class="fa fa-trash"></span>
                    Delete
                </a>
@@ -40,12 +40,14 @@
                 <h2>Formula</h2>
                 {{forecaster.formula}}
             </div>
-            <div>
-                <h2>Summary</h2>
-                <pre>
-                {{forecaster.summary}}
-                </pre>
-            </div>
+            {% if forecaster.summary %}
+                <div>
+                    <h2>Summary</h2>
+                    <pre>
+                    {{forecaster.summary}}
+                    </pre>
+                </div>
+            {% endif %}
             <div>
                 <h2>Last updated</h2>
                 {{forecaster.last_update_datetime|naturaltime}}

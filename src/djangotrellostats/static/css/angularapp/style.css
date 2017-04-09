@@ -435,6 +435,21 @@ card.closed-card-showed,
     margin-top: 2px;
 }
 
+.card-estimated_spent_time ul.forecasts {
+    list-style-type: none;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left: 0;
+    margin-left: 10px;
+}
+
+.card-estimated_spent_time ul.forecasts h3 {
+    font-size: 1.4em;
+}
+
+.card-estimated_spent_time ul.forecasts li.forecast span {
+    margin-left: 5px
+}
 
 /* Label filter */
 .label_filter{
