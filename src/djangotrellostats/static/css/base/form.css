@@ -26,3 +26,18 @@ form .errors{
 form .errors .error{
     color: red;
 }
+
+/* Filters */
+form.filter {
+    margin-bottom: 10px;
+}
+
+form.filter .field-container {
+}
+
+form.filter .button-container {
+}
+
+form.filter .button-container button {
+    margin-top: 35px;
+}

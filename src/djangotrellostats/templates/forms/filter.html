@@ -2,7 +2,7 @@
 <form action="{{action}}" method="get" class="filter">
     <div class="non_field_errors">{{form.non_field_errors}}</div>
     {% for field in form %}
-        <div class="field-container {% if field.is_hidden %}hidden{% endif %} form-group">
+        <div class="field-container {% if field.is_hidden %}hidden{% endif %} form-group d-inline-block">
             <label for="{{field.id_for_label}}">{{field.label}}</label>
             <div class="field input-group">{{field}}</div>
             <div class="help_text">{{field.help_text}}</div>
@@ -13,5 +13,7 @@
             </div>
         </div>
     {% endfor %}
-    <button type="submit" name="save" value="Send" class="btn btn-success">Filter</button>
+    <div class="button-container d-inline-block">
+        <button type="submit" name="save" value="Send" class="btn btn-success">Filter</button>
+    </div>
 </form>
