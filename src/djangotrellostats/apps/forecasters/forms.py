@@ -1,12 +1,11 @@
 from crequest.middleware import CrequestMiddleware
 from django import forms
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 
 from djangotrellostats.apps.base.auth import get_user_boards
-from djangotrellostats.apps.boards.models import Card
-from djangotrellostats.apps.forecasters.regression import OLS, GLS, WLS, GLSAR, QuantReg, REGRESSION_MODELS
 from djangotrellostats.apps.forecasters.models import Forecaster
+from djangotrellostats.apps.forecasters.regression.regressors import REGRESSION_MODELS
+from djangotrellostats.apps.forecasters.regression.runner import RegressorRunner
 from djangotrellostats.apps.members.models import Member
 
 
@@ -34,81 +33,20 @@ class BuildForecasterForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
-        model = self.instance.model.lower()
-        if model == "ols":
-            RegressorClass = OLS
-        elif model == "gls":
-            RegressorClass = GLS
-        elif model == "wls":
-            RegressorClass = WLS
-        elif model == "glsar":
-            RegressorClass = GLSAR
-        elif model == "quantreg":
-            RegressorClass = QuantReg
-        else:
-            raise ValueError("Invalid RegressorClass")
-
-        current_request = CrequestMiddleware.get_request()
-        current_user = current_request.user
-        boards = get_user_boards(current_user)
-
-        board = self.instance.board
-        member = self.instance.member
-
-        cards = Card.objects.all()
-        if board:
-            cards = cards.filter(board=board)
-            members = board.members.all()
-        elif member:
-            cards = cards.filter(members__in=[member])
-            members = []
-        else:
-            cards = cards.filter(board__in=boards)
-            members = Member.objects.filter(boards__in=boards).distinct()
-
-        regressor = RegressorClass(member=member, board=board, cards=cards, members=members, forecaster_name=self.instance.name)
-        return regressor.run(save=True)
+        runner = RegressorRunner(self.instance.name, self.instance.model, self.instance.board, self.instance.member)
+        return runner.run()
 
 
 class UpdateForecasterForm(forms.Form):
     confirm = forms.BooleanField(label="I want to update this forecaster", required=True)
 
-    # TODO: unify with BuildForecasterForm
     def save(self, forecaster):
+        name = forecaster.name
         model = forecaster.model.lower()
-        if model == "ols":
-            RegressorClass = OLS
-        elif model == "gls":
-            RegressorClass = GLS
-        elif model == "wls":
-            RegressorClass = WLS
-        elif model == "glsar":
-            RegressorClass = GLSAR
-        elif model == "quantreg":
-            RegressorClass = QuantReg
-        else:
-            raise ValueError("Invalid RegressorClass")
-
-        current_request = CrequestMiddleware.get_request()
-        current_user = current_request.user
-        boards = get_user_boards(current_user)
-
         board = forecaster.board
         member = forecaster.member
-
-        cards = Card.objects.all()
-        if board:
-            cards = cards.filter(board=board)
-            members = board.members.all()
-        elif member:
-            cards = cards.filter(members__in=[member])
-            members = []
-        else:
-            cards = cards.filter(board__in=boards)
-            members = Member.objects.filter(boards__in=boards).distinct()
-
-        regressor = RegressorClass(member=member, board=board, cards=cards, members=members, forecaster_name=forecaster.name)
-        regressor.run(save=True)
+        runner = RegressorRunner(name, model, board, member)
+        return runner.run()
 
 
 class TestForecasterForm(forms.Form):
