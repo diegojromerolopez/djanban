@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import pandas as pd
+import  statsmodels.nonparametric.kernel_regression as kr
 import statsmodels.formula.api as smf
 
 from djangotrellostats.apps.boards.models import List
@@ -15,7 +16,8 @@ REGRESSION_MODELS = (
     ("wls", "WLS Regression"),
     ("gls", "GLS Regression"),
     ("glsar", "GLSAR Regression"),
-    ("quantreg", "Quantile Regression")
+    ("quantreg", "Quantile Regression"),
+    ("rlm", "Robust Linear Model Regression")
 )
 
 
@@ -137,6 +139,12 @@ class QuantReg(Regressor):
 
     def fit(self, df, formula):
         return smf.quantreg(formula=formula, data=df).fit()
+
+
+# Robust Linear Model regression generator
+class RLM(Regressor):
+    def fit(self, df, formula):
+        return smf.rlm(formula=formula, data=df).fit()
 
 
 # Produce a linear regression of the spent time of the cards of the boards

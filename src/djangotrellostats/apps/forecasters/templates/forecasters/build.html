@@ -1,7 +1,13 @@
 {% extends "base/base.html" %}
 
+{% load staticfiles %}
+
 {% block page_title %}Regression test{% endblock %}
 
+{% block js %}
+    {{block.super}}
+    <script src="{% static 'js/forecasters/build.js' %}"></script>
+{% endblock js %}
 
 {% block content %}
     <div class="row">

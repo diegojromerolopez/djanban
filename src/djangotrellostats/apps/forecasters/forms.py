@@ -12,7 +12,7 @@ from djangotrellostats.apps.members.models import Member
 class BuildForecasterForm(forms.ModelForm):
     class Meta:
         model = Forecaster
-        fields = ("name", "model", "board", "member")
+        fields = ("model", "board", "member", "name")
 
     def __init__(self, *args, **kwargs):
         super(BuildForecasterForm, self).__init__(*args, **kwargs)

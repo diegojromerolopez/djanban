@@ -5,7 +5,7 @@ from crequest.middleware import CrequestMiddleware
 
 from djangotrellostats.apps.base.auth import get_user_boards
 from djangotrellostats.apps.boards.models import Card
-from djangotrellostats.apps.forecasters.regression.regressors import OLS, GLS, WLS, GLSAR, QuantReg
+from djangotrellostats.apps.forecasters.regression.regressors import OLS, GLS, WLS, GLSAR, QuantReg, RLM
 from djangotrellostats.apps.members.models import Member
 
 
@@ -29,6 +29,8 @@ class RegressorRunner(object):
             RegressorClass = GLSAR
         elif model == "quantreg":
             RegressorClass = QuantReg
+        elif model == "rlm":
+            RegressorClass = RLM
         else:
             raise ValueError("Invalid RegressorClass")
 
