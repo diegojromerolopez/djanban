@@ -454,14 +454,30 @@
                     <div class="card-list card-section">
                         <h2>
                             <span class="card-list-name">On list {{card.list.name}}</span>
-                            <span class="fa fa-times" *ngIf="card.list.type == 'ignored'" title='This task is ignored'></span>
-                            <span class="fa fa-book" *ngIf="card.list.type == 'backlog'" title='This task is in the task backlog'></span>
-                            <span class="fa fa-hourglass-start" *ngIf="card.list.type == 'ready_to_develop'" title='This task is waiting to be started'></span>
-                            <span class="fa fa-hourglass-half" *ngIf="card.list.type == 'development'" title='This task is in a development'></span>
-                            <span class="fa fa-gavel" *ngIf="card.list.type == 'after_development_in_review'" title='This task is in being reviewed'></span>
-                            <span class="fa fa-upload" *ngIf="card.list.type == 'after_development_waiting_release'" title='This task is waiting release'></span>
-                            <span class="fa fa-hourglass-end" *ngIf="card.list.type == 'done'" title='This task is done'></span>
-                            <span class="fa fa-archive" *ngIf="card.list.type == 'closed'" title='This task is in a closed list'></span>
+                            <span *ngIf="card.list.type == 'ignored'" title='This task is ignored'>
+                                <span class="fa fa-times"></span>
+                            </span>
+                            <span *ngIf="card.list.type == 'backlog'" title='This task is in the task backlog'>
+                                <span class="fa fa-book"></span> In backlog
+                            </span>
+                            <span *ngIf="card.list.type == 'ready_to_develop'" title='This task is waiting to be started'>
+                                <span class="fa fa-hourglass-start"></span> Ready start the development
+                            </span>
+                            <span *ngIf="card.list.type == 'development'" title='This task is in a development'>
+                                <span class="fa fa-hourglass-half"></span> In development
+                            </span>
+                            <span *ngIf="card.list.type == 'after_development_in_review'" title='This task is in being reviewed'>
+                                <span class="fa fa-gavel"></span> In review
+                            </span>
+                            <span *ngIf="card.list.type == 'after_development_waiting_release'" title='This task is waiting release'>
+                                <span class="fa fa-upload"></span> Waiting release
+                            </span>
+                            <span *ngIf="card.list.type == 'done'" title='This task is done'>
+                                <span class="fa fa-hourglass-end"></span> Done
+                            </span>
+                            <span *ngIf="card.list.type == 'closed'" title='This task is in a closed list'>
+                                <span class="fa fa-archive"></span> Closed
+                            </span>
                         </h2>
 
                         <div class="card-change-list-form">
