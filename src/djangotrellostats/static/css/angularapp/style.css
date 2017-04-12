@@ -447,7 +447,7 @@ card.closed-card-showed,
     font-size: 1.4em;
 }
 
-.card-estimated_spent_time ul.forecasts li.forecast span {
+.card-estimated_spent_time ul.forecasts li.forecast span.forecast-field {
     margin-left: 5px
 }
 

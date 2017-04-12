@@ -120,9 +120,9 @@
                         <div *ngIf="card.forecasts">
                             <ul class=forecasts>
                                 <li *ngFor="let forecast of card.forecasts" class="forecast">
-                                    <h3 class="d-block">{{forecast.name}}</h3>
-                                    <span class="d-block"><em>{{forecast.model}}</em> model</span>
-                                    <span class="d-block">
+                                    <h3 class="d-block forecast-field">{{forecast.name}}</h3>
+                                    <span class="d-block forecast-field"><em>{{forecast.model}}</em> model</span>
+                                    <span class="d-block forecast-field">
                                         <strong>{{forecast.estimated_spent_time}} hours</strong>
                                         (last update at {{forecast.last_update_datetime | localize_datetime }})
                                         <a href={{forecast.forecaster_url}} title="View forecaster details" class="btn btn-primary">
