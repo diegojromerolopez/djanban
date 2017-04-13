@@ -99,7 +99,6 @@ class Regressor(object):
 class OLS(Regressor):
     def get_formula(self):
         formula = super(OLS, self).get_formula()
-        formula += " + 1"
         return formula
 
     def fit(self, df, formula):
