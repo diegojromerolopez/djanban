@@ -300,7 +300,7 @@ def export_detailed_report(request, board_id):
     cards = board.cards.all()
 
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = u'attachment; filename="{0}-anonymized-cards.csv"'.format(board.name)
+    response['Content-Disposition'] = u'attachment; filename="{0}-detailed-card-report.csv"'.format(board.name)
 
     csv_template = loader.get_template('boards/cards/detailed_report_csv.txt')
     members = board.members.all()
