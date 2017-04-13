@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'djangotrellostats.apps.agility_rating',
     'djangotrellostats.apps.api',
+    'djangotrellostats.apps.anonymizer',
     'djangotrellostats.apps.base',
     'djangotrellostats.apps.boards',
     'djangotrellostats.apps.charts',
