@@ -60,7 +60,9 @@ urlpatterns = [
     # Delete comment
     url(r'^(?P<board_id>\d+)/cards/(?P<card_id>\d+)/comments/(?P<comment_id>\d+)/delete/?$', cards.delete_comment, name="delete_comment"),
 
-    url(r'^(?P<board_id>\d+)/export_card_report/?$', cards.export_report, name="export_card_report"),
+    url(r'^(?P<board_id>\d+)/cards/export/?$', cards.export_report, name="export_card_report"),
+    url(r'^(?P<board_id>\d+)/cards/export_detailed_report/?$', cards.export_detailed_report, name="export_detailed_report"),
+
     url(r'^(?P<board_id>\d+)/workflow_card_report/(?P<workflow_id>\d+)/?$', boards.view_workflow_card_report, name="view_workflow_card_report"),
 
     url(r'^(?P<board_id>\d+)/labels/?$', boards.view_label_report, name="view_label_report"),

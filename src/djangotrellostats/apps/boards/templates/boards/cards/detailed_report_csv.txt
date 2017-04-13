@@ -1,0 +1,3 @@
+"card_id";{% for card_attr in cards.0.keys %}"{{card_attr}}";{% endfor %}
+{% for card in cards %}{{card.id}};{% for card_attr,card_attr_value in card.items %}"{{card_attr_value}}";{% endfor %}
+{% endfor %}

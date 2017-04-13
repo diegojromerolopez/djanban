@@ -19,6 +19,7 @@ from djangotrellostats.apps.base.decorators import member_required
 from djangotrellostats.apps.boards.forms import NewCardForm, WeekSummaryFilterForm
 from djangotrellostats.apps.boards.models import List, Board, Card, CardComment, Label, CardAttachment
 from djangotrellostats.apps.boards.stats import avg, std_dev
+from djangotrellostats.apps.forecasters.serializer import CardSerializer
 from djangotrellostats.utils.week import get_iso_week_of_year, get_week_of_year
 
 
@@ -260,7 +261,7 @@ def view_report(request, board_id):
     return render(request, "boards/cards/list.html", replacements)
 
 
-# Export daily spent report in CSV format
+# Export card report in CSV format
 @login_required
 def export_report(request, board_id):
     try:
@@ -284,6 +285,33 @@ def export_report(request, board_id):
         "std_dev_lead_time": std_dev(cards, "lead_time"),
         "avg_cycle_time": avg(cards, "cycle_time"),
         "std_dev_cycle_time": std_dev(cards, "cycle_time"),
+    })
+    response.write(csv_template.render(replacements))
+    return response
+
+
+# Export detailed card report in CSV format
+@login_required
+def export_detailed_report(request, board_id):
+    try:
+        board = get_user_boards(request.user).get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
+    cards = board.cards.all()
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = u'attachment; filename="{0}-anonymized-cards.csv"'.format(board.name)
+
+    csv_template = loader.get_template('boards/cards/detailed_report_csv.txt')
+    members = board.members.all()
+    card_list = []
+    for card in cards:
+        serialized_card = CardSerializer(card, members).serialize()
+        serialized_card["id"] = card.id
+        card_list.append(serialized_card)
+
+    replacements = Context({
+        "cards": card_list,
     })
     response.write(csv_template.render(replacements))
     return response
