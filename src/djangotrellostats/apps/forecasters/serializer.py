@@ -60,7 +60,7 @@ class CardSerializer(object):
                 card_data[member.external_username] = 0
 
         # Creation list type
-        for list_type in List.LIST_TYPES:
+        for list_type in List.ACTIVE_LIST_TYPES:
             card_data["creation_list_type_{0}".format(list_type)] = 0
 
         creation_list = card.creation_list
@@ -69,7 +69,7 @@ class CardSerializer(object):
 
         # Time per list type
         time_per_list_type = card.time_in_each_list_type
-        for list_type in List.LIST_TYPES:
+        for list_type in List.ACTIVE_LIST_TYPES:
             if list_type in time_per_list_type:
                 card_data["time_in_list_type_{0}".format(list_type)] = time_per_list_type[list_type]
             else:

@@ -1701,6 +1701,8 @@ class Label(models.Model):
 class List(models.Model):
     LIST_TYPES = ("ignored", "backlog", "ready_to_develop", "development",
                   "after_development_in_review", "after_development_waiting_release", "done", "closed")
+    ACTIVE_LIST_TYPES = ("backlog", "ready_to_develop", "development",
+                         "after_development_in_review", "after_development_waiting_release", "done")
     STARTED_CARD_LIST_TYPES = ("development", "after_development_in_review", "after_development_waiting_release", "done")
     LIST_TYPE_CHOICES = (
         ("ignored", "Ignored"),

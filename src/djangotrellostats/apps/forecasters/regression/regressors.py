@@ -53,10 +53,10 @@ class Regressor(object):
         for member in self.members:
             formula += " + {0}".format(member.external_username)
         # Creation list type
-        for list_type in List.LIST_TYPES:
+        for list_type in List.ACTIVE_LIST_TYPES:
             formula += " + creation_list_type_{0}".format(list_type)
         # Time this card has spent per list type
-        for list_type in List.LIST_TYPES:
+        for list_type in List.ACTIVE_LIST_TYPES:
             formula += "+ time_in_list_type_{0}".format(list_type)
 
         return formula
