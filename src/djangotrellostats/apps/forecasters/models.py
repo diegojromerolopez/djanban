@@ -70,7 +70,10 @@ class Forecaster(models.Model):
 
         forecaster.last_updater = current_member
         forecaster.name = name
-        forecaster.summary = results.summary()
+        results_summary = results.summary()
+        forecaster.summary = ""
+        if results_summary:
+            forecaster.summary = results_summary
 
         with open(tmp_path, "r") as sm_results_pickle_file:
             forecaster.results_file.save(
@@ -98,8 +101,9 @@ class Forecaster(models.Model):
     def estimate_spent_time(self, card):
         if not hasattr(self, "_regression_results"):
             self._regression_results = self.get_regression_results()
-        estimate_spent_time = float(self._regression_results.predict([self._get_card_data(card)]))
-        return estimate_spent_time
+        prediction = self._regression_results.predict([self._get_card_data(card)])
+        estimated_spent_time = float(prediction)
+        return estimated_spent_time
 
     # Make a forecast of a card
     # Returns a Forecast object with the estimated spent time of this card according to this forecaster's model
