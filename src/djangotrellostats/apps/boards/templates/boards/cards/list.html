@@ -1,4 +1,6 @@
 {% extends "boards/view.html" %}
+
+{% load async_include %}
 {% load staticfiles %}
 
 {% block page_title %}Cards of {{board.name}}{% endblock %}
@@ -13,7 +15,7 @@
     {% if board.creator.has_trello_profile %}
         <div>Last updated: {{board.get_human_fetch_datetime}}</div>
     {% endif %}
-    {% if cards|length == 0 %}
+    {% if board.cards.count == 0 %}
         There are no cards in this board.
         {% if member.has_trello_profile %}
             Have you tried to fetch the cards?
@@ -43,7 +45,7 @@
                 <h2>Card list</h2>
             </div>
             <div class="panel col-md-12">
-                <div>
+                <p>
                     <a id="export_cards"
                        href="{% url 'boards:export_card_report' board.id %}"
                        class="btn btn-success">
@@ -59,72 +61,8 @@
                         <span class="fa fa-arrow-down"></span>
                         Detailed CSV export
                     </a>
-
-                </div>
-                <table class="table">
-                    <tr>
-                        <td>Name</td>
-                        <td>Value</td>
-                        <td>Closed?</td>
-                        <td>List</td>
-                        <td>Comments</td>
-                        <td>Reviews</td>
-                        <td>Lead time</td>
-                        <td>Cycle time</td>
-                        <td>Spent/Estimated time</td>
-                        <td>Deadline</td>
-                        <td>Last activity date</td>
-                        <td>Actions</td>
-                    </tr>
-                    {% for card in cards %}
-                        <tr>
-                            <td>
-                                <a href="{% url 'boards:view_card' board.id card.id %}" title="View card {{card.name}}">
-                                    {{card.name}}
-                                </a>
-                            </td>
-                            <td>{% if card.value != None %}{{card.value}}{% else %}Not set{% endif %}</td>
-                            <td>{% if card.is_closed %}Yes{% else %}No{% endif %}</td>
-                            <td>{{card.list.name}}</td>
-                            <td>{{card.number_of_comments}}</td>
-                            <td>
-                                {% for review in card.reviews.all %}
-                                    <span class="review">
-                                        <span class="review_creation_datetime">{{review.creation_datetime}}</span>
-                                        {% with reviewers=review.reviewers.all %}
-                                            {% if reviewers|length > 0 %}
-                                                <ul>
-                                                    {% for reviewer in reviewers %}
-                                                        <li>{{reviewer.external_username}}</li>
-                                                    {% endfor %}
-                                                </ul>
-                                            {% endif %}
-                                        {% endwith %}
-                                    </span>
-                                {% endfor %}
-                            </td>
-                            <td>{% if card.lead_time %}{{card.lead_time|floatformat:-2}}{% endif %}</td>
-                            <td>{% if card.cycle_time %}{{card.cycle_time|floatformat:-2}}{% endif %}</td>
-                            <td>{% if card.spent_time or card.estimated_time %}{{card.spent_time|floatformat:-2}}/{{card.estimated_time|floatformat:-2}}{% endif %}</td>
-                            <td>{% if card.due_datetime %}{{card.due_datetime}}{% endif %}</td>
-                            <td>{{card.last_activity_datetime}}</td>
-                            <td>
-                                <a href="{% url 'boards:view_card' board.id card.id %}" title="View card {{card.name}}">
-                                    <span class="fa fa-eye"></span>
-                                </a>
-                                <a href="{{card.short_url}}" title="View card in Trello">
-                                    <span class="fa fa-trello"></span>
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    <tr>
-                        <td colspan="6">Cycle time (avg. & std. dev.)</td><td>{{avg_cycle_time|floatformat:"-3"}}</td><td>{{std_dev_cycle_time|floatformat:"-3"}}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="6">Lead time (avg. & std. dev.)</td><td>{{avg_lead_time|floatformat:"-3"}}</td><td>{{std_dev_lead_time|floatformat:"-3"}}</td>
-                    </tr>
-                </table>
+                </p>
+                {%  async_include 'boards/cards/components/card_list.html' board=board avg_cycle_time=avg_cycle_time avg_lead_time=avg_lead_time %}
             </div>
         </div>
     {% endif %}

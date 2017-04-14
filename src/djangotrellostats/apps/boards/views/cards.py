@@ -252,7 +252,8 @@ def view_report(request, board_id):
     cards = board.cards.all()
     replacements = {
         "week_of_year": get_week_of_year(),
-        "member": member, "board": board, "cards": cards,
+        "member": member,
+        "board": board,
         "avg_lead_time": avg(cards, "lead_time"),
         "std_dev_lead_time": std_dev(cards, "lead_time"),
         "avg_cycle_time": avg(cards, "cycle_time"),
