@@ -240,6 +240,7 @@ def view_short_url(request, board_id, card_uuid):
 
 
 # View card report
+# View list of cards in this board
 @login_required
 def view_report(request, board_id):
     try:
