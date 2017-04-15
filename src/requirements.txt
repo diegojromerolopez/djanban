@@ -1,5 +1,5 @@
 CairoSVG==1.0.20
-Django==1.10
+Django==1.11
 Unidecode==0.04.19
 appnope==0.1.0
 beautifulsoup4==4.5.1
