@@ -30,7 +30,7 @@ class CardSerializer(object):
             num_forward_movements = 0
             num_backward_movements = 0
         name_num_words = len(re.split(r"\s+", card.name))
-        description_num_words = len(re.split(r"\s+", card.name))
+        description_num_words = len(re.split(r"\s+", card.description))
         card_data = {
             "card_spent_time": float(card.spent_time) if card.spent_time else 0,
             "num_time_measurements": card.daily_spent_times.count(),
