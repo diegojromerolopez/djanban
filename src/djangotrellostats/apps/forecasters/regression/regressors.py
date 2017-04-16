@@ -47,7 +47,7 @@ class Regressor(object):
         formula = """
             card_spent_time ~ card_age + num_time_measurements +
             num_forward_movements + num_backward_movements +
-            num_comments + name_num_words + name_length + description_num_words + description_length +
+            num_comments + num_comment_words + name_num_words + name_length + description_num_words + description_length +
             num_members + num_mentioned_members
         """
         for member in self.members:
@@ -129,7 +129,7 @@ class QuantReg(Regressor):
         formula = """
             card_spent_time ~ card_age + num_time_measurements +
             num_forward_movements + num_backward_movements +
-            num_comments + name_num_words
+            num_comments + num_comment_words + name_num_words
         """
         for member in self.members:
             formula += " + {0}".format(member.external_username)

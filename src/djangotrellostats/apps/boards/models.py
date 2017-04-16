@@ -684,6 +684,7 @@ class Card(models.Model):
     is_closed = models.BooleanField(verbose_name=u"Is this card closed?", default=False)
     position = models.PositiveIntegerField(verbose_name=u"Position in the list")
     number_of_comments = models.PositiveIntegerField(verbose_name=u"Number of comments of this card", default=0)
+    number_of_words_in_comments = models.PositiveIntegerField(verbose_name=u"Number of words in the comments of this card", default=0)
     number_of_mentioned_members = models.PositiveIntegerField(
         verbose_name=u"Number of mentioned members in the comments of this card", default=0
     )
@@ -1223,6 +1224,8 @@ class Card(models.Model):
 
         # Increment the number of comments
         self.number_of_comments += 1
+        # Increment the number of words this comment has
+        self.number_of_words_in_comments += len(re.split(r"\s+", content))
         self.save()
 
         # Delete all cached charts for this board
@@ -1237,12 +1240,24 @@ class Card(models.Model):
         if member.uuid != comment.author.uuid:
             raise AssertionError(u"This comment does not belong to {0}".format(member.external_username))
 
+        # Old comment content
+        old_content = comment.content
+
+        # Set new content
         comment.content = new_content
         comment.last_edition_datetime = timezone.now()
 
+        # Update the content in the remote backend (Trello or none)
         connector = RemoteBackendConnectorFactory.factory(member)
         comment = connector.edit_comment_of_card(card=self, comment=comment)
+        # Save the comment
         comment.save()
+
+        # Decrement the number of words this comment had
+        self.number_of_words_in_comments -= len(re.split(r"\s+", old_content))
+        # Increment the number of words this comment now has
+        self.number_of_words_in_comments += len(re.split(r"\s+", new_content))
+        self.save()
 
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
@@ -1262,6 +1277,9 @@ class Card(models.Model):
 
         # Decrement the number of comments
         self.number_of_comments -= 1
+
+        # Decrement the number of words the deleted comment had
+        self.number_of_words_in_comments -= len(re.split(r"\s+", comment.content))
         self.save()
 
         # Delete all cached charts for this board
