@@ -212,6 +212,10 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = BASE_DIR + "/public_html/collectedstatic"
 
+# Captcha image and font size
+CAPTCHA_IMAGE_SIZE = (200, 70)
+CAPTCHA_FONT_SIZE = 52
+
 # CKEDITOR preferences
 CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_RESTRICT_BY_USER = False
