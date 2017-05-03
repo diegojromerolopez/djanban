@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^fetch/', include('djangotrellostats.apps.fetch.urls', namespace="fetch")),
     url(r'^forecasters/', include('djangotrellostats.apps.forecasters.urls', namespace="forecasters")),
     url(r'^environment/', include('djangotrellostats.apps.dev_environment.urls', namespace="dev_environment")),
+    url(r'^multiboards/', include('djangotrellostats.apps.multiboards.urls', namespace="multiboards")),
     url(r'^notifications/', include('djangotrellostats.apps.notifications.urls', namespace="notifications")),
     url(r'^reports/', include('djangotrellostats.apps.reports.urls', namespace="reports")),
     url(r'^slideshow/', include('djangotrellostats.apps.slideshow.urls', namespace="slideshow")),

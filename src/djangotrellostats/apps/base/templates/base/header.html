@@ -27,6 +27,13 @@
                            <span class="fa fa-tasks"></span>
                        </a>
                     </li>
+                    {% if member %}
+                        <li role="presentation" {% if url_name == "view_list" and url_namespace == "multiboards" %}class="active"{% endif %}>
+                           <a href="{% url 'multiboards:view_list' %}" title="View my multiboards">
+                               <strong>M</strong>
+                           </a>
+                        </li>
+                    {% endif %}
                     <li role="presentation" {% if url_name == "view_board_panorama" %}class="active"{% endif %}>
                        <a href="{% url 'boards:view_board_panorama' %}" title="View project summary">
                            <span class="fa fa-line-chart"></span>
@@ -50,13 +57,13 @@
                         </li>
                         <li role="presentation" {% if url_namespace == "niko_niko_calendar" %}class="active"{% endif %}>
                             <a href="{% url 'niko_niko_calendar:view_calendar' %}" title="View Niko-niko calendar">
-                                <span class="fa fa-calendar"></span> Niko^2 cal.
+                                <span class="fa fa-calendar"></span> NN cal.
                             </a>
                         </li>
                     {% endif %}
                     <li role="presentation" {% if url_namespace == "slideshow" %}class="active"{% endif %}>
                         <a href="{% url 'slideshow:view' %}" title="Slideshow">
-                            <span class="fa fa-area-chart"></span> Slideshow
+                            <span class="fa fa-area-chart"></span> Pres.
                         </a>
                     </li>
                     {% if member %}

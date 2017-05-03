@@ -5,8 +5,7 @@ from django import template
 from crequest.middleware import CrequestMiddleware
 
 from djangotrellostats.apps.base.auth import get_user_boards
-from djangotrellostats.apps.boards.models import CardComment
-
+from djangotrellostats.apps.boards.models import CardComment, List
 
 register = template.Library()
 
@@ -18,3 +17,9 @@ def last_comments(number_of_comments=10):
     boards = get_user_boards(current_request.user)
     last_comments_ = CardComment.objects.filter(card__board__in=boards, card__is_closed=False).order_by("-creation_datetime")
     return last_comments_[:number_of_comments]
+
+
+# Custom filter to get the list type name
+# Return the name of the list type passed as parameter
+def get_list_type_name(list_type):
+    return dict(List.LIST_TYPE_CHOICES)[list_type]

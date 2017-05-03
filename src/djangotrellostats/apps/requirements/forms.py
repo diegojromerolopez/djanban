@@ -38,6 +38,6 @@ class EditRequirementForm(RequirementForm):
         fields = ["name", "description", "active", "other_comments", "value", "estimated_number_of_hours"]
 
 
-# Requirement form
+# Delete requirement form
 class DeleteRequirementForm(forms.Form):
     confirmed = forms.BooleanField(label=u"Confirm you want to delete this requirement")

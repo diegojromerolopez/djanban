@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     'djangotrellostats.apps.fetch',
     'djangotrellostats.apps.forecasters',
     'djangotrellostats.apps.members',
+    'djangotrellostats.apps.multiboards',
     'djangotrellostats.apps.niko_niko_calendar',
     'djangotrellostats.apps.notifications',
     'djangotrellostats.apps.reporter',

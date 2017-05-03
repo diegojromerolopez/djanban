@@ -1,0 +1,26 @@
+#content {
+    margin-left: 40px;
+    margin-right: 40px;
+    overflow: scroll;
+    width: 2500px;
+}
+
+.multiboard {
+
+}
+
+.multiboard .list_type {
+    width: 400px;
+    float: left;
+}
+
+.multiboard .list_type .panel-body.cards {
+    height: 800px;
+    overflow: scroll;
+}
+
+.multiboard-data {
+    margin-left: 20px;
+    /* margin-right: auto; */
+    width: 500px;
+}

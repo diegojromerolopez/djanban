@@ -1,0 +1,45 @@
+<div class="row card">
+    <div class="col-md-12 card">
+        <div class="panel panel-info">
+          <div class="panel-heading card-heading">
+              <a href="{% url 'boards:view_card' card.board_id card.id %}" title="View card {{card.name}} in board {{card.board.name}}">{{card.name}}</a>
+          </div>
+          <div class="panel-body">
+              <div class="card-info">
+                  <div>Last activity: {{card.last_activity_datetime}}</div>
+                  {% if card.due_datetime %}<p> Deadline: {{card.due_datetime}}</p>{% endif %}
+                  {% if card.spent_time %}
+                    <div>
+                        <span class="fa fa-clock-o"></span>
+                        {{card.spent_time|floatformat:-2}}
+                    </div>
+                  {% else %}
+                  {% endif %}
+                  <div class="members">
+                      {% for member in card.members.all %}
+                        <img class="avatar cursor-help" src="{{member.gravatar_url}}"
+                                alt="Gravatar image of {{member.external_username}}"
+                                title="Comment made by {{member.initials}}"/>
+                      {% endfor %}
+                  </div>
+              </div>
+              {% if card.is_blocked %}
+                  <div class="panel panel-default cursor-help" title="This card is blocked by {{card.pending_blocking_cards|length}} card(s). End them before developing this one.">
+                      <div class="panel-heading">Blocking cards</div>
+                      <div class="panel-body">
+                          <div class="list-group">
+                              {% for blocking_card in card.pending_blocking_cards %}
+                                <p class="list-group-item">
+                                    <a href="{% url 'boards:view_card' blocking_card.board_id blocking_card.id %}" title="View card {{blocking_card.name}} in board {{blocking_card.board.name}}">
+                                        {{blocking_card.name}}
+                                    </a>
+                                </p>
+                              {% endfor %}
+                          </div>
+                      </div>
+                  </div>
+              {% endif %}
+          </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,87 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}
+    {% if archived %}
+        Archived multiboards of {{member.external_username}}
+    {% else %}
+        Multiboards of {{member.external_username}}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <h1>
+        {% if archived %}
+            Archived multiboards of {{member.external_username}}
+        {% else %}
+            Multiboards of {{member.external_username}}
+        {% endif %}
+    </h1>
+
+    <div class="multiboard_list_list">
+        <div class="row">
+            <div class="panel col-md-12">
+                <p>
+                    {% if archived %}
+                        <a class="btn btn-primary" href="{% url 'multiboards:view_list' %}">
+                            <span class="fa fa-eye"></span>
+                            View active multiboards
+                        </a>
+                    {% else %}
+                        <a class="btn btn-primary" href="{% url 'multiboards:view_archived' %}">
+                            <span class="fa fa-eye-slash"></span>
+                            View archived multiboards
+                        </a>
+                    {% endif %}
+                    {% if member and not archived %}
+                        <a href="{% url 'multiboards:new' %}" class="btn btn-success">
+                            <span class="fa fa-plus"></span>
+                            New multiboard
+                        </a>
+                    {% endif %}
+                </p>
+                {% if multiboards|length == 0 %}
+                    {% if archived %}
+                        There are no archived multiboards for this member.
+                    {% else %}
+                        There are no multiboards for this member.
+                    {% endif %}
+                {% else %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <td>#</td>
+                                        <td>Name</td>
+                                        <td>Actions</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for multiboard in multiboards %}
+                                        <tr>
+                                            <td>{{multiboard.id}}</td>
+                                            <td>{{multiboard.name}}</td>
+                                            <td>
+                                                <a href="{% url 'multiboards:view' multiboard.id %}" title="View multiboard {{multiboard.name}}">
+                                                    <span class="fa fa-eye"></span>
+                                                </a>
+                                                {% if member and member.id == multiboard.creator_id %}
+                                                    <a href="{% url 'multiboards:edit' multiboard.id %}" title="Edit multiboard {{rmultiboard.name}}">
+                                                        <span class="fa fa-pencil"></span>
+                                                    </a>
+                                                    <a href="{% url 'multiboards:delete' multiboard.id %}" title="Delete multiboard {{multiboard.name}}">
+                                                        <span class="fa fa-trash"></span>
+                                                    </a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
