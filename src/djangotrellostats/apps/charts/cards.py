@@ -657,6 +657,13 @@ def _value_evolution(current_user, board=None, cumulative=False, day_step=1, by_
                                   show_minor_x_labels=False,
                                   human_readable=True, x_label_rotation=65)
 
+    # If there are no cards, return the empty chart
+    if not Card.objects.filter(board__in=boards, is_closed=False).exists():
+        card_value_chart.x_labels_major_every = None
+        card_value_chart.show_only_major_dots = False
+        card_value_chart.show_minor_x_labels = True
+        return card_value_chart.render_django_response()
+
     start_working_date = numpy.min(filter(None, [board_i.get_working_start_date() for board_i in boards]))
     end_working_date = numpy.max(filter(None, [board_i.get_working_end_date() for board_i in boards]))
     if start_working_date is None or end_working_date is None:
