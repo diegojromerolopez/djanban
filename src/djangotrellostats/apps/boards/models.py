@@ -77,6 +77,7 @@ class Board(models.Model):
     hourly_rates = models.ManyToManyField("hourly_rates.HourlyRate", verbose_name=u"Hourly rates",
                                           related_name="boards", blank=True)
 
+    # Should this project to be showed on the slideshow?
     show_on_slideshow = models.BooleanField(
         verbose_name=u"Should this board be shown on the slideshow?",
         help_text=u"Select this checkbox if you want to show this board in the slideshow",

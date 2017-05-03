@@ -25,7 +25,8 @@ class EditBoardForm(models.ModelForm):
         fields = [
             "has_to_be_fetched", "comments", "estimated_number_of_hours",
             "percentage_of_completion", "hourly_rates",
-            "enable_public_access", "public_access_code", "show_on_slideshow",
+            "enable_public_access", "public_access_code",
+            "show_on_slideshow",
             "background_color", "title_color", "header_image"
         ]
 

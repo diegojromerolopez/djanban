@@ -21,29 +21,7 @@ def index(request):
 
     lists = []
     if current_user.is_authenticated():
-        boards = get_user_boards(current_user).order_by("name")
-        now = timezone.now()
-        # Card for each list possible choice
-        for list_choice in List.LIST_TYPE_CHOICES:
-            list_type_id = list_choice[0]
-            list_type_name = list_choice[1]
-            # Ignored and closed lists are not showed
-            if list_type_id != "ignored" and list_type_id != "closed":
-                list_active_cards = Card.get_user_cards(current_user)\
-                    .filter(list__type=list_type_id).\
-                    order_by("board_id", "position")
-
-                # Do not show all done tasks. Show only tasks completed in the last 30 days
-                if list_type_id == "done":
-                    list_active_cards = list_active_cards.filter(last_activity_datetime__gte=now-timedelta(days=30))
-
-                list_ = {
-                    "id": list_type_id,
-                    "type": list_type_id,
-                    "name": list_type_name,
-                    "active_cards": list_active_cards
-                }
-                lists.append(list_)
+        boards = get_user_boards(current_user).filter(is_archived=False).order_by("name")
 
     now = timezone.now()
     today = now.date()
