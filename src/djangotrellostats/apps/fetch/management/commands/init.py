@@ -12,17 +12,17 @@ class Command(BaseCommand):
     help = 'Initialize all boards'
 
     def add_arguments(self, parser):
-        parser.add_argument('member_trello_username', nargs='+', type=str)
+        parser.add_argument('member_external_username', nargs='+', type=str)
 
     @transaction.atomic
     def handle(self, *args, **options):
         try:
-            member_trello_username = options['member_trello_username'][0]
+            member_external_username = options['member_external_username'][0]
         except (IndexError, KeyError)as e:
             self.stdout.write(self.style.SUCCESS("member_username is mandatory"))
             return False
 
-        member = Member.objects.get(trello_member_profile__username=member_trello_username)
+        member = Member.objects.get(trello_member_profile__username=member_external_username)
 
         initializer = Initializer(member)
         initializer.init()

@@ -87,9 +87,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        if options['member_trello_username']:
+        if options['member_external_username']:
             try:
-                member_trello_username = options['member_trello_username'][0]
+                member_trello_username = options['member_external_username'][0]
             except (IndexError, KeyError)as e:
                 self.stdout.write(self.style.ERROR("member_username is mandatory"))
                 raise AssertionError("member_username is mandatory")
