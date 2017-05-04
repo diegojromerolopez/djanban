@@ -28,7 +28,7 @@
                        </a>
                     </li>
                     {% if member %}
-                        <li role="presentation" {% if url_name == "view_list" and url_namespace == "multiboards" %}class="active"{% endif %}>
+                        <li role="presentation" {% if url_namespace == "multiboards" %}class="active"{% endif %}>
                            <a href="{% url 'multiboards:view_list' %}" title="View my multiboards">
                                <strong>M</strong>
                            </a>

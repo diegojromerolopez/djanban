@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^view_archived$', multiboards.view_archived_list, name="view_archived"),
     url(r'^new$', multiboards.new, name="new"),
     url(r'^(?P<multiboard_id>\d+)/view/?$', multiboards.view, name="view"),
+    url(r'^(?P<multiboard_id>\d+)/view_task_board/?$', multiboards.view_task_board, name="view_task_board"),
     url(r'^(?P<multiboard_id>\d+)/edit/?$', multiboards.edit, name="edit"),
     #url(r'^(?P<multiboard_id>\d+)/archive/?$', multiboards.archive, name="archive"),
     #url(r'^(?P<multiboard_id>\d+)/unarchive/?$', multiboards.unarchive, name="unarchive"),

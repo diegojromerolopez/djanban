@@ -1,0 +1,30 @@
+{% extends "base/base.html" %}
+
+{% load async_include %}
+
+{% block page_title %}Multiboard task board {{multiboard.name}}{% endblock %}
+
+{% block content %}
+    <div class="multiboard-container">
+        <div class="panel-body row">
+          <div class="col-md-12">
+                <a href="{% url 'multiboards:view_list' %}"
+                    title="View all multiboards"
+                    class="btn btn-primary">
+                    <span class="fa fa-arrow-left"></span>
+                </a>
+              <a href="{% url 'multiboards:view' multiboard.id %}" class="btn btn-primary">
+                  View multiboard paramaters
+              </a>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 multiboard">
+                <div class="panel-heading">
+                    <h1>Multiboard {{multiboard.name}}</h1>
+                </div>
+                {% async_include "multiboards/components/view_task_board/full_board.html" multiboard=multiboard member=member %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

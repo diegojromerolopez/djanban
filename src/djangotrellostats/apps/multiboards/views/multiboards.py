@@ -80,6 +80,22 @@ def view(request, multiboard_id):
     return render(request, "multiboards/view.html", replacements)
 
 
+# View a multiboard's task board
+@member_required
+def view_task_board(request, multiboard_id):
+    member = request.user.member
+    try:
+        multiboard = member.created_multiboards.get(id=multiboard_id, is_archived=False)
+    except Multiboard.DoesNotExist:
+        raise Http404
+    replacements = {
+        "multiboard": multiboard,
+        "member": member,
+        "boards": multiboard.boards.filter(is_archived=False).order_by("name")
+    }
+    return render(request, "multiboards/view_task_board.html", replacements)
+
+
 # Edition of multiboard
 @member_required
 def edit(request, multiboard_id):

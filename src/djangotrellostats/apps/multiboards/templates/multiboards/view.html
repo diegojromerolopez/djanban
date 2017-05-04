@@ -5,17 +5,7 @@
 {% block page_title %}Multiboard {{multiboard.name}}{% endblock %}
 
 {% block content %}
-    <div class="multiboard-container">
-        <div class="row">
-            <div class="col-md-12 multiboard">
-                <div class="panel-heading">
-                    <h1>Multiboard {{multiboard.name}}</h1>
-                </div>
-
-                {% async_include "multiboards/components/view/full_board.html" multiboard=multiboard member=member %}
-            </div>
-        </div>
-
+    <div class="multiboard-data-container">
         <div class="row">
             <div class="col-md-12 multiboard-data">
                 <div class="panel panel-info">
@@ -31,6 +21,9 @@
                                            title="View all multiboards"
                                             class="btn btn-primary">
                                             <span class="fa fa-arrow-left"></span>
+                                        </a>
+                                        <a href="{% url 'multiboards:view_task_board' multiboard.id %}" class="btn btn-primary">
+                                            View task board
                                         </a>
                                         <a href="{% url 'multiboards:edit' multiboard.id %}"
                                            title="Edit multiboard {{multiboard.name}}"
