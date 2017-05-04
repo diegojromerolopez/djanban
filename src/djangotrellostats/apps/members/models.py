@@ -113,6 +113,13 @@ class Member(models.Model):
     def has_trello_credentials(self):
         return self.has_trello_profile and self.trello_member_profile.is_initialized
 
+    # Inform if this user has an initialized profile for one of the backends
+    @property
+    def is_initialized(self):
+        if self.is_native:
+            return True
+        return self.has_trello_profile and self.trello_member_profile.is_initialized
+
     @property
     def uuid(self):
         if self.has_trello_profile:
