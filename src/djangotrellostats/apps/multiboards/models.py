@@ -24,12 +24,72 @@ class Multiboard(models.Model):
 
     order = models.PositiveIntegerField(verbose_name=u"Order of this multiboard", default=1)
 
+    show_in_index = models.BooleanField(
+        verbose_name=u"This multiboard will be shown in index",
+        help_text=u"Multiboards shown in index will be show to help users track pending tasks",
+        default=False
+    )
+
+    show_backlog_tasks = models.BooleanField(
+        verbose_name=u"Show 'backlog' tasks",
+        help_text=u"This multiboard will show the backlog tasks of its boards",
+        default=True
+    )
+
+    show_ready_to_develop_tasks = models.BooleanField(
+        verbose_name=u"Show 'ready to develop' tasks",
+        help_text=u"This multiboard will show the 'ready to develop' tasks of its boards",
+        default=True
+    )
+
+    show_development_tasks = models.BooleanField(
+        verbose_name=u"Show 'in development' tasks",
+        help_text=u"This multiboard will show the in 'development' tasks of its boards",
+        default=True
+    )
+
+    show_after_development_in_review_tasks = models.BooleanField(
+        verbose_name=u"Show 'after development (in review)' tasks",
+        help_text=u"This multiboard will show the in 'after development (in review)' tasks of its boards",
+        default=True
+    )
+
+    show_after_development_waiting_release_tasks = models.BooleanField(
+        verbose_name=u"Show 'after development (waiting release)' tasks",
+        help_text=u"This multiboard will show the in 'after development (waiting release)' tasks of its boards",
+        default=False
+    )
+
+    show_done_tasks = models.BooleanField(
+        verbose_name=u"Show 'done' tasks",
+        help_text=u"This multiboard will show the done tasks of its boards",
+        default=False
+    )
+
+    # Return a list with the active list types in this multiboard
+    @property
+    def active_list_types(self):
+        active_list_types = []
+        if self.show_backlog_tasks:
+            active_list_types.append("backlog")
+        if self.show_ready_to_develop_tasks:
+            active_list_types.append("ready_to_develop")
+        if self.show_development_tasks:
+            active_list_types.append("development")
+        if self.show_after_development_in_review_tasks:
+            active_list_types.append("after_development_in_review")
+        if self.show_after_development_waiting_release_tasks:
+            active_list_types.append("after_development_waiting_release")
+        if self.show_done_tasks:
+            active_list_types.append("done")
+        return active_list_types
+
     # Return the tasks that belongs to this multiboard grouped by list types
     @property
     def tasks_by_list_type(self):
         tasks = OrderedDict()
         list_type_names = dict(List.LIST_TYPE_CHOICES)
-        for list_type in List.ACTIVE_LIST_TYPES:
+        for list_type in self.active_list_types:
             multiboard_list_type_cards = Card.objects.filter(
                 board__in=self.boards.filter(is_archived=False),
                 list__type=list_type,
