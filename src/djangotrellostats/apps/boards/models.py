@@ -833,9 +833,25 @@ class Card(models.Model):
             return arrivals_to_ready_to_develop_list[0].datetime
         return self.creation_datetime
 
+    # Inform if this card is in one of the statuses of the board that represent that this card has received work
     @property
     def has_started(self):
         return self.list.type in List.STARTED_CARD_LIST_TYPES
+
+    # Inform if this card has a red label
+    @property
+    def is_red(self):
+        return self.labels.filter(color="red").exists()
+
+    # Inform if this card has a orange label
+    @property
+    def is_orange(self):
+        return self.labels.filter(color="orange").exists()
+
+    # Inform if this card has a yellow label
+    @property
+    def is_yellow(self):
+        return self.labels.filter(color="yellow").exists()
 
     @property
     def start_datetime(self):

@@ -2,14 +2,14 @@
 
 <div id="index_multiboards">
     {% for multiboard in multiboards %}
-        <div class="row multiboard">
-            <div class="col-md-12 multiboard">
-                <div class="panel-heading">
-                    <h1>Multiboard {{multiboard.name}}</h1>
-                </div>
-                <div class="list_types-container-wrapper">
-                    {% async_include "multiboards/components/view_task_board/full_board.html" multiboard=multiboard member=member %}
-                </div>
+        <div class="multiboard">
+            <h1 class="multiboard-title" data-id="{{multiboard.id}}">
+                Multiboard {{multiboard.name}}
+                <span class="fa fa-eye"></span>
+                <span class="fa fa-eye-slash" style="display: none;"></span>
+            </h1>
+            <div id="list_types-container-wrapper-{{multiboard.id}}" class="list_types-container-wrapper">
+                {% async_include "multiboards/components/view_task_board/full_board.html" multiboard=multiboard member=member %}
             </div>
         </div>
     {% endfor %}

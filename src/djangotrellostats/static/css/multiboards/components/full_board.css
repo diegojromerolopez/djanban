@@ -20,3 +20,18 @@
 #index_multiboards .async_included-block {
     overflow: scroll;
 }
+
+.multiboard .card-labels {
+    margin-top: 10px;
+}
+
+.multiboard .card-label {
+    color: white;
+    display: inline-block;
+    font-size: 1.5em;
+    margin-right: 5px;
+    text-shadow: 2px 0 0 black, -2px 0 0 black, 0 2px 0 black, 0 -2px 0 black, 1px 1px black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    vertical-align: middle;
+}
