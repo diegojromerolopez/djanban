@@ -387,8 +387,6 @@ def view_identicon(request, board_id, width=40, height=40):
     return HttpResponseRedirect(board.identicon.url)
 
 
-
-
 # View lists of a board
 @member_required
 def view_lists(request, board_id):
