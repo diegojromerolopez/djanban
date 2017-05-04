@@ -1,0 +1,16 @@
+{% load async_include %}
+
+<div id="index_multiboards">
+    {% for multiboard in multiboards %}
+        <div class="row multiboard">
+            <div class="col-md-12 multiboard">
+                <div class="panel-heading">
+                    <h1>Multiboard {{multiboard.name}}</h1>
+                </div>
+                <div class="list_types-container-wrapper">
+                    {% async_include "multiboards/components/view_task_board/full_board.html" multiboard=multiboard member=member %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>

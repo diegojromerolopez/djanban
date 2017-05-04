@@ -29,12 +29,17 @@ def index(request):
 
     weeks_of_year = get_weeks_of_year_since_one_year_ago()
 
+    member_multiboards = member.created_multiboards.\
+        filter(show_in_index=True, is_archived=False).\
+        order_by("order", "name")
+
     replacements = {
         "weeks_of_year": weeks_of_year,
         "lists": lists,
         "boards": boards,
         "week_of_year": week_of_year,
         "member": member,
+        "multiboards": member_multiboards,
         "developers": member.team_mates.filter(is_developer=True) if member else [],
         "downtime_developers": ([dev for dev in member.team_mates.filter(is_developer=True) if dev.is_in_downtime]) if member else [],
         "pending_red_cards": Card.objects.filter(board__in=boards, list__type="ready_to_develop", is_closed=False, labels__color="red").order_by("board__name", "name"),

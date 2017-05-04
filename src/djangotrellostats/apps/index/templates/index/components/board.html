@@ -1,51 +1,49 @@
- <div class="row">
-    <div class="col-md-12 center-block">
-        <div class="panel panel-{% if board.estimated_number_of_hours and board.current_percentage_of_completion > board.percentage_of_completion %}danger{% else %}success{% endif %}">
-          <a class="panel-heading btn-block" href="{% url 'boards:view' board.id %}" title="View {{board.name}}">
-                <h4 class="board-name-container">
-                    <img class="board-identicon" src="{% url 'boards:view_identicon' board.id 40 40 %}"
-                         alt="Identicon of board {{board.name}}"/>
-                    <span class="board-name">{{board.name}}</span>
-                </h4>
-          </a>
-          <div class="panel-body">
-              {% with spent_time=board.get_spent_time %}
-                {% with adjusted_spent_time=board.get_adjusted_spent_time %}
-                    <p>
-                        <strong title="Developed number of hours until now" class="cursor-help">
-                            {{spent_time|floatformat:-2}}
+
+    <div class="panel panel-{% if board.estimated_number_of_hours and board.current_percentage_of_completion > board.percentage_of_completion %}danger{% else %}success{% endif %}">
+      <a class="panel-heading btn-block" href="{% url 'boards:view' board.id %}" title="View {{board.name}}">
+            <h4 class="board-name-container">
+                <img class="board-identicon" src="{% url 'boards:view_identicon' board.id 40 40 %}"
+                     alt="Identicon of board {{board.name}}"/>
+                <span class="board-name">{{board.name}}</span>
+            </h4>
+      </a>
+      <div class="panel-body">
+          {% with spent_time=board.get_spent_time %}
+            {% with adjusted_spent_time=board.get_adjusted_spent_time %}
+                <p>
+                    <strong title="Developed number of hours until now" class="cursor-help">
+                        {{spent_time|floatformat:-2}}
+                    </strong>
+                    <strong title="Developed adjusted number of hours until now" class="cursor-help">
+                        ({{adjusted_spent_time|floatformat:-2}} adjusted)
+                    </strong>
+                    developed hours
+                    {% if board.estimated_number_of_hours %}
+                        of
+                        <strong class="cursor-help" title="Estimated number of hours">
+                            {{board.estimated_number_of_hours}}
                         </strong>
-                        <strong title="Developed adjusted number of hours until now" class="cursor-help">
-                            ({{adjusted_spent_time|floatformat:-2}} adjusted)
-                        </strong>
-                        developed hours
-                        {% if board.estimated_number_of_hours %}
-                            of
-                            <strong class="cursor-help" title="Estimated number of hours">
-                                {{board.estimated_number_of_hours}}
-                            </strong>
+                    {% endif %}
+                    estimated hours.
+                </p>
+
+            {% if board.estimated_number_of_hours %}
+                <div>
+                    {% with current_percentage_of_completion=board.current_percentage_of_completion %}
+                       <p>According to the number of developed hours, this board's percentage of completion is <strong>{{current_percentage_of_completion|floatformat:-2}} %</strong>. {% if board.percentage_of_completion %}But actually, the developed percentage is of <strong>{{board.percentage_of_completion}} %</strong>{% endif %}</p>
+                        {% if current_percentage_of_completion > board.percentage_of_completion %}
+                            <p>It is <strong>behind</strong> schedule.</p>
+                        {% elif current_percentage_of_completion < board.percentage_of_completion %}
+                            <p>It is <strong>ahead</strong> of schedule. Congratulations.</p>
+                        {% else %}
+                            <p>It is on schedule.</p>
                         {% endif %}
-                        estimated hours.
-                    </p>
+                    {% endwith %}
+                </div>
+            {% endif %}
 
-                {% if board.estimated_number_of_hours %}
-                    <div>
-                        {% with current_percentage_of_completion=board.current_percentage_of_completion %}
-                           <p>According to the number of developed hours, this board's percentage of completion is <strong>{{current_percentage_of_completion|floatformat:-2}} %</strong>. {% if board.percentage_of_completion %}But actually, the developed percentage is of <strong>{{board.percentage_of_completion}} %</strong>{% endif %}</p>
-                            {% if current_percentage_of_completion > board.percentage_of_completion %}
-                                <p>It is <strong>behind</strong> schedule.</p>
-                            {% elif current_percentage_of_completion < board.percentage_of_completion %}
-                                <p>It is <strong>ahead</strong> of schedule. Congratulations.</p>
-                            {% else %}
-                                <p>It is on schedule.</p>
-                            {% endif %}
-                        {% endwith %}
-                    </div>
-                {% endif %}
-
-              {% endwith %}
-              {% endwith %}
-        </div>
-      </div>
+          {% endwith %}
+          {% endwith %}
     </div>
-</div>
+  </div>
+

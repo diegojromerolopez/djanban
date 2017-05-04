@@ -1,13 +1,3 @@
-#content {
-    margin-left: 40px;
-    margin-right: 40px;
-    overflow: scroll;
-    width: 2500px;
-}
-
-.multiboard {
-
-}
 
 .multiboard .list_type {
     width: 400px;
@@ -19,8 +9,14 @@
     overflow: scroll;
 }
 
-.multiboard-data {
-    margin-left: 20px;
-    /* margin-right: auto; */
-    width: 500px;
+
+#multiboard_task_board .list_types,
+#index_multiboards .list_types {
+    overflow: scroll;
+    width: 2000px;
+}
+
+#multiboard_task_board .async_included-block,
+#index_multiboards .async_included-block {
+    overflow: scroll;
 }

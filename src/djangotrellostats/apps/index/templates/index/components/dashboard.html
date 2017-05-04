@@ -80,11 +80,13 @@
     <div class="row">
         <div class="col-md-8">
             <h3>Current projects</h3>
-            {% for board in member.boards.all %}
-                {% if not board.is_archived and board.is_ready and board.is_fetched %}
-                    {% async_include "index/components/board.html" board=board %}
-                {% endif %}
-            {% endfor %}
+             <div class="row">
+                {% for board in member.boards.all %}
+                    {% if not board.is_archived and board.is_ready and board.is_fetched %}
+                        {% async_include "index/components/board.html" board=board html__tag__class='col-md-6' %}
+                    {% endif %}
+                {% endfor %}
+            </div>
         </div>
         <div class="col-md-4">
             <h3>Pending cards</h3>
@@ -92,7 +94,8 @@
         </div>
     </div>
 
-    {# {% include "index/components/task_board/board.html" %} #}
+    {% include "index/components/multiboards.html" %}
+
     {% async_include "members/components/tasks_in_development_boards.html" member=member %}
 {% endif %}
 
