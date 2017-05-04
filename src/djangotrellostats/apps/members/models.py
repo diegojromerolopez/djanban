@@ -173,7 +173,7 @@ class Member(models.Model):
 
     # Returns cards that belongs to this member and are currently under development
     def get_current_development_cards(self, board=None):
-        development_cards = self.cards.filter(is_closed=False, list__type="development")
+        development_cards = self.cards.filter(board__is_archived=False, is_closed=False, list__type="development")
         # Filtering development cards by board
         if board:
             return development_cards.filter(board=board)
@@ -338,7 +338,7 @@ class Member(models.Model):
 
     @property
     def active_cards(self):
-        return self.cards.filter(is_closed=False).order_by("position")
+        return self.cards.filter(board__is_archived=False, is_closed=False).order_by("position")
 
     def all_boards_in_downtime(self):
         resumed_boards = get_member_boards(self).\
@@ -362,14 +362,14 @@ class Member(models.Model):
     def first_work_datetime(self):
         try:
             return self.daily_spent_times.all().order_by("id")[0].comment.creation_datetime
-        except IndexError:
+        except (IndexError, AttributeError):
             return None
 
     @property
     def last_work_datetime(self):
         try:
             return self.daily_spent_times.all().order_by("-id")[0].comment.creation_datetime
-        except IndexError:
+        except (IndexError, AttributeError):
             return None
 
     @property
