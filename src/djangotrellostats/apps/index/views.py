@@ -15,9 +15,13 @@ from djangotrellostats.utils.week import get_week_of_year, get_weeks_of_year_sin
 def index(request):
     member = None
     boards = []
+    member_multiboards = []
     current_user = request.user
     if user_is_member(current_user):
         member = current_user.member
+        member_multiboards = member.created_multiboards. \
+            filter(show_in_index=True, is_archived=False). \
+            order_by("order", "name")
 
     lists = []
     if current_user.is_authenticated():
@@ -28,10 +32,6 @@ def index(request):
     week_of_year = get_week_of_year(today)
 
     weeks_of_year = get_weeks_of_year_since_one_year_ago()
-
-    member_multiboards = member.created_multiboards.\
-        filter(show_in_index=True, is_archived=False).\
-        order_by("order", "name")
 
     replacements = {
         "weeks_of_year": weeks_of_year,
