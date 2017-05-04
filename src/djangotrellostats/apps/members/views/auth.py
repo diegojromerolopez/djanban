@@ -37,7 +37,6 @@ def local_signup(request):
     return render(request, "members/signup/local_signup.html", {"form": form})
 
 
-
 # Trello user registration
 @transaction.atomic
 def trello_signup(request):

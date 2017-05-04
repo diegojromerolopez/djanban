@@ -96,20 +96,32 @@ class TrelloSignUpForm(LocalSignUpForm):
         self.cleaned_data["trello_username"] = trello_member.username
         self.cleaned_data["initials"] = trello_member.initials
 
+        # Check if the user is already registered in the system.
+        # To do so, we have to check if this Trello Member Profile has already an associated user
+        if TrelloMemberProfile.objects.filter(trello_id=self.cleaned_data["uuid"], member__user__isnull=False).exists():
+            raise ValidationError(u"This Trello username already has an user in this system")
+
         return self.cleaned_data
 
     def save(self, commit=False):
         member = super(TrelloSignUpForm, self).save(commit=True)
 
-        trello_member_profile = TrelloMemberProfile(
-            api_key=self.cleaned_data["api_key"],
-            api_secret="xxx",
-            token=self.cleaned_data["token"],
-            token_secret=self.cleaned_data["token_secret"],
-            trello_id=self.cleaned_data["uuid"],
-            username=self.cleaned_data["trello_username"],
-            initials=self.cleaned_data["initials"],
-        )
+        # TrelloMemberProfile should always exist if at least one member whom he/she shares a board has registered
+        # in this system. Because all present members in a board are created but without an associated user.
+        try:
+            trello_member_profile = TrelloMemberProfile.objects.get(trello_id=self.cleaned_data["uuid"])
+        except TrelloMemberProfile.DoesNotExist:
+            trello_member_profile = TrelloMemberProfile()
+
+        # Assigning all Trello attributes
+        trello_member_profile.api_key=self.cleaned_data["api_key"]
+        # API secret seems to be deprecated
+        trello_member_profile.api_secret = "xxx"
+        trello_member_profile.token = self.cleaned_data["token"]
+        trello_member_profile.token_secret = self.cleaned_data["token_secret"]
+        trello_member_profile.trello_id = self.cleaned_data["uuid"]
+        trello_member_profile.username = self.cleaned_data["trello_username"]
+        trello_member_profile.initials = self.cleaned_data["initials"]
 
         if commit:
             trello_member_profile.member = member
