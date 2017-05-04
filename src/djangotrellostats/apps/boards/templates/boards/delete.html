@@ -4,22 +4,44 @@
 
 {% block content %}
 
- <div class="row">
-    <div class="col-md-5 center-block">
-        <div class="panel panel-danger ">
-          <div class="panel-heading">Danger! This action cannot be undone</div>
-          <div class="panel-body">
-            This board will be deleted. Are you sure?
+{% if not board.is_archived %}
+    <div class="row">
+        <div class="col-md-5 center-block">
+            <div class="panel panel-warning ">
+              <div class="panel-heading">Only archived boards can be deleted!</div>
+              <div class="panel-body">
+                  <p>
+                    For security reasons, deletion of active boards is not possible. If you want to delete this board,
+                    first archive it.
+                  </p>
 
-              <form action="{% url 'boards:delete' board.id %}" method="post">
-                <input type="hidden" name="board_id" value="{{board.id}}"/>
-                <button type="submit" class="btn btn-danger">I am sure, delete board</button>
-              </form>
+                  <a href="{% url 'boards:archive' board.id %}" class="btn btn-warning">
+                      <span class="fa fa-archive"></span>
+                      Archive
+                  </a>
 
-          </div>
+              </div>
+            </div>
         </div>
     </div>
-</div>
+{% else %}
+     <div class="row">
+        <div class="col-md-5 center-block">
+            <div class="panel panel-danger ">
+              <div class="panel-heading">Danger! This action cannot be undone</div>
+              <div class="panel-body">
+                This board will be deleted. Are you sure?
+
+                  <form action="{% url 'boards:delete' board.id %}" method="post">
+                    <input type="hidden" name="board_id" value="{{board.id}}"/>
+                    <button type="submit" class="btn btn-danger">I am sure, delete board</button>
+                  </form>
+
+              </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
 
 
 {% endblock %}

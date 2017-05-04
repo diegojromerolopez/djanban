@@ -491,7 +491,12 @@ def unarchive(request, board_id):
 @member_required
 def delete(request, board_id):
     member = request.user.member
-    board = member.boards.get(id=board_id, is_archived=True)
+
+    # Load the board
+    try:
+        board = member.boards.get(id=board_id)
+    except Board.DoesNotExist:
+        raise Http404
 
     # Show delete form
     if request.method == "GET":
@@ -501,8 +506,13 @@ def delete(request, board_id):
     # Delete action by post
     confirmed_board_id = request.POST.get("board_id")
     if confirmed_board_id and confirmed_board_id == board_id:
-        board.delete()
-        return HttpResponseRedirect(reverse("boards:view_boards"))
+        # Only archived boards can be deleted
+        if board.is_archived:
+            board.delete()
+            return HttpResponseRedirect(reverse("boards:view_boards"))
+        else:
+            replacements = {"member": member, "board": board}
+            return render(request, "boards/delete.html", replacements)
 
     raise Http404
 

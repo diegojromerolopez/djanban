@@ -38,6 +38,10 @@
                                 <a class="btn btn-warning" href="{% url 'boards:unarchive' board.id %}" title="Unarchive board {{board.name}}">
                                     <span class="fa fa-pencil"></span> Unarchive
                                 </a>
+
+                                <a class="btn btn-danger" href="{% url 'boards:delete' board.id %}" title="Delete board {{board.name}}">
+                                    <span class="fa fa-trash"></span> Delete
+                                </a>
                             </div>
                         {% endif %}
                     </li>
