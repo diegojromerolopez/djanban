@@ -19,7 +19,8 @@ from django.shortcuts import render, get_object_or_404
 
 from djangotrellostats.apps.base.auth import user_is_member, get_user_boards, user_is_visitor
 from djangotrellostats.apps.base.decorators import member_required
-from djangotrellostats.apps.boards.forms import EditBoardForm, NewBoardForm, NewListForm, LabelForm, EditListForm
+from djangotrellostats.apps.boards.forms import EditBoardForm, NewBoardForm, NewListForm, LabelForm, EditListForm, \
+    EditListPositionForm
 from djangotrellostats.apps.boards.models import List, Board, Label
 from djangotrellostats.apps.boards.stats import avg, std_dev
 from djangotrellostats.apps.fetch.fetchers.trello.boards import Initializer, BoardFetcher
@@ -444,7 +445,31 @@ def edit_list(request, board_id, list_id):
     else:
         form = EditListForm(instance=list_)
 
-    return render(request, "boards/lists/edit.html", {"form": form, "board": board, "member": member})
+    replacements = {"form": form, "board": board, "member": member, "list": list_}
+    return render(request, "boards/lists/edit.html", replacements)
+
+
+# Edit a list position
+@member_required
+def edit_list_position(request, board_id, list_id):
+    member = request.user.member
+    try:
+        board = member.boards.get(id=board_id)
+        list_ = board.lists.get(id=list_id)
+    except (Board.DoesNotExist, List.DoesNotExist):
+        raise Http404
+
+    if request.method == "POST":
+        form = EditListPositionForm(request.POST, instance=list_)
+
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect(reverse("boards:view_lists", args=(board_id,)))
+    else:
+        form = EditListPositionForm(instance=list_)
+
+    replacements = {"form": form, "board": board, "member": member, "list": list_}
+    return render(request, "boards/lists/edit_position.html", replacements)
 
 
 # Archive a board

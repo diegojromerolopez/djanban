@@ -121,6 +121,7 @@ class NewListForm(models.ModelForm):
                 list_.board.clean_cached_charts()
 
 
+# Form used to edit list
 class EditListForm(models.ModelForm):
     class Meta:
         model = List
@@ -128,8 +129,30 @@ class EditListForm(models.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(EditListForm, self).__init__(*args, **kwargs)
-        current_list = self.instance
-        lists = current_list.board.lists.order_by("position")
+
+    def save(self, commit=True):
+        if commit:
+            with transaction.atomic():
+                # Getting the current member (current user)
+                current_request = CrequestMiddleware.get_request()
+                current_user = current_request.user
+                if not hasattr(current_user, "member"):
+                    raise AssertionError("Only members can edit lists")
+
+                # Edit the list
+                super(EditListForm, self).save(commit=True)
+
+                # Clean cached charts for this lists' board
+                self.instance.board.clean_cached_charts()
+
+
+# Edit list position Form
+class EditListPositionForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        self.instance = kwargs.pop("instance")
+        super(EditListPositionForm, self).__init__(*args, **kwargs)
+        lists = self.instance.board.lists.order_by("position")
 
         if lists.exists():
             self.fields["list_to_be_swapped_with"] = models.ChoiceField(
@@ -137,7 +160,7 @@ class EditListForm(models.ModelForm):
                 choices=[(list_i.id, list_i.name) for list_i in lists],
                 required=True
             )
-            self.fields["list_to_be_swapped_with"].initial = current_list.id
+            self.fields["list_to_be_swapped_with"].initial = self.instance.id
 
     def save(self, commit=True):
         if commit:
@@ -164,9 +187,6 @@ class EditListForm(models.ModelForm):
                     list_to_be_swapped_with.save()
 
                 self.instance = board.edit_list(current_member, self.instance)
-
-                # Edit the list
-                super(EditListForm, self).save(commit=True)
 
                 # Clean cached charts for this lists' board
                 self.instance.board.clean_cached_charts()

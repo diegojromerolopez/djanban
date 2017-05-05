@@ -30,6 +30,9 @@
                                 <a class="btn btn-primary" href="{% url 'boards:edit_list' board.id list.id %}">
                                     <span class="fa fa-pencil"></span> Edit
                                 </a>
+                                <a class="btn btn-primary" href="{% url 'boards:edit_list_position' board.id list.id %}">
+                                    <span class="fa fa-arrows"></span> Edit position
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
