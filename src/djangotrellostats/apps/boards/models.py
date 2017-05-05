@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 import copy
+
+from django.core.exceptions import ObjectDoesNotExist
 from isoweek import Week
 import numpy
 import re
@@ -1434,8 +1436,12 @@ class CardComment(models.Model):
         matches = re.match(Card.COMMENT_REQUIREMENT_CARD_REGEX, self.content, re.IGNORECASE)
         if matches:
             requirement_code = matches.group("requirement_code")
-            requirement = self.card.board.requirements.get(code=requirement_code)
-            return requirement
+            try:
+                return self.card.board.requirements.get(code=requirement_code)
+            # If the requirement does not exist, you should be more careful when writing comments
+            # I suppose you'll get noticed and edit this comment accordingly
+            except ObjectDoesNotExist:
+                return None
         return None
 
     # Return the reviewer members of this comment extracted from its content.
