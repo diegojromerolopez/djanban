@@ -63,6 +63,8 @@
                                     <tr>
                                         <td>#</td>
                                         <td>Name</td>
+                                        <td>Boards</td>
+                                        <td>Members</td>
                                         <td>Actions</td>
                                     </tr>
                                 </thead>
@@ -71,6 +73,19 @@
                                         <tr>
                                             <td>{{multiboard.id}}</td>
                                             <td>{{multiboard.name}}</td>
+                                            <td>
+                                                {% for board in multiboard.boards.all %}
+                                                  <a href="{% url 'boards:view' board.id %}" title="View {{board.name}}">
+                                                        <img class="board-identicon" src="{% url 'boards:view_identicon' board.id 40 40 %}"
+                                                             alt="Identicon of board {{board.name}}"/>
+                                                  </a>
+                                                {% endfor %}
+                                            </td>
+                                            <td>
+                                                {% for member_i in multiboard.members.all %}
+                                                    <img class="avatar" src="{{member_i.gravatar_url}}"  alt="{{member_i.external_username}}" />
+                                                {% endfor %}
+                                            </td>
                                             <td>
                                                 <a href="{% url 'multiboards:view' multiboard.id %}" class="btn btn-primary"
                                                    title="View multiboard {{multiboard.name}}">
@@ -85,7 +100,7 @@
                                                        title="Edit multiboard {{rmultiboard.name}}">
                                                         <span class="fa fa-pencil"></span> Edit
                                                     </a>
-                                                    <a href="{% url 'multiboards:delete' multiboard.id %}" class="btn btn-primary"
+                                                    <a href="{% url 'multiboards:delete' multiboard.id %}" class="btn btn-danger"
                                                        title="Delete multiboard {{multiboard.name}}">
                                                         <span class="fa fa-trash"></span> Delete
                                                     </a>

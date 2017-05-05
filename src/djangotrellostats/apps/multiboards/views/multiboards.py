@@ -23,7 +23,7 @@ from djangotrellostats.apps.boards.forms import EditBoardForm, NewBoardForm, New
 from djangotrellostats.apps.boards.models import List, Board, Label
 from djangotrellostats.apps.boards.stats import avg, std_dev
 from djangotrellostats.apps.fetch.fetchers.trello.boards import Initializer, BoardFetcher
-from djangotrellostats.apps.multiboards.forms import MultiboardForm, DeleteMultiboardForm
+from djangotrellostats.apps.multiboards.forms import MultiboardForm, DeleteMultiboardForm, LeaveMultiboardForm
 from djangotrellostats.apps.multiboards.models import Multiboard
 from djangotrellostats.utils.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
 
@@ -40,7 +40,7 @@ def view_archived_list(request):
 
 def _view_list(request, archived):
     member = request.user.member
-    multiboards = member.created_multiboards.filter(is_archived=archived).order_by("order", "name")
+    multiboards = member.multiboards.filter(is_archived=archived).order_by("order", "name")
     replacements = {"multiboards": multiboards, "archived": archived, "member": member}
     return render(request, "multiboards/list.html", replacements)
 
@@ -69,12 +69,14 @@ def new(request):
 def view(request, multiboard_id):
     member = request.user.member
     try:
-        multiboard = member.created_multiboards.get(id=multiboard_id, is_archived=False)
+        multiboard = member.multiboards.get(id=multiboard_id, is_archived=False)
     except Multiboard.DoesNotExist:
         raise Http404
+
     replacements = {
         "multiboard": multiboard,
         "member": member,
+        "members": multiboard.members.all(),
         "boards": multiboard.boards.filter(is_archived=False).order_by("name")
     }
     return render(request, "multiboards/view.html", replacements)
@@ -85,7 +87,7 @@ def view(request, multiboard_id):
 def view_task_board(request, multiboard_id):
     member = request.user.member
     try:
-        multiboard = member.created_multiboards.get(id=multiboard_id, is_archived=False)
+        multiboard = member.multiboards.get(id=multiboard_id, is_archived=False)
     except Multiboard.DoesNotExist:
         raise Http404
     replacements = {
@@ -139,3 +141,27 @@ def delete(request, multiboard_id):
 
     return render(request, "multiboards/delete.html", {"form": form, "multiboard": multiboard, "member": member})
 
+
+# Leave a multiboard
+@member_required
+def leave(request, multiboard_id):
+    member = request.user.member
+    try:
+        multiboard = member.multiboards.get(id=multiboard_id)
+    except Multiboard.DoesNotExist:
+        raise Http404
+
+    if member.id == multiboard.creator.id:
+        return render(request, "multiboards/leave.html", {"multiboard": multiboard, "member": member})
+
+    if request.method == "POST":
+        form = LeaveMultiboardForm(request.POST)
+
+        if form.is_valid() and form.cleaned_data.get("confirmed"):
+            multiboard.members.remove(member)
+            return HttpResponseRedirect(reverse("multiboards:list"))
+
+    else:
+        form = LeaveMultiboardForm()
+
+    return render(request, "multiboards/leave.html", {"form": form, "multiboard": multiboard, "member": member})

@@ -22,6 +22,8 @@ class Multiboard(models.Model):
 
     boards = models.ManyToManyField("boards.Board", verbose_name=u"Boards", related_name="multiboards")
 
+    members = models.ManyToManyField("members.Member", verbose_name=u"Members", related_name="multiboards")
+
     order = models.PositiveIntegerField(verbose_name=u"Order of this multiboard", default=1)
 
     show_in_index = models.BooleanField(

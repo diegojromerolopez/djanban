@@ -15,7 +15,7 @@ class MultiboardForm(forms.ModelForm):
     class Meta:
         model = Multiboard
         fields = [
-            "name", "description", "is_archived", "order", "boards",
+            "name", "description", "is_archived", "order", "boards", "members",
             # Inform if the multiboard must be shown in index
             "show_in_index",
             # Inform if the tasks of the following statuses must be shown
@@ -32,9 +32,28 @@ class MultiboardForm(forms.ModelForm):
         self.fields["description"].widget = CKEditorWidget()
         current_request = CrequestMiddleware.get_request()
         current_user = current_request.user
-        self.fields["boards"].choices = [(board.id, board.name) for board in get_user_boards(current_user).order_by("name")]
+        # Available boards for this user
+        self.fields["boards"].choices = [
+            (board.id, board.name) for board in get_user_boards(current_user).filter(is_archived=False).order_by("name")
+        ]
+        # Members of a multiboard
+        current_member = current_user.member
+        self.fields["members"].choices = [
+            (member.id, member.external_username) for member in current_member.team_mates if member.id != current_member.id
+        ]
+
+    def save(self, commit=True):
+        super(MultiboardForm, self).save(commit=commit)
+        if commit:
+            if not self.instance.members.filter(id=self.instance.creator.id).exists():
+                self.instance.members.add(self.instance.creator)
 
 
 # Delete multiboard form
 class DeleteMultiboardForm(forms.Form):
     confirmed = forms.BooleanField(label=u"Confirm you want to delete this multiboard")
+
+
+# Leave multiboard form
+class LeaveMultiboardForm(forms.Form):
+    confirmed = forms.BooleanField(label=u"Confirm you want to leave this multiboard")

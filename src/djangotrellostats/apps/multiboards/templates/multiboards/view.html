@@ -15,28 +15,33 @@
                   <div class="panel-body row">
                       <div class="col-md-12">
                           <div class="actions">
-                                {% if member and multiboard.creator_id == member.id %}
-                                    <p>
-                                        <a href="{% url 'multiboards:view_list' %}"
-                                           title="View all multiboards"
-                                            class="btn btn-primary">
-                                            <span class="fa fa-arrow-left"></span>
-                                        </a>
-                                        <a href="{% url 'multiboards:view_task_board' multiboard.id %}" class="btn btn-primary">
-                                            View task board
-                                        </a>
-                                        <a href="{% url 'multiboards:edit' multiboard.id %}"
-                                           title="Edit multiboard {{multiboard.name}}"
-                                            class="btn btn-primary">
-                                            <span class="fa fa-pencil"></span> Edit
-                                        </a>
-                                        <a href="{% url 'multiboards:delete' multiboard.id %}"
-                                           title="Delete multiboard {{multiboard.name}}"
-                                            class="btn btn-primary">
-                                            <span class="fa fa-trash"></span> Delete
-                                        </a>
-                                    </p>
-                              {% endif %}
+                            <p>
+                                <a href="{% url 'multiboards:view_list' %}"
+                                   title="View all multiboards"
+                                    class="btn btn-primary">
+                                    <span class="fa fa-arrow-left"></span>
+                                </a>
+                                <a href="{% url 'multiboards:view_task_board' multiboard.id %}" class="btn btn-primary">
+                                    View task board
+                                </a>
+                                {% if member and member.id == multiboard.creator.id %}
+                                    <a href="{% url 'multiboards:edit' multiboard.id %}"
+                                       title="Edit multiboard {{multiboard.name}}"
+                                        class="btn btn-primary">
+                                        <span class="fa fa-pencil"></span> Edit
+                                    </a>
+                                    <a href="{% url 'multiboards:delete' multiboard.id %}"
+                                       title="Delete multiboard {{multiboard.name}}"
+                                        class="btn btn-danger">
+                                        <span class="fa fa-trash"></span> Delete
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'multiboards:leave' multiboard.id %}" class="btn btn-danger">
+                                        <span class="fa fa-sign-out"></span>
+                                        Leave
+                                    </a>
+                                {% endif %}
+                            </p>
                           </div>
                           <div class="row">
                                <div class="col-md-12 description">
@@ -85,8 +90,29 @@
                                       </div>
                                     <div class="panel-body">
                                         {% for board in boards %}
-                                            <div>{{board.name}}</div>
+                                              <a class="panel-heading btn-block" href="{% url 'boards:view' board.id %}" title="View {{board.name}}">
+                                                    <img class="board-identicon" src="{% url 'boards:view_identicon' board.id 40 40 %}"
+                                                         alt="Identicon of board {{board.name}}"/>
+                                                    <span class="board-name">{{board.name}}</span>
+                                              </a>
                                         {% endfor %}
+                                    </div>
+                               </div>
+                            </div>
+                          </div>
+
+                          <div class="row">
+                               <div class="col-md-12 description">
+                                <div class="panel panel-info">
+                                      <div class="panel-heading">
+                                          Members
+                                      </div>
+                                    <div class="panel-body">
+                                        <div>
+                                            {% for member_i in members %}
+                                                <img class="avatar" src="{{member_i.gravatar_url}}"  alt="{{member_i.external_username}}" />
+                                            {% endfor %}
+                                        </div>
                                     </div>
                                </div>
                             </div>
