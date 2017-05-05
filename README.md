@@ -367,7 +367,11 @@ Trello is a registered trademark in USA and other countries.
 
 This project uses [Trello API](https://developers.trello.com/) to help users of Trello to get some useful charts, lists and stats.
 
-The IP (intellectual property) of this project belongs to Diego J. Romero-López. The license of this project is [MIT](LICENSE) and the logos have been created with [Mark Maker](http://emblemmatic.org/markmaker).
+The IP (intellectual property) of this project belongs to Diego J. Romero-López.
+
+The license of this project is [MIT](LICENSE).
+
+Project logos have been created with [Mark Maker](http://emblemmatic.org/markmaker).
 
 # Questions? Suggestions? Need some help?
 
