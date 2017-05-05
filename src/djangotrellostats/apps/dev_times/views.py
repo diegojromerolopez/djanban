@@ -175,6 +175,7 @@ def _get_daily_spent_times_replacements(request):
     spent_times = _get_daily_spent_times_from_request(request)
 
     replacements = {
+        "multiboards": request.user.member.multiboards.all() if user_is_member(request.user) else None,
         "member": request.user.member if user_is_member(request.user) else None,
         "boards": get_user_boards(request.user),
         "members": Member.objects.all()
@@ -202,35 +203,43 @@ def _get_daily_spent_times_replacements(request):
 
     replacements["selected_member"] = selected_member
 
-    # If we are filtering by board, filter by board_id
-    label_id = request.GET.get("label_id", request.GET.get("label"))
-    label = None
-    board = None
-    if label_id:
-        matches = re.match(r"all_from_board_(?P<board_id>\d+)", label_id)
-        if matches:
-            board = get_user_boards(request.user).get(id=matches.group("board_id"))
+    multiboard_id = request.GET.get("multiboard_id", request.GET.get("multiboard"))
+    multiboard = None
+    if multiboard_id:
+        multiboard = request.user.member.multiboards.get(id=multiboard_id)
+        replacements["multiboard"] = multiboard
+        replacements["selected_multiboard"] = multiboard
+        replacements["board__multiboard"] = multiboard
+    else:
+        # If we are filtering by board, filter by board_id
+        label_id = request.GET.get("label_id", request.GET.get("label"))
+        label = None
+        board = None
+        if label_id:
+            matches = re.match(r"all_from_board_(?P<board_id>\d+)", label_id)
+            if matches:
+                board = get_user_boards(request.user).get(id=matches.group("board_id"))
+                label = None
+                replacements["selected_label"] = label
+                replacements["label"] = label
+                replacements["selected_board"] = board
+                replacements["board"] = board
+            else:
+                boards = get_user_boards(request.user)
+                label = Label.objects.get(board__in=boards, id=label_id)
+                replacements["selected_label"] = label
+                replacements["label"] = label
+                replacements["selected_board"] = label.board
+                replacements["board"] = label.board
+
+        board_id = request.GET.get("board_id", request.GET.get("board"))
+        if not label_id and board_id:
+            board = get_user_boards(request.user).get(id=board_id)
             label = None
             replacements["selected_label"] = label
             replacements["label"] = label
             replacements["selected_board"] = board
             replacements["board"] = board
-        else:
-            boards = get_user_boards(request.user)
-            label = Label.objects.get(board__in=boards, id=label_id)
-            replacements["selected_label"] = label
-            replacements["label"] = label
-            replacements["selected_board"] = label.board
-            replacements["board"] = label.board
-
-    board_id = request.GET.get("board_id", request.GET.get("board"))
-    if not label_id and board_id:
-        board = get_user_boards(request.user).get(id=board_id)
-        label = None
-        replacements["selected_label"] = label
-        replacements["label"] = label
-        replacements["selected_board"] = board
-        replacements["board"] = board
 
     daily_spent_times = spent_times["all"]
     replacements["week"] = request.GET.get('week') if request.GET.get('week') and request.GET.get('week') > 0 else None
@@ -246,22 +255,27 @@ def _get_daily_spent_times_from_request(request):
     if request.GET.get("member_id"):
         selected_member = Member.objects.get(id=request.GET.get("member_id"))
 
+    multiboard_id = None
+    if request.GET.get("multiboard_id"):
+        multiboard_id = request.GET.get("multiboard_id")
+
+    label_id = None
     if request.GET.get("label_id"):
         label_id = request.GET.get("label_id")
     elif request.GET.get("board_id"):
         label_id = "all_from_board_{0}".format(request.GET.get("board_id"))
-    else:
-        label_id = None
+
     spent_times = _get_daily_spent_times_queryset(
         current_user, selected_member,
-        request.GET.get("start_date"), request.GET.get("end_date"), request.GET.get('week'), label_id
+        request.GET.get("start_date"), request.GET.get("end_date"), request.GET.get('week'),
+        label_id=label_id, multiboard_id=multiboard_id
     )
 
     return spent_times
 
 
 # Return the filtered queryset and the replacements given the GET parameters
-def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, end_date_, week, label_id):
+def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, end_date_, week, multiboard_id, label_id):
     daily_spent_time_filter = {}
 
     # Member filter
@@ -290,22 +304,28 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
     if week and int(week) > 0:
         daily_spent_time_filter["week_of_year"] = week
 
-    # Label
-    label = None
     board = None
-    current_user_boards = get_user_boards(current_user)
-    if label_id:
-        matches = re.match(r"all_from_board_(?P<board_id>\d+)", label_id)
-        if matches and current_user_boards.filter(id=matches.group("board_id")).exists():
-            label = None
-            board = current_user_boards.get(id=matches.group("board_id"))
-            daily_spent_time_filter["board"] = board
+    multiboard = None
+    if multiboard_id and hasattr(current_user, "member"):
+        multiboard = current_user.member.multiboards.get(id=multiboard_id)
+        daily_spent_time_filter["board__multiboards"] = multiboard
+    else:
+        # Label
+        label = None
+        board = None
+        current_user_boards = get_user_boards(current_user)
+        if label_id:
+            matches = re.match(r"all_from_board_(?P<board_id>\d+)", label_id)
+            if matches and current_user_boards.filter(id=matches.group("board_id")).exists():
+                label = None
+                board = current_user_boards.get(id=matches.group("board_id"))
+                daily_spent_time_filter["board"] = board
 
-        elif Label.objects.filter(id=label_id, board__in=current_user_boards).exists():
-            label = Label.objects.get(id=label_id)
-            board = label.board
-            daily_spent_time_filter["board"] = board
-            daily_spent_time_filter["card__labels"] = label
+            elif Label.objects.filter(id=label_id, board__in=current_user_boards).exists():
+                label = Label.objects.get(id=label_id)
+                board = label.board
+                daily_spent_time_filter["board"] = board
+                daily_spent_time_filter["card__labels"] = label
 
     # Daily Spent Times
     daily_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).order_by("-date")

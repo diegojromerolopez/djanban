@@ -12,7 +12,11 @@
 
     {# Summary in the case of all boards #}
     {% if board == None %}
-        {% async_include "daily_spent_times/components/boards_summary.html" boards=boards date_interval=date_interval %}
+        {% if multiboard %}
+            {% async_include "daily_spent_times/components/boards_summary.html" boards=multiboard.boards.all multiboard=multiboard date_interval=date_interval %}
+        {% else %}
+            {% async_include "daily_spent_times/components/boards_summary.html" boards=boards date_interval=date_interval %}
+        {% endif %}
     {% endif %}
 
     {# Times per month #}

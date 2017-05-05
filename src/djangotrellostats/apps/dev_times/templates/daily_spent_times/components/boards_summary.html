@@ -1,7 +1,13 @@
 {% load template_extensions %}
 
 <div class="panel panel-default">
-    <div class="panel-heading">Summary for all boards</div>
+    <div class="panel-heading">
+        {% if multiboard %}
+            Summary for all boards of multiboard <strong>{{multiboard.name}}</strong>
+        {% else %}
+            Summary for all boards
+        {% endif %}
+    </div>
     <div class="panel-body">
         <table class="table table-striped table-responsive">
             <thead>

@@ -21,6 +21,15 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="select_label">Multiboard</label>
+                    <select id="select_multiboard" name="multiboard_id" class="form-control">
+                        <option value=""></option>
+                        {% for multiboard in multiboards %}
+                            <option value="{{multiboard.id}}" {% if selected_multiboard.id == multiboard.id %}selected="selected"{% endif %}>{{multiboard.name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="select_label">Board</label>
                     {% if selected_label %}
                         {{selected_board.name}}
