@@ -350,6 +350,15 @@ considered to measure spent, estimated and card living times.
 
 Workflow stats are partially completed. Only the average time in each list and the standard deviation time on each list is shown for each workflow.
 
+
+# Contributing
+
+I would gladly accept feature requests, pull requests and suggestions.
+
+All contributors must sign an intellectual property cession to the
+creator of this project (Diego J. Romero-López). 
+
+
 # Legal notice
 
 This project is not affiliated, endorsed or supported in any way by [Trello Inc.](http://trello.com)
@@ -358,7 +367,7 @@ Trello is a registered trademark in USA and other countries.
 
 This project uses [Trello API](https://developers.trello.com/) to help users of Trello to get some useful charts, lists and stats.
 
-The license of this project is [MIT](LICENSE) and the logos have been created with [Mark Maker](http://emblemmatic.org/markmaker).
+The IP (intellectual property) of this project belongs to Diego J. Romero-López. The license of this project is [MIT](LICENSE) and the logos have been created with [Mark Maker](http://emblemmatic.org/markmaker).
 
 # Questions? Suggestions? Need some help?
 
