@@ -95,6 +95,10 @@
                                                    title="View task multiboard {{multiboard.name}}">
                                                     <span class="fa fa-navicon fa-rotate-90e"></span> View task board
                                                 </a>
+                                                <a href="{% url 'dev_times:view_daily_spent_times' %}?multiboard_id={{multiboard.id}}" class="btn btn-primary"
+                                                   title="View multiboard {{multiboard.name}}">
+                                                    <span class="fa fa-clock-o"></span> Spent Time
+                                                </a>
                                                 {% if member and member.id == multiboard.creator_id %}
                                                     <a href="{% url 'multiboards:edit' multiboard.id %}" class="btn btn-primary"
                                                        title="Edit multiboard {{rmultiboard.name}}">
