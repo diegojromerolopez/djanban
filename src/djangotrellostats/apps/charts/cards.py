@@ -520,12 +520,13 @@ def cumulative_card_evolution(current_user, board=None, day_step=1):
                                   show_minor_x_labels=False,
                                   human_readable=True, x_label_rotation=65)
 
-    cumulative_chart.x_labels_major_every = 7
-    cumulative_chart.show_only_major_dots = True
-
     # If there are no cards, return the empty chart
     if not Card.objects.filter(board__in=boards, is_closed=False).exists():
+        cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False)
         return cumulative_chart.render_django_response()
+
+    cumulative_chart.x_labels_major_every = 7
+    cumulative_chart.show_only_major_dots = True
 
     # If there have no been work, return the empty chart
     start_working_date = numpy.min(filter(None, [board_i.get_working_start_date() for board_i in boards]))
