@@ -1351,7 +1351,7 @@ class CardAttachment(models.Model):
     uploader = models.ForeignKey("members.Member", verbose_name=u"Member uploader of this attachment",
                                  related_name="attachments")
     external_file_url = models.CharField(verbose_name=u"External file URL", max_length=1024, default="", blank=True)
-    external_file_name = models.CharField(verbose_name=u"External file name", max_length=128, default="", blank=True)
+    external_file_name = models.CharField(verbose_name=u"External file name", max_length=4096, default="", blank=True)
     file = models.FileField(verbose_name=u"File content", null=True, blank=True, default=None)
     is_cover = models.BooleanField(
         verbose_name=u"Is this file the cover of the card?",
