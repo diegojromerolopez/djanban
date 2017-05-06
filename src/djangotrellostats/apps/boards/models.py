@@ -1511,7 +1511,7 @@ class CardComment(models.Model):
         Card.objects.filter(id=self.card_id)\
             .update(
                 number_of_mentioned_members=
-                F("number_of_mentioned_members")-earlier_number_of_mentioned_members+len(mentioned_members)
+                F("number_of_mentioned_members")+(len(mentioned_members)-earlier_number_of_mentioned_members)
             )
 
     def delete(self, *args, **kwargs):

@@ -26,6 +26,7 @@ class Command(BaseCommand):
     def __init__(self, stdout=None, stderr=None, no_color=False):
         super(Command, self).__init__(stdout, stderr, no_color)
         self.members = []
+        self.fetched_boards = {}
         self.start_time = None
         self.end_time = None
 
@@ -87,7 +88,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        if options['member_external_username']:
+        if 'member_external_username' in options and options['member_external_username']:
             try:
                 member_trello_username = options['member_external_username'][0]
             except (IndexError, KeyError)as e:
@@ -100,14 +101,15 @@ class Command(BaseCommand):
 
         if not self.start():
             self.stdout.write(self.style.ERROR("Unable to fetch"))
-            error_message = u"Unable to fetch boards. Is the lock file present?"
+            error_message = u"Unable to fetch boards. Is the lock /tmp/django-trello-stats-fetch-lock.txt file present?"
             warn_administrators(subject=u"Unable to fetch boards",
                                      message=error_message)
             raise AssertionError(error_message)
 
         fetch_ok = True
 
-        # Make two retries to the fetch procsess
+        # For each selected member,
+        # make two retries to the fetch procsess
         for member in self.members:
             if member.is_initialized:
                 self.stdout.write(
@@ -138,29 +140,44 @@ class Command(BaseCommand):
 
     # Fetch boards
     def fetch_member_boards(self, member):
-        last_board = None
-        try:
-            # For each board that is ready, fetch it
-            for board in member.created_boards.filter(has_to_be_fetched=True, is_archived=False):
+        # For each board that is ready and belongs to this member, fetch it
+        boards = list(member.created_boards.filter(has_to_be_fetched=True, is_archived=False))
+        failed_boards = []
+        while len(boards) > 0:
+            board = boards.pop()
+            # Shouldn't be needed because we are getting the boards by creator, but in case
+            # we add this check in case we change the method of getting boards in a future
+            if board.id not in self.fetched_boards:
                 if board.is_ready():
-                    last_board = board
-                    self.stdout.write(self.style.SUCCESS(u"Board {0} is ready".format(board.name)))
-                    self.fetch_board(member, board)
-                    self.stdout.write(self.style.SUCCESS(u"Board {0} fetched successfully".format(board.name)))
+                    try:
+                        self.stdout.write(self.style.SUCCESS(u"Board {0} is ready".format(board.name)))
+                        self.fetch_board(member, board)
+                        self.stdout.write(self.style.SUCCESS(u"Board {0} fetched successfully".format(board.name)))
+                        # Mark this board as fetched
+                        self.fetched_boards[board.id] = True
+                    except Exception as e:
+                        import traceback
+                        traceback.print_exc()
+                        error_message = u"Error when fetching boards. Board {0} fetch failed. Exception {1}.".format(
+                            board.name, e
+                        )
+                        initializer = Initializer(member, debug=False)
+                        initializer.init(board.uuid)
+                        # Warn the administrators messaging them the traceback and show the error on stdout
+                        warn_administrators(subject=error_message, message=traceback.format_exc())
+                        self.stdout.write(self.style.ERROR(error_message))
+                        # Re-add the failed board to the last of the board list
+                        failed_boards.append(board)
                 else:
                     self.stdout.write(self.style.ERROR(u"Board {0} is not ready".format(board.name)))
-
-        # If there is any exception, warn the administrators
-        except Exception as e:
-            if last_board:
-                error_message = u"Error when fetching boards. Board {0} fetch failed.".format(last_board.name)
-                initializer = Initializer(member, debug=False)
-                initializer.init(last_board.uuid)
             else:
-                error_message = u"Error when fetching boards."
-            # Warn the administrators messaging them the traceback and show the error on stdout
-            warn_administrators(subject=error_message, message=traceback.format_exc())
-            self.stdout.write(self.style.ERROR(error_message))
+                self.stdout.write(self.style.WARNING(u"Board {0} has already been fetched".format(board.name)))
+
+        if len(failed_boards) > 0:
+            self.stdout.write(self.style.ERROR(u"There are {0} boards whose fetch failed".format(len(failed_boards))))
+            for failed_board in failed_boards:
+                self.stdout.write(
+                    self.style.ERROR(u" - {0}".format(failed_board)))
 
     # Fetch one board
     def fetch_board(self, member, board):
