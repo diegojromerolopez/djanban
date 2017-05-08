@@ -60,10 +60,16 @@
                 {% endif %}
                 {% for member_i in downtime_developers %}
                     <div>
-                        {{member_i.external_username}} is in downtime since {{member_i.last_work_datetime}}.
-                        {% if not all_boards_in_downtime %}
-                            Assign him/her one of the pending or in development tasks.
-                        {% endif %}
+                        {% with member_i_last_work_datetime=member_i.last_work_datetime %}
+                            {% if member_i_last_work_datetime %}
+                                <strong>{{member_i.external_username}}</strong> is in downtime since {{member_i_last_work_datetime}}.
+                            {% else %}
+                                <strong>{{member_i.external_username}}</strong> is in downtime.
+                            {% endif %}
+                            {% if not all_boards_in_downtime %}
+                                Assign him/her one of the pending or in development tasks.
+                            {% endif %}
+                        {% endwith %}
                     </div>
                 {% empty %}
                     {% if member.is_developer and member.is_in_downtime %}
