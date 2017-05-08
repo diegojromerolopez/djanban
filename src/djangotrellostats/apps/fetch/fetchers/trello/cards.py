@@ -74,6 +74,14 @@ class CardFetcher(object):
             if movements:
                 # For each card movement, we update its values if needed
                 for movement in movements:
+                    # Check if movement occurs inside the board. Those movements that happen outside the board
+                    # that is from/to a list of other board are ignored.
+                    # Your users are encouraged to DON'T DO THAT.
+                    source_list_exists = self.board.lists.filter(uuid=movement["data"]["listBefore"]["id"])
+                    destination_list_exists = self.board.lists.filter(uuid=movement["data"]["listAfter"]["id"])
+                    if not source_list_exists or not destination_list_exists:
+                        continue
+
                     source_list = self.board.lists.get(uuid=movement["data"]["listBefore"]["id"])
                     destination_list = self.board.lists.get(uuid=movement["data"]["listAfter"]["id"])
                     movement_type = "forward"
@@ -361,12 +369,15 @@ class CardFetcher(object):
 
         # Comparator function
         def list_cmp(list_1, list_2):
-            list_1_order = trello_list_order_dict[list_1]
-            list_2_order = trello_list_order_dict[list_2]
-            if list_1_order < list_2_order:
-                return 1
-            if list_1_order > list_2_order:
-                return -1
+            list_1_order = trello_list_order_dict.get(list_1)
+            list_2_order = trello_list_order_dict.get(list_2)
+            if list_1_order is not None and list_2_order is not None:
+                if list_1_order < list_2_order:
+                    return 1
+                if list_1_order > list_2_order:
+                    return -1
+                return 0
+            # In case the movement is from/to a list of other board, ignore it
             return 0
 
         trello_card.stats_by_list = trello_card.get_stats_by_list(lists=fake_trello_lists,
