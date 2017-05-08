@@ -2,21 +2,18 @@
 
 from __future__ import unicode_literals, absolute_import
 
-import tempfile
 from collections import namedtuple
 from datetime import datetime
-from dateutil import parser as dateparser
 
 import pytz
+from dateutil import parser as dateparser
 from django.conf import settings
-from django.core.files.base import ContentFile
 from trello import ResourceUnavailable
 
 from djangotrellostats.apps.base.utils.datetime import localize_if_needed
 from djangotrellostats.apps.boards.models import Card, CardComment, CardAttachment
 from djangotrellostats.apps.members.models import Member, TrelloMemberProfile
 from djangotrellostats.apps.reports.models import CardMovement
-import requests
 
 
 # Fetch a card
