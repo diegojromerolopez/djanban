@@ -209,11 +209,21 @@ class CardFetcher(object):
                 except Member.DoesNotExist as e:
                     deleted_member = Member()
                     deleted_member.save()
-                    trello_member_profile = TrelloMemberProfile(
-                        member=deleted_member,
-                        username=comment["memberCreator"]["username"],
-                        initials=comment["memberCreator"]["initials"]
-                    )
+                    try:
+                        trello_member_profile = TrelloMemberProfile.object.get(
+                            trello_id=comment["idMemberCreator"],
+                            username=comment["memberCreator"]["username"],
+                            initials=comment["memberCreator"]["initials"]
+                        )
+                    except TrelloMemberProfile.DoesNotExist:
+                        trello_member_profile = TrelloMemberProfile(
+                            member=deleted_member,
+                            trello_id=comment["idMemberCreator"],
+                            username=comment["memberCreator"]["username"],
+                            initials=comment["memberCreator"]["initials"]
+                        )
+
+                    trello_member_profile.member = deleted_member
                     trello_member_profile.save()
 
                     member_dict[trello_member_id] = deleted_member
