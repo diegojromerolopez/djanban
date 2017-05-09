@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Q
 from django.http.response import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
-from django.template import loader, Context
+from django.template import loader
 
 from djangotrellostats.apps.base.auth import get_user_boards, user_is_member
 from djangotrellostats.apps.boards.models import Label
@@ -41,23 +41,27 @@ def export_daily_spent_times(request):
     # Start and end date of the interval of the spent times that will be exported
     start_date = spent_times["start_date"]
     end_date = spent_times["end_date"]
-    board = spent_times["board"]
 
-    # Board string that will be placed in the filename
-    board_str = ""
-    if board:
-        board_str = (u"{0}-".format(board.name)).lower()
+    name_str = ""
+
+    if "multiboard" in spent_times and spent_times["multiboard"]:
+        multiboard = spent_times["multiboard"]
+        name_str = (u"mb-{0}-".format(multiboard.name)).lower()
+
+    if "board" in spent_times and spent_times["board"]:
+        board = spent_times["board"]
+        name_str = (u"{0}-".format(board.name)).lower()
 
     # Creation of the HTTP response
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="{0}export-daily-spent-times-from-{1}-to-{2}.csv"'.format(
-        board_str, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")
+        name_str, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")
     )
 
     csv_template = loader.get_template('daily_spent_times/csv.txt')
-    replacements = Context({
+    replacements = {
         'spent_times': spent_times["all"],
-    })
+    }
     response.write(csv_template.render(replacements))
     return response
 
@@ -102,21 +106,32 @@ def send_daily_spent_times(request):
     if week:
         daily_spent_times_filter["week"] = week
 
-    # Label
+    # Default filter is None
+    multiboard = None
     label = None
     board = None
-    label_str = request.POST.get("label")
-    matches = re.match(r"all_from_board_(?P<board_id>\d+)", label_str)
-    if matches and current_user_boards.filter(id=matches.group("board_id")).exists():
-        label = None
-        board = current_user_boards.get(id=matches.group("board_id"))
-        daily_spent_times_filter["board"] = board
 
-    elif Label.objects.filter(id=label_str).exists():
-        label = Label.objects.get(id=label_str)
-        board = label.board
-        daily_spent_times_filter["board"] = board
-        daily_spent_times_filter["card__labels"] = label
+    # Filter spent time by multiboard
+    multiboard_str = request.POST.get("multiboard")
+    if multiboard_str and hasattr(current_user, "member") and\
+            current_user.member.multiboards.filter(id=multiboard_str).exists():
+        multiboard = current_user.member.multiboards.get(id=multiboard_str)
+        daily_spent_times_filter["board__multiboards"] = multiboard
+    # Filter spent time by label o board
+    else:
+        # Label
+        label_str = request.POST.get("label")
+        matches = re.match(r"all_from_board_(?P<board_id>\d+)", label_str)
+        if matches and current_user_boards.filter(id=matches.group("board_id")).exists():
+            label = None
+            board = current_user_boards.get(id=matches.group("board_id"))
+            daily_spent_times_filter["board"] = board
+
+        elif Label.objects.filter(id=label_str).exists():
+            label = Label.objects.get(id=label_str)
+            board = label.board
+            daily_spent_times_filter["board"] = board
+            daily_spent_times_filter["card__labels"] = label
 
     # Member
     member = None
@@ -138,6 +153,7 @@ def send_daily_spent_times(request):
         "end_date": end_date,
         "label": label,
         "board": board,
+        "multiboard": multiboard,
         "member": member
     }
 
@@ -379,7 +395,7 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
     replacements = {
         "all": daily_spent_times, "per_month": months,
         "start_date": start_date, "end_date": end_date,
-        "board": board
+        "board": board, "multiboard": multiboard
     }
     return replacements
 

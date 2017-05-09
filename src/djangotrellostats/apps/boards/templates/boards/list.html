@@ -104,7 +104,7 @@
                                     <span class="fa fa-users"></span> Members
                                 </a>
                                 <a class="btn btn-primary" href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}" title="View spent times of board {{board.name}}">
-                                    <span class="fa fa-calendar-check-o"></span> Spent times
+                                    <span class="fa fa-clock-o"></span> Spent time
                                 </a>
                                 {% if board.estimated_number_of_hours %}
                                     {% with board_spent_time=board.get_spent_time %}

@@ -20,5 +20,6 @@
         Daily spent time {% if selected_member %}of {{selected_member.external_username}}{% endif %}
     </h1>
     {% include "daily_spent_times/components/filter_form.html" with selected_member=selected_member %}
+    {% include "daily_spent_times/components/send_daily_spent_times.html" %}
     {% include "daily_spent_times/components/list.html" %}
 {% endblock content %}

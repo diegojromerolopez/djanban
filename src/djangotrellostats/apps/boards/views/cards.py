@@ -10,7 +10,6 @@ from django.http import HttpResponseRedirect
 from django.http.response import Http404, HttpResponse
 from django.shortcuts import render
 from django.template import loader
-from django.template.context import Context
 from django.utils import timezone
 from isoweek import Week
 
@@ -279,7 +278,7 @@ def export_report(request, board_id):
     response['Content-Disposition'] = u'attachment; filename="{0}-cards.csv"'.format(board.name)
 
     csv_template = loader.get_template('boards/cards/csv.txt')
-    replacements = Context({
+    replacements = {
         "member": member,
         "board": board,
         "cards": cards,
@@ -287,7 +286,7 @@ def export_report(request, board_id):
         "std_dev_lead_time": std_dev(cards, "lead_time"),
         "avg_cycle_time": avg(cards, "cycle_time"),
         "std_dev_cycle_time": std_dev(cards, "cycle_time"),
-    })
+    }
     response.write(csv_template.render(replacements))
     return response
 
@@ -312,9 +311,9 @@ def export_detailed_report(request, board_id):
         serialized_card["id"] = card.id
         card_list.append(serialized_card)
 
-    replacements = Context({
+    replacements = {
         "cards": card_list,
-    })
+    }
     response.write(csv_template.render(replacements))
     return response
 

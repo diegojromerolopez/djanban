@@ -21,37 +21,6 @@
     </h1>
     <div>Last updated: {{board.last_fetch_datetime|timesince}}</div>
     {% include "daily_spent_times/components/filter_form.html" with selected_member=selected_member %}
-    <div class="row actions">
-        <div class="col-md-12">
-            <div class="text-right">
-                <form id="send_daily_spent_times" action="{% url 'dev_times:send_daily_spent_times' %}" method="post">
-                    <input type="hidden" name="start_date" value="{{start_date|date:'Y-m-d'}}" />
-                    <input type="hidden" name="end_date" value="{{end_date|date:'Y-m-d'}}" />
-                    <input type="hidden" name="week" value="{% if week %}{{week}}{% endif %}" />
-                    <input type="hidden" name="member" value="{{selected_member.id}}" />
-                    {% if board and not label %}
-                        <input type="hidden" name="label" value="all_from_board_{{board.id}}" />
-                    {% elif label %}
-                        <input type="hidden" name="label" value="{{label.id}}" />
-                    {% endif %}
-                    <label>
-                        <span>Recipient email</span>
-                        <input type="email" name="email" required />
-                    </label>
-                    <button class="btn btn-success" type="submit">
-                        <span class="fa fa-spin fa-spinner" style="display: none"></span>
-                        <span class="fa fa-envelope-o"></span>
-                        Send as CSV
-                    </button>
-                </form>
-                <a href="{% url 'dev_times:export_daily_spent_times' %}?start_date={{start_date|date:'Y-m-d'}}&end_date={{end_date|date:'Y-m-d'}}&week={% if week %}{{week}}{% endif %}&member_id={{selected_member.id}}&label_id={% if label %}{{label.id}}{% else %}all_from_board_{{board.id}}{% endif %}" class="btn btn-success">
-                    <span class="fa fa-arrow-down"></span>
-                    Download as CSV
-                </a>
-            </div>
-            <div id="send_daily_spent_times_error" class="alert alert-danger text-right" style="display:none"></div>
-            <div id="send_daily_spent_times_ok" class="alert alert-success text-right" style="display:none"></div>
-        </div>
-    </div>
+    {% include "daily_spent_times/components/send_daily_spent_times.html" %}
     {% include "daily_spent_times/components/list.html" %}
 {% endblock content %}
