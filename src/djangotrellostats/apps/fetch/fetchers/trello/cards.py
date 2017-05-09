@@ -215,7 +215,7 @@ class CardFetcher(object):
                     deleted_member = Member()
                     deleted_member.save()
                     try:
-                        trello_member_profile = TrelloMemberProfile.object.get(
+                        trello_member_profile = TrelloMemberProfile.objects.get(
                             trello_id=comment["idMemberCreator"],
                             username=comment["memberCreator"]["username"],
                             initials=comment["memberCreator"]["initials"]
