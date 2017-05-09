@@ -1,1 +1,0 @@
-[DjangoTrelloStats] Custom report for {{email}}

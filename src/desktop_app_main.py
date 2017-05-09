@@ -21,7 +21,7 @@ import logging.handlers
 import platform
 
 
-# Django standalone application for DjangoTrelloStats
+# Django standalone application for Djanban
 class DjangoApplication(object):
     def __init__(self):
         self.servers = []
@@ -134,17 +134,17 @@ if __name__ == '__main__':
 
     # set up logging and app_name
     if run_as_binary is True:
-        log_file = os.path.join(base_dir, "../logs/", "DjangoTrelloStats.log")
+        log_file = os.path.join(base_dir, "../logs/", "Djanban.log")
         cherry_access_log = os.path.join(base_dir, "../logs/", "access.log")
         cherry_error_log = os.path.join(base_dir, "../logs/", "error.log")
-        app_name = "DjangoTrelloStats"
+        app_name = "Djanban"
     else:
-        log_file = os.path.join(base_dir, "logs/DjangoTrelloStats.log")
+        log_file = os.path.join(base_dir, "logs/Djanban.log")
         cherry_access_log = os.path.join(base_dir, "logs/access.log")
         cherry_error_log = os.path.join(base_dir, "logs/error.log")
-        app_name = "DjangoTrelloStats"
+        app_name = "Djanban"
 
-    log = logging.getLogger("DjangoTrelloStats")
+    log = logging.getLogger("Djanban")
     log.setLevel(logging.DEBUG)
     handler = logging.handlers.RotatingFileHandler(log_file,
                                                    maxBytes=30000000,
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     log.addHandler(handler)
 
     # Django settings
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djangotrellostats.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djanban.settings')
     application = get_wsgi_application()
 
     # make app show up as frontmost app

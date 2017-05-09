@@ -65,22 +65,22 @@ target/
 .ipynb_checkpoints
 
 # Media directory
-src/djangotrellostats/media/*
+src/djanban/media/*
 
 # Local temp directory
-src/djangotrellostats/tmp
-src/djangotrellostats/tmp/*
+src/djanban/tmp
+src/djanban/tmp/*
 
 # Logs
-src/djangotrellostats/logs
-src/djangotrellostats/logs/*
+src/djanban/logs
+src/djanban/logs/*
 
 # Databases
-resources/database/djangotrellostats.db
+resources/database/djanban.db
 
 # Local configuration
-src/djangotrellostats/settings_local.py
-/src/djangotrellostats/settings_local_desktop_app.py
+src/djanban/settings_local.py
+/src/djanban/settings_local_desktop_app.py
 src/public_html
 src/shell
 src/build

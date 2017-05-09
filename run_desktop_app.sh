@@ -19,8 +19,8 @@ fi
 $ROOT_DIR/$VENV_NAME/bin/pip install -r $SRC_DIR/requirements.desktop_app.txt
 
 # Creation of empty SQLite database if needed
-if ! [ -f "$ROOT_DIR/resources/database/djangotrellostats.db" ]; then
-    echo "" > "$ROOT_DIR/resources/database/djangotrellostats.db"
+if ! [ -f "$ROOT_DIR/resources/database/djanban.db" ]; then
+    echo "" > "$ROOT_DIR/resources/database/djanban.db"
 fi
 
 # Executing Django migrations

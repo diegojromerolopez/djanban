@@ -25,8 +25,8 @@ OPTIONS = {
     'packages': ['cherrypy.wsgiserver', "cherrypy.process"],
     'includes': ['six', 'packaging', 'packaging.version', 'packaging.specifiers', 'packaging.requirements'],
     'plist': {
-        'CFBundleIdentifier': "djangotrellostats",
-        'CFBundleName': "DjangoTrelloStats",
+        'CFBundleIdentifier': "djanban",
+        'CFBundleName': "Djanban",
         'CFBundleVersion': '1001',
         'CFBundleShortVersionString': '1.0',
         'NSHumanReadableCopyright': 'Copyright 2016 DiegoJ.'

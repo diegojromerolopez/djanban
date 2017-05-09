@@ -9,8 +9,8 @@ if [ ! -d ./src/venv ]; then
     ./venv/bin/pip install -r ./src/requirements.txt
 fi
 
-if [ ! -f ./src/djangotrellostats/settings_local.py ]; then
-    cp ./src/djangotrellostats/settings_local.runserver.py ./src/djangotrellostats/settings_local.py
+if [ ! -f ./src/djanban/settings_local.py ]; then
+    cp ./src/djanban/settings_local.runserver.py ./src/djanban/settings_local.py
 fi
 
 ./venv/bin/python ./src/manage.py migrate

@@ -1,13 +1,13 @@
 
 
-![Django Trello Stats](resources/images/logos/logo.png)
+![Djanban](resources/images/logos/logo.png)
 
 
 Statistics and charts for Trello boards, now in a Django app.
 
 # What's this?
 
-Django Trello Stats is a web site that allows you to connect to your Trello user and fetch data from your boards.
+Djanban is a web site that allows you to connect to your Trello user and fetch data from your boards.
 
 The fetched data is processed and you are presented with several stats for each project that help you take
 strategic decisions like:

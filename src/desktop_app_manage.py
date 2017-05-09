@@ -4,7 +4,7 @@ import sys
 
 if __name__ == "__main__":
     os.environ["DJANGO_APP_MODE"] = "desktop_app"
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "djangotrellostats.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "djanban.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError:
