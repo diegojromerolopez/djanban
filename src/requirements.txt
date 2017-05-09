@@ -33,7 +33,7 @@ ptyprocess==0.5.1
 pycryptodome==3.4.5
 pydenticon==0.3
 -e git://github.com/diegojromerolopez/py-trello.git@master#egg=pytrello
--e git://github.com/diegojromerolopez/django-async-include.git#egg=django_async_include
+django-async-include==0.5
 pyOpenSSL==16.0.0
 pyasn1==0.1.9
 pycparser==2.14
