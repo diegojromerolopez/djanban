@@ -27,6 +27,14 @@ class MultiboardForm(forms.ModelForm):
             "show_done_tasks"
         ]
 
+    class Media:
+        css = {
+            'all': ('css/multiboards/form.css',)
+        }
+        js = (
+            'js/multiboards/form.js',
+        )
+
     def __init__(self, *args, **kwargs):
         super(MultiboardForm, self).__init__(*args, **kwargs)
         self.fields["description"].widget = CKEditorWidget()
