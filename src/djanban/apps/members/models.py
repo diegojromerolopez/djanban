@@ -427,6 +427,11 @@ class Member(models.Model):
         draw.text((4, 8), initials, (0, 0, 0), font=font)
 
         filename = "{0}.png".format(initials)
+
+        # If tmp directory does not exist, create it
+        if not os.path.exists(settings.TMP_DIR):
+            os.mkdir(settings.TMP_DIR)
+
         path = os.path.join(settings.TMP_DIR, "{0}".format(filename))
 
         canvas.save(path, "PNG")
