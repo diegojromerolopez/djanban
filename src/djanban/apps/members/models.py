@@ -8,6 +8,7 @@ from datetime import timedelta
 
 import numpy
 from PIL import Image, ImageDraw, ImageFont
+from crequest.middleware import CrequestMiddleware
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files import File
@@ -405,10 +406,11 @@ class Member(models.Model):
             self.create_default_avatar()
         # If the member has an user and therefore, an email, get its gravatar
         if self.user:
+            current_request = CrequestMiddleware.get_request()
             return "http://www.gravatar.com/avatar/{0}?s={1}&d={2}".format(
                 hashlib.md5(self.user.email.encode('utf-8')).hexdigest(),
                 size,
-                self.default_avatar.url
+                current_request.build_absolute_uri(self.default_avatar.url)
             )
         # Otherwise, get its default avatar URL
         return self.default_avatar.url
