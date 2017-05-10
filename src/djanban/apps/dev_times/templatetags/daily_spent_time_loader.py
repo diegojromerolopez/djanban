@@ -13,7 +13,7 @@ register = template.Library()
 
 
 @register.assignment_tag
-def get_daily_spent_times(current_user, member=None, start_date=None, end_date=None, week=None, board=None):
+def get_daily_spent_times(current_user, member=None, start_date=None, end_date=None, week=None, board=None, label=None):
     daily_spent_time_filter = {}
 
     # Member filter
@@ -35,6 +35,10 @@ def get_daily_spent_times(current_user, member=None, start_date=None, end_date=N
     # Board
     if board and get_user_boards(current_user).filter(id=board.id).exists():
         daily_spent_time_filter["board_id"] = board.id
+
+    # Label
+    if label and board and board.labels.filter(id=label.id).exists():
+        daily_spent_time_filter["card__labels"] = board.labels.get(id=label.id)
 
     # Daily Spent Times
     daily_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).order_by("-date")

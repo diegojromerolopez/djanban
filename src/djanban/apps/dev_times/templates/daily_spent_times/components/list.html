@@ -6,7 +6,7 @@
     {# Summary #}
     <div class="row">
         <div class="col-md-12">
-            {% async_include "daily_spent_times/components/list_summary.html" user=request.user start_date=request.GET.start_date end_date=request.GET.end_date week=request.GET.week selected_board=selected_board %}
+            {% async_include "daily_spent_times/components/list_summary.html" user=request.user start_date=request.GET.start_date end_date=request.GET.end_date week=request.GET.week selected_board=selected_board selected_label=selected_label %}
         </div>
     </div>
 

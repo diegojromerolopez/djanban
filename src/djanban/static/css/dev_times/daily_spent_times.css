@@ -1,4 +1,11 @@
 
+h2 .label {
+    padding: .2em;
+    text-align: left;
+    display: inline-block;
+    text-shadow: 2px 0 0 black, -2px 0 0 black, 0 2px 0 black, 0 -2px 0 black, 1px 1px black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black;
+}
+
 #toggle_month_order .btn-title {
     display: inline-block;
     margin-top: -10px;
