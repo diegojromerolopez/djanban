@@ -12,6 +12,11 @@
                     <a class="navbar-brand" href="{{board.url}}" title="View this board in Trello">
                         <span class="fa fa-trello"></span>
                     </a>
+                    {% if board.last_fetch_datetime %}
+                        <span class="navbar-brand last_fetch datetime">
+                            Last fetched {{board.last_fetch_datetime|timesince}} ago
+                        </span>
+                    {% endif %}
                 {% endif %}
             </div>
             {% if board.estimated_number_of_hours %}
