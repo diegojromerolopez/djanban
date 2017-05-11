@@ -35,6 +35,8 @@ urlpatterns = [
 
     url(r'^async_include/', include('async_include.urls', namespace="async_include")),
 
+    url(r'^password-reset/', include('djanban.apps.password_reseter.urls', namespace="password_reseter")),
+
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
 
     url(r'^captcha/', include('captcha.urls')),

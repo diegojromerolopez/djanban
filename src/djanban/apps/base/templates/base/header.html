@@ -113,6 +113,11 @@
                             Login
                         </a>
                     </li>
+                    <li role="presentation" {% if url_namespace == "password_reseter" %}class="active"{% endif %}>
+                        <a href="{% url 'password_reseter:request_password_reset' %}" title="Reset my password">
+                            Reset my password
+                        </a>
+                    </li>
                     <li role="presentation" {% if url_name == "signup" %}class="active"{% endif %}>
                         <a href="{% url 'members:signup' %}" title="User signup">
                             Signup as member

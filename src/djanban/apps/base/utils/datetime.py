@@ -13,7 +13,7 @@ def localize_if_needed(unlocalized_datetime):
     return unlocalized_datetime
 
 
-# Localized unlocalizaed datetime
+# Localized unlocalized datetime
 # Assumes that the datetime is unlocalized
 def localize(unlocalized_datetime):
     local_timezone = pytz.timezone(settings.TIME_ZONE)

@@ -1,6 +1,10 @@
+
+from __future__ import unicode_literals
+
 from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
 
@@ -19,3 +23,4 @@ class LoginForm(forms.Form):
 
         cleaned_data["user"] = user
         return cleaned_data
+

@@ -10,7 +10,8 @@
         {% include "forms/form.html" %}
         <div class="row">
             <div class="col-md-5">
-                Have you forgotten your password? Write administrator to ask for another one.
+                Have you forgotten your password?
+                <a href="{% url 'password_reseter:request_password_reset' %}" title="Reset password">Reset password</a>.
             </div>
         </div>
     {% endif %}
