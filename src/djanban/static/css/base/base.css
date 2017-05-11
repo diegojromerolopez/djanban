@@ -15,16 +15,33 @@ a {
     height: 133px;
 }
 
+
+/* Last cards, comments and notifications common CSS */
 #header ul.last_cards,
 #header ul.last_comments,
 #header ul.notifications {
     max-height: 450px;
+    max-width: 450px;
     overflow: scroll;
 }
 
+/* Last cards */
+#header ul.last_cards {
+    overflow: hidden;
+}
+
+#header ul.last_cards.dropdown-menu a.last_card {
+    min-width: 300px;
+    white-space: normal;
+}
+
+/* Last comments */
 #header .last_comments .last_comment .panel-info {
     margin: 10px;
-    white-space: nowrap;
+}
+
+#header .last_comments .last_comment  .panel-info .action  {
+
 }
 
 #header .last_comments .last_comment .panel-info .board_name {
@@ -36,6 +53,7 @@ a {
     width: 450px;
 }
 
+/* Notifications */
 #header ul.dropdown-menu.notifications {
 
 }
@@ -44,11 +62,31 @@ a {
     width: 300px;
 }
 
-#header ul.dropdown-menu.notifications li a {
-    padding-bottom: 20px;
-    padding-top: 20px;
+#header ul.dropdown-menu.notifications li .notification-item-wrapper {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 15px;
+    padding-top: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    white-space: normal;
 }
 
+#header ul.dropdown-menu.notifications li .notification-item-wrapper > a {
+    display: block;
+    float: left;
+}
+
+#header ul.dropdown-menu.notifications li .notification-item-wrapper > a.view_board-identicon {
+    min-width: 55px;
+    width: 10%;
+}
+
+#header ul.dropdown-menu.notifications li .notification-item-wrapper > a.view_card {
+    width: 75%;
+}
+
+/* CSS helpers */
 .center-block {
     float: none;
     margin-left: auto;
@@ -69,6 +107,28 @@ a {
     text-decoration: underline;
 }
 
+.cursor-help {
+    cursor: help
+}
+
+.d-inline-block {
+    display: inline-block;
+}
+
+.inline-block{
+    display: inline-block;
+}
+
+.d-block {
+    display: block;
+}
+
+.small-identicon {
+    height: 20px;
+    width: 20px;
+}
+
+/* General CSS rules */
 #content{
     margin-bottom: 50px;
     margin-left: auto;
@@ -97,27 +157,7 @@ a {
     margin-bottom: 10px;
 }
 
-.cursor-help {
-    cursor: help
-}
-
-.d-inline-block {
-    display: inline-block;
-}
-
-.inline-block{
-    display: inline-block;
-}
-
-.d-block {
-    display: block;
-}
-
-.small-identicon {
-    height: 20px;
-    width: 20px;
-}
-
+/* Spinner-related CSS rules */
 h1 a .fa,
 h1 a:hover .fa,
 a .img-loader-spinner.fa:hover,
@@ -139,8 +179,7 @@ a .img-loader-spinner.fa {
     display: none;
 }
 
-
-
+/* Responsive rules */
 @media (max-width: 391px) {
     #header_image{
         width: 100%;

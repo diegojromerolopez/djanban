@@ -16,17 +16,30 @@
                 {% with board=notification.board %}
                     <li id="notification_{{notification.id}}" class="notification {% if forloop.first %}newest_notification{% endif %} {% if forloop.last %}oldest_notification{% endif %}"
                         data-notification="{{notification.id}}">
-                        {% if notification.card %}
-                            <a href="{% url 'boards:view_card' board.id notification.card.id %}" title="{{notification.card.name}}">
+                        <span class="notification-item-wrapper">
+                            {% if notification.card or notification.board %}
+                                <a href="{% url 'boards:view_board' board.id %}"
+                                   title="{{board.name}}"
+                                   class="view_board-identicon">
+                                    <img src="{% url 'boards:view_identicon' board.id %}" alt="{{board.name}}" />
+                                </a>
+                                {% if notification.card %}
+                                    <a href="{% url 'boards:view_card' board.id notification.card.id %}"
+                                       title="{{notification.card.name}}"
+                                       class="view_card">
+                                        {{notification.description}}
+                                    </a>
+                                {% elif board %}
+                                    <a href="{% url 'boards:view_board' board.id %}"
+                                       title="{{board.name}}"
+                                       class="view_board">
+                                        {{notification.description}}
+                                    </a>
+                                {% endif %}
+                            {% else %}
                                 {{notification.description}}
-                            </a>
-                        {% elif board %}
-                            <a href="{% url 'boards:view_board' board.id %}" title="{{board.name}}">
-                                {{notification.description}}
-                            </a>
-                        {% else %}
-                            {{notification.description}}
-                        {% endif %}
+                            {% endif %}
+                        </span>
                     </li>
                 {% endwith %}
             {% endfor %}
