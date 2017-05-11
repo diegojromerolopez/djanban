@@ -44,16 +44,15 @@
                                     </td>
                                     <td>
                                         {% if member.user %}
-                                            {% if member.creator.id == current_member.id or request.user|user_is_administrator or member.id == current_member.id %}
+                                            {% if request.user|user_is_administrator or member.id == current_member.id %}
                                                 <a class="btn btn-primary" href="{% url 'members:change_password' member.id %}"
                                                        title="Change password to user {{member.external_username}}">
                                                     <span class="fa fa-key "></span>
                                                         Change password
                                                 </a>
                                             {% endif %}
-
                                         {% else %}
-                                            {% if member.creator.id == current_member.id or request.user|user_is_administrator %}
+                                            {% if request.user|user_is_administrator %}
                                                 <a class="btn btn-primary" href="{% url 'members:give_access' member.id %}"
                                                    title="Give access to {{member.external_username}}">
                                                    <span class="fa fa-unlock"></span>
@@ -62,7 +61,7 @@
                                             {% endif %}
                                         {% endif %}
 
-                                        {% if member.creator.id == current_member.id or request.user|user_is_administrator or member.id == current_member.id %}
+                                        {% if request.user|user_is_administrator or member.id == current_member.id %}
                                             <a class="btn btn-primary" href="{% url 'members:edit_profile' member.id %}"
                                                        title="Edit personal details">
                                                     <span class="fa fa-user"></span>
