@@ -101,7 +101,6 @@ def _move_all_list_cards(request, board_id):
     return JsonResponse(serializer.serialize_board())
 
 
-
 # Return the JSON representation of a card
 @member_required
 def get_card(request, board_id, card_id):
