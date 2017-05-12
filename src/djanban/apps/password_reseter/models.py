@@ -4,15 +4,12 @@ from __future__ import unicode_literals
 import shortuuid
 from datetime import timedelta
 from django.db import models
-
-
-# Each one of the password reset request
 from django.utils import timezone
-
 from djanban.apps.password_reseter.email_sender import send_password_request_link, \
     send_password_reset_successfully_email
 
 
+# Each one of the password reset request
 class PasswordResetRequest(models.Model):
     STATUS_CHOICES = (
         ("pending", "Pending"),

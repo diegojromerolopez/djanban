@@ -22,13 +22,18 @@ if os.environ.get("DJANGO_APP_MODE") == "desktop_app":
 try:
     settings_local = importlib.import_module(settings_local_module)
 except ImportError:
-    print("Please, create a {0} in project directory with SECRET_KEY, DEBUG, DOMAIN, ALLOWED_HOSTS and DATABASES settings".format(settings_local_module))
+    print("Please, create a {0} in project directory "
+          "with SECRET_KEY, DEBUG, DOMAIN, ALLOWED_HOSTS and DATABASES settings".format(settings_local_module))
     exit(-1)
 
 DATABASES = settings_local.DATABASES
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = settings_local.SECRET_KEY
+
+DESTRUCTION_PASSWORD_CHECKSUM = None
+if hasattr(settings_local, "DESTRUCTION_PASSWORD_CHECKSUM"):
+    DESTRUCTION_PASSWORD_CHECKSUM = settings_local.DESTRUCTION_PASSWORD_CHECKSUM
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = settings_local.DEBUG
@@ -76,6 +81,7 @@ INSTALLED_APPS = [
     'djanban.apps.hourly_rates',
     'djanban.apps.index',
     'djanban.apps.journal',
+    'djanban.apps.destructor',
     'djanban.apps.dev_times',
     'djanban.apps.dev_environment',
     'djanban.apps.fetch',
