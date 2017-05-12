@@ -65,7 +65,8 @@ class Command(BaseCommand):
 
         # Delete all media files
         # Delete media root directory
-        shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
+        if os.path.exists(settings.MEDIA_ROOT):
+            shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
         # Create again the media root
         os.mkdir(settings.MEDIA_ROOT)
 
