@@ -44,88 +44,113 @@
                             </a>
                         </h2>
                         {% if member.has_trello_profile %}
-                            {% if board.last_fetch_datetime %}
-                                <div>
-                                    Last fetched on {{board.last_fetch_datetime}} ({{board.last_fetch_datetime|timesince}} ago)
-                                </div>
-                            {% else %}
-                                <div>
-                                    Not fetched yet.
-                                </div>
-                            {% endif %}
-                        {% endif %}
-                        <div>
                             <div>
-                                {% if member.has_trello_profile %}
-                                    {% if board.has_to_be_fetched %}
-                                        <span class="fa fa-cloud-download"></span>Will be fetched.
-                                    {% else %}
-                                        <span class="fa fa-times"></span>Will <strong>not</strong> be fetched.
-                                        {% if member %}
-                                            <a href="{% url 'boards:edit' board.id %}" title="Change board fetching settings">Change</a>.
-                                        {% endif %}
+                                {% if board.last_fetch_datetime %}
+                                    <span>
+                                        Last fetched
+                                        <span title="{{board.last_fetch_datetime}}" class="cursor-help">{{board.last_fetch_datetime|timesince}} ago</span>
+                                    </span>
+                                {% else %}
+                                    <span >
+                                        Not fetched yet.
+                                    </span>
+                                {% endif %}
+                                {% if board.has_to_be_fetched %}
+                                    <span class="fa fa-cloud-download cursor-help" title="Will be fetched"></span>
+                                {% else %}
+                                    <span class="fa fa-times cursor-help" title="Will not be fetched"></span>
+                                    {% if member %}
+                                        <a href="{% url 'boards:edit' board.id %}" title="Change board fetching settings">Change</a>.
                                     {% endif %}
                                 {% endif %}
                             </div>
-                            <a class="btn btn-primary" href="{% url 'boards:view' board.id %}" title="View board {{board.name}}">
-                                <span class="fa fa-eye"></span> View
-                            </a>
+                        {% endif %}
+                        <div>
+                            <div class="actions">
+                                <a class="btn btn-primary" href="{% url 'boards:view' board.id %}" title="View board {{board.name}}">
+                                    <span class="fa fa-eye"></span>
+                                </a>
 
-                            {% if board.is_ready and board.is_fetched and member %}
-                                <a class="btn btn-primary" href="{% url 'boards:view_taskboard' board.id %}" title="View full card board of {{board.name}}">
-                                    <span class="fa fa-navicon fa-rotate-90"></span> Full card board
-                                </a>
-                            {% endif %}
-
-                            {% if member %}
-                                <a class="btn btn-warning" href="{% url 'boards:edit' board.id %}" title="Edit board {{board.name}}">
-                                    <span class="fa fa-pencil"></span> Edit
-                                </a>
-                                <a class="btn btn-warning" href="{% url 'boards:archive' board.id %}" title="Archive board {{board.name}}">
-                                    <span class="fa fa-archive"></span> Archive
-                                </a>
-                            {% endif %}
-                            <a class="btn btn-primary" href="{% url 'boards:view_lists' board.id %}" title="View lists of board {{board.name}}">
-                                <span class="fa fa-list"></span> Lists</a>
-                            {% if board.is_ready %}
-                                <a class="btn btn-primary" href="{% url 'boards:workflows:view_list' board.id %}" title="View workflows of board {{board.name}}">Workflows</a>
-                                <a class="btn btn-primary" href="{% url 'boards:view_card_report' board.id %}" title="View cards of board {{board.name}}">
-                                    <span class="fa fa-sticky-note-o"></span> Cards
-                                </a>
-                                {% for workflow in board.workflows.all %}
-                                    <a class="btn btn-primary" href="{% url 'boards:view_workflow_card_report' board.id workflow.id %}" title="View workflow {{workflow.name}} report for board {{board.name}}">
-                                        View {{workflow.name}} report
+                                {% if board.is_ready and board.is_fetched and member %}
+                                    <a class="btn btn-primary" href="{% url 'boards:view_taskboard' board.id %}" title="View full card board of {{board.name}}">
+                                        <span class="fa fa-navicon fa-rotate-90"></span>
                                     </a>
-                                {% endfor %}
-                                <a class="btn btn-primary" href="{% url 'boards:view_label_report' board.id %}" title="View label report of board {{board.name}}">
-                                    <span class="fa fa-tags"></span> Labels
+                                {% endif %}
+
+                                {% if member %}
+                                    <a class="btn btn-warning" href="{% url 'boards:edit' board.id %}" title="Edit board {{board.name}}">
+                                        <span class="fa fa-pencil"></span>
+                                    </a>
+                                    <a class="btn btn-warning" href="{% url 'boards:archive' board.id %}" title="Archive board {{board.name}}">
+                                        <span class="fa fa-archive"></span>
+                                    </a>
+                                {% endif %}
+                                <a class="btn btn-primary" href="{% url 'boards:view_lists' board.id %}" title="View lists of board {{board.name}}">
+                                    <span class="fa fa-list"></span>
                                 </a>
-                                <a class="btn btn-primary" href="{% url 'boards:view_member_report' board.id %}" title="View members of board {{board.name}}">
-                                    <span class="fa fa-users"></span> Members
-                                </a>
-                                <a class="btn btn-primary" href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}" title="View spent times of board {{board.name}}">
-                                    <span class="fa fa-clock-o"></span> Spent time
-                                </a>
+                                {% if board.is_ready %}
+                                    {% with workflows=board.workflows.all %}
+                                        {% if workflows|length > 0 %}
+                                            <a class="btn btn-primary" href="{% url 'boards:workflows:view_list' board.id %}" title="View workflows of board {{board.name}}">Workflows</a>
+                                            <a class="btn btn-primary" href="{% url 'boards:view_card_report' board.id %}" title="View cards of board {{board.name}}">
+                                                <span class="fa fa-sticky-note-o"></span>
+                                            </a>
+                                            {% for workflow in board.workflows.all %}
+                                                <a class="btn btn-primary" href="{% url 'boards:view_workflow_card_report' board.id workflow.id %}" title="View workflow {{workflow.name}} report for board {{board.name}}">
+                                                    View {{workflow.name}} report
+                                                </a>
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endwith %}
+                                    <a class="btn btn-primary" href="{% url 'boards:view_label_report' board.id %}" title="View label report of board {{board.name}}">
+                                        <span class="fa fa-tags"></span>
+                                    </a>
+                                    <a class="btn btn-primary" href="{% url 'boards:view_member_report' board.id %}" title="View members of board {{board.name}}">
+                                        <span class="fa fa-users"></span>
+                                    </a>
+                                    <a class="btn btn-primary" href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}" title="View spent times of board {{board.name}}">
+                                        <span class="fa fa-clock-o"></span>
+                                    </a>
+                                </div>
                                 {% if board.estimated_number_of_hours %}
-                                    {% with board_spent_time=board.get_spent_time %}
-                                        {% with board_adjusted_spent_time=board.get_adjusted_spent_time %}
-                                        <span class="cursor-help btn btn-{% if board_adjusted_spent_time < board.estimated_number_of_hours %}success{% elif board_adjusted_spent_time == board.estimated_number_of_hours %}warning{% else %}danger{% endif %}"
-                                        title="Team has developed {{board_spent_time|floatformat:-2}} ({{board_adjusted_spent_time|floatformat:-2}}) adjusted) of {{board.estimated_number_of_hours}} hours of the budget">
-                                            {{board_spent_time|floatformat:-2}} ({{board_adjusted_spent_time|floatformat:-2}} adjusted) hours of {{board.estimated_number_of_hours}} estimated hours
-                                        </span>
+                                    <div class="state-of-art">
+                                        {% with board_spent_time=board.get_spent_time %}
+                                            {% with board_adjusted_spent_time=board.get_adjusted_spent_time %}
+                                            <div class="cursor-help alert alert-{% if board_adjusted_spent_time < board.estimated_number_of_hours %}success{% elif board_adjusted_spent_time == board.estimated_number_of_hours %}warning{% else %}danger{% endif %}"
+                                            title="Team has developed {{board_spent_time|floatformat:-2}} ({{board_adjusted_spent_time|floatformat:-2}}) adjusted) of {{board.estimated_number_of_hours}} hours of the budget">
+                                                <h3>Development time</h3>
+                                                {% if board_spent_time == board_adjusted_spent_time %}
+                                                    <strong>{{board_adjusted_spent_time|floatformat:-2}}</strong> adj. hours / <strong>{{board.estimated_number_of_hours}}</strong> estimated hours
+                                                {% else %}
+                                                    {{board_spent_time|floatformat:-2}} (<strong>{{board_adjusted_spent_time|floatformat:-2}}</strong> adjusted) hours of <strong>{{board.estimated_number_of_hours}}</strong> estimated hours
+                                                {% endif %}
+                                            </div>
+                                            {% endwith %}
                                         {% endwith %}
-                                    {% endwith %}
 
-                                    {% with board_current_percentage_of_completion=board.current_percentage_of_completion %}
-                                        <span class="cursor-help btn {% if not board.percentage_of_completion %}btn-primary{% else %}btn-{% if board_current_percentage_of_completion < board.percentage_of_completion %}success{% elif board_current_percentage_of_completion == board.percentage_of_completion %}warning{% else %}danger{% endif %}{% endif %}"
-                                        title="Actual percentage of completion should be {{board_current_percentage_of_completion|floatformat:-2}}, while the team has assigned a percentage of completion of {{board.percentage_of_completion|floatformat:-2}} % to this project.">
-                                            {{board_current_percentage_of_completion|floatformat:-2}} % {% if board.percentage_of_completion %}/ {{board.percentage_of_completion|floatformat:-2}} %{% endif %}
-                                        </span>
-                                    {% endwith %}
-
+                                        {% with board_current_percentage_of_completion=board.current_percentage_of_completion %}
+                                            <div class="cursor-help alert {% if not board.percentage_of_completion %}alert-primary{% else %}alert-{% if board_current_percentage_of_completion < board.percentage_of_completion %}success{% elif board_current_percentage_of_completion == board.percentage_of_completion %}warning{% else %}danger{% endif %}{% endif %}"
+                                            title="Actual percentage of completion should be {{board_current_percentage_of_completion|floatformat:-2}}, while the team has assigned a percentage of completion of {{board.percentage_of_completion|floatformat:-2}} % to this project.">
+                                                {% if board.percentage_of_completion %}
+                                                    <h3>Real vs. Ideal completion %</h3>
+                                                {% else %}
+                                                    <h3>Real completion %</h3>
+                                                {% endif %}
+                                                <div>
+                                                    <strong>{{board_current_percentage_of_completion|floatformat:-2}} %</strong>
+                                                    {% if board.percentage_of_completion %}
+                                                        vs.
+                                                        <strong>{{board.percentage_of_completion|floatformat:-2}} %</strong>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endwith %}
+                                    </div>
                                 {% endif %}
                             {% else %}
-                                You need a 'done list' and at least a 'in development' list
+                                <div>
+                                    You need a 'done list' and at least a 'in development' list
+                                </div>
                             {% endif %}
                         </div>
                     </li>
