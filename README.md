@@ -44,6 +44,12 @@ You can also give other board members access to the dashboard. Each member will 
 
 ![How it works](resources/images/diagrams/how-it-works.png)
 
+# Test site
+
+Sign up in this [test site](https://djanban-test.intelligenia.com/) and share your ideas, suggestion or bug reports.
+
+IMPORTANT NOTE: **this site deletes all your data each day**, so don't use it for your projects. Use it for testing this web app.
+If you need help some help when installing this project in your servers, contact me and I will help you.
 
 # Requirements
 
@@ -347,8 +353,14 @@ Workflow stats are partially completed. Only the average time in each list and t
 I would gladly accept feature requests, pull requests and suggestions.
 
 All contributors must sign an intellectual property cession to the
-creator of this project (Diego J. Romero-López). 
+creator of this project (Diego J. Romero-López).
 
+
+# Acknowledgements
+
+* [intelligenia](http://www.intelligenia.com/), the place where I work for supporting some of the development of this project.
+* [Trello](http://trello.com), for making the best web kanban board and providing the developers with an API.
+* My development team: [Brian Holsters](https://github.com/brian-holsters) & [Francisco Morales](https://github.com/moralesgea) for testing the app and suggesting new features. 
 
 # Legal notice
 
