@@ -3,7 +3,7 @@
 ![Djanban](resources/images/logos/logo.png)
 
 
-Statistics and charts for Trello boards, now in a Django app.
+A kanban application with statistics and charts, including Trello integration.
 
 # What's this?
 
@@ -27,8 +27,8 @@ Run this commands in your terminal:
 sudo apt-get update
 sudo apt-get -y install git python python-dev virtualenv build-essential\ 
     libssl-dev libffi-dev libmysqlclient-dev libxml2-dev libxslt1-dev
-git clone https://github.com/diegojromerolopez/django-trello-stats
-cd django-trello-stats
+git clone https://github.com/diegojromerolopez/djanban
+cd djanban
 ./start_local_server.sh
 ```
 
@@ -55,16 +55,18 @@ If you need help some help when installing this project in your servers, contact
 
 ## Plus for Trello
 
-Use [Plus for Trello](https://chrome.google.com/webstore/detail/plus-for-trello-time-trac/gjjpophepkbhejnglcmkdnncmaanojkf?hl=en)
-in your boards to allow this application to get card spent and estimated times.
+If you have chose the Sign up with Trello integration, you'll have to provide the spent and estimated times for each task.
 
-Configure Plus for Trello to use **time storage in comments**. Otherwise, Django Trello Stats will be unable to track spend and estimated time.
+That's what [Plus for Trello](https://chrome.google.com/webstore/detail/plus-for-trello-time-trac/gjjpophepkbhejnglcmkdnncmaanojkf?hl=en) is.
+Use Plus for Trello in your boards to allow this application to get card spent and estimated times.
+
+Configure Plus for Trello to use **time storage in comments**. Otherwise, Djanban will be unable to track spend and estimated time.
 
 Don't use the feature of assigning times to other members of the team because it is not implemented yet.
 
 ## Py-Trello
 
-[This library](https://github.com/sarumont/py-trello) is free software and I've collaborated with Py-Trello team to include all features required for Django-Trello-Stats.
+[This library](https://github.com/sarumont/py-trello) is free software and I've collaborated with Py-Trello team to include all features required for Djanban.
 
 ## System packages
 
@@ -162,13 +164,23 @@ DATETIME_FORMAT = "<LOCAL DATETIME FORMAT IN TEMPLATES>"
 
 ## Sign up
 
+![Sign up](resources/images/screencaptures/auth-signup.png)
+
+## Sign up with your Trello credentials
+
 First you need to sign up with the api key, token and token secret.
 
 This action will create a new user in the system.
 
 User your email to log in the application.
 
-![Sign up](resources/images/screencaptures/auth-signup.png)
+![Sign up](resources/images/screencaptures/auth-signup-trello.png)
+
+## Standard sign up
+
+Don't have Trello account? Or don't want Trello synchronization? Register as a new user fulfilling the form.
+
+NOTE: Trello synchronization can't be added later for the moment, so please choose wisely
 
 ## Initialize boards and lists
 
@@ -228,8 +240,8 @@ Run this commands in your terminal:
 ```sh
 sudo apt-get -y install git python python-dev virtualenv build-essential\ 
     libssl-dev libffi-dev libmysqlclient-dev libxml2-dev libxslt1-dev
-git clone https://github.com/diegojromerolopez/django-trello-stats
-cd django-trello-stats
+git clone https://github.com/diegojromerolopez/djanban
+cd djanban
 ./start_local_server.sh
 ```
 
@@ -295,9 +307,6 @@ of this requirement.
 
 ![Members](resources/images/screencaptures/members.png)
 
-## Giving access to his/her boards in this platform
-
-![Giving access to members](resources/images/screencaptures/members-give-access.png)
 
 # Permissions
 
