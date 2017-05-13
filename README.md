@@ -18,6 +18,8 @@ strategic decisions like:
 - What's the lead and cycle time of each project tasks?
 - Is the project on time according to its percentage of completion?
 
+[Test site](https://djanban-test.intelligenia.com/).
+
 
 ## Want to see it running in your computer? It's easy:
 
