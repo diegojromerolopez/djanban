@@ -1112,7 +1112,7 @@ def number_of_comments(current_user, board=None, card=None):
 
     card_comment_filter = {}
     if board:
-        card_comment_filter["card__board"] = board
+        card_comment_filter["board"] = board
         if card:
             card_comment_filter["card"] = card
             number_of_comments_chart.show_minor_x_labels = True

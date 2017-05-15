@@ -14,9 +14,12 @@ register = template.Library()
 @register.assignment_tag
 def last_comments(number_of_comments=10):
     current_request = CrequestMiddleware.get_request()
-    boards = get_user_boards(current_request.user)
-    last_comments_ = CardComment.objects.filter(card__board__in=boards, card__is_closed=False).order_by("-creation_datetime")
-    return last_comments_[:number_of_comments]
+    current_user = current_request.user
+    if hasattr(current_user, "member"):
+        last_comments_ = CardComment.objects.filter(board__members=current_user.member, card__is_closed=False).\
+            order_by("-creation_datetime")
+        return last_comments_[:number_of_comments]
+    return CardComment.objects.none()
 
 
 # Custom filter to get the list type name

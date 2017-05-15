@@ -32,7 +32,7 @@
                             <td>{{board_spent_time|floatformat:-2}}</td>
                             <td>{{board|call:'get_adjusted_spent_time'|arg:date_interval|end_call|floatformat:-2}}</td>
                             <td>{{board|call:'get_developed_value'|arg:date_interval|end_call|floatformat:-2}}</td>
-                            <td>{{board|call:'get_adjusted_developed_value'|arg:date_interval|end_call|floatformat:-2}}</td>
+                            {# <td>{{board|call:'get_adjusted_developed_value'|arg:date_interval|end_call|floatformat:-2}}</td>#}
                         </tr>
                     {% endif %}
                 {% endwith %}

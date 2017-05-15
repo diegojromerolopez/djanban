@@ -252,7 +252,7 @@ class CardFetcher(object):
                 card_comment.blocking_card = None
                 del card_deleted_comments[uuid]
             except CardComment.DoesNotExist:
-                card_comment = CardComment(uuid=uuid, card=card, author=author,
+                card_comment = CardComment(uuid=uuid, card=card, board=card.board, author=author,
                                            creation_datetime=comment_creation_datetime, content=content)
 
             #print "{0} {1} {2}".format(card.name, card_comment.content, card_comment.creation_datetime)

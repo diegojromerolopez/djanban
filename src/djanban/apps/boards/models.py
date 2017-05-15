@@ -165,11 +165,6 @@ class Board(models.Model):
     def number_of_done_tasks(self):
         return self.cards.filter(is_closed=False, list__type="done").count()
 
-    # Comments of this board
-    @property
-    def card_comments(self):
-        return CardComment.objects.filter(card__board=self)
-
     # Number of comments
     @property
     def number_of_comments(self):
@@ -177,8 +172,7 @@ class Board(models.Model):
 
     # Last 30 comments
     def last_comments(self, number_of_comments=30):
-        return CardComment.objects.filter(card__board=self).\
-                   order_by("-last_edition_datetime", "-creation_datetime")[:number_of_comments]
+        return self.card_comments.all().order_by("-last_edition_datetime", "-creation_datetime")[:number_of_comments]
 
     # Returns the date of the last fetch in an ISO format
     def get_human_fetch_datetime(self):
@@ -1203,7 +1197,7 @@ class Card(models.Model):
     def add_comment(self, member, content):
 
         # Create comment locally using the id of the new comment in Trello
-        card_comment = CardComment(card=self, author=member, content=content,
+        card_comment = CardComment(card=self, board=self.board, author=member, content=content,
                                    creation_datetime=timezone.now())
 
         connector = RemoteBackendConnectorFactory.factory(member)
@@ -1355,6 +1349,7 @@ class CardComment(models.Model):
         )
 
     uuid = models.CharField(max_length=128, verbose_name=u"External id of the comment of this comment", unique=True)
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board this comment belongs to", related_name="card_comments")
     card = models.ForeignKey("boards.Card", verbose_name=u"Card this comment belongs to", related_name="comments")
     author = models.ForeignKey("members.Member", verbose_name=u"Member author of this comment", related_name="comments")
     content = models.TextField(verbose_name=u"Content of the comment")
