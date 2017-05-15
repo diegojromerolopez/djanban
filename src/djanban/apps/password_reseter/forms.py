@@ -17,7 +17,11 @@ class RequestPasswordResetForm(forms.Form):
 
     def clean(self):
         cleaned_data = super(RequestPasswordResetForm, self).clean()
-        user = User.objects.get(username=self.cleaned_data["username"])
+        # Check if user exists
+        try:
+            user = User.objects.get(username=self.cleaned_data["username"], is_active=True)
+        except User.DoesNotExist:
+            raise ValidationError("No user found with this username")
 
         # Check if user ir valid
         if not user or not user.is_active:
