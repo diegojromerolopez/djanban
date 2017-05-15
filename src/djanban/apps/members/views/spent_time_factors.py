@@ -7,6 +7,7 @@ from django.http.response import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 
 from djanban.apps.base.decorators import member_required
+from djanban.apps.dev_times.models import DailySpentTime
 from djanban.apps.members.forms import SpentTimeFactorForm, DeleteSpentTimeForm
 from djanban.apps.members.models import Member, SpentTimeFactor
 from djanban.apps.members.views.main import _assert_current_member_can_edit_member
@@ -48,6 +49,7 @@ def add(request, member_id):
         form = SpentTimeFactorForm(request.POST, instance=spent_time_factor)
         if form.is_valid():
             form.save()
+            _update_spent_time_factors(member)
             return HttpResponseRedirect(reverse("members:view_spent_time_factors", args=(member.id,)))
 
     else:
@@ -76,6 +78,7 @@ def edit(request, member_id, spent_time_factor_id):
         form = SpentTimeFactorForm(request.POST, instance=spent_time_factor)
         if form.is_valid():
             form.save()
+            _update_spent_time_factors(member)
             return HttpResponseRedirect(reverse("members:view_spent_time_factors", args=(member.id,)))
 
     else:
@@ -104,6 +107,7 @@ def delete(request, member_id, spent_time_factor_id):
         form = DeleteSpentTimeForm(request.POST)
         if form.is_valid():
             spent_time_factor.delete()
+            _update_spent_time_factors(member)
             return HttpResponseRedirect(reverse("members:view_spent_time_factors", args=(member.id,)))
 
     else:
@@ -111,3 +115,9 @@ def delete(request, member_id, spent_time_factor_id):
 
     replacements = {"member": member, "form": form}
     return render(request, "members/spent_time_factors/delete.html", replacements)
+
+
+# Update spent time factors for this member
+def _update_spent_time_factors(member):
+    for daily_spent_time in member.daily_spent_times.all():
+        daily_spent_time.update_adjusted_spent_time()

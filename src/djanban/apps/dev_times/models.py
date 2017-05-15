@@ -32,6 +32,9 @@ class DailySpentTime(models.Model):
     week_of_year = models.CharField(verbose_name="Week number of the time measurement", max_length=16)
     weekday = models.CharField(verbose_name="Week day of the time measurement", max_length=16)
 
+    adjusted_spent_time = models.DecimalField(verbose_name=u"Adjusted spent time for this day",
+                                              decimal_places=4, max_digits=12, default=None, null=True)
+
     spent_time = models.DecimalField(verbose_name=u"Spent time for this day", decimal_places=4, max_digits=12,
                                      default=None, null=True)
 
@@ -61,11 +64,6 @@ class DailySpentTime(models.Model):
     def iso_date(self):
         return self.date.isoformat()
 
-    # Returns the adjusted spent time for this measurement
-    def adjusted_spent_time(self):
-        member = self.member
-        return member.adjust_daily_spent_time(self, attribute="spent_time")
-
     # Add a new amount of spent time to a member
     @staticmethod
     def add_daily_spent_time(daily_spent_time):
@@ -92,9 +90,12 @@ class DailySpentTime(models.Model):
         week_of_year = get_iso_week_of_year(date)
         day_of_year = date.strftime("%j")
 
+        adjusted_spent_time = None
+
         # Convert spent_time to Decimal if is a number
         if spent_time is not None:
             spent_time = Decimal(spent_time)
+            adjusted_spent_time = spent_time * member.adjust_spent_time(spent_time, date)
 
         # Convert estimated_time to Decimal if is a number
         if estimated_time is not None:
@@ -110,6 +111,7 @@ class DailySpentTime(models.Model):
         # Creation of daily_spent_time
         daily_spent_time = DailySpentTime(board=board, member=member, card=card, comment=comment, uuid=comment.uuid,
                                           description=description,
+                                          adjusted_spent_time=adjusted_spent_time,
                                           spent_time=spent_time,
                                           estimated_time=estimated_time,
                                           diff_time=diff_time,
@@ -142,8 +144,10 @@ class DailySpentTime(models.Model):
         spent_time = spent_estimated_time["spent_time"]
         estimated_time = spent_estimated_time["estimated_time"]
 
+        adjusted_spent_time = None
         if spent_time is not None:
             spent_time = Decimal(spent_time)
+            adjusted_spent_time = spent_time * comment.author.adjust_spent_time(spent_time, date)
 
         # Convert estimated_time to Decimal if is a number
         if estimated_time is not None:
@@ -162,7 +166,8 @@ class DailySpentTime(models.Model):
         daily_spent_time = DailySpentTime(
             uuid=comment.uuid, board=board, card=card, comment=comment,
             date=spent_estimated_time["date"], weekday=weekday, week_of_year=week_of_year, day_of_year=day_of_year,
-            spent_time=spent_time, estimated_time=estimated_time, diff_time=diff_time,
+            spent_time=spent_time, adjusted_spent_time=adjusted_spent_time,
+            estimated_time=estimated_time, diff_time=diff_time,
             description=spent_estimated_time["description"],
             member=comment.author, rate_amount=rate_amount
         )
@@ -182,6 +187,21 @@ class DailySpentTime(models.Model):
     def set_from_comment(self, comment):
         spent_estimated_time = comment.spent_estimated_time
         if spent_estimated_time:
-            self.date = spent_estimated_time["date"]
-            self.spent_time = spent_estimated_time["spent_time"]
-            self.estimated_time = spent_estimated_time["estimated_time"]
+            date = spent_estimated_time["date"]
+            spent_time = spent_estimated_time["spent_time"]
+            estimated_time = spent_estimated_time["estimated_time"]
+            # Set the object attributes
+            self.date = date
+            self.spent_time = spent_time
+            if spent_time is not None:
+                self.adjusted_spent_time = spent_time * comment.author.adjust_spent_time(spent_time, date)
+            self.estimated_time = estimated_time
+
+    # Update adjusted spent time for this DailySpentTime
+    def update_adjusted_spent_time(self):
+        if self.spent_time is None:
+            self.adjusted_spent_time = None
+        else:
+            self.adjusted_spent_time = self.member.adjust_spent_time(self.spent_time, self.date)
+        DailySpentTime.objects.filter(id=self.id).update(adjusted_spent_time=self.adjusted_spent_time)
+

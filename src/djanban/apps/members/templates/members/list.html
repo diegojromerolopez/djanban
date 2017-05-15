@@ -75,7 +75,7 @@
                                                 </a>
                                             {% endif %}
                                         {% endif %}
-                                        {% if member.is_developer %}
+                                        {% if member.is_developer and member.id == current_member.id %}
                                             <a class="btn btn-primary" href="{% url 'members:view_spent_time_factors' member.id %}">
                                                 <span class="fa fa-clock-o"></span>
                                                 Spent time factors ({{member.spent_time_factors.all|length}})

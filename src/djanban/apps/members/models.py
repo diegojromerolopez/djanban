@@ -63,6 +63,18 @@ class Member(models.Model):
     def __init__(self, *args, **kwargs):
         super(Member, self).__init__(*args, **kwargs)
 
+    # Adjust spent time
+    def adjust_spent_time(self, spent_time, date):
+        spent_time_factors = self.spent_time_factors.all()
+        for spent_time_factor in spent_time_factors:
+            if (spent_time_factor.start_date is None and spent_time_factor.end_date is None) or\
+                    (spent_time_factor.start_date <= date and spent_time_factor.end_date is None) or \
+                    (spent_time_factor.start_date <= date <= spent_time_factor.end_date):
+
+                adjusted_value = spent_time * spent_time_factor.factor
+                return adjusted_value
+        return spent_time
+
     # Adjust spent time according to the factor specified by date intervals
     def adjust_daily_spent_time(self, daily_spent_time, attribute="spent_time", spent_time_factors=None):
 

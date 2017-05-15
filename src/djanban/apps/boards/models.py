@@ -285,6 +285,15 @@ class Board(models.Model):
     # If date parameter is present, computes the spent time on a given date for this board
     # Otherwise, computes the total spent time for this board
     def get_spent_time(self, date=None, member=None):
+        return self._get_developed_time(attr="spent_time", date=date, member=member)
+
+    # Returns the adjusted spent time according to the spent time factor defined in each member
+    def get_adjusted_spent_time(self, date=None, member=None):
+        return self._get_developed_time(attr="adjusted_spent_time", date=date, member=member)
+
+    # Returns the developed time (spent time or adjusted spent time).
+    # Do not use this method outside this class.
+    def _get_developed_time(self, attr="spent_time", date=None, member=None):
         daily_spent_times_filter = {}
         if date:
             if type(date) == tuple or type(date) == list:
@@ -292,58 +301,20 @@ class Board(models.Model):
                 daily_spent_times_filter["date__lte"] = date[1]
             else:
                 daily_spent_times_filter["date"] = date
+
         member_filter = {}
         if member:
             member_filter["member"] = member
 
-        spent_time = self.daily_spent_times.\
-            filter(**daily_spent_times_filter).\
-            filter(**member_filter).\
-            aggregate(sum=Sum("spent_time"))["sum"]
+        sum_time = self.daily_spent_times. \
+            filter(**daily_spent_times_filter). \
+            filter(**member_filter). \
+            aggregate(sum=Sum(attr))["sum"]
 
-        if spent_time is None:
+        if sum_time is None:
             return 0
 
-        return spent_time
-
-    # Returns the adjusted spent time according to the spent time factor defined in each member
-    def get_adjusted_spent_time(self, date=None, member=None):
-        daily_spent_times_filter = {}
-        if date:
-            if type(date) == tuple or type(date) == list:
-                daily_spent_times_filter["date__gte"] = date[0]
-                daily_spent_times_filter["date__lte"] = date[1]
-            else:
-                daily_spent_times_filter["date"] = date
-
-        adjusted_spent_time = 0
-        if member:
-            daily_spent_times_filter["member"] = member
-
-        daily_spent_times = self.daily_spent_times.filter(**daily_spent_times_filter)
-
-        spent_time_factors_by_member_id = {}
-        member_dict = {}
-
-        # For each daily spent time, we have to compute its adjusted value getting the right interval of dates of the
-        # spent time factors of the corresponding member
-        for daily_spent_time in daily_spent_times:
-
-            # Use memoization to improve member spent time factor fetch
-            if daily_spent_time.member_id not in member_dict:
-                member_dict[daily_spent_time.member_id] = daily_spent_time.member
-                spent_time_factors_by_member_id[daily_spent_time.member_id] = daily_spent_time.member.spent_time_factors.all()
-
-            # Compute the adjusted spent time for this measurement (daily spent time)
-            adjusted_spent_time_for_daily_spent_time = Member.adjust_daily_spent_time_from_spent_time_factors(
-                daily_spent_time=daily_spent_time,
-                spent_time_factors=spent_time_factors_by_member_id[daily_spent_time.member_id],
-                attribute="spent_time"
-            )
-
-            adjusted_spent_time += adjusted_spent_time_for_daily_spent_time
-
-        return adjusted_spent_time
+        return sum_time
 
     # Return the spent time on a given week of a year
     def get_weekly_spent_time(self, week, year, member=None):
@@ -437,19 +408,20 @@ class Board(models.Model):
 
     # Return the spent time on a given month of a year
     def get_monthly_spent_time(self, month, year, member=None):
-        spent_time_on_week_filter = {"date__month": month, "date__year": year}
-        if member:
-            spent_time_on_week_filter["member"] = member
-        spent_time = self.daily_spent_times.filter(**spent_time_on_week_filter).aggregate(sum=Sum("spent_time"))["sum"]
-        if spent_time is None:
-            return 0
-        return spent_time
+        return self._get_monthly_developed_time(attr="spent_time", month=month, year=year, member=member)
 
     # Return the adjusted spent time in this month
     def get_monthly_adjusted_spent_time(self, month, year, member=None):
-        first_day_of_month = datetime.date(year=year, month=month, day=1)
-        last_day_of_month = first_day_of_month + relativedelta(months=1) - timedelta(days=1)
-        return self.get_adjusted_spent_time(date=(first_day_of_month, last_day_of_month), member=member)
+        return self._get_monthly_developed_time(attr="adjusted_spent_time", month=month, year=year, member=member)
+
+    def _get_monthly_developed_time(self, attr, month, year, member=None):
+        spent_time_on_week_filter = {"date__month": month, "date__year": year}
+        if member:
+            spent_time_on_week_filter["member"] = member
+        dev_time = self.daily_spent_times.filter(**spent_time_on_week_filter).aggregate(sum=Sum(attr))["sum"]
+        if dev_time is None:
+            return 0
+        return dev_time
 
     # Returns the spent time.
     # If date parameter is present, computes the spent time on a given date for this board
@@ -741,6 +713,14 @@ class Card(models.Model):
     def get_spent_time(self):
         return self.daily_spent_times.all().aggregate(spent_time_sum=Sum("spent_time"))["spent_time_sum"]
 
+    def get_adjusted_spent_time(self):
+        return self.daily_spent_times.all().aggregate(time_sum=Sum("adjusted_spent_time"))["time_sum"]
+
+    # Returns the adjusted spent time according to the spent time factor defined in each member
+    @property
+    def adjusted_spent_time(self):
+        return self.get_adjusted_spent_time()
+
     def get_estimated_time(self):
         return self.daily_spent_times.all().aggregate(estimated_time_sum=Sum("estimated_time"))["estimated_time_sum"]
 
@@ -904,17 +884,6 @@ class Card(models.Model):
     @property
     def number_of_attachments(self):
         return self.attachments.all().count()
-
-    # Returns the adjusted spent time according to the spent time factor defined in each member
-    @property
-    def adjusted_spent_time(self):
-        adjusted_spent_time = 0
-        for member in self.members.all():
-            daily_spent_times = self.daily_spent_times.filter(member=member)
-            for daily_spent_time in daily_spent_times:
-                adjusted_spent_time += member.adjust_daily_spent_time(daily_spent_time, "spent_time")
-
-        return adjusted_spent_time
 
     @property
     def completion_datetime(self):
