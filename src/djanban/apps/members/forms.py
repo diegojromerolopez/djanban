@@ -6,6 +6,7 @@ from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.forms import ModelForm
 from django.forms import models
 from django.utils import timezone
@@ -359,7 +360,14 @@ class SpentTimeFactorForm(ModelForm):
     def clean(self):
         cleaned_data = super(SpentTimeFactorForm, self).clean()
         member = self.instance.member
+        start_date = cleaned_data["start_date"]
+        end_date = cleaned_data.get("end_date") if cleaned_data.get("end_date") else timezone.now().date()
         # Check if there is some overlapping with current spent time factors of that member
+        if member.spent_time_factors.exclude(id=self.instance.id).filter(
+                (Q(start_date__lte=end_date) & Q(start_date__gte=start_date)) |
+                (Q(end_date__lte=end_date) & Q(end_date__gte=start_date))
+        ).exists():
+            raise ValidationError("This spent time factor dates overlap with another of that already exists")
         return cleaned_data
 
 
