@@ -1,10 +1,12 @@
- <div class="row">
-    <div class="col-md-5 center-block">
-        <div class="panel panel-warning">
-          <div class="panel-heading">There are no developers in your team!</div>
-          <div class="panel-body">
-            There are no developers in your team. Ask administrator to set <a href="{% url 'members:view_members' %}" title="View members">some members</a> as developers.
+{% if member %}
+    <div class="row">
+        <div class="col-md-5 center-block">
+            <div class="panel panel-warning">
+              <div class="panel-heading">There are no developers in your team!</div>
+              <div class="panel-body">
+                There are no developers in your team. Ask administrator to set <a href="{% url 'members:view_members' %}" title="View members">some members</a> as developers.
+            </div>
+          </div>
         </div>
-      </div>
     </div>
-</div>
+{% endif %}

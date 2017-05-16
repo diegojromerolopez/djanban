@@ -4,9 +4,11 @@
 
 {% block content %}
     <h1>Lists of board {{board.name}}</h1>
-    <div class="board_list_actions">
-        <a href="{% url 'boards:new_list' board.id %}" class="btn btn-primary" title="Create new list">Create new list</a>
-    </div>
+    {% if member %}
+        <div class="board_list_actions">
+            <a href="{% url 'boards:new_list' board.id %}" class="btn btn-primary" title="Create new list">Create new list</a>
+        </div>
+    {% endif %}
     <div class="board_list_list">
         {% if lists|length == 0 %}
             This board has no lists
@@ -17,7 +19,9 @@
                         <th>Name</th>
                         <th title="Work In Progress limit (maximum number of tasks in this list)" class="cursor-help">WIP limit</th>
                         <th>Type</th>
-                        <th>Actions</th>
+                        {% if member %}
+                            <th>Actions</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -26,14 +30,16 @@
                             <td>{{list.name}}</td>
                             <td>{% if list.wip_limit != None %}{{list.wip_limit}}{% else %}No WIP limit{% endif %}</td>
                             <td>{{list.get_type_display}}</td>
-                            <td>
-                                <a class="btn btn-primary" href="{% url 'boards:edit_list' board.id list.id %}">
-                                    <span class="fa fa-pencil"></span> Edit
-                                </a>
-                                <a class="btn btn-primary" href="{% url 'boards:edit_list_position' board.id list.id %}">
-                                    <span class="fa fa-arrows"></span> Edit position
-                                </a>
-                            </td>
+                            {% if member %}
+                                <td>
+                                    <a class="btn btn-primary" href="{% url 'boards:edit_list' board.id list.id %}">
+                                        <span class="fa fa-pencil"></span> Edit
+                                    </a>
+                                    <a class="btn btn-primary" href="{% url 'boards:edit_list_position' board.id list.id %}">
+                                        <span class="fa fa-arrows"></span> Edit position
+                                    </a>
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>

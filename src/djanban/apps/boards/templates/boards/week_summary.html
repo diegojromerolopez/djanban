@@ -54,9 +54,18 @@
                     {% for card in completed_cards %}
                         <tr>
                             <td>
-                                <a href="{% url 'boards:view_card' board.id card.id %}" title="View card {{card.name}}">
+                               {% if member %}
+                                    <a href="{% url 'boards:view_card' board.id card.id %}" title="View card {{card.name}}">
+                                        {{card.name}}
+                                    </a>
+                                {% else %}
                                     {{card.name}}
-                                </a>
+                                {% endif %}
+                                {% if board.is_fetched and card.url %}
+                                    <a href="{{card.url}}" title="View card {{card.name}}">
+                                        <span class="fa fa-trello"></span>
+                                    </a>
+                                {% endif %}
                             </td>
                             <td>{{card.number_of_comments}}</td>
                             <td>

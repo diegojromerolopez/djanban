@@ -7,22 +7,36 @@
     <link href="{% static 'css/boards/list.css' %}" rel="stylesheet" />
 {% endblock css %}
 
-{% block page_title %}Boards of {{member.external_username}}{% endblock %}
+{% block page_title %}
+    {% if member %}
+        Boards of {{member.external_username}}
+    {% elif user %}
+        Boards of {{user.username}}
+    {% endif %}
+{% endblock %}
 
 {% block content %}
-    <h1>Boards of {{member.external_username}}</h1>
+    <h1>
+        {% if member %}
+            Boards of {{member.external_username}}
+        {% elif user %}
+            Boards of {{user.username}}
+        {% endif %}
+    </h1>
     <div class="board_list">
 
         <p>
-            <a class="btn btn-warning" href="{% url 'boards:new' %}" title="New board">New board</a>
-            {% if member.has_trello_credentials %}
-                <a class="btn btn-warning" href="{% url 'boards:sync' %}" title="New board">Synchronize from Trello</a>
-            {% endif %}
-            {% if archived_boards|length > 0 %}
-                <a class="btn btn-info"
-                   href="{% url 'boards:view_archived_boards' %}" title="View archived boards">View archived boards ({{archived_boards|length}})</a>
-            {% else %}
-                There are no archived boards.
+            {% if member %}
+                <a class="btn btn-warning" href="{% url 'boards:new' %}" title="New board">New board</a>
+                {% if member.has_trello_credentials %}
+                    <a class="btn btn-warning" href="{% url 'boards:sync' %}" title="New board">Synchronize from Trello</a>
+                {% endif %}
+                {% if archived_boards|length > 0 %}
+                    <a class="btn btn-info"
+                       href="{% url 'boards:view_archived_boards' %}" title="View archived boards">View archived boards ({{archived_boards|length}})</a>
+                {% else %}
+                    There are no archived boards.
+                {% endif %}
             {% endif %}
         </p>
 

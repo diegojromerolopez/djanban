@@ -125,7 +125,7 @@ def view_list(request):
         member = request.user.member
     boards = get_user_boards(request.user).order_by("name")
     archived_boards = get_user_boards(request.user, is_archived=True).order_by("name")
-    replacements = {"member": member, "boards": boards, "archived_boards": archived_boards}
+    replacements = {"member": member, "boards": boards, "archived_boards": archived_boards, "user": request.user}
     return render(request, "boards/list.html", replacements)
 
 
@@ -146,7 +146,7 @@ def view_board_panorama(request):
     member = None
     if user_is_member(request.user):
         member = request.user.member
-    replacements = {"member": member}
+    replacements = {"member": member, "user": request.user}
     return render(request, "boards/panorama.html", replacements)
 
 
@@ -389,12 +389,16 @@ def view_identicon(request, board_id, width=40, height=40):
 
 
 # View lists of a board
-@member_required
+@login_required
 def view_lists(request, board_id):
-    member = request.user.member
-    board = member.boards.get(id=board_id)
+    if user_is_member(request.user):
+        member = request.user.member
+        board = member.boards.get(id=board_id)
+    else:
+        member = None
+        board = get_user_boards(request.user).get(id=board_id)
     lists = board.lists.all().order_by("position")
-    replacements = {"member": member, "board": board, "lists": lists, "list_types": List.LIST_TYPE_CHOICES}
+    replacements = {"member": member, "user": request.user, "board": board, "lists": lists, "list_types": List.LIST_TYPE_CHOICES}
     return render(request, "boards/lists/list.html", replacements)
 
 

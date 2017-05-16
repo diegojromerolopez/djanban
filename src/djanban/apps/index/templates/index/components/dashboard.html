@@ -147,7 +147,9 @@
                     </a>
                 </div>
             {% else %}
-                {% include "members/components/no_developers_warning.html" %}
+                {% if member %}
+                    {% include "members/components/no_developers_warning.html" %}
+                {% endif %}
             {% endif %}
         </div>
 

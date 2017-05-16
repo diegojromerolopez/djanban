@@ -2,10 +2,22 @@
 
 {% load staticfiles %}
 
-{% block page_title %}Summary of projects for {{member.external_username}}{% endblock %}
+{% block page_title %}
+    {% if member %}
+        Summary of projects for {{member.external_username}}
+    {% else %}
+        Summary of projects for {{user.username}}
+    {% endif %}
+{% endblock %}
 
 {% block content %}
-    <h1>Summary of projects for {{member.external_username}}</h1>
+    <h1>
+        {% if member %}
+            Summary of projects for {{member.external_username}}
+        {% else %}
+            Summary of projects for {{user.username}}
+        {% endif %}
+    </h1>
 
     <div class="row">
         <div class="col-sm-12">

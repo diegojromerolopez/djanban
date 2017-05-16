@@ -2,11 +2,13 @@
 
 from __future__ import unicode_literals
 
+from crequest.middleware import CrequestMiddleware
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
 
+from djanban.apps.base.auth import get_user_boards
 from djanban.apps.boards.models import Board
 
 
@@ -38,12 +40,16 @@ class NewUserForm(forms.ModelForm):
                                                    required=True)
         self.fields["password2"] = forms.CharField(label=u"Repeat password", widget=forms.PasswordInput(),
                                                    required=True)
+
+        current_request = CrequestMiddleware.get_request()
+        boards = get_user_boards(current_request.user).filter(is_archived=False).order_by("name")
         self.fields["boards"] = forms.MultipleChoiceField(
             label=u"Boards",
-            choices=[(board.id, board.name) for board in Board.objects.all().order_by("name")],
+            choices=[(board.id, board.name) for board in boards],
             help_text=u"Boards this visitor will have access",
             required=False
         )
+        self.fields["boards"].widget.attrs = {'size': boards.count()}
 
     # Clean form
     def clean(self):
@@ -86,6 +92,7 @@ class NewUserForm(forms.ModelForm):
         return self.instance
 
 
+# Edit visitor
 class EditUserForm(NewUserForm):
     class Meta:
         model = User
@@ -97,13 +104,16 @@ class EditUserForm(NewUserForm):
         self.fields["password1"].help_text = u"Keep this field blank if you don't want to change the password"
         self.fields["password2"].required = False
         self.fields["password2"].help_text = u"Keep this field blank if you don't want to change the password"
+        current_request = CrequestMiddleware.get_request()
+        boards = get_user_boards(current_request.user).filter(is_archived=False).order_by("name")
         self.fields["boards"] = forms.MultipleChoiceField(
             label=u"Boards",
-            choices=[(board.id, board.name) for board in Board.objects.all().order_by("name")],
+            choices=[(board.id, board.name) for board in boards],
             initial=[board.id for board in self.instance.boards.all().order_by("name")],
             help_text=u"Boards this visitor will have access",
-            required=False
+            required=False,
         )
+        self.fields["boards"].widget.attrs={'size': boards.count()}
 
     def save(self, commit=True):
         super(EditUserForm, self).save(commit=True)

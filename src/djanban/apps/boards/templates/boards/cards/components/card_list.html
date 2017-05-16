@@ -19,9 +19,18 @@
                 {% for card in cards %}
                     <tr>
                         <td>
-                            <a href="{% url 'boards:view_card' board.id card.id %}" title="View card {{card.name}}">
+                            {% if member %}
+                                <a href="{% url 'boards:view_card' board.id card.id %}" title="View card {{card.name}}">
+                                    {{card.name}}
+                                </a>
+                            {% else %}
                                 {{card.name}}
-                            </a>
+                            {% endif %}
+                            {% if board.is_fetched and card.url %}
+                                <a href="{{card.url}}" title="View card {{card.name}}">
+                                    <span class="fa fa-trello"></span>
+                                </a>
+                            {% endif %}
                         </td>
                         <td>{% if card.value != None %}{{card.value}}{% else %}Not set{% endif %}</td>
                         <td>{% if card.is_closed %}Yes{% else %}No{% endif %}</td>
