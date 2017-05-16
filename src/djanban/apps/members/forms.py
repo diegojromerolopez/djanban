@@ -356,6 +356,12 @@ class SpentTimeFactorForm(ModelForm):
         self.fields["start_date"].widget.years = available_years
         self.fields["end_date"].widget.years = available_years
 
+    def clean(self):
+        cleaned_data = super(SpentTimeFactorForm, self).clean()
+        member = self.instance.member
+        # Check if there is some overlapping with current spent time factors of that member
+        return cleaned_data
+
 
 # Delete a spent time form
 class DeleteSpentTimeForm(forms.Form):
