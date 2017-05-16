@@ -27,7 +27,8 @@ def user_is_administrator(user):
     -------
     True if the user belongs to administrator groups, False otherwise.
     """
-    return user and user.is_authenticated() and user.groups.filter(name=settings.ADMINISTRATOR_GROUP).exists()
+    return user and user.is_authenticated() and\
+           (user.groups.filter(name=settings.ADMINISTRATOR_GROUP).exists() or user.is_superuser)
 
 
 # Informs if one user is a member
