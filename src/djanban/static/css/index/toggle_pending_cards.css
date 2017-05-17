@@ -50,7 +50,7 @@
 .red_cards
 .orange_cards,
 .yellow_cards {
-    height: 100vh;
+    height: auto;
     overflow: scroll;
 }
 
