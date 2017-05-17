@@ -85,7 +85,7 @@ def edit(request, member_id, spent_time_factor_id):
         form = SpentTimeFactorForm(instance=spent_time_factor)
 
     replacements = {"member": member, "form": form}
-    return render(request, "members/spent_time_factors/add.html", replacements)
+    return render(request, "members/spent_time_factors/edit.html", replacements)
 
 
 # Delete a Spent Time Factor

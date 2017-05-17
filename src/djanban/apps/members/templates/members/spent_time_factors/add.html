@@ -4,6 +4,13 @@
 
 {% block content %}
     <div class="row">
+        <div class="col-md-3">
+            <a href="{% url 'members:view_spent_time_factors' member.id %}" class="btn btn-primary" title="New spent time factor">
+                <span class="fa fa-arrow-left"></span> Go back to spent time factors of {{member.external_username}}
+            </a>
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md-6 center-block">
             <h1>New spent time factor of member {{member.external_username}}</h1>
             <div class="large-form">

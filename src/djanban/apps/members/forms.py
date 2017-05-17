@@ -362,10 +362,14 @@ class SpentTimeFactorForm(ModelForm):
         member = self.instance.member
         start_date = cleaned_data["start_date"]
         end_date = cleaned_data.get("end_date") if cleaned_data.get("end_date") else timezone.now().date()
+        # Check if start_date is less or equal than end_date
+        if start_date > end_date:
+            raise ValidationError(u"Start date must be less or equal than end date")
+
         # Check if there is some overlapping with current spent time factors of that member
         if member.spent_time_factors.exclude(id=self.instance.id).filter(
-                (Q(start_date__lte=end_date) & Q(start_date__gte=start_date)) |
-                (Q(end_date__lte=end_date) & Q(end_date__gte=start_date))
+                (Q(start_date__gte=start_date) & Q(start_date__lte=end_date)) |
+                (Q(start_date__lte=start_date) & Q(end_date__gte=start_date))
         ).exists():
             raise ValidationError("This spent time factor dates overlap with another of that already exists")
         return cleaned_data
