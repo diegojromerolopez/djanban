@@ -31,9 +31,16 @@ DATABASES = settings_local.DATABASES
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = settings_local.SECRET_KEY
 
+# This is the checksum of the destruction password. It is needed to verify the identity of administrator
+# that is executing the manage destruct_all option
 DESTRUCTION_PASSWORD_CHECKSUM = None
 if hasattr(settings_local, "DESTRUCTION_PASSWORD_CHECKSUM"):
     DESTRUCTION_PASSWORD_CHECKSUM = settings_local.DESTRUCTION_PASSWORD_CHECKSUM
+
+# Signup restriction by email regex
+SIGNUP_ALLOWED_EMAIL_REGEXES = None
+if hasattr(settings_local, "SIGNUP_ALLOWED_EMAIL_REGEXES"):
+    SIGNUP_ALLOWED_EMAIL_REGEXES = settings_local.SIGNUP_ALLOWED_EMAIL_REGEXES
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = settings_local.DEBUG

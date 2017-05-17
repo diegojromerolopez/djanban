@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+import re
+
 from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth.models import User
@@ -9,15 +11,32 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.forms import ModelForm
 from django.forms import models
+from django.conf import settings
 from django.utils import timezone
+
 from trello import TrelloClient
 from trello.member import Member as TrelloMember
 
 from djanban.apps.members.models import Member, TrelloMemberProfile, SpentTimeFactor
 
 
+# Mixin that validates that the emails are valid
+class SignUpEmailRestrictorMixinForm(object):
+
+    def clean_email(self):
+        if not settings.SIGNUP_ALLOWED_EMAIL_REGEXES:
+            return self.cleaned_data["email"]
+        # Check if email match with at leas one pattern
+        for signup_allowed_email_regex in settings.SIGNUP_ALLOWED_EMAIL_REGEXES:
+            if re.match(signup_allowed_email_regex, self.cleaned_data["email"]):
+                return self.cleaned_data["email"]
+        # If there is some patterns and the email has not matched with any pattern
+        # form is not valid
+        self.add_error("email", "This email is not allowed for registration in this platform")
+
+
 # Register form
-class LocalSignUpForm(forms.Form):
+class LocalSignUpForm(forms.Form, SignUpEmailRestrictorMixinForm):
 
     def __init__(self, *args, **kwargs):
         super(LocalSignUpForm, self).__init__(*args, **kwargs)
@@ -30,6 +49,7 @@ class LocalSignUpForm(forms.Form):
 
         self.fields["captcha"] = CaptchaField(label=u"Fill this captcha to sign up")
 
+    # Check if fields are valid
     def clean(self):
         cleaned_data = super(LocalSignUpForm, self).clean()
         # Check if passwords are equal
