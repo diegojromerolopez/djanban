@@ -2,26 +2,24 @@
 from __future__ import unicode_literals
 
 import copy
-
-from django.core.exceptions import ObjectDoesNotExist
-from isoweek import Week
-import numpy
 import re
+from datetime import timedelta
+from decimal import Decimal
+
+import numpy
 import requests
 import shortuuid
-from datetime import timedelta
-import datetime
-from dateutil.relativedelta import relativedelta
-from decimal import Decimal
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.db import models, transaction
 from django.db.models import Avg, Sum, Min, Max, F
 from django.db.models.query_utils import Q
 from django.utils import timezone
+from isoweek import Week
+
 from djanban.apps.dev_times.models import DailySpentTime
-from djanban.apps.members.models import Member
 from djanban.apps.niko_niko_calendar.models import DailyMemberMood
 from djanban.apps.notifications.models import Notification
 from djanban.apps.reports.models import CardMovement, CardReview
