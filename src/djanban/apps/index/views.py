@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from djanban.apps.base.auth import user_is_member, get_user_boards
 from djanban.apps.boards.models import List, Card
+from djanban.apps.dev_environment.models import NoiseMeasurement
 from djanban.apps.members.models import Member
 from djanban.utils.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
 
@@ -16,6 +17,7 @@ def index(request):
     member = None
     boards = []
     member_multiboards = []
+    team_mates = Member.get_user_team_mates(request.user)
     current_user = request.user
     if user_is_member(current_user):
         member = current_user.member
@@ -34,6 +36,8 @@ def index(request):
     weeks_of_year = get_weeks_of_year_since_one_year_ago()
 
     replacements = {
+        "any_card_has_value": Card.objects.filter(board__in=boards, value__isnull=False).exists(),
+        "has_noise_measurements": NoiseMeasurement.objects.filter(member__in=team_mates).exists(),
         "weeks_of_year": weeks_of_year,
         "lists": lists,
         "boards": boards,

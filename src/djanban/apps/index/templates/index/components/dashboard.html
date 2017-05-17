@@ -153,30 +153,32 @@
             {% endif %}
         </div>
 
-        <div class="row">
-            <div class="col-sm-12">
-                <h3>Developed value of tasks</h3>
-            </div>
-            <div class="col-sm-12">
-                <div class="row">
-                    <div class="col-sm-4">
-                        <a href="{% url 'charts:cumulative_card_value_evolution' 'all' %}" title="Cumulative card value evolution">
-                            <img class="ajax-img" data-src="{% url 'charts:cumulative_card_value_evolution' 'all' %}" alt="Cumulative card value evolution"/>
-                        </a>
-                    </div>
-                    <div class="col-sm-4">
-                        <a href="{% url 'charts:card_value_evolution' 'all' %}" title="Evolution of developed value">
-                            <img class="ajax-img" data-src="{% url 'charts:card_value_evolution' 'all' %}" alt="Card value evolution"/>
-                        </a>
-                    </div>
-                    <div class="col-sm-4">
-                        <a href="{% url 'charts:card_value_evolution_by_member' 'all' %}" title="Evolution of developed value by member">
-                            <img class="ajax-img" data-src="{% url 'charts:card_value_evolution_by_member' 'all' %}" alt="Card value evolution by member"/>
-                        </a>
+        {% if any_card_has_value %}
+            <div class="row">
+                <div class="col-sm-12">
+                    <h3>Developed value of tasks</h3>
+                </div>
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <a href="{% url 'charts:cumulative_card_value_evolution' 'all' %}" title="Cumulative card value evolution">
+                                <img class="ajax-img" data-src="{% url 'charts:cumulative_card_value_evolution' 'all' %}" alt="Cumulative card value evolution"/>
+                            </a>
+                        </div>
+                        <div class="col-sm-4">
+                            <a href="{% url 'charts:card_value_evolution' 'all' %}" title="Evolution of developed value">
+                                <img class="ajax-img" data-src="{% url 'charts:card_value_evolution' 'all' %}" alt="Card value evolution"/>
+                            </a>
+                        </div>
+                        <div class="col-sm-4">
+                            <a href="{% url 'charts:card_value_evolution_by_member' 'all' %}" title="Evolution of developed value by member">
+                                <img class="ajax-img" data-src="{% url 'charts:card_value_evolution_by_member' 'all' %}" alt="Card value evolution by member"/>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        {% endif %}
 
         <div class="row">
             <div class="col-sm-12">
@@ -258,31 +260,33 @@
             </a>
         </div>
     </div>
-    <div class="row">
-        <div class="col-sm-12">
-                <h3>Noise levels</h3>
-            </div>
-            <div class="col-md-6">
-                <a href="{% url 'charts:noise_level' %}" title="Noise level per day">
-                    <img class="ajax-img" data-src="{% url 'charts:noise_level' %}" alt="Noise level" />
-                </a>
-            </div>
-            <div class="col-md-6">
-                <a href="{% url 'charts:subjective_noise_level' %}" title="Subjective noise level">
-                    <img class="ajax-img" data-src="{% url 'charts:subjective_noise_level' %}" alt="Subjective noise level" />
-                </a>
-            </div>
-        </div>
+    {% if has_noise_measurements %}
         <div class="row">
-            <div class="col-md-6">
-                <a href="{% url 'charts:noise_level_per_hour' %}" title="Noise level per hour">
-                    <img class="ajax-img" data-src="{% url 'charts:noise_level_per_hour' %}" alt="Noise level per hour" />
-                </a>
+            <div class="col-sm-12">
+                    <h3>Noise levels</h3>
+                </div>
+                <div class="col-md-6">
+                    <a href="{% url 'charts:noise_level' %}" title="Noise level per day">
+                        <img class="ajax-img" data-src="{% url 'charts:noise_level' %}" alt="Noise level" />
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="{% url 'charts:subjective_noise_level' %}" title="Subjective noise level">
+                        <img class="ajax-img" data-src="{% url 'charts:subjective_noise_level' %}" alt="Subjective noise level" />
+                    </a>
+                </div>
             </div>
-            <div class="col-md-6">
-                <a href="{% url 'charts:noise_level_per_weekday' %}" title="Noise level per weekday">
-                    <img class="ajax-img" data-src="{% url 'charts:noise_level_per_weekday' %}" alt="Noise level per weekday" />
-                </a>
+            <div class="row">
+                <div class="col-md-6">
+                    <a href="{% url 'charts:noise_level_per_hour' %}" title="Noise level per hour">
+                        <img class="ajax-img" data-src="{% url 'charts:noise_level_per_hour' %}" alt="Noise level per hour" />
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="{% url 'charts:noise_level_per_weekday' %}" title="Noise level per weekday">
+                        <img class="ajax-img" data-src="{% url 'charts:noise_level_per_weekday' %}" alt="Noise level per weekday" />
+                    </a>
+                </div>
             </div>
-        </div>
+        {% endif %}
 {% endif %}

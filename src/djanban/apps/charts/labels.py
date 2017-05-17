@@ -43,14 +43,17 @@ def avg_spent_times(request, board=None):
         avg_times_chart.add(u"All boards", avg_spent_time)
         for board in boards:
             board_avg_spent_time = board.cards.aggregate(Avg("spent_time"))["spent_time__avg"]
-            avg_times_chart.add(u"{0}".format(board.name), board_avg_spent_time)
+            if board_avg_spent_time > 0:
+                avg_times_chart.add(u"{0}".format(board.name), board_avg_spent_time)
 
     if board:
         labels = board.labels.all()
 
         for label in labels:
             if label.name:
-                avg_times_chart.add(u"{0} average spent time".format(label.name), label.avg_spent_time())
+                label_avg_spent_time = label.avg_spent_time()
+                if label_avg_spent_time:
+                    avg_times_chart.add(u"{0} - {1}".format(board.name, label.name), label_avg_spent_time)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=avg_times_chart.render(is_unicode=True))
     return chart.render_django_response()
@@ -83,14 +86,17 @@ def avg_estimated_times(request, board=None):
         avg_times_chart.add(u"All boards", total_avg_estimated_time)
         for board in boards:
             board_avg_estimated_time = board.cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
-            avg_times_chart.add(u"{0}".format(board.name), board_avg_estimated_time)
+            if board_avg_estimated_time > 0:
+                avg_times_chart.add(u"{0}".format(board.name), board_avg_estimated_time)
 
     if board:
         labels = board.labels.all()
 
         for label in labels:
             if label.name:
-                avg_times_chart.add(u"{0} average estimated time".format(label.name), label.avg_estimated_time())
+                label_avg_estimated_time = label.avg_estimated_time()
+                if label_avg_estimated_time > 0:
+                    avg_times_chart.add(u"{0} - {1}".format(board.name, label.name), label_avg_estimated_time)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=avg_times_chart.render(is_unicode=True))
     return chart.render_django_response()

@@ -50,7 +50,8 @@ def avg_lead_time(request, board=None):
         if request.user.is_authenticated and hasattr(request.user, "member"):
             for board_i in boards:
                 card_avg_lead_time = board_i.cards.all().aggregate(Avg("lead_time"))["lead_time__avg"]
-                lead_time_chart.add(u"{0}".format(board_i.name), card_avg_lead_time)
+                if card_avg_lead_time > 0:
+                    lead_time_chart.add(u"{0}".format(board_i.name), card_avg_lead_time)
     else:
         labels = board.labels.all()
 
@@ -59,7 +60,9 @@ def avg_lead_time(request, board=None):
 
         for label in labels:
             if label.name:
-                lead_time_chart.add(u"{0} average lead time".format(label.name), label.avg_lead_time())
+                label_avg_lead_time = label.avg_lead_time()
+                if label_avg_lead_time > 0:
+                    lead_time_chart.add(u"{0} average lead time".format(label.name), label_avg_lead_time)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=lead_time_chart.render(is_unicode=True))
     return chart.render_django_response()
@@ -89,7 +92,8 @@ def avg_cycle_time(request, board=None):
         if request.user.is_authenticated and hasattr(request.user, "member"):
             for board_i in boards:
                 card_avg_cycle_time = board_i.cards.all().aggregate(Avg("cycle_time"))["cycle_time__avg"]
-                cycle_time_chart.add(u"{0}".format(board_i.name), card_avg_cycle_time)
+                if card_avg_cycle_time > 0:
+                    cycle_time_chart.add(u"{0}".format(board_i.name), card_avg_cycle_time)
 
     else:
         labels = board.labels.all()
@@ -99,7 +103,9 @@ def avg_cycle_time(request, board=None):
 
         for label in labels:
             if label.name:
-                cycle_time_chart.add(u"{0} average cycle time".format(label.name), label.avg_lead_time())
+                label_avg_cycle_time = label.avg_cycle_time()
+                if label_avg_cycle_time > 0:
+                    cycle_time_chart.add(u"{0} average cycle time".format(label.name), label_avg_cycle_time)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=cycle_time_chart.render(is_unicode=True))
     return chart.render_django_response()

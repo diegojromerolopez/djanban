@@ -19,7 +19,7 @@ from djanban.utils.week import number_of_weeks_of_year, get_iso_week_of_year
 
 
 # Show a chart with the task movements (backward or forward) by member
-def task_movements_by_member(movement_type="forward", board=None):
+def task_movements_by_member(request, movement_type="forward", board=None):
     if movement_type != "forward" and movement_type != "backward":
         raise ValueError("{0} is not recognized as a valid movement type".format(movement_type))
 
@@ -36,34 +36,17 @@ def task_movements_by_member(movement_type="forward", board=None):
     member_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True, print_zeroes=False,
                                        human_readable=True)
 
-    report_filter = {}
+    card_movement_filter = {"type": movement_type}
     if board:
-        report_filter["board_id"] = board.id
+        card_movement_filter["board_id"] = board.id
 
-    members = Member.objects.all().order_by("id")
+    members = Member.get_user_team_mates(request.user)
 
-    for member in members:
-        member_name = member.external_username
-
-        member_report_filter = copy.deepcopy(report_filter)
-        member_report_filter["member"] = member
-
-
-        # Depending on if the member report is filtered by board or not we only have to get the forward and
-        # backward movements of a report or sum all the members report of this user
-        if board:
-            forward_movements = member.forward_movements
-            backward_movements = member.backward_movements
-        else:
-            forward_movements = member.get_forward_movements_for_board(board)
-            backward_movements = member.get_backward_movements_for_board(board)
-
-        if movement_type == "forward":
-            member_chart.add(u"{0}'s tasks forward movements".format(member_name), forward_movements)
-
-        elif movement_type == "backward":
-            member_chart.add(u"{0}'s tasks backward movements".format(member_name), backward_movements)
-
+    for member_i in members:
+        member_name = member_i.external_username
+        num_card_movements = member_i.card_movements.filter(**card_movement_filter).count()
+        if num_card_movements > 0:
+            member_chart.add(u"{0}".format(member_name), num_card_movements)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=member_chart.render(is_unicode=True))
     return chart.render_django_response()

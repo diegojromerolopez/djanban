@@ -129,14 +129,14 @@ def number_of_cards_worked_on_by_week(request, board_id):
 @login_required
 def task_forward_movements_by_member(request, board_id=None):
     board = _get_user_board_or_none(request, board_id)
-    return members.task_movements_by_member("forward", board)
+    return members.task_movements_by_member(request, "forward", board)
 
 
 # Show a chart with the task backward movements by member
 @login_required
 def task_backward_movements_by_member(request, board_id=None):
     board = _get_user_board_or_none(request, board_id)
-    return members.task_movements_by_member("backward", board)
+    return members.task_movements_by_member(request, "backward", board)
 
 
 # Show a chart with the spent time by week by member and by board

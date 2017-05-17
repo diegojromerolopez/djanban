@@ -25,13 +25,13 @@ def spent_time_by_week(request, week_of_year, board_public_access_code):
 # Show a chart with the task forward movements by member
 def task_forward_movements_by_member(request, board_public_access_code):
     board = Board.objects.get(enable_public_access=True, public_access_code=board_public_access_code)
-    return members.task_movements_by_member("forward", board)
+    return members.task_movements_by_member(request, "forward", board)
 
 
 # Show a chart with the task backward movements by member
 def task_backward_movements_by_member(request, board_public_access_code):
     board = Board.objects.get(enable_public_access=True, public_access_code=board_public_access_code)
-    return members.task_movements_by_member("backward", board)
+    return members.task_movements_by_member(request, "backward", board)
 
 
 # Show average time each card lives in each list

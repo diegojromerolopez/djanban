@@ -29,7 +29,7 @@
             </div>
 
             {# Burndown #}
-            <div class="col-sm-{% if requirements|length > 0 %}6{% else %}12{% endif %}">
+            <div class="col-sm-{% if requirements|length > 0 %}6{% else %}8 center-block{% endif %}">
                 {% if board.estimated_number_of_hours > 0 %}
                     <a href="{% url 'charts:burndown' board.id %}" title="Burndown according to board estimates">
                         <img class="ajax-img" data-src="{% url 'charts:burndown' board.id %}" alt="Burndown of board {{board.name}}"/>
@@ -311,24 +311,26 @@
     {% endblock quality_charts %}
 
     {% block interruption_charts %}
-        <div class="row">
-            <div class="col-sm-6">
-                <a href="{% url 'charts:interruptions' board.id %}" title="Interruptions">
-                    <img
-                            class="ajax-img" data-src="{% url 'charts:interruptions' board.id %}"
-                            alt="Interruptions"
-                    />
-                </a>
+        {% if board.interruptions.all.exists %}
+            <div class="row">
+                <div class="col-sm-6">
+                    <a href="{% url 'charts:interruptions' board.id %}" title="Interruptions">
+                        <img
+                                class="ajax-img" data-src="{% url 'charts:interruptions' board.id %}"
+                                alt="Interruptions"
+                        />
+                    </a>
+                </div>
+                <div class="col-sm-6">
+                    <a href="{% url 'charts:interruptions_by_month' board.id %}" title="Interruptions by month">
+                        <img
+                                class="ajax-img" data-src="{% url 'charts:interruptions_by_month' board.id %}"
+                                alt="Interruptions by month"
+                        />
+                    </a>
+                </div>
             </div>
-            <div class="col-sm-6">
-                <a href="{% url 'charts:interruptions_by_month' board.id %}" title="Interruptions by month">
-                    <img
-                            class="ajax-img" data-src="{% url 'charts:interruptions_by_month' board.id %}"
-                            alt="Interruptions by month"
-                    />
-                </a>
-            </div>
-        </div>
+        {% endif %}
     {% endblock interruption_charts %}
 
 
