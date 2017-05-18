@@ -13,12 +13,39 @@
 #multiboard_task_board .list_types,
 #index_multiboards .list_types {
     overflow: scroll;
-    width: 2000px;
+    /*min-width: 2500px;*/
 }
 
 #multiboard_task_board .async_included-block,
 #index_multiboards .async_included-block {
     overflow: scroll;
+}
+
+.multiboard a.board {
+
+}
+
+.multiboard img.board-identicon {
+    display: block;
+    height: 20px;
+    width: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.multiboard .board-identicon-name {
+    display: block;
+    font-style: italic;
+}
+
+.multiboard .view_card {
+    text-decoration: none;
+    font-size: 20px;
+}
+
+.multiboard .view_card_in_trello {
+    text-decoration: none;
+    font-size: 20px;
 }
 
 .multiboard .card-labels {

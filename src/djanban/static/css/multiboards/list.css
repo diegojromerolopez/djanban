@@ -1,0 +1,19 @@
+
+
+
+table.multiboards a.board {
+    float: left;
+    width: 20%;
+}
+
+table.multiboards .board-identicon {
+    display: block;
+    height: 40px;
+    width: 40px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table.multiboards .board-identicon-name {
+    display: block;
+}

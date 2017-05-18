@@ -21,7 +21,7 @@ def index(request):
     current_user = request.user
     if user_is_member(current_user):
         member = current_user.member
-        member_multiboards = member.created_multiboards. \
+        member_multiboards = member.multiboards. \
             filter(show_in_index=True, is_archived=False). \
             order_by("order", "name")
 

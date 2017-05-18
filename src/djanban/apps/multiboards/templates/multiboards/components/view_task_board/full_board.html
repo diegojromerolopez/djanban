@@ -1,9 +1,10 @@
 {% load async_included %}
 {% load staticfiles %}
+{% load template_extensions %}
 
 <link href="{% static 'css/multiboards/components/full_board.css' %}" rel="stylesheet" />
 
-<div class="list_types-container" {% if tasks_by_list_type.items|length > 4 %}style="width: 3000px"{% endif %}>
+<div class="list_types-container" style="width: {{430|multiply:multiboard.tasks_by_list_type.items|length}}px">
     {% with tasks_by_list_type=multiboard.tasks_by_list_type %}
         <div class="row list_types">
             {% for pair_item in tasks_by_list_type.items %}

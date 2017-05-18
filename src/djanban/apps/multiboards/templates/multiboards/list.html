@@ -1,4 +1,11 @@
 {% extends "base/base.html" %}
+{% load staticfiles %}
+{% load template_extensions %}
+
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'css/multiboards/list.css' %}" rel="stylesheet" />
+{% endblock css %}
 
 {% block page_title %}
     {% if archived %}
@@ -58,7 +65,7 @@
                 {% else %}
                     <div class="row">
                         <div class="col-md-12">
-                            <table class="table">
+                            <table class="table multiboards">
                                 <thead>
                                     <tr>
                                         <td>#</td>
@@ -74,12 +81,21 @@
                                             <td>{{multiboard.id}}</td>
                                             <td>{{multiboard.name}}</td>
                                             <td>
-                                                {% for board in multiboard.boards.all %}
-                                                  <a href="{% url 'boards:view' board.id %}" title="View {{board.name}}">
-                                                        <img class="board-identicon" src="{% url 'boards:view_identicon' board.id 40 40 %}"
-                                                             alt="Identicon of board {{board.name}}"/>
-                                                  </a>
-                                                {% endfor %}
+                                                {% with num_multiboards=multiboard.boards.all.count %}
+                                                    {% if num_multiboards > 0 %}
+                                                        {% for board in multiboard.boards.all %}
+                                                          <a href="{% url 'boards:view' board.id %}"
+                                                             title="View {{board.name}}" class="board" style="width: {{100|divide:num_multiboards}}%">
+                                                             <img class="board-identicon"
+                                                                  src="{% url 'boards:view_identicon' board.id 40 40 %}"
+                                                                  alt="Identicon of board {{board.name}}" />
+                                                              <span class="board-identicon-name">
+                                                                {{board.name}}
+                                                              </span>
+                                                          </a>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                {% endwith %}
                                             </td>
                                             <td>
                                                 {% for member_i in multiboard.members.all %}
