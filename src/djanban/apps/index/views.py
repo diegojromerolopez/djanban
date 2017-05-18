@@ -17,7 +17,7 @@ def index(request):
     member = None
     boards = []
     member_multiboards = []
-    team_mates = Member.get_user_team_mates(request.user)
+    team_mates = []
     current_user = request.user
     if user_is_member(current_user):
         member = current_user.member
@@ -27,6 +27,7 @@ def index(request):
 
     lists = []
     if current_user.is_authenticated():
+        team_mates = Member.get_user_team_mates(request.user)
         boards = get_user_boards(current_user).filter(is_archived=False).order_by("name")
 
     now = timezone.now()
