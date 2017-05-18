@@ -357,7 +357,7 @@ def cumulative_flow_diagram(board, day_step=1):
 
     cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=True,
-                                  x_labels_major_every=3, show_only_major_dots=True,
+                                  x_labels_major_every=7, show_only_major_dots=True,
                                   show_minor_x_labels=False,
                                   human_readable=True, x_label_rotation=65)
 
