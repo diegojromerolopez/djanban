@@ -24,7 +24,10 @@
               </p>
 
               <form id="fetch_form" action="{% url 'fetch:fetch_boards' %}" method="post">
-                <button id="fetch_button" type="submit" class="btn btn-danger">I am sure, fetch and update their data</button>
+                <button id="fetch_button" type="submit" class="btn btn-danger">
+                    <span class="fa fa-spinner fa-spin" style="display: none"></span>
+                    I am sure, fetch and update their data
+                </button>
               </form>
 
           </div>

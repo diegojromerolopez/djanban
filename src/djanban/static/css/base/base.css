@@ -111,6 +111,10 @@ a {
     cursor: help
 }
 
+img.avatar {
+    border-radius: 5px;
+}
+
 .d-inline-block {
     display: inline-block;
 }

@@ -31,7 +31,10 @@
 
                   <form id="fetch_form" action="{% url 'boards:fetch' board.id %}" method="post">
                     <input type="hidden" name="board_id" value="{{board.id}}"/>
-                    <button id="fetch_button" type="submit" class="btn btn-danger">I am sure, fetch and update its data</button>
+                    <button id="fetch_button" type="submit" class="btn btn-danger">
+                        <span class="fa fa-spinner fa-spin" style="display: none"></span>
+                        I am sure, fetch and update its data
+                    </button>
                   </form>
 
               </div>
@@ -42,8 +45,8 @@
               <div class="panel-heading">Board fetched successfully</div>
               <div class="panel-body">
                   <p>
-                      Board {{board.name}} was fetched successfully!
-                      <a href="{% url 'boards:view' board.id %}" class="btn btn-primary">Go back to {{board.name}} dashboard</a>
+                      Board <strong>{{board.name}}</strong> was fetched successfully!
+                      <a href="{% url 'boards:view' board.id %}" class="btn btn-primary">Go back to this board's dashboard</a>
                   </p>
               </div>
         </div>

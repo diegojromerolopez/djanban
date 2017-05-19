@@ -4,10 +4,12 @@ from __future__ import unicode_literals
 
 import re
 
+from PIL import Image
 from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.files.images import get_image_dimensions
 from django.db.models import Q
 from django.forms import ModelForm
 from django.forms import models
@@ -150,11 +152,12 @@ class TrelloSignUpForm(LocalSignUpForm):
 
         return member
 
+
 # Edition of the Member
 class MemberForm(models.ModelForm):
     class Meta:
         model = Member
-        fields = ["biography", "is_public"]
+        fields = ["biography", "is_public", "custom_avatar"]
 
     def __init__(self, *args, **kwargs):
         super(MemberForm, self).__init__(*args, **kwargs)
@@ -165,10 +168,11 @@ class MemberForm(models.ModelForm):
                                                    required=False)
         self.fields["password2"] = forms.CharField(label=u"Repeat the password", widget=forms.PasswordInput(),
                                                    max_length=16, required=False)
-        self.order_fields(["first_name", "last_name", "email", "password", "password", "biography"])
+        self.order_fields(["first_name", "last_name", "email", "password1", "password2", "custom_avatar", "biography"])
 
     def clean(self):
         cleaned_data = super(MemberForm, self).clean()
+
         # Check if passwords are equal
         if cleaned_data.get("password1") and cleaned_data.get("password1") != cleaned_data.get("password2"):
             raise ValidationError(u"Passwords don't match")
@@ -196,6 +200,11 @@ class MemberForm(models.ModelForm):
             user.save()
             self.instance.user = user
             self.instance.save()
+            # Resize the custom avatar if it is present
+            if self.instance.custom_avatar:
+                custom_avatar_image = Image.open(self.instance.custom_avatar)
+                resized_custom_avatar_image = custom_avatar_image.resize((30, 30), Image.ANTIALIAS)
+                resized_custom_avatar_image.save(self.instance.custom_avatar.path)
 
         return self.instance
 
@@ -241,13 +250,13 @@ class EditMemberForm(MemberForm):
 class NewAdminMemberForm(NewMemberForm):
     class Meta(MemberForm.Meta):
         model = Member
-        fields = ["biography", "is_developer", "on_holidays", "minimum_working_hours_per_day",
+        fields = ["custom_avatar", "biography", "is_developer", "on_holidays", "minimum_working_hours_per_day",
                   "minimum_working_hours_per_week", "is_public"]
 
     def __init__(self, *args, **kwargs):
         super(NewAdminMemberForm, self).__init__(*args, **kwargs)
 
-        self.order_fields(["first_name", "last_name", "email", "password", "password", "biography",
+        self.order_fields(["first_name", "last_name", "email", "password", "password", "biography", "custom_avatar",
                            "is_developer", "on_holidays", "minimum_working_hours_per_day",
                            "minimum_working_hours_per_week", "spent_time_factor"])
 
@@ -256,13 +265,13 @@ class NewAdminMemberForm(NewMemberForm):
 class EditAdminMemberForm(EditMemberForm):
     class Meta(MemberForm.Meta):
         model = Member
-        fields = ["biography", "is_developer", "on_holidays", "minimum_working_hours_per_day",
+        fields = ["custom_avatar", "biography", "is_developer", "on_holidays", "minimum_working_hours_per_day",
                   "minimum_working_hours_per_week", "is_public"]
 
     def __init__(self, *args, **kwargs):
         super(EditAdminMemberForm, self).__init__(*args, **kwargs)
 
-        self.order_fields(["first_name", "last_name", "email", "password", "password", "biography",
+        self.order_fields(["first_name", "last_name", "email", "password1", "password2", "custom_avatar", "biography",
                            "is_developer", "on_holidays", "minimum_working_hours_per_day",
                            "minimum_working_hours_per_week", "spent_time_factor"])
 

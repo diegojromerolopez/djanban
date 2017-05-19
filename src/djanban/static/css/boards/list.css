@@ -49,10 +49,10 @@ h2 a.view_board {
 
 .list-group-item .actions a.btn {
     margin-bottom: 5px;
-    padding-right: 8px;
-    padding-bottom: 5px;
-    padding-left: 8px;
-    padding-top: 5px;
+    padding-right: 10px;
+    padding-bottom: 7px;
+    padding-left: 10px;
+    padding-top: 7px;
 }
 
 .list-group-item .alert {
@@ -69,6 +69,15 @@ h2 a.view_board {
     margin-right: 0;
     padding: 0
     text-align: center;
+}
+
+.list-group-item h3 {
+    margin-bottom: 2px;
+    margin-top: 0;
+}
+
+.list-group-item h3 a.members {
+    font-size: 16px;
 }
 
 .list-group-item > div {

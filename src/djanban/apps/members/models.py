@@ -27,6 +27,8 @@ class Member(models.Model):
 
     user = models.OneToOneField(User, verbose_name=u"Associated user", related_name="member", null=True, default=None)
 
+    custom_avatar = models.ImageField(verbose_name=u"Custom avatar", blank=True, null=True, default=None)
+
     default_avatar = models.ImageField(verbose_name=u"Default avatar", null=True, default=None)
 
     biography = models.TextField(verbose_name=u"Biography", blank=True, default="")
@@ -413,6 +415,10 @@ class Member(models.Model):
     # Returns the Gravatar URL
     @property
     def gravatar_url(self, size=30):
+        # Check if this member has a custom avatar, if that's the case, return the custom avatar
+        if self.custom_avatar:
+            return self.custom_avatar.url
+
         # Create avatar if it doesn't exist
         if not self.default_avatar:
             self.create_default_avatar()

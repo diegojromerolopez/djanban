@@ -119,9 +119,6 @@
                                     <a class="btn btn-primary" href="{% url 'boards:view_label_report' board.id %}" title="View label report of board {{board.name}}">
                                         <span class="fa fa-tags"></span>
                                     </a>
-                                    <a class="btn btn-primary" href="{% url 'boards:view_member_report' board.id %}" title="View members of board {{board.name}}">
-                                        <span class="fa fa-users"></span>
-                                    </a>
                                     <a class="btn btn-primary" href="{% url 'dev_times:view_daily_spent_times' %}?board_id={{board.id}}" title="View spent times of board {{board.name}}">
                                         <span class="fa fa-clock-o"></span>
                                     </a>
@@ -159,6 +156,23 @@
                                                 </div>
                                             </div>
                                         {% endwith %}
+                                    </div>
+                                {% endif %}
+                                {% if board.members.all.exists > 0 %}
+                                    <div class="members">
+                                        <h3>
+                                            <a href="{% url 'boards:view_member_report' board.id %}"
+                                               class="members"
+                                               title="Members of {{board.name}}">
+                                                <span class="fa fa-users"></span>
+                                                Members
+                                            </a>
+                                        </h3>
+                                        {% for member_i in board.members.all %}
+                                            <img class="avatar cursor-help" src="{{member_i.gravatar_url}}"
+                                                        alt="Avatar image of {{member_i.external_username}}"
+                                                        title="Member {{member_i.external_username}}"/>
+                                        {% endfor %}
                                     </div>
                                 {% endif %}
                             {% else %}

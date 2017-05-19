@@ -152,7 +152,7 @@ def edit_profile(request, member_id):
 
     if request.method == "POST":
 
-        form = Form(request.POST, instance=member)
+        form = Form(request.POST, request.FILES, instance=member)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse("members:view_members"))
