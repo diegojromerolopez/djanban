@@ -4,11 +4,64 @@
 
 {% block js %}
     {{block.super}}
+
 {% endblock js %}
 
 {% block page_title %}Edit list {{list.name}} position in board {{board.name}}{% endblock %}
 
 {% block content %}
-    <h1>Edit list {{list.name}} position in board {{board.name}}</h1>
-    {% include "forms/form.html" %}
+    <h1>Move list {{list.name}}</h1>
+    {% if lists|length > 1 %}
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Current position of list:</h2>
+                <ul>
+                    {% for list_i in lists %}
+                        <li>
+                            {% if list_i.id == list.id %}
+                                <strong>{{list_i.name}}</strong>
+                            {% else %}
+                                {{list_i.name}}
+                            {% endif %}
+                            {% if list_i.type == "backlog" %}
+                            <span class="fa fa-book" title='Task backlog'></span>
+                            {% elif list_i.type == "ready_to_develop" %}
+                                <span class="fa fa-hourglass-start" title='Tasks waiting to be started'></span>
+                            {% elif list_i.type == "development" %}
+                                <span class="fa fa-hourglass-half" title='Tasks in development'></span>
+                            {% elif list_i.type == "after_development_in_review" %}
+                                <span class="fa fa-gavel" title='Tasks being reviewed'></span>
+                            {% elif list_i.type == "after_development_waiting_release" %}
+                                <span class="fa fa-upload" title='Tasks waiting release'></span>
+                            {% elif list_i.type == "done" %}
+                                <span class="fa fa-hourglass-end" title='Tasks done'></span>
+                            {% endif %}
+                            <em>{{list_i.get_type_display}}</em>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <h2>Move list</h2>
+        <div class="row">
+
+            {% if not list.is_first %}
+                <div class="col-md-2">
+                    {% with form=form_move_up button_text="Move up" %}
+                        {% include "forms/form.html" %}
+                    {% endwith %}
+                </div>
+            {% endif %}
+            {% if not list.is_last %}
+                <div class="col-md-2">
+                    {% with form=form_move_down button_text="Move down" %}
+                        {% include "forms/form.html" %}
+                    {% endwith %}
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        List {{list.name}} is the only one list in board {{board.name}}
+    {% endif %}
 {% endblock content %}

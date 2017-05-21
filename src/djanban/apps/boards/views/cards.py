@@ -35,13 +35,13 @@ def new(request, board_id):
     card.member = member
 
     if request.method == "POST":
-        form = NewCardForm(request.POST, instance=card)
+        form = NewCardForm(request.POST, instance=card, member=member)
 
         if form.is_valid():
             form.save(commit=True)
             return HttpResponseRedirect(reverse("boards:view", args=(board_id,)))
     else:
-        form = NewCardForm(instance=card)
+        form = NewCardForm(instance=card, member=member)
 
     return render(request, "boards/cards/new.html", {"form": form, "board": board, "member": member})
 

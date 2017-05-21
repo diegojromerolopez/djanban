@@ -8,6 +8,7 @@ import pytz
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from trello.organization import Organization
+import sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -27,6 +28,14 @@ except ImportError:
     exit(-1)
 
 DATABASES = settings_local.DATABASES
+
+TEST_DATABASE_PATH = os.path.join(BASE_DIR, "../resources/database/test.db")
+
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': TEST_DATABASE_PATH
+    }
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = settings_local.SECRET_KEY

@@ -2,8 +2,9 @@
 
 from __future__ import unicode_literals, absolute_import
 
-from collections import namedtuple
+import random
 
+from django.db.models import Max
 from django.urls import reverse
 from django.utils import timezone
 
@@ -47,8 +48,18 @@ class NativeConnector(object):
     # Create a new list
     def new_list(self, new_list):
         new_list.uuid = custom_uuid()
-        new_list.creation_datetime = timezone.now()
-        new_list.last_activity_datetime = timezone.now()
+        # Calculation of position is a bit tricky:
+        # As position of the new list doesn't really matter, and
+        # we don't want to block some tuples of the database, we get the max position
+        # and add a random offset.
+        random_offset = random.randrange(0, 1000)
+        position = 0
+        if new_list.board.lists.all().exists():
+            position = new_list.board.lists.aggregate(max=Max("position"))["max"]
+        new_list.position = position + random_offset
+        now = timezone.now()
+        new_list.creation_datetime = now
+        new_list.last_activity_datetime = now
         return new_list
 
     # Edit a list

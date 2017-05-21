@@ -13,5 +13,11 @@
             </div>
         </div>
     {% endfor %}
-    <button type="submit" name="save" value="Send" class="btn btn-success">Send</button>
+    <button type="submit" name="save" value="Send" class="btn btn-success">
+        {% if button_text %}
+            {{button_text}}
+        {% else %}
+            Send
+        {% endif %}
+    </button>
 </form>

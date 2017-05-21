@@ -20,7 +20,7 @@ from django.shortcuts import render, get_object_or_404
 from djanban.apps.base.auth import user_is_member, get_user_boards, user_is_visitor
 from djanban.apps.base.decorators import member_required
 from djanban.apps.boards.forms import EditBoardForm, NewBoardForm, NewListForm, LabelForm, EditListForm, \
-    EditListPositionForm
+    SwapListForm, MoveUpListForm, MoveDownListForm
 from djanban.apps.boards.models import List, Board, Label
 from djanban.apps.boards.stats import avg, std_dev
 from djanban.apps.fetch.fetchers.trello.boards import Initializer, BoardFetcher
@@ -42,17 +42,16 @@ def init_boards(request):
 @member_required
 def new(request):
     member = request.user.member
-
     board = Board(creator=member)
 
     if request.method == "POST":
-        form = NewBoardForm(request.POST, instance=board)
+        form = NewBoardForm(request.POST, instance=board, member=member)
 
         if form.is_valid():
             form.save(commit=True)
             return HttpResponseRedirect(reverse("boards:view_boards"))
     else:
-        form = NewBoardForm(instance=board)
+        form = NewBoardForm(instance=board, member=member)
 
     return render(request, "boards/new.html", {"form": form, "board": board, "member": member})
 
@@ -98,7 +97,6 @@ def create_default_labels(request, board_id):
 def edit_label(request, board_id, label_id):
     member = request.user.member
     board = member.boards.get(id=board_id)
-
     try:
         label = board.labels.get(id=label_id)
     except Label.DoesNotExist:
@@ -419,13 +417,13 @@ def new_list(request, board_id):
         list_.position = lists[0].position + 10
 
     if request.method == "POST":
-        form = NewListForm(request.POST, instance=list_)
+        form = NewListForm(request.POST, instance=list_, member=member)
 
         if form.is_valid():
             form.save(commit=True)
             return HttpResponseRedirect(reverse("boards:view_lists", args=(board_id,)))
     else:
-        form = NewListForm(instance=list_)
+        form = NewListForm(instance=list_, member=member)
 
     return render(request, "boards/lists/new.html", {"form": form, "board": board, "member": member})
 
@@ -453,6 +451,29 @@ def edit_list(request, board_id, list_id):
     return render(request, "boards/lists/edit.html", replacements)
 
 
+# Swap this list with another
+@member_required
+def swap_list(request, board_id, list_id):
+    member = request.user.member
+    try:
+        board = member.boards.get(id=board_id)
+        list_ = board.lists.get(id=list_id)
+    except (Board.DoesNotExist, List.DoesNotExist):
+        raise Http404
+
+    if request.method == "POST":
+        form = SwapListForm(request.POST, instance=list_, member=member)
+
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect(reverse("boards:view_lists", args=(board_id,)))
+    else:
+        form = SwapListForm(instance=list_, member=member)
+
+    replacements = {"form": form, "board": board, "member": member, "list": list_}
+    return render(request, "boards/lists/swap_position.html", replacements)
+
+
 # Edit a list position
 @member_required
 def edit_list_position(request, board_id, list_id):
@@ -463,16 +484,37 @@ def edit_list_position(request, board_id, list_id):
     except (Board.DoesNotExist, List.DoesNotExist):
         raise Http404
 
+    lists = board.lists.order_by("position")
+
     if request.method == "POST":
-        form = EditListPositionForm(request.POST, instance=list_)
+        if request.POST.get("movement_type") == "up":
+            form = MoveUpListForm(request.POST, instance=list_, member=member)
+            form_move_up = form
+            form_move_down = MoveDownListForm(instance=list_, member=member)
+        elif request.POST.get("movement_type") == "down":
+            form = MoveDownListForm(request.POST, instance=list_, member=member)
+            form_move_down = form
+            form_move_up = MoveUpListForm(instance=list_, member=member)
+        else:
+            replacements = {"board": board, "list": list_, "lists":lists, "member": member, "message": "Option not recognized"}
+            return render(request, "boards/lists/edit_position.html", replacements)
 
         if form.is_valid():
-            form.save(commit=True)
-            return HttpResponseRedirect(reverse("boards:view_lists", args=(board_id,)))
-    else:
-        form = EditListPositionForm(instance=list_)
+            form.save()
+            return HttpResponseRedirect(reverse("boards:edit_list_position", args=(board_id, list_id)))
 
-    replacements = {"form": form, "board": board, "member": member, "list": list_}
+    else:
+        form_move_up = MoveUpListForm(instance=list_, member=member)
+        form_move_down = MoveDownListForm(instance=list_, member=member)
+
+    replacements = {
+        "form_move_up": form_move_up,
+        "form_move_down": form_move_down,
+        "board": board,
+        "member": member,
+        "lists": lists,
+        "list": list_
+    }
     return render(request, "boards/lists/edit_position.html", replacements)
 
 

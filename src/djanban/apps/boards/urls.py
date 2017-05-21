@@ -33,6 +33,8 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/lists/?$', boards.view_lists, name="view_lists"),
     url(r'^(?P<board_id>\d+)/lists/new/?$', boards.new_list, name="new_list"),
     url(r'^(?P<board_id>\d+)/lists/(?P<list_id>\d+)/?$', boards.edit_list, name="edit_list"),
+
+    url(r'^(?P<board_id>\d+)/lists/(?P<list_id>\d+)/swap/?$', boards.swap_list, name="swap_list"),
     url(r'^(?P<board_id>\d+)/lists/(?P<list_id>\d+)/position/?$', boards.edit_list_position, name="edit_list_position"),
 
     url(r'^(?P<board_id>\d+)/delete/?$', boards.delete, name="delete"),

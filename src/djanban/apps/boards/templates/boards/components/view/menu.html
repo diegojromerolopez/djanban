@@ -31,7 +31,7 @@
                                 <span class="fa fa-pencil"></span>
                             </a>
                         </li>
-                        <li {% if url_name == "view_lists" %}class="active"{% endif %}>
+                        <li {% if url_name == "view_lists" or url_name == "edit_list_position" or url_name == "swap_list" %}class="active"{% endif %}>
                             <a href="{% url 'boards:view_lists' board.id %}" title="Lists of board {{board.name}}">
                                 <span class="fa fa-list"></span>
                             </a>
