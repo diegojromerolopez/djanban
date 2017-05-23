@@ -59,7 +59,6 @@ class EditBoardForm(models.ModelForm):
 
 # Board creation form
 class NewBoardForm(models.ModelForm):
-    MAX_NUM_LISTS = 20
 
     class Meta:
         model = Board
@@ -86,6 +85,7 @@ class NewBoardForm(models.ModelForm):
                 role, created = MemberRole.objects.get_or_create(board=self.instance, type="admin")
                 role.members.add(self.instance.creator)
                 self.instance.roles.add(role)
+        return self.instance
 
 
 # New list form
