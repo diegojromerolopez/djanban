@@ -10,7 +10,7 @@ from djanban.apps.boards.models import Board, List
 from djanban.apps.members.models import Member
 
 
-# Test for lists in board application
+# Test for lists board application
 class ListTest(TestCase):
 
     # Creates an empty database without a backend
