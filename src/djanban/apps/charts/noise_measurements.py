@@ -29,7 +29,7 @@ def noise_level(current_user):
 
     chart_title = u"Average noise levels per day in db as of {0}".format(timezone.now())
 
-    noise_measurement_filter = {"member__in": Member.get_user_team_mates(current_user)}
+    noise_measurement_filter = {"member__in": Member.get_user_team_members(current_user)}
 
     noise_measurements = NoiseMeasurement.objects.filter(**noise_measurement_filter).order_by("datetime")
 
@@ -75,7 +75,7 @@ def noise_level_per_hour(current_user):
 
     chart_title = u"Noise levels per hour in db as of {0}".format(timezone.now())
 
-    noise_measurement_filter = {"member__in": Member.get_user_team_mates(current_user)}
+    noise_measurement_filter = {"member__in": Member.get_user_team_members(current_user)}
 
     noise_measurements = NoiseMeasurement.objects.filter(**noise_measurement_filter).order_by("datetime")
 
@@ -118,7 +118,7 @@ def noise_level_per_weekday(current_user):
 
     chart_title = u"Noise levels per weekday in db as of {0}".format(timezone.now())
 
-    noise_measurement_filter = {"member__in": Member.get_user_team_mates(current_user)}
+    noise_measurement_filter = {"member__in": Member.get_user_team_members(current_user)}
 
     noise_measurements = NoiseMeasurement.objects.filter(**noise_measurement_filter).order_by("datetime")
 
@@ -167,7 +167,7 @@ def subjective_noise_level(current_user, month=None, year=None):
 
     chart_title = u"Subjective noise levels as of {0}".format(timezone.now())
 
-    noise_measurement_filter = {"member__in": Member.get_user_team_mates(current_user)}
+    noise_measurement_filter = {"member__in": Member.get_user_team_members(current_user)}
     noise_measurements = NoiseMeasurement.objects.filter(**noise_measurement_filter).order_by("datetime")
 
     if month and year and 1 <= month <= 12:

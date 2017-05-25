@@ -20,7 +20,7 @@ class BuildForecasterForm(forms.ModelForm):
         current_request = CrequestMiddleware.get_request()
         current_user = current_request.user
         boards = get_user_boards(current_user)
-        members = Member.get_user_team_mates(current_user)
+        members = Member.get_user_team_members(current_user)
         self.fields["model"] = forms.ChoiceField(label="Regression model")
         self.fields["model"].choices = REGRESSION_MODELS
         self.fields["board"].choices = [("", "All")]+[(board.id, board.name) for board in boards]
@@ -67,7 +67,7 @@ class FilterForecastersForm(forms.Form):
         current_request = CrequestMiddleware.get_request()
         current_user = current_request.user
         boards = get_user_boards(current_user)
-        members = Member.get_user_team_mates(current_user)
+        members = Member.get_user_team_members(current_user)
         self.fields["board"].choices = [("", "All")]+[(board.id, board.name) for board in boards]
         self.fields["member"].choices = [("", "None")] + [(member.id, member.external_username) for member in members]
 

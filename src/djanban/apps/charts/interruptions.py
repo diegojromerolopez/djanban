@@ -78,7 +78,7 @@ def _number_of_interruptions(current_user, board, chart_title, interruption_meas
         boards = [board]
     else:
         boards = get_user_boards(current_user)
-        interruptions_filter["member__in"] = Member.get_user_team_mates(current_user)
+        interruptions_filter["member__in"] = Member.get_user_team_members(current_user)
 
     board_values = {board.id: [] for board in boards}
 
@@ -243,7 +243,7 @@ def _interruption_measurement_by_month(current_user, chart_title, interruption_m
     if board:
         interruptions_filter["board"] = board
     else:
-        interruptions_filter["member__in"] = Member.get_user_team_mates(current_user)
+        interruptions_filter["member__in"] = Member.get_user_team_members(current_user)
 
     interruptions = Interruption.objects.filter(**interruptions_filter).order_by("datetime")
 

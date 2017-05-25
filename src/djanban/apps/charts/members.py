@@ -9,7 +9,7 @@ from django.db.models import Sum, Count
 from django.utils import timezone
 from isoweek import Week
 
-from djanban.apps.base.auth import get_user_boards
+from djanban.apps.base.auth import get_user_boards, user_is_member
 from djanban.apps.boards.models import CardComment, Card
 from djanban.apps.charts.models import CachedChart
 from djanban.apps.dev_environment.models import Interruption
@@ -40,7 +40,11 @@ def task_movements_by_member(request, movement_type="forward", board=None):
     if board:
         card_movement_filter["board_id"] = board.id
 
-    members = Member.get_user_team_mates(request.user)
+    # If this user is a member, include it in the developers list at the front
+    if user_is_member(request.user):
+        members = [request.user.member] + list(Member.get_user_team_mates(request.user))
+    else:
+        members = Member.get_user_team_mates(request.user)
 
     for member_i in members:
         member_name = member_i.external_username

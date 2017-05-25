@@ -47,7 +47,7 @@ class MultiboardForm(forms.ModelForm):
         # Members of a multiboard
         current_member = current_user.member
         self.fields["members"].choices = [
-            (member.id, member.external_username) for member in current_member.team_mates if member.id != current_member.id
+            (member.id, member.external_username) for member in current_member.team_mates
         ]
 
     def save(self, commit=True):

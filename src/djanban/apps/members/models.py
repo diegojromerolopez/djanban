@@ -178,6 +178,19 @@ class Member(models.Model):
     @staticmethod
     def get_user_team_mates(user):
         boards = get_user_boards(user)
+        return Member.objects.filter(boards__in=boards).exclude(user=user).distinct().order_by("id")
+
+    # Get member on the same boards
+    # This method will always return at least one member (if user is a member)
+    @property
+    def team_members(self):
+        return Member.get_user_team_mates(self.user)
+
+    # Get members of the same team of this user
+    # This method will always return at least one member (if user is a member)
+    @staticmethod
+    def get_user_team_members(user):
+        boards = get_user_boards(user)
         return Member.objects.filter(boards__in=boards).distinct().order_by("id")
 
     # Resets the password of the associated user of this member
@@ -239,12 +252,13 @@ class Member(models.Model):
         return self.get_adjusted_spent_time(yesterday, board)
 
     # Returns the number of hours this member has develop on a given date
-    def get_spent_time(self, date, board=None):
-        # Note that only if the member is a developer can his/her spent time computed
-        if not self.is_developer:
-            raise AssertionError(u"This member is not a developer")
+    def get_spent_time(self, date=None, board=None):
 
-        spent_time_on_date_filter = {"date": date}
+        spent_time_on_date_filter = {}
+
+        # If we pass the date, filter adjusted spent time of this member by date
+        if date is not None:
+            spent_time_on_date_filter["date"] = date
 
         # If we pass the board, only this board spent times will be given
         if board is not None:
@@ -253,12 +267,13 @@ class Member(models.Model):
         return self._sum_spent_time_from_filter(spent_time_on_date_filter)
 
     # Returns the number of adjusted hours this member has develop on a given date
-    def get_adjusted_spent_time(self, date, board=None):
-        # Note that only if the member is a developer can his/her spent time computed
-        if not self.is_developer:
-            raise AssertionError(u"This member is not a developer")
+    def get_adjusted_spent_time(self, date=None, board=None):
 
-        spent_time_on_date_filter = {"date": date}
+        spent_time_on_date_filter = {}
+
+        # If we pass the date, filter adjusted spent time of this member by date
+        if date is not None:
+            spent_time_on_date_filter["date"] = date
 
         # If we pass the board, only this board spent times will be given
         if board is not None:

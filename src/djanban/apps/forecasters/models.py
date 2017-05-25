@@ -136,7 +136,7 @@ class Forecaster(models.Model):
     def get_all_from_member(member):
         user = member.user
         boards = get_user_boards(user)
-        teammates = Member.get_user_team_mates(user)
+        teammates = Member.get_user_team_members(user)
         forecasters = Forecaster.objects.filter(
             Q(last_updater=member) |
             Q(board__in=boards) |

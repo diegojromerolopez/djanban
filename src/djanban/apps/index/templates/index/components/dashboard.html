@@ -15,7 +15,29 @@
     {% endif %}
 </div>
 
-{% if member.is_developer %}
+{% if member and not member.is_developer %}
+    {% with member_get_spent_time=member.get_spent_time %}
+        {% if member_get_spent_time > 0 %}
+            <div class="panel panel-danger">
+              <div class="panel-heading">Are you a developer?</div>
+              <div class="panel-body">
+                  <p>
+                    You have spent time working in several tasks (<strong>{{member_get_spent_time|floatformat:"-2"}} hours</strong>)
+                    yet you are not a developer according
+                    to <a href="{% url 'members:edit_profile' member.id %}" title="Profile">your profile</a>.
+                  </p>
+                  <p>
+                      Please, <strong>if you are developer,
+                      update <a href="{% url 'members:edit_profile' member.id %}" title="Profile">your profile</a>
+                      accordingly</strong>.
+                  </p>
+              </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+{% endif %}
+
+{% if member and member.is_developer %}
     <div class="row">
         <div class="col-md-4">
             <h2>Work</h2>
@@ -58,26 +80,22 @@
                         {% endif %}
                     </div>
                 {% endif %}
-                {% for member_i in downtime_developers %}
-                    <div>
-                        {% with member_i_last_work_datetime=member_i.last_work_datetime %}
-                            {% if member_i_last_work_datetime %}
-                                <strong>{{member_i.external_username}}</strong> is in downtime since {{member_i_last_work_datetime}}.
+                <div class="row">
+                    <div class="col-md-12">
+                        {% for member_i in downtime_developers %}
+                            <img src="{{member_i.gravatar_url}}"
+                                 alt="{{member_i.external_username}} is in downtime"
+                                 title="{{member_i.external_username}} is in downtime"
+                                 class="cursor-help" />
+                        {% empty %}
+                            {% if member.is_developer and member.is_in_downtime %}
+                                <div>No other developers are in downtime.</div>
                             {% else %}
-                                <strong>{{member_i.external_username}}</strong> is in downtime.
+                                <div>No developers are in downtime.</div>
                             {% endif %}
-                            {% if not all_boards_in_downtime %}
-                                Assign him/her one of the pending or in development tasks.
-                            {% endif %}
-                        {% endwith %}
-                    </div>
-                {% empty %}
-                    {% if member.is_developer and member.is_in_downtime %}
-                        <div>No other developers are in downtime.</div>
-                    {% else %}
-                        <div>No developers are in downtime.</div>
-                    {% endif %}
-                {% endfor %}
+                        {% endfor %}
+                        </div>
+                </div>
             {% endwith %}
         </div>
     </div>
@@ -105,7 +123,7 @@
     {% async_include "members/components/tasks_in_development_boards.html" member=member %}
 {% endif %}
 
-{% if  boards|length > 0 %}
+{% if boards|length > 0 %}
 
     <h2>Charts</h2>
 
