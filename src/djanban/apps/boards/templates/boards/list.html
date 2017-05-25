@@ -169,7 +169,7 @@
                                             </a>
                                         </h3>
                                         {% for member_i in board.members.all %}
-                                            <img class="avatar cursor-help" src="{{member_i.gravatar_url}}"
+                                            <img class="avatar cursor-help" src="{{member_i.avatar_url}}"
                                                         alt="Avatar image of {{member_i.external_username}}"
                                                         title="Member {{member_i.external_username}}"/>
                                         {% endfor %}

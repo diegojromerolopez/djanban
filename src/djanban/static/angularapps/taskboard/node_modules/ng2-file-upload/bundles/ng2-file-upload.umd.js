@@ -7,7 +7,7 @@
 		exports["ng2-file-upload.umd"] = factory(require("@angular/core"), require("@angular/common"));
 	else
 		root["ng2-file-upload.umd"] = factory(root["@angular/core"], root["@angular/common"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_8__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_8__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -78,12 +78,46 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var file_like_object_class_1 = __webpack_require__(5);
-var file_item_class_1 = __webpack_require__(3);
+function isElement(node) {
+    return !!(node && (node.nodeName || node.prop && node.attr && node.find));
+}
+var FileLikeObject = (function () {
+    function FileLikeObject(fileOrInput) {
+        var isInput = isElement(fileOrInput);
+        var fakePathOrObject = isInput ? fileOrInput.value : fileOrInput;
+        var postfix = typeof fakePathOrObject === 'string' ? 'FakePath' : 'Object';
+        var method = '_createFrom' + postfix;
+        this[method](fakePathOrObject);
+    }
+    FileLikeObject.prototype._createFromFakePath = function (path) {
+        this.lastModifiedDate = void 0;
+        this.size = void 0;
+        this.type = 'like/' + path.slice(path.lastIndexOf('.') + 1).toLowerCase();
+        this.name = path.slice(path.lastIndexOf('/') + path.lastIndexOf('\\') + 2);
+    };
+    FileLikeObject.prototype._createFromObject = function (object) {
+        // this.lastModifiedDate = copy(object.lastModifiedDate);
+        this.size = object.size;
+        this.type = object.type;
+        this.name = object.name;
+    };
+    return FileLikeObject;
+}());
+exports.FileLikeObject = FileLikeObject;
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var file_like_object_class_1 = __webpack_require__(0);
+var file_item_class_1 = __webpack_require__(4);
 var file_type_class_1 = __webpack_require__(7);
 function isFile(value) {
     return (File && value instanceof File);
@@ -488,15 +522,15 @@ var FileUploader = (function () {
 exports.FileUploader = FileUploader;
 
 
-/***/ },
-/* 1 */
-/***/ function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
-
-/***/ },
+/***/ }),
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
@@ -509,8 +543,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var core_1 = __webpack_require__(1);
-var file_uploader_class_1 = __webpack_require__(0);
+var core_1 = __webpack_require__(2);
+var file_uploader_class_1 = __webpack_require__(1);
 var FileDropDirective = (function () {
     function FileDropDirective(element) {
         this.fileOver = new core_1.EventEmitter();
@@ -613,13 +647,13 @@ FileDropDirective = __decorate([
 exports.FileDropDirective = FileDropDirective;
 
 
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var file_like_object_class_1 = __webpack_require__(5);
+var file_like_object_class_1 = __webpack_require__(0);
 var FileItem = (function () {
     function FileItem(uploader, some, options) {
         this.url = '/';
@@ -746,9 +780,9 @@ var FileItem = (function () {
 exports.FileItem = FileItem;
 
 
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
@@ -761,8 +795,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var core_1 = __webpack_require__(1);
-var file_uploader_class_1 = __webpack_require__(0);
+var core_1 = __webpack_require__(2);
+var file_uploader_class_1 = __webpack_require__(1);
 // todo: filters
 var FileSelectDirective = (function () {
     function FileSelectDirective(element) {
@@ -808,43 +842,9 @@ FileSelectDirective = __decorate([
 exports.FileSelectDirective = FileSelectDirective;
 
 
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-
-function isElement(node) {
-    return !!(node && (node.nodeName || node.prop && node.attr && node.find));
-}
-var FileLikeObject = (function () {
-    function FileLikeObject(fileOrInput) {
-        var isInput = isElement(fileOrInput);
-        var fakePathOrObject = isInput ? fileOrInput.value : fileOrInput;
-        var postfix = typeof fakePathOrObject === 'string' ? 'FakePath' : 'Object';
-        var method = '_createFrom' + postfix;
-        this[method](fakePathOrObject);
-    }
-    FileLikeObject.prototype._createFromFakePath = function (path) {
-        this.lastModifiedDate = void 0;
-        this.size = void 0;
-        this.type = 'like/' + path.slice(path.lastIndexOf('.') + 1).toLowerCase();
-        this.name = path.slice(path.lastIndexOf('/') + path.lastIndexOf('\\') + 2);
-    };
-    FileLikeObject.prototype._createFromObject = function (object) {
-        // this.lastModifiedDate = copy(object.lastModifiedDate);
-        this.size = object.size;
-        this.type = object.type;
-        this.name = object.name;
-    };
-    return FileLikeObject;
-}());
-exports.FileLikeObject = FileLikeObject;
-
-
-/***/ },
+/***/ }),
 /* 6 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
@@ -855,9 +855,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 var common_1 = __webpack_require__(8);
-var core_1 = __webpack_require__(1);
-var file_drop_directive_1 = __webpack_require__(2);
-var file_select_directive_1 = __webpack_require__(4);
+var core_1 = __webpack_require__(2);
+var file_drop_directive_1 = __webpack_require__(3);
+var file_select_directive_1 = __webpack_require__(5);
 var FileUploadModule = (function () {
     function FileUploadModule() {
     }
@@ -873,9 +873,9 @@ FileUploadModule = __decorate([
 exports.FileUploadModule = FileUploadModule;
 
 
-/***/ },
+/***/ }),
 /* 7 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
@@ -1042,30 +1042,31 @@ FileType.mime_compress = [
 exports.FileType = FileType;
 
 
-/***/ },
+/***/ }),
 /* 8 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE_8__;
 
-/***/ },
+/***/ }),
 /* 9 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
-__export(__webpack_require__(4));
-__export(__webpack_require__(2));
-__export(__webpack_require__(0));
+__export(__webpack_require__(5));
 __export(__webpack_require__(3));
+__export(__webpack_require__(1));
+__export(__webpack_require__(4));
+__export(__webpack_require__(0));
 var file_upload_module_1 = __webpack_require__(6);
 exports.FileUploadModule = file_upload_module_1.FileUploadModule;
 
 
-/***/ }
+/***/ })
 /******/ ]);
 });
 //# sourceMappingURL=ng2-file-upload.umd.js.map

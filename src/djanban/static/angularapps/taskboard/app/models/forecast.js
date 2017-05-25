@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // A card spent time forecast
 var Forecast = (function () {
     function Forecast() {

@@ -44,7 +44,7 @@
             </div>
 
             <div class="row">
-                
+
                 <div class="col-md-8">
 
                     <!-- Show/Change value -->
@@ -144,7 +144,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Cycle time -->
                     <div *ngIf="card.cycle_time">
                         <div class="cycle_time card-section">
@@ -152,7 +152,7 @@
                             <div>{{card.cycle_time}} hours</div>
                         </div>
                     </div>
-                    
+
                     <!-- Lead time -->
                     <div *ngIf="card.lead_time">
                         <div class="lead_time  card-section">
@@ -271,7 +271,7 @@
                                         <li *ngFor="let member of board.members"
                                             (click)="newCommentContent = (newCommentContent?newCommentContent:'') + ' @' +  member.external_username + ' '"
                                         >
-                                            <img class="avatar cursor-help" src="{{member.gravatar_url}}"
+                                            <img class="avatar cursor-help" src="{{member.avatar_url}}"
                                                     alt="Gravatar image of {{member.external_username}}"
                                                     title="Comment made by {{member.initials}}"/>
                                             <span>{{member.external_username}}</span>
@@ -279,7 +279,7 @@
                                     </ul>
                                 </div>
                             </form>
-                            
+
                             <div *ngIf="card.comments.length == 0">
                                 <em>No comments yet.</em>
                             </div>
@@ -288,10 +288,10 @@
                                     <div class="card-comments-comment panel panel-info">
                                         <div class="panel-heading">
                                             <!--<span id="comment-{{comment.id}}" class="fa fa-link"></span>-->
-                                            <img class="avatar cursor-help" src="{{comment.author.gravatar_url}}"
+                                            <img class="avatar cursor-help" src="{{comment.author.avatar_url}}"
                                                  alt="Gravatar image of {{comment.author.external_username}}"
                                                  title="Comment made by {{comment.author.initials}}"/>
-                                            
+
                                             <span title="Comment made by {{comment.creation_datetime | localize_datetime}}">
                                                 wrote this comment at <strong>{{comment.creation_datetime | localize_datetime}}</strong>
                                             </span>
@@ -299,13 +299,13 @@
                                                  title="Comment edited {{comment.last_edition_datetime | localize_datetime}}">
                                                  and updated it at <strong>{{comment.last_edition_datetime | localize_datetime}}</strong>
                                             </span>
-                                                
+
                                         </div>
 
                                         <div *ngIf="editCommentStatus[comment.id] == 'standby' || comment.review || comment.blocking_card || comment.valued_card" class="panel-body">
                                             {{comment.content}}
                                         </div>
-                                        
+
                                         <!--
                                             I don't want have to worry about updating the blocking cards.
                                             If you want to edit/delete a blocking card comment, use the blocking card menu
@@ -348,7 +348,7 @@
                                             <div class="comment-delete" *ngIf="editCommentStatus[comment.id] == 'standby'" [ngClass]="{'showed': deleteCommentStatus[comment.id] == 'asking' }">
                                                 <form *ngIf="deleteCommentStatus[comment.id] == 'standby' || deleteCommentStatus[comment.id] == 'asking' || deleteCommentStatus[comment.id] == 'waiting'"
                                                         (ngSubmit)="onSubmitDeleteComment(comment)" #deleteCommentForm="ngForm">
-                                                    
+
                                                     <button type="submit" class="btn btn-danger delete_comment" title="Delete this comment"
                                                         *ngIf="deleteCommentStatus[comment.id] == 'standby'"
                                                         (click)="deleteCommentStatus[comment.id] = 'asking'"
@@ -363,7 +363,7 @@
                                                         <div>
                                                             <input type="checkbox" name="confirm" ngModel required [disabled]="deleteCommentStatus[comment.id] == 'waiting'" /> Are you sure?
                                                         </div>
-                                                        
+
                                                         <button type="submit" class="btn btn-success delete_comment" title="Cancel"
                                                                 (click)="$event.preventDefault()"
                                                                 (click)="deleteCommentStatus[comment.id] = 'standby'"
@@ -394,7 +394,7 @@
                     <!-- Movements of this card -->
                     <div class="card-movements card-section">
                         <h2>
-                            <span class="fa fa-arrows"></span> 
+                            <span class="fa fa-arrows"></span>
                             Movements ({{card.movements.length}})
                         </h2>
                         <div *ngIf="card.movements.length > 0">
@@ -552,10 +552,10 @@
                     <!-- Members -->
                     <div class="card-members card-section">
                         <h2>Members ({{card.members.length}})</h2>
-                        
+
                         <ul *ngIf="card.members.length > 0">
                             <li *ngFor="let member_i of card.members">
-                                <img class="avatar" src="{{member_i.gravatar_url}}" alt="Gravatar image of {{member_i.external_username}}" />
+                                <img class="avatar" src="{{member_i.avatar_url}}" alt="Gravatar image of {{member_i.external_username}}" />
                                 <span>{{member_i.external_username}}</span>
                             </li>
                         </ul>
@@ -563,7 +563,7 @@
                             <em>This task has no assigned members.</em>
                         </div>
                         <button class="btn btn-primary" *ngIf="changeMembersStatus!='showed' && changeMembersStatus!='waiting'" (click)="changeMembersStatus='showed'">Edit</button>
-                        
+
                         <div *ngIf="changeMembersStatus=='showed' || changeMembersStatus=='waiting'">
                             <form (ngSubmit)="onChangeMembers(changeMembersForm.value.members)" #changeMembersForm="ngForm">
                                 <select name="members" multiple required ngModel>
@@ -604,7 +604,7 @@
                                     > <span class="fa fa-spin fa-spinner" *ngIf="removeDueDatetimeStatus=='waiting'"></span> Remove </button>
                         </div>
                         <div class="card-change-due_datetime-form" *ngIf="!card.due_datetime">
-                            <span class="btn btn-primary" *ngIf="changeDueDatetimeStatus != 'showed' && changeDueDatetimeStatus != 'waiting'" 
+                            <span class="btn btn-primary" *ngIf="changeDueDatetimeStatus != 'showed' && changeDueDatetimeStatus != 'waiting'"
                                   (click)="changeDueDatetimeStatus = 'showed'">
                                   Add
                             </span>
@@ -735,7 +735,7 @@
                         <ul *ngIf="card.reviews.length > 0" class="reviews">
                             <li *ngFor="let review of card.reviews" class="review">
                                 <h3>Review on {{review.creation_datetime | localize_datetime}}</h3>
-                                
+
                                 <!-- Description of the review -->
                                 <div *ngIf="review.description">
                                     {{review.description}}
@@ -747,7 +747,7 @@
                                         {{member.trello_username}}
                                     </li>
                                 </ul>
-                                
+
                                 <!-- Delete review -->
                                 <div class="review-actions">
                                     <button class="btn btn-danger"
@@ -756,7 +756,7 @@
                                         <span class="fa fa-trash"></span>
                                         Delete
                                     </button>
-                                    
+
                                     <button class="btn btn-primary"
                                             *ngIf="deleteReviewStatus[review.id]=='asking'"
                                             (click)="deleteReviewStatus[review.id]='standby'"
@@ -870,14 +870,14 @@
                                             <span class="fa fa-close"></span>
                                             Close
                                         </button>
-                                        
+
                                         <button class="btn btn-danger"
                                                 *ngIf="removeRequirementStatus[requirement.id]!='asking' && removeRequirementStatus[requirement.id]!='waiting'"
                                                 (click)="removeRequirementStatus[requirement.id]='asking'">
                                             <span class="fa fa-trash"></span>
                                             Remove
                                         </button>
-                                        
+
                                         <button class="btn btn-primary"
                                                 *ngIf="removeRequirementStatus[requirement.id]=='asking'"
                                                 (click)="removeRequirementStatus[requirement.id]='standby'"

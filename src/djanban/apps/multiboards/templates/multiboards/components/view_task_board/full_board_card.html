@@ -44,7 +44,7 @@
                           {% endif %}
                           <div class="members">
                               {% for member in card.members.all %}
-                                <img class="avatar cursor-help" src="{{member.gravatar_url}}"
+                                <img class="avatar cursor-help" src="{{member.avatar_url}}"
                                         alt="Gravatar image of {{member.external_username}}"
                                         title="Comment made by {{member.initials}}"/>
                               {% endfor %}

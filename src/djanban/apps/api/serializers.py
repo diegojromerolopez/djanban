@@ -304,7 +304,7 @@ class Serializer(object):
             "external_username": member.external_username,
             "initials": member.initials,
             "is_current_user": True if self.current_member and member.id == self.current_member.id else False,
-            "gravatar_url": member.gravatar_url,
+            "avatar_url": member.avatar_url,
             "roles_by_board": {
                 member_role.board_id: member_role.type for member_role in member.roles.all()
             }

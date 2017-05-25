@@ -427,9 +427,9 @@ class Member(models.Model):
     def get_backward_movements_for_board(self, board):
         return self.card_movements.filter(type="backward", board=board).count()
 
-    # Returns the Gravatar URL
+    # Returns this member's avatar URL
     @property
-    def gravatar_url(self, size=30):
+    def avatar_url(self, size=30):
         # Check if this member has a custom avatar, if that's the case, return the custom avatar
         if self.custom_avatar:
             return self.custom_avatar.url
@@ -437,6 +437,7 @@ class Member(models.Model):
         # Create avatar if it doesn't exist
         if not self.default_avatar:
             self.create_default_avatar()
+
         # If the member has an user and therefore, an email, get its gravatar
         if self.user:
             current_request = CrequestMiddleware.get_request()
@@ -453,11 +454,18 @@ class Member(models.Model):
 
         initials = self.initials
 
-        font = ImageFont.truetype(settings.BASE_DIR + "/fonts/vera.ttf", size=15)
+        font_size = 15
+        x = 4
+        y = 8
+        if len(initials) == 3:
+            font_size = 11
+            x = 1
+            y = 10
 
+        font = ImageFont.truetype(settings.BASE_DIR + "/fonts/vera.ttf", size=font_size)
         canvas = Image.new('RGB', (30, 30), (255, 255, 255))
         draw = ImageDraw.Draw(canvas)
-        draw.text((4, 8), initials, (0, 0, 0), font=font)
+        draw.text((x, y), initials, font=font, fill=(0, 0, 0, 255))
 
         filename = "{0}.png".format(initials)
 

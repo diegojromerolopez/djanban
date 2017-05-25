@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var router_1 = require("@angular/router");
 var board_service_1 = require("../../services/board.service");
@@ -495,7 +496,9 @@ CardComponent = __decorate([
         templateUrl: 'card.component.html',
         styleUrls: ['card.component.css'],
         providers: [board_service_1.BoardService, card_service_1.CardService, angular2_notifications_1.NotificationsService]
-    }),
+    })
+    /** Card component: contains all the actions doable on a card */
+    ,
     __metadata("design:paramtypes", [router_1.Router,
         router_1.ActivatedRoute,
         board_service_1.BoardService,

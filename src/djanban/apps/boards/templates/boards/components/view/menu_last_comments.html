@@ -22,7 +22,7 @@
                                         <a href="{% url 'boards:view_board' board.id %}">{{board.name}}</a>
                                   </div>
                                   <div class="action">
-                                      <img src="{{last_comment.author.gravatar_url}}" alt="last_comment.author.initials"/>
+                                      <img src="{{last_comment.author.avatar_url}}" alt="last_comment.author.initials"/>
                                         {% if last_comment.last_edition_datetime %}
                                             edited his/her comment on
                                             <a href="{% url 'boards:view_card' board.id card.id %}" title="{{card.name}}" class="underlined">{{card.name}}</a> {{last_comment.last_edition_datetime|naturaltime}}

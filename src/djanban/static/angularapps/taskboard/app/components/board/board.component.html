@@ -121,7 +121,7 @@
             <div *ngFor="let member of board.members" class="member_container">
                 <span class="member">
                     <span class="member_name">
-                        <img src="{{member.gravatar_url}}" class="avatar" alt="{{member.external_username}}"/>
+                        <img src="{{member.avatar_url}}" class="avatar" alt="{{member.external_username}}"/>
                         <span class="member_role">({{member.roles_by_board[board.id]}})</span>
                     </span>
                     <button *ngIf="!member.is_current_user" class="btn btn-primary"
@@ -209,7 +209,7 @@
                                             (click)="moveAllCardsStatus[list.id]='hidden'"
                                             [disabled]="moveAllCardsStatus[list.id]=='waiting'"
                                             class="btn btn-danger">Cancel</button>
-                                    
+
                                     <button class="btn btn-success"
                                             (click)="$event.preventDefault()"
                                             (click)="moveAllCardsStatus[list.id]='waiting'"
@@ -263,14 +263,14 @@
                                     {{label.name}}
                                 </span>
                             </span>
-                            
+
                             <span class="card_heading-properties">
                                 <span class="card_value" *ngIf="card.value != null">
-                                    <span class="fa fa-diamond"></span> 
-                                    <span class="card_value-value cursor-help" title="This card has been valued in {{card.value}}">{{card.value}}</span> 
+                                    <span class="fa fa-diamond"></span>
+                                    <span class="card_value-value cursor-help" title="This card has been valued in {{card.value}}">{{card.value}}</span>
                                 </span>
                                 <span class="card_heading-se_time" *ngIf="card.spent_time || card.estimated_time">
-                                    <span class="fa fa-clock-o"></span> 
+                                    <span class="fa fa-clock-o"></span>
                                     <span class="card_heading-spent_time" title="The team has spent {{card.spent_time | number:'1.1-2'}} hours in this task">
                                         S: {{card.spent_time | number:'1.1-2'}}
                                     </span>
@@ -296,17 +296,17 @@
                                     {{card.number_of_attachments}}
                                 </span>
                                 <span class="card_heading-movements" *ngIf="card.number_of_forward_movements > 0 || card.number_of_backward_movements > 0">
-                                    <span class="fa fa-arrows"></span> 
+                                    <span class="fa fa-arrows"></span>
                                     <span class="fa fa-arrow-right"></span>: {{card.number_of_forward_movements}}
                                     <span class="fa fa-arrow-left"></span>: {{card.number_of_backward_movements}}
                                 </span>
                                 <span class="card_heading-members">
                                     <span *ngFor="let card_member of card.members">
-                                        <img class="avatar" src="{{card_member.gravatar_url}}"  alt="{{card_member.external_username}}" />
+                                        <img class="avatar" src="{{card_member.avatar_url}}"  alt="{{card_member.external_username}}" />
                                     </span>
                                 </span>
                             </span>
-                            
+
                             <span class="card_heading-deadline" *ngIf="card.due_datetime">
                                 <span class="fa fa-calendar-times-o"></span> {{card.due_datetime | localize_datetime}}
                             </span>

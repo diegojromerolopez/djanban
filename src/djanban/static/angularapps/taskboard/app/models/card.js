@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var assign_1 = require("rxjs/util/assign");
 var Card = (function () {
     function Card(card) {

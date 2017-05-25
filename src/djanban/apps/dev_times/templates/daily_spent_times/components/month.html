@@ -26,7 +26,7 @@
             <tr class="day_of_year_{{daily_spent_time.day_of_year}} week_of_year_{{daily_spent_time.week_of_year}} month_{{daily_spent_time.date.month}} {% if daily_spent_time.day_of_year|divisibleby:2 %}even{% else %}odd{% endif %}">
                 <td>{{daily_spent_time.board.name}}</td>
                 <td>
-                    <img class="avatar cursor-help" src="{{daily_spent_time.member.gravatar_url}}"
+                    <img class="avatar cursor-help" src="{{daily_spent_time.member.avatar_url}}"
                          alt="{{daily_spent_time.member.external_username}}"
                          title="{{daily_spent_time.member.external_username}}"/>
                 </td>
