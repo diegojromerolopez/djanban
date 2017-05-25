@@ -441,7 +441,7 @@ class Member(models.Model):
         # If the member has an user and therefore, an email, get its gravatar
         if self.user:
             current_request = CrequestMiddleware.get_request()
-            return "http://www.gravatar.com/avatar/{0}?s={1}&d={2}".format(
+            return "https://www.gravatar.com/avatar/{0}?s={1}&d={2}".format(
                 hashlib.md5(self.user.email.encode('utf-8')).hexdigest(),
                 size,
                 current_request.build_absolute_uri(self.default_avatar.url)
