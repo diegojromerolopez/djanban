@@ -521,6 +521,11 @@ class Board(models.Model):
 
         start_date = self.get_working_start_date()
         end_date = self.get_working_start_date()
+        # In case there is no working start date or working start date, it is impossible
+        # to compute the mood vale, so we return None
+        if start_date is None or end_date is None:
+            return None
+
         date_i = copy.deepcopy(start_date)
 
         for member in members:

@@ -46,17 +46,26 @@
             </h1>
 
             {% with mood_value=board.mood_value %}
-                <div class="board-mood cursor-help" title="This is the mood of the project, a subjective measurement of how the developers feel">
-                    <span class="board-mood-face">
-                        {% if mood_value > 0 %}
-                            <span class="fa fa-2x fa-smile-o"></span>
-                        {% elif mood_value < 0 %}
-                            <span class="fa fa-2x fa-frown-o"></span>
-                        {% else %}
-                            <span class="fa fa-2x fa-meh-o"></span>
-                        {% endif %}
-                    </span>
-                    <span class="board-mood-value">{{mood_value}}</span>
+                <div class="board-mood cursor-help"
+                     {% if mood_value != None %}
+                        title="This is the mood of the project, a subjective measurement of how the developers feel."
+                     {% else %}
+                        title="This is the mood of the project, a subjective measurement of how the developers feel. Start working in this project and introduce mood values to view it."
+                    {% endif %}>
+                    {% if mood_value != None %}
+                        <span class="board-mood-face">
+                            {% if mood_value > 0 %}
+                                <span class="fa fa-2x fa-smile-o"></span>
+                            {% elif mood_value < 0 %}
+                                <span class="fa fa-2x fa-frown-o"></span>
+                            {% else %}
+                                <span class="fa fa-2x fa-meh-o"></span>
+                            {% endif %}
+                        </span>
+                        <span class="board-mood-value">{{mood_value}}</span>
+                    {% else %}
+                        <span class="fa fa-2x fa-frown-o"></span> <span class="fa fa-2x fa-question"></span>
+                    {% endif %}
                 </div>
             {% endwith %}
         </div>
