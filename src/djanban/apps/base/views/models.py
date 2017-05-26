@@ -42,7 +42,7 @@ def edit(request, instance, form_class, template_path, ok_url, extra_form_parame
 
 
 # Delete an object
-def delete(request, instance, form_class, next_url, template_path="base/forms/delete.html"):
+def delete(request, instance, form_class, next_url, template_path="base/forms/delete.html", template_replacements=None):
     if request.method == "POST":
         form = form_class(request.POST)
 
@@ -54,4 +54,8 @@ def delete(request, instance, form_class, next_url, template_path="base/forms/de
         form = form_class()
 
     instance.meta_verbose_name = instance._meta.verbose_name
-    return render(request, template_path, {"form": form, "instance": instance})
+
+    replacements = {"form": form, "instance": instance}
+    if template_replacements:
+        replacements.update(template_replacements)
+    return render(request, template_path, replacements)

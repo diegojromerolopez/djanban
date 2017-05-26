@@ -1,9 +1,29 @@
 {% extends "base/base.html" %}
+{% load staticfiles %}
+
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'css/work_hours_packages/list.css' %}" rel="stylesheet" />
+{% endblock css %}
 
 {% block page_title %}Work hours packages{% endblock %}
 
 {% block content %}
     <h1>Work hours packages</h1>
+    <div class="row">
+        <div class="panel col-md-12">
+            <p>
+                A <strong>work hours package</strong> is a <em>bag of hours</em>
+                or a defined support/development number of hours that a client has paid for a particular project.
+                Each work hours package can be associated to a board, multiboard or even a label.
+            </p>
+            <p>
+                All members of a work hours package will be automatically notified of its completion. You can also add
+                an optional additional recipient email. To force the sent of the notifications, click on
+                <strong>Notify completions</strong>.
+            </p>
+        </div>
+    </div>
     <div class="board_list_list">
         <div class="row">
             <div class="panel col-md-12">
@@ -11,6 +31,10 @@
                     <div>
                         <p>
                             <a href="{% url 'work_hours_packages:new' %}" class="btn btn-success">New</a>
+                            <a href="{% url 'work_hours_packages:notify_completions' %}" class="btn btn-warning">
+                                <span class="fa fa-envelope"></span>
+                                Notify completions
+                            </a>
                         </p>
                     </div>
                 {% endif %}
@@ -43,6 +67,9 @@
                                 <td>
                                     {% if work_hours_package.board %}
                                         <a href="{% url 'boards:view_board' work_hours_package.board.id %}">
+                                            <img class="board-identicon"
+                                                 src="{% url 'boards:view_identicon' work_hours_package.board.id %}"
+                                                 alt="{{work_hours_package.board.name}}" />
                                             {{work_hours_package.board.name}}
                                         </a>
                                     {% elif work_hours_package.multiboard %}
@@ -55,15 +82,46 @@
                                         </a>
                                     {% endif %}
                                 </td>
-                                <td>{{work_hours_package.name}}</td>
                                 <td>
-                                    {% with current_spent_time=work_hours_package.get_adjusted_spent_time %}
-                                        {% if current_spent_time > work_hours_package.number_of_hours %}
-                                            <strong>{{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.</strong>
+                                    <a href="{% url 'work_hours_packages:view' work_hours_package.id %}"
+                                       title="View work hours package {{work_hours_package.name}}">
+                                        {{work_hours_package.name}}
+                                    </a>
+                                </td>
+                                <td>
+                                    <div>
+                                        {% with current_spent_time=work_hours_package.get_adjusted_spent_time %}
+                                            {% if current_spent_time > work_hours_package.number_of_hours %}
+                                                {% if not work_hours_package.completion_notification_datetime %}
+                                                    <strong class="notification-pending cursor-help"
+                                                            title="This package has a pending notification. Click on notify completions button to send it.">
+                                                        <span class="fa fa-exclamation-triangle"></span>
+                                                        {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
+                                                    </strong>
+                                                {% else %}
+                                                    {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
+                                                {% endif %}
+                                            {% else %}
+                                                {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                    <div>
+                                        {% if work_hours_package.completion_notification_datetime %}
+                                            Notified on {{work_hours_package.completion_notification_datetime}}
                                         {% else %}
-                                            {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
+                                            {% if work_hours_package.notify_on_completion %}
+                                                Will be notified
+                                                {% if work_hours_package.notification_email %}
+                                                    (members & {{work_hours_package.notification_email}})
+                                                {% else %}
+                                                    (only members)
+                                                {% endif %}
+                                            {% else %}
+                                                Will not be notified
+                                            {% endif %}
                                         {% endif %}
-                                    {% endwith %}
+                                    </div>
                                 </td>
                                 <td>{{work_hours_package.start_work_date}}
                                     {% if work_hours_package.end_work_date %}
@@ -79,14 +137,20 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'work_hours_packages:view' work_hours_package.id %}" title="View work hours package {{work_hours_package.name}}">
+                                    <a href="{% url 'work_hours_packages:view' work_hours_package.id %}"
+                                       title="View work hours package {{work_hours_package.name}}"
+                                       class="btn btn-primary">
                                         <span class="fa fa-eye"></span>
                                     </a>
                                     {% if member %}
-                                        <a href="{% url 'work_hours_packages:edit' work_hours_package.id %}" title="Edit work hours package {{work_hours_package.name}}">
+                                        <a href="{% url 'work_hours_packages:edit' work_hours_package.id %}"
+                                           title="Edit work hours package {{work_hours_package.name}}"
+                                            class="btn btn-primary">
                                             <span class="fa fa-pencil"></span>
                                         </a>
-                                        <a href="{% url 'work_hours_packages:delete' work_hours_package.id %}" title="Delete work hours package {{work_hours_package.name}}">
+                                        <a href="{% url 'work_hours_packages:delete' work_hours_package.id %}"
+                                           title="Delete work hours package {{work_hours_package.name}}"
+                                           class="btn btn-danger">
                                             <span class="fa fa-trash"></span>
                                         </a>
                                     {% endif %}

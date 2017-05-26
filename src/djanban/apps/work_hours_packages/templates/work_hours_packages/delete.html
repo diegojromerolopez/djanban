@@ -3,6 +3,7 @@
 {% block page_title %}Delete work hours package {{instance.full_name}}{% endblock %}
 
 {% block content %}
+    {% include "work_hours_packages/components/go_back.html" %}
     <h1>Delete work hours package {{instance.full_name}}</h1>
     {% include "forms/form.html" %}
 {% endblock content %}

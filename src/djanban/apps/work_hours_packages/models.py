@@ -5,6 +5,11 @@ from django.db import models
 
 
 # A package of work hours: support, development or whatever type of work a client needs.
+from django.utils import timezone
+
+from djanban.apps.dev_times.models import DailySpentTime
+
+
 class WorkHoursPackage(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="work_hours_packages", null=True, default=None, blank=True)
     multiboard = models.ForeignKey("multiboards.Multiboard", verbose_name=u"Multiboard", related_name="work_hours_packages", null=True, default=None, blank=True)
@@ -12,7 +17,9 @@ class WorkHoursPackage(models.Model):
 
     name = models.CharField(max_length=256, verbose_name=u"Name of this package")
 
+    notify_on_completion = models.BooleanField(verbose_name=u"Notify the members and this email on completion", default=False, blank=True)
     notification_email = models.EmailField(verbose_name=u"Notification email when number of hours is reached", default="", blank=True)
+    completion_notification_datetime = models.DateTimeField(verbose_name=u"Notification was sent in this date and time", default=None, null=True, blank=True)
 
     description = models.TextField(
         verbose_name=u"Description of this package",
@@ -36,6 +43,7 @@ class WorkHoursPackage(models.Model):
     creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_work_hours_packages")
     members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="work_hours_packages", blank=True)
 
+    @property
     def full_name(self):
         if self.start_work_date and self.end_work_date:
             return "{0} {1}-{2}".format(self.name, self.start_work_date, self.end_work_date)
@@ -72,3 +80,39 @@ class WorkHoursPackage(models.Model):
         if self.multiboard:
             return self.multiboard.get_adjusted_spent_time(date=date_interval)
         raise ValueError("This work hours package is not defined for a (multi)board or label")
+
+    # Get the daily spent times associated with this work hour package
+    @property
+    def daily_spent_times(self):
+        daily_spent_time_filter = {"date__gte": self.start_work_date}
+        if self.end_work_date:
+            daily_spent_time_filter["date__lte"] = self.end_work_date
+        if self.board:
+            daily_spent_time_filter["board"] = self.board
+        elif self.multiboard:
+            daily_spent_time_filter["board__in"] = [board.id for board in self.multiboard.boards.all()]
+        elif self.label:
+            daily_spent_time_filter["board"] = self.label.board
+            daily_spent_time_filter["card__labels"] = self.label
+        daily_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter)
+        return daily_spent_times
+
+    # Get the date of the last spent time measurement
+    @property
+    def completion_date(self):
+        # In case this package has not been spent, there is not a completion date
+        adjusted_time = self.get_adjusted_spent_time()
+        if adjusted_time < self.number_of_hours:
+            return None
+        # Otherwise, get the last daily spent time measurement date of the measurements that
+        # belong to the package interval
+        try:
+            last_daily_spent_time_in_this_work_package = self.daily_spent_times.order_by("-date")[0]
+        except IndexError:
+            return None
+        return last_daily_spent_time_in_this_work_package.date
+
+    # Mark this work hours package completion notification as sent to its members
+    def mark_completion_notification_as_sent(self):
+        self.completion_notification_datetime = timezone.now()
+        self.save()

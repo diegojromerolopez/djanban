@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from django.core.exceptions import ValidationError
 
 from djanban.apps.base.auth import get_member_boards
+from djanban.apps.work_hours_packages.management.commands.notify_work_hours_package_completions import Command
 from djanban.apps.work_hours_packages.models import WorkHoursPackage
 from django import forms
 from ckeditor.widgets import CKEditorWidget
@@ -17,7 +18,8 @@ class WorkHoursPackageForm(forms.ModelForm):
         fields = [
             "board", "multiboard", "label", "name", "description", "number_of_hours",
             "start_work_date", "end_work_date",
-            "members", "is_paid", "payment_date", "notification_email"
+            "members", "is_paid", "payment_date",
+            "notify_on_completion", "notification_email"
         ]
         widgets = {
             'start_work_date': forms.SelectDateWidget(),
@@ -83,6 +85,20 @@ class WorkHoursPackageForm(forms.ModelForm):
         if commit:
             if not self.instance.members.filter(id=self.instance.creator.id).exists():
                 self.instance.members.add(self.instance.creator)
+
+
+# Sent completion notifications form
+class NotificationCompletionSenderForm(forms.Form):
+    confirmed = forms.BooleanField(label=u"Confirm you want to send completion notifications")
+
+    def __init__(self, *args, **kwargs):
+        self.member = kwargs.pop("member")
+        super(NotificationCompletionSenderForm, self).__init__(*args, **kwargs)
+
+    def send(self):
+        command = Command()
+        command.handle()
+
 
 # Delete work hours package form
 class DeleteWorkHoursPackageForm(forms.Form):

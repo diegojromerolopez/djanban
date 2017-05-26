@@ -2,12 +2,12 @@
 
 from __future__ import unicode_literals
 
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
 from djanban.apps.base.decorators import member_required
-from djanban.apps.work_hours_packages.forms import WorkHoursPackageForm, DeleteWorkHoursPackageForm
+from djanban.apps.work_hours_packages.forms import WorkHoursPackageForm, DeleteWorkHoursPackageForm, NotificationCompletionSenderForm
 from djanban.apps.work_hours_packages.models import WorkHoursPackage
 from djanban.apps.base.views import models as model_views
 
@@ -41,6 +41,22 @@ def edit(request, work_hours_package_id):
     )
 
 
+@member_required
+def notify_completions(request):
+    member = request.user.member
+    if request.method == "POST":
+        form = NotificationCompletionSenderForm(request.POST, member=member)
+
+        if form.is_valid():
+            form.send()
+            return HttpResponseRedirect(reverse("work_hours_packages:view_list"))
+    else:
+        form = NotificationCompletionSenderForm(member=member)
+
+    replacements = {"form": form, "member": member}
+    return render(request, "work_hours_packages/notify_completions.html", replacements)
+
+
 # View a work hours package
 @member_required
 def view(request, work_hours_package_id):
@@ -72,5 +88,6 @@ def delete(request, work_hours_package_id):
         raise Http404
     return model_views.delete(
         request, instance=work_hours_package, form_class=DeleteWorkHoursPackageForm,
-        next_url=reverse("work_hours_packages:view_list")
+        next_url=reverse("work_hours_packages:view_list"),
+        template_path="work_hours_packages/delete.html", template_replacements={"member":member}
     )
