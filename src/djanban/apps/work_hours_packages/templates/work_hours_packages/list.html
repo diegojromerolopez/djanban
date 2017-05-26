@@ -89,39 +89,41 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <div>
-                                        {% with current_spent_time=work_hours_package.get_adjusted_spent_time %}
-                                            {% if current_spent_time > work_hours_package.number_of_hours %}
-                                                {% if not work_hours_package.completion_notification_datetime %}
-                                                    <strong class="notification-pending cursor-help"
-                                                            title="This package has a pending notification. Click on notify completions button to send it.">
-                                                        <span class="fa fa-exclamation-triangle"></span>
+                                    {% with completion_notification_datetime=work_hours_package.completion_notification_datetime %}
+                                        <div>
+                                            {% with current_spent_time=work_hours_package.get_adjusted_spent_time %}
+                                                {% if current_spent_time > work_hours_package.number_of_hours %}
+                                                    {% if not completion_notification_datetime %}
+                                                        <strong class="notification-pending cursor-help"
+                                                                title="This package has a pending notification. Click on notify completions button to send it.">
+                                                            <span class="fa fa-exclamation-triangle"></span>
+                                                            {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
+                                                        </strong>
+                                                    {% else %}
                                                         {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
-                                                    </strong>
+                                                    {% endif %}
                                                 {% else %}
                                                     {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
                                                 {% endif %}
+                                            {% endwith %}
+                                        </div>
+                                        <div>
+                                            {% if completion_notification_datetime %}
+                                                Notified on {{work_hours_package.completion_notification_datetime}}
                                             {% else %}
-                                                {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
-                                            {% endif %}
-                                        {% endwith %}
-                                    </div>
-                                    <div>
-                                        {% if work_hours_package.completion_notification_datetime %}
-                                            Notified on {{work_hours_package.completion_notification_datetime}}
-                                        {% else %}
-                                            {% if work_hours_package.notify_on_completion %}
-                                                Will be notified
-                                                {% if work_hours_package.notification_email %}
-                                                    (members & {{work_hours_package.notification_email}})
+                                                {% if work_hours_package.notify_on_completion %}
+                                                    Will be notified
+                                                    {% if work_hours_package.notification_email %}
+                                                        (members & {{work_hours_package.notification_email}})
+                                                    {% else %}
+                                                        (only members)
+                                                    {% endif %}
                                                 {% else %}
-                                                    (only members)
+                                                    Will not be notified
                                                 {% endif %}
-                                            {% else %}
-                                                Will not be notified
                                             {% endif %}
-                                        {% endif %}
-                                    </div>
+                                        </div>
+                                    {% endwith %}
                                 </td>
                                 <td>{{work_hours_package.start_work_date}}
                                     {% if work_hours_package.end_work_date %}
