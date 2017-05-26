@@ -285,7 +285,7 @@ class Board(models.Model):
 
     # Returns the developed time (spent time or adjusted spent time).
     # Do not use this method outside this class.
-    def _get_developed_time(self, attr="spent_time", date=None, member=None):
+    def _get_developed_time(self, attr="spent_time", date=None, member=None, label=None):
         daily_spent_times_filter = {}
         if date:
             if type(date) == tuple or type(date) == list:
@@ -297,6 +297,9 @@ class Board(models.Model):
         member_filter = {}
         if member:
             member_filter["member"] = member
+
+        if label:
+            daily_spent_times_filter["card__labels"] = label
 
         sum_time = self.daily_spent_times. \
             filter(**daily_spent_times_filter). \
@@ -554,7 +557,7 @@ class Board(models.Model):
         self.save()
         return self.last_mood_value
 
-    # Archive locally this board
+    # Archive lo this board
     def archive(self):
         self.is_archived = True
         self.save()
@@ -1695,6 +1698,14 @@ class Label(models.Model):
         avg_lead_time = self.cards.filter(**kwargs).aggregate(Avg("lead_time"))["lead_time__avg"]
         return avg_lead_time
 
+    # Returns the spent time for this label
+    def get_spent_time(self, date=None, member=None):
+        return self.board._get_developed_time(attr="spent_time", date=date, member=member, label=self)
+
+    # Returns the adjusted spent time according to the spent time factor defined in each member for this label
+    def get_adjusted_spent_time(self, date=None, member=None):
+        return self.board._get_developed_time(attr="adjusted_spent_time", date=date, member=member, label=self)
+
     @staticmethod
     def create_default_labels(board):
         default_labels = []
@@ -1703,6 +1714,7 @@ class Label(models.Model):
             label.save()
             default_labels.append(label)
         return default_labels
+
 
 
 # List of the task board

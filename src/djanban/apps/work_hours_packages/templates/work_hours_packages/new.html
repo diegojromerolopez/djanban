@@ -1,0 +1,8 @@
+{% extends "work_hours_packages/form.html" %}
+
+{% block page_title %}New work hours package {{instance.full_name}}{% endblock %}
+
+{% block content %}
+    <h1>New work hours package {{instance.full_name}}</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}

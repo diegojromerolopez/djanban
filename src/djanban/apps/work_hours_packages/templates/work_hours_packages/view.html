@@ -1,0 +1,98 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Work hours package {{work_hours_package.full_name}}{% endblock %}
+
+{% block content %}
+    {% with current_spent_time=work_hours_package.get_adjusted_spent_time %}
+        <div class="row">
+            <div class="col-md-12 card">
+                <div class="panel panel-{% if current_spent_time < work_hours_package.number_of_hours %}info{% elif current_spent_time == work_hours_package.number_of_hours %}warning{% else %}danger{% endif %}">
+                  <div class="panel-heading">
+                      <h1>{{work_hours_package.full_name}}</h1>
+                  </div>
+                  <div class="panel-body row">
+                      <div class="col-md-12">
+                          <div class="actions">
+                                {% if member %}
+                                    <a href="{% url 'work_hours_packages:edit' work_hours_package.id %}" title="Edit work hours package {{work_hours_package.full_name}}">
+                                        <span class="fa fa-pencil"></span>
+                                    </a>
+                                    <a href="{% url 'work_hours_packages:delete' work_hours_package.id %}" title="Delete work hours package {{work_hours_package.full_name}}">
+                                        <span class="fa fa-trash"></span>
+                                    </a>
+                              {% endif %}
+                          </div>
+
+
+
+                          <div class="row">
+                               <div class="col-md-12 description">
+                                <div class="panel panel-info">
+                                      <div class="panel-heading">
+                                          Notification email
+                                      </div>
+                                    <div class="panel-body">
+                                        {% if work_hours_package.notification_email %}
+                                            In case the number of hours {{work_hours_package.number_of_hours}} is reached,
+                                            send an email to {{notification_email}}
+                                        {% else %}
+                                            No notification when reaching {{work_hours_package.number_of_hours}} number of hours will be sent.
+                                        {% endif %}
+                                    </div>
+                               </div>
+                            </div>
+                          </div>
+
+                          <div class="row">
+                               <div class="col-md-12 description">
+                                <div class="panel panel-info">
+                                      <div class="panel-heading">
+                                          Description
+                                      </div>
+                                    <div class="panel-body">
+                                        {{work_hours_package.description|safe}}
+                                    </div>
+                               </div>
+                            </div>
+                          </div>
+
+                          <div class="row">
+                               <div class="col-md-12 description">
+                                <div class="panel panel-info">
+                                      <div class="panel-heading">
+                                          Dates
+                                      </div>
+                                    <div class="panel-body">
+                                        {% if work_hours_package.end_work_date %}
+                                            {{work_hours_package.start_work_date}} to {{work_hours_package.end_work_date}}
+                                        {% else %}
+                                            From {{work_hours_package.start_work_date}}
+                                        {% endif %}
+                                    </div>
+                               </div>
+                            </div>
+                          </div>
+
+                          <div class="row">
+                               <div class="col-md-12 description">
+                                <div class="panel panel-info">
+                                      <div class="panel-heading">
+                                          Number of hours (spent time / paid time)
+                                      </div>
+                                    <div class="panel-body">
+                                        {% if current_spent_time > work_hours_package.number_of_hours %}
+                                            <strong>{{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} hours</strong>
+                                        {% else %}
+                                            {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} hours
+                                        {% endif %}
+                                    </div>
+                               </div>
+                            </div>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+    {% endwith %}
+{% endblock content %}

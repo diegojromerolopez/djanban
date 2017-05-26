@@ -86,6 +86,20 @@ class Multiboard(models.Model):
             active_list_types.append("done")
         return active_list_types
 
+    # Returns the spent times for this multiboard
+    def get_spent_time(self, date=None, member=None):
+        board_spent_time = 0
+        for board_i in self.boards.all():
+            board_spent_time += board_i._get_developed_time(attr="spent_time", date=date, member=member)
+        return board_spent_time
+
+    # Returns the adjusted spent time according to the spent time factor defined in each member for this multiboard
+    def get_adjusted_spent_time(self, date=None, member=None):
+        board_spent_time = 0
+        for board_i in self.boards.all():
+            board_spent_time += board_i._get_developed_time(attr="adjusted_spent_time", date=date, member=member)
+        return board_spent_time
+
     # Return the tasks that belongs to this multiboard grouped by list types
     @property
     def tasks_by_list_type(self):

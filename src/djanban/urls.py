@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^slideshow/', include('djanban.apps.slideshow.urls', namespace="slideshow")),
     url(r'^visitors/', include('djanban.apps.visitors.urls', namespace="visitors")),
     url(r'^niko-niko-calendar/', include('djanban.apps.niko_niko_calendar.urls', namespace="niko_niko_calendar")),
+    url(r'^work-hours-packages/', include('djanban.apps.work_hours_packages.urls', namespace="work_hours_packages")),
 
     url(r'^async_include/', include('async_include.urls', namespace="async_include")),
 

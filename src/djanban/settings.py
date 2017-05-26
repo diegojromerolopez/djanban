@@ -113,6 +113,7 @@ INSTALLED_APPS = [
     'djanban.apps.requirements',
     'djanban.apps.slideshow',
     'djanban.apps.visitors',
+    'djanban.apps.work_hours_packages',
     'djanban.apps.workflows',
 ]
 

@@ -74,13 +74,18 @@
                         </li>
                         <li role="presentation" {% if url_namespace == "visitors" %}class="active"{% endif %}>
                             <a href="{% url 'visitors:view_list' %}" title="Visitors">
-                                <span class="fa fa-smile-o"></span> Visitors
+                                <span class="fa fa-user-o"></span>
                             </a>
                         </li>
                         <li role="presentation" {% if url_name == "view_hourly_rates" %}class="active"{% endif %}>
                            <a href="{% url 'hourly_rates:view_hourly_rates' %}" title="View available hourly rates">
                                <span class="fa fa-usd"></span> HRs
                            </a>
+                        </li>
+                        <li role="presentation" {% if url_namespace == "work_hours_packages" %}class="active"{% endif %}>
+                            <a href="{% url 'work_hours_packages:view_list' %}" title="Work hours packages">
+                                <span class="fa fa-fire-extinguisher"></span>
+                            </a>
                         </li>
                         {% if member.has_trello_credentials %}
                             <li role="presentation" {% if url_name == "fetch_boards" %}class="active"{% endif %}>
