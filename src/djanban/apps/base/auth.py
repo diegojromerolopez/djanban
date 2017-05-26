@@ -56,4 +56,6 @@ def get_user_boards(user, is_archived=False):
 
 # Return the boards of a member
 def get_member_boards(member, is_archived=False):
+    if is_archived is None:
+        return member.boards.all().order_by("name")
     return member.boards.filter(is_archived=is_archived).order_by("name")

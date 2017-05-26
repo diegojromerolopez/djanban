@@ -50,7 +50,8 @@ a {
 
 #header .last_comments .last_comment .comment_content {
     overflow-wrap: break-word;
-    width: 450px;
+    max-width: 450px;
+    min-width: 250px;
 }
 
 /* Notifications */

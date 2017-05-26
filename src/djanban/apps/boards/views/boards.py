@@ -348,7 +348,7 @@ def edit(request, board_id):
 @login_required
 def view_identicon(request, board_id, width=40, height=40):
     try:
-        board = get_user_boards(request.user).get(id=board_id)
+        board = get_user_boards(request.user, is_archived=None).get(id=board_id)
     except Board.DoesNotExist:
         raise Http404
 
@@ -524,12 +524,12 @@ def archive(request, board_id):
     member = request.user.member
     board = member.boards.get(id=board_id, is_archived=False)
 
-    # Show delete form
+    # Show archive form
     if request.method == "GET":
         replacements = {"member": member, "board": board}
         return render(request, "boards/archive.html", replacements)
 
-    # Delete action by post
+    # Archive action by post
     confirmed_board_id = request.POST.get("board_id")
     if confirmed_board_id and confirmed_board_id == board_id:
         board.archive()
