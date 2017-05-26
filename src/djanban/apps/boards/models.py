@@ -554,7 +554,7 @@ class Board(models.Model):
         self.save()
         return self.last_mood_value
 
-    # Archive this board
+    # Archive locally this board
     def archive(self):
         self.is_archived = True
         self.save()

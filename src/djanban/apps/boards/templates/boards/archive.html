@@ -9,8 +9,8 @@
         <div class="panel panel-danger ">
           <div class="panel-heading">Board archiving</div>
           <div class="panel-body">
-            This board will be archived. Are you sure?
-
+              <p>This board will be archived only in Djanban. Are you sure?</p>
+              <p>Archived boards will not be showed in your dashboard but you can un-archive them when you want.</p>
               <form action="{% url 'boards:archive' board.id %}" method="post">
                 <input type="hidden" name="board_id" value="{{board.id}}"/>
                 <button type="submit" class="btn btn-danger">I am sure, archive board</button>
