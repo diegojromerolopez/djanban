@@ -120,6 +120,14 @@ class EditListForm(models.ModelForm):
     def __init__(self, *args, **kwargs):
         super(EditListForm, self).__init__(*args, **kwargs)
 
+    # Avoid having several "done" lists in a board
+    def clean_type(self):
+        list_type = self.cleaned_data["type"]
+        if list_type == "done" and self.instance.board.lists.filter(type="done").count() > 1:
+            raise ValidationError(u"Only one 'done' list is allowed. If you want to make this the 'done' list,"
+                                  u"change before the type of the other list")
+        return list_type
+
     def save(self, commit=True):
         if commit:
             with transaction.atomic():
