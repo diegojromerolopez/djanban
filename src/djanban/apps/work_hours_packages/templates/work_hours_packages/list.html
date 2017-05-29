@@ -24,6 +24,11 @@
             </p>
         </div>
     </div>
+    <div class="row">
+        <div class="panel col-md-12">
+            {% include "forms/filter.html" %}
+        </div>
+    </div>
     <div class="board_list_list">
         <div class="row">
             <div class="panel col-md-12">
@@ -112,7 +117,10 @@
                                             </div>
                                             <div>
                                                 {% if completion_notification_datetime %}
-                                                    Notified on {{work_hours_package.completion_notification_datetime}}
+                                                    <strong class="notification-sent">
+                                                        <span class="fa fa-thumbs-up fa-flip-horizontal"></span>
+                                                        Notified on {{work_hours_package.completion_notification_datetime}}
+                                                    </strong>
                                                 {% else %}
                                                     {% if work_hours_package.notify_on_completion %}
                                                         Will be notified

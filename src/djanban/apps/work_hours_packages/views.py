@@ -7,7 +7,8 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
 from djanban.apps.base.decorators import member_required
-from djanban.apps.work_hours_packages.forms import WorkHoursPackageForm, DeleteWorkHoursPackageForm, NotificationCompletionSenderForm
+from djanban.apps.work_hours_packages.forms import WorkHoursPackageForm, DeleteWorkHoursPackageForm, \
+    NotificationCompletionSenderForm, WorkHoursPackageFilterForm
 from djanban.apps.work_hours_packages.models import WorkHoursPackage
 from djanban.apps.base.views import models as model_views
 
@@ -69,12 +70,16 @@ def view(request, work_hours_package_id):
     return render(request, "work_hours_packages/view.html", replacements)
 
 
-# View a work hours package
+# View all work hours packages
 @member_required
 def view_list(request):
     member = request.user.member
-    work_hours_packages = member.work_hours_packages.all().order_by("start_work_date", "end_work_date", "name")
-    replacements = {"work_hours_packages": work_hours_packages, "member": member}
+    form = WorkHoursPackageFilterForm(request.GET, member=member)
+    if form.is_valid():
+        work_hours_packages = form.get_work_hours_packages()
+    else:
+        work_hours_packages = member.work_hours_packages.all().order_by("start_work_date", "end_work_date", "name")
+    replacements = {"work_hours_packages": work_hours_packages, "member": member, "form": form}
     return render(request, "work_hours_packages/list.html", replacements)
 
 

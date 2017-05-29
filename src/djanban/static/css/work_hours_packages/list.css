@@ -2,6 +2,10 @@
     color: #d9534f;
 }
 
+.notification-sent {
+    color: #5cb85c;
+}
+
 table .board-identicon {
     height: 20px;
     width: 20px;
