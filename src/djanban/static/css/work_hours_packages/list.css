@@ -1,3 +1,13 @@
 .notification-pending {
     color: #d9534f;
 }
+
+table .board-identicon {
+    height: 20px;
+    width: 20px;
+}
+
+table .board-identicon,
+table .board-name {
+    display: block;
+}

@@ -42,123 +42,127 @@
                     No work hours packages set.
                 {% else %}
                     <table class="table">
-                        <tr>
-                            <td>Id</td>
-                            <td>Type</td>
-                            <td>(Multi)board/Label</td>
-                            <td>Name</td>
-                            <td>Completion</td>
-                            <td>Dates</td>
-                            <td>Paid</td>
-                            <td>Actions</td>
-                        </tr>
-                        {% for work_hours_package in work_hours_packages %}
+                        <thead>
                             <tr>
-                                <td>#{{work_hours_package.id}}</td>
-                                <td>
-                                    {% if work_hours_package.type == "multiboard" %}
-                                        Multiboard
-                                    {% elif work_hours_package.type == "board" %}
-                                        Board
-                                    {% elif work_hours_package.type == "label" %}
-                                        Label
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if work_hours_package.board %}
-                                        <a href="{% url 'boards:view_board' work_hours_package.board.id %}">
-                                            <img class="board-identicon"
-                                                 src="{% url 'boards:view_identicon' work_hours_package.board.id %}"
-                                                 alt="{{work_hours_package.board.name}}" />
-                                            {{work_hours_package.board.name}}
+                                <th>Id</th>
+                                <th>Type</th>
+                                <th>(Multi)board/Label</th>
+                                <th>Name</th>
+                                <th>Completion</th>
+                                <th>Dates</th>
+                                <th>Paid</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for work_hours_package in work_hours_packages %}
+                                <tr>
+                                    <td>#{{work_hours_package.id}}</td>
+                                    <td>
+                                        {% if work_hours_package.type == "multiboard" %}
+                                            Multiboard
+                                        {% elif work_hours_package.type == "board" %}
+                                            Board
+                                        {% elif work_hours_package.type == "label" %}
+                                            Label
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if work_hours_package.board %}
+                                            <a href="{% url 'boards:view_board' work_hours_package.board.id %}">
+                                                <img class="board-identicon"
+                                                     src="{% url 'boards:view_identicon' work_hours_package.board.id %}"
+                                                     alt="{{work_hours_package.board.name}}" />
+                                                <span class="board-name">{{work_hours_package.board.name}}</span>
+                                            </a>
+                                        {% elif work_hours_package.multiboard %}
+                                            <a href="{% url 'multiboards:view' work_hours_package.multiboard.id %}">
+                                                {{work_hours_package.multiboard.name}}
+                                            </a>
+                                        {% elif work_hours_package.label %}
+                                            <a href="{% url 'boards:view' work_hours_package.label.board_id %}">
+                                                {{work_hours_package.label.board.name}} - {{work_hours_package.label.name}}
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'work_hours_packages:view' work_hours_package.id %}"
+                                           title="View work hours package {{work_hours_package.name}}">
+                                            {{work_hours_package.name}}
                                         </a>
-                                    {% elif work_hours_package.multiboard %}
-                                        <a href="{% url 'multiboards:view' work_hours_package.multiboard.id %}">
-                                            {{work_hours_package.multiboard.name}}
-                                        </a>
-                                    {% elif work_hours_package.label %}
-                                        <a href="{% url 'boards:view' work_hours_package.label.board_id %}">
-                                            {{work_hours_package.label.board.name}} - {{work_hours_package.label.name}}
-                                        </a>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <a href="{% url 'work_hours_packages:view' work_hours_package.id %}"
-                                       title="View work hours package {{work_hours_package.name}}">
-                                        {{work_hours_package.name}}
-                                    </a>
-                                </td>
-                                <td>
-                                    {% with completion_notification_datetime=work_hours_package.completion_notification_datetime %}
-                                        <div>
-                                            {% with current_spent_time=work_hours_package.get_adjusted_spent_time %}
-                                                {% if current_spent_time > work_hours_package.number_of_hours %}
-                                                    {% if not completion_notification_datetime %}
-                                                        <strong class="notification-pending cursor-help"
-                                                                title="This package has a pending notification. Click on notify completions button to send it.">
-                                                            <span class="fa fa-exclamation-triangle"></span>
+                                    </td>
+                                    <td>
+                                        {% with completion_notification_datetime=work_hours_package.completion_notification_datetime %}
+                                            <div>
+                                                {% with current_spent_time=work_hours_package.get_adjusted_spent_time %}
+                                                    {% if current_spent_time > work_hours_package.number_of_hours %}
+                                                        {% if not completion_notification_datetime %}
+                                                            <strong class="notification-pending cursor-help"
+                                                                    title="This package has a pending notification. Click on notify completions button to send it.">
+                                                                <span class="fa fa-exclamation-triangle"></span>
+                                                                {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
+                                                            </strong>
+                                                        {% else %}
                                                             {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
-                                                        </strong>
+                                                        {% endif %}
                                                     {% else %}
                                                         {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
                                                     {% endif %}
+                                                {% endwith %}
+                                            </div>
+                                            <div>
+                                                {% if completion_notification_datetime %}
+                                                    Notified on {{work_hours_package.completion_notification_datetime}}
                                                 {% else %}
-                                                    {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
-                                                {% endif %}
-                                            {% endwith %}
-                                        </div>
-                                        <div>
-                                            {% if completion_notification_datetime %}
-                                                Notified on {{work_hours_package.completion_notification_datetime}}
-                                            {% else %}
-                                                {% if work_hours_package.notify_on_completion %}
-                                                    Will be notified
-                                                    {% if work_hours_package.notification_email %}
-                                                        (members & {{work_hours_package.notification_email}})
+                                                    {% if work_hours_package.notify_on_completion %}
+                                                        Will be notified
+                                                        {% if work_hours_package.notification_email %}
+                                                            (members & {{work_hours_package.notification_email}})
+                                                        {% else %}
+                                                            (only members)
+                                                        {% endif %}
                                                     {% else %}
-                                                        (only members)
+                                                        Will not be notified
                                                     {% endif %}
-                                                {% else %}
-                                                    Will not be notified
                                                 {% endif %}
-                                            {% endif %}
-                                        </div>
-                                    {% endwith %}
-                                </td>
-                                <td>{{work_hours_package.start_work_date}}
-                                    {% if work_hours_package.end_work_date %}
-                                        - {{work_hours_package.end_work_date}}
-                                    {% else %}
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if work_hours_package.is_paid %}
-                                        Yes {% if work_hours_package.payment_date %}({{work_hours_package.payment_date}}){% endif %}
-                                    {% else %}
-                                        No
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <a href="{% url 'work_hours_packages:view' work_hours_package.id %}"
-                                       title="View work hours package {{work_hours_package.name}}"
-                                       class="btn btn-primary">
-                                        <span class="fa fa-eye"></span>
-                                    </a>
-                                    {% if member %}
-                                        <a href="{% url 'work_hours_packages:edit' work_hours_package.id %}"
-                                           title="Edit work hours package {{work_hours_package.name}}"
-                                            class="btn btn-primary">
-                                            <span class="fa fa-pencil"></span>
+                                            </div>
+                                        {% endwith %}
+                                    </td>
+                                    <td>{{work_hours_package.start_work_date}}
+                                        {% if work_hours_package.end_work_date %}
+                                            - {{work_hours_package.end_work_date}}
+                                        {% else %}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if work_hours_package.is_paid %}
+                                            Yes {% if work_hours_package.payment_date %}({{work_hours_package.payment_date}}){% endif %}
+                                        {% else %}
+                                            No
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'work_hours_packages:view' work_hours_package.id %}"
+                                           title="View work hours package {{work_hours_package.name}}"
+                                           class="btn btn-primary">
+                                            <span class="fa fa-eye"></span>
                                         </a>
-                                        <a href="{% url 'work_hours_packages:delete' work_hours_package.id %}"
-                                           title="Delete work hours package {{work_hours_package.name}}"
-                                           class="btn btn-danger">
-                                            <span class="fa fa-trash"></span>
-                                        </a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
+                                        {% if member %}
+                                            <a href="{% url 'work_hours_packages:edit' work_hours_package.id %}"
+                                               title="Edit work hours package {{work_hours_package.name}}"
+                                                class="btn btn-primary">
+                                                <span class="fa fa-pencil"></span>
+                                            </a>
+                                            <a href="{% url 'work_hours_packages:delete' work_hours_package.id %}"
+                                               title="Delete work hours package {{work_hours_package.name}}"
+                                               class="btn btn-danger">
+                                                <span class="fa fa-trash"></span>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
                     </table>
                 {% endif %}
             </div>
