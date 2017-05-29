@@ -78,6 +78,7 @@ class WorkHoursPackageForm(forms.ModelForm):
         model = WorkHoursPackage
         fields = [
             "board", "multiboard", "label", "name", "description", "number_of_hours",
+            "offset_hours", "offset_hours_description",
             "start_work_date", "end_work_date",
             "members", "is_paid", "payment_date",
             "notify_on_completion", "notification_email"

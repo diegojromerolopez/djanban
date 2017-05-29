@@ -105,13 +105,25 @@
                                                             <strong class="notification-pending cursor-help"
                                                                     title="This package has a pending notification. Click on notify completions button to send it.">
                                                                 <span class="fa fa-exclamation-triangle"></span>
-                                                                {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
+                                                                {{current_spent_time|floatformat:"-2"}}
+                                                                {% if work_hours_package.offset_hours != 0 %}
+                                                                    <span class="offset">{% if work_hours_package.offset_hours > 0 %}+{% endif %} {{work_hours_package.offset_hours}}</span>
+                                                                {% endif %}
+                                                                / {{work_hours_package.number_of_hours}} h.
                                                             </strong>
                                                         {% else %}
-                                                            {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
+                                                            {{current_spent_time|floatformat:"-2"}}
+                                                            {% if work_hours_package.offset_hours != 0 %}
+                                                                <span class="offset">{% if work_hours_package.offset_hours > 0 %}+{% endif %} {{work_hours_package.offset_hours}}</span>
+                                                            {% endif %}
+                                                            / {{work_hours_package.number_of_hours}} h.
                                                         {% endif %}
                                                     {% else %}
-                                                        {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} h.
+                                                        {{current_spent_time|floatformat:"-2"}}
+                                                        {% if work_hours_package.offset_hours != 0 %}
+                                                            <span class="offset">{% if work_hours_package.offset_hours > 0 %}+{% endif %} {{work_hours_package.offset_hours}}</span>
+                                                        {% endif %}
+                                                        / {{work_hours_package.number_of_hours}} h.
                                                     {% endif %}
                                                 {% endwith %}
                                             </div>

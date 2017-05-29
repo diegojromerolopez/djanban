@@ -9,11 +9,25 @@ from djanban.apps.dev_times.models import DailySpentTime
 
 # A package of work hours: support, development or whatever type of work a client needs.
 class WorkHoursPackage(models.Model):
+
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="work_hours_packages", null=True, default=None, blank=True)
     multiboard = models.ForeignKey("multiboards.Multiboard", verbose_name=u"Multiboard", related_name="work_hours_packages", null=True, default=None, blank=True)
     label = models.ForeignKey("boards.Label", verbose_name=u"Label", related_name="work_hours_packages", null=True, default=None, blank=True)
 
     name = models.CharField(max_length=256, verbose_name=u"Name of this package")
+
+    offset_hours = models.DecimalField(
+        verbose_name=u"Offset hours",
+        help_text=u"This hours will be added as an initial offset of the spent time measurements "
+                  u"gotten in the date interval",
+        default=0, blank=True,
+        decimal_places=2, max_digits=10
+    )
+    offset_hours_description = models.TextField(
+        verbose_name="Offset hours description",
+        help_text=u"Provide a description of the tasks that were done in this hours",
+        default="", blank=True
+    )
 
     notify_on_completion = models.BooleanField(verbose_name=u"Notify the members and this email on completion", default=False, blank=True)
     notification_email = models.EmailField(verbose_name=u"Notification email when number of hours is reached", default="", blank=True)
@@ -25,9 +39,10 @@ class WorkHoursPackage(models.Model):
                   u"type of work the workers must do"
     )
 
-    number_of_hours = models.PositiveIntegerField(
+    number_of_hours = models.DecimalField(
         verbose_name=u"Number of hours",
-        help_text=u"Number of hours of this package."
+        help_text=u"Number of hours of this package.",
+        decimal_places=2, max_digits=10
     )
 
     is_paid = models.BooleanField(verbose_name=u"Is this package paid?",
@@ -98,17 +113,24 @@ class WorkHoursPackage(models.Model):
     # Get the date of the last spent time measurement
     @property
     def completion_date(self):
-        # In case this package has not been spent, there is not a completion date
+        last_daily_spent_time_in_this_work_package = self.last_daily_spent_time
+        if last_daily_spent_time_in_this_work_package:
+            return last_daily_spent_time_in_this_work_package.date
+        return None
+
+    # Get the last spent time measurement
+    @property
+    def last_daily_spent_time(self):
+        # In case this package has not been spent, there is not last daily spent time
         adjusted_time = self.get_adjusted_spent_time()
         if adjusted_time < self.number_of_hours:
             return None
         # Otherwise, get the last daily spent time measurement date of the measurements that
         # belong to the package interval
         try:
-            last_daily_spent_time_in_this_work_package = self.daily_spent_times.order_by("-date")[0]
+            return self.daily_spent_times.order_by("-date")[0]
         except IndexError:
             return None
-        return last_daily_spent_time_in_this_work_package.date
 
     # Mark this work hours package completion notification as sent to its members
     def mark_completion_notification_as_sent(self):

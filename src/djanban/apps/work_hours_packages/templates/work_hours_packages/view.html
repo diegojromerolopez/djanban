@@ -90,18 +90,22 @@
                                    <div class="col-md-12 description">
                                     <div class="panel panel-info">
                                           <div class="panel-heading">
-                                              Number of hours (spent time / paid time)
+                                              Number of hours (spent time [± offset] / paid time)
                                           </div>
                                         <div class="panel-body">
-                                            {% if current_spent_time >= work_hours_package.number_of_hours %}
+                                            {% if work_hours_package.offset_hours == 0 %}
                                                 <strong>{{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} hours</strong>
-                                                {% if completion_date %}
-                                                    <strong>Completed at {{completion_date}}</strong>
-                                                {% else %}
-                                                    No completion date yet.
-                                                {% endif %}
+                                            {% elif work_hours_package.offset_hours != 0 %}
+                                                <strong>
+                                                    {{current_spent_time|floatformat:"-2"}}
+                                                    <span>{% if work_hours_package.offset_hours > 0 %}+{% endif %} {{work_hours_package.offset_hours}}</span> / {{work_hours_package.number_of_hours}} hours
+                                                </strong>
+                                            {% endif %}
+
+                                            {% if completion_date %}
+                                                <strong>completed at {{completion_date}}</strong>
                                             {% else %}
-                                                {{current_spent_time|floatformat:"-2"}} / {{work_hours_package.number_of_hours}} hours
+                                                No completion date yet.
                                             {% endif %}
                                         </div>
                                    </div>
