@@ -17,7 +17,7 @@ from django.db.models import Sum, Avg, Q, Count
 from django.utils import timezone
 from isoweek import Week
 
-from djanban.apps.base.auth import get_user_boards, get_member_boards
+from djanban.apps.base.auth import get_user_boards, get_member_boards, user_is_administrator
 
 
 class Member(models.Model):
@@ -178,6 +178,8 @@ class Member(models.Model):
     @staticmethod
     def get_user_team_mates(user):
         boards = get_user_boards(user)
+        if user_is_administrator(user):
+            return Member.objects.all().exclude(user=user).distinct().order_by("id")
         return Member.objects.filter(boards__in=boards).exclude(user=user).distinct().order_by("id")
 
     # Get member on the same boards

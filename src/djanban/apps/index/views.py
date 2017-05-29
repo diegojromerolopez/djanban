@@ -47,7 +47,7 @@ def index(request):
         "week_of_year": week_of_year,
         "member": member,
         "multiboards": member_multiboards,
-        "developers": [member]+(list(member.team_mates.filter(is_developer=True)) if member else []),
+        "developers": [member]+(list(member.team_mates.filter(is_developer=True)) if member else list(team_mates)),
         "downtime_developers": ([dev for dev in member.team_members.filter(is_developer=True) if dev.is_in_downtime]) if member else [],
         "pending_red_cards": Card.objects.filter(board__in=boards, list__type="ready_to_develop", is_closed=False, labels__color="red").order_by("board__name", "name"),
         "pending_orange_cards": Card.objects.filter(board__in=boards, list__type="ready_to_develop", is_closed=False, labels__color="orange").order_by("board__name", "name"),
