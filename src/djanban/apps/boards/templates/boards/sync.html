@@ -13,34 +13,48 @@
 
 <div class="row">
     <div class="col-md-5 center-block">
-        {% if not done %}
+        {% if error %}
             <div class="panel panel-danger ">
-              <div class="panel-heading">Danger! This action cannot be undone</div>
+              <div class="panel-heading">Error when synchronizing boards</div>
               <div class="panel-body">
                   <p>
-                    All your Trello boards will be created in this platform.
+                    There was an error when synchronizing your boards:
                   </p>
                   <p>
-                    Are you sure?
+                    {{error}}
                   </p>
-
-                  <form id="sync_form" action="{% url 'boards:sync' %}" method="post">
-                      <button id="sync_button" type="submit" class="btn btn-danger">I am sure, synchronize my Trello boards</button>
-                  </form>
-
               </div>
             </div>
-        </div>
-    {% else %}
-        <div class="panel panel-success">
-              <div class="panel-heading">Boards created successfully</div>
-              <div class="panel-body">
-                  <p>
-                      Boards created successfully
-                      <a href="{% url 'boards:view_boards' %}" class="btn btn-primary">Go back to your boards</a>
-                  </p>
-              </div>
-        </div>
+        {% else %}
+            {% if not done %}
+                <div class="panel panel-danger ">
+                  <div class="panel-heading">Danger! This action cannot be undone</div>
+                  <div class="panel-body">
+                      <p>
+                        All your Trello boards will be created in this platform.
+                      </p>
+                      <p>
+                        Are you sure?
+                      </p>
+
+                      <form id="sync_form" action="{% url 'boards:sync' %}" method="post">
+                          <button id="sync_button" type="submit" class="btn btn-danger">I am sure, synchronize my Trello boards</button>
+                      </form>
+
+                  </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="panel panel-success">
+                  <div class="panel-heading">Boards created successfully</div>
+                  <div class="panel-body">
+                      <p>
+                          Boards created successfully
+                          <a href="{% url 'boards:view_boards' %}" class="btn btn-primary">Go back to your boards</a>
+                      </p>
+                  </div>
+            </div>
+        {% endif %}
     {% endif %}
 </div>
 

@@ -16,6 +16,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.http.response import Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
+from requests.packages.urllib3.exceptions import SSLError, HTTPError
 
 from djanban.apps.base.auth import user_is_member, get_user_boards, user_is_visitor
 from djanban.apps.base.decorators import member_required
@@ -66,9 +67,17 @@ def sync(request):
         return HttpResponseRedirect(reverse("boards:view_boards"))
 
     if request.method == "POST":
-        initializer = Initializer(member)
-        initializer.init()
-        return HttpResponseRedirect(reverse("boards:view_boards"))
+        try:
+            initializer = Initializer(member)
+            initializer.init()
+        except (SSLError, HTTPError) as e:
+            replacements = {
+                "member": member,
+                "error": "Connection error when initializing member: {0}".format(e)
+            }
+            return render(request, "boards/sync.html", replacements)
+
+        return render(request, "boards/sync.html", {"member": member, "done": True})
 
     return render(request, "boards/sync.html", {"member": member})
 
