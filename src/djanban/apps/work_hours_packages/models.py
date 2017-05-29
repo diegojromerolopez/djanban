@@ -2,14 +2,12 @@
 from __future__ import unicode_literals
 
 from django.db import models
-
-
-# A package of work hours: support, development or whatever type of work a client needs.
 from django.utils import timezone
 
 from djanban.apps.dev_times.models import DailySpentTime
 
 
+# A package of work hours: support, development or whatever type of work a client needs.
 class WorkHoursPackage(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="work_hours_packages", null=True, default=None, blank=True)
     multiboard = models.ForeignKey("multiboards.Multiboard", verbose_name=u"Multiboard", related_name="work_hours_packages", null=True, default=None, blank=True)
