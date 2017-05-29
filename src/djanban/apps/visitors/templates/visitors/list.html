@@ -1,4 +1,11 @@
 {% extends "base/base.html" %}
+{% load staticfiles %}
+
+
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'css/visitors/list.css' %}" rel="stylesheet" />
+{% endblock css %}
 
 {% block page_title %}Visitors{% endblock %}
 
@@ -14,43 +21,61 @@
                     There are no visitors in this platform.
                 {% else %}
                     <table class="table">
-                        <tr>
-                            <td>Username</td>
-                            <td>First name</td>
-                            <td>Last name</td>
-                            <td>Email</td>
-                            <td>Boards</td>
-                            <td>Actions</td>
-                        </tr>
-                        {% for visitor in visitors%}
+                        <thead>
                             <tr>
-                                <td>{{visitor.username}}</td>
-                                <td>{{visitor.first_name}}</td>
-                                <td>{{visitor.last_name}}</td>
-                                <td>{{visitor.email}}</td>
-                                <td>
-                                    {% with visitor_boards=visitor.boards.all %}
-                                        {% if visitor_boards|length == 1 %}
-                                            {{visitor_boards.0}}
-                                        {% elif visitor_boards|length == 2 %}
-                                            {{visitor_boards.0}} and {{visitor_boards.1}}
-                                        {% else %}
-                                            {% for board in visitor_boards %}
-                                                {{board.name}}{% if forloop.revcounter > 2 %}, {% elif forloop.revcounter == 2 %} and {% else  %}{% endif %}
-                                            {% endfor %}
-                                        {% endif %}
-                                    {% endwith %}
-                                </td>
-                                <td>
-                                    <a href="{% url 'visitors:edit' visitor.id %}" title="Edit visitor {{visitor.username}}">
-                                        <span class="fa fa-pencil"></span>
-                                    </a>
-                                    <a href="{% url 'visitors:delete' visitor.id %}" title="Delete visitor {{visitor.username}}">
-                                        <span class="fa fa-trash"></span>
-                                    </a>
-                                </td>
+                                <th>Username</th>
+                                <th>Full name</th>
+                                <th>Email</th>
+                                <th>Boards</th>
+                                <th>Actions</th>
                             </tr>
-                        {% endfor %}
+                        </thead>
+                        <tbody>
+                            {% for visitor in visitors%}
+                                <tr>
+                                    <td>{{visitor.username}}</td>
+                                    <td>{{visitor.first_name}} {{visitor.last_name}}</td>
+                                    <td>{{visitor.email}}</td>
+                                    <td>
+                                        {% with visitor_boards=visitor.boards.all %}
+                                            {% if visitor_boards|length == 1 %}
+                                                {{visitor_boards.0}}
+                                            {% elif visitor_boards|length == 2 %}
+                                                {{visitor_boards.0}} and {{visitor_boards.1}}
+                                            {% else %}
+                                                <ul class="boards">
+                                                    {% for board in visitor_boards %}
+                                                        <li>
+                                                            <a href="{% url 'boards:view' board.id %}"
+                                                                 title="View {{board.name}}" class="board">
+                                                                 <img class="board-identicon"
+                                                                      src="{% url 'boards:view_identicon' board.id 40 40 %}"
+                                                                      alt="Identicon of board {{board.name}}" />
+                                                                  <span class="board-identicon-name">
+                                                                    {{board.name}}
+                                                                  </span>
+                                                              </a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'visitors:edit' visitor.id %}"
+                                           class="btn btn-primary"
+                                           title="Edit visitor {{visitor.username}}">
+                                            <span class="fa fa-pencil"></span>
+                                        </a>
+                                        <a href="{% url 'visitors:delete' visitor.id %}"
+                                           class="btn btn-danger"
+                                           title="Delete visitor {{visitor.username}}">
+                                            <span class="fa fa-trash"></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
                     </table>
                 {% endif %}
             </div>

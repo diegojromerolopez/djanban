@@ -1,6 +1,8 @@
 
 from django.conf import settings
 
+from djanban.apps.boards.models import Board
+
 
 def member_is_administrator(member):
     """
@@ -45,11 +47,21 @@ def user_is_visitor(user, board=None):
 
 # Return the boards of an user
 def get_user_boards(user, is_archived=False):
+    # Get all boards
+    if user_is_administrator(user):
+        if is_archived is True or is_archived is False:
+            return Board.objects.filter(is_archived=is_archived).order_by("name")
+        return Board.objects.all().order_by("name")
+
+    # For a member, return all his/her boards
     if user_is_member(user):
         return get_member_boards(user.member, is_archived=is_archived)
 
+    # If user is visitor, return his/her boards
     if user_is_visitor(user):
-        return user.boards.filter(is_archived=is_archived).order_by("name")
+        if is_archived is True or is_archived is False:
+            return user.boards.filter(is_archived=is_archived).order_by("name")
+        return user.boards.all().order_by("name")
 
     raise ValueError(u"This user is not valid")
 

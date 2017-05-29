@@ -20,15 +20,17 @@
             </p>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-12">
-            <p>
-                <a href="{% url 'niko_niko_calendar:new_mood_measurement' %}" title="New mood measurement" class="btn btn-primary">
-                    New measurement for today
-                </a>
-            </p>
+    {% if member %}
+        <div class="row">
+            <div class="col-md-12">
+                <p>
+                    <a href="{% url 'niko_niko_calendar:new_mood_measurement' %}" title="New mood measurement" class="btn btn-primary">
+                        New measurement for today
+                    </a>
+                </p>
+            </div>
         </div>
-    </div>
+    {% endif %}
     <div class="row">
         <div class="col-md-12 x-scrollable">
             <div class="panel">

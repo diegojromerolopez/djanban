@@ -1,6 +1,7 @@
 {% load staticfiles %}
 {% load boards %}
 {% load async_include %}
+{% load djanban_auth %}
 
 <div id="header">
     <div id="header_logo">
@@ -39,7 +40,7 @@
                            <span class="fa fa-line-chart"></span>
                        </a>
                     </li>
-                    {% if member %}
+                    {% if member or request.user|user_is_administrator %}
                         <li role="presentation" {% if url_name == "view_members" or url_name == "view_spent_time_factors" %}class="active"{% endif %}>
                             <a href="{% url 'members:view_members' %}" title="View members">
                                 <span class="fa fa-users"></span>
@@ -72,6 +73,8 @@
                                 <span class="fa fa-cloud"></span> Forecasts
                             </a>
                         </li>
+                    {% endif %}
+                    {% if member or request.user|user_is_administrator %}
                         <li role="presentation" {% if url_namespace == "visitors" %}class="active"{% endif %}>
                             <a href="{% url 'visitors:view_list' %}" title="Visitors">
                                 <span class="fa fa-user-o"></span>
@@ -87,7 +90,7 @@
                                 <span class="fa fa-fire-extinguisher"></span>
                             </a>
                         </li>
-                        {% if member.has_trello_credentials %}
+                        {% if member and member.has_trello_credentials %}
                             <li role="presentation" {% if url_name == "fetch_boards" %}class="active"{% endif %}>
                                 <a href="{% url 'fetch:fetch_boards' %}" title="Fetch all boards">
                                     <span class="fa fa-download"></span>
@@ -95,15 +98,15 @@
                             </li>
                         {% endif %}
                     {% endif %}
-                    {% with member=request.user.member %}
-                        {% if member.is_developer %}
-                            {% async_include "base/components/header/last_comments.html" html__tag="li" request__frequency=820 %}
 
-                            {% async_include "base/components/header/last_cards_in_development.html" member=member html__tag="li" request__frequency=800 %}
+                    {% if member and member.is_developer %}
+                        {% async_include "base/components/header/last_comments.html" html__tag="li" request__frequency=820 %}
 
-                            {% async_include "base/components/header/last_notifications.html" member=member html__tag="li" request__frequency=620 %}
-                        {% endif %}
-                    {% endwith %}
+                        {% async_include "base/components/header/last_cards_in_development.html" member=member html__tag="li" request__frequency=800 %}
+
+                        {% async_include "base/components/header/last_notifications.html" member=member html__tag="li" request__frequency=620 %}
+                    {% endif %}
+
                     <li class="dropdown">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Logout">
                           <span class="fa fa-sign-out"></span> <span class="caret"></span>

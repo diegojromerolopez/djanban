@@ -4,17 +4,21 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
+from djanban.apps.base.auth import user_is_member
 from djanban.apps.base.decorators import member_required
 from djanban.apps.hourly_rates.forms import HourlyRateForm, DeleteHourlyRateForm
 from djanban.apps.hourly_rates.models import HourlyRate
 
 
 # View list of hourly rates
-@member_required
+@login_required
 def view_list(request):
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
     hourly_rates = HourlyRate.objects.all()
     replacements = {
-        "member": request.user.member,
+        "member": member,
         "hourly_rates": hourly_rates
     }
     return render(request, "hourly_rates/list.html", replacements)
@@ -40,9 +44,12 @@ def new(request):
 
 
 # Edit one hourly rate
-@member_required
+@login_required
 def edit(request, hourly_rate_id):
-    member = request.user.member
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+
     hourly_rate = HourlyRate.objects.get(id=hourly_rate_id)
 
     if request.method == "POST":
@@ -59,9 +66,12 @@ def edit(request, hourly_rate_id):
 
 
 # Delete one hourly rate
-@member_required
+@login_required
 def delete(request, hourly_rate_id):
-    member = request.user.member
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+
     hourly_rate = HourlyRate.objects.get(id=hourly_rate_id)
 
     if request.method == "POST":

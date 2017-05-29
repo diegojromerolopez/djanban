@@ -1,5 +1,6 @@
 {% extends "base/base.html" %}
 {% load staticfiles %}
+{% load djanban_auth %}
 
 {% block css %}
     {{block.super}}
@@ -24,25 +25,29 @@
             </p>
         </div>
     </div>
-    <div class="row">
-        <div class="panel col-md-12">
-            {% include "forms/filter.html" %}
+    {% if member %}
+        <div class="row">
+            <div class="panel col-md-12">
+                {% include "forms/filter.html" %}
+            </div>
         </div>
-    </div>
+    {% endif %}
     <div class="board_list_list">
         <div class="row">
             <div class="panel col-md-12">
-                {% if member %}
-                    <div>
-                        <p>
-                            <a href="{% url 'work_hours_packages:new' %}" class="btn btn-success">New</a>
-                            <a href="{% url 'work_hours_packages:notify_completions' %}" class="btn btn-warning">
-                                <span class="fa fa-envelope"></span>
-                                Notify completions
-                            </a>
-                        </p>
-                    </div>
-                {% endif %}
+
+                <div>
+                    <p>
+                        {% if member %}
+                        <a href="{% url 'work_hours_packages:new' %}" class="btn btn-success">New</a>
+                        {% endif %}
+                        <a href="{% url 'work_hours_packages:notify_completions' %}" class="btn btn-warning">
+                            <span class="fa fa-envelope"></span>
+                            Notify completions
+                        </a>
+                    </p>
+                </div>
+
                 {% if work_hours_packages|length == 0 %}
                     No work hours packages set.
                 {% else %}
@@ -173,6 +178,8 @@
                                                 class="btn btn-primary">
                                                 <span class="fa fa-pencil"></span>
                                             </a>
+                                        {% endif %}
+                                        {% if member or request.user|user_is_administrator %}
                                             <a href="{% url 'work_hours_packages:delete' work_hours_package.id %}"
                                                title="Delete work hours package {{work_hours_package.name}}"
                                                class="btn btn-danger">

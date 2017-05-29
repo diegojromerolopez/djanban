@@ -1,0 +1,8 @@
+ul.boards{
+    list-style-type: none;
+    padding-left: 0;
+}
+
+ul.boards > li {
+    margin-bottom: 5px;
+}

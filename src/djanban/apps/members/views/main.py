@@ -13,6 +13,7 @@ from django.shortcuts import render
 
 from djanban.apps.base.auth import user_is_administrator, get_user_boards, user_is_member
 from djanban.apps.base.decorators import member_required
+from djanban.apps.members.auth import assert_user_can_edit_member
 from djanban.apps.members.decorators import administrator_required
 from djanban.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm,\
     EditTrelloMemberProfileForm, EditMemberForm, NewMemberForm, EditAdminMemberForm
@@ -21,14 +22,6 @@ from djanban.apps.members.models import Member
 
 # User dashboard
 from djanban.apps.members.views.emailer import send_new_member_email
-
-
-@member_required
-def dashboard(request):
-    member = request.user.member
-    boards = member.boards.all()
-    replacements = {"member": member, "boards": boards}
-    return render(request, "members/dashboard.html", replacements)
 
 
 # List of members
@@ -76,10 +69,16 @@ def new(request):
 
 
 # Give a password an create an user for a member if this member does not have an user yet
-@member_required
-@administrator_required
+@login_required
 def give_access_to_member(request, member_id):
     member = Member.objects.get(id=member_id)
+
+    # Check if the current user is an administrator or the creator of this member or the member him/herself
+    try:
+        assert_user_can_edit_member(request.user, member)
+    except AssertionError:
+        return HttpResponseForbidden()
+
     if request.method == "POST":
 
         form = GiveAccessToMemberForm(request.POST)
@@ -109,9 +108,16 @@ def give_access_to_member(request, member_id):
 
 
 # Change password to an user of a member
-@member_required
+@login_required
 def change_password_to_member(request, member_id):
     member = Member.objects.get(id=member_id)
+
+    # Check if the current user is an administrator or the creator of this member or the member him/herself
+    try:
+        assert_user_can_edit_member(request.user, member)
+    except AssertionError:
+        return HttpResponseForbidden()
+
     if request.method == "POST":
 
         form = ChangePasswordToMemberForm(request.POST)
@@ -131,18 +137,23 @@ def change_password_to_member(request, member_id):
     return render(request, "members/give_access_to_member.html", replacements)
 
 
-@member_required
+# Edit member profile
+@login_required
 def edit_profile(request, member_id):
     user = request.user
-    current_member = user.member
 
     member = Member.objects.get(id=member_id)
 
-    current_user_is_admin_for_this_member = current_member.id != member.creator_id or user_is_administrator(user)
+    if hasattr(user, "member"):
+        current_member = user.member
+        current_user_is_admin_for_this_member = current_member.id != member.creator_id
+    else:
+        current_user_is_admin_for_this_member = user_is_administrator(user)
 
-    # Check if the current member is editing his/her profile or the current member is his/her creator or
-    # is an administrator
-    if current_member.id != int(member_id) and not current_user_is_admin_for_this_member:
+    # Check if the current user is an administrator or the creator of this member or the member him/herself
+    try:
+        assert_user_can_edit_member(user, member)
+    except AssertionError:
         return HttpResponseForbidden()
 
     # Only the administrator has permission of a full change of member attributes
@@ -165,13 +176,16 @@ def edit_profile(request, member_id):
 
 
 # Change your user profile data
-@member_required
+@login_required
 def edit_trello_member_profile(request, member_id):
     user = request.user
-    current_member = user.member
 
     member = Member.objects.get(id=member_id)
-    if current_member.id != int(member_id) and current_member.id != member.creator_id and not user_is_administrator(user):
+
+    # Check if the current user is an administrator or the creator of this member or the member him/herself
+    try:
+        assert_user_can_edit_member(user, member)
+    except AssertionError:
         return HttpResponseForbidden()
 
     # Edition of Trello Profile
@@ -191,12 +205,5 @@ def edit_trello_member_profile(request, member_id):
     return render(request, "members/edit_trello_profile.html", replacements)
 
 
-# Assert if current member can edit this member
-def _assert_current_member_can_edit_member(current_member, member):
-    current_user_is_admin_for_this_member = current_member.id != member.creator_id or user_is_administrator(current_member.user)
 
-    # Check if the current member is editing his/her profile or the current member is his/her creator or
-    # is an administrator
-    if current_member.id != member.id and not current_user_is_admin_for_this_member:
-        raise AssertionError()
-    return True
+

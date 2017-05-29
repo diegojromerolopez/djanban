@@ -4,6 +4,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
+from djanban.apps.base.auth import user_is_member
 from djanban.apps.boards.models import Board
 
 from djanban.apps.visitors.forms import DeleteUserForm, NewUserForm, EditUserForm
@@ -12,7 +13,9 @@ from djanban.apps.visitors.forms import DeleteUserForm, NewUserForm, EditUserFor
 # List all visitors
 @login_required
 def view_list(request, board_id=None):
-    member = request.user.member
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
     visitor_group = Group.objects.get(name="Visitors")
 
     if board_id is None:
@@ -28,7 +31,10 @@ def view_list(request, board_id=None):
 # New user
 @login_required
 def new(request):
-    member = request.user.member
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+
     user = User()
 
     if request.method == "POST":
@@ -46,7 +52,10 @@ def new(request):
 # Edition of a visitor
 @login_required
 def edit(request, visitor_id):
-    member = request.user.member
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+
     visitor_group = Group.objects.get(name="Visitors")
     try:
         user = visitor_group.user_set.get(id=visitor_id)
@@ -69,7 +78,10 @@ def edit(request, visitor_id):
 # Delete a visitor
 @login_required
 def delete(request, visitor_id):
-    member = request.user.member
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+
     visitor_group = Group.objects.get(name="Visitors")
     try:
         user = visitor_group.user_set.get(id=visitor_id)

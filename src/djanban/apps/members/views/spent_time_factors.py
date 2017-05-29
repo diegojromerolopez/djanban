@@ -2,25 +2,24 @@
 
 from __future__ import unicode_literals
 
+from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 
-from djanban.apps.base.decorators import member_required
-from djanban.apps.dev_times.models import DailySpentTime
 from djanban.apps.members.forms import SpentTimeFactorForm, DeleteSpentTimeForm
 from djanban.apps.members.models import Member, SpentTimeFactor
-from djanban.apps.members.views.main import _assert_current_member_can_edit_member
+from djanban.apps.members.views.main import assert_user_can_edit_member
 
 
-@member_required
+# View list of spent factor for this member
+@login_required
 def view_list(request, member_id):
-    user = request.user
-    current_member = user.member
     member = Member.objects.get(id=member_id)
 
+    # Check if current user has permissions to change his/her spent factors
     try:
-        _assert_current_member_can_edit_member(current_member, member)
+        assert_user_can_edit_member(request.user, member)
     except AssertionError:
         return HttpResponseForbidden()
 
@@ -31,14 +30,13 @@ def view_list(request, member_id):
 
 
 # Add a new Spent Time Factor
-@member_required
+@login_required
 def add(request, member_id):
-    user = request.user
-    current_member = user.member
     member = Member.objects.get(id=member_id)
 
+    # Check if current user has permissions to add new spent factor to this user
     try:
-        _assert_current_member_can_edit_member(current_member, member)
+        assert_user_can_edit_member(request.user, member)
     except AssertionError:
         return HttpResponseForbidden()
 
@@ -60,14 +58,13 @@ def add(request, member_id):
 
 
 # Edit a Spent Time Factor
-@member_required
+@login_required
 def edit(request, member_id, spent_time_factor_id):
-    user = request.user
-    current_member = user.member
     member = Member.objects.get(id=member_id)
 
+    # Check if current user has permissions to edit a spent factor to this user
     try:
-        _assert_current_member_can_edit_member(current_member, member)
+        assert_user_can_edit_member(request.user, member)
     except AssertionError:
         return HttpResponseForbidden()
 
@@ -89,14 +86,13 @@ def edit(request, member_id, spent_time_factor_id):
 
 
 # Delete a Spent Time Factor
-@member_required
+@login_required
 def delete(request, member_id, spent_time_factor_id):
-    user = request.user
-    current_member = user.member
     member = Member.objects.get(id=member_id)
 
+    # Check if current user has permissions to delete a spent factor to this user
     try:
-        _assert_current_member_can_edit_member(current_member, member)
+        assert_user_can_edit_member(request.user, member)
     except AssertionError:
         return HttpResponseForbidden()
 
