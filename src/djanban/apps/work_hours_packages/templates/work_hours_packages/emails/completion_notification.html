@@ -5,13 +5,25 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>#{{work_hours_package.id}} {{work_hours_package.name}} has been completed</title>
+        <title>#{{work_hours_package.id}} {{work_hours_package.name}} is completed at {{percentage}}</title>
     </head>
     <body>
         <div>
             <div>
-                <h1>#{{work_hours_package.id}} {{work_hours_package.name}} has been completed</h1>
-                <p>#{{work_hours_package.id}} {{work_hours_package.name}} ({{work_hours_package.start_work_date}} - {{work_hours_package.end_work_date}}) has been completed on {{completion_datetime|date}}</p>
+                <h1>#{{work_hours_package.id}} {{work_hours_package.name}} is completed at {{percentage}}</h1>
+                {% if completion_date %}
+                    <p>
+                        #{{work_hours_package.id}} {{work_hours_package.name}}
+                        ({{work_hours_package.start_work_date}} - {{work_hours_package.end_work_date}})
+                        has been completed on {{completion_datetime|date}}
+                    </p>
+                {% else %}
+                    <p>
+                        #{{work_hours_package.id}} {{work_hours_package.name}}
+                        ({{work_hours_package.start_work_date}} - {{work_hours_package.end_work_date}})
+                        is completed at {{percentage}}
+                    </p>
+                {% endif %}
             </div>
             <div>
                 <h1>{{work_hours_package.name}}'s spent times</h1>

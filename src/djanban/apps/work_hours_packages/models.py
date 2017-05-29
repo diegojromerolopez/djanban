@@ -31,7 +31,22 @@ class WorkHoursPackage(models.Model):
 
     notify_on_completion = models.BooleanField(verbose_name=u"Notify the members and this email on completion", default=False, blank=True)
     notification_email = models.EmailField(verbose_name=u"Notification email when number of hours is reached", default="", blank=True)
-    completion_notification_datetime = models.DateTimeField(verbose_name=u"Notification was sent in this date and time", default=None, null=True, blank=True)
+
+    half_completion_notification_datetime = models.DateTimeField(
+        verbose_name=u"50% notification was sent in this date and time",
+        default=None, null=True, blank=True)
+
+    eighty_percent_completion_notification_datetime = models.DateTimeField(
+        verbose_name=u"80% notification was sent in this date and time",
+        default=None, null=True, blank=True)
+
+    ninety_percent_completion_notification_datetime = models.DateTimeField(
+        verbose_name=u"90% notification was sent in this date and time",
+        default=None, null=True, blank=True)
+
+    completion_notification_datetime = models.DateTimeField(
+        verbose_name=u"Notification was sent in this date and time",
+        default=None, null=True, blank=True)
 
     description = models.TextField(
         verbose_name=u"Description of this package",
@@ -133,6 +148,16 @@ class WorkHoursPackage(models.Model):
             return None
 
     # Mark this work hours package completion notification as sent to its members
-    def mark_completion_notification_as_sent(self):
-        self.completion_notification_datetime = timezone.now()
+    def mark_completion_notification_as_sent(self, percentage):
+        now = timezone.now()
+        if percentage == "100%" or percentage == 100:
+            self.completion_notification_datetime = now
+        elif percentage == "90%" or percentage == 90:
+            self.ninety_percent_completion_notification_datetime = now
+        elif percentage == "80%" or percentage == 80:
+            self.eighty_percent_completion_notification_datetime = now
+        elif percentage == "50%" or percentage == 50:
+            self.half_completion_notification_datetime = now
+        else:
+            raise ValueError(u"Invalid percentage value")
         self.save()

@@ -1,4 +1,4 @@
-{{work_hours_package.name}} has been completed on {{completion_datetime|date}}
+{{work_hours_package.name}} is completed at {{percentage}}
 
 "Week day"; "Board"; "Spent time"; "Adjusted spent time"; "Estimated time";
 {% for daily_spent_time in developer_daily_spent_times %}{{daily_spent_time.weekday}};{{daily_spent_time.board.name}};{{daily_spent_time.spent_time|floatformat:"-2"}};{{daily_spent_time.adjusted_spent_time|floatformat:"-2"}};{{daily_spent_time.estimated_time|floatformat:"-2"}};
