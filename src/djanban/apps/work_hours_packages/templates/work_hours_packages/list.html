@@ -69,13 +69,7 @@
                                 <tr>
                                     <td>#{{work_hours_package.id}}</td>
                                     <td>
-                                        {% if work_hours_package.type == "multiboard" %}
-                                            Multiboard
-                                        {% elif work_hours_package.type == "board" %}
-                                            Board
-                                        {% elif work_hours_package.type == "label" %}
-                                            Label
-                                        {% endif %}
+                                        {{work_hours_package.get_type_display}}
                                     </td>
                                     <td>
                                         {% if work_hours_package.board %}

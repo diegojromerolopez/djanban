@@ -2,7 +2,7 @@
 <form action="{{action}}" method="post" enctype="multipart/form-data">
     <div class="non_field_errors">{{form.non_field_errors}}</div>
     {% for field in form %}
-        <div class="field-container {% if field.is_hidden %}hidden{% endif %} form-group">
+        <div class="field-container field-{{field.name}}-container {% if field.is_hidden %}hidden{% endif %} form-group">
             <label for="{{field.id_for_label}}">{{field.label}}</label>
             <div class="field input-group">{{field}}</div>
             <div class="help_text">{{field.help_text}}</div>

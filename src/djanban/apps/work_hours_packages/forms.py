@@ -77,7 +77,9 @@ class WorkHoursPackageForm(forms.ModelForm):
     class Meta:
         model = WorkHoursPackage
         fields = [
-            "board", "multiboard", "label", "name", "description", "number_of_hours",
+            "type",
+            "board", "multiboard", "label",
+            "name", "description", "number_of_hours",
             "offset_hours", "offset_hours_description",
             "start_work_date", "end_work_date",
             "members", "is_paid", "payment_date",
@@ -140,6 +142,27 @@ class WorkHoursPackageForm(forms.ModelForm):
             raise ValidationError(
                 "Please, select a board, label or multiboard. A package must be associated to one of them."
             )
+        # Check if type matches with what we have selected
+        if cleaned_data.get("type") == "board" and not cleaned_data.get("board"):
+            raise ValidationError(u"Please, select a board for this work hours package")
+        if cleaned_data.get("type") == "multiboard" and not cleaned_data.get("multiboard"):
+            raise ValidationError(u"Please, select a multiboard for this work hours package")
+        if cleaned_data.get("type") == "label" and not cleaned_data.get("label"):
+            raise ValidationError(u"Please, select a label for this work hours package")
+
+        # Erase elements not required depending on selected type
+        if cleaned_data.get("type") == "board":
+            cleaned_data["multiboard"] = None
+            cleaned_data["label"] = None
+
+        elif cleaned_data.get("type") == "multiboard":
+            cleaned_data["board"] = None
+            cleaned_data["label"] = None
+
+        elif cleaned_data.get("type") == "label":
+            cleaned_data["board"] = None
+            cleaned_data["multiboard"] = None
+
         return cleaned_data
 
     def save(self, commit=True):

@@ -9,10 +9,20 @@ from djanban.apps.dev_times.models import DailySpentTime
 
 # A package of work hours: support, development or whatever type of work a client needs.
 class WorkHoursPackage(models.Model):
+    TYPE_CHOICES = (
+        ("board", "Board"),
+        ("multiboard", "Multiboard"),
+        ("label", "Label"),
+    )
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="work_hours_packages", null=True, default=None, blank=True, on_delete=models.SET_NULL)
+    multiboard = models.ForeignKey("multiboards.Multiboard", verbose_name=u"Multiboard", related_name="work_hours_packages", null=True, default=None, blank=True, on_delete=models.SET_NULL)
+    label = models.ForeignKey("boards.Label", verbose_name=u"Label", related_name="work_hours_packages", null=True, default=None, blank=True, on_delete=models.SET_NULL)
 
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="work_hours_packages", null=True, default=None, blank=True)
-    multiboard = models.ForeignKey("multiboards.Multiboard", verbose_name=u"Multiboard", related_name="work_hours_packages", null=True, default=None, blank=True)
-    label = models.ForeignKey("boards.Label", verbose_name=u"Label", related_name="work_hours_packages", null=True, default=None, blank=True)
+    type = models.CharField(max_length=256, choices=TYPE_CHOICES,
+                            verbose_name=u"Type of this package",
+                            help_text=u"A work hours package depends on a board, multiboard or label. "
+                                      u"It depends on the project, the default option if selecting a label for each "
+                                      u"package")
 
     name = models.CharField(max_length=256, verbose_name=u"Name of this package")
 
@@ -51,7 +61,8 @@ class WorkHoursPackage(models.Model):
     description = models.TextField(
         verbose_name=u"Description of this package",
         help_text=u"Long description of this pakage describing the"
-                  u"type of work the workers must do"
+                  u"type of work the workers must do",
+        default="", blank=True
     )
 
     number_of_hours = models.DecimalField(
@@ -78,16 +89,6 @@ class WorkHoursPackage(models.Model):
         elif self.start_work_date:
             return "{0} {1}".format(self.name, self.start_work_date)
         return "{0}".format(self.name)
-
-    @property
-    def type(self):
-        if self.multiboard:
-            return "multiboard"
-        if self.board:
-            return "board"
-        if self.label:
-            return "label"
-        raise ValueError("This work hours package is not defined for a (multi)board or label")
 
     def get_spent_time(self):
         date_interval = (self.start_work_date, self.end_work_date)
