@@ -2,24 +2,21 @@
 
 from __future__ import unicode_literals
 
-import math
-import numpy
 import copy
 import inspect
+import math
 from datetime import datetime, time, timedelta
-import pygal
-import calendar
-from datetime import date
-
-import pytz
 from decimal import Decimal
+
+import numpy
+import pygal
+import pytz
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Min, Q, Count, Max, Sum
 from django.utils import timezone
 
 from djanban.apps.base.auth import get_user_boards
-from djanban.apps.boards.models import Board, Card, CardComment, Label, List
+from djanban.apps.boards.models import Card, CardComment, Label, List
 from djanban.apps.charts.models import CachedChart
 from djanban.apps.dev_times.models import DailySpentTime
 from djanban.apps.members.models import Member
@@ -293,7 +290,7 @@ def absolute_flow_diagram(board, day_step=1):
 
     cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=False,
-                                  x_labels_major_every=3, show_only_major_dots=True,
+                                  x_labels_major_every=7, show_only_major_dots=True,
                                   show_minor_x_labels=False,
                                   human_readable=True, x_label_rotation=65)
 
@@ -315,10 +312,13 @@ def absolute_flow_diagram(board, day_step=1):
         for list_ in lists:
             list_id = list_.id
             # Number of cards that were created in this list before the date
-            num_cards_without_movements = board.cards.filter(creation_datetime__lt=datetime_i,
-                                                             creation_datetime__gte=datetime_i-timedelta(days=day_step),
-                                                             list=list_). \
-                annotate(num_movements=Count("movements")).filter(num_movements=0).count()
+            num_cards_without_movements = board.cards.filter(
+                list=list_,
+                number_of_forward_movements=0,
+                number_of_backward_movements=0,
+                creation_datetime__lt=datetime_i,
+                creation_datetime__gte=datetime_i-timedelta(days=day_step)
+            ).count()
 
             # Number of cards that were moved to this list before the date
             num_cards_moving_to_list = board.card_movements.filter(
@@ -385,8 +385,12 @@ def cumulative_flow_diagram(board, day_step=1):
         for list_ in lists:
             list_id = list_.id
             # Number of cards that were created in this list before the date
-            num_cards_without_movements = board.cards.filter(creation_datetime__lte=datetime_i, list=list_). \
-                annotate(num_movements=Count("movements")).filter(num_movements=0).count()
+            num_cards_without_movements = board.cards.filter(
+                creation_datetime__lte=datetime_i,
+                list=list_,
+                number_of_forward_movements=0,
+                number_of_backward_movements=0,
+            ).count()
 
             # Number of cards that were moved to this list before the date
             num_cards_moving_to_list = board.card_movements.filter(
@@ -462,15 +466,22 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=1):
 
     date_i = copy.deepcopy(start_working_date)
     local_timezone = pytz.timezone(settings.TIME_ZONE)
+
     while date_i <= end_working_date:
         datetime_i = local_timezone.localize(datetime.combine(date_i, time.min))
         num_total_cards = 0
+        # For each list type, you have to get the number of present cards in that date and the number of cards
+        # that reached that list in that time or before that
         for list_type_index in range(0, num_list_types):
             list_type = List.LIST_TYPES[list_type_index]
 
             # Number of cards that were created in this list before the date
-            num_cards_without_movements = cards.filter(creation_datetime__lte=datetime_i, list__type=list_type)\
-                .filter(number_of_forward_movements=0, number_of_backward_movements=0).count()
+            num_cards_without_movements = cards.filter(
+                creation_datetime__lte=datetime_i,
+                list__type=list_type,
+                number_of_forward_movements=0,
+                number_of_backward_movements=0
+            ).count()
 
             # Number of cards that were moved to this list before the date
             num_cards_moving_to_list = card_movements.filter(
@@ -616,7 +627,7 @@ def cumulative_card_evolution(current_user, board=None, day_step=1):
     return chart.render_django_response()
 
 
-# Cumulative developed card value throug time
+# Cumulative developed card value through time
 def cumulative_value_evolution(current_user, board=None, day_step=1):
     return _value_evolution(current_user=current_user, board=board, cumulative=True, day_step=day_step)
 
@@ -673,12 +684,19 @@ def _value_evolution(current_user, board=None, cumulative=False, day_step=1, by_
 
     start_working_date = numpy.min(filter(None, [board_i.get_working_start_date() for board_i in boards]))
     end_working_date = numpy.max(filter(None, [board_i.get_working_end_date() for board_i in boards]))
+
+    # In case members have not started working in any of the boards, the chart is empty (obviously)
     if start_working_date is None or end_working_date is None:
         return card_value_chart.render_django_response()
 
     local_timezone = pytz.timezone(settings.TIME_ZONE)
 
+    # For each date, we compute the sum of the card value.
+    # We have two options of sums: cumulative or absolute
+    # Both define a lambda function that will we called for each date in the chart
     if cumulative:
+        # Get the cumulative developed value until that date
+        # Optional filtering by member
         def developed_value_sum(date_, member_=None):
             datetime_ = local_timezone.localize(datetime.combine(date_, time.min))
             card_movement_filter = {"board__in": boards, "destination_list__type": "done", "datetime__lte": datetime_}
@@ -686,7 +704,10 @@ def _value_evolution(current_user, board=None, cumulative=False, day_step=1, by_
                 card_movement_filter["card__members"] = member_
             return CardMovement.objects.filter(**card_movement_filter).\
                 aggregate(sum_of_developed_value=Sum("card__value"))["sum_of_developed_value"]
+
     else:
+        # Get the cumulative developed value in that date
+        # Optional filtering by member
         def developed_value_sum(date_, member_=None):
             min_datetime_ = local_timezone.localize(datetime.combine(date_, time.min))
             max_datetime_ = local_timezone.localize(datetime.combine(date_, time.max))
@@ -706,6 +727,7 @@ def _value_evolution(current_user, board=None, cumulative=False, day_step=1, by_
     members = Member.objects.filter(boards__in=boards, is_developer=True).distinct().order_by("id")
     card_values_by_member = {member_i.id: [] for member_i in members}
 
+    # For each working date, we compute the sum of card values (cumulative or absolute)
     while date_i <= end_working_date:
         sum_of_developed_value = developed_value_sum(date_i)
         if sum_of_developed_value is not None:

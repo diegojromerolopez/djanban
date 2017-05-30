@@ -626,8 +626,13 @@ class Card(models.Model):
         verbose_name_plural = "Cards"
         index_together = (
             ("board", "creation_datetime", "list"),
+            ("board", "list", "number_of_forward_movements", "number_of_backward_movements", "creation_datetime"),
             ("board", "creation_datetime"),
             ("board", "list", "position"),
+            ("board", "due_datetime"),
+            ("board", "is_closed", "list", "position"),
+            ("board", "is_closed", "creation_datetime", "list", "number_of_forward_movements", "number_of_backward_movements"),
+            ("is_closed", "board", "creation_datetime", "list", "number_of_forward_movements", "number_of_backward_movements"),
         )
 
     COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s+(\-(?P<days_before>(\d+))d\s+)?(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)(\s*(?P<description>.+))?"
@@ -1716,9 +1721,17 @@ class Label(models.Model):
         return default_labels
 
 
-
 # List of the task board
 class List(models.Model):
+    class Meta:
+        verbose_name = "List"
+        verbose_name_plural = "Lists"
+        index_together = (
+            ("board", "type", "position"),
+            ("board", "position"),
+            ("type", "board"),
+        )
+
     LIST_TYPES = ("ignored", "backlog", "ready_to_develop", "development",
                   "after_development_in_review", "after_development_waiting_release", "done", "closed")
     ACTIVE_LIST_TYPES = ("backlog", "ready_to_develop", "development",

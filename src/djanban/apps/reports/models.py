@@ -10,7 +10,10 @@ class CardMovement(models.Model):
         verbose_name = u"Card movement"
         verbose_name_plural = u"Card movements"
         index_together = (
-            ("board", "card", "datetime"),
+            ("board", "card", "source_list", "datetime", "destination_list"),
+            ("board", "card", "destination_list", "datetime", "source_list"),
+            ("board", "destination_list", "datetime", "source_list"),
+            ("board", "card",  "datetime"),
             ("board", "type", "source_list", "destination_list"),
             ("board", "destination_list", "datetime"),
         )
