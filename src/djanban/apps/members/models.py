@@ -67,6 +67,9 @@ class Member(models.Model):
 
     # Adjust spent time
     def adjust_spent_time(self, spent_time, date):
+        # Check to what spent time factor belongs this spent time according to the date
+        # in case the date is in any spent time factor interval, apply that factor to
+        # the spent time
         spent_time_factors = self.spent_time_factors.all()
         for spent_time_factor in spent_time_factors:
             if (spent_time_factor.start_date is None and spent_time_factor.end_date is None) or\
@@ -75,6 +78,8 @@ class Member(models.Model):
 
                 adjusted_value = spent_time * spent_time_factor.factor
                 return adjusted_value
+
+        # In case there is no date interval which date belongs to, return the spent time
         return spent_time
 
     # Adjust spent time according to the factor specified by date intervals

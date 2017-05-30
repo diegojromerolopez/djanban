@@ -33,7 +33,17 @@
                               <div class="panel-body">
                                   <p>Last activity: {{card.last_activity_datetime}}</p>
                                   {% if card.due_datetime %}<p> Deadline: {{card.due_datetime}}</p>{% endif %}
-                                  {% if card.spent_time %}<p>Spent time: {{card.spent_time|floatformat:-2}} hours</p>{% else %}{% endif %}
+                                  {% if card.spent_time %}
+                                    <div>
+                                        <p>
+                                            Spent time: {{card.spent_time|floatformat:-2}} hours
+                                        </p>
+                                        <p>
+                                            Adj. spent time: {{card.adjusted_spent_time|floatformat:-2}} hours
+                                        </p>
+                                    </div>
+                                  {% else %}
+                                  {% endif %}
                                   <p>
                                       {% if card.description %}{{card.description}}.{% endif %}
                                       <a href="{% url 'boards:view_card' card.board_id card.id %}" title="View card {{card.name}} in board {{card.board.name}}" class="btn btn-primary btn-sm">View</a>

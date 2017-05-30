@@ -95,7 +95,7 @@ class DailySpentTime(models.Model):
         # Convert spent_time to Decimal if is a number
         if spent_time is not None:
             spent_time = Decimal(spent_time)
-            adjusted_spent_time = spent_time * member.adjust_spent_time(spent_time, date)
+            adjusted_spent_time = member.adjust_spent_time(spent_time, date)
 
         # Convert estimated_time to Decimal if is a number
         if estimated_time is not None:
@@ -144,10 +144,11 @@ class DailySpentTime(models.Model):
         spent_time = spent_estimated_time["spent_time"]
         estimated_time = spent_estimated_time["estimated_time"]
 
+        # Set adjusted spent time
         adjusted_spent_time = None
         if spent_time is not None:
             spent_time = Decimal(spent_time)
-            adjusted_spent_time = spent_time * comment.author.adjust_spent_time(spent_time, date)
+            adjusted_spent_time = comment.author.adjust_spent_time(spent_time, date)
 
         # Convert estimated_time to Decimal if is a number
         if estimated_time is not None:
@@ -194,7 +195,7 @@ class DailySpentTime(models.Model):
             self.date = date
             self.spent_time = spent_time
             if spent_time is not None:
-                self.adjusted_spent_time = spent_time * comment.author.adjust_spent_time(spent_time, date)
+                self.adjusted_spent_time = comment.author.adjust_spent_time(spent_time, date)
             self.estimated_time = estimated_time
 
     # Update adjusted spent time for this DailySpentTime

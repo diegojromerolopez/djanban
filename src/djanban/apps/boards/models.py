@@ -678,11 +678,17 @@ class Card(models.Model):
     number_of_forward_movements = models.PositiveIntegerField(verbose_name=u"Number of forward movements", default=0)
     number_of_backward_movements = models.PositiveIntegerField(verbose_name=u"Number of backward movements", default=0)
 
-    spent_time = models.DecimalField(verbose_name=u"Spent time", decimal_places=4, max_digits=12, default=None,
-                                     null=True)
+    spent_time = models.DecimalField(
+        verbose_name=u"Spent time", decimal_places=4, max_digits=12, default=None, null=True
+    )
 
-    estimated_time = models.DecimalField(verbose_name=u"Estimated time", decimal_places=4, max_digits=12, default=None,
-                                         null=True)
+    adjusted_spent_time = models.DecimalField(
+        verbose_name=u"Adjusted spent time", decimal_places=4, max_digits=12, default=None, null=True
+    )
+
+    estimated_time = models.DecimalField(
+        verbose_name=u"Estimated time", decimal_places=4, max_digits=12, default=None, null=True
+    )
 
     cycle_time = models.DecimalField(verbose_name=u"Lead time", decimal_places=4, max_digits=12, default=None,
                                      null=True)
@@ -715,17 +721,15 @@ class Card(models.Model):
         time_diff = (completion_datetime - start_development_datetime)
         return time_diff.total_seconds() / 3600.0
 
+    # Get the spent time for this card
     def get_spent_time(self):
         return self.daily_spent_times.all().aggregate(spent_time_sum=Sum("spent_time"))["spent_time_sum"]
 
-    def get_adjusted_spent_time(self):
-        return self.daily_spent_times.all().aggregate(time_sum=Sum("adjusted_spent_time"))["time_sum"]
-
     # Returns the adjusted spent time according to the spent time factor defined in each member
-    @property
-    def adjusted_spent_time(self):
-        return self.get_adjusted_spent_time()
+    def get_adjusted_spent_time(self):
+        return self.daily_spent_times.all().aggregate(adj_spent_time_sum=Sum("adjusted_spent_time"))["adj_spent_time_sum"]
 
+    # Get the estimated time for this card
     def get_estimated_time(self):
         return self.daily_spent_times.all().aggregate(estimated_time_sum=Sum("estimated_time"))["estimated_time_sum"]
 
@@ -907,8 +911,12 @@ class Card(models.Model):
         self.save()
 
     # Update spent/estimated cached time according to daily spent time values
+    # In case of a change in spent time, it also updates the adjusted_spent_time
     def update_spent_estimated_time(self):
-        self.spent_time = self.get_spent_time()
+        new_spent_time = self.get_spent_time()
+        if new_spent_time != self.spent_time:
+            self.spent_time = new_spent_time
+            self.adjusted_spent_time = self.get_adjusted_spent_time()
         self.estimated_time = self.get_estimated_time()
         self.save()
 

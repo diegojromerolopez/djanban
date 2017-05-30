@@ -7,13 +7,15 @@
                     <td>Value</td>
                     <td>Closed?</td>
                     <td>List</td>
-                    <td>Comments</td>
+                    <td>No. Comm.</td>
                     <td>Reviews</td>
                     <td>Lead time</td>
                     <td>Cycle time</td>
-                    <td>Spent/Estimated time</td>
+                    <td>Spent time</td>
+                    <td>Adj. Spent time</td>
+                    <td>Est. time</td>
                     <td>Deadline</td>
-                    <td>Last activity date</td>
+                    <td>Last act. date</td>
                     <td>Actions</td>
                 </tr>
                 {% for card in cards %}
@@ -56,7 +58,21 @@
                         </td>
                         <td>{% if card.lead_time %}{{card.lead_time|floatformat:-2}}{% endif %}</td>
                         <td>{% if card.cycle_time %}{{card.cycle_time|floatformat:-2}}{% endif %}</td>
-                        <td>{% if card.spent_time or card.estimated_time %}{{card.spent_time|floatformat:-2}}/{{card.estimated_time|floatformat:-2}}{% endif %}</td>
+                        <td>
+                            {% if card.spent_time %}
+                                {{card.spent_time|floatformat:-2}}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if card.adjusted_spent_time %}
+                                {{card.adjusted_spent_time|floatformat:-2}}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if card.estimated_time %}
+                                {{card.estimated_time|floatformat:-2}}
+                            {% endif %}
+                        </td>
                         <td>{% if card.due_datetime %}{{card.due_datetime}}{% endif %}</td>
                         <td>{{card.last_activity_datetime}}</td>
                         <td>
@@ -70,10 +86,10 @@
                     </tr>
                 {% endfor %}
                 <tr>
-                    <td colspan="10">Cycle time (avg. & std. dev.)</td><td>{{avg_cycle_time|floatformat:"-3"}}</td><td>{{std_dev_cycle_time|floatformat:"-3"}}</td>
+                    <td colspan="12">Cycle time (avg. & std. dev.)</td><td>{{avg_cycle_time|floatformat:"-3"}}</td><td>{{std_dev_cycle_time|floatformat:"-3"}}</td>
                 </tr>
                 <tr>
-                    <td colspan="10">Lead time (avg. & std. dev.)</td><td>{{avg_lead_time|floatformat:"-3"}}</td><td>{{std_dev_lead_time|floatformat:"-3"}}</td>
+                    <td colspan="12">Lead time (avg. & std. dev.)</td><td>{{avg_lead_time|floatformat:"-3"}}</td><td>{{std_dev_lead_time|floatformat:"-3"}}</td>
                 </tr>
             </table>
         </div>
