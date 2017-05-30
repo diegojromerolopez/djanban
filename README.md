@@ -18,10 +18,14 @@ strategic decisions like:
 - What's the lead and cycle time of each project tasks?
 - Is the project on time according to its percentage of completion?
 
-[Test site](https://djanban-test.intelligenia.com/).
+# Test site
 
+Sign up in this [test site](https://djanban-test.intelligenia.com/) and share your ideas, suggestion or bug reports.
 
-## Want to see it running in your computer? It's easy:
+IMPORTANT NOTE: **this site deletes all your data each day**, so don't use it for your projects. Use it for testing this web app.
+If you need help some help when installing this project in your servers, contact me and I will help you.
+
+# Want to see it running in your computer? It's easy:
 
 Run this commands in your terminal:
 
@@ -45,13 +49,6 @@ Once you have your boards ready, fetch the data.
 You can also give other board members access to the dashboard. Each member will be able to access to his/her own boards, so it is perfect for a multi-project team.
 
 ![How it works](resources/images/diagrams/how-it-works.png)
-
-# Test site
-
-Sign up in this [test site](https://djanban-test.intelligenia.com/) and share your ideas, suggestion or bug reports.
-
-IMPORTANT NOTE: **this site deletes all your data each day**, so don't use it for your projects. Use it for testing this web app.
-If you need help some help when installing this project in your servers, contact me and I will help you.
 
 # Requirements
 
