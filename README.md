@@ -25,7 +25,7 @@ Sign up in this [test site](https://djanban-test.intelligenia.com/) and share yo
 IMPORTANT NOTE: **this site deletes all your data each day**, so don't use it for your projects. Use it for testing this web app.
 If you need help some help when installing this project in your servers, contact me and I will help you.
 
-# Want to see it running in your computer? It's easy:
+# Want to see it running in your computer?
 
 Run this commands in your terminal:
 
