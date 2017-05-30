@@ -51,7 +51,7 @@ class Command(BaseCommand):
         try:
             with transaction.atomic():
                 # Creation of user
-                user = User(username=username, is_superuser=True)
+                user = User(username=username, is_superuser=True, is_active=True)
                 user.set_password(password)
                 user.save()
 
