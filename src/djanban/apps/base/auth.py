@@ -1,5 +1,6 @@
 
 from django.conf import settings
+from django.http import Http404
 
 from djanban.apps.boards.models import Board
 
@@ -68,6 +69,21 @@ def get_user_boards(user, is_archived=False):
 
 # Return the boards of a member
 def get_member_boards(member, is_archived=False):
+    # Get all boards if the member belongs to an administrator
+    if user_is_administrator(member.user):
+        if is_archived is True or is_archived is False:
+            return Board.objects.filter(is_archived=is_archived).order_by("name")
+        return Board.objects.all().order_by("name")
+
+    # Member is an standard member
     if is_archived is None:
         return member.boards.all().order_by("name")
     return member.boards.filter(is_archived=is_archived).order_by("name")
+
+
+# Get user board or a 404 exception
+def get_user_board_or_404(user, board_id, is_archived=False):
+    try:
+        return get_user_boards(user=user, is_archived=is_archived).get(id=board_id)
+    except Board.DoesNotExist as e:
+        raise Http404

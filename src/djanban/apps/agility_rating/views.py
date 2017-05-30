@@ -9,7 +9,7 @@ from django.urls import reverse
 
 from djanban.apps.agility_rating.forms import ProjectAgilityRatingForm, DeleteProjectAgilityRatingForm
 from djanban.apps.agility_rating.models import ProjectAgilityRating
-from djanban.apps.base.auth import user_is_member, get_user_boards
+from djanban.apps.base.auth import user_is_member, get_user_boards, get_user_board_or_404
 from djanban.apps.base.decorators import member_required
 from djanban.apps.boards.models import Board
 
@@ -20,8 +20,8 @@ def view(request, board_id):
     member = None
     if user_is_member(request.user):
         member = request.user.member
-    board = get_user_boards(request.user).get(id=board_id)
-    agility_rating = None
+    board = get_user_board_or_404(request.user, board_id)
+
     try:
         agility_rating = board.agility_rating
     except ObjectDoesNotExist:
@@ -34,11 +34,11 @@ def view(request, board_id):
 # New agility rating
 @member_required
 def new(request, board_id):
-    member = request.user.member
-    try:
-        board = member.boards.get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+
+    board = get_user_board_or_404(request.user, board_id)
 
     project_agility_rating = ProjectAgilityRating(board=board)
 
@@ -57,9 +57,11 @@ def new(request, board_id):
 # Edition of the project agility rating
 @member_required
 def edit(request, board_id):
-    member = request.user.member
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
     try:
-        board = member.boards.get(id=board_id)
+        board = get_user_board_or_404(request.user, board_id)
         project_agility_rating = board.agility_rating
     except ObjectDoesNotExist:
         raise Http404
@@ -80,9 +82,11 @@ def edit(request, board_id):
 # Delete the project agility rating
 @member_required
 def delete(request, board_id):
-    member = request.user.member
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
     try:
-        board = member.boards.get(id=board_id)
+        board = get_user_board_or_404(request.user, board_id)
         project_agility_rating = board.agility_rating
     except ObjectDoesNotExist:
         raise Http404

@@ -13,7 +13,7 @@ from django.template import loader
 from django.utils import timezone
 from isoweek import Week
 
-from djanban.apps.base.auth import user_is_member, get_user_boards
+from djanban.apps.base.auth import user_is_member, get_user_boards, get_member_boards, get_user_board_or_404
 from djanban.apps.base.decorators import member_required
 from djanban.apps.boards.forms import NewCardForm, WeekSummaryFilterForm
 from djanban.apps.boards.models import List, Board, Card, CardComment, Label, CardAttachment
@@ -26,10 +26,7 @@ from djanban.utils.week import get_iso_week_of_year, get_week_of_year
 @member_required
 def new(request, board_id):
     member = request.user.member
-    try:
-        board = member.boards.get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+    board = get_user_board_or_404(request.user, board_id)
 
     card = Card(board=board, list=board.first_list)
     card.member = member
@@ -53,10 +50,11 @@ def change_labels(request, board_id, card_id):
         raise Http404
 
     member = request.user.member
+
     try:
-        board = member.boards.get(id=board_id)
+        board = get_member_boards(member).get(id=board_id)
         card = board.cards.get(id=card_id)
-    except Board.DoesNotExist:
+    except (Board.DoesNotExist, Card.DoesNotExist) as e:
         raise Http404
 
     # Get in labels a list of objects Label gotten from the selected labels
@@ -120,9 +118,7 @@ def download_attachment(request, board_id, card_id, attachment_id):
     except (Board.DoesNotExist, Card.DoesNotExist, CardAttachment.DoesNotExist) as e:
         raise Http404
 
-    print attachment.file
     if not attachment.file:
-        print "sdfasfs"
         attachment.fetch_external_file()
 
     return HttpResponseRedirect(attachment.file.url)
@@ -265,13 +261,12 @@ def view_report(request, board_id):
 # Export card report in CSV format
 @login_required
 def export_report(request, board_id):
-    try:
-        member = None
-        if user_is_member(request.user):
-            member = request.user.member
-        board = get_user_boards(request.user).get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+
+    board = get_user_board_or_404(request.user, board_id)
     cards = board.cards.all()
 
     response = HttpResponse(content_type='text/csv')
@@ -294,10 +289,7 @@ def export_report(request, board_id):
 # Export detailed card report in CSV format
 @login_required
 def export_detailed_report(request, board_id):
-    try:
-        board = get_user_boards(request.user).get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+    board = get_user_board_or_404(request.user, board_id)
     cards = board.cards.all()
 
     response = HttpResponse(content_type='text/csv')
@@ -321,13 +313,11 @@ def export_detailed_report(request, board_id):
 # View week report
 @login_required
 def view_week_summary(request, board_id, member_id="all", week_of_year=None):
-    try:
-        current_member = None
-        if user_is_member(request.user):
-            current_member = request.user.member
-        board = get_user_boards(request.user).get(id=board_id, is_archived=False)
-    except Board.DoesNotExist:
-        raise Http404
+
+    current_member = None
+    if user_is_member(request.user):
+        current_member = request.user.member
+    board = get_user_board_or_404(request.user, board_id)
 
     replacements = {"board": board, "member": current_member}
 

@@ -11,7 +11,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 
-from djanban.apps.base.auth import user_is_member, get_user_boards
+from djanban.apps.base.auth import user_is_member, get_user_boards, get_user_board_or_404
 from djanban.apps.base.decorators import member_required
 from djanban.apps.boards.models import Board
 from djanban.apps.journal.forms import NewJournalEntryForm, EditJournalEntryForm, DeleteJournalEntryForm
@@ -49,13 +49,12 @@ def view(request, board_id):
 # View a journal entry
 @login_required
 def view_entry(request, board_id, year, month, journal_entry_slug):
-    try:
-        member = None
-        if user_is_member(request.user):
-            member = request.user.member
-        board = get_user_boards(request.user).get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+
+    board = get_user_board_or_404(request.user, board_id)
 
     journal_entry = get_object_or_404(
         JournalEntry, creation_datetime__year=year, creation_datetime__month=month, slug=journal_entry_slug
@@ -76,10 +75,7 @@ def view_entry(request, board_id, year, month, journal_entry_slug):
 @member_required
 def new_entry(request, board_id):
     member = request.user.member
-    try:
-        board = member.boards.get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+    board = get_user_board_or_404(request.user, board_id)
 
     journal_entry = JournalEntry(board=board, author=member)
 
@@ -99,11 +95,7 @@ def new_entry(request, board_id):
 @member_required
 def edit_entry(request, board_id, year, month, journal_entry_slug):
     member = request.user.member
-    try:
-        board = member.boards.get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
-
+    board = get_user_board_or_404(request.user, board_id)
     journal_entry = get_object_or_404(
         JournalEntry, creation_datetime__year=year, creation_datetime__month=month, slug=journal_entry_slug
     )
@@ -125,10 +117,7 @@ def edit_entry(request, board_id, year, month, journal_entry_slug):
 @member_required
 def delete_entry(request, board_id, year, month, journal_entry_slug):
     member = request.user.member
-    try:
-        board = member.boards.get(id=board_id)
-    except ObjectDoesNotExist:
-        raise Http404
+    board = get_user_board_or_404(request.user, board_id)
 
     journal_entry = get_object_or_404(
         JournalEntry, creation_datetime__year=year, creation_datetime__month=month, slug=journal_entry_slug

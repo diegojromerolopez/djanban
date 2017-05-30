@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic import DeleteView
 
+from djanban.apps.base.auth import get_user_board_or_404
 from djanban.apps.base.decorators import member_required
 from djanban.apps.boards.models import Board
 from djanban.apps.repositories.forms import GitLabRepositoryForm, get_form_class, DeleteRepositoryForm, \
@@ -20,10 +21,7 @@ from djanban.apps.repositories.models import Repository, GitLabRepository, GitHu
 @member_required
 def view_list(request, board_id):
     member = request.user.member
-    try:
-        board = member.boards.get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+    board = get_user_board_or_404(request.user, board_id)
     repositories = board.repositories.all().order_by("name")
     replacements = {
         "member": member,
@@ -37,10 +35,10 @@ def view_list(request, board_id):
 @member_required
 def view(request, board_id, repository_id):
     member = request.user.member
+    board = get_user_board_or_404(request.user, board_id)
     try:
-        board = member.boards.get(id=board_id)
         repository = board.repositories.get(id=repository_id)
-    except (Board.DoesNotExist, Repository.DoesNotExist):
+    except Repository.DoesNotExist:
         raise Http404
 
     replacements = {
@@ -56,10 +54,7 @@ def view(request, board_id, repository_id):
 @member_required
 def new(request, board_id, type="gitlab"):
     member = request.user.member
-    try:
-        board = member.boards.get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+    board = get_user_board_or_404(request.user, board_id)
 
     if type == "gitlab":
         repository_class = GitLabRepository
@@ -88,8 +83,8 @@ def new(request, board_id, type="gitlab"):
 @member_required
 def edit(request, board_id, repository_id):
     member = request.user.member
+    board = get_user_board_or_404(request.user, board_id)
     try:
-        board = member.boards.get(id=board_id)
         repository = board.repositories.get(id=repository_id)
     except ObjectDoesNotExist:
         raise Http404
@@ -115,8 +110,8 @@ def edit(request, board_id, repository_id):
 @member_required
 def checkout(request, board_id, repository_id):
     member = request.user.member
+    board = get_user_board_or_404(request.user, board_id)
     try:
-        board = member.boards.get(id=board_id)
         repository = board.repositories.get(id=repository_id)
     except ObjectDoesNotExist:
         raise Http404
@@ -129,8 +124,8 @@ def checkout(request, board_id, repository_id):
 @member_required
 def delete(request, board_id, repository_id):
     member = request.user.member
+    board = get_user_board_or_404(request.user, board_id)
     try:
-        board = member.boards.get(id=board_id)
         repository = board.repositories.get(id=repository_id)
     except ObjectDoesNotExist:
         raise Http404

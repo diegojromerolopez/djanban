@@ -18,7 +18,8 @@ from django.http.response import Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from requests.packages.urllib3.exceptions import SSLError, HTTPError
 
-from djanban.apps.base.auth import user_is_member, get_user_boards, user_is_visitor
+from djanban.apps.base.auth import user_is_member, get_user_boards, user_is_visitor, get_member_boards, \
+    get_user_board_or_404
 from djanban.apps.base.decorators import member_required
 from djanban.apps.boards.forms import EditBoardForm, NewBoardForm, NewListForm, LabelForm, EditListForm, \
     SwapListForm, MoveUpListForm, MoveDownListForm
@@ -105,7 +106,7 @@ def create_default_labels(request, board_id):
 @member_required
 def edit_label(request, board_id, label_id):
     member = request.user.member
-    board = member.boards.get(id=board_id)
+    board = get_user_board_or_404(request.user, board_id)
     try:
         label = board.labels.get(id=label_id)
     except Label.DoesNotExist:
@@ -160,16 +161,14 @@ def view_board_panorama(request):
 # View board gantt chart
 @login_required
 def view_gantt_chart(request, board_id):
-    try:
-        board = get_user_boards(request.user).get(id=board_id)
-        member = None
-        visitor = None
-        if user_is_member(request.user):
-            member = request.user.member
-        elif user_is_visitor(request.user, board):
-            visitor = request.user
-    except Board.DoesNotExist:
-        raise Http404
+    board = get_user_board_or_404(request.user, board_id)
+
+    member = None
+    visitor = None
+    if user_is_member(request.user):
+        member = request.user.member
+    elif user_is_visitor(request.user, board):
+        visitor = request.user
 
     board_cards = board.cards.filter(list__type__in=List.STARTED_CARD_LIST_TYPES)
 
@@ -251,13 +250,11 @@ def view_gantt_chart(request, board_id):
 # Dynamic task board view
 @member_required
 def view_taskboard(request, board_id, path=""):
-    try:
-        board = get_user_boards(request.user).get(id=board_id)
-        member = None
-        if user_is_member(request.user):
-            member = request.user.member
-    except Board.DoesNotExist:
-        raise Http404
+
+    board = get_user_board_or_404(request.user, board_id)
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
 
     replacements = {
         "member": member,
@@ -339,7 +336,7 @@ def public_view(request, board_public_access_code):
 @member_required
 def edit(request, board_id):
     member = request.user.member
-    board = member.boards.get(id=board_id)
+    board = get_user_board_or_404(request.user, board_id)
 
     if request.method == "POST":
         form = EditBoardForm(request.POST, request.FILES, instance=board)
@@ -356,10 +353,7 @@ def edit(request, board_id):
 
 @login_required
 def view_identicon(request, board_id, width=40, height=40):
-    try:
-        board = get_user_boards(request.user, is_archived=None).get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+    board = get_user_board_or_404(request.user, board_id, is_archived=None)
 
     # List of colors taken from example http://pydenticon.readthedocs.io/en/0.3/usage.html#instantiating-a-generator
     foreground = [
@@ -398,13 +392,13 @@ def view_identicon(request, board_id, width=40, height=40):
 # View lists of a board
 @login_required
 def view_lists(request, board_id):
+    member = None
     if user_is_member(request.user):
         member = request.user.member
-        board = member.boards.get(id=board_id)
-    else:
-        member = None
-        board = get_user_boards(request.user).get(id=board_id)
+
+    board = get_user_board_or_404(request.user, board_id)
     lists = board.lists.all().order_by("position")
+
     replacements = {"member": member, "user": request.user, "board": board, "lists": lists, "list_types": List.LIST_TYPE_CHOICES}
     return render(request, "boards/lists/list.html", replacements)
 
@@ -412,11 +406,10 @@ def view_lists(request, board_id):
 # Create a new list
 @member_required
 def new_list(request, board_id):
-    member = request.user.member
-    try:
-        board = member.boards.get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+    board = get_user_board_or_404(request.user, board_id)
 
     list_ = List(board=board)
 
@@ -442,7 +435,7 @@ def new_list(request, board_id):
 def edit_list(request, board_id, list_id):
     member = request.user.member
     try:
-        board = member.boards.get(id=board_id)
+        board = get_user_board_or_404(request.user, board_id)
         list_ = board.lists.get(id=list_id)
     except (Board.DoesNotExist, List.DoesNotExist):
         raise Http404
@@ -465,7 +458,7 @@ def edit_list(request, board_id, list_id):
 def swap_list(request, board_id, list_id):
     member = request.user.member
     try:
-        board = member.boards.get(id=board_id)
+        board = get_user_board_or_404(request.user, board_id)
         list_ = board.lists.get(id=list_id)
     except (Board.DoesNotExist, List.DoesNotExist):
         raise Http404
@@ -488,7 +481,7 @@ def swap_list(request, board_id, list_id):
 def edit_list_position(request, board_id, list_id):
     member = request.user.member
     try:
-        board = member.boards.get(id=board_id)
+        board = get_user_board_or_404(request.user, board_id)
         list_ = board.lists.get(id=list_id)
     except (Board.DoesNotExist, List.DoesNotExist):
         raise Http404
@@ -531,7 +524,7 @@ def edit_list_position(request, board_id, list_id):
 @member_required
 def archive(request, board_id):
     member = request.user.member
-    board = member.boards.get(id=board_id, is_archived=False)
+    board = get_user_board_or_404(request.user, board_id)
 
     # Show archive form
     if request.method == "GET":
@@ -551,7 +544,7 @@ def archive(request, board_id):
 @member_required
 def unarchive(request, board_id):
     member = request.user.member
-    board = member.boards.get(id=board_id, is_archived=True)
+    board = get_user_board_or_404(request.user, board_id)
 
     # Show un-archive form
     if request.method == "GET":
@@ -573,10 +566,7 @@ def delete(request, board_id):
     member = request.user.member
 
     # Load the board
-    try:
-        board = member.boards.get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+    board = get_user_board_or_404(request.user, board_id)
 
     # Show delete form
     if request.method == "GET":
@@ -601,7 +591,7 @@ def delete(request, board_id):
 @member_required
 def fetch(request, board_id):
     member = request.user.member
-    board = member.boards.get(id=board_id)
+    board = get_user_board_or_404(request.user, board_id)
 
     replacements = {"member": member, "board": board}
 
@@ -630,13 +620,12 @@ def fetch(request, board_id):
 # View workflow card report
 @login_required
 def view_workflow_card_report(request, board_id, workflow_id):
-    try:
-        member = None
-        if user_is_member(request.user):
-            member = request.user.member
-        board = get_user_boards(request.user).get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+
+    board = get_user_board_or_404(request.user, board_id)
 
     workflow = board.workflows.get(id=workflow_id)
     workflow_card_reports = board.workflow_card_reports.filter(workflow_id=workflow_id)
@@ -655,13 +644,12 @@ def view_workflow_card_report(request, board_id, workflow_id):
 # View label report
 @login_required
 def view_label_report(request, board_id):
-    try:
-        member = None
-        if user_is_member(request.user):
-            member = request.user.member
-        board = get_user_boards(request.user).get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+
+    board = get_user_board_or_404(request.user, board_id)
+
     labels = board.labels.exclude(name="")
     replacements = {"member": member, "board": board, "labels": labels}
     return render(request, "boards/labels/list.html", replacements)
@@ -670,13 +658,11 @@ def view_label_report(request, board_id):
 # View member report
 @login_required
 def view_member_report(request, board_id):
-    try:
-        member = None
-        if user_is_member(request.user):
-            member = request.user.member
-        board = get_user_boards(request.user).get(id=board_id)
-    except Board.DoesNotExist:
-        raise Http404
+    member = None
+    if user_is_member(request.user):
+        member = request.user.member
+
+    board = get_user_board_or_404(request.user, board_id)
 
     week_of_year = get_week_of_year()
 
@@ -689,20 +675,3 @@ def view_member_report(request, board_id):
     }
     return render(request, "boards/members/list.html", replacements)
 
-
-# Change list type. Remember a list can be "development" or "done" list
-@member_required
-def change_list_type(request):
-    member = request.user.member
-    if request.method == "POST":
-        list_id = request.POST.get("list_id")
-        type_ = request.POST.get("type")
-        if type_ not in List.LIST_TYPES:
-            raise Http404
-
-        list_ = List.objects.get(id=list_id, board__members=member)
-        list_.type = type_
-        list_.save()
-
-        return HttpResponseRedirect(reverse("boards:view_lists", args=(list_.board_id,)))
-    raise Http404

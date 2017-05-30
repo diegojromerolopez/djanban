@@ -76,9 +76,6 @@ urlpatterns = [
     url(r'^(?P<board_id>\d+)/fetch/?$', boards.fetch, name="fetch"),
     url(r'^(?P<board_id>\d+)/gantt-chart/?$', boards.view_gantt_chart, name="view_gantt_chart"),
 
-    # Change list type
-    url(r'^change-list-type/?$', boards.change_list_type, name="change_list_type"),
-
     # Workflow URLs
     url(r'^(?P<board_id>\d+)/workflows/', include('djanban.apps.workflows.urls', namespace="workflows")),
 

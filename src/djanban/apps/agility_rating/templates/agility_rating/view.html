@@ -12,12 +12,16 @@
               <div class="panel-body row">
                   <div class="col-md-12">
                       <div class="actions">
-                            {% if member %}
+                            {% if board.agility_rating and member %}
                                 <p>
-                                    <a href="{% url 'boards:agility_rating:edit' board.id %}" title="Edit agility rating of project {{board.name}}">
+                                    <a href="{% url 'boards:agility_rating:edit' board.id %}"
+                                       class="btn btn-primary"
+                                       title="Edit agility rating of project {{board.name}}">
                                         <span class="fa fa-pencil"></span>
                                     </a>
-                                    <a href="{% url 'boards:agility_rating:delete' board.id %}" title="Delete agility rating or project {{board.name}}">
+                                    <a href="{% url 'boards:agility_rating:delete' board.id %}"
+                                       class="btn btn-danger"
+                                       title="Delete agility rating or project {{board.name}}">
                                         <span class="fa fa-trash"></span>
                                     </a>
                                 </p>
@@ -75,7 +79,27 @@
                                     </div>
                                </div>
                            {% else %}
-                                Please, <a href="{% url 'boards:agility_rating:new' board.id %}">create first an agility rating.
+
+
+                           <div class="row">
+                                <div class="col-md-7 center-block">
+                                    <div class="panel panel-warning">
+                                      <div class="panel-heading">No agility rating present for this project</div>
+                                      <div class="panel-body">
+                                          <p>
+                                              Please,
+                                              <a href="{% url 'boards:agility_rating:new' board.id %}"
+                                                class="btn btn-success">
+                                                  <span class="fa fa-plus"></span>
+                                                  create first an agility rating
+                                              </a>
+                                          </p>
+                                      </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
                            {% endif %}
                         </div>
                   </div>
