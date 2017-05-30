@@ -30,7 +30,7 @@ from djanban.apps.reports.models import CardMovement
 def avg_lead_time(request, board=None):
 
     # Caching
-    chart_uuid = "cards.avg_lead_time-{0}".format(board.id if board else "None")
+    chart_uuid = "cards.avg_lead_time-{0}".format(board.id if board else "user-{0}".format(request.user.id))
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
@@ -72,7 +72,7 @@ def avg_lead_time(request, board=None):
 def avg_cycle_time(request, board=None):
 
     # Caching
-    chart_uuid = "cards.avg_cycle_time-{0}".format(board.id if board else "None")
+    chart_uuid = "cards.avg_cycle_time-{0}".format(board.id if board else "user-{0}".format(request.user.id))
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
@@ -128,7 +128,7 @@ def _avg_metric_time_by_month(request, board=None, metric="lead"):
         raise ValueError("The metric must be 'lead' or 'cycle'")
 
     # Caching
-    chart_uuid = "cards._avg_metric_time_by_month-{0}-{1}".format(board.id if board else "None", metric)
+    chart_uuid = "cards._avg_metric_time_by_month-{0}-{1}".format(board.id if board else "user-{0}".format(request.user.id), metric)
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
@@ -635,7 +635,7 @@ def value_evolution_by_member(current_user, board=None, day_step=1):
 def _value_evolution(current_user, board=None, cumulative=False, day_step=1, by_member=False):
     # Caching
     chart_uuid = "cards.value_evolution-{0}-{1}-{2}-{3}".format(
-        board.id if board else "all",
+        board.id if board else "user-{0}".format(current_user.id),
         "cumulative" if cumulative else "",
         day_step,
         "by_member" if by_member else ""
@@ -833,7 +833,7 @@ def time_scatterplot(current_user, time_metric_name="Time", board=None,
 
     # Caching
     chart_uuid = "cards.time_scatterplot-{0}-{1}-{2}-{3}-{4}".format(
-        current_user.id, board.id if board else "None", inspect.getsource(y_function).strip(),
+        current_user.id, board.id if board else "user-{0}".format(current_user.id), inspect.getsource(y_function).strip(),
         year if year else "None", month if month else "None"
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
@@ -922,7 +922,7 @@ def time_vs_spent_time(current_user, time_metric_name="Time", board=None,
 
     # Caching
     chart_uuid = "cards.time_vs_spent_time-{0}-{1}-{2}-{3}-{4}".format(
-        current_user.id, board.id if board else "None", inspect.getsource(y_function).strip(),
+        current_user.id, board.id if board else "user-{0}".format(current_user.id), inspect.getsource(y_function).strip(),
         year if year else "None", month if month else "None"
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
@@ -1012,7 +1012,7 @@ def time_box(current_user, time_metric_name="Time", board=None,
 
     # Caching
     chart_uuid = "cards.time_box-{0}-{1}-{2}-{3}-{4}".format(
-        current_user.id, board.id if board else "None", inspect.getsource(y_function).strip(),
+        current_user.id, board.id if board else "user-{0}".format(current_user.id), inspect.getsource(y_function).strip(),
         year if year else "None", month if month else "None"
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
@@ -1098,7 +1098,7 @@ def time_box(current_user, time_metric_name="Time", board=None,
 def number_of_comments(current_user, board=None, card=None):
     # Caching
     chart_uuid = "cards.number_of_comments-{0}-{1}-{2}".format(
-        current_user.id, board.id if board else "None", card.id if card else "None"
+        current_user.id, board.id if board else "user-{0}".format(current_user.id), card.id if card else "None"
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:

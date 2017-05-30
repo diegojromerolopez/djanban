@@ -24,7 +24,7 @@ def task_movements_by_member(request, movement_type="forward", board=None):
         raise ValueError("{0} is not recognized as a valid movement type".format(movement_type))
 
     # Caching
-    chart_uuid = "members.task_movements_by_member-{0}-{1}".format(movement_type, board.id if board else "None")
+    chart_uuid = "members.task_movements_by_member-{0}-{1}".format(movement_type, board.id if board else "user-{0}".format(request.user.id))
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
@@ -65,7 +65,9 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
         week_of_year = "{0}W{1}".format(today.year, week_of_year_)
 
     # Caching
-    chart_uuid = "members.spent_time_by_week-{0}-{1}".format(current_user.id, week_of_year, board.id if board else "None")
+    chart_uuid = "members.spent_time_by_week-{0}-{1}".format(
+        current_user.id, week_of_year, board.id if board else "user-{0}".format(current_user.id)
+    )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart

@@ -19,7 +19,7 @@ class CachedChart(models.Model):
 
     creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
 
-    uuid = models.CharField(max_length=1024, verbose_name=u"Chart view name",
+    uuid = models.CharField(max_length=2048, verbose_name=u"Chart view name",
                             help_text=u"Chart view name including some optional parameters")
 
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cached_charts", default=None, null=True)

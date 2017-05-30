@@ -20,7 +20,7 @@ from djanban.utils.week import number_of_weeks_of_year, get_iso_week_of_year, st
 def avg_spent_times(request, board=None):
 
     # Caching
-    chart_uuid = "labels.avg_spent_times-{0}".format(board.id if board else "None")
+    chart_uuid = "labels.avg_spent_times-{0}".format(board.id if board else "user-{0}".format(request.user.id))
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
@@ -63,7 +63,7 @@ def avg_spent_times(request, board=None):
 def avg_estimated_times(request, board=None):
 
     # Caching
-    chart_uuid = "labels.avg_estimated_times-{0}".format(board.id if board else "None")
+    chart_uuid = "labels.avg_estimated_times-{0}".format(board.id if board else "user-{0}".format(request.user.id))
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
@@ -103,30 +103,32 @@ def avg_estimated_times(request, board=None):
 
 
 # Average spent time by month
-def avg_estimated_time_by_month(board=None):
-    return _daily_spent_times_by_period(board, "estimated_time")
+def avg_estimated_time_by_month(request, board=None):
+    return _daily_spent_times_by_period(request.user, board, "estimated_time")
 
 
 # Average estimated time by month
-def avg_spent_time_by_month(board=None):
-    return _daily_spent_times_by_period(board, "spent_time")
+def avg_spent_time_by_month(request, board=None):
+    return _daily_spent_times_by_period(request.user, board, "spent_time")
 
 
 # Number of cards worked on by month
-def number_of_cards_worked_on_by_month(board=None):
-    return _daily_spent_times_by_period(board, "spent_time", operation="Count")
+def number_of_cards_worked_on_by_month(request, board=None):
+    return _daily_spent_times_by_period(request.user, board, "spent_time", operation="Count")
 
 
 # Number of cards worked on by week
-def number_of_cards_worked_on_by_week(board=None):
-    return _daily_spent_times_by_period(board, "spent_time", operation="Count", period="week")
+def number_of_cards_worked_on_by_week(request, board=None):
+    return _daily_spent_times_by_period(request.user, board, "spent_time", operation="Count", period="week")
 
 
 # Average spent/estimated time by week/month
-def _daily_spent_times_by_period(board=None, time_measurement="spent_time", operation="Avg", period="month"):
+def _daily_spent_times_by_period(current_user, board=None, time_measurement="spent_time", operation="Avg", period="month"):
 
     # Caching
-    chart_uuid = "labels._daily_spent_times_by_period-{0}-{1}-{2}-{3}".format(board.id if board else "None", time_measurement, operation, period)
+    chart_uuid = "labels._daily_spent_times_by_period-{0}-{1}-{2}-{3}".format(
+        board.id if board else "user-{0}".format(current_user.id), time_measurement, operation, period
+    )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart

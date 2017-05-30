@@ -49,7 +49,7 @@ def _number_of_interruptions(current_user, board, chart_title, interruption_meas
     chart_uuid = "interruptions.{0}".format(
         hashlib.sha256("_number_of_interruptions-{0}-{1}-{2}-{3}-{4}".format(
             current_user.id,
-            board.id if board else "",
+            board.id if board else "user-{0}".format(current_user.id),
             inspect.getsource(interruption_measurement),
             "incremental" if incremental else "absolute",
             chart_title
@@ -229,7 +229,7 @@ def _interruption_measurement_by_month(current_user, chart_title, interruption_m
         hashlib.sha256("_interruption_measurement_by_month-{0}-{1}-{2}".format(
             current_user.id,
             inspect.getsource(interruption_measurement),
-            board.id if board else "None"
+            board.id if board else "username-{0}".format(current_user.id)
         )).hexdigest()
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
