@@ -1,0 +1,38 @@
+{% extends "boards/view.html" %}
+
+{% block page_title %}Recurrent cards {{recurrent_card.full_name}}{% endblock %}
+
+{% block content %}
+    <p>
+        {% include "recurrent_cards/components/go_back.html" %}
+    </p>
+    <div class="row">
+        <div class="col-md-12 card">
+            <div class="panel panel-info">
+              <div class="panel-heading">
+                  <h1>{{recurrent_card.full_name}}</h1>
+              </div>
+              <div class="panel-body row">
+                  <div class="col-md-12">
+                      <div class="actions">
+                        {% if member %}
+                            <p>
+                                <a href="{% url 'recurrent_card:edit' recurrent_card.id %}"
+                                   title="Edit recurrent card {{recurrent_card.full_name}}"
+                                   class="btn btn-primary">
+                                    <span class="fa fa-pencil"></span>
+                                </a>
+                                <a href="{% url 'recurrent_card:delete' recurrent_card.id %}"
+                                   title="Delete recurrent card {{recurrent_card.full_name}}"
+                                    class="btn btn-danger">
+                                    <span class="fa fa-trash"></span>
+                                </a>
+                            </p>
+                      {% endif %}
+                      </div>
+                  </div>
+              </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

@@ -107,6 +107,7 @@ INSTALLED_APPS = [
     'djanban.apps.niko_niko_calendar',
     'djanban.apps.notifications',
     'djanban.apps.password_reseter',
+    'djanban.apps.recurrent_cards',
     'djanban.apps.reporter',
     'djanban.apps.reports',
     'djanban.apps.repositories',

@@ -1,0 +1,106 @@
+{% extends "base/base.html" %}
+
+{% load staticfiles %}
+{% load djanban_auth %}
+
+{% block css %}
+    {{block.super}}
+    <link href="{% static 'css/recurrent_cards/list.css' %}" rel="stylesheet" />
+{% endblock css %}
+
+{% block page_title %}Recurrent cards{% endblock %}
+
+{% block content %}
+    <h1>Work hours packages</h1>
+    <div class="row">
+        <div class="panel col-md-12">
+            <p>
+                A <strong>recurrent card</strong> is a card that repeats itself from time to time.
+            </p>
+            <p>
+                All recurrent cards will be created automatically on their board each for their selected days.
+            </p>
+        </div>
+    </div>
+    {% if member %}
+        <div class="row">
+            <div class="panel col-md-12">
+                {% include "forms/filter.html" %}
+            </div>
+        </div>
+    {% endif %}
+    <div class="board_list_list">
+        <div class="row">
+            <div class="panel col-md-12">
+
+                <div>
+                    <p>
+                        {% if member %}
+                            <a href="{% url 'recurrent_cards:new' %}" class="btn btn-success">New</a>
+                        {% endif %}
+                    </p>
+                </div>
+
+                {% if recurrent_cards|length == 0 %}
+                    No recurrent cards in this platform.
+                {% else %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Board</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Active?</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for recurrent_card in recurrent_cards %}
+                                <tr>
+                                    <td>#{{recurrent_card.id}}</td>
+                                    <td>
+                                        <a href="{% url 'boards:view_board' work_hours_package.board.id %}">
+                                            {{recurrent_card.board.name}}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {{recurrent_card.name}}
+                                    </td>
+                                    <td>
+                                        Weekly
+                                    </td>
+                                    <td>
+                                        {% if recurrent_card.is_active %}Yes{% else %}No{% endif %}
+                                    </td>
+
+                                    <td>
+                                        <a href="{% url 'recurrent_cards:view' recurrent_card.id %}"
+                                           title="View recurrent card {{recurrent_card.name}}"
+                                           class="btn btn-primary">
+                                            <span class="fa fa-eye"></span>
+                                        </a>
+                                        {% if member %}
+                                            <a href="{% url 'recurrent_cards:edit' recurrent_card.id %}"
+                                               title="Edit recurrent card {{recurrent_card.name}}"
+                                                class="btn btn-primary">
+                                                <span class="fa fa-pencil"></span>
+                                            </a>
+                                        {% endif %}
+                                        {% if member or request.user|user_is_administrator %}
+                                            <a href="{% url 'recurrent_cards:delete' recurrent_card.id %}"
+                                               title="Delete recurrent card {{recurrent_card.name}}"
+                                               class="btn btn-danger">
+                                                <span class="fa fa-trash"></span>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

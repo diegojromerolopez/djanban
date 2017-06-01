@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from django.conf.urls import url, include
 from django.contrib import admin
 
@@ -33,6 +34,7 @@ urlpatterns = [
     url(r'^visitors/', include('djanban.apps.visitors.urls', namespace="visitors")),
     url(r'^niko-niko-calendar/', include('djanban.apps.niko_niko_calendar.urls', namespace="niko_niko_calendar")),
     url(r'^work-hours-packages/', include('djanban.apps.work_hours_packages.urls', namespace="work_hours_packages")),
+    url(r'^recurrent-cards/', include('djanban.apps.recurrent_cards.urls', namespace="recurrent_cards")),
 
     url(r'^async_include/', include('async_include.urls', namespace="async_include")),
 

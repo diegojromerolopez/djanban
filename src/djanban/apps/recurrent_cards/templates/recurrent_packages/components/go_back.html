@@ -1,0 +1,14 @@
+<div class="row">
+    <div class="col-md-12">
+        {% if recurrent_card %}
+            {% with board=recurrent_card.board %}
+                <a href="{% url 'boards:view' board.id %}" class="btn btn-primary">
+                    <span class="fa fa-arrow-left"></span> Go to {{board.name}}
+                </a>
+            {% endwith %}
+        {% endif %}
+        <a href="{% url 'recurrent_cards:view_list' %}" class="btn btn-primary">
+            <span class="fa fa-arrow-left"></span> Go back to list
+        </a>
+    </div>
+</div>

@@ -1,0 +1,9 @@
+{% extends "recurrent_cards/form.html" %}
+
+{% block page_title %}Edit recurrent card {{instance.full_name}}{% endblock %}
+
+{% block content %}
+    {% include "recurrent_cards/components/go_back.html" %}
+    <h1>Edit recurrent card {{instance.full_name}}</h1>
+    {% include "forms/form.html" %}
+{% endblock content %}
