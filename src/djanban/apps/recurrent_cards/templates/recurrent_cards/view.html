@@ -8,29 +8,148 @@
     </p>
     <div class="row">
         <div class="col-md-12 card">
-            <div class="panel panel-info">
+            <div class="panel panel-{% if recurrent_card.is_active %}succes{% else %}warning{% endif %}">
               <div class="panel-heading">
-                  <h1>{{recurrent_card.full_name}}</h1>
+                  <h1>
+                      {{recurrent_card.full_name}}
+                      {% if not recurrent_card.is_active %}[NOT ACTIVE]{% endif %}
+                  </h1>
               </div>
-              <div class="panel-body row">
-                  <div class="col-md-12">
-                      <div class="actions">
-                        {% if member %}
-                            <p>
-                                <a href="{% url 'boards:recurrent_cards:edit' board.id recurrent_card.id %}"
-                                   title="Edit recurrent card {{recurrent_card.full_name}}"
-                                   class="btn btn-primary">
-                                    <span class="fa fa-pencil"></span>
-                                </a>
-                                <a href="{% url 'boards:recurrent_cards:delete' board.id recurrent_card.id %}"
-                                   title="Delete recurrent card {{recurrent_card.full_name}}"
-                                    class="btn btn-danger">
-                                    <span class="fa fa-trash"></span>
-                                </a>
-                            </p>
-                      {% endif %}
+              <div class="panel-body">
+
+                  <div class="row">
+                      <div class="col-md-12">
+                          <div class="actions">
+                            {% if member %}
+                                <p>
+                                    <a href="{% url 'boards:recurrent_cards:edit' board.id recurrent_card.id %}"
+                                       title="Edit recurrent card {{recurrent_card.full_name}}"
+                                       class="btn btn-primary">
+                                        <span class="fa fa-pencil"></span>
+                                    </a>
+                                    <a href="{% url 'boards:recurrent_cards:delete' board.id recurrent_card.id %}"
+                                       title="Delete recurrent card {{recurrent_card.full_name}}"
+                                        class="btn btn-danger">
+                                        <span class="fa fa-trash"></span>
+                                    </a>
+                                </p>
+                          {% endif %}
+                          </div>
                       </div>
                   </div>
+
+                  <div class="row">
+                      <div class="col-md-12">
+                          <div>
+                            {% if recurrent_card.is_active %}
+                                Active
+                            {% else %}
+                                Not active
+                            {% endif %}
+                          </div>
+
+                          <div>
+                              <h2>Creator</h2>
+                              <div>{{recurrent_card.creator.external_username}}</div>
+                          </div>
+
+                          <div>
+                              <h2>Description</h2>
+                              <div>{{recurrent_card.description|safe}}</div>
+                          </div>
+
+                          <div>
+                              <h2>Creation</h2>
+                              <div>
+                                  Creation list: {{recurrent_card.creation_list.name}}.
+                                  {% if recurrent_card.position == "top" %}
+                                    New cards will be created at the top of that list.
+                                  {% elif recurrent_card.position == "bottom" %}
+                                    New cards will be created at the bottom of that list.
+                                  {% endif %}
+                              </div>
+                          </div>
+
+                          <div>
+                              <h2>Estimated spent time</h2>
+                              <div>{{recurrent_card.estimated_time}} h.</div>
+                          </div>
+
+                          {% if recurrent_card.labels.all.exists %}
+                              <div>
+                                  <h2>Labels</h2>
+                                  <div>
+                                      <ul>
+                                          {% for label in recurrent_card.labels.all %}
+                                            <li>{{label.name}}</li>
+                                          {% endfor %}
+                                      </ul>
+                                  </div>
+                              </div>
+                          {% endif %}
+
+                          {% if recurrent_card.members.all.exists %}
+                              <div>
+                                  <h2>Members</h2>
+                                  <div>
+                                      <span class="members">
+                                          {% for member in recurrent_card.members.all %}
+                                            <span class="member">
+                                                <img src="{{member.avatar_url}}" class="avatar cursor-help"
+                                                     title="{{member.external_username}}"
+                                                     alt="{{member.external_username}}"/>
+                                            </span>
+                                          {% endfor %}
+                                      </span>
+                                  </div>
+                              </div>
+                          {% endif %}
+
+
+                        <div>
+                          <h2>Creation days</h2>
+                          <div>
+                              <ul class="days">
+                                  <li class="day">
+                                        Mondays: {% if create_on_mondays %}<span class="fa fa-times"></span>{% else %}<span class="fa fa-check"></span>{% endif %}
+                                  </li>
+                                  <li class="day">
+                                        Tuesdays: {% if create_on_tuesdays %}<span class="fa fa-times"></span>{% else %}<span class="fa fa-check"></span>{% endif %}
+                                  </li>
+                                  <li class="day">
+                                        Wednesdays: {% if create_on_wednesdays %}<span class="fa fa-times"></span>{% else %}<span class="fa fa-check"></span>{% endif %}
+                                  </li>
+                                  <li class="day">
+                                      Thursdays: {% if create_on_thursdays %}<span class="fa fa-times"></span>{% else %}<span class="fa fa-check"></span>{% endif %}
+                                  </li>
+                                  <li class="day">
+                                        Fridays: {% if create_on_fridays %}<span class="fa fa-times"></span>{% else %}<span class="fa fa-check"></span>{% endif %}
+                                  </li>
+                                  <li class="day">
+                                        Saturdays: {% if create_on_saturdays %}<span class="fa fa-times"></span>{% else %}<span class="fa fa-check"></span>{% endif %}
+                                  </li>
+                                  <li class="day">
+                                      Sundays: {% if create_on_sundays %}<span class="fa fa-times"></span>{% else %}<span class="fa fa-check"></span>{% endif %}
+                                  </li>
+                              </ul>
+                          </div>
+                      </div>
+
+                        <div>
+                          <h2>Move cards when day ends?</h2>
+                          <div>
+                              {% if not recurrent_card.move_to_list_when_day_ends %}
+                                No
+                              {% else %}
+                                Yes. To list {{recurrent_card.move_to_list_when_day_ends.name}}
+                              {% endif %}
+                          </div>
+                      </div>
+
+
+                      </div>
+                  </div>
+
               </div>
             </div>
         </div>
