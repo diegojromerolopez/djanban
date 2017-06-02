@@ -14,7 +14,7 @@ from djanban.apps.recurrent_cards.models import WeeklyRecurrentCard
 class RecurrentCardFilterForm(forms.Form):
 
     label = forms.ChoiceField(label="Label", choices=[], required=False)
-    is_active = forms.ChoiceField(label="Paid?", choices=[], required=False)
+    is_active = forms.ChoiceField(label="Active?", choices=[], required=False)
 
     def __init__(self, *args, **kwargs):
         self.member = kwargs.pop("member")
@@ -69,7 +69,7 @@ class WeeklyRecurrentCardForm(forms.ModelForm):
         # Lists of this board
         active_lists = [(list_.id, list_.name) for list_ in self.board.active_lists.order_by("position")]
         self.fields["creation_list"].choices = active_lists
-        self.fields["move_to_list_when_day_ends"].choices = [("", "None")] + active_lists
+        self.fields["move_to_list_when_day_ends"].choices = [("", "Don't move")] + active_lists
 
         # Member team mates of this user
         self.fields["members"].choices =\
