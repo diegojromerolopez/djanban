@@ -34,14 +34,11 @@ class RecurrentCardFilterForm(forms.Form):
 
     def get_recurrent_cards(self):
         # Filtering by board or label
-        board_id = self.cleaned_data.get("board")
         label_id = self.cleaned_data.get("label")
-        recurrent_cards = self.member.recurrent_cards.all().order_by("board", "name")
-        if board_id:
-            recurrent_cards = recurrent_cards.filter(board_id=board_id)
-        elif label_id:
-            label = Label.objects.get(id, board__in=get_member_boards(self.member))
-            recurrent_cards = recurrent_cards.filter(board__label=label)
+        recurrent_cards = self.member.recurrent_cards.filter(board=self.board).order_by("name")
+        if label_id:
+            label = self.boards.labels.get(id)
+            recurrent_cards = recurrent_cards.filter(labels=label)
 
         # Filtering paid work hours packages
         if self.cleaned_data.get("is_active") == "Yes" or self.cleaned_data.get("is_active") == "No":
@@ -61,6 +58,14 @@ class WeeklyRecurrentCardForm(forms.ModelForm):
             "is_active"
         ]
 
+    class Media:
+        css = {
+            'all': ('css/recurrent_cards/form.css',)
+        }
+        js = (
+            'js/recurrent_cards/form.js',
+        )
+
     def __init__(self, *args, **kwargs):
         self.member = kwargs.pop("member")
         self.board = kwargs.pop("board")
@@ -72,12 +77,11 @@ class WeeklyRecurrentCardForm(forms.ModelForm):
         self.fields["move_to_list_when_day_ends"].choices = [("", "Don't move")] + active_lists
 
         # Member team mates of this user
-        self.fields["members"].choices =\
-            [(member.id, member.external_username) for member in self.member.team_mates.all()]
+        self.fields["members"].choices = \
+            [(member.id, member.external_username) for member in self.board.members.all()]
 
         # Available labels for this board
         self.fields["labels"].choices = \
-            [("", "None")] +\
             [(label.id, label.name) for label in self.board.labels.exclude(name="").order_by("name")]
 
     def save(self, commit=True):

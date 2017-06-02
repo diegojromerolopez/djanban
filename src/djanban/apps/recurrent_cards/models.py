@@ -6,6 +6,8 @@ from datetime import timedelta
 from django.db import models, transaction
 
 # Recurrent cards are cards that have to be created
+from django.utils import timezone
+
 from djanban.apps.boards.models import Card
 
 
@@ -39,7 +41,7 @@ class RecurrentCard(models.Model):
     labels = models.ManyToManyField("boards.Label", related_name="recurrent_cards", blank=True)
     members = models.ManyToManyField("members.Member", verbose_name=u"Members", related_name="recurrent_cards", blank=True)
     is_active = models.BooleanField(
-        verbose_name="Should its child cards be created?",
+        verbose_name="Active?",
         help_text="If unchecked, no cards will be created that depends on this recurrent card",
         default=False
     )
@@ -49,42 +51,39 @@ class RecurrentCard(models.Model):
 
     @transaction.atomic
     def create_card(self):
-
-        # Get card position
-        position = self._get_position_value()
+        now = timezone.now()
+        today = now.today()
 
         # Creation of the card
-        card = Card(
-            board=self.board, list=self.creation_list, position=position,
-            name=self.name, description=self.description
+        new_card = self.creation_list.add_card(
+            member=self.creator,
+            name="{0} [{1}]".format(self.name, today.strftime("%Y-%m-%d")),
+            description=self.description,
+            position=self.position,
+            parent_recurrent_card=self
         )
-        card.save()
 
         # Update card estimated time
         if self.estimated_time:
-            card.add_spent_estimated_time(member=self.creator, spent_time=0, estimated_time=self.estimated_time)
+            new_card.add_spent_estimated_time(member=self.creator, spent_time=0, estimated_time=self.estimated_time)
 
         # Update card labels
-        card.update_labels(member=self.creator, labels=self.labels.all())
+        new_card.update_labels(member=self.creator, labels=self.labels.all())
 
         # Update members
-        #for member in self.members.all():
-        #    card.add_member(member=self.creator, member_to_add=member)
+        new_card.update_members(member=self.creator, new_members=self.members.all())
 
-        return card
+        return new_card
 
-    # Return card position value in the list
-    def _get_position_value(self):
-        if self.creation_list.cards.exists():
-            if self.position == "top":
-                position = self.creation_list.cards.all().order_by("position")[0].position
-            elif self.position == "bottom":
-                position = self.creation_list.cards.all().order_by("-position")[0].position
-            else:
-                raise ValueError("Invalid position")
-        else:
-            position = 1000
-        return position
+    # Inform in has created a card today
+    @property
+    def has_created_a_card_today(self):
+        today = timezone.now().today()
+        try:
+            return self.cards.filter(creation_datetime__date=today).exists()
+        except (IndexError, KeyError):
+            return None
+
 
 # Recurrent cards are cards that have to be created
 class WeeklyRecurrentCard(RecurrentCard):

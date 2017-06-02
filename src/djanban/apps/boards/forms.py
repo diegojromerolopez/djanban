@@ -271,7 +271,7 @@ class NewCardForm(models.ModelForm):
                 board = self.instance.board
                 list_ = self.instance.list
 
-                self.instance = list_.add_card(self.member, self.instance.name, position="bottom")
+                self.instance = list_.add_card(member=self.member, name=self.instance.name, position="bottom")
 
                 self.instance.creation_datetime = timezone.now()
                 self.instance.last_activity_datetime = timezone.now()

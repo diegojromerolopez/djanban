@@ -656,6 +656,12 @@ class Card(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
     list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")
 
+    # Some cards are created from recurrent cards
+    parent_recurrent_card = models.ForeignKey(
+        "recurrent_cards.RecurrentCard", verbose_name=u"Recurrent card", related_name="cards",
+        blank=True, default=None, null=True, on_delete=models.SET_NULL
+    )
+
     name = models.TextField(verbose_name=u"Name of the card")
     uuid = models.CharField(max_length=128, verbose_name=u"External id of the card", unique=True)
     url = models.CharField(max_length=255, verbose_name=u"URL of the card", unique=True)
@@ -989,15 +995,15 @@ class Card(models.Model):
 
         if attribute == "name":
             self.name = value
-            connector.set_card_name(value)
+            connector.set_card_name(card=self)
 
         elif attribute == "description":
             self.description = value
-            connector.set_card_description(value)
+            connector.set_card_description(card=self)
 
         elif attribute == "is_closed":
             self.is_closed = value
-            connector.set_card_is_closed(value)
+            connector.set_card_is_closed(card=self)
 
         elif attribute == "due_datetime":
             if value is not None:
@@ -1303,6 +1309,27 @@ class Card(models.Model):
             if card_label.id not in label_ids:
                 self.labels.remove(card_label)
                 connector.remove_label_of_card(card=self, label=card_label)
+
+        # Delete all cached charts for this board
+        self.board.clean_cached_charts()
+
+    # Update members of the card
+    @transaction.atomic
+    def update_members(self, member, new_members):
+        connector = RemoteBackendConnectorFactory.factory(member)
+
+        # New members
+        for member_i in new_members:
+            if not self.members.filter(id=member_i.id).exists():
+                self.members.add(member_i)
+                connector.add_member_to_card(card=self, member_to_add=member_i)
+
+        # Check if there is any member that needs to be removed
+        member_ids = {member_i.id: member_i for member_i in new_members}
+        for member_i in self.members.all():
+            if member_i.id not in member_ids:
+                self.members.remove(member_i)
+                connector.remove_member_of_card(card=self, member_to_remove=member_i)
 
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
@@ -1766,17 +1793,18 @@ class List(models.Model):
 
     # Adds a new card
     @transaction.atomic
-    def add_card(self, member, name, position="bottom"):
+    def add_card(self, member, name, description="", position="bottom", parent_recurrent_card=None):
         board = self.board
 
         # Construction of the card
         # We don't save it yet because we need some Trello attributes before saving
-        card = Card(board=board, name=name, list=self)
+        card = Card(board=board, name=name, description=description, list=self)
         card.creator = member # TODO: not a model attribute (yet)
 
         # Update the remote backend
         connector = RemoteBackendConnectorFactory.factory(member)
         card = connector.new_card(card=card, labels=None, position=position)
+        card.parent_recurrent_card = parent_recurrent_card
         card.save()
 
         return card

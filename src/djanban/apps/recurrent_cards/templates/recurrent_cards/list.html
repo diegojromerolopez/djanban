@@ -50,6 +50,7 @@
                                 <th>Id</th>
                                 <th>Name</th>
                                 <th>Type</th>
+                                <th>No. of created cards</th>
                                 <th>Active?</th>
                                 <th>Actions</th>
                             </tr>
@@ -63,6 +64,9 @@
                                     </td>
                                     <td>
                                         Weekly
+                                    </td>
+                                    <td>
+                                        {{recurrent_card.cards.count}}
                                     </td>
                                     <td>
                                         {% if recurrent_card.is_active %}Yes{% else %}No{% endif %}

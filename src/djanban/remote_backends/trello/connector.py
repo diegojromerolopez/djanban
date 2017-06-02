@@ -213,6 +213,18 @@ class TrelloConnector(object):
         TrelloLabelUuid = namedtuple("TrelloLabelUuid", ["id"])
         return trello_card.remove_label(TrelloLabelUuid(id=label.uuid))
 
+    # Add a member to a card
+    def add_member_to_card(self, card, member_to_add):
+        trello_card = self.get_trello_card(card)
+        TrelloMemberUuid = namedtuple("TrelloMemberUuid", ["id"])
+        return trello_card.add_member(TrelloMemberUuid(id=member_to_add.uuid))
+
+    # Remove member from card
+    def remove_member_of_card(self, card, member_to_remove):
+        trello_card = self.get_trello_card(card)
+        TrelloMemberUuid = namedtuple("TrelloMemberUuid", ["id"])
+        return trello_card.remove_member(TrelloMemberUuid(id=member_to_remove.uuid))
+
     # Sets the name of the card in Trello
     def set_card_name(self, card):
         trello_card = self.get_trello_card(card)

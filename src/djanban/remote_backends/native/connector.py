@@ -133,6 +133,14 @@ class NativeConnector(object):
     def remove_label_of_card(self, card, label):
         pass
 
+    # Add a member to a card
+    def add_member_to_card(self, card, member_to_add):
+        pass
+
+    # Remove member from card
+    def remove_member_of_card(self, card, member_to_remove):
+        pass
+
     # Sets the name of the card in Trello
     def set_card_name(self, card):
         pass

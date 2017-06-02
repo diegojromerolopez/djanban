@@ -6,6 +6,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from django.db.models import Q
 from django.template.loader import get_template
 from django.utils import timezone
@@ -26,7 +27,10 @@ class Command(BaseCommand):
         today = timezone.now().today()
         weekday = today.isoweekday()
 
-        recurrent_cards_filter = {"is_active": True, "board__is_archived": False}
+        recurrent_cards_filter = {
+            "is_active": True,
+            "board__is_archived": False
+        }
         if weekday == 1:
             recurrent_cards_filter["create_on_mondays"] = True
         elif weekday == 2:
@@ -44,14 +48,40 @@ class Command(BaseCommand):
 
         recurrent_cards = WeeklyRecurrentCard.objects.filter(**recurrent_cards_filter)
 
-        for recurrent_card in recurrent_cards:
-            card = recurrent_card.create_card()
+        num_created_cards = 0
+
+        with transaction.atomic():
+            for recurrent_card in recurrent_cards:
+                # Check if has already created a card today
+                has_created_a_card_today = recurrent_card.has_created_a_card_today
+                # In case a card has not been already created today for this recurrent card,
+                # create it (also in its backend)
+                if not has_created_a_card_today:
+                    card = recurrent_card.create_card()
+                    num_created_cards += 1
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            u"{0} successfully created".format(card.name))
+                    )
+                # In case a card has been already created for this recurrent card, show a warning
+                else:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            u"card {0} already created today".format(recurrent_card.name))
+                    )
+
+        # If there has been at least one creation of card, show a message
+        if num_created_cards > 0:
+            self.stdout.write(
+                    self.style.SUCCESS(
+                        u"Creation of {0} card(s) from recurrent cards completed successfully".format(num_created_cards)
+                    )
+                )
+        # Otherwise, show another "less happy" message
+        else:
             self.stdout.write(
                 self.style.SUCCESS(
-                    u"{0} successfully created".format(card.name))
-            )
-
-        self.stdout.write(
-                self.style.SUCCESS(
-                    u"Creation of cards from recurrent cards completed successfully")
+                    u"No recurrent cards for this day, hence, no cards were created".format(
+                        recurrent_cards.count())
+                )
             )

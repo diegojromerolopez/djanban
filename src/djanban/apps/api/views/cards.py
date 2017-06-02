@@ -195,6 +195,7 @@ def change_members(request, board_id, card_id):
     if request.method != "POST":
         return JsonResponseMethodNotAllowed({"message": "HTTP method not allowed."})
 
+    member = request.user.member
     try:
         card = get_card_or_404(request, board_id, card_id)
     except Http404:
@@ -207,11 +208,8 @@ def change_members(request, board_id, card_id):
         return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
 
     member_ids = post_params.get("members")
-    card.members.clear()
-    for member_id in member_ids:
-        if board.members.filter(id=member_id).exists():
-            member = board.members.get(id=member_id)
-            card.members.add(member)
+
+    card.update_members(member, board.members.filter(id__in=member_ids))
 
     serializer = Serializer(board=card.board)
     return JsonResponse(serializer.serialize_card(card))
