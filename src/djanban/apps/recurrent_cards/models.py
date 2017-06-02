@@ -3,10 +3,12 @@ from __future__ import unicode_literals
 
 from datetime import timedelta
 
-from django.db import models
-
+from django.db import models, transaction
 
 # Recurrent cards are cards that have to be created
+from djanban.apps.boards.models import Card
+
+
 class RecurrentCard(models.Model):
     class Meta:
         verbose_name = "recurrent card"
@@ -45,6 +47,44 @@ class RecurrentCard(models.Model):
     def full_name(self):
         return "{0} of {1}".format(self.name, self.board.name)
 
+    @transaction.atomic
+    def create_card(self):
+
+        # Get card position
+        position = self._get_position_value()
+
+        # Creation of the card
+        card = Card(
+            board=self.board, list=self.creation_list, position=position,
+            name=self.name, description=self.description
+        )
+        card.save()
+
+        # Update card estimated time
+        if self.estimated_time:
+            card.add_spent_estimated_time(member=self.creator, spent_time=0, estimated_time=self.estimated_time)
+
+        # Update card labels
+        card.update_labels(member=self.creator, labels=self.labels.all())
+
+        # Update members
+        #for member in self.members.all():
+        #    card.add_member(member=self.creator, member_to_add=member)
+
+        return card
+
+    # Return card position value in the list
+    def _get_position_value(self):
+        if self.creation_list.cards.exists():
+            if self.position == "top":
+                position = self.creation_list.cards.all().order_by("position")[0].position
+            elif self.position == "bottom":
+                position = self.creation_list.cards.all().order_by("-position")[0].position
+            else:
+                raise ValueError("Invalid position")
+        else:
+            position = 1000
+        return position
 
 # Recurrent cards are cards that have to be created
 class WeeklyRecurrentCard(RecurrentCard):
