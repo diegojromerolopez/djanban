@@ -47,17 +47,22 @@
                         {% endif %}
                         <li {% if url_namespace == "boards:journal" %}class="active"{% endif %}>
                             <a href="{% url 'boards:journal:view' board.id %}" title="Journal of project {{board.name}}">
-                                <span class="fa fa-leaf"></span> Journal
+                                <span class="fa fa-leaf"></span> J.
                             </a>
                         </li>
                         <li {% if url_name == "view_requirements" %}class="active"{% endif %}>
                             <a href="{% url 'boards:requirements:view_requirements' board.id %}" title="Requirements for project {{board.name}}">
-                                <span class="fa fa-cogs"></span> Requirements
+                                <span class="fa fa-cogs"></span> Req.
                             </a>
                         </li>
                         <li {% if url_name == "view_card_report" or url_name == "view_week_summary" or url_name == "view_card" or url_name == "view_gantt_chart" %}class="active"{% endif %}>
                             <a href="{% url 'boards:view_card_report' board.id %}" title="Cards of board {{board.name}}">
                                 <span class="fa fa-sticky-note-o"></span> Cards
+                            </a>
+                        </li>
+                        <li {% if url_namespace == "boards:recurrent_cards" %}class="active"{% endif %}>
+                            <a href="{% url 'boards:recurrent_cards:view_list' board.id %}" title="Recurrent cards of board {{board.name}}">
+                                <span class="fa fa-sticky-note"></span> Rec. cards
                             </a>
                         </li>
                         <li {% if url_name == "view_label_report" %}class="active"{% endif %}>

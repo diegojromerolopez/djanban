@@ -1,4 +1,4 @@
-{% extends "base/base.html" %}
+{% extends "boards/view.html" %}
 
 {% load staticfiles %}
 {% load djanban_auth %}
@@ -11,7 +11,7 @@
 {% block page_title %}Recurrent cards{% endblock %}
 
 {% block content %}
-    <h1>Work hours packages</h1>
+    <h1>Recurrent cards for board {{board.name}}</h1>
     <div class="row">
         <div class="panel col-md-12">
             <p>
@@ -36,7 +36,7 @@
                 <div>
                     <p>
                         {% if member %}
-                            <a href="{% url 'recurrent_cards:new' %}" class="btn btn-success">New</a>
+                            <a href="{% url 'boards:recurrent_cards:new' board.id %}" class="btn btn-success">New</a>
                         {% endif %}
                     </p>
                 </div>
@@ -48,7 +48,6 @@
                         <thead>
                             <tr>
                                 <th>Id</th>
-                                <th>Board</th>
                                 <th>Name</th>
                                 <th>Type</th>
                                 <th>Active?</th>
@@ -60,11 +59,6 @@
                                 <tr>
                                     <td>#{{recurrent_card.id}}</td>
                                     <td>
-                                        <a href="{% url 'boards:view_board' work_hours_package.board.id %}">
-                                            {{recurrent_card.board.name}}
-                                        </a>
-                                    </td>
-                                    <td>
                                         {{recurrent_card.name}}
                                     </td>
                                     <td>
@@ -75,20 +69,20 @@
                                     </td>
 
                                     <td>
-                                        <a href="{% url 'recurrent_cards:view' recurrent_card.id %}"
+                                        <a href="{% url 'boards:recurrent_cards:view' board.id recurrent_card.id %}"
                                            title="View recurrent card {{recurrent_card.name}}"
                                            class="btn btn-primary">
                                             <span class="fa fa-eye"></span>
                                         </a>
                                         {% if member %}
-                                            <a href="{% url 'recurrent_cards:edit' recurrent_card.id %}"
+                                            <a href="{% url 'boards:recurrent_cards:edit' board.id recurrent_card.id %}"
                                                title="Edit recurrent card {{recurrent_card.name}}"
                                                 class="btn btn-primary">
                                                 <span class="fa fa-pencil"></span>
                                             </a>
                                         {% endif %}
                                         {% if member or request.user|user_is_administrator %}
-                                            <a href="{% url 'recurrent_cards:delete' recurrent_card.id %}"
+                                            <a href="{% url 'boards:recurrent_cards:delete' board.id recurrent_card.id %}"
                                                title="Delete recurrent card {{recurrent_card.name}}"
                                                class="btn btn-danger">
                                                 <span class="fa fa-trash"></span>

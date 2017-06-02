@@ -17,12 +17,12 @@
                       <div class="actions">
                         {% if member %}
                             <p>
-                                <a href="{% url 'recurrent_card:edit' recurrent_card.id %}"
+                                <a href="{% url 'boards:recurrent_cards:edit' board.id recurrent_card.id %}"
                                    title="Edit recurrent card {{recurrent_card.full_name}}"
                                    class="btn btn-primary">
                                     <span class="fa fa-pencil"></span>
                                 </a>
-                                <a href="{% url 'recurrent_card:delete' recurrent_card.id %}"
+                                <a href="{% url 'boards:recurrent_cards:delete' board.id recurrent_card.id %}"
                                    title="Delete recurrent card {{recurrent_card.full_name}}"
                                     class="btn btn-danger">
                                     <span class="fa fa-trash"></span>

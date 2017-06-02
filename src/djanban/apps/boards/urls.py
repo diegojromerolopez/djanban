@@ -82,6 +82,9 @@ urlpatterns = [
     # Requirement URLs
     url(r'^(?P<board_id>\d+)/requirements/', include('djanban.apps.requirements.urls', namespace="requirements")),
 
+    # Recurrent cards
+    url(r'^(?P<board_id>\d+)/recurrent-cards/', include('djanban.apps.recurrent_cards.urls', namespace="recurrent_cards")),
+
     # Repositories for this board
     url(r'^(?P<board_id>\d+)/repositories/', include('djanban.apps.repositories.urls', namespace="repositories")),
 

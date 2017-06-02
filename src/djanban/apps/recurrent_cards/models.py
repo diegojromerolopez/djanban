@@ -25,7 +25,8 @@ class RecurrentCard(models.Model):
                                 default="top", max_length=8)
 
     estimated_time = models.DecimalField(
-        verbose_name="Estimated time of this recurrent card",
+        verbose_name="Estimated spent time of this recurrent card",
+        help_text="Estimated time that will be spent in this card",
         decimal_places=2, max_digits=10,
         default=None, null=True, blank=True
     )
@@ -33,9 +34,13 @@ class RecurrentCard(models.Model):
     creation_list = models.ForeignKey("boards.List", related_name="recurrent_cards",
                                       verbose_name="Creation list for the recurrent cards")
 
-    labels = models.ManyToManyField("boards.Label", related_name="recurrent_cards")
-    members = models.ManyToManyField("members.Member", verbose_name=u"Members", related_name="recurrent_cards")
-    is_active = models.BooleanField(verbose_name="Should this cards be created?", default=False)
+    labels = models.ManyToManyField("boards.Label", related_name="recurrent_cards", blank=True)
+    members = models.ManyToManyField("members.Member", verbose_name=u"Members", related_name="recurrent_cards", blank=True)
+    is_active = models.BooleanField(
+        verbose_name="Should its child cards be created?",
+        help_text="If unchecked, no cards will be created that depends on this recurrent card",
+        default=False
+    )
 
     def full_name(self):
         return "{0} of {1}".format(self.name, self.board.name)
@@ -43,22 +48,17 @@ class RecurrentCard(models.Model):
 
 # Recurrent cards are cards that have to be created
 class WeeklyRecurrentCard(RecurrentCard):
-    create_on_mondays = models.BooleanField(verbose_name="Creation on mondays", default=False)
-    create_on_tuesdays = models.BooleanField(verbose_name="Creation on tuesdays", default=False)
-    create_on_wednesdays = models.BooleanField(verbose_name="Creation on wednesdays", default=False)
-    create_on_thursdays = models.BooleanField(verbose_name="Creation on thursdays", default=False)
-    create_on_fridays = models.BooleanField(verbose_name="Creation on fridays", default=False)
-    create_on_saturdays = models.BooleanField(verbose_name="Creation on saturdays", default=False)
-    create_on_sundays = models.BooleanField(verbose_name="Creation on sundays", default=False)
+    create_on_mondays = models.BooleanField(verbose_name="Create card on mondays", default=False)
+    create_on_tuesdays = models.BooleanField(verbose_name="Create card on tuesdays", default=False)
+    create_on_wednesdays = models.BooleanField(verbose_name="Create card on wednesdays", default=False)
+    create_on_thursdays = models.BooleanField(verbose_name="Create card on thursdays", default=False)
+    create_on_fridays = models.BooleanField(verbose_name="Create card on fridays", default=False)
+    create_on_saturdays = models.BooleanField(verbose_name="Create card on saturdays", default=False)
+    create_on_sundays = models.BooleanField(verbose_name="Create card on sundays", default=False)
 
-    deadline = models.DurationField(
-        verbose_name="Deadline of the card",
-        help_text="Default deadline of the card from the creation datetime of it (00:00:00 hours of each day)",
-        null=True, blank=True, default=timedelta(days=1))
-
-    move_on_deadline_to_list = models.ForeignKey(
+    move_to_list_when_day_ends = models.ForeignKey(
         "boards.List",
-        verbose_name="Automatically move the card to this list when reaching deadline",
+        verbose_name="Automatically move the card to this list when the day ends",
         related_name="moved_recurrent_cards", default=None, null=True, blank=True
     )
 

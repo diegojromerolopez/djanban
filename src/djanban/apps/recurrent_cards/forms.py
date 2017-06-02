@@ -13,26 +13,17 @@ from djanban.apps.recurrent_cards.models import WeeklyRecurrentCard
 # Work hours package filter
 class RecurrentCardFilterForm(forms.Form):
 
-    board = forms.ChoiceField(label="Board", choices=[], required=False)
     label = forms.ChoiceField(label="Label", choices=[], required=False)
     is_active = forms.ChoiceField(label="Paid?", choices=[], required=False)
 
     def __init__(self, *args, **kwargs):
         self.member = kwargs.pop("member")
+        self.board = kwargs.pop("board")
         super(RecurrentCardFilterForm, self).__init__(*args, **kwargs)
 
-        # Available boards for this user
-        boards = get_member_boards(self.member).filter(is_archived=False).order_by("name")
-        self.fields["board"].choices = [("", "None")] + [
-            (board.id, board.name)
-            for board in boards
-        ]
-
         # Available labels for this user
-        self.fields["label"].choices = [("None", [("", "None")])] + [
-            (board.name, [(label.id, label.name) for label in board.labels.exclude(name="").order_by("name")])
-            for board in boards
-        ]
+        self.fields["label"].choices = [("", "None")] + [
+            (label.id, label.name) for label in self.board.labels.exclude(name="").order_by("name")]
 
         # Is paid?
         self.fields["is_active"].choices = [("", "Indiferent"),("Yes", "Yes"),("No", "No")]
@@ -45,7 +36,7 @@ class RecurrentCardFilterForm(forms.Form):
         # Filtering by board or label
         board_id = self.cleaned_data.get("board")
         label_id = self.cleaned_data.get("label")
-        recurrent_cards = self.member.work_hours_packages.all().order_by("board", "name")
+        recurrent_cards = self.member.recurrent_cards.all().order_by("board", "name")
         if board_id:
             recurrent_cards = recurrent_cards.filter(board_id=board_id)
         elif label_id:
@@ -63,28 +54,38 @@ class WeeklyRecurrentCardForm(forms.ModelForm):
     class Meta:
         model = WeeklyRecurrentCard
         fields = [
-            "board", "name", "description", "position", "estimated_time", "creation_list",
-            "labels", "members", "is_active",
+            "name", "description", "position", "estimated_time", "creation_list",
+            "labels", "members",
             "create_on_mondays", "create_on_tuesdays", "create_on_wednesdays", "create_on_thursdays",
-            "create_on_fridays", "create_on_saturdays", "create_on_sundays", "deadline", "move_on_deadline_to_list"
+            "create_on_fridays", "create_on_saturdays", "create_on_sundays", "move_to_list_when_day_ends",
+            "is_active"
         ]
 
     def __init__(self, *args, **kwargs):
         self.member = kwargs.pop("member")
+        self.board = kwargs.pop("board")
         super(WeeklyRecurrentCardForm, self).__init__(*args, **kwargs)
 
-        # Available boards for this member
-        boards = get_member_boards(self.member).filter(is_archived=False).order_by("name")
-        self.fields["board"].choices = [("", "None")] + [
-            (board.id, board.name)
-            for board in boards
-        ]
+        # Lists of this board
+        active_lists = [(list_.id, list_.name) for list_ in self.board.active_lists.order_by("position")]
+        self.fields["creation_list"].choices = active_lists
+        self.fields["move_to_list_when_day_ends"].choices = [("", "None")] + active_lists
 
-        # Available labels for this user
-        self.fields["label"].choices = [("None", [("", "None")])] + [
-            (board.name, [(label.id, label.name) for label in board.labels.exclude(name="").order_by("name")])
-            for board in boards
-        ]
+        # Member team mates of this user
+        self.fields["members"].choices =\
+            [(member.id, member.external_username) for member in self.member.team_mates.all()]
+
+        # Available labels for this board
+        self.fields["labels"].choices = \
+            [("", "None")] +\
+            [(label.id, label.name) for label in self.board.labels.exclude(name="").order_by("name")]
+
+    def save(self, commit=True):
+        super(WeeklyRecurrentCardForm, self).save(commit)
+        if commit:
+            # Add the creator as member by default
+            if not self.instance.members.filter(id=self.instance.creator.id).exists():
+                self.instance.members.add(self.instance.creator)
 
 
 # Delete recurrent card
