@@ -2,17 +2,11 @@
 
 from __future__ import unicode_literals, absolute_import
 
-from decimal import Decimal
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.db.models import Q
-from django.template.loader import get_template
 from django.utils import timezone
 
 from djanban.apps.recurrent_cards.models import WeeklyRecurrentCard
-from djanban.apps.work_hours_packages.models import WorkHoursPackage
 
 
 # Notification completion email send
@@ -81,7 +75,6 @@ class Command(BaseCommand):
         else:
             self.stdout.write(
                 self.style.SUCCESS(
-                    u"No recurrent cards for this day, hence, no cards were created".format(
-                        recurrent_cards.count())
+                    u"No recurrent cards for this day, hence, no cards were created"
                 )
             )
