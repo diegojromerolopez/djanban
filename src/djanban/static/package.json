@@ -1,0 +1,14 @@
+{
+  "name": "djanban",
+  "version": "10.0.0",
+  "description": "A project management tool with task tracking and report generation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Diego J. Romero López",
+  "license": "MIT",
+  "dependencies": {
+    "hopscotch": "^0.3.1"
+  }
+}
