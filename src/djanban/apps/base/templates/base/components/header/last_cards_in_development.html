@@ -3,7 +3,7 @@
     {% if last_cards_in_development|length > 0 %}
         <a href="#" class="dropdown-toggle" data-toggle="dropdown"
            role="button" aria-haspopup="true" aria-expanded="false" title="Last cards worked on">
-            Last cards I worked on ({{last_cards_in_development|length}}) <span class="caret"></span>
+            Last cards ({{last_cards_in_development|length}}) <span class="caret"></span>
         </a>
         <ul class="dropdown-menu dropdown-menu-right last_cards">
             {% for last_card_in_development in last_cards_in_development %}

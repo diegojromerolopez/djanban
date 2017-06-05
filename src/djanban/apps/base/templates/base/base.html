@@ -18,15 +18,20 @@
             <link href="{% static 'css/base/base.css' %}" rel="stylesheet" />
             <link href="{% static 'css/base/form.css' %}" rel="stylesheet" />
             <link href="{% static 'css/libs/jquery-confirm.css' %}" rel="stylesheet" />
+            <link href="{% static 'node_modules/hopscotch/dist/css/hopscotch.min.css' %}" rel="stylesheet" />
         {% endblock css %}
 
         {% block js %}
             <script src="{% static 'js/libs/jquery-2.2.4.min.js' %}"></script>
             <script src="{% static 'js/libs/bootstrap.min.js' %}"></script>
             <script src="{% static 'js/libs/jquery-confirm.js' %}"></script>
+            <script src="{% static 'node_modules/hopscotch/dist/js/hopscotch.min.js' %}"></script>
+
             <script type="text/javascript">
                 CKEDITOR_JQUERY_URL = "{% static 'js/libs/jquery-2.2.4.min.js' %}";
             </script>
+
+            <script src="{% static 'js/base/header/tutorial.js' %}"></script>
             <script src="{% static 'js/base/ajax-img-load.js' %}"></script>
             <script src="{% static 'js/base/header/read_last_notifications.js' %}"></script>
         {% endblock js %}

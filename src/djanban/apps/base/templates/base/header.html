@@ -17,81 +17,83 @@
     {% if user %}
         {% with url_name=request.resolver_match.url_name url_namespace=request.resolver_match.namespace %}
             <ul class="nav nav-tabs ">
-                <li role="presentation" {% if url_name == "index" and url_namespace == "" %}class="active"{% endif %}>
+                <li id="header-menu-index"
+                    role="presentation"
+                    {% if url_name == "index" and url_namespace == "" %}class="active"{% endif %}>
                     <a href="{% url 'index' %}" title="Go to index">
                         <span class="fa fa-home"></span>
                     </a>
                 </li>
                 {% if user and user.is_authenticated %}
-                    <li role="presentation" {% if url_name == "view_boards" %}class="active"{% endif %}>
+                    <li id="header-menu-my-boards" role="presentation" {% if url_name == "view_boards" %}class="active"{% endif %}>
                        <a href="{% url 'boards:view_boards' %}" title="View my boards">
                            <span class="fa fa-tasks"></span>
                        </a>
                     </li>
                     {% if member %}
-                        <li role="presentation" {% if url_namespace == "multiboards" %}class="active"{% endif %}>
+                        <li id="header-menu-multiboards" role="presentation" {% if url_namespace == "multiboards" %}class="active"{% endif %}>
                            <a href="{% url 'multiboards:view_list' %}" title="View my multiboards">
                                <strong>M</strong>
                            </a>
                         </li>
                     {% endif %}
-                    <li role="presentation" {% if url_name == "view_board_panorama" %}class="active"{% endif %}>
+                    <li id="header-menu-panorama" role="presentation" {% if url_name == "view_board_panorama" %}class="active"{% endif %}>
                        <a href="{% url 'boards:view_board_panorama' %}" title="View project summary">
                            <span class="fa fa-line-chart"></span>
                        </a>
                     </li>
                     {% if member or request.user|user_is_administrator %}
-                        <li role="presentation" {% if url_name == "view_members" or url_name == "view_spent_time_factors" %}class="active"{% endif %}>
+                        <li id="header-menu-members" role="presentation" {% if url_name == "view_members" or url_name == "view_spent_time_factors" %}class="active"{% endif %}>
                             <a href="{% url 'members:view_members' %}" title="View members">
                                 <span class="fa fa-users"></span>
                             </a>
                         </li>
-                        <li role="presentation" {% if url_namespace == "reports" %}class="active"{% endif %}>
+                        <li id="header-menu-report_recipients" role="presentation" {% if url_namespace == "reports" %}class="active"{% endif %}>
                             <a href="{% url 'reports:view_report_recipients' %}" title="View report recipients">
                                 <span class="fa fa-at"></span>
                             </a>
                         </li>
-                        <li role="presentation" {% if url_namespace == "dev_environment"  %}class="active"{% endif %}>
+                        <li id="header-menu-environment" role="presentation" {% if url_namespace == "dev_environment"  %}class="active"{% endif %}>
                             <a href="{% url 'dev_environment:index' %}" title="View software development environment">
                                 <span class="fa fa-building-o"></span> Env.
                             </a>
                         </li>
-                        <li role="presentation" {% if url_namespace == "niko_niko_calendar" %}class="active"{% endif %}>
+                        <li id="header-menu-niko_niko_calendar" role="presentation" {% if url_namespace == "niko_niko_calendar" %}class="active"{% endif %}>
                             <a href="{% url 'niko_niko_calendar:view_calendar' %}" title="View Niko-niko calendar">
                                 <span class="fa fa-calendar"></span> NN cal.
                             </a>
                         </li>
                     {% endif %}
-                    <li role="presentation" {% if url_namespace == "slideshow" %}class="active"{% endif %}>
+                    <li id="header-menu-slideshow" role="presentation" {% if url_namespace == "slideshow" %}class="active"{% endif %}>
                         <a href="{% url 'slideshow:view' %}" title="Slideshow">
                             <span class="fa fa-area-chart"></span> Pres.
                         </a>
                     </li>
                     {% if member %}
-                        <li role="presentation" {% if url_namespace == "forecasters" %}class="active"{% endif %}>
+                        <li id="header-menu-forecasts" role="presentation" {% if url_namespace == "forecasters" %}class="active"{% endif %}>
                             <a href="{% url 'forecasters:index' %}" title="Forecasts">
                                 <span class="fa fa-cloud"></span> Forecasts
                             </a>
                         </li>
                     {% endif %}
                     {% if member or request.user|user_is_administrator %}
-                        <li role="presentation" {% if url_namespace == "visitors" %}class="active"{% endif %}>
+                        <li id="header-menu-visitors" role="presentation" {% if url_namespace == "visitors" %}class="active"{% endif %}>
                             <a href="{% url 'visitors:view_list' %}" title="Visitors">
                                 <span class="fa fa-user-o"></span>
                             </a>
                         </li>
-                        <li role="presentation" {% if url_name == "view_hourly_rates" %}class="active"{% endif %}>
+                        <li id="header-menu-hourly_rates" role="presentation" {% if url_name == "view_hourly_rates" %}class="active"{% endif %}>
                            <a href="{% url 'hourly_rates:view_hourly_rates' %}" title="View available hourly rates">
                                <span class="fa fa-usd"></span> HRs
                            </a>
                         </li>
-                        <li role="presentation" {% if url_namespace == "work_hours_packages" %}class="active"{% endif %}>
+                        <li id="header-menu-work_hours_packages" role="presentation" {% if url_namespace == "work_hours_packages" %}class="active"{% endif %}>
                             <a href="{% url 'work_hours_packages:view_list' %}" title="Work hours packages">
                                 <span class="fa fa-fire-extinguisher"></span>
                             </a>
                         </li>
                         {% if member and member.has_trello_credentials %}
-                            <li role="presentation" {% if url_name == "fetch_boards" %}class="active"{% endif %}>
+                            <li id="header-menu-fetch" role="presentation" {% if url_name == "fetch_boards" %}class="active"{% endif %}>
                                 <a href="{% url 'fetch:fetch_boards' %}" title="Fetch all boards">
                                     <span class="fa fa-download"></span>
                                 </a>
@@ -107,7 +109,16 @@
                         {% async_include "base/components/header/last_notifications.html" member=member html__tag="li" request__frequency=620 %}
                     {% endif %}
 
-                    <li class="dropdown">
+                    {% if member %}
+                        <li id="header-menu-help" role="presentation">
+                            <a id="header-menu-help-link" href="javascript:void(0);"
+                               class="help"
+                               title="Click to view interactive help">
+                                <span class="fa fa-question"></span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li id="header-menu-logout" class="dropdown">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Logout">
                           <span class="fa fa-sign-out"></span> <span class="caret"></span>
                       </a>
