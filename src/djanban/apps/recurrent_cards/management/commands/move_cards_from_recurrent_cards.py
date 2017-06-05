@@ -18,7 +18,8 @@ from djanban.apps.recurrent_cards.models import WeeklyRecurrentCard
 from djanban.apps.work_hours_packages.models import WorkHoursPackage
 
 
-# Notification completion email send
+# Move all cards with recurrent cards to their destination list
+# Use: python manage.py move_cards_from_recurrent_cards.py
 class Command(BaseCommand):
     help = u'Move cards from recurrent cards'
 
@@ -29,6 +30,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         today = timezone.now().today()
         yesterday = today - timedelta(days=1)
+
         cards = Card.objects.filter(
             parent_recurrent_card__isnull=False,
             creation_datetime__date=yesterday
@@ -38,7 +40,9 @@ class Command(BaseCommand):
         with transaction.atomic():
             for card in cards:
                 recurrent_card = card.parent_recurrent_card
-                if recurrent_card.move_to_list_when_day_ends:
+                # Move cards that have not already be moved to the destination list
+                if recurrent_card.move_to_list_when_day_ends and\
+                                card.list.id != recurrent_card.move_to_list_when_day_ends.id:
                     card.move(
                         member=recurrent_card.creator,
                         destination_list=recurrent_card.move_to_list_when_day_ends,

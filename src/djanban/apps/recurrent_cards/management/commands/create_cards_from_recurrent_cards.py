@@ -9,7 +9,7 @@ from django.utils import timezone
 from djanban.apps.recurrent_cards.models import WeeklyRecurrentCard
 
 
-# Notification completion email send
+# Create cards based on recurrent cards
 class Command(BaseCommand):
     help = u'Create real cards from the recurrent cards'
 
