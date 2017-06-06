@@ -8,6 +8,7 @@ from datetime import datetime
 import pytz
 from dateutil import parser as dateparser
 from django.conf import settings
+from django.core.exceptions import MultipleObjectsReturned
 from trello import ResourceUnavailable
 
 from djanban.apps.base.utils.datetime import localize_if_needed
@@ -26,7 +27,11 @@ class CardFetcher(object):
         self.trello_cycle_dict = {list_.uuid: True for list_ in self.board_fetcher.cycle_lists}
         self.trello_lead_dict = {list_.uuid: True for list_ in self.board_fetcher.lead_lists}
         self.lists = self.board_fetcher.lists
-        self.done_list = self.board_fetcher.lists.get(type="done")
+        try:
+            self.done_list = self.board_fetcher.lists.get(type="done")
+        # This shouldn't happen, but in case you have two "done" lists take the last one
+        except MultipleObjectsReturned:
+            self.done_list = self.board_fetcher.lists.filter(type="done")[-1]
         self.trello_cards = trello_cards
         self.trello_movements_by_card = trello_movements_by_card
         self.trello_comments_by_card = trello_comments_by_card
