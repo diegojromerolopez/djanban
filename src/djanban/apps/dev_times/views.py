@@ -17,16 +17,21 @@ from django.shortcuts import render
 from django.template import loader
 
 from djanban.apps.base.auth import get_user_boards, user_is_member
-from djanban.apps.boards.models import Label
+from djanban.apps.boards.models import Label, Board
 from djanban.apps.dev_times.models import DailySpentTime
 from djanban.apps.members.models import Member
 from django.template.loader import get_template
+
+from djanban.apps.multiboards.models import Multiboard
 
 
 # View spent time report
 @login_required
 def view_daily_spent_times(request):
-    parameters = _get_daily_spent_times_replacements(request)
+    try:
+        parameters = _get_daily_spent_times_replacements(request)
+    except (Multiboard.DoesNotExist, Board.DoesNotExist) as e:
+        raise Http404
 
     if "board" in parameters["replacements"] and parameters["replacements"]["board"]:
         return render(request, "daily_spent_times/list_by_board.html", parameters["replacements"])
@@ -332,16 +337,17 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
         current_user_boards = get_user_boards(current_user)
         if label_id:
             matches = re.match(r"all_from_board_(?P<board_id>\d+)", label_id)
-            if matches and current_user_boards.filter(id=matches.group("board_id")).exists():
-                label = None
-                board = current_user_boards.get(id=matches.group("board_id"))
-                daily_spent_time_filter["board"] = board
-
-            elif Label.objects.filter(id=label_id, board__in=current_user_boards).exists():
-                label = Label.objects.get(id=label_id)
-                board = label.board
-                daily_spent_time_filter["board"] = board
-                daily_spent_time_filter["card__labels"] = label
+            if matches:
+                if current_user_boards.filter(id=matches.group("board_id")).exists():
+                    label = None
+                    board = current_user_boards.get(id=matches.group("board_id"))
+                    daily_spent_time_filter["board"] = board
+            else:
+                if Label.objects.filter(id=label_id, board__in=current_user_boards).exists():
+                    label = Label.objects.get(id=label_id)
+                    board = label.board
+                    daily_spent_time_filter["board"] = board
+                    daily_spent_time_filter["card__labels"] = label
 
     # Daily Spent Times
     daily_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).order_by("-date")
