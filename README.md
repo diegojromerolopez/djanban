@@ -366,9 +366,9 @@ creator of this project (Diego J. Romero-López).
 
 # Acknowledgements
 
-* [intelligenia](http://www.intelligenia.com/), the place where I work for supporting some of the development of this project.
+* [intelligenia](http://www.intelligenia.com/), the place where I worked while developing this project in my own free time. intelligenia also supported some of the development of this project.
 * [Trello](http://trello.com), for making the best web kanban board and providing the developers with an API.
-* My development team: [Brian Holsters](https://github.com/brian-holsters) & [Francisco Morales](https://github.com/moralesgea) for testing the app and suggesting new features. 
+* My former development team in intelligenia: [Brian Holsters](https://github.com/brian-holsters) & [Francisco Morales](https://github.com/moralesgea) for testing the app and suggesting new features.
 
 # Legal notice
 
