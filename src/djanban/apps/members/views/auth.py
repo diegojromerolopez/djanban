@@ -9,7 +9,7 @@ from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template.loader import get_template
-from djanban.apps.members.forms import TrelloSignUpForm, LocalSignUpForm, ResetPasswordForm
+from djanban.apps.members.forms import JiraSignUpForm, TrelloSignUpForm, LocalSignUpForm, ResetPasswordForm
 
 
 # Local user registration
@@ -34,7 +34,7 @@ def local_signup(request):
     else:
         form = LocalSignUpForm()
 
-    return render(request, "members/signup/local_signup.html", {"form": form})
+    return render(request, "members/signup/backends/local_signup.html", {"form": form})
 
 
 # Trello user registration
@@ -54,7 +54,27 @@ def trello_signup(request):
     else:
         form = TrelloSignUpForm()
 
-    return render(request, "members/signup/trello_signup.html", {"form": form})
+    return render(request, "members/signup/backends/trello_signup.html", {"form": form})
+
+
+# Jira user registration
+@transaction.atomic
+def jira_signup(request):
+
+    if request.method == "POST":
+        form = JiraSignUpForm(request.POST)
+
+        if form.is_valid():
+            member = form.save(commit=True)
+            user = authenticate(username=member.user.username, password=form.data["password1"])
+            if user and user is not None:
+                django_login(request, user)
+                return HttpResponseRedirect(reverse("index"))
+
+    else:
+        form = JiraSignUpForm()
+
+    return render(request, "members/signup/backends/jira_signup.html", {"form": form})
 
 
 # Resets user password and send it to user

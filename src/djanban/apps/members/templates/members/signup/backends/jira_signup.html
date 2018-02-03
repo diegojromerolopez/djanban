@@ -1,0 +1,15 @@
+{% extends "base/base.html" %}
+
+{% block page_title %}Signup with Jira credencials{% endblock %}
+
+{% block content %}
+    <h1>Signup with Jira credencials</h1>
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+            Please, introduce your Jira user and password to enable connection with Attlasian server.
+            </p>
+        </div>
+    </div>
+    {% include "forms/form.html" %}
+{% endblock content %}

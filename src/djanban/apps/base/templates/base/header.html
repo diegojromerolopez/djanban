@@ -92,7 +92,7 @@
                                 <span class="fa fa-fire-extinguisher"></span>
                             </a>
                         </li>
-                        {% if member and member.has_trello_credentials %}
+                        {% if member and member.has_external_profile %}
                             <li id="header-menu-fetch" role="presentation" {% if url_name == "fetch_boards" %}class="active"{% endif %}>
                                 <a href="{% url 'fetch:fetch_boards' %}" title="Fetch all boards">
                                     <span class="fa fa-download"></span>

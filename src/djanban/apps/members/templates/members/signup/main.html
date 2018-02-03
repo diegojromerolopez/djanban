@@ -10,12 +10,17 @@
                 Welcome to Django Trello Stats, please, choose your signup form:
             </p>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <a class="btn btn-primary" href="{% url 'members:trello_signup' %}" title="Signup synchronizing with Trello">
-                        <span class="fa fa-trello"></span> Signup synchronizing with Trello
+                        <span class="fa fa-trello"></span> Signup with Trello
                     </a>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <a class="btn btn-primary" href="{% url 'members:jira_signup' %}" title="Signup synchronizing with Jira">
+                        <span class="fa fa-trello"></span> Signup with Jira
+                    </a>
+                </div>
+                <div class="col-md-4">
                     <a class="btn btn-primary" href="{% url 'members:local_signup' %}" title="Basic signup">
                         Standard Signup
                     </a>

@@ -16,6 +16,7 @@ from django.db import models
 from django.db.models import Sum, Avg, Q, Count
 from django.utils import timezone
 from isoweek import Week
+from jira import JIRA
 
 from djanban.apps.base.auth import get_user_boards, get_member_boards, user_is_administrator
 
@@ -116,7 +117,12 @@ class Member(models.Model):
     # A native member is one that has no Trello profile
     @property
     def is_native(self):
-        return not self.has_trello_profile
+        return not self.has_trello_profile and not self.has_jira_profile
+
+    # Inform if this member has an external profile
+    @property
+    def has_external_profile(self):
+        return self.has_trello_profile or self.has_jira_profile
 
     # Inform if this member was fetched from Trello (alias method).
     @property
@@ -132,6 +138,21 @@ class Member(models.Model):
     @property
     def has_trello_credentials(self):
         return self.has_trello_profile and self.trello_member_profile.is_initialized
+
+    # Inform if this member was fetched from Jira (alias method).
+    @property
+    def has_jira_profile(self):
+        return hasattr(self, "jira_member_profile") and self.jira_member_profile
+
+    # Inform if this member was fetched from Jira
+    @property
+    def has_jira_member_profile(self):
+        return self.has_jira_profile
+
+    # Has this uses credentials to make actions with the Trello API?
+    @property
+    def has_jira_credentials(self):
+        return self.has_jira_profile and self.jira_member_profile.is_initialized
 
     # Inform if this user has an initialized profile for one of the backends
     @property
@@ -573,7 +594,7 @@ class MemberRole(models.Model):
         return dict(MemberRole.TYPE_CHOICES)[self.type]
 
 
-#
+# Trello Member profile data
 class TrelloMemberProfile(models.Model):
 
     api_key = models.CharField(max_length=128, verbose_name=u"Trello API key", null=True, default=None, blank=True)
@@ -605,3 +626,27 @@ class TrelloMemberProfile(models.Model):
         if self.member:
             return self.member.user
         return None
+
+
+# JIRA profile data
+class JiraMemberProfile(models.Model):
+    username = models.CharField(verbose_name="Jira username", null=True, default=None, max_length=64)
+    password = models.CharField(verbose_name="Jira password", null=True, default=None, max_length=64)
+    server = models.URLField(verbose_name="Jira server", null=True, default=None, max_length=128)
+    member = models.OneToOneField(Member, verbose_name=u"Associated member", related_name="jira_member_profile",
+                                  null=True, default=None)
+
+    # Return a JIRA auth object
+    def connect(self):
+        """
+        Connect with the JIRA server
+        Returns a jira_auth object authenticated with the data provided by this object
+        -------
+        """
+        if self.username and self.password:
+            return JIRA(basic_auth=(self.username, self.password), options={"server": self.server})
+        raise ValueError(u"Unable to make a connection with Jira server")
+
+    @property
+    def initials(self):
+        return "".join(self.username.upper().split(" "))

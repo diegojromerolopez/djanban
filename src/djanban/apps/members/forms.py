@@ -11,15 +11,16 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
 from django.db.models import Q
-from django.forms import ModelForm
+from django.forms import ModelForm, PasswordInput
 from django.forms import models
 from django.conf import settings
 from django.utils import timezone
+from jira import JIRA
 
 from trello import TrelloClient
 from trello.member import Member as TrelloMember
 
-from djanban.apps.members.models import Member, TrelloMemberProfile, SpentTimeFactor
+from djanban.apps.members.models import Member, TrelloMemberProfile, SpentTimeFactor, JiraMemberProfile
 
 
 # Mixin that validates that the emails are valid
@@ -149,6 +150,78 @@ class TrelloSignUpForm(LocalSignUpForm):
         if commit:
             trello_member_profile.member = member
             trello_member_profile.save()
+
+        return member
+
+
+class JiraSignUpForm(LocalSignUpForm):
+    """
+    JIRA signup form
+    """
+    def __init__(self, *args, **kwargs):
+        super(JiraSignUpForm, self).__init__(*args, **kwargs)
+
+        self.fields["jira_username"] = forms.CharField(label=u"Your Jira's user", max_length=64, required=True)
+        self.fields["jira_password1"] = forms.CharField(label=u"Your Jira's password", max_length=64, required=True,
+                                                        widget=forms.PasswordInput())
+        self.fields["jira_password2"] = forms.CharField(label=u"Repeat Jira's password", max_length=64, required=True,
+                                                        widget=forms.PasswordInput())
+        self.fields["jira_server"] = forms.CharField(label=u"Jira's server", max_length=64, required=True)
+
+
+        self.order_fields(["first_name", "last_name", "email", "password1", "password2",
+                           "jira_username", "jira_password1", "jira_password2", "jira_server"])
+
+    def clean(self):
+        cleaned_data = super(JiraSignUpForm, self).clean()
+
+        # Check if passwords are equal
+        if cleaned_data["jira_password1"] != cleaned_data["jira_password2"]:
+            raise ValidationError(u"Jira passwords don't match")
+
+        # Get Jira remote data
+        options = {
+            'server': 'https://jira.atlassian.com'
+        }
+        jira_client = JIRA(
+            basic_auth=(cleaned_data["jira_username"], cleaned_data["jira_password1"]),
+            options={"server": cleaned_data["jira_server"]}
+        )
+
+        projects = jira_client.projects()
+
+        # Check if the user is already registered in the system.
+        # To do so, we have to check if this Trello Member Profile has already an associated user
+        if JiraMemberProfile.objects.filter(
+                username=cleaned_data["jira_username"],
+                server=cleaned_data["jira_server"],
+                member__user__isnull=False
+        ).exists():
+            raise ValidationError(u"This Jira username already has an user in this system")
+
+        return cleaned_data
+
+    def save(self, commit=False):
+        member = super(JiraSignUpForm, self).save(commit=True)
+
+        # TrelloMemberProfile should always exist if at least one member whom he/she shares a board has registered
+        # in this system. Because all present members in a board are created but without an associated user.
+        try:
+            jira_member_profile = JiraMemberProfile.objects.get(
+                username=self.cleaned_data["jira_username"],
+                server=self.cleaned_data["jira_server"]
+            )
+        except JiraMemberProfile.DoesNotExist:
+            jira_member_profile = JiraMemberProfile()
+
+        # Assigning all Jira user profile attributes
+        jira_member_profile.username = self.cleaned_data["jira_username"]
+        jira_member_profile.password = self.cleaned_data["jira_password1"]
+        jira_member_profile.server = self.cleaned_data["jira_server"]
+
+        if commit:
+            jira_member_profile.member = member
+            jira_member_profile.save()
 
         return member
 
