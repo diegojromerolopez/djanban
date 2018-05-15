@@ -7,7 +7,7 @@ A kanban application with statistics and charts, including Trello integration.
 
 # IMPORTANT NOTICE: [CONTRIBUTORS WANTED](#contributing)
 
-**This project is being stagnated**.
+**This project is stagnated**.
 
 I need your help. Want to collaborate?
 
