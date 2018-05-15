@@ -5,6 +5,14 @@
 
 A kanban application with statistics and charts, including Trello integration.
 
+# IMPORTANT NOTICE: [CONTRIBUTORS WANTED](#contributing)
+
+**This project is being stagnated**.
+
+I need your help. Want to collaborate?
+
+I'm listening to all kind of help (bug-fixing, new features, proposing features...).
+
 # What's this?
 
 Djanban is a web site that allows you to connect to your Trello user and fetch data from your boards.
@@ -358,10 +366,9 @@ Workflow stats are partially completed. Only the average time in each list and t
 
 # Contributing
 
-I would gladly accept feature requests, pull requests and suggestions.
+If you want to implement some feature, or fix some bug, please contact me.
 
-All contributors must sign an intellectual property cession to the
-creator of this project (Diego J. Romero-López).
+I would gladly accept feature requests, pull requests and suggestions.
 
 
 # Acknowledgements
@@ -378,7 +385,7 @@ Trello is a registered trademark in USA and other countries.
 
 This project uses [Trello API](https://developers.trello.com/) to help users of Trello to get some useful charts, lists and stats.
 
-The IP (intellectual property) of this project belongs to Diego J. Romero-López.
+This project was started by Diego J. Romero-López.
 
 The license of this project is [MIT](LICENSE).
 
