@@ -12,7 +12,7 @@ from djanban.apps.dev_times.models import DailySpentTime
 register = template.Library()
 
 
-@register.assignment_tag
+@register.simple_tag
 def get_daily_spent_times(current_user, member=None, start_date=None, end_date=None, week=None, board=None, label=None):
     daily_spent_time_filter = {}
 

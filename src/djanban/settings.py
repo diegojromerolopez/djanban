@@ -76,7 +76,6 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
     'crequest',
-    'cuser',
     'dal',
     'dal_select2',
     'django.contrib.auth',
@@ -124,7 +123,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'crequest.middleware.CrequestMiddleware',
-    'cuser.middleware.CuserMiddleware'
 ]
 
 # Based on the tutorial that integrates Django with Angular

@@ -30,19 +30,22 @@ def user_is_administrator(user):
     -------
     True if the user belongs to administrator groups, False otherwise.
     """
-    return user and user.is_authenticated() and\
+    return user and user.is_authenticated and\
            (user.groups.filter(name=settings.ADMINISTRATOR_GROUP).exists() or user.is_superuser)
 
 
 # Informs if one user is a member
 def user_is_member(user):
-    return hasattr(user, "member") and user.member
+    return user and user.is_authenticated and\
+           hasattr(user, "member") and user.member.is_active
 
 
-# Informs if one user is a visitor
+# User is a visitor
 def user_is_visitor(user, board=None):
     if board is None:
-        return user.is_authenticated() and not user_is_member(user)
+         if user:
+            return user.is_authenticated and not user_is_member(user)
+         return False
     return board.visitors.filter(id=user.id).exists()
 
 

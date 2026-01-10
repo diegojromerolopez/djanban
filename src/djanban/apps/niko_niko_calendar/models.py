@@ -13,7 +13,7 @@ class DailyMemberMood(models.Model):
         ("sad", ":-(")
     )
 
-    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="daily_member_moods")
+    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="daily_member_moods", on_delete=models.CASCADE)
 
     date = models.DateField(verbose_name="Date of mood measurement")
 

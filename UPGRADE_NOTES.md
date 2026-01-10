@@ -60,3 +60,7 @@ After setting up the virtual environment:
 cd src
 python manage.py runserver
 ```
+
+## Update
+Backend is running on http://localhost:8001.
+Frontend failed to start due to legacy dependencies (SystemJS/Angular 2 vs Node 24).

@@ -5,7 +5,8 @@ import subprocess
 
 from datetime import datetime
 import gitlab
-import pygithub3
+
+
 
 import os
 
@@ -27,7 +28,7 @@ class Repository(models.Model):
 
     # Project this repository depends on
     board = models.ForeignKey("boards.Board", verbose_name=u"Project this repository depends on",
-                              related_name="repositories")
+                              related_name="repositories", on_delete=models.CASCADE)
 
     # Name for this repository
     name = models.CharField(verbose_name=u"Name of this repository", max_length=128)
@@ -39,7 +40,7 @@ class Repository(models.Model):
     url = models.URLField(verbose_name=u"Repository URL")
 
     # Type of this repository
-    type = models.ForeignKey(ContentType, editable=False)
+    type = models.ForeignKey(ContentType, editable=False, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         if not self._state.adding:
@@ -173,8 +174,10 @@ class GitHubPublicRepository(Repository, GitRepository):
     # and datetime (with the date and time when that commit was created)
     def fetch_commit_info(self, commit):
         # Get commit info
-        gh = pygithub3.Github(user=self.username, repo=self.name)
-        commit_info = gh.repos.commits.get(sha=commit)
+        from github import Github
+        gh = Github()
+        repo = gh.get_repo(f"{self.username}/{self.name}")
+        commit_info = repo.get_commit(sha=commit)
         commit_creation_date = commit_info.commit.author.date
         local_timezone = pytz.timezone(settings.TIME_ZONE)
         commit_creation_datetime = local_timezone.localize(commit_creation_date)
@@ -252,9 +255,9 @@ class GitLabRepository(Repository, GitRepository):
 class Commit(models.Model):
 
     board = models.ForeignKey("boards.Board", verbose_name=u"Project this commit depends on",
-                               related_name="commits")
+                               related_name="commits", on_delete=models.CASCADE)
     repository = models.ForeignKey("repositories.Repository", verbose_name=u"Repository this commit depends on",
-                                   related_name="commits")
+                                   related_name="commits", on_delete=models.CASCADE)
     commit = models.CharField(verbose_name=u"Repository commit", max_length=64)
 
     comments = models.TextField(verbose_name=u"Comments about this commit", blank=True, default="")
@@ -268,11 +271,11 @@ class Commit(models.Model):
     class Meta:
         verbose_name = "commit"
         verbose_name_plural = "commits"
-        index_together = (
-            ("board", "repository", "commit"),
-            ("board", "repository", "creation_datetime", "commit"),
-            ("board", "repository", "has_been_assessed"),
-        )
+#         index_together = (
+#             ("board", "repository", "commit"),
+#             ("board", "repository", "creation_datetime", "commit"),
+#             ("board", "repository", "has_been_assessed"),
+#         )
 
     @property
     def has_python_assessment_report(self):
@@ -321,15 +324,15 @@ class Commit(models.Model):
 # Each one of the files of this commit
 class CommitFile(models.Model):
     board = models.ForeignKey("boards.Board", verbose_name=u"Project this linting message depends on",
-                              related_name="commit_files")
+                              related_name="commit_files", on_delete=models.CASCADE)
 
     repository = models.ForeignKey("repositories.Repository",
                                    verbose_name=u"Repository this linting message depends on",
-                                   related_name="commit_files")
+                                   related_name="commit_files", on_delete=models.CASCADE)
 
     commit = models.ForeignKey("repositories.Commit",
                                verbose_name=u"Commit this source code file depends on",
-                               related_name="files")
+                               related_name="files", on_delete=models.CASCADE)
 
     language = models.CharField(verbose_name=u"Language of the file", max_length=64)
 
@@ -344,9 +347,9 @@ class CommitFile(models.Model):
     class Meta:
         verbose_name = "commit file"
         verbose_name_plural = "commit files"
-        index_together = (
-            ("board", "repository", "commit", "language"),
-        )
+#         index_together = (
+#             ("board", "repository", "commit", "language"),
+#         )
 
     @staticmethod
     def create_from_cloc_result(commit, cloc_result):
@@ -374,18 +377,18 @@ class PhpMdMessage(models.Model):
                 "Unused Code Rules")
 
     board = models.ForeignKey("boards.Board", verbose_name=u"Project this linting message depends on",
-                              related_name="phpmd_messages")
+                              related_name="phpmd_messages", on_delete=models.CASCADE)
 
     repository = models.ForeignKey("repositories.Repository",
                                    verbose_name=u"Repository this linting message depends on",
-                                   related_name="phpmd_messages")
+                                   related_name="phpmd_messages", on_delete=models.CASCADE)
 
     commit = models.ForeignKey("repositories.Commit", verbose_name=u"Commit this linting message depends on",
-                               related_name="phpmd_messages")
+                               related_name="phpmd_messages", on_delete=models.CASCADE)
 
     commit_file = models.ForeignKey("repositories.CommitFile",
                                     verbose_name=u"Commit file this linting message depends on",
-                                    related_name="phpmd_messages")
+                                    related_name="phpmd_messages", on_delete=models.CASCADE)
 
     path = models.CharField(verbose_name=u"File", max_length=512)
 
@@ -402,15 +405,15 @@ class PhpMdMessage(models.Model):
     class Meta:
         verbose_name = u"phpmd message"
         verbose_name_plural = u"phpmd messages"
-        index_together = (
-            ("board", "repository", "commit", "commit_file", "ruleset"),
-            ("board", "repository", "commit", "ruleset"),
-            ("commit", "commit_file", "ruleset"),
-            ("board", "commit", "ruleset"),
-            ("board", "commit", "commit_file", "ruleset"),
-            ("board", "repository", "ruleset", "commit"),
-            ("board", "ruleset"),
-        )
+#         index_together = (
+#             ("board", "repository", "commit", "commit_file", "ruleset"),
+#             ("board", "repository", "commit", "ruleset"),
+#             ("commit", "commit_file", "ruleset"),
+#             ("board", "commit", "ruleset"),
+#             ("board", "commit", "commit_file", "ruleset"),
+#             ("board", "repository", "ruleset", "commit"),
+#             ("board", "ruleset"),
+#         )
 
     @staticmethod
     def create_all(commit, phpmd_results):
@@ -442,28 +445,28 @@ class PylintMessage(models.Model):
     class Meta:
         verbose_name = u"pylint message"
         verbose_name_plural = u"pylint messages"
-        index_together = (
-            ("board", "repository", "commit", "commit_file", "type"),
-            ("board", "repository", "type", "commit", "commit_file"),
-            ("commit", "type"),
-            ("commit", "commit_file", "type"),
-            ("commit", "type", "commit_file"),
-            ("board", "commit", "type"),
-            ("board", "type")
-        )
+#         index_together = (
+#             ("board", "repository", "commit", "commit_file", "type"),
+#             ("board", "repository", "type", "commit", "commit_file"),
+#             ("commit", "type"),
+#             ("commit", "commit_file", "type"),
+#             ("commit", "type", "commit_file"),
+#             ("board", "commit", "type"),
+#             ("board", "type")
+#         )
 
     board = models.ForeignKey("boards.Board", verbose_name=u"Project this linting message depends on",
-                              related_name="pylint_messages")
+                              related_name="pylint_messages", on_delete=models.CASCADE)
 
     commit = models.ForeignKey("repositories.Commit", verbose_name=u"Commit this linting message depends on",
-                               related_name="pylint_messages")
+                               related_name="pylint_messages", on_delete=models.CASCADE)
 
     repository = models.ForeignKey("repositories.Repository", verbose_name=u"Repository this linting message depends on",
-                                   related_name="pylint_messages")
+                                   related_name="pylint_messages", on_delete=models.CASCADE)
 
     commit_file = models.ForeignKey("repositories.CommitFile",
                                     verbose_name=u"Commit file this linting message depends on",
-                                    related_name="pylint_messages")
+                                    related_name="pylint_messages", on_delete=models.CASCADE)
 
     type = models.CharField(verbose_name=u"Message type", max_length=256)
 

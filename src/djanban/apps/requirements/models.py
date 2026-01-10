@@ -7,7 +7,7 @@ from django.db.models import Sum
 
 # A requirement for a project
 class Requirement(models.Model):
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="requirements")
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="requirements", on_delete=models.CASCADE)
 
     code = models.CharField(max_length=16, verbose_name=u"Unique code of this requirement", unique=True)
 

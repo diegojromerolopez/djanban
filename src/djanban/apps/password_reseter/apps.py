@@ -4,4 +4,4 @@ from django.apps import AppConfig
 
 
 class PasswordReseterConfig(AppConfig):
-    name = 'password_reseter'
+    name = 'djanban.apps.password_reseter'

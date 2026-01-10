@@ -8,7 +8,7 @@ class HourlyRate(models.Model):
     class Meta:
         ordering = ["start_date", "end_date", "name"]
 
-    creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_hourly_rates")
+    creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_hourly_rates", on_delete=models.CASCADE)
 
     name = models.CharField(verbose_name=u"Name for this hourly rate", max_length=128)
 

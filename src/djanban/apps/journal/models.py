@@ -8,9 +8,9 @@ from ckeditor_uploader.fields import RichTextUploadingField
 # Each one of the journal entries
 class JournalEntry(models.Model):
 
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="journal_entries")
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="journal_entries", on_delete=models.CASCADE)
 
-    author = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="journal_entries")
+    author = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="journal_entries", on_delete=models.CASCADE)
 
     title = models.CharField(verbose_name=u"Title", max_length=128)
 

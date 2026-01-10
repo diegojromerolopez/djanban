@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 # A multiboard is a board that references several boards and depends on a particular user
 class Multiboard(models.Model):
-    creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_multiboards")
+    creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_multiboards", on_delete=models.CASCADE)
 
     name = models.CharField(max_length=128, verbose_name=u"Name of the multiboard")
 

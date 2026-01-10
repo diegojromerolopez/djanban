@@ -16,7 +16,6 @@ idna
 ipython
 isoweek
 lxml
-mysqlclient
 numpy
 oauthlib
 Pillow
@@ -32,7 +31,7 @@ pyOpenSSL
 pyasn1
 pycparser
 pygal
-pygithub3
+PyGithub
 pylint
 python-dateutil
 python-gitlab

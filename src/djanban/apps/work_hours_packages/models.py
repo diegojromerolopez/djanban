@@ -78,7 +78,7 @@ class WorkHoursPackage(models.Model):
     start_work_date = models.DateField(verbose_name=u"Start date")
     end_work_date = models.DateField(verbose_name=u"End date")
 
-    creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_work_hours_packages")
+    creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_work_hours_packages", on_delete=models.CASCADE)
     members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="work_hours_packages", blank=True)
 
     @property

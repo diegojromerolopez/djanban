@@ -4,4 +4,4 @@ from django.apps import AppConfig
 
 
 class DestructorConfig(AppConfig):
-    name = 'destructor'
+    name = 'djanban.apps.destructor'
