@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 
 
 from djanban.apps.dev_environment.views import index
 from djanban.apps.dev_environment.views import interruptions
 from djanban.apps.dev_environment.views import noise_measurements
 
+
+
+app_name = 'dev_environment'
 
 urlpatterns = [
     # Index

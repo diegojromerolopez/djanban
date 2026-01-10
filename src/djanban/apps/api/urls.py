@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 from djanban.apps.api.views import boards, cards, lists, members
 from djanban.apps.journal.views import JournalEntryTagAutocompleteView
 
+
+
+app_name = 'api'
 
 urlpatterns = [
     # Members API

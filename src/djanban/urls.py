@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 from django.contrib import admin
 
 from djanban.apps.index import views as index_views

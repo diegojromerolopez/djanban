@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
 from crequest.middleware import CrequestMiddleware
 from django.core.mail import send_mail

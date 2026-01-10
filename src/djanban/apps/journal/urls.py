@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 
 from djanban.apps.journal.views import view, new_entry, view_entry, edit_entry, delete_entry
 from djanban.apps.journal.views import JournalEntryTagAutocompleteView
+
+
+app_name = 'journal'
 
 urlpatterns = [
 

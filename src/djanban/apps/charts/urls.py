@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url
+from django.urls import re_path as url
 
 from djanban.apps.charts.views import private, public
 
+
+
+app_name = 'charts'
 
 urlpatterns = [
 

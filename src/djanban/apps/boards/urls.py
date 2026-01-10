@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 from djanban.apps.boards.views import boards, cards
 from djanban.apps.journal.views import JournalEntryTagAutocompleteView
 
+
+
+app_name = 'boards'
 
 urlpatterns = [
     url(r'^init-boards$', boards.init_boards, name="init_boards"),

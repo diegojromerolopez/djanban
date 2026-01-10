@@ -1,5 +1,4 @@
 
-from __future__ import unicode_literals
 
 import pygal
 from django.db.models import Min, Max, Sum

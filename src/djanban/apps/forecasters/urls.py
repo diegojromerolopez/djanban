@@ -1,7 +1,10 @@
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 
 from djanban.apps.forecasters.views.admin import index, test_forecaster, build_forecaster,\
     ForecasterDelete, update_forecaster, view_forecaster
+
+
+app_name = 'forecasters'
 
 urlpatterns = [
 

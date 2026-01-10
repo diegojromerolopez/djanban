@@ -1,5 +1,4 @@
 
-from __future__ import unicode_literals
 
 from captcha.fields import CaptchaField
 from django import forms

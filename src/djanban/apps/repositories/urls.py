@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 
 from djanban.apps.repositories.views.repositories import view_list, new, view, edit, delete, checkout
 from djanban.apps.repositories.views.commits import add as add_commit, delete as delete_commit, \
     view_assessment_report
+
+
+app_name = 'repositories'
 
 urlpatterns = [
 

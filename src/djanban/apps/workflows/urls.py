@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 
 from djanban.apps.workflows import views
+
+
+app_name = 'workflows'
 
 urlpatterns = [
     url(r'^$', views.view_list, name="view_list"),

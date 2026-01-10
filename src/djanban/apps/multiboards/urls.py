@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 from djanban.apps.multiboards.views import multiboards
 
+
+
+app_name = 'multiboards'
 
 urlpatterns = [
     url(r'^$', multiboards.view_list, name="list"),

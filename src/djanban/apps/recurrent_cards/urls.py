@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 
 from djanban.apps.recurrent_cards.views import view_list, new, view, edit, delete
+
+
+app_name = 'recurrent_cards'
 
 urlpatterns = [
     # List of work hours packages

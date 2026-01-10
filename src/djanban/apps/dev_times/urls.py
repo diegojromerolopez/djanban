@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url
+from django.urls import re_path as url
 
 from djanban.apps.dev_times import views as dev_time_views
 
+
+
+app_name = 'dev_times'
 
 urlpatterns = [
     url(r'^daily_spent_time/?$', dev_time_views.view_daily_spent_times, name="view_daily_spent_times"),

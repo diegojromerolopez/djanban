@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 
 from djanban.apps.visitors.views.main import view_list, new, edit, delete
+
+
+app_name = 'visitors'
 
 urlpatterns = [
     url(r'^$', view_list, name="view_list"),
