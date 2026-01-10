@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
 import pandas as pd
 import  statsmodels.nonparametric.kernel_regression as kr

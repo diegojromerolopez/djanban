@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
 import os
 
@@ -24,17 +23,17 @@ class Forecaster(models.Model):
     board = models.ForeignKey(
         "boards.Board", related_name="forecasters", verbose_name=u"Board of this forecaster",
         null=True, default=None, blank=True
-    )
+    , on_delete=models.CASCADE)
     member = models.ForeignKey(
         "members.Member", related_name="forecasters", verbose_name=u"Member of this forecaster",
         null=True, default=None, blank=True
-    )
+    , on_delete=models.CASCADE)
     name = models.CharField(verbose_name=u"Name", max_length=1024)
     model = models.CharField(verbose_name=u"Regression model", max_length=32)
     formula = models.TextField(verbose_name=u"Formula")
     summary = models.TextField(verbose_name=u"Summary", blank=True, default="")
     results_file = models.FileField(verbose_name=u"Field with the statsmodels results")
-    last_updater = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="updated_forecasters")
+    last_updater = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="updated_forecasters", on_delete=models.CASCADE)
     last_update_datetime = models.DateTimeField(verbose_name=u"Last update datetime")
 
     # Retrieve the RegressionResults statsmodels object from database
@@ -161,7 +160,7 @@ class Forecast(models.Model):
     forecaster = models.ForeignKey(
         "forecasters.Forecaster", related_name="forecasts",
         verbose_name=u"Spent time for this forecast"
-    )
-    card = models.ForeignKey("boards.Card", related_name="forecasts", verbose_name=u"Card for this forecast")
+    , on_delete=models.CASCADE)
+    card = models.ForeignKey("boards.Card", related_name="forecasts", verbose_name=u"Card for this forecast", on_delete=models.CASCADE)
     estimated_spent_time = models.DecimalField(verbose_name=u"Estimated spent time", decimal_places=4, max_digits=12)
     last_update_datetime = models.DateTimeField(verbose_name=u"Date this estimation was done")

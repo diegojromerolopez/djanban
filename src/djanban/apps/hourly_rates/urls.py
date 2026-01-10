@@ -1,10 +1,13 @@
 
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url
+from django.urls import re_path as url
 
 from djanban.apps.hourly_rates import views as hourly_rate_views
 
+
+
+app_name = 'hourly_rates'
 
 urlpatterns = [
     url(r'^$', hourly_rate_views.view_list, name="view_hourly_rates"),

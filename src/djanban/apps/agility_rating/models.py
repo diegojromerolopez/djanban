@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
 from django.db import models
 
@@ -52,7 +51,7 @@ class ProjectAgilityRating(models.Model):
     )
 
     # Project rated
-    board = models.OneToOneField("boards.Board", verbose_name=u"Project", related_name="agility_rating")
+    board = models.OneToOneField("boards.Board", verbose_name=u"Project", related_name="agility_rating", on_delete=models.CASCADE)
 
     # Personnel dimension
     personnel = models.CharField(verbose_name="Personnel", max_length=64, choices=PERSONNEL_CHOICES,

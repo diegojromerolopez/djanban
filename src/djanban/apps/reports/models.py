@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 
 from django.db import models
 
@@ -9,36 +8,36 @@ class CardMovement(models.Model):
     class Meta:
         verbose_name = u"Card movement"
         verbose_name_plural = u"Card movements"
-        index_together = (
-            ("board", "card", "source_list", "datetime", "destination_list"),
-            ("board", "card", "destination_list", "datetime", "source_list"),
-            ("board", "destination_list", "datetime", "source_list"),
-            ("board", "card",  "datetime"),
-            ("board", "type", "source_list", "destination_list"),
-            ("board", "destination_list", "datetime"),
-        )
+#         index_together = (
+#             ("board", "card", "source_list", "datetime", "destination_list"),
+#             ("board", "card", "destination_list", "datetime", "source_list"),
+#             ("board", "destination_list", "datetime", "source_list"),
+#             ("board", "card",  "datetime"),
+#             ("board", "type", "source_list", "destination_list"),
+#             ("board", "destination_list", "datetime"),
+#         )
 
     CARD_MOVEMENT_TYPES = (
         ("forward", "Forward"),
         ("backward", "Backward"),
     )
 
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="card_movements")
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="card_movements", on_delete=models.CASCADE)
 
-    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="movements")
+    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="movements", on_delete=models.CASCADE)
 
     type = models.CharField(verbose_name="Movement type", choices=CARD_MOVEMENT_TYPES, max_length=32)
 
     source_list = models.ForeignKey("boards.List", verbose_name=u"Source list",
-                                    related_name="source_movements", null=True)
+                                    related_name="source_movements", null=True, on_delete=models.CASCADE)
 
     destination_list = models.ForeignKey("boards.List", verbose_name=u"Destination list",
-                                         related_name="destination_movements")
+                                         related_name="destination_movements", on_delete=models.CASCADE)
 
     datetime = models.DateTimeField(verbose_name="Date and time this card has been moved")
 
     member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="card_movements",
-                               null=True, default=None)
+                               null=True, default=None, on_delete=models.CASCADE)
 
     def __unicode__(self):
         return "{0} -> {1} (on {2})".format(self.source_list.name, self.destination_list.name, self.datetime)
@@ -46,8 +45,8 @@ class CardMovement(models.Model):
 
 # Reviews of a card
 class CardReview(models.Model):
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="card_reviews")
-    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="reviews")
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="card_reviews", on_delete=models.CASCADE)
+    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="reviews", on_delete=models.CASCADE)
     description = models.TextField(verbose_name=u"Description of the review", default="", blank=True)
     reviewers = models.ManyToManyField("members.Member", verbose_name=u"Members", related_name="card_reviews")
     creation_datetime = models.DateTimeField(verbose_name="Date and time this card has been reviewed")

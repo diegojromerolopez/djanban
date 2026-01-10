@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
 from django.apps import AppConfig
 
 
 class RecurrenceConfig(AppConfig):
-    name = 'recurrence'
+    name = 'djanban.apps.recurrent_cards'

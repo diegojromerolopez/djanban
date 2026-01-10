@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
 
 import json
 import os
 import re
-from pylint import epylint as lint
+import subprocess
 from djanban.apps.repositories.cloc import Cloc
 
 
@@ -51,8 +48,15 @@ class Pylinter(object):
         self.stderr = None
 
     def run(self):
-        command_options = u"{0} --output-format=json --reports=y".format(self.file_path)
-        (stdout, stderr) = lint.py_run(command_options, return_std=True)
+        command = ["pylint", "--output-format=json", "--reports=y", self.file_path]
+        try:
+            result = subprocess.run(command, capture_output=True, text=True)
+            stdout = result.stdout
+            stderr = result.stderr
+        except FileNotFoundError:
+            # Pylint not installed?
+            stdout = ""
+            stderr = "pylint not found"
         return PylinterResult(self.file_path, stdout, stderr)
 
 
@@ -61,8 +65,8 @@ class PylinterResult(object):
 
     def __init__(self, file_path, stdout, stderr):
         self.file_path = file_path
-        self.stdout = stdout.getvalue()
-        self.stderr = stderr.getvalue()
+        self.stdout = stdout
+        self.stderr = stderr
 
         self._init_results()
 
@@ -70,5 +74,8 @@ class PylinterResult(object):
     def _init_results(self):
         self.messages = []
         if self.stdout != "":
-            self.messages = json.loads(self.stdout)
+            try:
+                self.messages = json.loads(self.stdout)
+            except json.JSONDecodeError:
+                self.messages = []
 

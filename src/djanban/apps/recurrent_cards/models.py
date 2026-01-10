@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
 from datetime import timedelta
 
@@ -20,8 +19,8 @@ class RecurrentCard(models.Model):
         ("top", "Top"),
         ("bottom", "Bottom")
     )
-    creator = models.ForeignKey("members.Member", related_name="created_recurrent_cards", verbose_name=u"Created recurrent cards")
-    board = models.ForeignKey("boards.Board", related_name="recurrent_cards", verbose_name=u"Recurrent cards")
+    creator = models.ForeignKey("members.Member", related_name="created_recurrent_cards", verbose_name=u"Created recurrent cards", on_delete=models.CASCADE)
+    board = models.ForeignKey("boards.Board", related_name="recurrent_cards", verbose_name=u"Recurrent cards", on_delete=models.CASCADE)
 
     name = models.CharField(verbose_name="Recurrent card name", max_length=512)
     description = models.TextField(verbose_name=u"Description of the card", default="", blank=True)
@@ -36,7 +35,7 @@ class RecurrentCard(models.Model):
     )
 
     creation_list = models.ForeignKey("boards.List", related_name="recurrent_cards",
-                                      verbose_name="Creation list for the recurrent cards")
+                                      verbose_name="Creation list for the recurrent cards", on_delete=models.CASCADE)
 
     labels = models.ManyToManyField("boards.Label", related_name="recurrent_cards", blank=True)
     members = models.ManyToManyField("members.Member", verbose_name=u"Members", related_name="recurrent_cards", blank=True)
@@ -99,6 +98,6 @@ class WeeklyRecurrentCard(RecurrentCard):
         "boards.List",
         verbose_name="Automatically move the card to this list when the day ends",
         related_name="moved_recurrent_cards", default=None, null=True, blank=True
-    )
+    , on_delete=models.CASCADE)
 
 

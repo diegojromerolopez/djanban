@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 
 from djanban.apps.reports.views.report_recipients import ReportRecipientListView,\
     EditReportRecipientView, CreateReportRecipientView, DeleteReportRecipientView
+
+
+app_name = 'reports'
 
 urlpatterns = [
     url(r'^report_recipients$', ReportRecipientListView.as_view(), name="view_report_recipient_list"),

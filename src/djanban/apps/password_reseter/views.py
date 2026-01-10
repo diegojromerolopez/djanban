@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
-from audioop import reverse
+
+
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404

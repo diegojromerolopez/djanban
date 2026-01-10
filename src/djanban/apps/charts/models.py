@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
 import random
 from datetime import timedelta
@@ -22,7 +21,7 @@ class CachedChart(models.Model):
     uuid = models.CharField(max_length=2048, verbose_name=u"Chart view name",
                             help_text=u"Chart view name including some optional parameters")
 
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cached_charts", default=None, null=True)
+    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cached_charts", default=None, null=True, on_delete=models.CASCADE)
 
     svg = models.FileField(verbose_name="SVG content of the chart")
 

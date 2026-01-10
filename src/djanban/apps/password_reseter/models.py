@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
 import shortuuid
 from datetime import timedelta
@@ -16,7 +15,7 @@ class PasswordResetRequest(models.Model):
         ("completed", "Completed"),
     )
     # User this password request belongs to
-    user = models.ForeignKey("auth.User", verbose_name=u"User", related_name="password_reset_requests")
+    user = models.ForeignKey("auth.User", verbose_name=u"User", related_name="password_reset_requests", on_delete=models.CASCADE)
 
     # Unique identifier
     uuid = models.CharField(verbose_name=u"Uuid", max_length=64, unique=True)

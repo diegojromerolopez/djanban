@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
 from django.apps import AppConfig
 
 
 class PasswordReseterConfig(AppConfig):
-    name = 'password_reseter'
+    name = 'djanban.apps.password_reseter'

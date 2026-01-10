@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 
 from djanban.apps.work_hours_packages.views import view_list, new, view, edit, delete, notify_completions
+
+
+app_name = 'work_hours_packages'
 
 urlpatterns = [
     # List of work hours packages

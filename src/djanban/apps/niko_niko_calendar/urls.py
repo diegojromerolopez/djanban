@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url, include
+from django.urls import re_path as url, include
 
 from djanban.apps.niko_niko_calendar.views import view_calendar, new_mood_measurement
+
+
+app_name = 'niko_niko_calendar'
 
 urlpatterns = [
     # View the niko-niko calendar

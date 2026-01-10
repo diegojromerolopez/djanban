@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url
+from django.urls import re_path as url
 from django.views.generic import TemplateView
 
 from djanban.apps.members.views import auth, main, spent_time_factors
+
+
+app_name = 'members'
 
 urlpatterns = [
     url(r'^signup/?$', auth.signup, name="signup"),

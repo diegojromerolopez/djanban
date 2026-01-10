@@ -1,5 +1,4 @@
 
-from __future__ import unicode_literals
 
 from datetime import timedelta
 
@@ -28,7 +27,7 @@ def index(request):
             order_by("order", "name")
 
     lists = []
-    if current_user.is_authenticated():
+    if current_user.is_authenticated:
         team_mates = Member.get_user_team_mates(request.user)
         boards = get_user_boards(current_user).filter(is_archived=False).order_by("name")
 

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
 import hashlib
 import os
@@ -23,9 +22,9 @@ from djanban.apps.base.auth import get_user_boards, get_member_boards, user_is_a
 class Member(models.Model):
     DEFAULT_MAX_NUMBER_OF_BOARDS = None
 
-    creator = models.ForeignKey("members.Member", related_name="created_members", null=True, default=None, blank=True)
+    creator = models.ForeignKey("members.Member", related_name="created_members", null=True, default=None, blank=True, on_delete=models.CASCADE)
 
-    user = models.OneToOneField(User, verbose_name=u"Associated user", related_name="member", null=True, default=None)
+    user = models.OneToOneField(User, verbose_name=u"Associated user", related_name="member", null=True, default=None, on_delete=models.CASCADE)
 
     custom_avatar = models.ImageField(verbose_name=u"Custom avatar", blank=True, null=True, default=None)
 
@@ -544,7 +543,7 @@ class Member(models.Model):
 
 # Spent factors of each member
 class SpentTimeFactor(models.Model):
-    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="spent_time_factors")
+    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="spent_time_factors", on_delete=models.CASCADE)
     name = models.CharField(verbose_name=u"Name of this factor", max_length=128, default="", blank=True)
     start_date = models.DateField(verbose_name=u"Start date of this factor")
     end_date = models.DateField(verbose_name=u"End date of this factor", null=True, default=None, blank=True)
@@ -565,7 +564,7 @@ class MemberRole(models.Model):
     )
     type = models.CharField(verbose_name="Role a member has in a board", default="normal", max_length=32)
     members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="roles")
-    board = models.ForeignKey("boards.Board", verbose_name=u"Boards", related_name="roles")
+    board = models.ForeignKey("boards.Board", verbose_name=u"Boards", related_name="roles", on_delete=models.CASCADE)
 
     # Return the full name of the type
     @property
@@ -593,7 +592,7 @@ class TrelloMemberProfile(models.Model):
 
     initials = models.CharField(max_length=8, verbose_name=u"User initials in Trello")
 
-    member = models.OneToOneField(Member, verbose_name=u"Associated member", related_name="trello_member_profile", null=True, default=None)
+    member = models.OneToOneField(Member, verbose_name=u"Associated member", related_name="trello_member_profile", null=True, default=None, on_delete=models.CASCADE)
 
     # Informs if this member is initialized, that is, it has the credentials needed for connecting to trello.com
     @property

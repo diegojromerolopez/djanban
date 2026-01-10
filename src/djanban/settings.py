@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
 import importlib
 import os
@@ -77,7 +76,6 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
     'crequest',
-    'cuser',
     'dal',
     'dal_select2',
     'django.contrib.auth',
@@ -118,15 +116,14 @@ INSTALLED_APPS = [
     'djanban.apps.workflows',
 ]
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'crequest.middleware.CrequestMiddleware',
-    'cuser.middleware.CuserMiddleware'
-)
+]
 
 # Based on the tutorial that integrates Django with Angular
 # (https://4sw.in/blog/2016/django-angular2-tutorial-part-2/)

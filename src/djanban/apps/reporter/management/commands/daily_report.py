@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 
 import time
 from djanban.apps.dev_times.models import DailySpentTime
