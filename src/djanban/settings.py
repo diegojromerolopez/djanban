@@ -71,6 +71,7 @@ DATE_INPUT_FORMATS = ('%Y-%m-%d', '%Y/%m/%d', '%d-%m-%Y', '%d/%m/%Y')
 
 # Application definition
 
+
 INSTALLED_APPS = [
     'async_include',
     'captcha',
@@ -117,6 +118,10 @@ INSTALLED_APPS = [
     'djanban.apps.work_hours_packages',
     'djanban.apps.workflows',
 ]
+
+if hasattr(settings_local, "DISABLED_APPS"):
+    INSTALLED_APPS = [app for app in INSTALLED_APPS if app not in settings_local.DISABLED_APPS]
+
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
