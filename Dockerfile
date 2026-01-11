@@ -25,8 +25,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY src/requirements_p3.txt /app/
-RUN pip install --no-cache-dir -r requirements_p3.txt
+COPY src/requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the project code into the container
 COPY . /app/

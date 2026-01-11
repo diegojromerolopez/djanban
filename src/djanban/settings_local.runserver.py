@@ -11,7 +11,7 @@ DEBUG = True
 
 # Set to your name and email
 ADMINS = (
-    ("Your name", "youremail@example.com"),
+    "youremail@example.com",
 )
 
 # Set to your domain
