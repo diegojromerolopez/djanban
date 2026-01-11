@@ -1,16 +1,13 @@
+import os
 import subprocess
 
-from datetime import datetime
 import gitlab
-from github import Github
-
-import os
-
 import pytz
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, transaction
-from django.conf import settings
 from django.utils import timezone
+from github import Github
 
 from djanban.apps.repositories.phpmd import PhpDirectoryAnalyzer
 from djanban.apps.repositories.pylinter import PythonDirectoryAnalyzer
@@ -23,14 +20,20 @@ class Repository(models.Model):
         verbose_name_plural = "Repositories"
 
     # Project this repository depends on
-    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Project this repository depends on",
-                              related_name="repositories")
+    board = models.ForeignKey(
+        "boards.Board",
+        on_delete=models.CASCADE,
+        verbose_name="Project this repository depends on",
+        related_name="repositories",
+    )
 
     # Name for this repository
     name = models.CharField(verbose_name="Name of this repository", max_length=128)
 
     # Description of this repository
-    description = models.TextField(verbose_name="Description for this repository", default="", blank=True)
+    description = models.TextField(
+        verbose_name="Description for this repository", default="", blank=True
+    )
 
     # Repository URL
     url = models.URLField(verbose_name="Repository URL")
@@ -105,7 +108,9 @@ class GitRepository:
         # Create directory inside userspace if needed
         repository_dir = self.repository_path
         if not os.path.exists(repository_dir):
-            clone_result = subprocess.Popen(self.clone_command, shell=True, stdout=subprocess.PIPE)
+            clone_result = subprocess.Popen(
+                self.clone_command, shell=True, stdout=subprocess.PIPE
+            )
             clone_stdout = clone_result.stdout.read()
             print(clone_stdout)
             if clone_result.stderr:
@@ -123,7 +128,9 @@ class GitRepository:
 
         if commit:
             checkout_command = f"cd {repository_dir} && git checkout {commit} && cd -"
-            checkout_result = subprocess.Popen(checkout_command, shell=True, stdout=subprocess.PIPE)
+            checkout_result = subprocess.Popen(
+                checkout_command, shell=True, stdout=subprocess.PIPE
+            )
             checkout_stdout = checkout_result.stdout.read()
             print(checkout_stdout)
             if checkout_result.stderr:
@@ -192,20 +199,28 @@ class GitLabRepository(Repository, GitRepository):
         verbose_name_plural = "GitLab repositories"
 
     # Token for Django Trello Stats Integration. For example: aoiefhsLFKDJj
-    access_token = models.CharField(verbose_name="Access token for the repository", max_length=128)
+    access_token = models.CharField(
+        verbose_name="Access token for the repository", max_length=128
+    )
 
     # Username
-    username = models.CharField(verbose_name="Username used to clone repository",
-                                help_text="Username of the reporter user that will be used to clone and checkout the repository",
-                                max_length=128)
+    username = models.CharField(
+        verbose_name="Username used to clone repository",
+        help_text="Username of the reporter user that will be used to clone and checkout the repository",
+        max_length=128,
+    )
 
     # Password of the reporter user
-    password = models.CharField(verbose_name="Password of the username used to clone repository",
-                                help_text="Password of the reporter user that will be used to clone and checkout the repository",
-                                max_length=128)
+    password = models.CharField(
+        verbose_name="Password of the username used to clone repository",
+        help_text="Password of the reporter user that will be used to clone and checkout the repository",
+        max_length=128,
+    )
 
     # Userspace of repository full name (userspace/name)
-    project_userspace = models.CharField(verbose_name="Project userspace", max_length=128)
+    project_userspace = models.CharField(
+        verbose_name="Project userspace", max_length=128
+    )
 
     # Name of repository full name (userspace/name)
     project_name = models.CharField(verbose_name="Project name", max_length=128)
@@ -229,8 +244,12 @@ class GitLabRepository(Repository, GitRepository):
     def clone_command(self):
         repository_dir = self.repository_path
         clone_command = "git clone https://{}:{}@{}/{}/{}.git {}".format(
-            self.username, self.password, self.url.replace("http://", ""), self.project_userspace, self.project_name,
-            repository_dir
+            self.username,
+            self.password,
+            self.url.replace("http://", ""),
+            self.project_userspace,
+            self.project_name,
+            repository_dir,
         )
         return clone_command
 
@@ -252,24 +271,42 @@ class GitLabRepository(Repository, GitRepository):
 # Each one of the commits fetched from the repository
 class Commit(models.Model):
 
-    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Project this commit depends on",
-                               related_name="commits")
-    repository = models.ForeignKey("repositories.Repository", on_delete=models.CASCADE, verbose_name="Repository this commit depends on",
-                                   related_name="commits")
+    board = models.ForeignKey(
+        "boards.Board",
+        on_delete=models.CASCADE,
+        verbose_name="Project this commit depends on",
+        related_name="commits",
+    )
+    repository = models.ForeignKey(
+        "repositories.Repository",
+        on_delete=models.CASCADE,
+        verbose_name="Repository this commit depends on",
+        related_name="commits",
+    )
     commit = models.CharField(verbose_name="Repository commit", max_length=64)
 
-    comments = models.TextField(verbose_name="Comments about this commit", blank=True, default="")
+    comments = models.TextField(
+        verbose_name="Comments about this commit", blank=True, default=""
+    )
 
     creation_datetime = models.DateTimeField(verbose_name="Datetime of this commit")
 
-    has_been_assessed = models.BooleanField(verbose_name="Informs if the commit code has been assessed", default=False)
+    has_been_assessed = models.BooleanField(
+        verbose_name="Informs if the commit code has been assessed", default=False
+    )
 
-    assessment_datetime = models.DateTimeField(verbose_name="Assessment date and time", default=None, null=True)
+    assessment_datetime = models.DateTimeField(
+        verbose_name="Assessment date and time", default=None, null=True
+    )
 
     class Meta:
         verbose_name = "commit"
         verbose_name_plural = "commits"
-        indexes = [models.Index(fields=("board", "repository", "commit")), models.Index(fields=("board", "repository", "creation_datetime", "commit")), models.Index(fields=("board", "repository", "has_been_assessed"))]
+        indexes = [
+            models.Index(fields=("board", "repository", "commit")),
+            models.Index(fields=("board", "repository", "creation_datetime", "commit")),
+            models.Index(fields=("board", "repository", "has_been_assessed")),
+        ]
 
     @property
     def has_python_assessment_report(self):
@@ -317,24 +354,38 @@ class Commit(models.Model):
 
 # Each one of the files of this commit
 class CommitFile(models.Model):
-    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Project this linting message depends on",
-                              related_name="commit_files")
+    board = models.ForeignKey(
+        "boards.Board",
+        on_delete=models.CASCADE,
+        verbose_name="Project this linting message depends on",
+        related_name="commit_files",
+    )
 
-    repository = models.ForeignKey("repositories.Repository", on_delete=models.CASCADE,
-                                   verbose_name="Repository this linting message depends on",
-                                   related_name="commit_files")
+    repository = models.ForeignKey(
+        "repositories.Repository",
+        on_delete=models.CASCADE,
+        verbose_name="Repository this linting message depends on",
+        related_name="commit_files",
+    )
 
-    commit = models.ForeignKey("repositories.Commit", on_delete=models.CASCADE,
-                               verbose_name="Commit this source code file depends on",
-                               related_name="files")
+    commit = models.ForeignKey(
+        "repositories.Commit",
+        on_delete=models.CASCADE,
+        verbose_name="Commit this source code file depends on",
+        related_name="files",
+    )
 
     language = models.CharField(verbose_name="Language of the file", max_length=64)
 
     path = models.CharField(verbose_name="File", max_length=512)
 
-    blank_lines = models.PositiveIntegerField(verbose_name="Number of blank lines in this file")
+    blank_lines = models.PositiveIntegerField(
+        verbose_name="Number of blank lines in this file"
+    )
 
-    commented_lines = models.PositiveIntegerField(verbose_name="Number of commented lines")
+    commented_lines = models.PositiveIntegerField(
+        verbose_name="Number of commented lines"
+    )
 
     lines_of_code = models.PositiveIntegerField(verbose_name="Lines of code")
 
@@ -347,7 +398,9 @@ class CommitFile(models.Model):
     def create_from_cloc_result(commit, cloc_result):
         repository = commit.repository
         commit_file = CommitFile(
-            commit=commit, repository=repository, board=repository.board,
+            commit=commit,
+            repository=repository,
+            board=repository.board,
             language=cloc_result["language"],
             path=cloc_result["path"],
             blank_lines=cloc_result["blank_lines"],
@@ -361,58 +414,99 @@ class CommitFile(models.Model):
 # PHP-md messages
 class PhpMdMessage(models.Model):
 
-    RULESETS = ("Clean Code Rules",
-                "Code Size Rules",
-                "Controversial Rules",
-                "Design Rules",
-                "Naming Rules",
-                "Unused Code Rules")
+    RULESETS = (
+        "Clean Code Rules",
+        "Code Size Rules",
+        "Controversial Rules",
+        "Design Rules",
+        "Naming Rules",
+        "Unused Code Rules",
+    )
 
-    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Project this linting message depends on",
-                              related_name="phpmd_messages")
+    board = models.ForeignKey(
+        "boards.Board",
+        on_delete=models.CASCADE,
+        verbose_name="Project this linting message depends on",
+        related_name="phpmd_messages",
+    )
 
-    repository = models.ForeignKey("repositories.Repository", on_delete=models.CASCADE,
-                                   verbose_name="Repository this linting message depends on",
-                                   related_name="phpmd_messages")
+    repository = models.ForeignKey(
+        "repositories.Repository",
+        on_delete=models.CASCADE,
+        verbose_name="Repository this linting message depends on",
+        related_name="phpmd_messages",
+    )
 
-    commit = models.ForeignKey("repositories.Commit", on_delete=models.CASCADE, verbose_name="Commit this linting message depends on",
-                               related_name="phpmd_messages")
+    commit = models.ForeignKey(
+        "repositories.Commit",
+        on_delete=models.CASCADE,
+        verbose_name="Commit this linting message depends on",
+        related_name="phpmd_messages",
+    )
 
-    commit_file = models.ForeignKey("repositories.CommitFile", on_delete=models.CASCADE,
-                                    verbose_name="Commit file this linting message depends on",
-                                    related_name="phpmd_messages")
+    commit_file = models.ForeignKey(
+        "repositories.CommitFile",
+        on_delete=models.CASCADE,
+        verbose_name="Commit file this linting message depends on",
+        related_name="phpmd_messages",
+    )
 
     path = models.CharField(verbose_name="File", max_length=512)
 
     message = models.TextField(verbose_name="Assessment message content")
 
-    rule = models.CharField(verbose_name="Violated rule", max_length=64, default=None, null=True)
+    rule = models.CharField(
+        verbose_name="Violated rule", max_length=64, default=None, null=True
+    )
 
-    ruleset = models.CharField(verbose_name="Rule set", max_length=64, default=None, null=True)
+    ruleset = models.CharField(
+        verbose_name="Rule set", max_length=64, default=None, null=True
+    )
 
-    begin_line = models.IntegerField(verbose_name="Begin line where the error happens", default=None, null=True)
+    begin_line = models.IntegerField(
+        verbose_name="Begin line where the error happens", default=None, null=True
+    )
 
-    end_line = models.IntegerField(verbose_name="End line where the error happens", default=None, null=True)
+    end_line = models.IntegerField(
+        verbose_name="End line where the error happens", default=None, null=True
+    )
 
     class Meta:
         verbose_name = "phpmd message"
         verbose_name_plural = "phpmd messages"
-        indexes = [models.Index(fields=("board", "repository", "commit", "commit_file", "ruleset")), models.Index(fields=("board", "repository", "commit", "ruleset")), models.Index(fields=("commit", "commit_file", "ruleset")), models.Index(fields=("board", "commit", "ruleset")), models.Index(fields=("board", "commit", "commit_file", "ruleset")), models.Index(fields=("board", "repository", "ruleset", "commit")), models.Index(fields=("board", "ruleset"))]
+        indexes = [
+            models.Index(
+                fields=("board", "repository", "commit", "commit_file", "ruleset")
+            ),
+            models.Index(fields=("board", "repository", "commit", "ruleset")),
+            models.Index(fields=("commit", "commit_file", "ruleset")),
+            models.Index(fields=("board", "commit", "ruleset")),
+            models.Index(fields=("board", "commit", "commit_file", "ruleset")),
+            models.Index(fields=("board", "repository", "ruleset", "commit")),
+            models.Index(fields=("board", "ruleset")),
+        ]
 
     @staticmethod
     def create_all(commit, phpmd_results):
         repository = commit.repository
         board = commit.board
         for phpmd_result in phpmd_results:
-            commit_file = CommitFile.create_from_cloc_result(commit, phpmd_result.cloc_result)
+            commit_file = CommitFile.create_from_cloc_result(
+                commit, phpmd_result.cloc_result
+            )
             for phpmd_result_message in phpmd_result.messages:
-                phpmd_message = PhpMdMessage(board=board, repository=repository, commit=commit, commit_file=commit_file,
-                                             rule=phpmd_result_message["rule"],
-                                             ruleset=phpmd_result_message["ruleset"],
-                                             message=phpmd_result_message["message"],
-                                             path=phpmd_result_message["path"],
-                                             begin_line=phpmd_result_message["begin_line"],
-                                             end_line=phpmd_result_message["end_line"])
+                phpmd_message = PhpMdMessage(
+                    board=board,
+                    repository=repository,
+                    commit=commit,
+                    commit_file=commit_file,
+                    rule=phpmd_result_message["rule"],
+                    ruleset=phpmd_result_message["ruleset"],
+                    message=phpmd_result_message["message"],
+                    path=phpmd_result_message["path"],
+                    begin_line=phpmd_result_message["begin_line"],
+                    end_line=phpmd_result_message["end_line"],
+                )
                 phpmd_message.save()
 
 
@@ -423,26 +517,53 @@ class PylintMessage(models.Model):
         ("convention", "Coding standard violation"),
         ("error", "Standard programming error"),
         ("refactor", "Needs refactoring"),
-        ("warning", "Warning")
+        ("warning", "Warning"),
     )
 
     class Meta:
         verbose_name = "pylint message"
         verbose_name_plural = "pylint messages"
-        indexes = [models.Index(fields=("board", "repository", "commit", "commit_file", "type")), models.Index(fields=("board", "repository", "type", "commit", "commit_file")), models.Index(fields=("commit", "type")), models.Index(fields=("commit", "commit_file", "type")), models.Index(fields=("commit", "type", "commit_file")), models.Index(fields=("board", "commit", "type")), models.Index(fields=("board", "type"))]
+        indexes = [
+            models.Index(
+                fields=("board", "repository", "commit", "commit_file", "type")
+            ),
+            models.Index(
+                fields=("board", "repository", "type", "commit", "commit_file")
+            ),
+            models.Index(fields=("commit", "type")),
+            models.Index(fields=("commit", "commit_file", "type")),
+            models.Index(fields=("commit", "type", "commit_file")),
+            models.Index(fields=("board", "commit", "type")),
+            models.Index(fields=("board", "type")),
+        ]
 
-    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Project this linting message depends on",
-                              related_name="pylint_messages")
+    board = models.ForeignKey(
+        "boards.Board",
+        on_delete=models.CASCADE,
+        verbose_name="Project this linting message depends on",
+        related_name="pylint_messages",
+    )
 
-    commit = models.ForeignKey("repositories.Commit", on_delete=models.CASCADE, verbose_name="Commit this linting message depends on",
-                               related_name="pylint_messages")
+    commit = models.ForeignKey(
+        "repositories.Commit",
+        on_delete=models.CASCADE,
+        verbose_name="Commit this linting message depends on",
+        related_name="pylint_messages",
+    )
 
-    repository = models.ForeignKey("repositories.Repository", on_delete=models.CASCADE, verbose_name="Repository this linting message depends on",
-                                   related_name="pylint_messages")
+    repository = models.ForeignKey(
+        "repositories.Repository",
+        on_delete=models.CASCADE,
+        verbose_name="Repository this linting message depends on",
+        related_name="pylint_messages",
+    )
 
-    commit_file = models.ForeignKey("repositories.CommitFile", on_delete=models.CASCADE,
-                                    verbose_name="Commit file this linting message depends on",
-                                    related_name="pylint_messages")
+    commit_file = models.ForeignKey(
+        "repositories.CommitFile",
+        on_delete=models.CASCADE,
+        verbose_name="Commit file this linting message depends on",
+        related_name="pylint_messages",
+    )
 
     type = models.CharField(verbose_name="Message type", max_length=256)
 
@@ -450,7 +571,9 @@ class PylintMessage(models.Model):
 
     message = models.TextField(verbose_name="Assessment message content")
 
-    message_symbolic_name = models.CharField(verbose_name="Message content", max_length=64, default="", blank=True)
+    message_symbolic_name = models.CharField(
+        verbose_name="Message content", max_length=64, default="", blank=True
+    )
 
     line = models.IntegerField(verbose_name="Line where the error happens")
 
@@ -460,15 +583,24 @@ class PylintMessage(models.Model):
 
     @staticmethod
     def create_from_dict(board, repository, commit, pylinter_result):
-        commit_file = CommitFile.create_from_cloc_result(commit, pylinter_result.cloc_result)
+        commit_file = CommitFile.create_from_cloc_result(
+            commit, pylinter_result.cloc_result
+        )
         for pylinter_result_message in pylinter_result.messages:
             if pylinter_result_message:
                 dict_message = pylinter_result_message
                 linting_message = PylintMessage(
-                    board=board, repository=repository, commit=commit, commit_file=commit_file,
-                    path=dict_message["path"], type=dict_message["type"], message=dict_message["message"],
-                    message_symbolic_name=dict_message["symbol"], line=dict_message["line"], column=dict_message["column"],
-                    object=dict_message["obj"]
+                    board=board,
+                    repository=repository,
+                    commit=commit,
+                    commit_file=commit_file,
+                    path=dict_message["path"],
+                    type=dict_message["type"],
+                    message=dict_message["message"],
+                    message_symbolic_name=dict_message["symbol"],
+                    line=dict_message["line"],
+                    column=dict_message["column"],
+                    object=dict_message["obj"],
                 )
                 linting_message.save()
 
@@ -478,4 +610,3 @@ class PylintMessage(models.Model):
         board = commit.board
         for pylinter_result in pylinter_results:
             PylintMessage.create_from_dict(board, repository, commit, pylinter_result)
-

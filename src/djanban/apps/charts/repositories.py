@@ -1,35 +1,48 @@
 import pygal
-from django.db.models import Min, Max, Sum
+from django.db.models import Max, Min, Sum
 from django.utils import timezone
 
 from djanban.apps.charts.models import CachedChart
-from djanban.apps.repositories.models import PylintMessage, PhpMdMessage
+from djanban.apps.repositories.models import PhpMdMessage, PylintMessage
 
 
 # Number of code errors by commit
 def number_of_code_errors(grouped_by, board, repository, language="python"):
     if grouped_by == "commit":
-        return _number_of_code_errors_by_commit(board, repository=repository, language=language, per_loc=False)
+        return _number_of_code_errors_by_commit(
+            board, repository=repository, language=language, per_loc=False
+        )
     elif grouped_by == "month":
-        return _number_of_code_errors_by_month(board, repository=repository, language=language, per_loc=False)
+        return _number_of_code_errors_by_month(
+            board, repository=repository, language=language, per_loc=False
+        )
     raise ValueError(f"Value {grouped_by} not recognized")
 
 
 # Number of code errors by commit
 def number_of_code_errors_per_loc(grouped_by, board, repository, language="python"):
     if grouped_by == "commit":
-        return _number_of_code_errors_by_commit(board, repository=repository, language=language, per_loc=True)
+        return _number_of_code_errors_by_commit(
+            board, repository=repository, language=language, per_loc=True
+        )
     elif grouped_by == "month":
-        return _number_of_code_errors_by_month(board, repository=repository, language=language, per_loc=True)
+        return _number_of_code_errors_by_month(
+            board, repository=repository, language=language, per_loc=True
+        )
     raise ValueError(f"Value {grouped_by} not recognized")
 
 
 # Return the number of PHP/Python code errors by commit
-def _number_of_code_errors_by_commit(board, repository=None, language="python", per_loc=False):
+def _number_of_code_errors_by_commit(
+    board, repository=None, language="python", per_loc=False
+):
 
     # Caching
     chart_uuid = "repositories._number_of_code_errors_by_commit-{}-{}-{}-{}".format(
-        board.id, repository.id if repository else "None", language, "per_loc" if per_loc else "global"
+        board.id,
+        repository.id if repository else "None",
+        language,
+        "per_loc" if per_loc else "global",
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
@@ -48,25 +61,36 @@ def _number_of_code_errors_by_commit(board, repository=None, language="python", 
 
     def formatter(x):
         if per_loc:
-            return f'{x:.2f}'
+            return f"{x:.2f}"
         return f"{x}"
 
-    chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
-                       print_zeroes=False, value_formatter=formatter,
-                       human_readable=False)
+    chart = pygal.Line(
+        title=chart_title,
+        legend_at_bottom=True,
+        print_values=True,
+        print_zeroes=False,
+        value_formatter=formatter,
+        human_readable=False,
+    )
 
     if language.lower() == "php":
-        error_messages = board.phpmd_messages.filter(commit__has_been_assessed=True).filter(**repository_filter)
+        error_messages = board.phpmd_messages.filter(
+            commit__has_been_assessed=True
+        ).filter(**repository_filter)
         message_types = PhpMdMessage.RULESETS
         message_type_label = "ruleset"
     elif language.lower() == "python":
-        error_messages = board.pylint_messages.filter(commit__has_been_assessed=True).filter(**repository_filter)
+        error_messages = board.pylint_messages.filter(
+            commit__has_been_assessed=True
+        ).filter(**repository_filter)
         message_types = list(dict(PylintMessage.TYPE_CHOICES).keys())
         message_type_label = "type"
     else:
         raise ValueError(f"Programming language {language} not recognized")
 
-    project_locs = board.commit_files.filter(**repository_filter).aggregate(locs=Sum("lines_of_code"))["locs"]
+    project_locs = board.commit_files.filter(**repository_filter).aggregate(
+        locs=Sum("lines_of_code")
+    )["locs"]
     if project_locs is None:
         return chart.render_django_response()
 
@@ -78,10 +102,7 @@ def _number_of_code_errors_by_commit(board, repository=None, language="python", 
         number_of_messages_by_commit = []
         chart.x_labels = []
         for commit in commits:
-            error_message_filter = {
-                message_type_label: message_type,
-                "commit": commit
-            }
+            error_message_filter = {message_type_label: message_type, "commit": commit}
             month_i_messages = error_messages.filter(**error_message_filter)
 
             number_of_errors = month_i_messages.count()
@@ -92,15 +113,22 @@ def _number_of_code_errors_by_commit(board, repository=None, language="python", 
 
         chart.add(message_type, number_of_messages_by_commit)
 
-    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=chart.render(is_unicode=True))
+    chart = CachedChart.make(
+        board=board, uuid=chart_uuid, svg=chart.render(is_unicode=True)
+    )
     return chart.render_django_response()
 
 
 # Return the number of PHP/Python code errors by month
-def _number_of_code_errors_by_month(board, repository=None, language="python", per_loc=False):
+def _number_of_code_errors_by_month(
+    board, repository=None, language="python", per_loc=False
+):
     # Caching
     chart_uuid = "repositories._number_of_code_errors_by_month-{}-{}-{}-{}".format(
-        board.id, repository.id if repository else "None", language, "per_loc" if per_loc else "global"
+        board.id,
+        repository.id if repository else "None",
+        language,
+        "per_loc" if per_loc else "global",
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
@@ -119,35 +147,56 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
 
     def formatter(x):
         if per_loc:
-            return f'{x:.2f}'
+            return f"{x:.2f}"
         return f"{x}"
 
-    chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
-                       print_zeroes=False, value_formatter=formatter,
-                       human_readable=False)
+    chart = pygal.Line(
+        title=chart_title,
+        legend_at_bottom=True,
+        print_values=True,
+        print_zeroes=False,
+        value_formatter=formatter,
+        human_readable=False,
+    )
 
     if language.lower() == "php":
-        error_messages = board.phpmd_messages.filter(commit__has_been_assessed=True).filter(**repository_filter)
+        error_messages = board.phpmd_messages.filter(
+            commit__has_been_assessed=True
+        ).filter(**repository_filter)
         message_types = PhpMdMessage.RULESETS
         message_type_label = "ruleset"
     elif language.lower() == "python":
-        error_messages = board.pylint_messages.filter(commit__has_been_assessed=True).filter(**repository_filter)
+        error_messages = board.pylint_messages.filter(
+            commit__has_been_assessed=True
+        ).filter(**repository_filter)
         message_types = list(dict(PylintMessage.TYPE_CHOICES).keys())
         message_type_label = "type"
     else:
         raise ValueError(f"Programming language {language} not recognized")
 
-    project_locs = board.commit_files.filter(**repository_filter).aggregate(locs=Sum("lines_of_code"))["locs"]
+    project_locs = board.commit_files.filter(**repository_filter).aggregate(
+        locs=Sum("lines_of_code")
+    )["locs"]
     if project_locs is None:
         return chart.render_django_response()
 
-    min_creation_datetime = board.commits.filter(has_been_assessed=True).filter(**repository_filter).aggregate(
-        min_creation_datetime=Min("creation_datetime"))["min_creation_datetime"]
+    min_creation_datetime = (
+        board.commits.filter(has_been_assessed=True)
+        .filter(**repository_filter)
+        .aggregate(min_creation_datetime=Min("creation_datetime"))[
+            "min_creation_datetime"
+        ]
+    )
     if min_creation_datetime is None:
         return chart.render_django_response()
 
-    max_creation_datetime = board.commits.filter(has_been_assessed=True).filter(**repository_filter).aggregate(
-        max_creation_datetime=Max("creation_datetime"))["max_creation_datetime"]
+    max_creation_datetime = (
+        board.commits.filter(has_been_assessed=True)
+        .filter(**repository_filter)
+        .aggregate(max_creation_datetime=Max("creation_datetime"))[
+            "max_creation_datetime"
+        ]
+    )
 
     max_month_i = max_creation_datetime.month
     max_year_i = max_creation_datetime.year
@@ -161,7 +210,8 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
             error_message_filter = {
                 message_type_label: message_type,
                 "commit__has_been_assessed": True,
-                "commit__creation_datetime__year": year_i, "commit__creation_datetime__month": month_i
+                "commit__creation_datetime__year": year_i,
+                "commit__creation_datetime__month": month_i,
             }
             month_i_messages = error_messages.filter(**error_message_filter)
 
@@ -178,5 +228,7 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
 
         chart.add(message_type, number_of_messages_by_month)
 
-    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=chart.render(is_unicode=True))
+    chart = CachedChart.make(
+        board=board, uuid=chart_uuid, svg=chart.render(is_unicode=True)
+    )
     return chart.render_django_response()

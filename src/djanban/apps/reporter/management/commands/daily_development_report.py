@@ -3,20 +3,18 @@ import time
 import traceback
 
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.utils import timezone
 
 from djanban.apps.base.email import warn_administrators
-from djanban.apps.dev_times.models import DailySpentTime
 from djanban.apps.members.models import Member
 from djanban.apps.niko_niko_calendar.models import DailyMemberMood
 from djanban.apps.reporter.management.commands import daily_report
-from django.core.mail import EmailMultiAlternatives
 
 
 class Command(daily_report.Command):
-    help = 'Daily report for developers'
+    help = "Daily report for developers"
 
     def handle(self, *args, **options):
         now = timezone.now()
@@ -24,11 +22,15 @@ class Command(daily_report.Command):
         # Calling this management action without parameteres assume that date is today
         date = now.today()
 
-        if options['date']:
+        if options["date"]:
             try:
                 date = datetime.datetime.strptime(options["date"], "%Y-%m-%d")
             except ValueError:
-                self.stderr.write(self.style.ERROR("Date {} format is not valid".format(options["date"])))
+                self.stderr.write(
+                    self.style.ERROR(
+                        "Date {} format is not valid".format(options["date"])
+                    )
+                )
                 return None
 
         # If this day is holiday, don't send anything
@@ -37,7 +39,8 @@ class Command(daily_report.Command):
             self.stdout.write(
                 self.style.SUCCESS(
                     "Daily development reports for day {} are not sent because that day is holiday".format(
-                    date.strftime("%Y-%m-%d"))
+                        date.strftime("%Y-%m-%d")
+                    )
                 )
             )
             return False
@@ -47,31 +50,53 @@ class Command(daily_report.Command):
         developers = Member.objects.filter(is_developer=True, on_holidays=False)
         try:
             for member in developers:
-                if member.daily_spent_times.filter(date=date).count() > 0 and member.user:
-                    daily_spent_times = member.daily_spent_times.filter(date=date).order_by("date", "member")
-                    Command.send_daily_development_report(date, member, daily_spent_times)
-                    self.stdout.write(self.style.SUCCESS(f"Daily report sent to developer {member.user.email}"))
+                if (
+                    member.daily_spent_times.filter(date=date).count() > 0
+                    and member.user
+                ):
+                    daily_spent_times = member.daily_spent_times.filter(
+                        date=date
+                    ).order_by("date", "member")
+                    Command.send_daily_development_report(
+                        date, member, daily_spent_times
+                    )
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"Daily report sent to developer {member.user.email}"
+                        )
+                    )
                 elif member.user:
                     self.stdout.write(
-                        self.style.WARNING("Developer {} has not worked on day {}".format(member.user.email,
-                                                                                         date.strftime("%Y-%m-%d")))
+                        self.style.WARNING(
+                            "Developer {} has not worked on day {}".format(
+                                member.user.email, date.strftime("%Y-%m-%d")
+                            )
+                        )
                     )
                 else:
                     self.stdout.write(
-                        self.style.WARNING(f"Developer {member.external_username} has no email")
+                        self.style.WARNING(
+                            f"Developer {member.external_username} has no email"
+                        )
                     )
 
-        except Exception as e:
-            warn_administrators(subject="Error in Daily development report",
-                                message=traceback.format_exc())
-            self.stdout.write(self.style.ERROR("Error in the daily development report "))
+        except Exception:
+            warn_administrators(
+                subject="Error in Daily development report",
+                message=traceback.format_exc(),
+            )
+            self.stdout.write(
+                self.style.ERROR("Error in the daily development report ")
+            )
 
         end = time.time()
-        elapsed_time = end-start
+        elapsed_time = end - start
 
         self.stdout.write(
-            self.style.SUCCESS("Daily development reports for day {} sent successfully to {} developers in {} s".format(
-                date.strftime("%Y-%m-%d"), developers.count(), elapsed_time)
+            self.style.SUCCESS(
+                "Daily development reports for day {} sent successfully to {} developers in {} s".format(
+                    date.strftime("%Y-%m-%d"), developers.count(), elapsed_time
+                )
             )
         )
 
@@ -88,17 +113,36 @@ class Command(daily_report.Command):
             "date": date,
             "developer": developer_member,
             "developer_mood": developer_mood,
-            "developer_daily_spent_times": daily_spent_times.filter(member=developer_member)
+            "developer_daily_spent_times": daily_spent_times.filter(
+                member=developer_member
+            ),
         }
 
-        txt_message = get_template('reporter/emails/daily_development_report.txt').render(replacements)
-        html_message = get_template('reporter/emails/daily_development_report.html').render(replacements)
+        txt_message = get_template(
+            "reporter/emails/daily_development_report.txt"
+        ).render(replacements)
+        html_message = get_template(
+            "reporter/emails/daily_development_report.html"
+        ).render(replacements)
 
-        subject = "[Djanban][DevReports] Daily development report of {}".format(date.strftime("%Y-%m-%d"))
+        subject = "[Djanban][DevReports] Daily development report of {}".format(
+            date.strftime("%Y-%m-%d")
+        )
 
-        csv_report = get_template('daily_spent_times/csv.txt').render({"spent_times": daily_spent_times})
+        csv_report = get_template("daily_spent_times/csv.txt").render(
+            {"spent_times": daily_spent_times}
+        )
 
-        message = EmailMultiAlternatives(subject, txt_message, settings.EMAIL_HOST_USER, [developer_member.user.email])
+        message = EmailMultiAlternatives(
+            subject,
+            txt_message,
+            settings.EMAIL_HOST_USER,
+            [developer_member.user.email],
+        )
         message.attach_alternative(html_message, "text/html")
-        message.attach('spent_times-for-day-{}.csv'.format(date.strftime("%Y-%m-%d")), csv_report, 'text/csv')
+        message.attach(
+            "spent_times-for-day-{}.csv".format(date.strftime("%Y-%m-%d")),
+            csv_report,
+            "text/csv",
+        )
         message.send()

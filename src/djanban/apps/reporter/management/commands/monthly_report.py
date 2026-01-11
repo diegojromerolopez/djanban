@@ -5,8 +5,8 @@ from djanban.apps.reporter.management.report_command import ReportCommand
 
 
 class Command(ReportCommand):
-    help = 'Monthly report for administrators'
-    date_help_text = 'Send the monthly report to the administrators for the month this date belongs to'
+    help = "Monthly report for administrators"
+    date_help_text = "Send the monthly report to the administrators for the month this date belongs to"
 
     def handle(self, *args, **options):
         self.date = super().handle(*args, **options)
@@ -16,23 +16,35 @@ class Command(ReportCommand):
         month = self.date.month
         year = self.date.year
 
-        daily_spent_times = DailySpentTime.objects.filter(date__month=month, date__year=year).order_by("date", "member")
+        daily_spent_times = DailySpentTime.objects.filter(
+            date__month=month, date__year=year
+        ).order_by("date", "member")
 
         subject = f"[Djanban][Reports] Monthly report of {year}/{month}"
-        txt_template_path = 'reporter/emails/monthly_report.txt'
-        html_template_path = 'reporter/emails/monthly_report.html'
-        csv_file_name = f'spent_times-for-month-{year}-{month}.csv'
+        txt_template_path = "reporter/emails/monthly_report.txt"
+        html_template_path = "reporter/emails/monthly_report.html"
+        csv_file_name = f"spent_times-for-month-{year}-{month}.csv"
 
-        report_recipient = self.send_reports(daily_spent_times, subject,
-                                                txt_template_path, html_template_path, csv_file_name)
+        report_recipient = self.send_reports(
+            daily_spent_times,
+            subject,
+            txt_template_path,
+            html_template_path,
+            csv_file_name,
+        )
         self.stdout.write(
-            self.style.SUCCESS(f"Monthly reports sent to {report_recipient.count()} administrators"))
+            self.style.SUCCESS(
+                f"Monthly reports sent to {report_recipient.count()} administrators"
+            )
+        )
 
         end = time.time()
         elapsed_time = end - start
 
         self.stdout.write(
-            self.style.SUCCESS("Monthly reports for month {}/{} sent successfully to {} in {} s".format(
-                year, month, report_recipient.count(), elapsed_time)
+            self.style.SUCCESS(
+                "Monthly reports for month {}/{} sent successfully to {} in {} s".format(
+                    year, month, report_recipient.count(), elapsed_time
+                )
             )
         )

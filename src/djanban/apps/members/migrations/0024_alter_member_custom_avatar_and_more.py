@@ -6,23 +6,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('members', '0023_auto_20170519_1715'),
+        ("members", "0023_auto_20170519_1715"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='member',
-            name='custom_avatar',
-            field=models.ImageField(blank=True, default=None, null=True, upload_to='', verbose_name='Custom avatar'),
+            model_name="member",
+            name="custom_avatar",
+            field=models.ImageField(
+                blank=True,
+                default=None,
+                null=True,
+                upload_to="",
+                verbose_name="Custom avatar",
+            ),
         ),
         migrations.AlterField(
-            model_name='member',
-            name='default_avatar',
-            field=models.ImageField(default=None, null=True, upload_to='', verbose_name='Default avatar'),
+            model_name="member",
+            name="default_avatar",
+            field=models.ImageField(
+                default=None, null=True, upload_to="", verbose_name="Default avatar"
+            ),
         ),
         migrations.AlterField(
-            model_name='member',
-            name='is_public',
-            field=models.BooleanField(blank=True, default=False, help_text='If checked, this user will be seen by other members and they will be able to add it to their boards', verbose_name='Is this member public?'),
+            model_name="member",
+            name="is_public",
+            field=models.BooleanField(
+                blank=True,
+                default=False,
+                help_text="If checked, this user will be seen by other members and they will be able to add it to their boards",
+                verbose_name="Is this member public?",
+            ),
         ),
     ]

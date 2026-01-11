@@ -1,7 +1,0 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
-import unittest
-from djanban.apps.niko_niko_calendar.templatetags.niko_niko_calendar import *
-
-class TestNikonikocalendar(unittest.TestCase):
-    pass

@@ -3,20 +3,21 @@ import re
 import tempfile
 
 import dateutil
-from django.core.files.base import ContentFile
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
 from django.db.models import Q
-from django.http import JsonResponse, Http404
-from django.utils import timezone
+from django.http import Http404, JsonResponse
 
-from djanban.apps.api.http import JsonResponseBadRequest, JsonResponseMethodNotAllowed, JsonResponseNotFound
+from djanban.apps.api.http import (
+    JsonResponseBadRequest,
+    JsonResponseMethodNotAllowed,
+    JsonResponseNotFound,
+)
 from djanban.apps.api.serializers import Serializer
-from djanban.apps.api.util import get_list_or_404, get_card_or_404, get_board_or_404
+from djanban.apps.api.util import get_board_or_404, get_card_or_404, get_list_or_404
 from djanban.apps.base.auth import get_user_boards
 from djanban.apps.base.decorators import member_required
-from djanban.apps.boards.models import Board, Card, CardComment, List, CardAttachment
-
+from djanban.apps.boards.models import Board, Card, CardAttachment, CardComment, List
 
 # Point of access to several actions
 from djanban.apps.forecasters.models import Forecaster
@@ -47,18 +48,28 @@ def _add_card(request, board_id):
 
     put_params = json.loads(request.body)
 
-    if not put_params.get("name") or not put_params.get("list") or not put_params.get("position"):
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+    if (
+        not put_params.get("name")
+        or not put_params.get("list")
+        or not put_params.get("position")
+    ):
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     if put_params.get("position") != "top" and put_params.get("position") != "bottom":
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     try:
         list_ = get_list_or_404(request, board_id, put_params.get("list"))
     except Http404:
         return JsonResponseNotFound({"message": "List not found"})
 
-    new_card = list_.add_card(member=member, name=put_params.get("name"), position=put_params.get("position"))
+    new_card = list_.add_card(
+        member=member, name=put_params.get("name"), position=put_params.get("position")
+    )
 
     serializer = Serializer(board=new_card.board)
     return JsonResponse(serializer.serialize_card(new_card))
@@ -79,16 +90,22 @@ def _move_all_list_cards(request, board_id):
     post_params = json.loads(request.body)
 
     if not post_params.get("source_list") or not post_params.get("destination_list"):
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     # Check if the lists exists and if they are different
     try:
         source_list = board.active_lists.get(id=post_params.get("source_list"))
-        destination_list = board.active_lists.get(id=post_params.get("destination_list"))
+        destination_list = board.active_lists.get(
+            id=post_params.get("destination_list")
+        )
         if source_list.id == destination_list.id:
             raise AssertionError()
     except (List.DoesNotExist, AssertionError):
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     # Move the cards
     source_list.move_cards(member=member, destination_list=destination_list)
@@ -130,10 +147,14 @@ def change(request, board_id, card_id):
         card.change_attribute(member, attribute="name", value=put_params.get("name"))
 
     elif put_params.get("description"):
-        card.change_attribute(member, attribute="description", value=put_params.get("name"))
+        card.change_attribute(
+            member, attribute="description", value=put_params.get("name")
+        )
 
     elif put_params.get("is_closed") is not None:
-        card.change_attribute(member, attribute="is_closed", value=put_params.get("name"))
+        card.change_attribute(
+            member, attribute="is_closed", value=put_params.get("name")
+        )
 
     elif put_params.get("due_datetime"):
         due_datetime_str = put_params.get("due_datetime")
@@ -150,7 +171,9 @@ def change(request, board_id, card_id):
         card.change_value(member=member, value=card_value)
 
     else:
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     serializer = Serializer(board=card.board)
     return JsonResponse(serializer.serialize_card(card))
@@ -172,7 +195,9 @@ def change_labels(request, board_id, card_id):
     post_params = json.loads(request.body)
 
     if not post_params.get("labels"):
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     label_ids = post_params.get("labels")
     card.labels.clear()
@@ -201,7 +226,9 @@ def change_members(request, board_id, card_id):
     post_params = json.loads(request.body)
 
     if not post_params.get("members"):
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     member_ids = post_params.get("members")
 
@@ -251,7 +278,7 @@ def add_attachment(request, board_id, card_id):
     try:
         board = get_user_boards(request.user).get(id=board_id)
         card = board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+    except (Board.DoesNotExist, Card.DoesNotExist):
         return JsonResponseNotFound({"message": "Not found."})
 
     uploaded_file_content = request.body
@@ -279,7 +306,7 @@ def delete_attachment(request, board_id, card_id, attachment_id):
         board = get_user_boards(request.user).get(id=board_id)
         card = board.cards.get(id=card_id)
         attachment = card.attachments.get(id=attachment_id)
-    except (Board.DoesNotExist, Card.DoesNotExist, CardAttachment.DoesNotExist) as e:
+    except (Board.DoesNotExist, Card.DoesNotExist, CardAttachment.DoesNotExist):
         return JsonResponseNotFound({"message": "Not found."})
 
     card.delete_attachment(member, attachment)
@@ -308,7 +335,9 @@ def add_new_comment(request, board_id, card_id):
 
     # If the comment is empty, fail
     if not comment_content:
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     # Otherwise, add the comment
     new_comment = card.add_comment(member, comment_content)
@@ -361,7 +390,9 @@ def add_se_time(request, board_id, card_id):
     if matches:
         days_ago = int(matches.group("days_ago"))
 
-    card.add_spent_estimated_time(member, spent_time, estimated_time, days_ago, description)
+    card.add_spent_estimated_time(
+        member, spent_time, estimated_time, days_ago, description
+    )
 
     serializer = Serializer(board=card.board)
     return JsonResponse(serializer.serialize_card(card))
@@ -373,13 +404,13 @@ def update_forecasts(request, board_id, card_id):
     try:
         board = get_user_boards(request.user).get(id=board_id)
         card = board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+    except (Board.DoesNotExist, Card.DoesNotExist):
         return JsonResponseNotFound({"message": "Not found."})
 
     available_card_forecasters = Forecaster.objects.filter(
-        (Q(board=None) & Q(member=None)) |
-        (Q(board=card.board) & Q(member=None)) |
-        (Q(board=None) & Q(member__in=card.members.all()))
+        (Q(board=None) & Q(member=None))
+        | (Q(board=card.board) & Q(member=None))
+        | (Q(board=None) & Q(member__in=card.members.all()))
     )
 
     serializer = Serializer(board=card.board)
@@ -402,13 +433,17 @@ def add_blocking_card(request, board_id, card_id):
     member = request.user.member
     put_body = json.loads(request.body)
     if not put_body.get("blocking_card"):
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     try:
         board = get_user_boards(request.user).get(id=board_id)
         card = board.cards.get(id=card_id)
-        blocking_card = board.cards.exclude(id=card_id).get(id=put_body.get("blocking_card"))
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+        blocking_card = board.cards.exclude(id=card_id).get(
+            id=put_body.get("blocking_card")
+        )
+    except (Board.DoesNotExist, Card.DoesNotExist):
         return JsonResponseNotFound({"message": "Not found."})
 
     card.add_blocking_card(member, blocking_card)
@@ -420,14 +455,16 @@ def add_blocking_card(request, board_id, card_id):
 @member_required
 def remove_blocking_card(request, board_id, card_id, blocking_card_id):
     if request.method != "DELETE":
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     member = request.user.member
     try:
         board = get_user_boards(request.user).get(id=board_id)
         card = board.cards.get(id=card_id)
         blocking_card = card.blocking_cards.exclude(id=card_id).get(id=blocking_card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+    except (Board.DoesNotExist, Card.DoesNotExist):
         return JsonResponseNotFound({"message": "Not found."})
 
     card.remove_blocking_card(member, blocking_card)
@@ -451,7 +488,9 @@ def add_new_review(request, board_id, card_id):
 
     put_body = json.loads(request.body)
     if not put_body.get("members"):
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     reviewers = board.members.filter(id__in=put_body.get("members"))
 
@@ -475,7 +514,7 @@ def delete_review(request, board_id, card_id, review_id):
         board = get_user_boards(request.user).get(id=board_id)
         card = board.cards.get(id=card_id)
         review = card.reviews.get(id=review_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+    except (Board.DoesNotExist, Card.DoesNotExist):
         return JsonResponseNotFound({"message": "Not found."})
 
     card.delete_review(member, review)
@@ -499,13 +538,17 @@ def add_requirement(request, board_id, card_id):
 
     put_body = json.loads(request.body)
     if not put_body.get("requirement"):
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     requirement = board.requirements.get(id=put_body.get("requirement"))
 
     # If the requirement is already in the card, we can't continue
     if card.requirements.filter(id=requirement.id).exists():
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     card.add_requirement(member, requirement)
 
@@ -525,7 +568,7 @@ def remove_requirement(request, board_id, card_id, requirement_id):
         board = get_user_boards(request.user).get(id=board_id)
         card = board.cards.get(id=card_id)
         requirement = card.requirements.get(id=requirement_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+    except (Board.DoesNotExist, Card.DoesNotExist):
         return JsonResponseNotFound({"message": "Not found."})
 
     card.remove_requirement(member, requirement)
@@ -547,7 +590,7 @@ def modify_comment(request, board_id, card_id, comment_id):
         return JsonResponseNotFound({"message": "Card not found."})
     try:
         comment = card.comments.get(id=comment_id)
-    except CardComment.DoesNotExist as e:
+    except CardComment.DoesNotExist:
         return JsonResponseNotFound({"message": "Not found."})
 
     if request.method == "DELETE":
@@ -557,11 +600,15 @@ def modify_comment(request, board_id, card_id, comment_id):
         post_params = json.loads(request.body)
         new_comment_content = post_params.get("content")
         if not new_comment_content:
-            return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+            return JsonResponseBadRequest(
+                {"message": "Bad request: some parameters are missing."}
+            )
         comment = _edit_comment(member, card, comment, new_comment_content)
 
     else:
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     serializer = Serializer(board=card.board)
     return JsonResponse(serializer.serialize_card_comment(comment))
@@ -580,4 +627,3 @@ def _delete_comment(member, card, comment_to_delete):
     # Delete the comment
     card.delete_comment(member, comment_to_delete)
     return comment_to_delete
-

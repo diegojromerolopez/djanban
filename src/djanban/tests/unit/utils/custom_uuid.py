@@ -1,6 +1,8 @@
 import unittest
+
+
 from djanban.utils.custom_uuid import custom_uuid
-import six
+
 
 class TestCustomUuid(unittest.TestCase):
     def test_custom_uuid_length(self):

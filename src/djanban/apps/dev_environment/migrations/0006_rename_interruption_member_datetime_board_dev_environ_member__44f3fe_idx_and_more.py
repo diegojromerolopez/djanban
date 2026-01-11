@@ -6,10 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dev_environment', '0005_interruption_interrupted_task'),
+        ("dev_environment", "0005_interruption_interrupted_task"),
     ]
 
-    operations = [
-        
-        
-    ]
+    operations = []

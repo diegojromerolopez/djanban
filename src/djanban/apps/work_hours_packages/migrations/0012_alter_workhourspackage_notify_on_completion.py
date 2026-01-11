@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('work_hours_packages', '0011_auto_20170530_1527'),
+        ("work_hours_packages", "0011_auto_20170530_1527"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='workhourspackage',
-            name='notify_on_completion',
-            field=models.BooleanField(blank=True, default=False, verbose_name='Notify the members and this email on completion'),
+            model_name="workhourspackage",
+            name="notify_on_completion",
+            field=models.BooleanField(
+                blank=True,
+                default=False,
+                verbose_name="Notify the members and this email on completion",
+            ),
         ),
     ]

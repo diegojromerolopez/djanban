@@ -1,5 +1,5 @@
-from django.forms import models
 from django import forms
+from django.forms import models
 from django.utils import timezone
 
 from djanban.apps.charts.models import CachedChart
@@ -41,4 +41,6 @@ class NewNoiseMeasurementForm(models.ModelForm):
 
 
 class DeleteNoiseMeasurementForm(forms.Form):
-    confirmed = forms.BooleanField(label="Confirm you want to delete this noise measurement")
+    confirmed = forms.BooleanField(
+        label="Confirm you want to delete this noise measurement"
+    )

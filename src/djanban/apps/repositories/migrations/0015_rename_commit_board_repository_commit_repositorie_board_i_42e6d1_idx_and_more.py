@@ -6,26 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('repositories', '0014_auto_20161006_0143'),
+        ("repositories", "0014_auto_20161006_0143"),
     ]
 
-    operations = [
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    ]
+    operations = []

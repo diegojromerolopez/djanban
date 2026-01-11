@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('forecasters', '0003_auto_20170416_2026'),
+        ("forecasters", "0003_auto_20170416_2026"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='forecaster',
-            name='results_file',
-            field=models.FileField(upload_to='', verbose_name='Field with the statsmodels results'),
+            model_name="forecaster",
+            name="results_file",
+            field=models.FileField(
+                upload_to="", verbose_name="Field with the statsmodels results"
+            ),
         ),
     ]

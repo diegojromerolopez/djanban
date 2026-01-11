@@ -1,5 +1,7 @@
 import re
+
 from django.forms import models
+
 from djanban.apps.boards.models import List
 from djanban.apps.workflows.models import Workflow, WorkflowList
 
@@ -16,28 +18,46 @@ class NewWorkflowForm(models.ModelForm):
         # Creation of pair of lists of lists for development and done
         lists = workflow.board.lists.all().order_by("id")
         num_lists = lists.count()
-        list_position = {lists[i].id: i+1 for i in range(0, num_lists)}
-        list_choices = [("empty", "Empty")]+[(list_.id, list_.name) for list_ in lists]
+        list_position = {lists[i].id: i + 1 for i in range(0, num_lists)}
+        list_choices = [("empty", "Empty")] + [
+            (list_.id, list_.name) for list_ in lists
+        ]
 
         # Development lists
         for list_i in range(0, num_lists):
             development_list_name_i = f"development_list_{list_i}"
-            self.fields[development_list_name_i] = models.ChoiceField(choices=list_choices, initial="empty",
-                                                                      label=f"'Development' list in position {list_i}")
+            self.fields[development_list_name_i] = models.ChoiceField(
+                choices=list_choices,
+                initial="empty",
+                label=f"'Development' list in position {list_i}",
+            )
             # In case we are editing, get default value of the select of the lists
-            if workflow.workflow_lists.filter(order=list_i, is_done_list=False).exists():
-                list_id_in_position_i = workflow.workflow_lists.get(order=list_i, is_done_list=False).list_id
-                self.fields[development_list_name_i].initial = list_position[list_id_in_position_i]
+            if workflow.workflow_lists.filter(
+                order=list_i, is_done_list=False
+            ).exists():
+                list_id_in_position_i = workflow.workflow_lists.get(
+                    order=list_i, is_done_list=False
+                ).list_id
+                self.fields[development_list_name_i].initial = list_position[
+                    list_id_in_position_i
+                ]
 
         # Done lists
         for list_i in range(0, num_lists):
             done_list_name_i = f"done_list_{list_i}"
-            self.fields[done_list_name_i] = models.ChoiceField(choices=list_choices, initial="empty",
-                                                               label=f"'Done' list in position {list_i}")
+            self.fields[done_list_name_i] = models.ChoiceField(
+                choices=list_choices,
+                initial="empty",
+                label=f"'Done' list in position {list_i}",
+            )
 
             if workflow.workflow_lists.filter(order=list_i, is_done_list=True).exists():
-                list_id_in_position_i = workflow.workflow_lists.get(order=list_i, is_done_list=True).list_id
-                self.fields[done_list_name_i].initial = list_position[list_id_in_position_i]
+                list_id_in_position_i = workflow.workflow_lists.get(
+                    order=list_i, is_done_list=True
+                ).list_id
+                self.fields[done_list_name_i].initial = list_position[
+                    list_id_in_position_i
+                ]
 
     def save(self, commit=True):
         workflow = super().save(commit)
@@ -53,12 +73,16 @@ class NewWorkflowForm(models.ModelForm):
                     list_match_groups = list_match.groups()
 
                     list_type = list_match_groups[0]
-                    list_is_done_list = (list_type == "done_list")
+                    list_is_done_list = list_type == "done_list"
 
                     list_position = list_match_groups[1]
                     list_ = List.objects.get(id=list_id)
-                    workflowlist = WorkflowList(order=list_position, is_done_list=list_is_done_list,
-                                                list=list_, workflow=workflow)
+                    workflowlist = WorkflowList(
+                        order=list_position,
+                        is_done_list=list_is_done_list,
+                        list=list_,
+                        workflow=workflow,
+                    )
                     workflowlist.save()
 
 
@@ -67,4 +91,3 @@ class EditWorkflowForm(NewWorkflowForm):
     class Meta:
         model = Workflow
         fields = ["name"]
-

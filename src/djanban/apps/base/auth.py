@@ -29,8 +29,14 @@ def user_is_administrator(user):
     -------
     True if the user belongs to administrator groups, False otherwise.
     """
-    return user and user.is_authenticated() and\
-           (user.groups.filter(name=settings.ADMINISTRATOR_GROUP).exists() or user.is_superuser)
+    return (
+        user
+        and user.is_authenticated()
+        and (
+            user.groups.filter(name=settings.ADMINISTRATOR_GROUP).exists()
+            or user.is_superuser
+        )
+    )
 
 
 # Informs if one user is a member
@@ -84,5 +90,5 @@ def get_member_boards(member, is_archived=False):
 def get_user_board_or_404(user, board_id, is_archived=False):
     try:
         return get_user_boards(user=user, is_archived=is_archived).get(id=board_id)
-    except Board.DoesNotExist as e:
+    except Board.DoesNotExist:
         raise Http404

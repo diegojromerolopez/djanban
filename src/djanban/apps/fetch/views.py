@@ -1,7 +1,4 @@
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse
 
 from djanban.apps.base.decorators import member_required
 from djanban.apps.fetch.management.commands.fetch import Command
@@ -18,13 +15,20 @@ def fetch(request):
         return render(request, "fetch/fetch.html", replacements)
 
     if not member.is_initialized:
-        return render(request, "fetch/fetch_error.html",
-                      context={"exception_message": f"Member {member.user.username} is not initialized"})
+        return render(
+            request,
+            "fetch/fetch_error.html",
+            context={
+                "exception_message": f"Member {member.user.username} is not initialized"
+            },
+        )
 
     try:
         fetch_command = Command()
         fetch_command.handle(member_external_username=[member.external_username])
     except Exception as e:
-        return render(request, "fetch/fetch_error.html", context={"exception_message": e})
+        return render(
+            request, "fetch/fetch_error.html", context={"exception_message": e}
+        )
 
     return render(request, "fetch/fetch_success.html")

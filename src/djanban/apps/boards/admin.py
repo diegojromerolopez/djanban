@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from djanban.apps.boards.models import List, Card, Board, Label
+from djanban.apps.boards.models import Board, Card, Label, List
 
 admin.site.register(Board)
 admin.site.register(Card)

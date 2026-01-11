@@ -1,27 +1,16 @@
-import hashlib
-import time
 
-from datetime import timedelta
-
-import pydenticon
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.core.files.base import ContentFile
-from django.urls import reverse
-from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.http.response import Http404, HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.http.response import Http404
+from django.shortcuts import render
+from django.urls import reverse
 
-from djanban.apps.base.auth import user_is_member, get_user_boards, user_is_visitor
 from djanban.apps.base.decorators import member_required
-from djanban.apps.boards.forms import EditBoardForm, NewBoardForm, NewListForm, LabelForm, EditListForm
-from djanban.apps.boards.models import List, Board, Label
-from djanban.apps.boards.stats import avg, std_dev
-from djanban.apps.fetch.fetchers.trello.boards import Initializer, BoardFetcher
-from djanban.apps.multiboards.forms import MultiboardForm, DeleteMultiboardForm, LeaveMultiboardForm
+from djanban.apps.multiboards.forms import (
+    DeleteMultiboardForm,
+    LeaveMultiboardForm,
+    MultiboardForm,
+)
 from djanban.apps.multiboards.models import Multiboard
-from djanban.utils.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
 
 
 @member_required
@@ -36,7 +25,9 @@ def view_archived_list(request):
 
 def _view_list(request, archived):
     member = request.user.member
-    multiboards = member.multiboards.filter(is_archived=archived).order_by("order", "name")
+    multiboards = member.multiboards.filter(is_archived=archived).order_by(
+        "order", "name"
+    )
     replacements = {"multiboards": multiboards, "archived": archived, "member": member}
     return render(request, "multiboards/list.html", replacements)
 
@@ -73,7 +64,7 @@ def view(request, multiboard_id):
         "multiboard": multiboard,
         "member": member,
         "members": multiboard.members.all(),
-        "boards": multiboard.boards.filter(is_archived=False).order_by("name")
+        "boards": multiboard.boards.filter(is_archived=False).order_by("name"),
     }
     return render(request, "multiboards/view.html", replacements)
 
@@ -89,7 +80,7 @@ def view_task_board(request, multiboard_id):
     replacements = {
         "multiboard": multiboard,
         "member": member,
-        "boards": multiboard.boards.filter(is_archived=False).order_by("name")
+        "boards": multiboard.boards.filter(is_archived=False).order_by("name"),
     }
     return render(request, "multiboards/view_task_board.html", replacements)
 
@@ -113,7 +104,11 @@ def edit(request, multiboard_id):
     else:
         form = MultiboardForm(instance=multiboard)
 
-    return render(request, "multiboards/edit.html", {"form": form, "multiboard": multiboard, "member": member})
+    return render(
+        request,
+        "multiboards/edit.html",
+        {"form": form, "multiboard": multiboard, "member": member},
+    )
 
 
 # Delete a multiboard
@@ -135,7 +130,11 @@ def delete(request, multiboard_id):
     else:
         form = DeleteMultiboardForm()
 
-    return render(request, "multiboards/delete.html", {"form": form, "multiboard": multiboard, "member": member})
+    return render(
+        request,
+        "multiboards/delete.html",
+        {"form": form, "multiboard": multiboard, "member": member},
+    )
 
 
 # Leave a multiboard
@@ -148,7 +147,11 @@ def leave(request, multiboard_id):
         raise Http404
 
     if member.id == multiboard.creator.id:
-        return render(request, "multiboards/leave.html", {"multiboard": multiboard, "member": member})
+        return render(
+            request,
+            "multiboards/leave.html",
+            {"multiboard": multiboard, "member": member},
+        )
 
     if request.method == "POST":
         form = LeaveMultiboardForm(request.POST)
@@ -160,4 +163,8 @@ def leave(request, multiboard_id):
     else:
         form = LeaveMultiboardForm()
 
-    return render(request, "multiboards/leave.html", {"form": form, "multiboard": multiboard, "member": member})
+    return render(
+        request,
+        "multiboards/leave.html",
+        {"form": form, "multiboard": multiboard, "member": member},
+    )

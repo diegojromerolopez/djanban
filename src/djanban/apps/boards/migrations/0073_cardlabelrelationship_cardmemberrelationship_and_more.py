@@ -6,63 +6,63 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('boards', '0072_auto_20170603_0130'),
+        ("boards", "0072_auto_20170603_0130"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CardLabelRelationship',
+            name="CardLabelRelationship",
             fields=[
-                ('id', models.IntegerField(primary_key=True, serialize=False)),
+                ("id", models.IntegerField(primary_key=True, serialize=False)),
             ],
             options={
-                'db_table': 'boards_card_labels',
-                'managed': False,
+                "db_table": "boards_card_labels",
+                "managed": False,
             },
         ),
         migrations.CreateModel(
-            name='CardMemberRelationship',
+            name="CardMemberRelationship",
             fields=[
-                ('id', models.IntegerField(primary_key=True, serialize=False)),
+                ("id", models.IntegerField(primary_key=True, serialize=False)),
             ],
             options={
-                'db_table': 'boards_card_members',
-                'managed': False,
+                "db_table": "boards_card_members",
+                "managed": False,
             },
         ),
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         migrations.AlterField(
-            model_name='board',
-            name='header_image',
-            field=models.ImageField(blank=True, default=None, help_text='Header image for this board. Optional.', null=True, upload_to='', verbose_name='Header image'),
+            model_name="board",
+            name="header_image",
+            field=models.ImageField(
+                blank=True,
+                default=None,
+                help_text="Header image for this board. Optional.",
+                null=True,
+                upload_to="",
+                verbose_name="Header image",
+            ),
         ),
         migrations.AlterField(
-            model_name='board',
-            name='identicon',
-            field=models.ImageField(blank=True, default=None, help_text='Identicon for this board. It is automatically generated and stored.', null=True, upload_to='', verbose_name='Identicon'),
+            model_name="board",
+            name="identicon",
+            field=models.ImageField(
+                blank=True,
+                default=None,
+                help_text="Identicon for this board. It is automatically generated and stored.",
+                null=True,
+                upload_to="",
+                verbose_name="Identicon",
+            ),
         ),
         migrations.AlterField(
-            model_name='cardattachment',
-            name='file',
-            field=models.FileField(blank=True, default=None, null=True, upload_to='', verbose_name='File content'),
+            model_name="cardattachment",
+            name="file",
+            field=models.FileField(
+                blank=True,
+                default=None,
+                null=True,
+                upload_to="",
+                verbose_name="File content",
+            ),
         ),
     ]

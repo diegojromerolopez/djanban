@@ -1,12 +1,7 @@
 import importlib
-import inspect
+
 from django import template
-import datetime
 
-from django.db.models import Sum
-
-from djanban.apps.base.auth import get_user_boards
-from djanban.apps.dev_times.models import DailySpentTime
 
 register = template.Library()
 

@@ -1,16 +1,21 @@
-from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
-from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
-from django.views.generic import DeleteView
+from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import reverse
 
 from djanban.apps.base.auth import get_user_board_or_404
 from djanban.apps.base.decorators import member_required
-from djanban.apps.boards.models import Board
-from djanban.apps.repositories.forms import GitLabRepositoryForm, get_form_class, DeleteRepositoryForm, \
-    GitHubPublicRepositoryForm
-from djanban.apps.repositories.models import Repository, GitLabRepository, GitHubPublicRepository
+from djanban.apps.repositories.forms import (
+    DeleteRepositoryForm,
+    GitHubPublicRepositoryForm,
+    GitLabRepositoryForm,
+    get_form_class,
+)
+from djanban.apps.repositories.models import (
+    GitHubPublicRepository,
+    GitLabRepository,
+    Repository,
+)
 
 
 # List of repositories
@@ -19,11 +24,7 @@ def view_list(request, board_id):
     member = request.user.member
     board = get_user_board_or_404(request.user, board_id)
     repositories = board.repositories.all().order_by("name")
-    replacements = {
-        "member": member,
-        "board": board,
-        "repositories": repositories
-    }
+    replacements = {"member": member, "board": board, "repositories": repositories}
     return render(request, "repositories/list.html", replacements)
 
 
@@ -41,7 +42,7 @@ def view(request, board_id, repository_id):
         "member": member,
         "board": board,
         "repository": repository,
-        "commits": repository.commits.all().order_by("creation_datetime")
+        "commits": repository.commits.all().order_by("creation_datetime"),
     }
     return render(request, "repositories/view.html", replacements)
 
@@ -68,11 +69,17 @@ def new(request, board_id, type="gitlab"):
 
         if form.is_valid():
             form.save(commit=True)
-            return HttpResponseRedirect(reverse("boards:repositories:view_repositories", args=(board_id,)))
+            return HttpResponseRedirect(
+                reverse("boards:repositories:view_repositories", args=(board_id,))
+            )
     else:
         form = form_class(instance=repository)
 
-    return render(request, "repositories/new.html", {"form": form, "board": board, "member": member})
+    return render(
+        request,
+        "repositories/new.html",
+        {"form": form, "board": board, "member": member},
+    )
 
 
 # Edition of a repository
@@ -93,12 +100,19 @@ def edit(request, board_id, repository_id):
 
         if form.is_valid():
             form.save(commit=True)
-            return HttpResponseRedirect(reverse("boards:repositories:view_repositories", args=(board_id,)))
+            return HttpResponseRedirect(
+                reverse("boards:repositories:view_repositories", args=(board_id,))
+            )
 
     else:
         form = form_class(instance=derived_object)
 
-    replacements = {"form": form, "board": board, "member": member, "repository": repository}
+    replacements = {
+        "form": form,
+        "board": board,
+        "member": member,
+        "repository": repository,
+    }
     return render(request, "repositories/edit.html", replacements)
 
 
@@ -113,7 +127,9 @@ def checkout(request, board_id, repository_id):
         raise Http404
 
     repository.checkout()
-    return HttpResponseRedirect(reverse("boards:repositories:view_repository", args=(board_id, repository.id)))
+    return HttpResponseRedirect(
+        reverse("boards:repositories:view_repository", args=(board_id, repository.id))
+    )
 
 
 # Delete a repository
@@ -131,10 +147,17 @@ def delete(request, board_id, repository_id):
 
         if form.is_valid() and form.cleaned_data.get("confirmed"):
             repository.delete()
-            return HttpResponseRedirect(reverse("boards:repositories:view_repositories", args=(board_id,)))
+            return HttpResponseRedirect(
+                reverse("boards:repositories:view_repositories", args=(board_id,))
+            )
 
     else:
         form = DeleteRepositoryForm()
 
-    replacements = {"form": form, "board": board, "member": member, "repository": repository}
+    replacements = {
+        "form": form,
+        "board": board,
+        "member": member,
+        "repository": repository,
+    }
     return render(request, "repositories/delete.html", replacements)

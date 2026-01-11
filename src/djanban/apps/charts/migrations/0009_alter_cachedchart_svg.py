@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('charts', '0008_auto_20170530_1354'),
+        ("charts", "0008_auto_20170530_1354"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='cachedchart',
-            name='svg',
-            field=models.FileField(upload_to='', verbose_name='SVG content of the chart'),
+            model_name="cachedchart",
+            name="svg",
+            field=models.FileField(
+                upload_to="", verbose_name="SVG content of the chart"
+            ),
         ),
     ]

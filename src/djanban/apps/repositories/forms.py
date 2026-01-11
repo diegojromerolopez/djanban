@@ -1,7 +1,11 @@
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 
-from djanban.apps.repositories.models import GitLabRepository, Commit, GitHubPublicRepository
+from djanban.apps.repositories.models import (
+    Commit,
+    GitHubPublicRepository,
+    GitLabRepository,
+)
 
 
 # Get form class for a repository
@@ -20,7 +24,16 @@ def get_form_class(repository):
 class GitLabRepositoryForm(forms.ModelForm):
     class Meta:
         model = GitLabRepository
-        fields = ["name", "description", "url", "access_token", "username", "password", "project_userspace", "project_name"]
+        fields = [
+            "name",
+            "description",
+            "url",
+            "access_token",
+            "username",
+            "password",
+            "project_userspace",
+            "project_name",
+        ]
 
     def save(self, commit=True):
         super().save(commit=False)
@@ -39,7 +52,9 @@ class GitHubPublicRepositoryForm(forms.ModelForm):
         super().save(commit=False)
         if commit:
             if not self.instance.url:
-                self.instance.url = f"http://github.com/{self.instance.username}/{self.instance.name}"
+                self.instance.url = (
+                    f"http://github.com/{self.instance.username}/{self.instance.name}"
+                )
             self.instance.type = ContentType.objects.get_for_model(type(self.instance))
             self.instance.save()
         return self.instance
@@ -59,7 +74,9 @@ class CommitForm(forms.ModelForm):
     def save(self, commit=True):
         super().save(commit=False)
         if commit:
-            commit_info = self.instance.repository.fetch_commit_info(self.cleaned_data["commit"])
+            commit_info = self.instance.repository.fetch_commit_info(
+                self.cleaned_data["commit"]
+            )
             self.instance.creation_datetime = commit_info["creation_datetime"]
             self.instance.save()
         return self.instance
@@ -74,6 +91,7 @@ class MakeAssessmentForm(forms.Form):
         ("python", "Python"),
         ("php", "PHP"),
     )
-    confirmed = forms.BooleanField(label="Confirm you want to make an assessment of this commit")
+    confirmed = forms.BooleanField(
+        label="Confirm you want to make an assessment of this commit"
+    )
     language = forms.ChoiceField(choices=LANGUAGE_CHOICES)
-

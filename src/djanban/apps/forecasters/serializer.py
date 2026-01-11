@@ -1,5 +1,6 @@
 import re
 from decimal import Decimal
+
 from djanban.apps.boards.models import List
 
 
@@ -12,17 +13,25 @@ class CardSerializer:
 
     def serialize(self):
         card = self.card
-        card_age_in_seconds_decimal = Decimal(card.age_in_board.seconds / 3600.0).quantize(Decimal("1.000"))
+        card_age_in_seconds_decimal = Decimal(
+            card.age_in_board.seconds / 3600.0
+        ).quantize(Decimal("1.000"))
         card_age_in_seconds = float(card_age_in_seconds_decimal)
         num_forward_movements = 0
         if card_age_in_seconds > 0:
             if card.number_of_forward_movements > 0:
                 num_forward_movements = float(
-                    (card.number_of_forward_movements / card_age_in_seconds_decimal).quantize(Decimal("1.000")))
+                    (
+                        card.number_of_forward_movements / card_age_in_seconds_decimal
+                    ).quantize(Decimal("1.000"))
+                )
             num_backward_movements = 0
             if card.number_of_backward_movements > 0:
                 num_backward_movements = float(
-                    (card.number_of_backward_movements / card_age_in_seconds_decimal).quantize(Decimal("1.000")))
+                    (
+                        card.number_of_backward_movements / card_age_in_seconds_decimal
+                    ).quantize(Decimal("1.000"))
+                )
         else:
             num_forward_movements = 0
             num_backward_movements = 0
@@ -47,7 +56,7 @@ class CardSerializer:
             "num_labels": card.labels.count(),
             "has_red_label": 1 if card.labels.filter(color="red") else 0,
             "has_orange_label": 1 if card.labels.filter(color="orange") else 0,
-            "has_yellow_label": 1 if card.labels.filter(color="yellow") else 0
+            "has_yellow_label": 1 if card.labels.filter(color="yellow") else 0,
         }
 
         # Member that work in this card
@@ -69,7 +78,9 @@ class CardSerializer:
         time_per_list_type = card.time_in_each_list_type
         for list_type in List.ACTIVE_LIST_TYPES:
             if list_type in time_per_list_type:
-                card_data[f"time_in_list_type_{list_type}"] = time_per_list_type[list_type]
+                card_data[f"time_in_list_type_{list_type}"] = time_per_list_type[
+                    list_type
+                ]
             else:
                 card_data[f"time_in_list_type_{list_type}"] = 0
 

@@ -1,18 +1,29 @@
 import re
 
 from django.contrib.auth.decorators import login_required
-from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.http.response import Http404, HttpResponse
 from django.shortcuts import render
 from django.template import loader
+from django.urls import reverse
 from django.utils import timezone
 from isoweek import Week
 
-from djanban.apps.base.auth import user_is_member, get_user_boards, get_member_boards, get_user_board_or_404
+from djanban.apps.base.auth import (
+    get_member_boards,
+    get_user_board_or_404,
+    get_user_boards,
+    user_is_member,
+)
 from djanban.apps.base.decorators import member_required
 from djanban.apps.boards.forms import NewCardForm, WeekSummaryFilterForm
-from djanban.apps.boards.models import List, Board, Card, CardComment, Label, CardAttachment
+from djanban.apps.boards.models import (
+    Board,
+    Card,
+    CardAttachment,
+    CardComment,
+    Label,
+)
 from djanban.apps.boards.stats import avg, std_dev
 from djanban.apps.forecasters.serializer import CardSerializer
 from djanban.utils.week import get_iso_week_of_year, get_week_of_year
@@ -36,7 +47,11 @@ def new(request, board_id):
     else:
         form = NewCardForm(instance=card, member=member)
 
-    return render(request, "boards/cards/new.html", {"form": form, "board": board, "member": member})
+    return render(
+        request,
+        "boards/cards/new.html",
+        {"form": form, "board": board, "member": member},
+    )
 
 
 # Change labels of this card
@@ -50,7 +65,7 @@ def change_labels(request, board_id, card_id):
     try:
         board = get_member_boards(member).get(id=board_id)
         card = board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+    except (Board.DoesNotExist, Card.DoesNotExist):
         raise Http404
 
     # Get in labels a list of objects Label gotten from the selected labels
@@ -89,7 +104,7 @@ def _move(request, board_id, card_id, movement_type="forward"):
     try:
         board = get_user_boards(request.user).get(id=board_id)
         card = board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+    except (Board.DoesNotExist, Card.DoesNotExist):
         raise Http404
 
     if movement_type == "forward":
@@ -111,7 +126,7 @@ def download_attachment(request, board_id, card_id, attachment_id):
         board = get_user_boards(request.user).get(id=board_id)
         card = board.cards.get(id=card_id)
         attachment = card.attachments.get(id=attachment_id)
-    except (Board.DoesNotExist, Card.DoesNotExist, CardAttachment.DoesNotExist) as e:
+    except (Board.DoesNotExist, Card.DoesNotExist, CardAttachment.DoesNotExist):
         raise Http404
 
     if not attachment.file:
@@ -129,7 +144,7 @@ def add_comment(request, board_id, card_id):
     try:
         board = get_user_boards(request.user).get(id=board_id)
         card = board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+    except (Board.DoesNotExist, Card.DoesNotExist):
         raise Http404
 
     # Getting the comment content
@@ -137,7 +152,9 @@ def add_comment(request, board_id, card_id):
 
     # If the comment is empty, redirect to card view
     if not comment_content:
-        return HttpResponseRedirect(reverse("boards:view_card", args=(board_id, card_id)))
+        return HttpResponseRedirect(
+            reverse("boards:view_card", args=(board_id, card_id))
+        )
 
     # Otherwise, add the comment
     card.add_comment(member, comment_content)
@@ -154,7 +171,7 @@ def delete_comment(request, board_id, card_id, comment_id):
         board = get_user_boards(request.user).get(id=board_id)
         card = board.cards.get(id=card_id)
         comment = card.comments.get(id=comment_id)
-    except (Board.DoesNotExist, Card.DoesNotExist, CardComment.DoesNotExist) as e:
+    except (Board.DoesNotExist, Card.DoesNotExist, CardComment.DoesNotExist):
         raise Http404
 
     # Delete the comment
@@ -172,7 +189,7 @@ def add_spent_estimated_time(request, board_id, card_id):
     try:
         board = get_user_boards(request.user).get(id=board_id)
         card = board.cards.get(id=card_id)
-    except (Board.DoesNotExist, Card.DoesNotExist) as e:
+    except (Board.DoesNotExist, Card.DoesNotExist):
         raise Http404
 
     # Getting the date
@@ -213,21 +230,27 @@ def add_spent_estimated_time(request, board_id, card_id):
     if matches:
         days_ago = int(matches.group("days_ago"))
 
-    card.add_spent_estimated_time(member, spent_time, estimated_time, days_ago=days_ago, description=description)
+    card.add_spent_estimated_time(
+        member, spent_time, estimated_time, days_ago=days_ago, description=description
+    )
     return HttpResponseRedirect(reverse("boards:view_card", args=(board_id, card_id)))
 
 
 # View card
 @login_required
 def view(request, board_id, card_id):
-    return HttpResponseRedirect(reverse("boards:view_taskboard", args=(board_id, f"/card/{card_id}")))
+    return HttpResponseRedirect(
+        reverse("boards:view_taskboard", args=(board_id, f"/card/{card_id}"))
+    )
 
 
 @login_required
 def view_short_url(request, board_id, card_uuid):
     board = get_user_boards(request.user).get(id=board_id)
     card = board.cards.get(uuid=card_uuid)
-    return HttpResponseRedirect(reverse("boards:view_taskboard", args=(board.id,f"/card/{card.id}")))
+    return HttpResponseRedirect(
+        reverse("boards:view_taskboard", args=(board.id, f"/card/{card.id}"))
+    )
 
 
 # View card report
@@ -265,10 +288,10 @@ def export_report(request, board_id):
     board = get_user_board_or_404(request.user, board_id)
     cards = board.cards.all()
 
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="{board.name}-cards.csv"'
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{board.name}-cards.csv"'
 
-    csv_template = loader.get_template('boards/cards/csv.txt')
+    csv_template = loader.get_template("boards/cards/csv.txt")
     replacements = {
         "member": member,
         "board": board,
@@ -288,10 +311,12 @@ def export_detailed_report(request, board_id):
     board = get_user_board_or_404(request.user, board_id)
     cards = board.cards.all()
 
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="{board.name}-detailed-card-report.csv"'
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = (
+        f'attachment; filename="{board.name}-detailed-card-report.csv"'
+    )
 
-    csv_template = loader.get_template('boards/cards/detailed_report_csv.txt')
+    csv_template = loader.get_template("boards/cards/detailed_report_csv.txt")
     members = board.members.all()
     card_list = []
     for card in cards:
@@ -324,7 +349,16 @@ def view_week_summary(request, board_id, member_id="all", week_of_year=None):
             week = form.cleaned_data.get("week")
             member_id = form.cleaned_data.get("member")
             week_of_year = f"{year}W{week}"
-            return HttpResponseRedirect(reverse("boards:view_week_summary", args=(board_id, member_id, week_of_year,)))
+            return HttpResponseRedirect(
+                reverse(
+                    "boards:view_week_summary",
+                    args=(
+                        board_id,
+                        member_id,
+                        week_of_year,
+                    ),
+                )
+            )
 
     year = None
     week = None
@@ -341,7 +375,9 @@ def view_week_summary(request, board_id, member_id="all", week_of_year=None):
             year = int(matches.group("year"))
             week = int(matches.group("week"))
 
-    form = WeekSummaryFilterForm(initial={"year": year, "week": week, "member": member_id}, board=board)
+    form = WeekSummaryFilterForm(
+        initial={"year": year, "week": week, "member": member_id}, board=board
+    )
     replacements["form"] = form
     replacements["week_of_year"] = week_of_year
 
@@ -355,14 +391,17 @@ def view_week_summary(request, board_id, member_id="all", week_of_year=None):
     week_end_date = Week(year, week).friday()
 
     # Getting the cards that were completed in the selected week for the selected user
-    completed_cards = board.cards.\
-        filter(list__type="done",
-               movements__type="forward",
-               movements__destination_list__type="done",
-               movements__datetime__gte=week_start_date,
-               movements__datetime__lte=week_end_date)\
-        .filter(**member_filter).\
-        order_by("last_activity_datetime")
+    completed_cards = (
+        board.cards.filter(
+            list__type="done",
+            movements__type="forward",
+            movements__destination_list__type="done",
+            movements__datetime__gte=week_start_date,
+            movements__datetime__lte=week_end_date,
+        )
+        .filter(**member_filter)
+        .order_by("last_activity_datetime")
+    )
 
     replacements["completed_cards"] = completed_cards
 
@@ -373,7 +412,9 @@ def view_week_summary(request, board_id, member_id="all", week_of_year=None):
     else:
         member = board.members.get(id=member_id)
         spent_time = board.get_spent_time([week_start_date, week_end_date], member)
-        adjusted_spent_time = board.get_spent_time([week_start_date, week_end_date], member)
+        adjusted_spent_time = board.get_spent_time(
+            [week_start_date, week_end_date], member
+        )
         replacements["selected_member"] = member
 
     replacements["spent_time"] = spent_time

@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class NotificationsConfig(AppConfig):
-    name = 'djanban.apps.notifications'
+    name = "djanban.apps.notifications"

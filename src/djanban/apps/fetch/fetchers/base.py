@@ -1,9 +1,7 @@
 import os
 import time
 
-
 # Abstract board fetcher
-from djanban.apps.boards.models import CardComment
 
 
 class Fetcher:
@@ -31,7 +29,7 @@ class Fetcher:
             raise AssertionError(f"Lock file {fetch_lock_file_path} already exists")
 
         # Creates a new lock file
-        with open(fetch_lock_file_path, 'w', encoding="utf-8") as lock_file:
+        with open(fetch_lock_file_path, "w", encoding="utf-8") as lock_file:
             lock_file.write(f"Fetching data for board {self.board.name}")
 
         return True
@@ -50,4 +48,3 @@ class Fetcher:
     # Delete all children entities but lists and workflows
     def _truncate(self):
         self.board.clean_cached_charts()
-

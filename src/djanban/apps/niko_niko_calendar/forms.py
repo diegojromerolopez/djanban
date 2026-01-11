@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.forms import models
+
 from djanban.apps.niko_niko_calendar.models import DailyMemberMood
 
 
@@ -10,7 +11,9 @@ class NewDailyMemberMoodForm(models.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["mood"].label = "Mood on day {}".format(self.instance.date.strftime("%Y-%m-%d"))
+        self.fields["mood"].label = "Mood on day {}".format(
+            self.instance.date.strftime("%Y-%m-%d")
+        )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -19,7 +22,8 @@ class NewDailyMemberMoodForm(models.ModelForm):
         # Avoid several mood measurements for the same member in the same day
         if member.daily_member_moods.filter(date=date).exists():
             raise ValidationError(
-                "Member {0} has already a mood measurement on day {1}".\
-                format(member.external_username, date.strftime("%Y-%m-%d"))
+                "Member {0} has already a mood measurement on day {1}".format(
+                    member.external_username, date.strftime("%Y-%m-%d")
+                )
             )
         return cleaned_data

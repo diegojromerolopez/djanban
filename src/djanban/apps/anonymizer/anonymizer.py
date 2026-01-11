@@ -1,4 +1,5 @@
 import re
+
 from django.apps import apps
 from django.core.serializers import serialize
 from django.utils import timezone
@@ -41,9 +42,22 @@ class Anonymizer:
 
         out = open(filename, "w")
 
-        for app_name in ["boards", "hourly_rates", "journal", "dev_times", "dev_environment", "forecasters", "members",
-                         "notifications", "reporter", "reports", "repositories", "requirements",
-                         "visitors", "workflows"]:
+        for app_name in [
+            "boards",
+            "hourly_rates",
+            "journal",
+            "dev_times",
+            "dev_environment",
+            "forecasters",
+            "members",
+            "notifications",
+            "reporter",
+            "reports",
+            "repositories",
+            "requirements",
+            "visitors",
+            "workflows",
+        ]:
             models = apps.get_app_config(app_name).get_models()
             for model in models:
                 objects = Anonymizer.serialize(model)

@@ -12,7 +12,7 @@ class ProjectAgilityRating(models.Model):
         ("2", "10% Level 1B / 30% Level 2 and 3"),
         ("3", "20% Level 1B / 25% Level 2 and 3"),
         ("4", "30% Level 1B / 20% Level 2 and 3"),
-        ("5", "40% Level 1B / 15% Level 2 and 3")
+        ("5", "40% Level 1B / 15% Level 2 and 3"),
     )
 
     DYNAMISM_CHOICES = (
@@ -28,16 +28,10 @@ class ProjectAgilityRating(models.Model):
         ("2", "70%"),
         ("3", "50%"),
         ("4", "30%"),
-        ("5", "10%")
+        ("5", "10%"),
     )
 
-    SIZE_CHOICES = (
-        ("1", "3"),
-        ("2", "10"),
-        ("3", "30"),
-        ("4", "100"),
-        ("5", "300")
-    )
+    SIZE_CHOICES = (("1", "3"), ("2", "10"), ("3", "30"), ("4", "100"), ("5", "300"))
 
     CRITICALITY_CHOICES = (
         ("1", "Comfort"),
@@ -48,31 +42,60 @@ class ProjectAgilityRating(models.Model):
     )
 
     # Project rated
-    board = models.OneToOneField("boards.Board", on_delete=models.CASCADE, verbose_name="Project", related_name="agility_rating")
+    board = models.OneToOneField(
+        "boards.Board",
+        on_delete=models.CASCADE,
+        verbose_name="Project",
+        related_name="agility_rating",
+    )
 
     # Personnel dimension
-    personnel = models.CharField(verbose_name="Personnel", max_length=64, choices=PERSONNEL_CHOICES,
-                                 help_text="Personnel dimension in extended Cockburn scale.")
+    personnel = models.CharField(
+        verbose_name="Personnel",
+        max_length=64,
+        choices=PERSONNEL_CHOICES,
+        help_text="Personnel dimension in extended Cockburn scale.",
+    )
 
     # Dynamism dimension
-    dynamism = models.CharField(verbose_name="Dynamism", max_length=64, choices=DYNAMISM_CHOICES,
-                                help_text="Percentage of requirement changes per month.")
+    dynamism = models.CharField(
+        verbose_name="Dynamism",
+        max_length=64,
+        choices=DYNAMISM_CHOICES,
+        help_text="Percentage of requirement changes per month.",
+    )
 
     # Culture
     culture = models.CharField(
-        verbose_name="Culture", max_length=64, choices=CULTURE_CHOICES,
-        help_text="Thriving on chaos vs. order. What percentage of tasks are disciplined done vs. on a chaotic way."
+        verbose_name="Culture",
+        max_length=64,
+        choices=CULTURE_CHOICES,
+        help_text="Thriving on chaos vs. order. What percentage of tasks are disciplined done vs. on a chaotic way.",
     )
 
     # Size (number of workers)
-    size = models.CharField(verbose_name="Size", max_length=64, choices=SIZE_CHOICES,
-                            help_text="Number of personnel.")
+    size = models.CharField(
+        verbose_name="Size",
+        max_length=64,
+        choices=SIZE_CHOICES,
+        help_text="Number of personnel.",
+    )
 
     # Criticality (consequences of a software defect)
-    criticality = models.CharField(verbose_name="Criticality", max_length=64, choices=CRITICALITY_CHOICES,
-                                   help_text="Consequences of a software defect.")
+    criticality = models.CharField(
+        verbose_name="Criticality",
+        max_length=64,
+        choices=CRITICALITY_CHOICES,
+        help_text="Consequences of a software defect.",
+    )
 
     @property
     def value(self):
-        value = (int(self.personnel) + int(self.dynamism) + int(self.culture) + int(self.size) + int(self.criticality))
+        value = (
+            int(self.personnel)
+            + int(self.dynamism)
+            + int(self.culture)
+            + int(self.size)
+            + int(self.criticality)
+        )
         return 100 - value * 4.0

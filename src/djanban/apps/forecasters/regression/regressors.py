@@ -1,11 +1,9 @@
 import pandas as pd
-import  statsmodels.nonparametric.kernel_regression as kr
 import statsmodels.formula.api as smf
 
 from djanban.apps.boards.models import List
 from djanban.apps.forecasters.models import Forecaster
 from djanban.apps.forecasters.serializer import CardSerializer
-
 
 # Regression models that exist in this module
 REGRESSION_MODELS = (
@@ -14,7 +12,7 @@ REGRESSION_MODELS = (
     ("gls", "GLS Regression"),
     ("glsar", "GLSAR Regression"),
     ("quantreg", "Quantile Regression"),
-    ("rlm", "Robust Linear Model Regression")
+    ("rlm", "Robust Linear Model Regression"),
 )
 
 
@@ -29,8 +27,7 @@ class Regressor:
         self.board = board
         self.results = None
         # We are going to make the regression with the active done cards that have consumed some time
-        self.cards = cards\
-            .filter(is_closed=False, spent_time__gt=0, list__type="done")
+        self.cards = cards.filter(is_closed=False, spent_time__gt=0, list__type="done")
         self.forecaster_name = forecaster_name
         if members:
             self.members = members
@@ -149,5 +146,3 @@ class WLS(Regressor):
 
     def fit(self, df, formula):
         return smf.wls(formula=formula, data=df).fit()
-
-

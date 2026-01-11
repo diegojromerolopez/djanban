@@ -16,7 +16,9 @@ class RequestPasswordResetForm(forms.Form):
         cleaned_data = super().clean()
         # Check if user exists
         try:
-            user = User.objects.get(username=self.cleaned_data["username"], is_active=True)
+            user = User.objects.get(
+                username=self.cleaned_data["username"], is_active=True
+            )
         except User.DoesNotExist:
             raise ValidationError("No user found with this username")
 
@@ -35,7 +37,9 @@ class RequestPasswordResetForm(forms.Form):
 # Reset password form
 class ResetPasswordForm(forms.Form):
     password1 = forms.CharField(label="Password", widget=PasswordInput())
-    password2 = forms.CharField(label="Introduce again your password", widget=PasswordInput())
+    password2 = forms.CharField(
+        label="Introduce again your password", widget=PasswordInput()
+    )
     captcha = CaptchaField(label="Fill this captcha to reset your password")
 
     def clean(self):

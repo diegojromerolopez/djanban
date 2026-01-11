@@ -1,8 +1,8 @@
-from bs4 import BeautifulSoup
 import os
 import re
 import subprocess
 
+from bs4 import BeautifulSoup
 
 # PHP-md for directories
 from djanban.apps.repositories.cloc import Cloc
@@ -58,7 +58,9 @@ class PhpMdAnalyzer:
         PhpMdAnalyzer.assert_existence()
 
         php_md_command = f"phpmd {self.file_path} xml cleancode,codesize,controversial,design,naming,unusedcode"
-        phpmd_call_results = subprocess.Popen(php_md_command, shell=True, stdout=subprocess.PIPE)
+        phpmd_call_results = subprocess.Popen(
+            php_md_command, shell=True, stdout=subprocess.PIPE
+        )
 
         self.stdout = phpmd_call_results.stdout.read()
         self.stderr = ""
@@ -102,9 +104,8 @@ class PhpMdAnalysisResult:
                 "end_line": violation["endline"],
                 "rule": violation["rule"],
                 "ruleset": violation["ruleset"],
-                "message": violation.string
+                "message": violation.string,
             }
             self.messages.append(message)
 
         return self.messages
-

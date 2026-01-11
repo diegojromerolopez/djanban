@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import login_required
+from django.http.response import HttpResponseForbidden, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.http.response import HttpResponseRedirect, HttpResponseForbidden
-from django.shortcuts import render, get_object_or_404
 
-from djanban.apps.members.forms import SpentTimeFactorForm, DeleteSpentTimeForm
+from djanban.apps.members.forms import DeleteSpentTimeForm, SpentTimeFactorForm
 from djanban.apps.members.models import Member, SpentTimeFactor
 from djanban.apps.members.views.main import assert_user_can_edit_member
 
@@ -44,7 +44,9 @@ def add(request, member_id):
         if form.is_valid():
             form.save()
             _update_spent_time_factors(member)
-            return HttpResponseRedirect(reverse("members:view_spent_time_factors", args=(member.id,)))
+            return HttpResponseRedirect(
+                reverse("members:view_spent_time_factors", args=(member.id,))
+            )
 
     else:
         form = SpentTimeFactorForm(instance=spent_time_factor)
@@ -64,7 +66,9 @@ def edit(request, member_id, spent_time_factor_id):
     except AssertionError:
         return HttpResponseForbidden()
 
-    spent_time_factor = get_object_or_404(SpentTimeFactor, id=spent_time_factor_id, member=member)
+    spent_time_factor = get_object_or_404(
+        SpentTimeFactor, id=spent_time_factor_id, member=member
+    )
 
     if request.method == "POST":
 
@@ -72,7 +76,9 @@ def edit(request, member_id, spent_time_factor_id):
         if form.is_valid():
             form.save()
             _update_spent_time_factors(member)
-            return HttpResponseRedirect(reverse("members:view_spent_time_factors", args=(member.id,)))
+            return HttpResponseRedirect(
+                reverse("members:view_spent_time_factors", args=(member.id,))
+            )
 
     else:
         form = SpentTimeFactorForm(instance=spent_time_factor)
@@ -92,7 +98,9 @@ def delete(request, member_id, spent_time_factor_id):
     except AssertionError:
         return HttpResponseForbidden()
 
-    spent_time_factor = get_object_or_404(SpentTimeFactor, id=spent_time_factor_id, member=member)
+    spent_time_factor = get_object_or_404(
+        SpentTimeFactor, id=spent_time_factor_id, member=member
+    )
 
     if request.method == "POST":
 
@@ -100,7 +108,9 @@ def delete(request, member_id, spent_time_factor_id):
         if form.is_valid():
             spent_time_factor.delete()
             _update_spent_time_factors(member)
-            return HttpResponseRedirect(reverse("members:view_spent_time_factors", args=(member.id,)))
+            return HttpResponseRedirect(
+                reverse("members:view_spent_time_factors", args=(member.id,))
+            )
 
     else:
         form = DeleteSpentTimeForm()

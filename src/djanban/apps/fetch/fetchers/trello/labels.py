@@ -16,6 +16,11 @@ class LabelUpdater:
                 label.save()
         # If the label does not exist, create it with the trello label values
         except Label.DoesNotExist:
-            label = Label(board=board, uuid=trello_label.id, name=trello_label.name, color=trello_label.color)
+            label = Label(
+                board=board,
+                uuid=trello_label.id,
+                name=trello_label.name,
+                color=trello_label.color,
+            )
             label.save()
         return label

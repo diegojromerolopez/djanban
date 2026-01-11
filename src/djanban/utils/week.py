@@ -1,6 +1,6 @@
-from datetime import timedelta, date
-from django.utils import timezone
+from datetime import date, timedelta
 
+from django.utils import timezone
 from isoweek import Week
 
 

@@ -6,24 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reports', '0014_auto_20170530_1448'),
+        ("reports", "0014_auto_20170530_1448"),
     ]
 
     operations = [
-        
-        
-        
-        
-        
-        
         migrations.AlterField(
-            model_name='reportrecipient',
-            name='is_active',
-            field=models.BooleanField(blank=True, default=True, help_text='Only active report recipients will be notified', verbose_name='Is active?'),
+            model_name="reportrecipient",
+            name="is_active",
+            field=models.BooleanField(
+                blank=True,
+                default=True,
+                help_text="Only active report recipients will be notified",
+                verbose_name="Is active?",
+            ),
         ),
         migrations.AlterField(
-            model_name='reportrecipient',
-            name='send_errors',
-            field=models.BooleanField(blank=True, default=False, help_text='Only report recipients with this option enabled will receive 500 error notifications', verbose_name='Send platform errors?'),
+            model_name="reportrecipient",
+            name="send_errors",
+            field=models.BooleanField(
+                blank=True,
+                default=False,
+                help_text="Only report recipients with this option enabled will receive 500 error notifications",
+                verbose_name="Send platform errors?",
+            ),
         ),
     ]

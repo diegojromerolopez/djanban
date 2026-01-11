@@ -2,6 +2,7 @@ import json
 import os
 import re
 import subprocess
+
 from djanban.apps.repositories.cloc import Cloc
 
 
@@ -47,11 +48,7 @@ class Pylinter:
         self.stderr = None
 
     def run(self):
-        command = [
-            'pylint',
-            self.file_path,
-            '--output-format=json'
-        ]
+        command = ["pylint", self.file_path, "--output-format=json"]
         # In modern pylint, --reports=y is often default or handled differently but--output-format=json is key
         result = subprocess.run(command, capture_output=True, text=True)
         return PylinterResult(self.file_path, result.stdout, result.stderr)

@@ -5,37 +5,47 @@ Usage:
     python setup.py py2app
 """
 
-from setuptools import setup
 import os
 
+from setuptools import setup
 
-APP = ['desktop_app_main.py']
+APP = ["desktop_app_main.py"]
 
 current_dir = os.path.realpath(os.path.dirname(__file__))
 
+
 def tree(src):
-    return [(root, map(lambda f: os.path.join(root, f), files)) for (root, dirs, files) in os.walk(os.path.normpath(src))]
+    return [
+        (root, map(lambda f: os.path.join(root, f), files))
+        for (root, dirs, files) in os.walk(os.path.normpath(src))
+    ]
 
 
-DATA_FILES = tree(current_dir+'/public')
+DATA_FILES = tree(current_dir + "/public")
 
 OPTIONS = {
-    'argv_emulation': True,
-    'iconfile': current_dir+'/../resources/images/logos/logo.ico',
-    'packages': ['cherrypy.wsgiserver', "cherrypy.process"],
-    'includes': ['six', 'packaging', 'packaging.version', 'packaging.specifiers', 'packaging.requirements'],
-    'plist': {
-        'CFBundleIdentifier': "djanban",
-        'CFBundleName': "Djanban",
-        'CFBundleVersion': '1001',
-        'CFBundleShortVersionString': '1.0',
-        'NSHumanReadableCopyright': 'Copyright 2016 DiegoJ.'
-    }
+    "argv_emulation": True,
+    "iconfile": current_dir + "/../resources/images/logos/logo.ico",
+    "packages": ["cherrypy.wsgiserver", "cherrypy.process"],
+    "includes": [
+        "six",
+        "packaging",
+        "packaging.version",
+        "packaging.specifiers",
+        "packaging.requirements",
+    ],
+    "plist": {
+        "CFBundleIdentifier": "djanban",
+        "CFBundleName": "Djanban",
+        "CFBundleVersion": "1001",
+        "CFBundleShortVersionString": "1.0",
+        "NSHumanReadableCopyright": "Copyright 2016 DiegoJ.",
+    },
 }
 
 setup(
     app=APP,
     data_files=DATA_FILES,
-    options={'py2app': OPTIONS},
-    setup_requires=['py2app'],
+    options={"py2app": OPTIONS},
+    setup_requires=["py2app"],
 )

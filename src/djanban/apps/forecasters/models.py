@@ -1,12 +1,11 @@
 import os
 
 import shortuuid
+import statsmodels.api as sm
 from crequest.middleware import CrequestMiddleware
 from django.conf import settings
 from django.core.files import File
-from django.db import models, transaction
-
-import statsmodels.api as sm
+from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
@@ -19,19 +18,34 @@ from djanban.apps.members.models import Member
 # Forecaster model. Provide save and load functionality used to store and retrieve regression models.
 class Forecaster(models.Model):
     board = models.ForeignKey(
-        "boards.Board", on_delete=models.CASCADE, related_name="forecasters", verbose_name="Board of this forecaster",
-        null=True, default=None, blank=True
+        "boards.Board",
+        on_delete=models.CASCADE,
+        related_name="forecasters",
+        verbose_name="Board of this forecaster",
+        null=True,
+        default=None,
+        blank=True,
     )
     member = models.ForeignKey(
-        "members.Member", on_delete=models.CASCADE, related_name="forecasters", verbose_name="Member of this forecaster",
-        null=True, default=None, blank=True
+        "members.Member",
+        on_delete=models.CASCADE,
+        related_name="forecasters",
+        verbose_name="Member of this forecaster",
+        null=True,
+        default=None,
+        blank=True,
     )
     name = models.CharField(verbose_name="Name", max_length=1024)
     model = models.CharField(verbose_name="Regression model", max_length=32)
     formula = models.TextField(verbose_name="Formula")
     summary = models.TextField(verbose_name="Summary", blank=True, default="")
     results_file = models.FileField(verbose_name="Field with the statsmodels results")
-    last_updater = models.ForeignKey("members.Member", on_delete=models.CASCADE, verbose_name="Member", related_name="updated_forecasters")
+    last_updater = models.ForeignKey(
+        "members.Member",
+        on_delete=models.CASCADE,
+        verbose_name="Member",
+        related_name="updated_forecasters",
+    )
     last_update_datetime = models.DateTimeField(verbose_name="Last update datetime")
 
     # Retrieve the RegressionResults statsmodels object from database
@@ -57,7 +71,9 @@ class Forecaster(models.Model):
                 member=member, board=board, model=model, formula=formula
             )
         except Forecaster.DoesNotExist:
-            forecaster = Forecaster(member=member, board=board, model=model, formula=formula)
+            forecaster = Forecaster(
+                member=member, board=board, model=model, formula=formula
+            )
 
         current_request = CrequestMiddleware.get_request()
         current_user = current_request.user
@@ -75,7 +91,7 @@ class Forecaster(models.Model):
         with open(tmp_path) as sm_results_pickle_file:
             forecaster.results_file.save(
                 f"{model}-{now_str}-{shortuuid.uuid()}.pickle",
-                File(sm_results_pickle_file)
+                File(sm_results_pickle_file),
             )
         forecaster.save()
 
@@ -86,7 +102,9 @@ class Forecaster(models.Model):
 
     @property
     def test_cards(self):
-        cards = Card.objects.filter(is_closed=False, spent_time__gt=0, list__type="done")
+        cards = Card.objects.filter(
+            is_closed=False, spent_time__gt=0, list__type="done"
+        )
         if self.board:
             cards = cards.filter(board=self.board)
         elif self.member:
@@ -108,7 +126,11 @@ class Forecaster(models.Model):
 
         # If Forecast object exists, return it
         try:
-            return Forecast.objects.get(forecaster=self, card=card, last_update_datetime__gte=self.last_update_datetime)
+            return Forecast.objects.get(
+                forecaster=self,
+                card=card,
+                last_update_datetime__gte=self.last_update_datetime,
+            )
         # Otherwise,
         except Forecast.DoesNotExist:
             # Try getting an old forecast and updating it if it exists
@@ -135,9 +157,9 @@ class Forecaster(models.Model):
         boards = get_user_boards(user)
         teammates = Member.get_user_team_members(user)
         forecasters = Forecaster.objects.filter(
-            Q(last_updater=member) |
-            Q(board__in=boards) |
-            Q(member__in=list(teammates)+[member])
+            Q(last_updater=member)
+            | Q(board__in=boards)
+            | Q(member__in=list(teammates) + [member])
         )
         return forecasters
 
@@ -151,14 +173,23 @@ class Forecaster(models.Model):
 # Estimation of spent time for a card
 class Forecast(models.Model):
     class Meta:
-        unique_together = (
-            ("forecaster", "card")
-        )
+        unique_together = ("forecaster", "card")
 
     forecaster = models.ForeignKey(
-        "forecasters.Forecaster", on_delete=models.CASCADE, related_name="forecasts",
-        verbose_name="Spent time for this forecast"
+        "forecasters.Forecaster",
+        on_delete=models.CASCADE,
+        related_name="forecasts",
+        verbose_name="Spent time for this forecast",
     )
-    card = models.ForeignKey("boards.Card", on_delete=models.CASCADE, related_name="forecasts", verbose_name="Card for this forecast")
-    estimated_spent_time = models.DecimalField(verbose_name="Estimated spent time", decimal_places=4, max_digits=12)
-    last_update_datetime = models.DateTimeField(verbose_name="Date this estimation was done")
+    card = models.ForeignKey(
+        "boards.Card",
+        on_delete=models.CASCADE,
+        related_name="forecasts",
+        verbose_name="Card for this forecast",
+    )
+    estimated_spent_time = models.DecimalField(
+        verbose_name="Estimated spent time", decimal_places=4, max_digits=12
+    )
+    last_update_datetime = models.DateTimeField(
+        verbose_name="Date this estimation was done"
+    )

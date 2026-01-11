@@ -4,15 +4,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATABASE_PATH = os.path.join(BASE_DIR, "../resources/database/djanban.db")
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'sdfjaxsldfkjsadflxkasjdfksdjf'
+SECRET_KEY = "sdfjaxsldfkjsadflxkasjdfksdjf"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 # Set to your name and email
-ADMINS = (
-    "youremail@example.com",
-)
+ADMINS = ("youremail@example.com",)
 
 # Set to your domain
 DOMAIN = "localhost"
@@ -23,16 +21,16 @@ if DEBUG is True and DOMAIN == "localhost":
 
 # Configuration for tests with SQLite
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DATABASE_PATH,
-        'HOST': '',
-        'PORT': ''
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": DATABASE_PATH,
+        "HOST": "",
+        "PORT": "",
     }
 }
 
 # Or use the following configuration for mysql
-#DATABASES = {
+# DATABASES = {
 #    'default': {
 #        'ENGINE': 'django.db.backends.mysql',
 #        'NAME': 'djanban',
@@ -41,10 +39,10 @@ DATABASES = {
 #        'HOST': '',
 #        'PORT': ''
 #    }
-#}
+# }
 
 # Default language is English and there are no translations (yet)
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
 # Your timezone
 TIME_ZONE = "Europe/Madrid"
@@ -52,9 +50,9 @@ TIME_ZONE = "Europe/Madrid"
 
 # Set to your notification email
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'djanban@gmail.com'
-EMAIL_HOST_PASSWORD = 'xxx'
-DEFAULT_FROM_EMAIL = 'djanban@gmail.com'
-SERVER_EMAIL = 'djanban@gmail.com'
+EMAIL_HOST_USER = "djanban@gmail.com"
+EMAIL_HOST_PASSWORD = "xxx"
+DEFAULT_FROM_EMAIL = "djanban@gmail.com"
+SERVER_EMAIL = "djanban@gmail.com"

@@ -1,7 +1,0 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
-import unittest
-from djanban.apps.repositories.views.commits import *
-
-class TestCommits(unittest.TestCase):
-    pass

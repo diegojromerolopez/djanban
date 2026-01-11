@@ -1,12 +1,11 @@
 import random
 from datetime import timedelta
 
-import shortuuid
+from crequest.middleware import CrequestMiddleware
 from django.core.files.base import ContentFile
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
-from crequest.middleware import CrequestMiddleware
 
 
 # Each one of the SVG charts of this platform
@@ -15,21 +14,35 @@ class CachedChart(models.Model):
 
     creation_datetime = models.DateTimeField(verbose_name="Creation datetime")
 
-    uuid = models.CharField(max_length=2048, verbose_name="Chart view name",
-                            help_text="Chart view name including some optional parameters")
+    uuid = models.CharField(
+        max_length=2048,
+        verbose_name="Chart view name",
+        help_text="Chart view name including some optional parameters",
+    )
 
-    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Board", related_name="cached_charts", default=None, null=True)
+    board = models.ForeignKey(
+        "boards.Board",
+        on_delete=models.CASCADE,
+        verbose_name="Board",
+        related_name="cached_charts",
+        default=None,
+        null=True,
+    )
 
     svg = models.FileField(verbose_name="SVG content of the chart")
 
-    is_expired = models.BooleanField(verbose_name="Is this cache item expired?", default=False)
+    is_expired = models.BooleanField(
+        verbose_name="Is this cache item expired?", default=False
+    )
 
     # Gets a chart or False if the cached chart does not exists and must be created
     @staticmethod
     def get(board, uuid):
         # CachedChart update can be forced passing a GET parameter that would be evaluated to True
         current_request = CrequestMiddleware.get_request()
-        force_update_param_value = current_request.GET.get(CachedChart.FORCE_UPDATE_GET_PARAM_NAME)
+        force_update_param_value = current_request.GET.get(
+            CachedChart.FORCE_UPDATE_GET_PARAM_NAME
+        )
         if force_update_param_value:
             return False
 
@@ -56,8 +69,10 @@ class CachedChart(models.Model):
     @staticmethod
     def _get(board, uuid):
         return CachedChart.objects.get(
-            board=board, uuid=uuid, is_expired=False,
-            creation_datetime__gte=CachedChart.chart_life_datetime_limit(board)
+            board=board,
+            uuid=uuid,
+            is_expired=False,
+            creation_datetime__gte=CachedChart.chart_life_datetime_limit(board),
         )
 
     # Create a new cached chart
@@ -67,12 +82,16 @@ class CachedChart(models.Model):
         life_datetime_limit = CachedChart.chart_life_datetime_limit(board)
         try:
             chart_cache = CachedChart.objects.get(
-                Q(creation_datetime__lt=life_datetime_limit)|Q(is_expired=True), board=board, uuid=uuid
+                Q(creation_datetime__lt=life_datetime_limit) | Q(is_expired=True),
+                board=board,
+                uuid=uuid,
             )
         # There shouldn't be two charts with the same signature
         except CachedChart.MultipleObjectsReturned:
             CachedChart.objects.filter(
-                Q(creation_datetime__lt=life_datetime_limit)|Q(is_expired=True), board=board, uuid=uuid
+                Q(creation_datetime__lt=life_datetime_limit) | Q(is_expired=True),
+                board=board,
+                uuid=uuid,
             ).delete()
             chart_cache = CachedChart(board=board, uuid=uuid)
 
@@ -97,4 +116,5 @@ class CachedChart(models.Model):
     # Render a django response
     def render_django_response(self):
         from django.http import HttpResponse
-        return HttpResponse(self.svg.read(), content_type='image/svg+xml')
+
+        return HttpResponse(self.svg.read(), content_type="image/svg+xml")

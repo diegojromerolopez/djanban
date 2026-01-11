@@ -1,7 +1,0 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
-import unittest
-from djanban.apps.repositories.templatetags.repositories_tags import *
-
-class TestRepositoriestags(unittest.TestCase):
-    pass

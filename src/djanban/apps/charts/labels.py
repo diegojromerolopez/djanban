@@ -1,22 +1,27 @@
-import copy
 import datetime
 
 import pygal
-from django.db.models import Avg, Min, Count, Max
+from django.db.models import Avg, Count, Max, Min
 from django.utils import timezone
 
 from djanban.apps.base.auth import get_user_boards
 from djanban.apps.boards.models import Card
 from djanban.apps.charts.models import CachedChart
 from djanban.apps.dev_times.models import DailySpentTime
-from djanban.utils.week import number_of_weeks_of_year, get_iso_week_of_year, start_of_week_of_year
+from djanban.utils.week import (
+    get_iso_week_of_year,
+    number_of_weeks_of_year,
+    start_of_week_of_year,
+)
 
 
 # Average spent times
 def avg_spent_times(request, board=None):
 
     # Caching
-    chart_uuid = "labels.avg_spent_times-{}".format(board.id if board else f"user-{request.user.id}")
+    chart_uuid = "labels.avg_spent_times-{}".format(
+        board.id if board else f"user-{request.user.id}"
+    )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
@@ -25,8 +30,13 @@ def avg_spent_times(request, board=None):
     if board:
         chart_title += f" for board {board.name}"
 
-    avg_times_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
-                                          print_zeroes=False, human_readable=True)
+    avg_times_chart = pygal.HorizontalBar(
+        title=chart_title,
+        legend_at_bottom=True,
+        print_values=True,
+        print_zeroes=False,
+        human_readable=True,
+    )
 
     if board:
         cards = board.cards.all()
@@ -38,7 +48,9 @@ def avg_spent_times(request, board=None):
         avg_spent_time = cards.aggregate(Avg("spent_time"))["spent_time__avg"]
         avg_times_chart.add("All boards", avg_spent_time)
         for board in boards:
-            board_avg_spent_time = board.cards.aggregate(Avg("spent_time"))["spent_time__avg"]
+            board_avg_spent_time = board.cards.aggregate(Avg("spent_time"))[
+                "spent_time__avg"
+            ]
             if board_avg_spent_time > 0:
                 avg_times_chart.add(f"{board.name}", board_avg_spent_time)
 
@@ -49,9 +61,13 @@ def avg_spent_times(request, board=None):
             if label.name:
                 label_avg_spent_time = label.avg_spent_time()
                 if label_avg_spent_time:
-                    avg_times_chart.add(f"{board.name} - {label.name}", label_avg_spent_time)
+                    avg_times_chart.add(
+                        f"{board.name} - {label.name}", label_avg_spent_time
+                    )
 
-    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=avg_times_chart.render(is_unicode=True))
+    chart = CachedChart.make(
+        board=board, uuid=chart_uuid, svg=avg_times_chart.render(is_unicode=True)
+    )
     return chart.render_django_response()
 
 
@@ -59,7 +75,9 @@ def avg_spent_times(request, board=None):
 def avg_estimated_times(request, board=None):
 
     # Caching
-    chart_uuid = "labels.avg_estimated_times-{}".format(board.id if board else f"user-{request.user.id}")
+    chart_uuid = "labels.avg_estimated_times-{}".format(
+        board.id if board else f"user-{request.user.id}"
+    )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
@@ -68,20 +86,31 @@ def avg_estimated_times(request, board=None):
     if board:
         chart_title += f" for board {board.name}"
 
-    avg_times_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
-                                          print_zeroes=False, human_readable=True)
+    avg_times_chart = pygal.HorizontalBar(
+        title=chart_title,
+        legend_at_bottom=True,
+        print_values=True,
+        print_zeroes=False,
+        human_readable=True,
+    )
 
     if board:
         cards = board.cards.all()
-        total_avg_estimated_time = cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
+        total_avg_estimated_time = cards.aggregate(Avg("estimated_time"))[
+            "estimated_time__avg"
+        ]
         avg_times_chart.add("Average estimated time", total_avg_estimated_time)
     else:
         boards = get_user_boards(request.user)
         cards = Card.objects.filter(board__in=boards)
-        total_avg_estimated_time = cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
+        total_avg_estimated_time = cards.aggregate(Avg("estimated_time"))[
+            "estimated_time__avg"
+        ]
         avg_times_chart.add("All boards", total_avg_estimated_time)
         for board in boards:
-            board_avg_estimated_time = board.cards.aggregate(Avg("estimated_time"))["estimated_time__avg"]
+            board_avg_estimated_time = board.cards.aggregate(Avg("estimated_time"))[
+                "estimated_time__avg"
+            ]
             if board_avg_estimated_time > 0:
                 avg_times_chart.add(f"{board.name}", board_avg_estimated_time)
 
@@ -92,9 +121,13 @@ def avg_estimated_times(request, board=None):
             if label.name:
                 label_avg_estimated_time = label.avg_estimated_time()
                 if label_avg_estimated_time > 0:
-                    avg_times_chart.add(f"{board.name} - {label.name}", label_avg_estimated_time)
+                    avg_times_chart.add(
+                        f"{board.name} - {label.name}", label_avg_estimated_time
+                    )
 
-    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=avg_times_chart.render(is_unicode=True))
+    chart = CachedChart.make(
+        board=board, uuid=chart_uuid, svg=avg_times_chart.render(is_unicode=True)
+    )
     return chart.render_django_response()
 
 
@@ -110,20 +143,33 @@ def avg_spent_time_by_month(request, board=None):
 
 # Number of cards worked on by month
 def number_of_cards_worked_on_by_month(request, board=None):
-    return _daily_spent_times_by_period(request.user, board, "spent_time", operation="Count")
+    return _daily_spent_times_by_period(
+        request.user, board, "spent_time", operation="Count"
+    )
 
 
 # Number of cards worked on by week
 def number_of_cards_worked_on_by_week(request, board=None):
-    return _daily_spent_times_by_period(request.user, board, "spent_time", operation="Count", period="week")
+    return _daily_spent_times_by_period(
+        request.user, board, "spent_time", operation="Count", period="week"
+    )
 
 
 # Average spent/estimated time by week/month
-def _daily_spent_times_by_period(current_user, board=None, time_measurement="spent_time", operation="Avg", period="month"):
+def _daily_spent_times_by_period(
+    current_user,
+    board=None,
+    time_measurement="spent_time",
+    operation="Avg",
+    period="month",
+):
 
     # Caching
     chart_uuid = "labels._daily_spent_times_by_period-{}-{}-{}-{}".format(
-        board.id if board else f"user-{current_user.id}", time_measurement, operation, period
+        board.id if board else f"user-{current_user.id}",
+        time_measurement,
+        operation,
+        period,
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
@@ -136,7 +182,9 @@ def _daily_spent_times_by_period(current_user, board=None, time_measurement="spe
         daily_spent_time_filter["board"] = board
 
     if operation == "Avg":
-        chart_title = "Task average {1} as of {0}".format(last_activity_datetime, time_measurement.replace("_", " "))
+        chart_title = "Task average {1} as of {0}".format(
+            last_activity_datetime, time_measurement.replace("_", " ")
+        )
         if board:
             chart_title += f" for board {board.name} (fetched on {board.get_human_fetch_datetime()})"
     elif operation == "Count":
@@ -146,16 +194,25 @@ def _daily_spent_times_by_period(current_user, board=None, time_measurement="spe
     else:
         raise ValueError("Operation not valid only Avg and Count values are valid")
 
-    period_measurement_chart = pygal.StackedBar(title=chart_title, legend_at_bottom=True, print_values=True,
-                                                print_zeroes=False, x_label_rotation=45,
-                                                human_readable=True)
+    period_measurement_chart = pygal.StackedBar(
+        title=chart_title,
+        legend_at_bottom=True,
+        print_values=True,
+        print_zeroes=False,
+        x_label_rotation=45,
+        human_readable=True,
+    )
     labels = []
     if board:
         labels = board.labels.all()
 
-    end_date= DailySpentTime.objects.filter(**daily_spent_time_filter).aggregate(max_date=Max("date"))["max_date"]
+    end_date = DailySpentTime.objects.filter(**daily_spent_time_filter).aggregate(
+        max_date=Max("date")
+    )["max_date"]
 
-    date_i = DailySpentTime.objects.filter(**daily_spent_time_filter).aggregate(min_date=Min("date"))["min_date"]
+    date_i = DailySpentTime.objects.filter(**daily_spent_time_filter).aggregate(
+        min_date=Min("date")
+    )["min_date"]
 
     if date_i is None or end_date is None:
         return period_measurement_chart.render_django_response()
@@ -183,19 +240,27 @@ def _daily_spent_times_by_period(current_user, board=None, time_measurement="spe
             period_filter = {"date__month": month_i, "date__year": year_i}
             measurement_title = f"{year_i}-{month_i}"
             label_measurement_title_suffix = f"{year_i}-{month_i}"
-            end_loop = datetime.datetime.strptime(f'{year_i}-{month_i}-1', '%Y-%m-%d').date() > end_date
+            end_loop = (
+                datetime.datetime.strptime(f"{year_i}-{month_i}-1", "%Y-%m-%d").date()
+                > end_date
+            )
         elif period == "week":
             period_filter = {"week_of_year": week_i, "date__year": year_i}
             measurement_title = f"{year_i}W{week_i}"
             label_measurement_title_suffix = f"{year_i}W{week_i}"
             end_loop = start_of_week_of_year(week=week_i, year=year_i) > end_date
         else:
-            raise ValueError(f"Period {period} not valid. Only 'month' or 'week' is valid")
+            raise ValueError(
+                f"Period {period} not valid. Only 'month' or 'week' is valid"
+            )
 
-        period_times = DailySpentTime.objects.filter(**daily_spent_time_filter).\
-            filter(**period_filter)
+        period_times = DailySpentTime.objects.filter(**daily_spent_time_filter).filter(
+            **period_filter
+        )
 
-        period_measurement = period_times.aggregate(measurement=aggregation(time_measurement))["measurement"]
+        period_measurement = period_times.aggregate(
+            measurement=aggregation(time_measurement)
+        )["measurement"]
         # For each month that have some data, add it to the chart
         if period_measurement is not None and period_measurement > 0:
             measurement_titles.append(measurement_title)
@@ -204,8 +269,11 @@ def _daily_spent_times_by_period(current_user, board=None, time_measurement="spe
             # For each label that has a name (i.e. it is being used) and has a value, store its measurement per label
             for label in labels:
                 if label.name:
-                    label_measurement = period_times.filter(card__labels=label).\
-                                            aggregate(measurement=aggregation(time_measurement))["measurement"]
+                    label_measurement = period_times.filter(
+                        card__labels=label
+                    ).aggregate(measurement=aggregation(time_measurement))[
+                        "measurement"
+                    ]
                     if label_measurement:
                         label_measurement_titles[label.id].append(measurement_title)
                         label_measurement_values[label.id].append(label_measurement)
@@ -231,6 +299,9 @@ def _daily_spent_times_by_period(current_user, board=None, time_measurement="spe
         if sum(label_measurement_values[label.id]) > 0:
             period_measurement_chart.add(label.name, label_measurement_values[label.id])
 
-    chart = CachedChart.make(board=board, uuid=chart_uuid, svg=period_measurement_chart.render(is_unicode=True))
+    chart = CachedChart.make(
+        board=board,
+        uuid=chart_uuid,
+        svg=period_measurement_chart.render(is_unicode=True),
+    )
     return chart.render_django_response()
-

@@ -1,13 +1,13 @@
 from django.contrib.auth.decorators import login_required
-from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.http.response import Http404
 from django.shortcuts import render
+from django.urls import reverse
 
 from djanban.apps.base.auth import get_user_boards, user_is_member
 from djanban.apps.base.decorators import member_required
 from djanban.apps.boards.stats import avg, std_dev
-from djanban.apps.workflows.forms import NewWorkflowForm, EditWorkflowForm
+from djanban.apps.workflows.forms import EditWorkflowForm, NewWorkflowForm
 from djanban.apps.workflows.models import Workflow
 
 
@@ -44,12 +44,16 @@ def new(request, board_id):
 
         if form.is_valid():
             form.save(commit=True)
-            return HttpResponseRedirect(reverse("boards:view_workflows", args=(board_id,)))
+            return HttpResponseRedirect(
+                reverse("boards:view_workflows", args=(board_id,))
+            )
 
     else:
         form = NewWorkflowForm(workflow)
 
-    return render(request, "workflows/new.html", {"form": form, "board": board, "member": member})
+    return render(
+        request, "workflows/new.html", {"form": form, "board": board, "member": member}
+    )
 
 
 # Edit workflow of a board
@@ -64,12 +68,18 @@ def edit(request, board_id, workflow_id):
 
         if form.is_valid():
             form.save(commit=True)
-            return HttpResponseRedirect(reverse("boards:view_workflows", args=(board_id,)))
+            return HttpResponseRedirect(
+                reverse("boards:view_workflows", args=(board_id,))
+            )
 
     else:
         form = EditWorkflowForm(workflow, instance=workflow)
 
-    return render(request, "workflows/edit.html", {"form": form, "board": board, "workflow": workflow, "member": member})
+    return render(
+        request,
+        "workflows/edit.html",
+        {"form": form, "board": board, "workflow": workflow, "member": member},
+    )
 
 
 # Edit workflow of a board

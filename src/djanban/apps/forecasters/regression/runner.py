@@ -2,7 +2,14 @@ from crequest.middleware import CrequestMiddleware
 
 from djanban.apps.base.auth import get_user_boards
 from djanban.apps.boards.models import Card
-from djanban.apps.forecasters.regression.regressors import OLS, GLS, WLS, GLSAR, QuantReg, RLM
+from djanban.apps.forecasters.regression.regressors import (
+    GLS,
+    GLSAR,
+    OLS,
+    RLM,
+    WLS,
+    QuantReg,
+)
 from djanban.apps.members.models import Member
 
 
@@ -49,6 +56,11 @@ class RegressorRunner:
             cards = cards.filter(board__in=boards)
             members = Member.objects.filter(boards__in=boards).distinct()
 
-        regressor = RegressorClass(member=member, board=board, cards=cards, members=members,
-                                   forecaster_name=self.name)
+        regressor = RegressorClass(
+            member=member,
+            board=board,
+            cards=cards,
+            members=members,
+            forecaster_name=self.name,
+        )
         return regressor.run(save=True)

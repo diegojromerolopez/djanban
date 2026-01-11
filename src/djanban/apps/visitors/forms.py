@@ -1,11 +1,10 @@
 from crequest.middleware import CrequestMiddleware
 from django import forms
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django.core.exceptions import ValidationError
 
 from djanban.apps.base.auth import get_user_boards
-from djanban.apps.boards.models import Board
 
 
 # Login form
@@ -15,10 +14,14 @@ class LoginForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        user = authenticate(username=cleaned_data.get("username"), password=cleaned_data.get("password"))
+        user = authenticate(
+            username=cleaned_data.get("username"), password=cleaned_data.get("password")
+        )
 
         if not user or not user.is_active:
-            raise ValidationError("Your authentication data is invalid. Please check your username and password")
+            raise ValidationError(
+                "Your authentication data is invalid. Please check your username and password"
+            )
 
         cleaned_data["user"] = user
         return cleaned_data
@@ -32,20 +35,26 @@ class NewUserForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["password1"] = forms.CharField(label="Password", widget=forms.PasswordInput(),
-                                                   required=True)
-        self.fields["password2"] = forms.CharField(label="Repeat password", widget=forms.PasswordInput(),
-                                                   required=True)
+        self.fields["password1"] = forms.CharField(
+            label="Password", widget=forms.PasswordInput(), required=True
+        )
+        self.fields["password2"] = forms.CharField(
+            label="Repeat password", widget=forms.PasswordInput(), required=True
+        )
 
         current_request = CrequestMiddleware.get_request()
-        boards = get_user_boards(current_request.user).filter(is_archived=False).order_by("name")
+        boards = (
+            get_user_boards(current_request.user)
+            .filter(is_archived=False)
+            .order_by("name")
+        )
         self.fields["boards"] = forms.MultipleChoiceField(
             label="Boards",
             choices=[(board.id, board.name) for board in boards],
             help_text="Boards this visitor will have access",
-            required=False
+            required=False,
         )
-        self.fields["boards"].widget.attrs = {'size': boards.count()}
+        self.fields["boards"].widget.attrs = {"size": boards.count()}
 
     # Clean form
     def clean(self):
@@ -56,8 +65,9 @@ class NewUserForm(forms.ModelForm):
             raise ValidationError("Please select at least one board for this visitor")
 
         # Check if passwords match
-        if self.cleaned_data.get("password1") \
-                and self.cleaned_data.get("password1") != self.cleaned_data.get("password2"):
+        if self.cleaned_data.get("password1") and self.cleaned_data.get(
+            "password1"
+        ) != self.cleaned_data.get("password2"):
             raise ValidationError("Passwords don't match")
         return cleaned_data
 
@@ -65,15 +75,19 @@ class NewUserForm(forms.ModelForm):
         super().save(commit=False)
         if commit:
             # Change password if both passwords match
-            if self.cleaned_data.get("password1") \
-                    and self.cleaned_data.get("password1") == self.cleaned_data.get("password2"):
+            if self.cleaned_data.get("password1") and self.cleaned_data.get(
+                "password1"
+            ) == self.cleaned_data.get("password2"):
 
                 self.instance.set_password(self.cleaned_data.get("password1"))
                 self.instance.save()
 
             # Add user to visitors groups
-            visitors = Group.objects.get(name='Visitors')
-            if self.instance.id is None or not visitors.user_set.filter(id=self.instance.id).exists():
+            visitors = Group.objects.get(name="Visitors")
+            if (
+                self.instance.id is None
+                or not visitors.user_set.filter(id=self.instance.id).exists()
+            ):
                 visitors.user_set.add(self.instance)
 
             # Add boards to visitor
@@ -97,11 +111,19 @@ class EditUserForm(NewUserForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["password1"].required = False
-        self.fields["password1"].help_text = "Keep this field blank if you don't want to change the password"
+        self.fields["password1"].help_text = (
+            "Keep this field blank if you don't want to change the password"
+        )
         self.fields["password2"].required = False
-        self.fields["password2"].help_text = "Keep this field blank if you don't want to change the password"
+        self.fields["password2"].help_text = (
+            "Keep this field blank if you don't want to change the password"
+        )
         current_request = CrequestMiddleware.get_request()
-        boards = get_user_boards(current_request.user).filter(is_archived=False).order_by("name")
+        boards = (
+            get_user_boards(current_request.user)
+            .filter(is_archived=False)
+            .order_by("name")
+        )
         self.fields["boards"] = forms.MultipleChoiceField(
             label="Boards",
             choices=[(board.id, board.name) for board in boards],
@@ -109,7 +131,7 @@ class EditUserForm(NewUserForm):
             help_text="Boards this visitor will have access",
             required=False,
         )
-        self.fields["boards"].widget.attrs={'size': boards.count()}
+        self.fields["boards"].widget.attrs = {"size": boards.count()}
 
     def save(self, commit=True):
         super().save(commit=True)

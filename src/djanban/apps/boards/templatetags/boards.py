@@ -1,8 +1,7 @@
-import inspect
-from django import template
-from crequest.middleware import CrequestMiddleware
 
-from djanban.apps.base.auth import get_user_boards
+from crequest.middleware import CrequestMiddleware
+from django import template
+
 from djanban.apps.boards.models import CardComment, List
 
 register = template.Library()
@@ -14,8 +13,9 @@ def last_comments(number_of_comments=10):
     current_request = CrequestMiddleware.get_request()
     current_user = current_request.user
     if hasattr(current_user, "member"):
-        last_comments_ = CardComment.objects.filter(board__members=current_user.member, card__is_closed=False).\
-            order_by("-creation_datetime")
+        last_comments_ = CardComment.objects.filter(
+            board__members=current_user.member, card__is_closed=False
+        ).order_by("-creation_datetime")
         return last_comments_[:number_of_comments]
     return CardComment.objects.none()
 

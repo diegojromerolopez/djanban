@@ -5,7 +5,7 @@ from djanban.apps.anonymizer.anonymizer import Anonymizer
 
 
 class Command(BaseCommand):
-    help = 'Anonymize all data'
+    help = "Anonymize all data"
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -13,4 +13,8 @@ class Command(BaseCommand):
         anonymizer = Anonymizer()
         fileoutput = anonymizer.run()
 
-        self.stdout.write(self.style.SUCCESS(f"Database anonymized successfully. Output stored in file {fileoutput}"))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Database anonymized successfully. Output stored in file {fileoutput}"
+            )
+        )

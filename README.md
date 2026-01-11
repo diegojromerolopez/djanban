@@ -1,7 +1,10 @@
-
-
 ![Djanban](resources/images/logos/logo.png)
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+[![Flake8: checked](https://img.shields.io/badge/flake8-checked-blueviolet)](https://flake8.pycqa.org/en/latest/)
+[![Pylint: checked](https://img.shields.io/badge/pylint-checked-blue)](https://www.pylint.org/)
 
 A kanban application with statistics and charts, including Trello integration.
 

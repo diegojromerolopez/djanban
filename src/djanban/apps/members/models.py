@@ -3,58 +3,94 @@ import os
 from datetime import timedelta
 
 import numpy
-from PIL import Image, ImageDraw, ImageFont
 from crequest.middleware import CrequestMiddleware
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files import File
 from django.db import models
-from django.db.models import Sum, Avg, Q, Count
+from django.db.models import Avg, Count, Q, Sum
 from django.utils import timezone
 from isoweek import Week
+from PIL import Image, ImageDraw, ImageFont
 
-from djanban.apps.base.auth import get_user_boards, get_member_boards, user_is_administrator
+from djanban.apps.base.auth import (
+    get_member_boards,
+    get_user_boards,
+    user_is_administrator,
+)
 
 
 class Member(models.Model):
     DEFAULT_MAX_NUMBER_OF_BOARDS = None
 
-    creator = models.ForeignKey("members.Member", on_delete=models.CASCADE, related_name="created_members", null=True, default=None, blank=True)
+    creator = models.ForeignKey(
+        "members.Member",
+        on_delete=models.CASCADE,
+        related_name="created_members",
+        null=True,
+        default=None,
+        blank=True,
+    )
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Associated user", related_name="member", null=True, default=None)
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Associated user",
+        related_name="member",
+        null=True,
+        default=None,
+    )
 
-    custom_avatar = models.ImageField(verbose_name="Custom avatar", blank=True, null=True, default=None)
+    custom_avatar = models.ImageField(
+        verbose_name="Custom avatar", blank=True, null=True, default=None
+    )
 
-    default_avatar = models.ImageField(verbose_name="Default avatar", null=True, default=None)
+    default_avatar = models.ImageField(
+        verbose_name="Default avatar", null=True, default=None
+    )
 
     biography = models.TextField(verbose_name="Biography", blank=True, default="")
 
-    is_developer = models.BooleanField(verbose_name="Is this member a developer?",
-                                       help_text="Informs if this member is a developer and hence will receive reports"
-                                                 " and other information", default=False)
+    is_developer = models.BooleanField(
+        verbose_name="Is this member a developer?",
+        help_text="Informs if this member is a developer and hence will receive reports"
+        " and other information",
+        default=False,
+    )
 
-    on_holidays = models.BooleanField(verbose_name="Is this developer on holidays?",
-                                      help_text="If the developer is on holidays will stop receiving reports "
-                                                "and other emails", default=False)
+    on_holidays = models.BooleanField(
+        verbose_name="Is this developer on holidays?",
+        help_text="If the developer is on holidays will stop receiving reports "
+        "and other emails",
+        default=False,
+    )
 
     minimum_working_hours_per_day = models.PositiveIntegerField(
         verbose_name="Minimum number hours this developer should complete each day",
-        default=None, null=True, blank=True)
+        default=None,
+        null=True,
+        blank=True,
+    )
 
     minimum_working_hours_per_week = models.PositiveIntegerField(
         verbose_name="Minimum number of hours this developer should complete per week",
-        default=None, null=True, blank=True)
+        default=None,
+        null=True,
+        blank=True,
+    )
 
     max_number_of_boards = models.PositiveIntegerField(
         verbose_name="Max number of boards",
         help_text="Maximum number of boards this member can fetch. If null, unlimited number of boards",
-        default=None, null=True
+        default=None,
+        null=True,
     )
 
     is_public = models.BooleanField(
         verbose_name="Is this member public?",
         help_text="If checked, this user will be seen by other members and they will be able to add it to their boards",
-        default=False, blank=True
+        default=False,
+        blank=True,
     )
 
     # Constructor for Member
@@ -68,9 +104,17 @@ class Member(models.Model):
         # the spent time
         spent_time_factors = self.spent_time_factors.all()
         for spent_time_factor in spent_time_factors:
-            if (spent_time_factor.start_date is None and spent_time_factor.end_date is None) or\
-                    (spent_time_factor.start_date <= date and spent_time_factor.end_date is None) or \
-                    (spent_time_factor.start_date <= date <= spent_time_factor.end_date):
+            if (
+                (
+                    spent_time_factor.start_date is None
+                    and spent_time_factor.end_date is None
+                )
+                or (
+                    spent_time_factor.start_date <= date
+                    and spent_time_factor.end_date is None
+                )
+                or (spent_time_factor.start_date <= date <= spent_time_factor.end_date)
+            ):
 
                 adjusted_value = spent_time * spent_time_factor.factor
                 return adjusted_value
@@ -79,7 +123,9 @@ class Member(models.Model):
         return spent_time
 
     # Adjust spent time according to the factor specified by date intervals
-    def adjust_daily_spent_time(self, daily_spent_time, attribute="spent_time", spent_time_factors=None):
+    def adjust_daily_spent_time(
+        self, daily_spent_time, attribute="spent_time", spent_time_factors=None
+    ):
 
         if spent_time_factors is None:
             spent_time_factors = self.spent_time_factors.all()
@@ -87,24 +133,34 @@ class Member(models.Model):
         return Member.adjust_daily_spent_time_from_spent_time_factors(
             daily_spent_time=daily_spent_time,
             spent_time_factors=spent_time_factors,
-            attribute=attribute
+            attribute=attribute,
         )
 
     # Adjust spent time according to the spent time factors passed as parameters
     @staticmethod
-    def adjust_daily_spent_time_from_spent_time_factors(daily_spent_time, spent_time_factors, attribute="spent_time"):
+    def adjust_daily_spent_time_from_spent_time_factors(
+        daily_spent_time, spent_time_factors, attribute="spent_time"
+    ):
         date = daily_spent_time.date
         adjusted_value = getattr(daily_spent_time, attribute)
         if adjusted_value is None:
             return 0
 
         for spent_time_factor in spent_time_factors:
-            if (spent_time_factor.start_date is None and spent_time_factor.end_date is None) or\
-                    (spent_time_factor.start_date <= date and spent_time_factor.end_date is None) or \
-                    (spent_time_factor.start_date <= date <= spent_time_factor.end_date):
+            if (
+                (
+                    spent_time_factor.start_date is None
+                    and spent_time_factor.end_date is None
+                )
+                or (
+                    spent_time_factor.start_date <= date
+                    and spent_time_factor.end_date is None
+                )
+                or (spent_time_factor.start_date <= date <= spent_time_factor.end_date)
+            ):
                 original_value = getattr(daily_spent_time, attribute)
                 adjusted_value = original_value * spent_time_factor.factor
-                #print "{0} {1} * {2} = {3}".format(self.external_username, original_value, spent_time_factor.factor, adjusted_value)
+                # print "{0} {1} * {2} = {3}".format(self.external_username, original_value, spent_time_factor.factor, adjusted_value)
                 return adjusted_value
 
         return adjusted_value
@@ -168,7 +224,9 @@ class Member(models.Model):
         boards = []
         if self.user:
             boards = get_user_boards(self.user)
-        return Member.objects.filter(Q(boards__in=boards) | Q(creator=self) | Q(is_public=True)).distinct()
+        return Member.objects.filter(
+            Q(boards__in=boards) | Q(creator=self) | Q(is_public=True)
+        ).distinct()
 
     # Get member companions of the same boards
     @property
@@ -181,7 +239,12 @@ class Member(models.Model):
         boards = get_user_boards(user)
         if user_is_administrator(user):
             return Member.objects.all().exclude(user=user).distinct().order_by("id")
-        return Member.objects.filter(boards__in=boards).exclude(user=user).distinct().order_by("id")
+        return (
+            Member.objects.filter(boards__in=boards)
+            .exclude(user=user)
+            .distinct()
+            .order_by("id")
+        )
 
     # Get member on the same boards
     # This method will always return at least one member (if user is a member)
@@ -211,7 +274,9 @@ class Member(models.Model):
 
     # Returns cards that belongs to this member and are currently under development
     def get_current_development_cards(self, board=None):
-        development_cards = self.cards.filter(board__is_archived=False, is_closed=False, list__type="development")
+        development_cards = self.cards.filter(
+            board__is_archived=False, is_closed=False, list__type="development"
+        )
         # Filtering development cards by board
         if board:
             return development_cards.filter(board=board)
@@ -224,7 +289,9 @@ class Member(models.Model):
 
     # Return the last notifications (10 by default)
     def get_last_unread_notifications(self, number=10):
-        return self.received_notifications.filter(is_read=False).order_by("-creation_datetime")[:number]
+        return self.received_notifications.filter(is_read=False).order_by(
+            "-creation_datetime"
+        )[:number]
 
     # Returns the number of hours this member has develop today
     def get_today_spent_time(self, board=None):
@@ -340,15 +407,16 @@ class Member(models.Model):
         adjusted_spent_time_sum = 0
         for daily_spent_time in daily_spent_times:
             adjusted_spent_time_sum += self.adjust_daily_spent_time(
-                daily_spent_time, attribute="spent_time", spent_time_factors=spent_time_factors
+                daily_spent_time,
+                attribute="spent_time",
+                spent_time_factors=spent_time_factors,
             )
         return adjusted_spent_time_sum
 
     # Returns the number of hours this member has develop given a filter
     @staticmethod
     def _sum_spent_time(daily_spent_times):
-        spent_time = daily_spent_times. \
-            aggregate(sum=Sum("spent_time"))["sum"]
+        spent_time = daily_spent_times.aggregate(sum=Sum("spent_time"))["sum"]
         if spent_time is None:
             return 0
         return spent_time
@@ -363,7 +431,7 @@ class Member(models.Model):
         happy_days = self.daily_member_moods.filter(mood="happy").count()
         normal_days = self.daily_member_moods.filter(mood="normal").count()
         sad_days = self.daily_member_moods.filter(mood="sad").count()
-        all_days = (happy_days + normal_days + sad_days)
+        all_days = happy_days + normal_days + sad_days
         if all_days == 0:
             return 0.0
         return 1.0 * (happy_days - sad_days) / all_days
@@ -372,43 +440,67 @@ class Member(models.Model):
         try:
             return self.roles.get(board=board)
         except MemberRole.DoesNotExist:
-            member_role, created = MemberRole.objects.get_or_create(type="normal", board=board)
+            member_role, created = MemberRole.objects.get_or_create(
+                type="normal", board=board
+            )
             member_role.members.add(self)
         return member_role
 
     @property
     def active_cards(self):
-        return self.cards.filter(board__is_archived=False, is_closed=False).order_by("position")
+        return self.cards.filter(board__is_archived=False, is_closed=False).order_by(
+            "position"
+        )
 
     def all_boards_in_downtime(self):
-        resumed_boards = get_member_boards(self).\
-            annotate(num_resumed_cards=Count(
+        resumed_boards = (
+            get_member_boards(self)
+            .annotate(
+                num_resumed_cards=Count(
                     models.Case(
-                        models.When(cards__is_closed=False, cards__list__type="development",  then=1),
-                        models.When(cards__is_closed=False, cards__list__type="ready_to_develop",  then=1),
+                        models.When(
+                            cards__is_closed=False,
+                            cards__list__type="development",
+                            then=1,
+                        ),
+                        models.When(
+                            cards__is_closed=False,
+                            cards__list__type="ready_to_develop",
+                            then=1,
+                        ),
                         default=0,
-                        output_field=models.IntegerField()
-                    ))
-            ).\
-            filter(num_resumed_cards__gt=0)
+                        output_field=models.IntegerField(),
+                    )
+                )
+            )
+            .filter(num_resumed_cards__gt=0)
+        )
         return not resumed_boards.exists()
 
     # Is the member in downtime?
     @property
     def is_in_downtime(self):
-        return not self.active_cards.filter(Q(list__type="development")|Q(list__type="ready_to_develop")).exists()
+        return not self.active_cards.filter(
+            Q(list__type="development") | Q(list__type="ready_to_develop")
+        ).exists()
 
     @property
     def first_work_datetime(self):
         try:
-            return self.daily_spent_times.all().order_by("id")[0].comment.creation_datetime
+            return (
+                self.daily_spent_times.all().order_by("id")[0].comment.creation_datetime
+            )
         except (IndexError, AttributeError):
             return None
 
     @property
     def last_work_datetime(self):
         try:
-            return self.daily_spent_times.all().order_by("-id")[0].comment.creation_datetime
+            return (
+                self.daily_spent_times.all()
+                .order_by("-id")[0]
+                .comment.creation_datetime
+            )
         except (IndexError, AttributeError):
             return None
 
@@ -445,9 +537,9 @@ class Member(models.Model):
         if self.user:
             current_request = CrequestMiddleware.get_request()
             return "https://www.gravatar.com/avatar/{}?s={}&d={}".format(
-                hashlib.md5(self.user.email.encode('utf-8')).hexdigest(),
+                hashlib.md5(self.user.email.encode("utf-8")).hexdigest(),
                 size,
-                current_request.build_absolute_uri(self.default_avatar.url)
+                current_request.build_absolute_uri(self.default_avatar.url),
             )
         # Otherwise, get its default avatar URL
         return self.default_avatar.url
@@ -466,7 +558,7 @@ class Member(models.Model):
             y = 10
 
         font = ImageFont.truetype(settings.BASE_DIR + "/fonts/vera.ttf", size=font_size)
-        canvas = Image.new('RGB', (30, 30), (255, 255, 255))
+        canvas = Image.new("RGB", (30, 30), (255, 255, 255))
         draw = ImageDraw.Draw(canvas)
         draw.text((x, y), initials, font=font, fill=(0, 0, 0, 255))
 
@@ -501,21 +593,30 @@ class Member(models.Model):
     # Standard deviation of the lead time of the cards of this member
     @property
     def std_dev_card_lead_time(self):
-        values = [float(card_i.lead_time) for card_i in self.active_cards.exclude(lead_time=None)]
+        values = [
+            float(card_i.lead_time)
+            for card_i in self.active_cards.exclude(lead_time=None)
+        ]
         std_dev_time = numpy.nanstd(values)
         return std_dev_time
 
     # Standard deviation of the spent time of the cards of this member
     @property
     def std_dev_card_spent_time(self):
-        values = [float(card_i.spent_time) for card_i in self.active_cards.exclude(spent_time=None)]
+        values = [
+            float(card_i.spent_time)
+            for card_i in self.active_cards.exclude(spent_time=None)
+        ]
         std_dev_time = numpy.nanstd(values)
         return std_dev_time
 
     # Standard deviation of the estimated time of the cards of this member
     @property
     def std_dev_card_estimated_time(self):
-        values = [float(card_i.estimated_time) for card_i in self.active_cards.exclude(estimated_time=None)]
+        values = [
+            float(card_i.estimated_time)
+            for card_i in self.active_cards.exclude(estimated_time=None)
+        ]
         std_dev_time = numpy.nanstd(values)
         return std_dev_time
 
@@ -540,15 +641,25 @@ class Member(models.Model):
 
 # Spent factors of each member
 class SpentTimeFactor(models.Model):
-    member = models.ForeignKey("members.Member", on_delete=models.CASCADE, verbose_name="Member", related_name="spent_time_factors")
-    name = models.CharField(verbose_name="Name of this factor", max_length=128, default="", blank=True)
+    member = models.ForeignKey(
+        "members.Member",
+        on_delete=models.CASCADE,
+        verbose_name="Member",
+        related_name="spent_time_factors",
+    )
+    name = models.CharField(
+        verbose_name="Name of this factor", max_length=128, default="", blank=True
+    )
     start_date = models.DateField(verbose_name="Start date of this factor")
-    end_date = models.DateField(verbose_name="End date of this factor", null=True, default=None, blank=True)
+    end_date = models.DateField(
+        verbose_name="End date of this factor", null=True, default=None, blank=True
+    )
     factor = models.DecimalField(
-        decimal_places=2, max_digits=5,
+        decimal_places=2,
+        max_digits=5,
         verbose_name="Factor that needs to be multiplied on the spent time price for this member",
         help_text="Modify this value whe this member cost needs to be adjusted by a factor",
-        default=1
+        default=1,
     )
 
 
@@ -557,11 +668,20 @@ class MemberRole(models.Model):
     TYPE_CHOICES = (
         ("admin", "Administrator"),
         ("normal", "Normal"),
-        ("guest", "Guest")
+        ("guest", "Guest"),
     )
-    type = models.CharField(verbose_name="Role a member has in a board", default="normal", max_length=32)
-    members = models.ManyToManyField("members.Member", verbose_name="Member", related_name="roles")
-    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Boards", related_name="roles")
+    type = models.CharField(
+        verbose_name="Role a member has in a board", default="normal", max_length=32
+    )
+    members = models.ManyToManyField(
+        "members.Member", verbose_name="Member", related_name="roles"
+    )
+    board = models.ForeignKey(
+        "boards.Board",
+        on_delete=models.CASCADE,
+        verbose_name="Boards",
+        related_name="roles",
+    )
 
     # Return the full name of the type
     @property
@@ -572,24 +692,51 @@ class MemberRole(models.Model):
 #
 class TrelloMemberProfile(models.Model):
 
-    api_key = models.CharField(max_length=128, verbose_name="Trello API key", null=True, default=None, blank=True)
+    api_key = models.CharField(
+        max_length=128,
+        verbose_name="Trello API key",
+        null=True,
+        default=None,
+        blank=True,
+    )
 
-    api_secret = models.CharField(max_length=128,
-                                  verbose_name="Trello API secret (obsolete)",
-                                  help_text="Trello API secret. Deprecated and not used. This field will be removed.",
-                                  null=True, default=None, blank=True)
+    api_secret = models.CharField(
+        max_length=128,
+        verbose_name="Trello API secret (obsolete)",
+        help_text="Trello API secret. Deprecated and not used. This field will be removed.",
+        null=True,
+        default=None,
+        blank=True,
+    )
 
-    token = models.CharField(max_length=128, verbose_name="Trello token", null=True, default=None, blank=True)
+    token = models.CharField(
+        max_length=128, verbose_name="Trello token", null=True, default=None, blank=True
+    )
 
-    token_secret = models.CharField(max_length=128, verbose_name="Trello token secret", null=True, default=None, blank=True)
+    token_secret = models.CharField(
+        max_length=128,
+        verbose_name="Trello token secret",
+        null=True,
+        default=None,
+        blank=True,
+    )
 
-    trello_id = models.CharField(max_length=128, verbose_name="Trello member id", unique=True)
+    trello_id = models.CharField(
+        max_length=128, verbose_name="Trello member id", unique=True
+    )
 
     username = models.CharField(max_length=128, verbose_name="Trello username")
 
     initials = models.CharField(max_length=8, verbose_name="User initials in Trello")
 
-    member = models.OneToOneField(Member, on_delete=models.CASCADE, verbose_name="Associated member", related_name="trello_member_profile", null=True, default=None)
+    member = models.OneToOneField(
+        Member,
+        on_delete=models.CASCADE,
+        verbose_name="Associated member",
+        related_name="trello_member_profile",
+        null=True,
+        default=None,
+    )
 
     # Informs if this member is initialized, that is, it has the credentials needed for connecting to trello.com
     @property

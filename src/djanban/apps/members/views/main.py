@@ -1,20 +1,30 @@
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.urls import reverse
 from django.db import transaction
 from django.db.models import Q
-from django.http.response import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
+from django.http.response import (
+    HttpResponseForbidden,
+    HttpResponseRedirect,
+)
 from django.shortcuts import render
+from django.urls import reverse
 
-from djanban.apps.base.auth import user_is_administrator, get_user_boards, user_is_member
+from djanban.apps.base.auth import (
+    get_user_boards,
+    user_is_administrator,
+    user_is_member,
+)
 from djanban.apps.base.decorators import member_required
 from djanban.apps.members.auth import assert_user_can_edit_member
-from djanban.apps.members.decorators import administrator_required
-from djanban.apps.members.forms import GiveAccessToMemberForm, ChangePasswordToMemberForm,\
-    EditTrelloMemberProfileForm, EditMemberForm, NewMemberForm, EditAdminMemberForm
+from djanban.apps.members.forms import (
+    ChangePasswordToMemberForm,
+    EditAdminMemberForm,
+    EditMemberForm,
+    EditTrelloMemberProfileForm,
+    GiveAccessToMemberForm,
+    NewMemberForm,
+)
 from djanban.apps.members.models import Member
-
 
 # User dashboard
 from djanban.apps.members.views.emailer import send_new_member_email
@@ -27,7 +37,9 @@ def view_members(request):
     boards = get_user_boards(current_user)
     if user_is_member(current_user):
         member = request.user.member
-        members = Member.objects.filter(Q(boards__in=boards) | Q(creator=current_user.member) | Q(is_public=True)).distinct()
+        members = Member.objects.filter(
+            Q(boards__in=boards) | Q(creator=current_user.member) | Q(is_public=True)
+        ).distinct()
     else:
         member = None
         members = Member.objects.filter(boards__in=boards).distinct()
@@ -35,7 +47,7 @@ def view_members(request):
     replacements = {
         "member": member,
         "members": members,
-        "developers": Member.objects.filter(is_developer=True)
+        "developers": Member.objects.filter(is_developer=True),
     }
     return render(request, "members/list.html", replacements)
 
@@ -199,7 +211,3 @@ def edit_trello_member_profile(request, member_id):
 
     replacements = {"member": member, "form": form}
     return render(request, "members/edit_trello_profile.html", replacements)
-
-
-
-

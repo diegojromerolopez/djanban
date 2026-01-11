@@ -13,7 +13,9 @@ class Cloc:
     def run(self):
 
         cloc_command = f"cloc {self.file_path} --xml"
-        cloc_command_result = subprocess.Popen(cloc_command, shell=True, stdout=subprocess.PIPE)
+        cloc_command_result = subprocess.Popen(
+            cloc_command, shell=True, stdout=subprocess.PIPE
+        )
 
         self.stdout = cloc_command_result.stdout.read()
 
@@ -27,7 +29,8 @@ class Cloc:
         except OSError as e:
             if e.errno == os.errno.ENOENT:
                 raise AssertionError(
-                    "Cloc was not found in your system. Install cloc (https://github.com/AlDanial/cloc).")
+                    "Cloc was not found in your system. Install cloc (https://github.com/AlDanial/cloc)."
+                )
 
 
 # Result of a cloc execution
@@ -52,4 +55,3 @@ class ClocResult:
 
     def __getitem__(self, key):
         return self.data[key]
-

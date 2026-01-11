@@ -1,4 +1,4 @@
-import inspect
+
 from django import template
 
 from djanban.apps.base import auth as djanban_auth

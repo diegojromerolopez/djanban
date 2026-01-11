@@ -10,13 +10,11 @@ from django.utils import timezone
 
 from djanban.apps.base.email import warn_administrators
 from djanban.apps.boards.models import Board
-from djanban.apps.fetch.fetchers.trello import BoardFetcher, Initializer
-from djanban.apps.members.models import Member
 
 
 # Make sure you are running this command on a shell that contains the path of the virtualenv
 class Command(BaseCommand):
-    help = 'Fetch board data'
+    help = "Fetch board data"
 
     CHECKOUT_LOCK_FILE_PATH = "/tmp/django-trello-stats-checkout-repository-lock.txt"
 
@@ -31,20 +29,28 @@ class Command(BaseCommand):
         if os.path.isfile(Command.CHECKOUT_LOCK_FILE_PATH):
             # If the file is not old (has been there for less than 30 minutes), return an error code
             if not Command._lock_file_is_old():
-                self.stdout.write(self.style.ERROR("Lock is in place. Unable to do checkout"))
+                self.stdout.write(
+                    self.style.ERROR("Lock is in place. Unable to do checkout")
+                )
                 return False
             # Warn administrators that lock file is too old and remove it
-            lock_last_modification_date_str = Command._get_lock_file_last_modification_datetime().isoformat()
+            lock_last_modification_date_str = (
+                Command._get_lock_file_last_modification_datetime().isoformat()
+            )
             warn_administrators(
                 subject="Lock file removed",
-                message=f"Lock file was last modified on {lock_last_modification_date_str} and was removed"
+                message=f"Lock file was last modified on {lock_last_modification_date_str} and was removed",
             )
             os.remove(Command.CHECKOUT_LOCK_FILE_PATH)
-            self.stdout.write(self.style.SUCCESS(f"Old lock created on {lock_last_modification_date_str} removed."))
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Old lock created on {lock_last_modification_date_str} removed."
+                )
+            )
 
         # Creates a new lock file
         self.stdout.write(self.style.SUCCESS("Lock does not exist. Creating..."))
-        with open(Command.CHECKOUT_LOCK_FILE_PATH, 'w', encoding="utf-8") as lock_file:
+        with open(Command.CHECKOUT_LOCK_FILE_PATH, "w", encoding="utf-8") as lock_file:
             lock_file.write("Fetching data for boards")
 
         self.stdout.write(self.style.SUCCESS("Lock file created"))
@@ -53,7 +59,9 @@ class Command(BaseCommand):
     # We consider a lock file is old when has been there 2 hours or more
     @staticmethod
     def _lock_file_is_old():
-        lock_file_modification_datetime = Command._get_lock_file_last_modification_datetime()
+        lock_file_modification_datetime = (
+            Command._get_lock_file_last_modification_datetime()
+        )
         return lock_file_modification_datetime > timezone.now() - timedelta(hours=2)
 
     # Gets last modification datetime of the lock file
@@ -89,17 +97,29 @@ class Command(BaseCommand):
         checkout_ok = False
 
         try:
-            boards = Board.objects.filter(has_to_be_fetched=True).exclude(last_fetch_datetime=None)
-            self.stdout.write(self.style.SUCCESS("You have {} projects that could have repositories".format(
-                boards.count()
-            )))
+            boards = Board.objects.filter(has_to_be_fetched=True).exclude(
+                last_fetch_datetime=None
+            )
+            self.stdout.write(
+                self.style.SUCCESS(
+                    "You have {} projects that could have repositories".format(
+                        boards.count()
+                    )
+                )
+            )
             for board in boards:
                 repositories = board.repositories.all()
-                self.stdout.write(self.style.SUCCESS("There are {} repositories of code {}".format(
-                    repositories.count(), board.name
-                )))
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        "There are {} repositories of code {}".format(
+                            repositories.count(), board.name
+                        )
+                    )
+                )
                 for repository in repositories:
-                    self.stdout.write(self.style.SUCCESS(f"Repository {repository.name}"))
+                    self.stdout.write(
+                        self.style.SUCCESS(f"Repository {repository.name}")
+                    )
                     repository.checkout()
                     commits = repository.commits.filter(has_been_assessed=False)
                     self.stdout.write(
@@ -111,25 +131,39 @@ class Command(BaseCommand):
                     )
                     for commit in commits:
                         commit.assess_code_quality()
-                        self.stdout.write(self.style.SUCCESS(f"- Commit {commit.commit}"))
-                        self.stdout.write(self.style.SUCCESS(f"  - PHPMD Messages {commit.phpmd_messages.count()}"))
-                        self.stdout.write(self.style.SUCCESS(f"  - Pylint Messages {commit.pylint_messages.count()}"))
+                        self.stdout.write(
+                            self.style.SUCCESS(f"- Commit {commit.commit}")
+                        )
+                        self.stdout.write(
+                            self.style.SUCCESS(
+                                f"  - PHPMD Messages {commit.phpmd_messages.count()}"
+                            )
+                        )
+                        self.stdout.write(
+                            self.style.SUCCESS(
+                                f"  - Pylint Messages {commit.pylint_messages.count()}"
+                            )
+                        )
 
-                    self.stdout.write(self.style.SUCCESS("Repository {} {} commits assessed succesfully".format(
-                        repository.name, commits.count()))
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            "Repository {} {} commits assessed succesfully".format(
+                                repository.name, commits.count()
+                            )
+                        )
                     )
 
             checkout_ok = True
 
         # If after two retries the exception persists, warn the administrators
-        except Exception as e:
+        except Exception:
             checkout_ok = False
             exception_message = "We tried checkout out the code repositories but it didn't work out. {}".format(
-                    traceback.format_exc()
+                traceback.format_exc()
             )
             warn_administrators(
                 subject="Unable to checkout repositories code",
-                message=exception_message
+                message=exception_message,
             )
             print(exception_message)
         # Always delete the lock file
@@ -137,5 +171,8 @@ class Command(BaseCommand):
             self.end()
 
         if checkout_ok:
-            self.stdout.write(self.style.SUCCESS(f"All code repositories checkout out successfully {self.elapsed_time()}"))
-
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"All code repositories checkout out successfully {self.elapsed_time()}"
+                )
+            )

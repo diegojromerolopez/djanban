@@ -1,7 +1,0 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
-import unittest
-from django.test import TestCase
-
-class Test0015auto201608081817Integration(TestCase):
-    pass

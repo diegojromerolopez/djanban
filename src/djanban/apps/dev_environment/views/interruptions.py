@@ -1,10 +1,12 @@
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
 from djanban.apps.base.decorators import member_required
-from djanban.apps.dev_environment.forms import NewInterruptionForm, DeleteInterruptionForm
+from djanban.apps.dev_environment.forms import (
+    DeleteInterruptionForm,
+    NewInterruptionForm,
+)
 from djanban.apps.dev_environment.models import Interruption
 
 
@@ -33,7 +35,11 @@ def new(request):
     else:
         form = NewInterruptionForm(instance=interruption)
 
-    return render(request, "dev_environment/interruptions/new.html", {"form": form, "member": member})
+    return render(
+        request,
+        "dev_environment/interruptions/new.html",
+        {"form": form, "member": member},
+    )
 
 
 # Delete an interruption

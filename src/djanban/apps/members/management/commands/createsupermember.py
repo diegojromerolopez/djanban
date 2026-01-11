@@ -1,47 +1,47 @@
-import os
-import time
-import traceback
-from datetime import datetime, timedelta
 
-import pytz
 from django.conf import settings
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.utils import timezone
 
-from djanban.apps.base.email import warn_administrators
-from djanban.apps.fetch.fetchers.trello.boards import Initializer, BoardFetcher
 from djanban.apps.members.models import Member
 
 
 # Creates a new supermember that can access all boards, members, charts, etc.
 # It can
 class Command(BaseCommand):
-    help = 'Create a supermember'
+    help = "Create a supermember"
 
     def __init__(self, stdout=None, stderr=None, no_color=False):
         super().__init__(stdout, stderr, no_color)
 
     def add_arguments(self, parser):
-        parser.add_argument('username', nargs='+', type=str, default=False)
-        parser.add_argument('password', nargs='+', type=str, default=False)
+        parser.add_argument("username", nargs="+", type=str, default=False)
+        parser.add_argument("password", nargs="+", type=str, default=False)
 
     def handle(self, *args, **options):
-        if 'username' not in options or not options['username'] or len(options['username']) != 1:
+        if (
+            "username" not in options
+            or not options["username"]
+            or len(options["username"]) != 1
+        ):
             self.stdout.write(self.style.ERROR("username is mandatory"))
             return False
 
-        if 'password' not in options or not options['password'] or len(options['password'])!=1:
+        if (
+            "password" not in options
+            or not options["password"]
+            or len(options["password"]) != 1
+        ):
             self.stdout.write(self.style.ERROR("password is mandatory"))
             return False
 
-        username = options['username'][0]
+        username = options["username"][0]
         if User.objects.filter(username=username).exists():
             self.stdout.write(self.style.ERROR("This username already exists"))
             return False
 
-        password = options['password'][0]
+        password = options["password"][0]
 
         try:
             with transaction.atomic():
@@ -60,10 +60,14 @@ class Command(BaseCommand):
 
         except Exception as e:
             self.stdout.write(
-                self.style.ERROR(f"Supermember couldn't be created successfully because of exception {e}")
+                self.style.ERROR(
+                    f"Supermember couldn't be created successfully because of exception {e}"
+                )
             )
 
         # Everything went well
         self.stdout.write(
-            self.style.SUCCESS(f"Supermember with username {username} has been created successfully")
+            self.style.SUCCESS(
+                f"Supermember with username {username} has been created successfully"
+            )
         )

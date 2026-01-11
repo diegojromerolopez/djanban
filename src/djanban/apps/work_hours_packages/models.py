@@ -11,73 +11,140 @@ class WorkHoursPackage(models.Model):
         ("multiboard", "Multiboard"),
         ("label", "Label"),
     )
-    board = models.ForeignKey("boards.Board", verbose_name="Board", related_name="work_hours_packages", null=True, default=None, blank=True, on_delete=models.SET_NULL)
-    multiboard = models.ForeignKey("multiboards.Multiboard", verbose_name="Multiboard", related_name="work_hours_packages", null=True, default=None, blank=True, on_delete=models.SET_NULL)
-    label = models.ForeignKey("boards.Label", verbose_name="Label", related_name="work_hours_packages", null=True, default=None, blank=True, on_delete=models.SET_NULL)
+    board = models.ForeignKey(
+        "boards.Board",
+        verbose_name="Board",
+        related_name="work_hours_packages",
+        null=True,
+        default=None,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    multiboard = models.ForeignKey(
+        "multiboards.Multiboard",
+        verbose_name="Multiboard",
+        related_name="work_hours_packages",
+        null=True,
+        default=None,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    label = models.ForeignKey(
+        "boards.Label",
+        verbose_name="Label",
+        related_name="work_hours_packages",
+        null=True,
+        default=None,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
 
-    type = models.CharField(max_length=256, choices=TYPE_CHOICES,
-                            verbose_name="Type of this package",
-                            help_text="A work hours package depends on a board, multiboard or label. "
-                                      "It depends on the project, the default option if selecting a label for each "
-                                      "package")
+    type = models.CharField(
+        max_length=256,
+        choices=TYPE_CHOICES,
+        verbose_name="Type of this package",
+        help_text="A work hours package depends on a board, multiboard or label. "
+        "It depends on the project, the default option if selecting a label for each "
+        "package",
+    )
 
     name = models.CharField(max_length=256, verbose_name="Name of this package")
 
     offset_hours = models.DecimalField(
         verbose_name="Offset hours",
         help_text="This hours will be added as an initial offset of the spent time measurements "
-                  "gotten in the date interval",
-        default=0, blank=True,
-        decimal_places=2, max_digits=10
+        "gotten in the date interval",
+        default=0,
+        blank=True,
+        decimal_places=2,
+        max_digits=10,
     )
     offset_hours_description = models.TextField(
         verbose_name="Offset hours description",
         help_text="Provide a description of the tasks that were done in this hours",
-        default="", blank=True
+        default="",
+        blank=True,
     )
 
-    notify_on_completion = models.BooleanField(verbose_name="Notify the members and this email on completion", default=False, blank=True)
-    notification_email = models.EmailField(verbose_name="Notification email when number of hours is reached", default="", blank=True)
+    notify_on_completion = models.BooleanField(
+        verbose_name="Notify the members and this email on completion",
+        default=False,
+        blank=True,
+    )
+    notification_email = models.EmailField(
+        verbose_name="Notification email when number of hours is reached",
+        default="",
+        blank=True,
+    )
 
     half_completion_notification_datetime = models.DateTimeField(
         verbose_name="50% notification was sent in this date and time",
-        default=None, null=True, blank=True)
+        default=None,
+        null=True,
+        blank=True,
+    )
 
     eighty_percent_completion_notification_datetime = models.DateTimeField(
         verbose_name="80% notification was sent in this date and time",
-        default=None, null=True, blank=True)
+        default=None,
+        null=True,
+        blank=True,
+    )
 
     ninety_percent_completion_notification_datetime = models.DateTimeField(
         verbose_name="90% notification was sent in this date and time",
-        default=None, null=True, blank=True)
+        default=None,
+        null=True,
+        blank=True,
+    )
 
     completion_notification_datetime = models.DateTimeField(
         verbose_name="Notification was sent in this date and time",
-        default=None, null=True, blank=True)
+        default=None,
+        null=True,
+        blank=True,
+    )
 
     description = models.TextField(
         verbose_name="Description of this package",
         help_text="Long description of this pakage describing the"
-                  "type of work the workers must do",
-        default="", blank=True
+        "type of work the workers must do",
+        default="",
+        blank=True,
     )
 
     number_of_hours = models.DecimalField(
         verbose_name="Number of hours",
         help_text="Number of hours of this package.",
-        decimal_places=2, max_digits=10
+        decimal_places=2,
+        max_digits=10,
     )
 
-    is_paid = models.BooleanField(verbose_name="Is this package paid?",
-                                  help_text="Has the client paid for this package", default=False)
+    is_paid = models.BooleanField(
+        verbose_name="Is this package paid?",
+        help_text="Has the client paid for this package",
+        default=False,
+    )
 
-    payment_date = models.DateField(verbose_name="When this package was paid", default=None, null=True, blank=True)
+    payment_date = models.DateField(
+        verbose_name="When this package was paid", default=None, null=True, blank=True
+    )
 
     start_work_date = models.DateField(verbose_name="Start date")
     end_work_date = models.DateField(verbose_name="End date")
 
-    creator = models.ForeignKey("members.Member", on_delete=models.CASCADE, verbose_name="Member", related_name="created_work_hours_packages")
-    members = models.ManyToManyField("members.Member", verbose_name="Member", related_name="work_hours_packages", blank=True)
+    creator = models.ForeignKey(
+        "members.Member",
+        on_delete=models.CASCADE,
+        verbose_name="Member",
+        related_name="created_work_hours_packages",
+    )
+    members = models.ManyToManyField(
+        "members.Member",
+        verbose_name="Member",
+        related_name="work_hours_packages",
+        blank=True,
+    )
 
     @property
     def full_name(self):
@@ -95,7 +162,9 @@ class WorkHoursPackage(models.Model):
             return self.label.spent_number_of_hours(date=date_interval)
         if self.multiboard:
             return self.multiboard.spent_number_of_hours(date=date_interval)
-        raise ValueError("This work hours package is not defined for a (multi)board or label")
+        raise ValueError(
+            "This work hours package is not defined for a (multi)board or label"
+        )
 
     def get_adjusted_spent_time(self):
         date_interval = (self.start_work_date, self.end_work_date)
@@ -105,7 +174,9 @@ class WorkHoursPackage(models.Model):
             return self.label.get_adjusted_spent_time(date=date_interval)
         if self.multiboard:
             return self.multiboard.get_adjusted_spent_time(date=date_interval)
-        raise ValueError("This work hours package is not defined for a (multi)board or label")
+        raise ValueError(
+            "This work hours package is not defined for a (multi)board or label"
+        )
 
     # Get the daily spent times associated with this work hour package
     @property
@@ -116,7 +187,9 @@ class WorkHoursPackage(models.Model):
         if self.board:
             daily_spent_time_filter["board"] = self.board
         elif self.multiboard:
-            daily_spent_time_filter["board__in"] = [board.id for board in self.multiboard.boards.all()]
+            daily_spent_time_filter["board__in"] = [
+                board.id for board in self.multiboard.boards.all()
+            ]
         elif self.label:
             daily_spent_time_filter["board"] = self.label.board
             daily_spent_time_filter["card__labels"] = self.label

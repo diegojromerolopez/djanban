@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+
 from djanban.utils.week import get_iso_week_of_year
 
 
@@ -11,34 +12,95 @@ class DailySpentTime(models.Model):
     class Meta:
         verbose_name = "Spent time"
         verbose_name_plural = "Spent times"
-        indexes = [models.Index(fields=("date", "week_of_year", "spent_time")), models.Index(fields=("date", "week_of_year", "board", "spent_time")), models.Index(fields=("board", "date", "week_of_year", "spent_time"))]
+        indexes = [
+            models.Index(fields=("date", "week_of_year", "spent_time")),
+            models.Index(fields=("date", "week_of_year", "board", "spent_time")),
+            models.Index(fields=("board", "date", "week_of_year", "spent_time")),
+        ]
 
-    uuid = models.CharField(max_length=128, verbose_name="External id of the comment", unique=False, null=True)
-    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Board", related_name="daily_spent_times")
-    card = models.ForeignKey("boards.Card", on_delete=models.CASCADE, verbose_name="Card", related_name="daily_spent_times", null=True)
-    comment = models.OneToOneField("boards.CardComment", on_delete=models.CASCADE, verbose_name="Comment", related_name="daily_spent_time", null=True)
-    member = models.ForeignKey("members.Member", on_delete=models.CASCADE, verbose_name="Member", related_name="daily_spent_times")
+    uuid = models.CharField(
+        max_length=128,
+        verbose_name="External id of the comment",
+        unique=False,
+        null=True,
+    )
+    board = models.ForeignKey(
+        "boards.Board",
+        on_delete=models.CASCADE,
+        verbose_name="Board",
+        related_name="daily_spent_times",
+    )
+    card = models.ForeignKey(
+        "boards.Card",
+        on_delete=models.CASCADE,
+        verbose_name="Card",
+        related_name="daily_spent_times",
+        null=True,
+    )
+    comment = models.OneToOneField(
+        "boards.CardComment",
+        on_delete=models.CASCADE,
+        verbose_name="Comment",
+        related_name="daily_spent_time",
+        null=True,
+    )
+    member = models.ForeignKey(
+        "members.Member",
+        on_delete=models.CASCADE,
+        verbose_name="Member",
+        related_name="daily_spent_times",
+    )
     description = models.TextField(verbose_name="Description of the task")
     date = models.DateField(verbose_name="Date of the time measurement")
-    day_of_year = models.CharField(verbose_name="Day number of the time measurement", max_length=16)
-    week_of_year = models.CharField(verbose_name="Week number of the time measurement", max_length=16)
-    weekday = models.CharField(verbose_name="Week day of the time measurement", max_length=16)
+    day_of_year = models.CharField(
+        verbose_name="Day number of the time measurement", max_length=16
+    )
+    week_of_year = models.CharField(
+        verbose_name="Week number of the time measurement", max_length=16
+    )
+    weekday = models.CharField(
+        verbose_name="Week day of the time measurement", max_length=16
+    )
 
-    adjusted_spent_time = models.DecimalField(verbose_name="Adjusted spent time for this day",
-                                              decimal_places=4, max_digits=12, default=None, null=True)
+    adjusted_spent_time = models.DecimalField(
+        verbose_name="Adjusted spent time for this day",
+        decimal_places=4,
+        max_digits=12,
+        default=None,
+        null=True,
+    )
 
-    spent_time = models.DecimalField(verbose_name="Spent time for this day", decimal_places=4, max_digits=12,
-                                     default=None, null=True)
+    spent_time = models.DecimalField(
+        verbose_name="Spent time for this day",
+        decimal_places=4,
+        max_digits=12,
+        default=None,
+        null=True,
+    )
 
-    rate_amount = models.DecimalField(verbose_name="Rate amount for this spent time", decimal_places=4, max_digits=12,
-                                      default=None, null=True)
+    rate_amount = models.DecimalField(
+        verbose_name="Rate amount for this spent time",
+        decimal_places=4,
+        max_digits=12,
+        default=None,
+        null=True,
+    )
 
-    estimated_time = models.DecimalField(verbose_name="Estimated time for this day", decimal_places=4, max_digits=12,
-                                         default=None, null=True)
+    estimated_time = models.DecimalField(
+        verbose_name="Estimated time for this day",
+        decimal_places=4,
+        max_digits=12,
+        default=None,
+        null=True,
+    )
 
-    diff_time = models.DecimalField(verbose_name="Difference between the estimated time and the spent time",
-                                    decimal_places=4, max_digits=12,
-                                    default=None, null=True)
+    diff_time = models.DecimalField(
+        verbose_name="Difference between the estimated time and the spent time",
+        decimal_places=4,
+        max_digits=12,
+        default=None,
+        null=True,
+    )
 
     @property
     def day(self):
@@ -59,18 +121,22 @@ class DailySpentTime(models.Model):
     # Add a new amount of spent time to a member
     @staticmethod
     def add_daily_spent_time(daily_spent_time):
-        DailySpentTime.add(board=daily_spent_time.board,
-                           card=daily_spent_time.card,
-                           comment=daily_spent_time.comment,
-                           description=daily_spent_time.description,
-                           member=daily_spent_time.member,
-                           date=daily_spent_time.date,
-                           spent_time=daily_spent_time.spent_time,
-                           estimated_time=daily_spent_time.estimated_time)
+        DailySpentTime.add(
+            board=daily_spent_time.board,
+            card=daily_spent_time.card,
+            comment=daily_spent_time.comment,
+            description=daily_spent_time.description,
+            member=daily_spent_time.member,
+            date=daily_spent_time.date,
+            spent_time=daily_spent_time.spent_time,
+            estimated_time=daily_spent_time.estimated_time,
+        )
 
     # Add a new amount of spent time to a member
     @staticmethod
-    def add(board, member, date, card, comment, description, spent_time, estimated_time):
+    def add(
+        board, member, date, card, comment, description, spent_time, estimated_time
+    ):
         # In case a uuid is passed, load the Member object
         if isinstance(member, str):
             try:
@@ -101,14 +167,22 @@ class DailySpentTime(models.Model):
             diff_time = Decimal(estimated_time) - Decimal(spent_time)
 
         # Creation of daily_spent_time
-        daily_spent_time = DailySpentTime(board=board, member=member, card=card, comment=comment, uuid=comment.uuid,
-                                          description=description,
-                                          adjusted_spent_time=adjusted_spent_time,
-                                          spent_time=spent_time,
-                                          estimated_time=estimated_time,
-                                          diff_time=diff_time,
-                                          date=date, day_of_year=day_of_year, week_of_year=week_of_year,
-                                          weekday=weekday)
+        daily_spent_time = DailySpentTime(
+            board=board,
+            member=member,
+            card=card,
+            comment=comment,
+            uuid=comment.uuid,
+            description=description,
+            adjusted_spent_time=adjusted_spent_time,
+            spent_time=spent_time,
+            estimated_time=estimated_time,
+            diff_time=diff_time,
+            date=date,
+            day_of_year=day_of_year,
+            week_of_year=week_of_year,
+            weekday=weekday,
+        )
 
         # Rate amount computation
         hourly_rate = board.get_date_hourly_rate(date)
@@ -157,12 +231,21 @@ class DailySpentTime(models.Model):
             rate_amount = spent_time * hourly_rate.amount
 
         daily_spent_time = DailySpentTime(
-            uuid=comment.uuid, board=board, card=card, comment=comment,
-            date=spent_estimated_time["date"], weekday=weekday, week_of_year=week_of_year, day_of_year=day_of_year,
-            spent_time=spent_time, adjusted_spent_time=adjusted_spent_time,
-            estimated_time=estimated_time, diff_time=diff_time,
+            uuid=comment.uuid,
+            board=board,
+            card=card,
+            comment=comment,
+            date=spent_estimated_time["date"],
+            weekday=weekday,
+            week_of_year=week_of_year,
+            day_of_year=day_of_year,
+            spent_time=spent_time,
+            adjusted_spent_time=adjusted_spent_time,
+            estimated_time=estimated_time,
+            diff_time=diff_time,
             description=spent_estimated_time["description"],
-            member=comment.author, rate_amount=rate_amount
+            member=comment.author,
+            rate_amount=rate_amount,
         )
         return daily_spent_time
 
@@ -187,7 +270,9 @@ class DailySpentTime(models.Model):
             self.date = date
             self.spent_time = spent_time
             if spent_time is not None:
-                self.adjusted_spent_time = comment.author.adjust_spent_time(spent_time, date)
+                self.adjusted_spent_time = comment.author.adjust_spent_time(
+                    spent_time, date
+                )
             self.estimated_time = estimated_time
 
     # Update adjusted spent time for this DailySpentTime
@@ -195,5 +280,9 @@ class DailySpentTime(models.Model):
         if self.spent_time is None:
             self.adjusted_spent_time = None
         else:
-            self.adjusted_spent_time = self.member.adjust_spent_time(self.spent_time, self.date)
-        DailySpentTime.objects.filter(id=self.id).update(adjusted_spent_time=self.adjusted_spent_time)
+            self.adjusted_spent_time = self.member.adjust_spent_time(
+                self.spent_time, self.date
+            )
+        DailySpentTime.objects.filter(id=self.id).update(
+            adjusted_spent_time=self.adjusted_spent_time
+        )
