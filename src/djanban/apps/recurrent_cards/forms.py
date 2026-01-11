@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from django.core.exceptions import ValidationError
 from django import forms
 
@@ -19,7 +15,7 @@ class RecurrentCardFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.member = kwargs.pop("member")
         self.board = kwargs.pop("board")
-        super(RecurrentCardFilterForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Available labels for this user
         self.fields["label"].choices = [("", "None")] + [
@@ -29,7 +25,7 @@ class RecurrentCardFilterForm(forms.Form):
         self.fields["is_active"].choices = [("", "Indiferent"),("Yes", "Yes"),("No", "No")]
 
     def clean(self):
-        cleaned_data = super(RecurrentCardFilterForm, self).clean()
+        cleaned_data = super().clean()
         return cleaned_data
 
     def get_recurrent_cards(self):
@@ -69,7 +65,7 @@ class WeeklyRecurrentCardForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.member = kwargs.pop("member")
         self.board = kwargs.pop("board")
-        super(WeeklyRecurrentCardForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Lists of this board
         active_lists = [(list_.id, list_.name) for list_ in self.board.active_lists.order_by("position")]
@@ -85,7 +81,7 @@ class WeeklyRecurrentCardForm(forms.ModelForm):
             [(label.id, label.name) for label in self.board.labels.exclude(name="").order_by("name")]
 
     def save(self, commit=True):
-        super(WeeklyRecurrentCardForm, self).save(commit)
+        super().save(commit)
         if commit:
             # Add the creator as member by default
             if not self.instance.members.filter(id=self.instance.creator.id).exists():
@@ -94,4 +90,4 @@ class WeeklyRecurrentCardForm(forms.ModelForm):
 
 # Delete recurrent card
 class DeleteWeeklyRecurrentCardForm(forms.Form):
-    confirmed = forms.BooleanField(label=u"Confirm you want to delete this recurrent card")
+    confirmed = forms.BooleanField(label="Confirm you want to delete this recurrent card")

@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
 from decimal import Decimal
 
 from datetime import timedelta
@@ -21,10 +17,10 @@ from djanban.apps.work_hours_packages.models import WorkHoursPackage
 # Move all cards with recurrent cards to their destination list
 # Use: python manage.py move_cards_from_recurrent_cards.py
 class Command(BaseCommand):
-    help = u'Move cards from recurrent cards'
+    help = 'Move cards from recurrent cards'
 
     def __init__(self, stdout=None, stderr=None, no_color=False):
-        super(Command, self).__init__(stdout, stderr, no_color)
+        super().__init__(stdout, stderr, no_color)
 
     # Handle de command action
     def handle(self, *args, **options):
@@ -51,7 +47,7 @@ class Command(BaseCommand):
                     num_moved_cards += 1
                     self.stdout.write(
                         self.style.SUCCESS(
-                            u"Board {0}: card {1} moved to {2}".format(
+                            "Board {}: card {} moved to {}".format(
                                 card.board,
                                 card.name,
                                 recurrent_card.move_to_list_when_day_ends.name
@@ -63,7 +59,7 @@ class Command(BaseCommand):
         if num_moved_cards > 0:
             self.stdout.write(
                 self.style.SUCCESS(
-                    u"{0} card(s) were moved to their recurrent card destination list".format(
+                    "{} card(s) were moved to their recurrent card destination list".format(
                         num_moved_cards)
                 )
             )
@@ -71,6 +67,6 @@ class Command(BaseCommand):
         else:
             self.stdout.write(
                 self.style.SUCCESS(
-                    u"No cards were moved"
+                    "No cards were moved"
                 )
             )

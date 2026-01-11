@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function
-
 from decimal import Decimal
 
 import numpy as np
 from django.http import Http404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
@@ -55,7 +52,7 @@ class ForecasterDelete(DeleteView):
         return Forecaster.get_all_from_member(member)
 
     def get_context_data(self, *args, **kwargs):
-        context = super(ForecasterDelete, self).get_context_data(*args, **kwargs)
+        context = super().get_context_data(*args, **kwargs)
         context["member"] = self.request.user.member
         return context
 

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 import hashlib
 import os
 import shutil
@@ -32,7 +29,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             password = options['password'][0]
-        except (IndexError, KeyError)as e:
+        except (IndexError, KeyError) as e:
             self.stdout.write(self.style.ERROR("password is mandatory"))
             return False
 
@@ -70,4 +67,4 @@ class Command(BaseCommand):
         # Create again the media root
         os.mkdir(settings.MEDIA_ROOT)
 
-        self.stdout.write(self.style.SUCCESS(u"Database and media files have been destructed successfully"))
+        self.stdout.write(self.style.SUCCESS("Database and media files have been destructed successfully"))

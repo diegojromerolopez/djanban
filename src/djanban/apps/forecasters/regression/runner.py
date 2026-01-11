@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from crequest.middleware import CrequestMiddleware
 
 from djanban.apps.base.auth import get_user_boards
@@ -10,7 +7,7 @@ from djanban.apps.members.models import Member
 
 
 # Regressor runner. Hides the complexity of selecting the right parameteres depending on the model.
-class RegressorRunner(object):
+class RegressorRunner:
     def __init__(self, name, model, board, member):
         self.name = name
         self.model = model

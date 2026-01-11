@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from django.db.models import Q
 from django.urls import reverse
 from django.conf import settings
@@ -11,7 +7,7 @@ from djanban.apps.boards.models import CardMemberRelationship, CardLabelRelation
 from djanban.apps.reports.models import CardReview
 
 
-class Serializer(object):
+class Serializer:
 
     def __init__(self, board=None):
         self.board = board

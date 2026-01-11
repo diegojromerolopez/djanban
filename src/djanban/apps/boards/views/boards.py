@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
 import hashlib
 import time
 
@@ -11,7 +7,7 @@ import pydenticon
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.http.response import Http404, HttpResponse
@@ -74,7 +70,7 @@ def sync(request):
         except (SSLError, HTTPError) as e:
             replacements = {
                 "member": member,
-                "error": "Connection error when initializing member: {0}".format(e)
+                "error": f"Connection error when initializing member: {e}"
             }
             return render(request, "boards/sync.html", replacements)
 
@@ -212,17 +208,17 @@ def view_gantt_chart(request, board_id):
         dependant_cards = ""
         if blocked_cards.exists():
             for blocked_card in blocked_cards:
-                dependant_cards += ",".format(blocked_card.id)
+                dependant_cards += f","
             dependant_cards = dependant_cards[:-1]
 
         members = board_card.members.all()
         for member in members:
             card = {
                 "pID": board_card.id,
-                "pName": "{0}".format(board_card.short_url, member.external_username),
+                "pName": f"{board_card.short_url}",
                 "pStart": start_date.strftime("%Y-%m-%d"),
                 "pEnd": end_date.strftime("%Y-%m-%d"),
-                "pClass": "gtask{0}".format(task_color),
+                "pClass": f"gtask{task_color}",
                 "pLink": reverse("boards:view_card", args=(board_id, board_card.id)),
                 "pMile": 0,
                 "pRes": member.external_username,
@@ -232,7 +228,7 @@ def view_gantt_chart(request, board_id):
                 "pOpen": 0,
                 "pDepend": dependant_cards,
                 "pCaption": board_card.name,
-                "pNotes": "{0}\\\n{1}".format(
+                "pNotes": "{}\\\n{}".format(
                     board_card.name, board_card.description.replace("\n", "\\\n")
                 )
             }
@@ -298,7 +294,7 @@ def view(request, board_id):
 
     # Replacements in the template
     replacements = {
-        "url_prefix": "http://{0}".format(settings.DOMAIN),
+        "url_prefix": f"http://{settings.DOMAIN}",
         "board": board,
         "next_due_date_cards": next_due_date_cards,
         "requirement": requirement,
@@ -357,7 +353,7 @@ def view_identicon(request, board_id, width=40, height=40):
 
     # List of colors taken from example http://pydenticon.readthedocs.io/en/0.3/usage.html#instantiating-a-generator
     foreground = [
-        "#{0}".format(board.title_color),
+        f"#{board.title_color}",
         "rgb(45,79,255)",
         "rgb(254,180,44)",
         "rgb(226,121,234)",
@@ -368,7 +364,7 @@ def view_identicon(request, board_id, width=40, height=40):
     ]
 
     # Background color taken from example http://pydenticon.readthedocs.io/en/0.3/usage.html#instantiating-a-generator
-    background = u"#{0}".format(board.background_color)
+    background = f"#{board.background_color}"
 
     identicon_hash = hashlib.sha1(board.name.encode('utf-8')).hexdigest()
 
@@ -384,7 +380,7 @@ def view_identicon(request, board_id, width=40, height=40):
 
     identicon_png = generator.generate(board.name, int(width), int(height), output_format="png")
 
-    board.identicon.save(u"{0}".format(identicon_hash), ContentFile(identicon_png))
+    board.identicon.save(f"{identicon_hash}", ContentFile(identicon_png))
     board.save()
     return HttpResponseRedirect(board.identicon.url)
 
@@ -607,7 +603,7 @@ def fetch(request, board_id):
             board_fetcher = BoardFetcher(board)
             board_fetcher.fetch(debug=True)
             end_time = time.time()
-            print("Elapsed time {0} s".format(end_time-start_time))
+            print(f"Elapsed time {end_time-start_time} s")
             replacements["done"] = True
             return render(request, "boards/fetch.html", replacements)
         except UnicodeDecodeError as e:

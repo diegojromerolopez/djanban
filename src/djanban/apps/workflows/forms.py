@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import re
 from django.forms import models
 from djanban.apps.boards.models import List
@@ -13,7 +11,7 @@ class NewWorkflowForm(models.ModelForm):
         fields = ["name"]
 
     def __init__(self, workflow, *args, **kwargs):
-        super(NewWorkflowForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.instance = workflow
         # Creation of pair of lists of lists for development and done
         lists = workflow.board.lists.all().order_by("id")
@@ -23,9 +21,9 @@ class NewWorkflowForm(models.ModelForm):
 
         # Development lists
         for list_i in range(0, num_lists):
-            development_list_name_i = "development_list_{0}".format(list_i)
+            development_list_name_i = f"development_list_{list_i}"
             self.fields[development_list_name_i] = models.ChoiceField(choices=list_choices, initial="empty",
-                                                                      label=u"'Development' list in position {0}".format(list_i))
+                                                                      label=f"'Development' list in position {list_i}")
             # In case we are editing, get default value of the select of the lists
             if workflow.workflow_lists.filter(order=list_i, is_done_list=False).exists():
                 list_id_in_position_i = workflow.workflow_lists.get(order=list_i, is_done_list=False).list_id
@@ -33,22 +31,22 @@ class NewWorkflowForm(models.ModelForm):
 
         # Done lists
         for list_i in range(0, num_lists):
-            done_list_name_i = "done_list_{0}".format(list_i)
+            done_list_name_i = f"done_list_{list_i}"
             self.fields[done_list_name_i] = models.ChoiceField(choices=list_choices, initial="empty",
-                                                               label=u"'Done' list in position {0}".format(list_i))
+                                                               label=f"'Done' list in position {list_i}")
 
             if workflow.workflow_lists.filter(order=list_i, is_done_list=True).exists():
                 list_id_in_position_i = workflow.workflow_lists.get(order=list_i, is_done_list=True).list_id
                 self.fields[done_list_name_i].initial = list_position[list_id_in_position_i]
 
     def save(self, commit=True):
-        workflow = super(NewWorkflowForm, self).save(commit)
+        workflow = super().save(commit)
 
         if commit:
             # Clear existing relationships
             workflow.workflow_lists.all().delete()
             for field in self.cleaned_data:
-                list_match = re.match("^(development_list|done_list)_(\d)+$", field)
+                list_match = re.match(r"^(development_list|done_list)_(\d)+$", field)
                 if list_match and self.cleaned_data[field] != "empty":
                     list_id = self.cleaned_data[field]
 

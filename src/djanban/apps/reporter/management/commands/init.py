@@ -15,11 +15,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             member_trello_username = options['member_trello_username'][0]
-        except (IndexError, KeyError)as e:
+        except (IndexError, KeyError) as e:
             self.stdout.write(self.style.SUCCESS("member_username is mandatory"))
             return False
 
         member = Member.objects.get(trello_member_profile__username=member_trello_username)
         member.init_fetch(debug=True)
 
-        self.stdout.write(self.style.SUCCESS(u"Member {0} successfully initialized".format(member.external_username)))
+        self.stdout.write(self.style.SUCCESS(f"Member {member.external_username} successfully initialized"))

@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import hashlib
 import os
 from datetime import timedelta
@@ -23,47 +19,47 @@ from djanban.apps.base.auth import get_user_boards, get_member_boards, user_is_a
 class Member(models.Model):
     DEFAULT_MAX_NUMBER_OF_BOARDS = None
 
-    creator = models.ForeignKey("members.Member", related_name="created_members", null=True, default=None, blank=True)
+    creator = models.ForeignKey("members.Member", on_delete=models.CASCADE, related_name="created_members", null=True, default=None, blank=True)
 
-    user = models.OneToOneField(User, verbose_name=u"Associated user", related_name="member", null=True, default=None)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Associated user", related_name="member", null=True, default=None)
 
-    custom_avatar = models.ImageField(verbose_name=u"Custom avatar", blank=True, null=True, default=None)
+    custom_avatar = models.ImageField(verbose_name="Custom avatar", blank=True, null=True, default=None)
 
-    default_avatar = models.ImageField(verbose_name=u"Default avatar", null=True, default=None)
+    default_avatar = models.ImageField(verbose_name="Default avatar", null=True, default=None)
 
-    biography = models.TextField(verbose_name=u"Biography", blank=True, default="")
+    biography = models.TextField(verbose_name="Biography", blank=True, default="")
 
-    is_developer = models.BooleanField(verbose_name=u"Is this member a developer?",
-                                       help_text=u"Informs if this member is a developer and hence will receive reports"
-                                                 u" and other information", default=False)
+    is_developer = models.BooleanField(verbose_name="Is this member a developer?",
+                                       help_text="Informs if this member is a developer and hence will receive reports"
+                                                 " and other information", default=False)
 
-    on_holidays = models.BooleanField(verbose_name=u"Is this developer on holidays?",
-                                      help_text=u"If the developer is on holidays will stop receiving reports "
-                                                u"and other emails", default=False)
+    on_holidays = models.BooleanField(verbose_name="Is this developer on holidays?",
+                                      help_text="If the developer is on holidays will stop receiving reports "
+                                                "and other emails", default=False)
 
     minimum_working_hours_per_day = models.PositiveIntegerField(
-        verbose_name=u"Minimum number hours this developer should complete each day",
+        verbose_name="Minimum number hours this developer should complete each day",
         default=None, null=True, blank=True)
 
     minimum_working_hours_per_week = models.PositiveIntegerField(
-        verbose_name=u"Minimum number of hours this developer should complete per week",
+        verbose_name="Minimum number of hours this developer should complete per week",
         default=None, null=True, blank=True)
 
     max_number_of_boards = models.PositiveIntegerField(
-        verbose_name=u"Max number of boards",
-        help_text=u"Maximum number of boards this member can fetch. If null, unlimited number of boards",
+        verbose_name="Max number of boards",
+        help_text="Maximum number of boards this member can fetch. If null, unlimited number of boards",
         default=None, null=True
     )
 
     is_public = models.BooleanField(
-        verbose_name=u"Is this member public?",
-        help_text=u"If checked, this user will be seen by other members and they will be able to add it to their boards",
+        verbose_name="Is this member public?",
+        help_text="If checked, this user will be seen by other members and they will be able to add it to their boards",
         default=False, blank=True
     )
 
     # Constructor for Member
     def __init__(self, *args, **kwargs):
-        super(Member, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     # Adjust spent time
     def adjust_spent_time(self, spent_time, date):
@@ -153,7 +149,7 @@ class Member(models.Model):
             return self.trello_member_profile.username
         if self.user:
             return self.user.username
-        return "Member {0}".format(self.id)
+        return f"Member {self.id}"
 
     @property
     def initials(self):
@@ -161,7 +157,7 @@ class Member(models.Model):
             return self.trello_member_profile.initials
         if self.user:
             return self.user.username
-        return "Member {0}".format(self.id)
+        return f"Member {self.id}"
 
     # Return the members this member can see. That is:
     # - Members of one of his/her boards.
@@ -204,7 +200,7 @@ class Member(models.Model):
     def reset_password(self, new_password=None):
         # A member without an user cannot be his/her password changed
         if not self.user:
-            raise ValueError(u"This member has not an associated user")
+            raise ValueError("This member has not an associated user")
         # Create automatically a new password if None is passed
         if new_password is None:
             new_password = User.objects.make_random_password()
@@ -448,7 +444,7 @@ class Member(models.Model):
         # If the member has an user and therefore, an email, get its gravatar
         if self.user:
             current_request = CrequestMiddleware.get_request()
-            return "https://www.gravatar.com/avatar/{0}?s={1}&d={2}".format(
+            return "https://www.gravatar.com/avatar/{}?s={}&d={}".format(
                 hashlib.md5(self.user.email.encode('utf-8')).hexdigest(),
                 size,
                 current_request.build_absolute_uri(self.default_avatar.url)
@@ -474,13 +470,13 @@ class Member(models.Model):
         draw = ImageDraw.Draw(canvas)
         draw.text((x, y), initials, font=font, fill=(0, 0, 0, 255))
 
-        filename = "{0}.png".format(initials)
+        filename = f"{initials}.png"
 
         # If tmp directory does not exist, create it
         if not os.path.exists(settings.TMP_DIR):
             os.mkdir(settings.TMP_DIR)
 
-        path = os.path.join(settings.TMP_DIR, "{0}".format(filename))
+        path = os.path.join(settings.TMP_DIR, f"{filename}")
 
         canvas.save(path, "PNG")
 
@@ -544,14 +540,14 @@ class Member(models.Model):
 
 # Spent factors of each member
 class SpentTimeFactor(models.Model):
-    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="spent_time_factors")
-    name = models.CharField(verbose_name=u"Name of this factor", max_length=128, default="", blank=True)
-    start_date = models.DateField(verbose_name=u"Start date of this factor")
-    end_date = models.DateField(verbose_name=u"End date of this factor", null=True, default=None, blank=True)
+    member = models.ForeignKey("members.Member", on_delete=models.CASCADE, verbose_name="Member", related_name="spent_time_factors")
+    name = models.CharField(verbose_name="Name of this factor", max_length=128, default="", blank=True)
+    start_date = models.DateField(verbose_name="Start date of this factor")
+    end_date = models.DateField(verbose_name="End date of this factor", null=True, default=None, blank=True)
     factor = models.DecimalField(
         decimal_places=2, max_digits=5,
-        verbose_name=u"Factor that needs to be multiplied on the spent time price for this member",
-        help_text=u"Modify this value whe this member cost needs to be adjusted by a factor",
+        verbose_name="Factor that needs to be multiplied on the spent time price for this member",
+        help_text="Modify this value whe this member cost needs to be adjusted by a factor",
         default=1
     )
 
@@ -564,8 +560,8 @@ class MemberRole(models.Model):
         ("guest", "Guest")
     )
     type = models.CharField(verbose_name="Role a member has in a board", default="normal", max_length=32)
-    members = models.ManyToManyField("members.Member", verbose_name=u"Member", related_name="roles")
-    board = models.ForeignKey("boards.Board", verbose_name=u"Boards", related_name="roles")
+    members = models.ManyToManyField("members.Member", verbose_name="Member", related_name="roles")
+    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Boards", related_name="roles")
 
     # Return the full name of the type
     @property
@@ -576,24 +572,24 @@ class MemberRole(models.Model):
 #
 class TrelloMemberProfile(models.Model):
 
-    api_key = models.CharField(max_length=128, verbose_name=u"Trello API key", null=True, default=None, blank=True)
+    api_key = models.CharField(max_length=128, verbose_name="Trello API key", null=True, default=None, blank=True)
 
     api_secret = models.CharField(max_length=128,
-                                  verbose_name=u"Trello API secret (obsolete)",
-                                  help_text=u"Trello API secret. Deprecated and not used. This field will be removed.",
+                                  verbose_name="Trello API secret (obsolete)",
+                                  help_text="Trello API secret. Deprecated and not used. This field will be removed.",
                                   null=True, default=None, blank=True)
 
-    token = models.CharField(max_length=128, verbose_name=u"Trello token", null=True, default=None, blank=True)
+    token = models.CharField(max_length=128, verbose_name="Trello token", null=True, default=None, blank=True)
 
-    token_secret = models.CharField(max_length=128, verbose_name=u"Trello token secret", null=True, default=None, blank=True)
+    token_secret = models.CharField(max_length=128, verbose_name="Trello token secret", null=True, default=None, blank=True)
 
-    trello_id = models.CharField(max_length=128, verbose_name=u"Trello member id", unique=True)
+    trello_id = models.CharField(max_length=128, verbose_name="Trello member id", unique=True)
 
-    username = models.CharField(max_length=128, verbose_name=u"Trello username")
+    username = models.CharField(max_length=128, verbose_name="Trello username")
 
-    initials = models.CharField(max_length=8, verbose_name=u"User initials in Trello")
+    initials = models.CharField(max_length=8, verbose_name="User initials in Trello")
 
-    member = models.OneToOneField(Member, verbose_name=u"Associated member", related_name="trello_member_profile", null=True, default=None)
+    member = models.OneToOneField(Member, on_delete=models.CASCADE, verbose_name="Associated member", related_name="trello_member_profile", null=True, default=None)
 
     # Informs if this member is initialized, that is, it has the credentials needed for connecting to trello.com
     @property

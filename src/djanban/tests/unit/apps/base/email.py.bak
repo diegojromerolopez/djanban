@@ -1,0 +1,7 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
+import unittest
+from djanban.apps.base.email import *
+
+class TestEmail(unittest.TestCase):
+    pass

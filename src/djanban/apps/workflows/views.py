@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.http.response import Http404
 from django.shortcuts import render
@@ -41,7 +37,7 @@ def view_list(request, board_id):
 def new(request, board_id):
     member = request.user.member
     board = get_user_boards(request.user).get(id=board_id)
-    workflow = Workflow(name=u"New workflow", board=board)
+    workflow = Workflow(name="New workflow", board=board)
 
     if request.method == "POST":
         form = NewWorkflowForm(workflow, request.POST)

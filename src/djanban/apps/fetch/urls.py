@@ -1,7 +1,11 @@
-from django.conf.urls import url, include
+from django.urls import path
 
 from djanban.apps.fetch.views import fetch
 
+
+
+app_name = 'fetch'
+
 urlpatterns = [
-    url(r'^fetch$', fetch, name="fetch_boards"),
+    path('fetch', fetch, name="fetch_boards"),
 ]

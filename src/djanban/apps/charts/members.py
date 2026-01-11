@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import copy
 
 import pygal
@@ -21,17 +17,17 @@ from djanban.utils.week import number_of_weeks_of_year, get_iso_week_of_year
 # Show a chart with the task movements (backward or forward) by member
 def task_movements_by_member(request, movement_type="forward", board=None):
     if movement_type != "forward" and movement_type != "backward":
-        raise ValueError("{0} is not recognized as a valid movement type".format(movement_type))
+        raise ValueError(f"{movement_type} is not recognized as a valid movement type")
 
     # Caching
-    chart_uuid = "members.task_movements_by_member-{0}-{1}".format(movement_type, board.id if board else "user-{0}".format(request.user.id))
+    chart_uuid = "members.task_movements_by_member-{}-{}".format(movement_type, board.id if board else f"user-{request.user.id}")
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Task {0} movements as of {1}".format(movement_type, timezone.now())
+    chart_title = f"Task {movement_type} movements as of {timezone.now()}"
     if board:
-        chart_title += u" for board {0}".format(board.name)
+        chart_title += f" for board {board.name}"
 
     member_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True, print_zeroes=False,
                                        human_readable=True)
@@ -50,7 +46,7 @@ def task_movements_by_member(request, movement_type="forward", board=None):
         member_name = member_i.external_username
         num_card_movements = member_i.card_movements.filter(**card_movement_filter).count()
         if num_card_movements > 0:
-            member_chart.add(u"{0}".format(member_name), num_card_movements)
+            member_chart.add(f"{member_name}", num_card_movements)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=member_chart.render(is_unicode=True))
     return chart.render_django_response()
@@ -62,11 +58,11 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
         now = timezone.now()
         today = now.date()
         week_of_year_ = get_iso_week_of_year(today)
-        week_of_year = "{0}W{1}".format(today.year, week_of_year_)
+        week_of_year = f"{today.year}W{week_of_year_}"
 
     # Caching
-    chart_uuid = "members.spent_time_by_week-{0}-{1}".format(
-        current_user.id, week_of_year, board.id if board else "user-{0}".format(current_user.id)
+    chart_uuid = "members.spent_time_by_week-{}-{}".format(
+        current_user.id, week_of_year, board.id if board else f"user-{current_user.id}"
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
@@ -77,11 +73,11 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
     start_of_week = week.monday()
     end_of_week = week.sunday()
 
-    chart_title = u"Spent time in week {0} ({1} - {2})".format(week_of_year,
+    chart_title = "Spent time in week {} ({} - {})".format(week_of_year,
                                                                start_of_week.strftime("%Y-%m-%d"),
                                                                end_of_week.strftime("%Y-%m-%d"))
     if board:
-        chart_title += u" for board {0}".format(board.name)
+        chart_title += f" for board {board.name}"
 
     spent_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                            print_zeroes=False, human_readable=True)
@@ -106,9 +102,9 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
         team_spent_time += spent_time
 
         if spent_time > 0:
-            spent_time_chart.add(u"{0}'s spent time".format(member_name), spent_time)
+            spent_time_chart.add(f"{member_name}'s spent time", spent_time)
 
-    spent_time_chart.add(u"Team spent time", team_spent_time)
+    spent_time_chart.add("Team spent time", team_spent_time)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=spent_time_chart.render(is_unicode=True))
     return chart.render_django_response()
@@ -118,14 +114,14 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
 def avg_spent_time_by_weekday(current_user, board=None):
 
     # Caching
-    chart_uuid = "members.avg_spent_time_by_weekday-{0}-{1}".format(current_user, board.id if board else "None")
+    chart_uuid = "members.avg_spent_time_by_weekday-{}-{}".format(current_user, board.id if board else "None")
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Average spent time by weekday by member"
+    chart_title = "Average spent time by weekday by member"
     if board:
-        chart_title += u" for board {0}".format(board.name)
+        chart_title += f" for board {board.name}"
 
     spent_time_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, human_readable=True)
@@ -169,13 +165,13 @@ def avg_spent_time_by_weekday(current_user, board=None):
                 member_weekday_spent_time.append(member_sum_spent_time_in_weekday/num_weekday_i)
                 team_spent_time[weekday_i] += member_sum_spent_time_in_weekday/num_weekday_i
 
-        spent_time_chart.add(u"{0}".format(member_name), member_weekday_spent_time)
+        spent_time_chart.add(f"{member_name}", member_weekday_spent_time)
 
     num_members = members.count()
     if num_members > 0:
         spent_time_chart.add(
-            u"All members",
-            [weekday_spent_time/num_members for weekday_i, weekday_spent_time in team_spent_time.items()]
+            "All members",
+            [weekday_spent_time/num_members for weekday_i, weekday_spent_time in list(team_spent_time.items())]
         )
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=spent_time_chart.render(is_unicode=True))
@@ -186,15 +182,15 @@ def avg_spent_time_by_weekday(current_user, board=None):
 def spent_time_by_week_evolution(board, show_interruptions=False):
 
     # Caching
-    chart_uuid = "members.spent_time_by_week_evolution-{0}-{1}".format(board.id, "with_interruptions" if show_interruptions else "without_interruptions")
+    chart_uuid = "members.spent_time_by_week_evolution-{}-{}".format(board.id, "with_interruptions" if show_interruptions else "without_interruptions")
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Evolution of each member's spent time by week"
+    chart_title = "Evolution of each member's spent time by week"
     if show_interruptions:
-        chart_title += u", including interruptions suffered by the team, "
-    chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
+        chart_title += ", including interruptions suffered by the team, "
+    chart_title += f" for board {board.name} (fetched on {board.get_human_fetch_datetime()})"
 
     evolution_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                  print_zeroes=False, fill=False,
@@ -226,7 +222,7 @@ def spent_time_by_week_evolution(board, show_interruptions=False):
 
         there_is_data = board.daily_spent_times.filter(date__year=year_i, week_of_year=week_i).exists()
         if there_is_data:
-            x_labels.append(u"{0}W{1}".format(year_i, week_i))
+            x_labels.append(f"{year_i}W{week_i}")
 
             team_spent_time = 0
             for member in members:
@@ -271,18 +267,18 @@ def spent_time_by_week_evolution(board, show_interruptions=False):
 def number_of_comments(current_user, board=None, card=None):
 
     # Caching
-    chart_uuid = "members.number_of_comments-{0}-{1}-{2}".format(current_user.id, board.id if board else "None", card.id if card else "None")
+    chart_uuid = "members.number_of_comments-{}-{}-{}".format(current_user.id, board.id if board else "None", card.id if card else "None")
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Number of comments by member as of {0}".format(timezone.now())
+    chart_title = f"Number of comments by member as of {timezone.now()}"
 
     if board:
-        chart_title += u" for board {0}".format(board.name)
+        chart_title += f" for board {board.name}"
         if card:
-            chart_title += u" for card '{0}'".format(card.name)
-        chart_title += " (fetched on {0})".format(board.get_human_fetch_datetime())
+            chart_title += f" for card '{card.name}'"
+        chart_title += f" (fetched on {board.get_human_fetch_datetime()})"
 
     number_of_comments_chart = pygal.Bar(
         title=chart_title, legend_at_bottom=True, print_values=False, print_zeroes=False, fill=False,
@@ -325,16 +321,16 @@ def number_of_comments(current_user, board=None, card=None):
 def number_of_cards(current_user, board=None):
 
     # Caching
-    chart_uuid = "members.number_of_cards-{0}-{1}".format(current_user.id, board.id if board else "None")
+    chart_uuid = "members.number_of_cards-{}-{}".format(current_user.id, board.id if board else "None")
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Number of cards by member as of {0}".format(timezone.now())
+    chart_title = f"Number of cards by member as of {timezone.now()}"
 
     if board:
-        chart_title += u" for board {0}".format(board.name)
-        chart_title += u" (fetched on {0})".format(board.get_human_fetch_datetime())
+        chart_title += f" for board {board.name}"
+        chart_title += f" (fetched on {board.get_human_fetch_datetime()})"
 
     number_of_cards_chart = pygal.Bar(
         title=chart_title, legend_at_bottom=True, print_values=False, print_zeroes=False, fill=False,
@@ -374,16 +370,16 @@ def number_of_cards(current_user, board=None):
 def spent_time(current_user, board=None):
 
     # Caching
-    chart_uuid = "members.spent_time-{0}-{1}".format(current_user.id, board.id if board else "None")
+    chart_uuid = "members.spent_time-{}-{}".format(current_user.id, board.id if board else "None")
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Spent time by member as of {0}".format(timezone.now())
+    chart_title = f"Spent time by member as of {timezone.now()}"
 
     if board:
-        chart_title += u" for board {0}".format(board.name)
-        chart_title += u" (fetched on {0})".format(board.get_human_fetch_datetime())
+        chart_title += f" for board {board.name}"
+        chart_title += f" (fetched on {board.get_human_fetch_datetime()})"
 
     if board:
         boards = [board]

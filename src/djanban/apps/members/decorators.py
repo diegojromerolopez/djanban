@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.http import HttpResponseForbidden
 
 from djanban.apps.base.auth import user_is_administrator

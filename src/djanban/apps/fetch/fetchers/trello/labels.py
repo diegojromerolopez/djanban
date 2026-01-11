@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
 from djanban.apps.boards.models import Label
 
 
 # Label updater
-class LabelUpdater(object):
+class LabelUpdater:
 
     # Creates a label if there is some change between Trello's label and this one
     @staticmethod

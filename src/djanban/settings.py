@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import importlib
 import os
 import pytz
@@ -23,7 +19,7 @@ if os.environ.get("DJANGO_APP_MODE") == "desktop_app":
 try:
     settings_local = importlib.import_module(settings_local_module)
 except ImportError:
-    print("Please, create a {0} in project directory "
+    print("Please, create a {} in project directory "
           "with SECRET_KEY, DEBUG, DOMAIN, ALLOWED_HOSTS and DATABASES settings".format(settings_local_module))
     exit(-1)
 
@@ -123,7 +119,7 @@ if hasattr(settings_local, "DISABLED_APPS"):
     INSTALLED_APPS = [app for app in INSTALLED_APPS if app not in settings_local.DISABLED_APPS]
 
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -131,7 +127,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'crequest.middleware.CrequestMiddleware',
     'cuser.middleware.CuserMiddleware'
-)
+]
 
 # Based on the tutorial that integrates Django with Angular
 # (https://4sw.in/blog/2016/django-angular2-tutorial-part-2/)
@@ -209,7 +205,7 @@ else:
 
 USE_I18N = False
 
-USE_L10N = False
+# USE_L10N removed in Django 5.0
 
 USE_TZ = True
 
@@ -270,3 +266,5 @@ CKEDITOR_CONFIGS = {
         'toolbar': 'full'
     }
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

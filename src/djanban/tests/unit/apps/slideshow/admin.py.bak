@@ -1,0 +1,7 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
+import unittest
+from djanban.apps.slideshow.admin import *
+
+class TestAdmin(unittest.TestCase):
+    pass

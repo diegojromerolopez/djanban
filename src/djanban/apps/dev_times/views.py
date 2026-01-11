@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import calendar
 import datetime
 import re
@@ -51,15 +47,15 @@ def export_daily_spent_times(request):
 
     if "multiboard" in spent_times and spent_times["multiboard"]:
         multiboard = spent_times["multiboard"]
-        name_str = (u"mb-{0}-".format(multiboard.name)).lower()
+        name_str = (f"mb-{multiboard.name}-").lower()
 
     if "board" in spent_times and spent_times["board"]:
         board = spent_times["board"]
-        name_str = (u"{0}-".format(board.name)).lower()
+        name_str = (f"{board.name}-").lower()
 
     # Creation of the HTTP response
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="{0}export-daily-spent-times-from-{1}-to-{2}.csv"'.format(
+    response['Content-Disposition'] = 'attachment; filename="{}export-daily-spent-times-from-{}-to-{}.csv"'.format(
         name_str, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")
     )
 
@@ -168,7 +164,7 @@ def send_daily_spent_times(request):
     html_message = get_template("daily_spent_times/emails/send_daily_spent_times.html").render(replacements)
 
     csv_report = get_template('daily_spent_times/csv.txt').render({"spent_times": daily_spent_times})
-    csv_file_name = "custom_report_for_{0}.csv".format(recipient_email)
+    csv_file_name = f"custom_report_for_{recipient_email}.csv"
 
     try:
         message = EmailMultiAlternatives(report_subject, txt_message, settings.EMAIL_HOST_USER, [recipient_email])
@@ -284,7 +280,7 @@ def _get_daily_spent_times_from_request(request):
     if request.GET.get("label_id"):
         label_id = request.GET.get("label_id")
     elif request.GET.get("board_id"):
-        label_id = "all_from_board_{0}".format(request.GET.get("board_id"))
+        label_id = "all_from_board_{}".format(request.GET.get("board_id"))
 
     spent_times = _get_daily_spent_times_queryset(
         current_user, selected_member,

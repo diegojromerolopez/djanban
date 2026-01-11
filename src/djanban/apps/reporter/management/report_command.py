@@ -1,5 +1,3 @@
-
-from __future__ import unicode_literals
 import datetime
 
 from django.conf import settings
@@ -16,11 +14,11 @@ from djanban.utils.week import get_iso_week_of_year, start_of_week_of_year, end_
 
 
 class ReportCommand(BaseCommand):
-    help = u'Base report for administrators'
-    date_help_text = u"Date of the base report"
+    help = 'Base report for administrators'
+    date_help_text = "Date of the base report"
 
     def __init__(self):
-        super(ReportCommand, self).__init__()
+        super().__init__()
         self.date = None
 
     def add_arguments(self, parser):
@@ -44,7 +42,7 @@ class ReportCommand(BaseCommand):
             try:
                 date = datetime.datetime.strptime(options["date"], "%Y-%m-%d")
             except ValueError:
-                self.stderr.write(self.style.ERROR(u"Date {0} format is not valid".format(options["date"])))
+                self.stderr.write(self.style.ERROR("Date {} format is not valid".format(options["date"])))
                 return None
 
         return date
@@ -60,7 +58,7 @@ class ReportCommand(BaseCommand):
                 daily_spent_times, report_recipient, subject,
                 txt_template_path, html_template_path, csv_file_name
             )
-            self.stdout.write(self.style.SUCCESS(u"Report sent to {0}".format(report_recipient.email)))
+            self.stdout.write(self.style.SUCCESS(f"Report sent to {report_recipient.email}"))
         return report_recipients
 
     # Send a report to one administrator user

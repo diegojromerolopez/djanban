@@ -1,12 +1,14 @@
-# -*- coding: utf-8 -*-
-
-from django.conf.urls import url, include
+from django.urls import path, re_path
 
 from djanban.apps.workflows import views
 
+
+
+app_name = 'workflows'
+
 urlpatterns = [
-    url(r'^$', views.view_list, name="view_list"),
-    url(r'^new/?$', views.new, name="new"),
-    url(r'^(?P<workflow_id>\d+)/edit/?$', views.edit, name="edit"),
-    url(r'^(?P<workflow_id>\d+)/delete/?$', views.delete, name="delete"),
+    path('', views.view_list, name="view_list"),
+    re_path(r'^new/?$', views.new, name="new"),
+    re_path(r'^(?P<workflow_id>\d+)/edit/?$', views.edit, name="edit"),
+    re_path(r'^(?P<workflow_id>\d+)/delete/?$', views.delete, name="delete"),
 ]

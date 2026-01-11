@@ -1,9 +1,11 @@
-# -*- coding: utf-8 -*-
-
-from django.conf.urls import url, include
+from django.urls import path
 
 from djanban.apps.slideshow.views import view
 
+
+
+app_name = 'slideshow'
+
 urlpatterns = [
-    url(r'^$', view, name="view"),
+    path('', view, name="view"),
 ]

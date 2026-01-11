@@ -1,0 +1,7 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
+import unittest
+from djanban.apps.forecasters.regression.runner import *
+
+class TestRunner(unittest.TestCase):
+    pass

@@ -1,8 +1,6 @@
-
-# -*- coding: utf-8 -*-
 import unittest
 from datetime import date, timedelta
-from mock import patch
+from unittest.mock import patch
 from djanban.utils.week import *
 
 class TestWeek(unittest.TestCase):
@@ -21,26 +19,26 @@ class TestWeek(unittest.TestCase):
 
     def test_get_week_of_year(self):
         d = date(2023, 1, 2)
-        self.assertEqual(get_week_of_year(d), u"2023W1")
+        self.assertEqual(get_week_of_year(d), "2023W1")
 
     @patch('django.utils.timezone.now')
     def test_get_week_of_year_none(self, mock_now):
         mock_now.return_value.date.return_value = date(2023, 1, 2)
-        self.assertEqual(get_week_of_year(None), u"2023W1")
+        self.assertEqual(get_week_of_year(None), "2023W1")
 
     def test_get_weeks_of_year_since_one_year_ago(self):
         d = date(2023, 1, 2)
         weeks = get_weeks_of_year_since_one_year_ago(d)
         self.assertEqual(len(weeks), 53)
-        self.assertEqual(weeks[0], u"2023W1")
-        self.assertEqual(weeks[1], u"2022W52")
+        self.assertEqual(weeks[0], "2023W1")
+        self.assertEqual(weeks[1], "2022W52")
 
     @patch('django.utils.timezone.now')
     def test_get_weeks_of_year_since_one_year_ago_none(self, mock_now):
         mock_now.return_value.date.return_value = date(2023, 1, 2)
         weeks = get_weeks_of_year_since_one_year_ago(None)
         self.assertEqual(len(weeks), 53)
-        self.assertEqual(weeks[0], u"2023W1")
+        self.assertEqual(weeks[0], "2023W1")
 
     def test_number_of_weeks_of_year(self):
         self.assertEqual(number_of_weeks_of_year(2023), 52)

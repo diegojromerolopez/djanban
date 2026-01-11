@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import copy
 from datetime import timedelta
 
@@ -22,12 +18,12 @@ from djanban.apps.members.models import Member
 def noise_level(current_user):
 
     # Caching
-    chart_uuid = "noise_measurements.noise_level-{0}".format(current_user.id)
+    chart_uuid = f"noise_measurements.noise_level-{current_user.id}"
     chart = CachedChart.get(board=None, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Average noise levels per day in db as of {0}".format(timezone.now())
+    chart_title = f"Average noise levels per day in db as of {timezone.now()}"
 
     noise_measurement_filter = {"member__in": Member.get_user_team_members(current_user)}
 
@@ -68,12 +64,12 @@ def noise_level(current_user):
 # Average, min and max noise level per hour
 def noise_level_per_hour(current_user):
     # Caching
-    chart_uuid = "noise_measurements.noise_level_per_hour-{0}".format(current_user.id)
+    chart_uuid = f"noise_measurements.noise_level_per_hour-{current_user.id}"
     chart = CachedChart.get(board=None, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Noise levels per hour in db as of {0}".format(timezone.now())
+    chart_title = f"Noise levels per hour in db as of {timezone.now()}"
 
     noise_measurement_filter = {"member__in": Member.get_user_team_members(current_user)}
 
@@ -111,12 +107,12 @@ def noise_level_per_hour(current_user):
 # Average, min and max noise level per weekday
 def noise_level_per_weekday(current_user):
     # Caching
-    chart_uuid = "noise_measurements.noise_level_per_weekday-{0}".format(current_user.id)
+    chart_uuid = f"noise_measurements.noise_level_per_weekday-{current_user.id}"
     chart = CachedChart.get(board=None, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Noise levels per weekday in db as of {0}".format(timezone.now())
+    chart_title = f"Noise levels per weekday in db as of {timezone.now()}"
 
     noise_measurement_filter = {"member__in": Member.get_user_team_members(current_user)}
 
@@ -156,7 +152,7 @@ def noise_level_per_weekday(current_user):
 def subjective_noise_level(current_user, month=None, year=None):
 
     # Caching
-    chart_uuid = "noise_measurements.subjective_noise_level-{0}-{1}-{2}".format(
+    chart_uuid = "noise_measurements.subjective_noise_level-{}-{}-{}".format(
         current_user.id,
         month if month else "None",
         year if year else "None"
@@ -165,7 +161,7 @@ def subjective_noise_level(current_user, month=None, year=None):
     if chart:
         return chart
 
-    chart_title = u"Subjective noise levels as of {0}".format(timezone.now())
+    chart_title = f"Subjective noise levels as of {timezone.now()}"
 
     noise_measurement_filter = {"member__in": Member.get_user_team_members(current_user)}
     noise_measurements = NoiseMeasurement.objects.filter(**noise_measurement_filter).order_by("datetime")
@@ -177,8 +173,8 @@ def subjective_noise_level(current_user, month=None, year=None):
                                            print_zeroes=False, human_readable=True, x_label_rotation=45 )
 
     subjective_noise_levels = dict(NoiseMeasurement.SUBJECTIVE_NOISE_LEVELS)
-    for level_key, level_name in subjective_noise_levels.items():
-        noise_chart.add(u"{0}".format(level_name), noise_measurements.filter(subjective_noise_level=level_key).count())
+    for level_key, level_name in list(subjective_noise_levels.items()):
+        noise_chart.add(f"{level_name}", noise_measurements.filter(subjective_noise_level=level_key).count())
 
     chart = CachedChart.make(board=None, uuid=chart_uuid, svg=noise_chart.render(is_unicode=True))
     return chart.render_django_response()

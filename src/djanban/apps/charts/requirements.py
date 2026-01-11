@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import copy
 from datetime import timedelta
 
@@ -22,15 +18,15 @@ def burndown(board, requirement=None):
 # Burndown for a particular requirement
 def _requirement_burndown(board, requirement):
     # Caching
-    chart_uuid = "requirements._requirement_burndown-{0}".format(requirement.id)
+    chart_uuid = f"requirements._requirement_burndown-{requirement.id}"
     svg_chart = CachedChart.get(board=board, uuid=chart_uuid)
     if svg_chart:
         return svg_chart
 
     board = requirement.board
 
-    chart_title = u"Burndown of requirement {0}".format(requirement.code)
-    chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
+    chart_title = f"Burndown of requirement {requirement.code}"
+    chart_title += f" for board {board.name} as of {board.get_human_fetch_datetime()}"
 
     burndown_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
                                 x_labels_major_count=30, show_minor_x_labels=False,
@@ -73,9 +69,9 @@ def _requirement_burndown(board, requirement):
             x_labels.append(date_i.strftime("%Y-%m-%d"))
         date_i += timedelta(days=1)
 
-    burndown_chart.add(u"Initial estimation for {0}".format(requirement.code), [remaining_time for i in range(0, len(x_labels))])
+    burndown_chart.add(f"Initial estimation for {requirement.code}", [remaining_time for i in range(0, len(x_labels))])
     burndown_chart.x_labels = x_labels
-    burndown_chart.add(u"Burndown of {0}".format(requirement.code), remaining_time_values)
+    burndown_chart.add(f"Burndown of {requirement.code}", remaining_time_values)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=burndown_chart.render(is_unicode=True))
     return chart.render_django_response()
@@ -85,13 +81,13 @@ def _requirement_burndown(board, requirement):
 def _burndown_by_requirement(board):
 
     # Caching
-    chart_uuid = "requirements._burndown_by_requirement-{0}".format(board.id)
+    chart_uuid = f"requirements._burndown_by_requirement-{board.id}"
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Burndown for board {0}".format(board.name)
-    chart_title += u" as of {1}".format(board.name, board.get_human_fetch_datetime())
+    chart_title = f"Burndown for board {board.name}"
+    chart_title += f" as of {board.get_human_fetch_datetime()}"
 
     burndown_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
                                 x_labels_major_count=30, show_minor_x_labels=False,
@@ -134,9 +130,9 @@ def _burndown_by_requirement(board):
             x_labels.append(date_i.strftime("%Y-%m-%d"))
         date_i += timedelta(days=1)
 
-    burndown_chart.add(u"{0} requirements estimation".format(board.name), [remaining_time for i in range(0, len(x_labels))])
+    burndown_chart.add(f"{board.name} requirements estimation", [remaining_time for i in range(0, len(x_labels))])
     burndown_chart.x_labels = x_labels
-    burndown_chart.add(u"Burndown according to {0} requirements".format(board.name), remaining_time_values)
+    burndown_chart.add(f"Burndown according to {board.name} requirements", remaining_time_values)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=burndown_chart.render(is_unicode=True))
     return chart.render_django_response()

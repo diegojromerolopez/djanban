@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from djanban.apps.base.auth import user_is_administrator
 from djanban.apps.boards.models import Board
 from djanban.apps.charts import cards, labels, members, boards, requirements

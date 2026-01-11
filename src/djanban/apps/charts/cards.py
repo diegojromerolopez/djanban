@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import copy
 import inspect
 import math
@@ -27,14 +23,14 @@ from djanban.apps.reports.models import CardMovement
 def avg_lead_time(request, board=None):
 
     # Caching
-    chart_uuid = "cards.avg_lead_time-{0}".format(board.id if board else "user-{0}".format(request.user.id))
+    chart_uuid = "cards.avg_lead_time-{}".format(board.id if board else f"user-{request.user.id}")
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Task average lead time as of {0}".format(timezone.now())
+    chart_title = f"Task average lead time as of {timezone.now()}"
     if board:
-        chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
+        chart_title += f" for board {board.name} as of {board.get_human_fetch_datetime()}"
 
     lead_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                           print_zeroes=False,
@@ -43,23 +39,23 @@ def avg_lead_time(request, board=None):
     if not board:
         boards = get_user_boards(request.user)
         card_avg_lead_time = Card.objects.filter(board__in=boards).aggregate(Avg("lead_time"))["lead_time__avg"]
-        lead_time_chart.add(u"All boards", card_avg_lead_time)
+        lead_time_chart.add("All boards", card_avg_lead_time)
         if request.user.is_authenticated and hasattr(request.user, "member"):
             for board_i in boards:
                 card_avg_lead_time = board_i.cards.all().aggregate(Avg("lead_time"))["lead_time__avg"]
                 if card_avg_lead_time > 0:
-                    lead_time_chart.add(u"{0}".format(board_i.name), card_avg_lead_time)
+                    lead_time_chart.add(f"{board_i.name}", card_avg_lead_time)
     else:
         labels = board.labels.all()
 
         card_avg_lead_time = board.cards.all().aggregate(Avg("lead_time"))["lead_time__avg"]
-        lead_time_chart.add(u"Card average lead time", card_avg_lead_time)
+        lead_time_chart.add("Card average lead time", card_avg_lead_time)
 
         for label in labels:
             if label.name:
                 label_avg_lead_time = label.avg_lead_time()
                 if label_avg_lead_time > 0:
-                    lead_time_chart.add(u"{0} average lead time".format(label.name), label_avg_lead_time)
+                    lead_time_chart.add(f"{label.name} average lead time", label_avg_lead_time)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=lead_time_chart.render(is_unicode=True))
     return chart.render_django_response()
@@ -69,14 +65,14 @@ def avg_lead_time(request, board=None):
 def avg_cycle_time(request, board=None):
 
     # Caching
-    chart_uuid = "cards.avg_cycle_time-{0}".format(board.id if board else "user-{0}".format(request.user.id))
+    chart_uuid = "cards.avg_cycle_time-{}".format(board.id if board else f"user-{request.user.id}")
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Task average cycle time as of {0}".format(timezone.now())
+    chart_title = f"Task average cycle time as of {timezone.now()}"
     if board:
-        chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
+        chart_title += f" for board {board.name} as of {board.get_human_fetch_datetime()}"
 
     cycle_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                            print_zeroes=False,
@@ -85,24 +81,24 @@ def avg_cycle_time(request, board=None):
     if not board:
         boards = get_user_boards(request.user)
         card_avg_cycle_time = Card.objects.filter(board__in=boards).aggregate(Avg("cycle_time"))["cycle_time__avg"]
-        cycle_time_chart.add(u"All boards", card_avg_cycle_time)
+        cycle_time_chart.add("All boards", card_avg_cycle_time)
         if request.user.is_authenticated and hasattr(request.user, "member"):
             for board_i in boards:
                 card_avg_cycle_time = board_i.cards.all().aggregate(Avg("cycle_time"))["cycle_time__avg"]
                 if card_avg_cycle_time > 0:
-                    cycle_time_chart.add(u"{0}".format(board_i.name), card_avg_cycle_time)
+                    cycle_time_chart.add(f"{board_i.name}", card_avg_cycle_time)
 
     else:
         labels = board.labels.all()
 
         card_avg_lead_time = board.cards.all().aggregate(Avg("cycle_time"))["cycle_time__avg"]
-        cycle_time_chart.add(u"Task average cycle time", card_avg_lead_time)
+        cycle_time_chart.add("Task average cycle time", card_avg_lead_time)
 
         for label in labels:
             if label.name:
                 label_avg_cycle_time = label.avg_cycle_time()
                 if label_avg_cycle_time > 0:
-                    cycle_time_chart.add(u"{0} average cycle time".format(label.name), label_avg_cycle_time)
+                    cycle_time_chart.add(f"{label.name} average cycle time", label_avg_cycle_time)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=cycle_time_chart.render(is_unicode=True))
     return chart.render_django_response()
@@ -125,14 +121,14 @@ def _avg_metric_time_by_month(request, board=None, metric="lead"):
         raise ValueError("The metric must be 'lead' or 'cycle'")
 
     # Caching
-    chart_uuid = "cards._avg_metric_time_by_month-{0}-{1}".format(board.id if board else "user-{0}".format(request.user.id), metric)
+    chart_uuid = "cards._avg_metric_time_by_month-{}-{}".format(board.id if board else f"user-{request.user.id}", metric)
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Task average {0} time by month as of {1}".format(metric, timezone.now())
+    chart_title = f"Task average {metric} time by month as of {timezone.now()}"
     if board:
-        chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
+        chart_title += f" for board {board.name} as of {board.get_human_fetch_datetime()}"
 
     metric_time_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
                                    print_zeroes=False, human_readable=True)
@@ -171,7 +167,7 @@ def _avg_metric_time_by_month(request, board=None, metric="lead"):
                                                movements__destination_list__type="done")
 
         if cards_ending_this_month.exists():
-            x_labels.append(u"{0}-{1}".format(year_i, month_i))
+            x_labels.append(f"{year_i}-{month_i}")
             if metric == "lead":
                 def card_metric(card_):
                     return card_.lead_time
@@ -192,7 +188,7 @@ def _avg_metric_time_by_month(request, board=None, metric="lead"):
             else:
                 raise ValueError("The metric must be 'lead' or 'cycle'")
 
-            card_metric_value = filter(lambda v: v is not None, [card_metric(card) for card in cards_ending_this_month])
+            card_metric_value = [v for v in [card_metric(card) for card in cards_ending_this_month] if v is not None]
             if len(card_metric_value) > 0:
                 metric_time_values.append(numpy.mean(card_metric_value))
                 if board:
@@ -200,7 +196,7 @@ def _avg_metric_time_by_month(request, board=None, metric="lead"):
                         label_cards = cards_ending_this_month.filter(labels=label)
                         if label_cards.exists():
                             label_metric_value = [card_metric(card) for card in label_cards]
-                            label.metric_values.append(numpy.mean(filter(lambda v: v is not None, label_metric_value)))
+                            label.metric_values.append(numpy.mean([v for v in label_metric_value if v is not None]))
 
         month_i += 1
         if month_i > 12:
@@ -209,12 +205,12 @@ def _avg_metric_time_by_month(request, board=None, metric="lead"):
 
     metric_time_chart.x_labels = x_labels
     metric_name = metric[0].upper() + metric[1:]
-    metric_title = "{0} time for all cards".format(metric_name)
+    metric_title = f"{metric_name} time for all cards"
     metric_time_chart.add(metric_title, metric_time_values)
 
     if board:
         for label in labels:
-            metric_time_chart.add("{1} cards".format(metric_name, label.name), label.metric_values)
+            metric_time_chart.add(f"{label.name} cards", label.metric_values)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=metric_time_chart.render(is_unicode=True))
     return chart.render_django_response()
@@ -223,16 +219,16 @@ def _avg_metric_time_by_month(request, board=None, metric="lead"):
 # Average card time in each list
 def avg_time_by_list(board, workflow=None):
     # Caching
-    chart_uuid = "cards.avg_time_by_list-{0}-{1}".format(board.id, workflow.id if workflow else "None")
+    chart_uuid = "cards.avg_time_by_list-{}-{}".format(board.id, workflow.id if workflow else "None")
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Average time of all tasks living in each list for board {0} ".format(board.name)
+    chart_title = f"Average time of all tasks living in each list for board {board.name} "
     if workflow:
-        chart_title += "for workflow {0} ".format(workflow.name)
+        chart_title += f"for workflow {workflow.name} "
 
-    chart_title += "as of {0}".format(board.get_human_fetch_datetime())
+    chart_title += f"as of {board.get_human_fetch_datetime()}"
 
     avg_time_by_list_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                                  print_zeroes=False,
@@ -242,7 +238,7 @@ def avg_time_by_list(board, workflow=None):
     if workflow:
         lists = workflow.lists.all()
     for list_ in lists:
-        avg_time_by_list_chart.add(u"{0}".format(list_.name), list_.avg_card_time_in_list)
+        avg_time_by_list_chart.add(f"{list_.name}", list_.avg_card_time_in_list)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=avg_time_by_list_chart.render(is_unicode=True))
     return chart.render_django_response()
@@ -251,16 +247,16 @@ def avg_time_by_list(board, workflow=None):
 # Average card estimated time in each list
 def avg_std_dev_time_by_list(board, workflow=None):
     # Caching
-    chart_uuid = "cards.avg_std_dev_time_by_list-{0}-{1}".format(board.id, workflow.id if workflow else "None")
+    chart_uuid = "cards.avg_std_dev_time_by_list-{}-{}".format(board.id, workflow.id if workflow else "None")
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Average standard deviation time of all tasks living in each list for board {0} ".format(board.name)
+    chart_title = f"Average standard deviation time of all tasks living in each list for board {board.name} "
     if workflow:
-        chart_title += "for workflow {0} ".format(workflow.name)
+        chart_title += f"for workflow {workflow.name} "
 
-    chart_title += "as of {0}".format(board.get_human_fetch_datetime())
+    chart_title += f"as of {board.get_human_fetch_datetime()}"
 
     avg_time_by_list_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                                  print_zeroes=False,
@@ -270,7 +266,7 @@ def avg_std_dev_time_by_list(board, workflow=None):
     if workflow:
         lists = workflow.lists.all()
     for list_ in lists:
-        avg_time_by_list_chart.add(u"{0}".format(list_.name), list_.std_dev_card_time_in_list)
+        avg_time_by_list_chart.add(f"{list_.name}", list_.std_dev_card_time_in_list)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=avg_time_by_list_chart.render(is_unicode=True))
     return chart.render_django_response()
@@ -280,13 +276,13 @@ def avg_std_dev_time_by_list(board, workflow=None):
 def absolute_flow_diagram(board, day_step=1):
 
     # Caching
-    chart_uuid = "cards.absolute_flow_diagram-{0}-{1}".format(board.id, day_step)
+    chart_uuid = f"cards.absolute_flow_diagram-{board.id}-{day_step}"
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Flow diagram as of {0}".format(timezone.now())
-    chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
+    chart_title = f"Flow diagram as of {timezone.now()}"
+    chart_title += f" for board {board.name} (fetched on {board.get_human_fetch_datetime()})"
 
     cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=False,
@@ -330,7 +326,7 @@ def absolute_flow_diagram(board, day_step=1):
             num_cards = num_cards_moving_to_list + num_cards_without_movements
             list_values[list_id].append(num_cards)
 
-        x_labels.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
+        x_labels.append(f"{date_i.year}-{date_i.month}-{date_i.day}")
 
         date_i += timedelta(days=day_step)
 
@@ -347,13 +343,13 @@ def absolute_flow_diagram(board, day_step=1):
 def cumulative_flow_diagram(board, day_step=1):
 
     # Caching
-    chart_uuid = "cards.cumulative_flow-diagram-{0}-{1}".format(board.id, day_step)
+    chart_uuid = f"cards.cumulative_flow-diagram-{board.id}-{day_step}"
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Cumulative flow diagram as of {0}".format(timezone.now())
-    chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
+    chart_title = f"Cumulative flow diagram as of {timezone.now()}"
+    chart_title += f" for board {board.name} (fetched on {board.get_human_fetch_datetime()})"
 
     cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=True,
@@ -401,7 +397,7 @@ def cumulative_flow_diagram(board, day_step=1):
             num_cards = num_cards_moving_to_list + num_cards_without_movements
             list_values[list_id].append(num_cards)
 
-        x_labels.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
+        x_labels.append(f"{date_i.year}-{date_i.month}-{date_i.day}")
         date_i += timedelta(days=day_step)
 
     cumulative_chart.x_labels = x_labels
@@ -418,17 +414,17 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=1):
 
     # Caching
     if board:
-        chart_uuid = "cards.cumulative_list_type_evolution-{0}-{1}".format(board.id, day_step)
+        chart_uuid = f"cards.cumulative_list_type_evolution-{board.id}-{day_step}"
     else:
-        chart_uuid = "cards.cumulative_list_type_evolution-all-{0}".format(day_step)
+        chart_uuid = f"cards.cumulative_list_type_evolution-all-{day_step}"
 
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Cumulative flow diagram as of {0}".format(timezone.now())
+    chart_title = f"Cumulative flow diagram as of {timezone.now()}"
     if board:
-        chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
+        chart_title += f" for board {board.name} (fetched on {board.get_human_fetch_datetime()})"
 
     cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=True,
@@ -445,8 +441,8 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=1):
         cumulative_chart = pygal.Line(title=chart_title)
         return cumulative_chart.render_django_response()
 
-    start_working_date = numpy.min(filter(None, [board_i.get_working_start_date() for board_i in boards]))
-    end_working_date = numpy.max(filter(None, [board_i.get_working_end_date() for board_i in boards]))
+    start_working_date = numpy.min([_f for _f in [board_i.get_working_start_date() for board_i in boards] if _f])
+    end_working_date = numpy.max([_f for _f in [board_i.get_working_end_date() for board_i in boards] if _f])
     if start_working_date is None or end_working_date is None:
         cumulative_chart = pygal.Line(title=chart_title)
         return cumulative_chart.render_django_response()
@@ -494,7 +490,7 @@ def cumulative_list_type_evolution(current_user, board=None, day_step=1):
             list_type_values[list_type].append(num_cards)
 
         if num_total_cards > 0:
-            x_labels.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
+            x_labels.append(f"{date_i.year}-{date_i.month}-{date_i.day}")
 
         date_i += timedelta(days=day_step)
 
@@ -514,9 +510,9 @@ def cumulative_card_evolution(current_user, board=None, day_step=1):
 
     # Caching
     if board:
-        chart_uuid = "cards.cumulative_card_evolution-{0}-{1}".format(board.id, day_step)
+        chart_uuid = f"cards.cumulative_card_evolution-{board.id}-{day_step}"
     else:
-        chart_uuid = "cards.cumulative_card_evolution-all-{0}".format(day_step)
+        chart_uuid = f"cards.cumulative_card_evolution-all-{day_step}"
 
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
@@ -527,9 +523,9 @@ def cumulative_card_evolution(current_user, board=None, day_step=1):
     else:
         boards = get_user_boards(current_user)
 
-    chart_title = u"Number of created cards vs completed cards as of {0}".format(timezone.now())
+    chart_title = f"Number of created cards vs completed cards as of {timezone.now()}"
     if board:
-        chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
+        chart_title += f" for board {board.name} (fetched on {board.get_human_fetch_datetime()})"
 
     cumulative_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=False,
@@ -546,8 +542,8 @@ def cumulative_card_evolution(current_user, board=None, day_step=1):
     cumulative_chart.show_only_major_dots = True
 
     # If there have no been work, return the empty chart
-    start_working_date = numpy.min(filter(None, [board_i.get_working_start_date() for board_i in boards]))
-    end_working_date = numpy.max(filter(None, [board_i.get_working_end_date() for board_i in boards]))
+    start_working_date = numpy.min([_f for _f in [board_i.get_working_start_date() for board_i in boards] if _f])
+    end_working_date = numpy.max([_f for _f in [board_i.get_working_end_date() for board_i in boards] if _f])
     if start_working_date is None or end_working_date is None:
         return cumulative_chart.render_django_response()
 
@@ -593,7 +589,7 @@ def cumulative_card_evolution(current_user, board=None, day_step=1):
             num_created_card_values.append(num_created_cards)
             num_done_card_values.append(num_done_cards)
 
-            x_labels.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
+            x_labels.append(f"{date_i.year}-{date_i.month}-{date_i.day}")
 
             # Each category filtered by label
             if board:
@@ -618,10 +614,10 @@ def cumulative_card_evolution(current_user, board=None, day_step=1):
     cumulative_chart.add("Done cards", num_done_card_values)
     if board:
         for label in labels:
-            if sum(filter(None, created_card_values_by_label[label.id])) > 0:
-                cumulative_chart.add("Created {0} cards in {1}".format(label.name, label.board.name), created_card_values_by_label[label.id])
-            if sum(filter(None, done_card_values_by_label[label.id])) > 0:
-                cumulative_chart.add("Done {0} cards in {1}".format(label.name, label.board.name), done_card_values_by_label[label.id])
+            if sum([_f for _f in created_card_values_by_label[label.id] if _f]) > 0:
+                cumulative_chart.add(f"Created {label.name} cards in {label.board.name}", created_card_values_by_label[label.id])
+            if sum([_f for _f in done_card_values_by_label[label.id] if _f]) > 0:
+                cumulative_chart.add(f"Done {label.name} cards in {label.board.name}", done_card_values_by_label[label.id])
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=cumulative_chart.render(is_unicode=True))
     return chart.render_django_response()
@@ -645,8 +641,8 @@ def value_evolution_by_member(current_user, board=None, day_step=1):
 # Evolution of developed card value through time
 def _value_evolution(current_user, board=None, cumulative=False, day_step=1, by_member=False):
     # Caching
-    chart_uuid = "cards.value_evolution-{0}-{1}-{2}-{3}".format(
-        board.id if board else "user-{0}".format(current_user.id),
+    chart_uuid = "cards.value_evolution-{}-{}-{}-{}".format(
+        board.id if board else f"user-{current_user.id}",
         "cumulative" if cumulative else "",
         day_step,
         "by_member" if by_member else ""
@@ -662,12 +658,12 @@ def _value_evolution(current_user, board=None, cumulative=False, day_step=1, by_
         boards = get_user_boards(current_user)
 
     if cumulative:
-        chart_title = u"Cumulative evolution of developed card value{0}as of {1}".format(" by member " if by_member else " ", timezone.now())
+        chart_title = "Cumulative evolution of developed card value{}as of {}".format(" by member " if by_member else " ", timezone.now())
     else:
-        chart_title = u"Evolution of developed card value{0}as of {1}".format(" by member " if by_member else " ", timezone.now())
+        chart_title = "Evolution of developed card value{}as of {}".format(" by member " if by_member else " ", timezone.now())
 
     if board:
-        chart_title += u" for board {0} (fetched on {1})".format(board.name, board.get_human_fetch_datetime())
+        chart_title += f" for board {board.name} (fetched on {board.get_human_fetch_datetime()})"
 
     card_value_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                   print_zeroes=False, fill=False,
@@ -682,8 +678,8 @@ def _value_evolution(current_user, board=None, cumulative=False, day_step=1, by_
         card_value_chart.show_minor_x_labels = True
         return card_value_chart.render_django_response()
 
-    start_working_date = numpy.min(filter(None, [board_i.get_working_start_date() for board_i in boards]))
-    end_working_date = numpy.max(filter(None, [board_i.get_working_end_date() for board_i in boards]))
+    start_working_date = numpy.min([_f for _f in [board_i.get_working_start_date() for board_i in boards] if _f])
+    end_working_date = numpy.max([_f for _f in [board_i.get_working_end_date() for board_i in boards] if _f])
 
     # In case members have not started working in any of the boards, the chart is empty (obviously)
     if start_working_date is None or end_working_date is None:
@@ -745,7 +741,7 @@ def _value_evolution(current_user, board=None, cumulative=False, day_step=1, by_
 
     if by_member:
         for member in members:
-            card_value_chart.add("{0}".format(member.external_username), card_values_by_member[member.id])
+            card_value_chart.add(f"{member.external_username}", card_values_by_member[member.id])
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=card_value_chart.render(is_unicode=True))
     return chart.render_django_response()
@@ -754,12 +750,12 @@ def _value_evolution(current_user, board=None, cumulative=False, day_step=1, by_
 # Current age of each card per list in the board
 def age(board):
     # Caching
-    chart_uuid = "cards.age-{0}".format(board.id)
+    chart_uuid = f"cards.age-{board.id}"
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Age box chart of tasks for {0} as of {1}".format(board.name, timezone.now())
+    chart_title = f"Age box chart of tasks for {board.name} as of {timezone.now()}"
 
     age_chart = pygal.Box(
         title=chart_title, legend_at_bottom=False, print_values=False, print_zeroes=False, fill=False,
@@ -781,9 +777,9 @@ def completion_histogram(current_user, board=None, time_metric="lead_time", unit
 
     # Caching
     if board:
-        chart_uuid = "cards.completion_histogram-{0}-{1}-{2}".format(board.id, time_metric, units)
+        chart_uuid = f"cards.completion_histogram-{board.id}-{time_metric}-{units}"
     else:
-        chart_uuid = "cards.completion_histogram-all-{0}-{1}".format(time_metric, units)
+        chart_uuid = f"cards.completion_histogram-all-{time_metric}-{units}"
 
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
@@ -791,9 +787,9 @@ def completion_histogram(current_user, board=None, time_metric="lead_time", unit
 
     time_metric_name = time_metric.replace("_", " ")
     if board:
-        chart_title = u"{0} histogram for {1} as of {2}".format(time_metric_name, board.name, timezone.now())
+        chart_title = f"{time_metric_name} histogram for {board.name} as of {timezone.now()}"
     else:
-        chart_title = u"{0} histogram for all boards as of {1}".format(time_metric_name, timezone.now())
+        chart_title = f"{time_metric_name} histogram for all boards as of {timezone.now()}"
     chart_title = chart_title.capitalize()
 
     completion_histogram_chart = pygal.Bar(
@@ -823,7 +819,7 @@ def completion_histogram(current_user, board=None, time_metric="lead_time", unit
         for days in range(1, max_time_in_days+1):
             hours_min = (days-1) * 24.0
             hours_max = days * 24.0
-            card_filter = {"{0}__gt".format(time_metric): hours_min, "{0}__lte".format(time_metric): hours_max}
+            card_filter = {f"{time_metric}__gt": hours_min, f"{time_metric}__lte": hours_max}
             num_cards = cards.filter(**card_filter).count()
             if num_cards > 0:
                 x_labels.append(days)
@@ -832,14 +828,14 @@ def completion_histogram(current_user, board=None, time_metric="lead_time", unit
     elif units == "hours":
         for hours in range(1, max_time+1):
             hours_min = (hours - 1)
-            card_filter = {"{0}__gt".format(time_metric): hours_min, "{0}__lte".format(time_metric): hours}
+            card_filter = {f"{time_metric}__gt": hours_min, f"{time_metric}__lte": hours}
             num_cards = cards.filter(**card_filter).count()
             if num_cards > 0:
                 x_labels.append(hours)
                 num_card_values.append(num_cards)
 
     else:
-        ValueError(u"Unknown units")
+        ValueError("Unknown units")
 
     completion_histogram_chart.x_labels = x_labels
     completion_histogram_chart.add(units.capitalize(), num_card_values)
@@ -854,8 +850,8 @@ def time_scatterplot(current_user, time_metric_name="Time", board=None,
                      year=None, month=None):
 
     # Caching
-    chart_uuid = "cards.time_scatterplot-{0}-{1}-{2}-{3}-{4}".format(
-        current_user.id, board.id if board else "user-{0}".format(current_user.id), inspect.getsource(y_function).strip(),
+    chart_uuid = "cards.time_scatterplot-{}-{}-{}-{}-{}".format(
+        current_user.id, board.id if board else f"user-{current_user.id}", inspect.getsource(y_function).strip(),
         year if year else "None", month if month else "None"
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
@@ -863,9 +859,9 @@ def time_scatterplot(current_user, time_metric_name="Time", board=None,
         return chart
 
     if board:
-        chart_title = u"{0} scatterplot of tasks for {1} as of {2}".format(time_metric_name, board.name, timezone.now())
+        chart_title = f"{time_metric_name} scatterplot of tasks for {board.name} as of {timezone.now()}"
     else:
-        chart_title = u"{0} scatterplot of tasks for all boards as of {1}".format(time_metric_name, timezone.now())
+        chart_title = f"{time_metric_name} scatterplot of tasks for all boards as of {timezone.now()}"
 
     scatterplot = pygal.DateLine(
         title=chart_title, legend_at_bottom=False, print_values=False, print_zeroes=False, fill=False,
@@ -925,7 +921,7 @@ def time_scatterplot(current_user, time_metric_name="Time", board=None,
                 except TypeError as e:
                     pass
 
-            scatterplot.add("{0}-{1}".format(year_i, month_i), card_values)
+            scatterplot.add(f"{year_i}-{month_i}", card_values)
 
         month_i += 1
         i += 1
@@ -943,8 +939,8 @@ def time_vs_spent_time(current_user, time_metric_name="Time", board=None,
                        year=None, month=None):
 
     # Caching
-    chart_uuid = "cards.time_vs_spent_time-{0}-{1}-{2}-{3}-{4}".format(
-        current_user.id, board.id if board else "user-{0}".format(current_user.id), inspect.getsource(y_function).strip(),
+    chart_uuid = "cards.time_vs_spent_time-{}-{}-{}-{}-{}".format(
+        current_user.id, board.id if board else f"user-{current_user.id}", inspect.getsource(y_function).strip(),
         year if year else "None", month if month else "None"
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
@@ -953,9 +949,9 @@ def time_vs_spent_time(current_user, time_metric_name="Time", board=None,
 
     now = timezone.now()
     if board:
-        chart_title = u"{0} vs spent time of tasks for {1} as of {2}".format(time_metric_name, board.name, now)
+        chart_title = f"{time_metric_name} vs spent time of tasks for {board.name} as of {now}"
     else:
-        chart_title = u"{0} vs spent time of tasks for all boards as of {1}".format(time_metric_name, now)
+        chart_title = f"{time_metric_name} vs spent time of tasks for all boards as of {now}"
 
     time_vs_spent_time_chart = pygal.XY(
         title=chart_title, legend_at_bottom=False, print_values=False, print_zeroes=False, fill=False,
@@ -1015,7 +1011,7 @@ def time_vs_spent_time(current_user, time_metric_name="Time", board=None,
                 except TypeError:
                     pass
 
-            time_vs_spent_time_chart.add("{0}-{1}".format(year_i, month_i), card_values)
+            time_vs_spent_time_chart.add(f"{year_i}-{month_i}", card_values)
 
         month_i += 1
         i += 1
@@ -1033,8 +1029,8 @@ def time_box(current_user, time_metric_name="Time", board=None,
              year=None, month=None):
 
     # Caching
-    chart_uuid = "cards.time_box-{0}-{1}-{2}-{3}-{4}".format(
-        current_user.id, board.id if board else "user-{0}".format(current_user.id), inspect.getsource(y_function).strip(),
+    chart_uuid = "cards.time_box-{}-{}-{}-{}-{}".format(
+        current_user.id, board.id if board else f"user-{current_user.id}", inspect.getsource(y_function).strip(),
         year if year else "None", month if month else "None"
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
@@ -1042,9 +1038,9 @@ def time_box(current_user, time_metric_name="Time", board=None,
         return chart
 
     if board:
-        chart_title = u"{0} box chart of tasks for {1} as of {2}".format(time_metric_name, board.name, timezone.now())
+        chart_title = f"{time_metric_name} box chart of tasks for {board.name} as of {timezone.now()}"
     else:
-        chart_title = u"{0} box chart of tasks for all boards as of {1}".format(time_metric_name, timezone.now())
+        chart_title = f"{time_metric_name} box chart of tasks for all boards as of {timezone.now()}"
 
     box_chart = pygal.Box(
         title=chart_title, legend_at_bottom=False, print_values=False, print_zeroes=False, fill=False,
@@ -1104,7 +1100,7 @@ def time_box(current_user, time_metric_name="Time", board=None,
                 except TypeError:
                     pass
 
-            box_chart.add("{0}-{1}".format(year_i, month_i), card_values)
+            box_chart.add(f"{year_i}-{month_i}", card_values)
 
         month_i += 1
         i += 1
@@ -1119,19 +1115,19 @@ def time_box(current_user, time_metric_name="Time", board=None,
 # Number of comments chart
 def number_of_comments(current_user, board=None, card=None):
     # Caching
-    chart_uuid = "cards.number_of_comments-{0}-{1}-{2}".format(
-        current_user.id, board.id if board else "user-{0}".format(current_user.id), card.id if card else "None"
+    chart_uuid = "cards.number_of_comments-{}-{}-{}".format(
+        current_user.id, board.id if board else f"user-{current_user.id}", card.id if card else "None"
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Number of comments as of {0}".format(timezone.now())
+    chart_title = f"Number of comments as of {timezone.now()}"
     if board:
-        chart_title += u" for board {0}".format(board.name)
+        chart_title += f" for board {board.name}"
         if card:
-            chart_title += u" for card '{0}'".format(card.name)
-        chart_title += " (fetched on {0})".format(board.get_human_fetch_datetime())
+            chart_title += f" for card '{card.name}'"
+        chart_title += f" (fetched on {board.get_human_fetch_datetime()})"
 
     number_of_comments_chart = pygal.Line(
         title=chart_title, legend_at_bottom=True, print_values=False, print_zeroes=False, fill=False,
@@ -1179,9 +1175,9 @@ def number_of_comments(current_user, board=None, card=None):
         # If there is at least a comment, is a day with comments
         if comments.exists():
             number_of_comments_list.append(comments.count())
-            x_labels.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
+            x_labels.append(f"{date_i.year}-{date_i.month}-{date_i.day}")
             if i == 1 or i % 5 == 0:
-                x_labels_major.append(u"{0}-{1}-{2}".format(date_i.year, date_i.month, date_i.day))
+                x_labels_major.append(f"{date_i.year}-{date_i.month}-{date_i.day}")
             # Comments for each member
             for member in members:
                 member_comments = comments.filter(author=member)
@@ -1196,7 +1192,7 @@ def number_of_comments(current_user, board=None, card=None):
 
     for member in members:
         if sum(number_of_comments_by_member[member.id]) > 0:
-            number_of_comments_chart.add("{0}".format(member.external_username), number_of_comments_by_member[member.id])
+            number_of_comments_chart.add(f"{member.external_username}", number_of_comments_by_member[member.id])
 
     number_of_comments_chart.add("All members", number_of_comments_list)
 

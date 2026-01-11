@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
@@ -24,7 +20,7 @@ class ListTest(TestCase):
         self.lists = []
         # Create some lists, one for each type of active list
         for list_type in List.ACTIVE_LIST_TYPES:
-            form_data = {"name": "{0} list".format(list_type), "type": list_type}
+            form_data = {"name": f"{list_type} list", "type": list_type}
             form = NewListForm(data=form_data, instance=List(board=self.board), member=self.member)
             self.assertTrue(form.is_valid())
             list_i = form.save(commit=True)

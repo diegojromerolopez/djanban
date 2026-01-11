@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from decimal import Decimal
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -13,38 +9,34 @@ from djanban.utils.week import get_iso_week_of_year
 class DailySpentTime(models.Model):
 
     class Meta:
-        verbose_name = u"Spent time"
-        verbose_name_plural = u"Spent times"
-        index_together = (
-            ("date", "week_of_year", "spent_time"),
-            ("date", "week_of_year", "board", "spent_time"),
-            ("board", "date", "week_of_year", "spent_time")
-        )
+        verbose_name = "Spent time"
+        verbose_name_plural = "Spent times"
+        indexes = [models.Index(fields=("date", "week_of_year", "spent_time")), models.Index(fields=("date", "week_of_year", "board", "spent_time")), models.Index(fields=("board", "date", "week_of_year", "spent_time"))]
 
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of the comment", unique=False, null=True)
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="daily_spent_times")
-    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="daily_spent_times", null=True)
-    comment = models.OneToOneField("boards.CardComment", verbose_name=u"Comment", related_name="daily_spent_time", null=True)
-    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="daily_spent_times")
+    uuid = models.CharField(max_length=128, verbose_name="External id of the comment", unique=False, null=True)
+    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Board", related_name="daily_spent_times")
+    card = models.ForeignKey("boards.Card", on_delete=models.CASCADE, verbose_name="Card", related_name="daily_spent_times", null=True)
+    comment = models.OneToOneField("boards.CardComment", on_delete=models.CASCADE, verbose_name="Comment", related_name="daily_spent_time", null=True)
+    member = models.ForeignKey("members.Member", on_delete=models.CASCADE, verbose_name="Member", related_name="daily_spent_times")
     description = models.TextField(verbose_name="Description of the task")
     date = models.DateField(verbose_name="Date of the time measurement")
     day_of_year = models.CharField(verbose_name="Day number of the time measurement", max_length=16)
     week_of_year = models.CharField(verbose_name="Week number of the time measurement", max_length=16)
     weekday = models.CharField(verbose_name="Week day of the time measurement", max_length=16)
 
-    adjusted_spent_time = models.DecimalField(verbose_name=u"Adjusted spent time for this day",
+    adjusted_spent_time = models.DecimalField(verbose_name="Adjusted spent time for this day",
                                               decimal_places=4, max_digits=12, default=None, null=True)
 
-    spent_time = models.DecimalField(verbose_name=u"Spent time for this day", decimal_places=4, max_digits=12,
+    spent_time = models.DecimalField(verbose_name="Spent time for this day", decimal_places=4, max_digits=12,
                                      default=None, null=True)
 
-    rate_amount = models.DecimalField(verbose_name=u"Rate amount for this spent time", decimal_places=4, max_digits=12,
+    rate_amount = models.DecimalField(verbose_name="Rate amount for this spent time", decimal_places=4, max_digits=12,
                                       default=None, null=True)
 
-    estimated_time = models.DecimalField(verbose_name=u"Estimated time for this day", decimal_places=4, max_digits=12,
+    estimated_time = models.DecimalField(verbose_name="Estimated time for this day", decimal_places=4, max_digits=12,
                                          default=None, null=True)
 
-    diff_time = models.DecimalField(verbose_name=u"Difference between the estimated time and the spent time",
+    diff_time = models.DecimalField(verbose_name="Difference between the estimated time and the spent time",
                                     decimal_places=4, max_digits=12,
                                     default=None, null=True)
 
@@ -80,7 +72,7 @@ class DailySpentTime(models.Model):
     @staticmethod
     def add(board, member, date, card, comment, description, spent_time, estimated_time):
         # In case a uuid is passed, load the Member object
-        if type(member) is str or type(member) is unicode:
+        if isinstance(member, str):
             try:
                 member = board.members.get(uuid=member)
             except ObjectDoesNotExist:
@@ -205,4 +197,3 @@ class DailySpentTime(models.Model):
         else:
             self.adjusted_spent_time = self.member.adjust_spent_time(self.spent_time, self.date)
         DailySpentTime.objects.filter(id=self.id).update(adjusted_spent_time=self.adjusted_spent_time)
-

@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
 import random
 
 from django.db.models import Max
@@ -12,7 +8,7 @@ from djanban.utils.custom_uuid import custom_uuid
 
 
 # Native connector for board that are not synchronized with Trello or other external platforms
-class NativeConnector(object):
+class NativeConnector:
 
     def __init__(self, member):
         self.member = member

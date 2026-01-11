@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import copy
 import re
 from datetime import timedelta
@@ -30,100 +27,100 @@ from djanban.utils.custom_uuid import custom_uuid
 # Task board
 class Board(models.Model):
 
-    creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_boards")
+    creator = models.ForeignKey("members.Member", on_delete=models.CASCADE, verbose_name="Member", related_name="created_boards")
 
-    name = models.CharField(max_length=128, verbose_name=u"Name of the board")
+    name = models.CharField(max_length=128, verbose_name="Name of the board")
 
-    description = models.TextField(max_length=128, verbose_name=u"Description of the board", default="", blank=True)
+    description = models.TextField(max_length=128, verbose_name="Description of the board", default="", blank=True)
 
-    comments = models.TextField(max_length=128, verbose_name=u"Comments for this board", default="", blank=True)
+    comments = models.TextField(max_length=128, verbose_name="Comments for this board", default="", blank=True)
 
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of the board", unique=True)
+    uuid = models.CharField(max_length=128, verbose_name="External id of the board", unique=True)
 
-    last_activity_datetime = models.DateTimeField(verbose_name=u"Last activity date", default=None, null=True)
+    last_activity_datetime = models.DateTimeField(verbose_name="Last activity date", default=None, null=True)
 
-    has_to_be_fetched = models.BooleanField(verbose_name=u"Has to be this board fetched?",
+    has_to_be_fetched = models.BooleanField(verbose_name="Has to be this board fetched?",
                                             help_text="Select this option if you want to fetch data for this board.",
                                             default=True)
 
-    is_archived = models.BooleanField(verbose_name=u"This board is archived",
-                                      help_text=u"Archived boards are not fetched automatically and are ignored",
+    is_archived = models.BooleanField(verbose_name="This board is archived",
+                                      help_text="Archived boards are not fetched automatically and are ignored",
                                       default=False)
 
-    enable_public_access = models.BooleanField(verbose_name=u"Enable public access to this board",
-                                               help_text=u"Only when enabled the users will be able to access",
+    enable_public_access = models.BooleanField(verbose_name="Enable public access to this board",
+                                               help_text="Only when enabled the users will be able to access",
                                                default=False)
 
     # Public access code to the board
     public_access_code = models.CharField(max_length=32,
-                                          verbose_name=u"External code of the board",
-                                          help_text=u"With this code it is possible to access to a view with stats "
-                                                    u"of this board", unique=True)
+                                          verbose_name="External code of the board",
+                                          help_text="With this code it is possible to access to a view with stats "
+                                                    "of this board", unique=True)
 
-    last_fetch_datetime = models.DateTimeField(verbose_name=u"Last fetch datetime", default=None, null=True)
+    last_fetch_datetime = models.DateTimeField(verbose_name="Last fetch datetime", default=None, null=True)
 
-    members = models.ManyToManyField("members.Member", verbose_name=u"Members", related_name="boards")
+    members = models.ManyToManyField("members.Member", verbose_name="Members", related_name="boards")
 
     percentage_of_completion = models.DecimalField(
-        verbose_name=u"Percentage of completion",
-        help_text=u"Percentage of completion of project. Mind the percentage of completion of each requirement.",
+        verbose_name="Percentage of completion",
+        help_text="Percentage of completion of project. Mind the percentage of completion of each requirement.",
         decimal_places=2, max_digits=10, blank=True, default=None, null=True
     )
 
-    estimated_number_of_hours = models.PositiveIntegerField(verbose_name=u"Estimated number of hours to be completed",
-                                                            help_text=u"Number of hours in the budget",
+    estimated_number_of_hours = models.PositiveIntegerField(verbose_name="Estimated number of hours to be completed",
+                                                            help_text="Number of hours in the budget",
                                                             blank=True, default=None, null=True)
 
-    hourly_rates = models.ManyToManyField("hourly_rates.HourlyRate", verbose_name=u"Hourly rates",
+    hourly_rates = models.ManyToManyField("hourly_rates.HourlyRate", verbose_name="Hourly rates",
                                           related_name="boards", blank=True)
 
     # Should this project to be showed on the slideshow?
     show_on_slideshow = models.BooleanField(
-        verbose_name=u"Should this board be shown on the slideshow?",
-        help_text=u"Select this checkbox if you want to show this board in the slideshow",
+        verbose_name="Should this board be shown on the slideshow?",
+        help_text="Select this checkbox if you want to show this board in the slideshow",
         default=False)
 
     # Image that appears in the header of the board views
     header_image = models.ImageField(
-        verbose_name=u"Header image", default=None, null=True, blank=True,
-        help_text=u"Header image for this board. Optional."
+        verbose_name="Header image", default=None, null=True, blank=True,
+        help_text="Header image for this board. Optional."
     )
 
     identicon = models.ImageField(
-        verbose_name=u"Identicon", default=None, null=True, blank=True,
-        help_text=u"Identicon for this board. It is automatically generated and stored."
+        verbose_name="Identicon", default=None, null=True, blank=True,
+        help_text="Identicon for this board. It is automatically generated and stored."
     )
 
     identicon_hash = models.CharField(max_length=256,
-                                      verbose_name=u"Identicon hash",
-                                      help_text=u"Identicon hash used to know when to update it",
+                                      verbose_name="Identicon hash",
+                                      help_text="Identicon hash used to know when to update it",
                                       default="", blank=True)
 
     # Users that can view the board stats and other parameters but cannot change anything
-    visitors = models.ManyToManyField(User, verbose_name=u"Visitors of this board", related_name="boards", blank=True)
+    visitors = models.ManyToManyField(User, verbose_name="Visitors of this board", related_name="boards", blank=True)
 
     # Last time the mood for this project was computed.
     # As the computation only has to be done once a day it serves us as a cache
-    last_time_mood_was_computed = models.DateTimeField(verbose_name=u"Last time mood was computed",
+    last_time_mood_was_computed = models.DateTimeField(verbose_name="Last time mood was computed",
                                                        default=None, null=True)
 
-    last_mood_value = models.DecimalField(verbose_name=u"Last mood value",
+    last_mood_value = models.DecimalField(verbose_name="Last mood value",
                                           decimal_places=2, max_digits=10, default=None, null=True)
 
     background_color = models.CharField(
-        verbose_name=u"Background color for this board", help_text=u"Background color for this board in hexadecimal",
+        verbose_name="Background color for this board", help_text="Background color for this board in hexadecimal",
         max_length=32, default="196A3E"
     )
 
     title_color = models.CharField(
-        verbose_name=u"Title color for this board", help_text=u"Title color for this board in hexadecimal",
+        verbose_name="Title color for this board", help_text="Title color for this board in hexadecimal",
         max_length=32, default="FFFFFF"
     )
 
     # External or source URL
-    url = models.CharField(max_length=255, verbose_name=u"URL of the board", null=True, default=None)
+    url = models.CharField(max_length=255, verbose_name="URL of the board", null=True, default=None)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def __str__(self):
@@ -615,7 +612,7 @@ class Board(models.Model):
         if not self.public_access_code:
             self.public_access_code = shortuuid.ShortUUID().random(length=20).lower()
         # Call to parent save method
-        super(Board, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 
 # Card of the task board
@@ -624,16 +621,7 @@ class Card(models.Model):
     class Meta:
         verbose_name = "Card"
         verbose_name_plural = "Cards"
-        index_together = (
-            ("board", "creation_datetime", "list"),
-            ("board", "list", "number_of_forward_movements", "number_of_backward_movements", "creation_datetime"),
-            ("board", "creation_datetime"),
-            ("board", "list", "position"),
-            ("board", "due_datetime"),
-            ("board", "is_closed", "list", "position"),
-            ("board", "is_closed", "creation_datetime", "list", "number_of_forward_movements", "number_of_backward_movements"),
-            ("is_closed", "board", "creation_datetime", "list", "number_of_forward_movements", "number_of_backward_movements"),
-        )
+        indexes = [models.Index(fields=("board", "creation_datetime", "list")), models.Index(fields=("board", "list", "number_of_forward_movements", "number_of_backward_movements", "creation_datetime")), models.Index(fields=("board", "creation_datetime")), models.Index(fields=("board", "list", "position")), models.Index(fields=("board", "due_datetime")), models.Index(fields=("board", "is_closed", "list", "position")), models.Index(fields=("board", "is_closed", "creation_datetime", "list", "number_of_forward_movements", "number_of_backward_movements")), models.Index(fields=("is_closed", "board", "creation_datetime", "list", "number_of_forward_movements", "number_of_backward_movements"))]
 
     COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s+(\-(?P<days_before>(\d+))d\s+)?(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)(\s*(?P<description>.+))?"
     COMMENT_SPENT_ESTIMATED_TIME_PATTERN = "plus! {days_ago}{spent_time}/{estimated_time} {description}"
@@ -653,55 +641,55 @@ class Card(models.Model):
     COMMENT_VALUATED_CARD_REGEX = r"^task\s+valued\s+on\s+(?P<value>\d+)$"
     COMMENT_VALUATED_CARD_PATTERN = "task valued on {value}"
 
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
-    list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")
+    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Board", related_name="cards")
+    list = models.ForeignKey("boards.List", on_delete=models.CASCADE, verbose_name="List", related_name="cards")
 
     # Some cards are created from recurrent cards
     parent_recurrent_card = models.ForeignKey(
-        "recurrent_cards.RecurrentCard", verbose_name=u"Recurrent card", related_name="cards",
+        "recurrent_cards.RecurrentCard", verbose_name="Recurrent card", related_name="cards",
         blank=True, default=None, null=True, on_delete=models.SET_NULL
     )
 
-    name = models.TextField(verbose_name=u"Name of the card")
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of the card", unique=True)
-    url = models.CharField(max_length=255, verbose_name=u"URL of the card", unique=True)
-    short_url = models.CharField(max_length=128, verbose_name=u"Short URL of the card", unique=True)
-    description = models.TextField(verbose_name=u"Description of the card")
-    is_closed = models.BooleanField(verbose_name=u"Is this card closed?", default=False)
-    position = models.PositiveIntegerField(verbose_name=u"Position in the list")
-    number_of_comments = models.PositiveIntegerField(verbose_name=u"Number of comments of this card", default=0)
-    number_of_words_in_comments = models.PositiveIntegerField(verbose_name=u"Number of words in the comments of this card", default=0)
+    name = models.TextField(verbose_name="Name of the card")
+    uuid = models.CharField(max_length=128, verbose_name="External id of the card", unique=True)
+    url = models.CharField(max_length=255, verbose_name="URL of the card", unique=True)
+    short_url = models.CharField(max_length=128, verbose_name="Short URL of the card", unique=True)
+    description = models.TextField(verbose_name="Description of the card")
+    is_closed = models.BooleanField(verbose_name="Is this card closed?", default=False)
+    position = models.PositiveIntegerField(verbose_name="Position in the list")
+    number_of_comments = models.PositiveIntegerField(verbose_name="Number of comments of this card", default=0)
+    number_of_words_in_comments = models.PositiveIntegerField(verbose_name="Number of words in the comments of this card", default=0)
     number_of_mentioned_members = models.PositiveIntegerField(
-        verbose_name=u"Number of mentioned members in the comments of this card", default=0
+        verbose_name="Number of mentioned members in the comments of this card", default=0
     )
-    number_of_reviews = models.PositiveIntegerField(verbose_name=u"Number of reviews of this card", default=0)
-    value = models.PositiveIntegerField(verbose_name=u"Value of this card for the client", blank=True, default=None, null=True)
+    number_of_reviews = models.PositiveIntegerField(verbose_name="Number of reviews of this card", default=0)
+    value = models.PositiveIntegerField(verbose_name="Value of this card for the client", blank=True, default=None, null=True)
 
-    due_datetime = models.DateTimeField(verbose_name=u"Deadline", blank=True, null=True, default=None)
-    creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
-    last_activity_datetime = models.DateTimeField(verbose_name=u"Last activity datetime")
+    due_datetime = models.DateTimeField(verbose_name="Deadline", blank=True, null=True, default=None)
+    creation_datetime = models.DateTimeField(verbose_name="Creation datetime")
+    last_activity_datetime = models.DateTimeField(verbose_name="Last activity datetime")
 
-    number_of_forward_movements = models.PositiveIntegerField(verbose_name=u"Number of forward movements", default=0)
-    number_of_backward_movements = models.PositiveIntegerField(verbose_name=u"Number of backward movements", default=0)
+    number_of_forward_movements = models.PositiveIntegerField(verbose_name="Number of forward movements", default=0)
+    number_of_backward_movements = models.PositiveIntegerField(verbose_name="Number of backward movements", default=0)
 
     spent_time = models.DecimalField(
-        verbose_name=u"Spent time", decimal_places=4, max_digits=12, default=None, null=True
+        verbose_name="Spent time", decimal_places=4, max_digits=12, default=None, null=True
     )
 
     adjusted_spent_time = models.DecimalField(
-        verbose_name=u"Adjusted spent time", decimal_places=4, max_digits=12, default=None, null=True
+        verbose_name="Adjusted spent time", decimal_places=4, max_digits=12, default=None, null=True
     )
 
     estimated_time = models.DecimalField(
-        verbose_name=u"Estimated time", decimal_places=4, max_digits=12, default=None, null=True
+        verbose_name="Estimated time", decimal_places=4, max_digits=12, default=None, null=True
     )
 
-    cycle_time = models.DecimalField(verbose_name=u"Lead time", decimal_places=4, max_digits=12, default=None,
+    cycle_time = models.DecimalField(verbose_name="Lead time", decimal_places=4, max_digits=12, default=None,
                                      null=True)
-    lead_time = models.DecimalField(verbose_name=u"Cycle time", decimal_places=4, max_digits=12, default=None,
+    lead_time = models.DecimalField(verbose_name="Cycle time", decimal_places=4, max_digits=12, default=None,
                                     null=True)
 
-    valuation_comment = models.OneToOneField("boards.CardComment", related_name="valued_card",
+    valuation_comment = models.OneToOneField("boards.CardComment", on_delete=models.CASCADE, related_name="valued_card",
                                              blank=True, default=None, null=True)
     labels = models.ManyToManyField("boards.Label", related_name="cards")
     members = models.ManyToManyField("members.Member", related_name="cards")
@@ -810,8 +798,7 @@ class Card(models.Model):
             # only if the last column is not "Done" column
             if last_list.type != "done":
                 time_card_has_spent_in_list_until_now = (timezone.now() - card_last_action_datetime).total_seconds()
-                time_by_list[last_list.id] += time_card_has_spent_in_list_until_now\
-
+                time_by_list[last_list.id] += time_card_has_spent_in_list_until_now
         return time_by_list
 
     @property
@@ -819,7 +806,7 @@ class Card(models.Model):
         list_type_by_id = {list_.id: list_.type for list_ in self.board.active_lists.all()}
         time_by_list_type = {list_type: 0 for list_type in List.LIST_TYPES}
         time_by_list = self.time_in_each_list
-        for list_id, time_in_list in time_by_list.items():
+        for list_id, time_in_list in list(time_by_list.items()):
             time_by_list_type[list_type_by_id[list_id]] +=time_in_list
         return time_by_list_type
 
@@ -903,7 +890,7 @@ class Card(models.Model):
     @property
     def completion_datetime(self):
         if self.list.type != "done":
-            raise ValueError(u"This card is not completed")
+            raise ValueError("This card is not completed")
         try:
             return self.movements.filter(destination_list__type="done").order_by("-id")[0].datetime
         # In case this card is added directly in the "done" list
@@ -949,7 +936,7 @@ class Card(models.Model):
         # Only move the card if the source list is different from the destination list.
         # Otherwise only a ordering is needed on the current card list.
         if self.list.id == destination_list.id:
-            raise ValueError(u"Trying to move a card to its list")
+            raise ValueError("Trying to move a card to its list")
 
         # Checking if it is a forward or backward movement
         if self.list.position < destination_list.position:
@@ -957,7 +944,7 @@ class Card(models.Model):
         elif self.list.position > destination_list.position:
             movement_type = "backward"
         else:
-            raise ValueError(u"Trying to move a card to its list")
+            raise ValueError("Trying to move a card to its list")
 
         # Store the movement of this card
         card_movement = CardMovement(
@@ -1088,7 +1075,7 @@ class Card(models.Model):
         # Preparation of the comment content with the style of Plus for Trello
         days_ago_str = ""
         if days_ago:
-            days_ago_str = "-{0}d ".format(days_ago)
+            days_ago_str = f"-{days_ago}d "
 
         # Creation of comment with the daily spent time
         comment_content = Card.COMMENT_SPENT_ESTIMATED_TIME_PATTERN.format(
@@ -1115,7 +1102,7 @@ class Card(models.Model):
     @transaction.atomic
     def add_review(self, member, reviewers, description=""):
         # Add the blocking card with the review format
-        member_usernames = ", ".join(["@{0}".format(reviewer.external_username) for reviewer in reviewers])
+        member_usernames = ", ".join([f"@{reviewer.external_username}" for reviewer in reviewers])
         if description:
             content = Card.COMMENT_REVIEWED_BY_MEMBERS_WITH_DESCRIPTION_PATTERN.format(
                 member_usernames=member_usernames,
@@ -1197,12 +1184,12 @@ class Card(models.Model):
 
         # If there is already a file named uploaded_file_name, put
         if CardAttachment.objects.filter(file=uploaded_file_name).exists():
-            matches = re.match("^(?P<filename>.+)(?P<extension>\.[\w\d]+)", uploaded_file_name)
+            matches = re.match(r"^(?P<filename>.+)(?P<extension>\.[\w\d]+)", uploaded_file_name)
             if matches:
                 filename = matches.group("filename")
                 extension = matches.group("extension")
                 now = timezone.now()
-                uploaded_file_name = "{0}-{1}{2}".format(filename, now.isoformat(), extension)
+                uploaded_file_name = f"{filename}-{now.isoformat()}{extension}"
 
         attachment.file.save(uploaded_file_name, attached_file)
         return self.add_attachment(member, attachment)
@@ -1245,7 +1232,7 @@ class Card(models.Model):
     @transaction.atomic
     def edit_comment(self, member, comment, new_content):
         if member.uuid != comment.author.uuid:
-            raise AssertionError(u"This comment does not belong to {0}".format(member.external_username))
+            raise AssertionError(f"This comment does not belong to {member.external_username}")
 
         # Old comment content
         old_content = comment.content
@@ -1347,28 +1334,23 @@ class CardAttachment(models.Model):
     class Meta:
         verbose_name = "Card attachment"
         verbose_name_plural = "Card attachments"
-        index_together = (
-            ("card", "creation_datetime", "uploader"),
-            ("uploader", "card", "creation_datetime"),
-            ("card", "uploader", "creation_datetime"),
-            ("creation_datetime", "card", "uploader"),
-        )
+        indexes = [models.Index(fields=("card", "creation_datetime", "uploader")), models.Index(fields=("uploader", "card", "creation_datetime")), models.Index(fields=("card", "uploader", "creation_datetime")), models.Index(fields=("creation_datetime", "card", "uploader"))]
 
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of this attachment", unique=True)
-    card = models.ForeignKey("boards.Card", verbose_name=u"Card this attachment belongs to",
+    uuid = models.CharField(max_length=128, verbose_name="External id of this attachment", unique=True)
+    card = models.ForeignKey("boards.Card", on_delete=models.CASCADE, verbose_name="Card this attachment belongs to",
                              related_name="attachments")
-    uploader = models.ForeignKey("members.Member", verbose_name=u"Member uploader of this attachment",
+    uploader = models.ForeignKey("members.Member", on_delete=models.CASCADE, verbose_name="Member uploader of this attachment",
                                  related_name="attachments")
-    external_file_url = models.CharField(verbose_name=u"External file URL", max_length=1024, default="", blank=True)
-    external_file_name = models.CharField(verbose_name=u"External file name", max_length=4096, default="", blank=True)
-    file = models.FileField(verbose_name=u"File content", null=True, blank=True, default=None)
+    external_file_url = models.CharField(verbose_name="External file URL", max_length=1024, default="", blank=True)
+    external_file_name = models.CharField(verbose_name="External file name", max_length=4096, default="", blank=True)
+    file = models.FileField(verbose_name="File content", null=True, blank=True, default=None)
     is_cover = models.BooleanField(
-        verbose_name=u"Is this file the cover of the card?",
+        verbose_name="Is this file the cover of the card?",
         help_text="Is this file the cover of the card? "
                   "If it is the cover, it will be used as a the header image of the card.",
         default=True
     )
-    creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
+    creation_datetime = models.DateTimeField(verbose_name="Creation datetime of the comment")
 
     def fetch_external_file(self):
         if self.external_file_url and not self.file:
@@ -1387,25 +1369,20 @@ class CardComment(models.Model):
     class Meta:
         verbose_name = "Card comment"
         verbose_name_plural = "Card comments"
-        index_together = (
-            ("card", "creation_datetime", "author"),
-            ("author", "card", "creation_datetime"),
-            ("card", "author", "creation_datetime"),
-            ("creation_datetime", "card", "author"),
-        )
+        indexes = [models.Index(fields=("card", "creation_datetime", "author")), models.Index(fields=("author", "card", "creation_datetime")), models.Index(fields=("card", "author", "creation_datetime")), models.Index(fields=("creation_datetime", "card", "author"))]
 
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of the comment of this comment", unique=True)
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board this comment belongs to", related_name="card_comments")
-    card = models.ForeignKey("boards.Card", verbose_name=u"Card this comment belongs to", related_name="comments")
-    author = models.ForeignKey("members.Member", verbose_name=u"Member author of this comment", related_name="comments")
-    content = models.TextField(verbose_name=u"Content of the comment")
-    mentioned_members = models.ManyToManyField("members.Member", verbose_name=u"Mentioned members in this comment", related_name="mentioning_comments")
-    number_of_mentioned_members = models.PositiveIntegerField(verbose_name=u"Number of mentioned members", default=0)
-    blocking_card = models.ForeignKey("boards.Card", verbose_name=u"Blocking card this comment belongs to", related_name="blocking_comments", null=True, default=None)
-    review = models.OneToOneField("reports.CardReview", verbose_name=u"Card review this comment represents", related_name="comment", null=True, default=None)
-    requirement = models.ForeignKey("requirements.Requirement", verbose_name=u"Requirement this comment belongs to", related_name="card_comments", null=True, default=None)
-    creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
-    last_edition_datetime = models.DateTimeField(verbose_name=u"Last edition of the comment", default=None, null=True)
+    uuid = models.CharField(max_length=128, verbose_name="External id of the comment of this comment", unique=True)
+    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Board this comment belongs to", related_name="card_comments")
+    card = models.ForeignKey("boards.Card", on_delete=models.CASCADE, verbose_name="Card this comment belongs to", related_name="comments")
+    author = models.ForeignKey("members.Member", on_delete=models.CASCADE, verbose_name="Member author of this comment", related_name="comments")
+    content = models.TextField(verbose_name="Content of the comment")
+    mentioned_members = models.ManyToManyField("members.Member", verbose_name="Mentioned members in this comment", related_name="mentioning_comments")
+    number_of_mentioned_members = models.PositiveIntegerField(verbose_name="Number of mentioned members", default=0)
+    blocking_card = models.ForeignKey("boards.Card", on_delete=models.CASCADE, verbose_name="Blocking card this comment belongs to", related_name="blocking_comments", null=True, default=None)
+    review = models.OneToOneField("reports.CardReview", on_delete=models.CASCADE, verbose_name="Card review this comment represents", related_name="comment", null=True, default=None)
+    requirement = models.ForeignKey("requirements.Requirement", on_delete=models.CASCADE, verbose_name="Requirement this comment belongs to", related_name="card_comments", null=True, default=None)
+    creation_datetime = models.DateTimeField(verbose_name="Creation datetime of the comment")
+    last_edition_datetime = models.DateTimeField(verbose_name="Last edition of the comment", default=None, null=True)
 
     def get_spent_estimated_time_from_content(self):
         matches = re.match(Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, self.content, re.IGNORECASE)
@@ -1525,7 +1502,7 @@ class CardComment(models.Model):
             )
 
     def delete(self, *args, **kwargs):
-        super(CardComment, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
 
         # If the comment is a spent/estimated measure it should be updated
         spent_estimated_time = self.get_spent_estimated_time_from_content()
@@ -1571,7 +1548,7 @@ class CardComment(models.Model):
         else:
             self._save_new(card)
 
-        super(CardComment, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
         # If this comment contains S/E time, update the spent and estimated times of the parent card
         if hasattr(self, "daily_spent_time") and self.daily_spent_time and self.daily_spent_time.id is None:
@@ -1711,14 +1688,12 @@ class Label(models.Model):
     class Meta:
         verbose_name = "label"
         verbose_name_plural = "labels"
-        index_together = (
-            ("board", "name", "color"),
-        )
+        indexes = [models.Index(fields=("board", "name", "color"))]
 
-    name = models.CharField(max_length=128, verbose_name=u"Name of the label")
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of the label", unique=True)
-    color = models.CharField(max_length=128, verbose_name=u"Color of the label", default=None, null=True)
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="labels")
+    name = models.CharField(max_length=128, verbose_name="Name of the label")
+    uuid = models.CharField(max_length=128, verbose_name="External id of the label", unique=True)
+    color = models.CharField(max_length=128, verbose_name="Color of the label", default=None, null=True)
+    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Board", related_name="labels")
 
     def avg_estimated_time(self, **kwargs):
         label_cards = self.cards.filter(**kwargs)
@@ -1761,11 +1736,7 @@ class List(models.Model):
     class Meta:
         verbose_name = "List"
         verbose_name_plural = "Lists"
-        index_together = (
-            ("board", "type", "position"),
-            ("board", "position"),
-            ("type", "board"),
-        )
+        indexes = [models.Index(fields=("board", "type", "position")), models.Index(fields=("board", "position")), models.Index(fields=("type", "board"))]
 
     LIST_TYPES = ("ignored", "backlog", "ready_to_develop", "development",
                   "after_development_in_review", "after_development_waiting_release", "done", "closed")
@@ -1782,13 +1753,13 @@ class List(models.Model):
         ("done", "Done"),
         ("closed", "Closed"),
     )
-    name = models.CharField(max_length=128, verbose_name=u"Name of the list")
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of the list", unique=True)
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="lists")
+    name = models.CharField(max_length=128, verbose_name="Name of the list")
+    uuid = models.CharField(max_length=128, verbose_name="External id of the list", unique=True)
+    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Board", related_name="lists")
     type = models.CharField(max_length=64, choices=LIST_TYPE_CHOICES, default="ready_to_develop")
-    position = models.PositiveIntegerField(verbose_name=u"Position of this list in the board", default=0)
-    wip_limit = models.PositiveIntegerField(verbose_name=u"Maximum WIP limit of this list",
-                                            help_text=u"Maximum number of cards that should be in this list",
+    position = models.PositiveIntegerField(verbose_name="Position of this list in the board", default=0)
+    wip_limit = models.PositiveIntegerField(verbose_name="Maximum WIP limit of this list",
+                                            help_text="Maximum number of cards that should be in this list",
                                             default=None, null=True, blank=True)
 
     # Adds a new card
@@ -1822,7 +1793,7 @@ class List(models.Model):
     @transaction.atomic
     def move_cards(self, member, destination_list):
         if self.id == destination_list.id:
-            raise AssertionError(u"Source list and destination list cannot be the same")
+            raise AssertionError("Source list and destination list cannot be the same")
         # Card local movement
         cards_to_move = self.active_cards.all()
         for card_to_move in cards_to_move:
@@ -1933,8 +1904,8 @@ class CardMemberRelationship(models.Model):
         db_table = "boards_card_members"
 
     id = models.IntegerField(primary_key=True)
-    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="card_member_relationships")
-    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="card_member_relationships")
+    card = models.ForeignKey("boards.Card", on_delete=models.CASCADE, verbose_name="Card", related_name="card_member_relationships")
+    member = models.ForeignKey("members.Member", on_delete=models.CASCADE, verbose_name="Member", related_name="card_member_relationships")
 
     # Return a dict of members by card
     @staticmethod
@@ -1968,8 +1939,8 @@ class CardLabelRelationship(models.Model):
         db_table = "boards_card_labels"
 
     id = models.IntegerField(primary_key=True)
-    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="card_label_relationships")
-    label = models.ForeignKey("boards.Label", verbose_name=u"Label", related_name="card_label_relationships")
+    card = models.ForeignKey("boards.Card", on_delete=models.CASCADE, verbose_name="Card", related_name="card_label_relationships")
+    label = models.ForeignKey("boards.Label", on_delete=models.CASCADE, verbose_name="Label", related_name="card_label_relationships")
 
     # Return a dict of labels by card
     @staticmethod

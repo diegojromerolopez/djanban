@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from django.db import models
 
 
 # Agility rating according to Boehm & Turner (extracted from their book "Balancing Agility & Discipline")
 class ProjectAgilityRating(models.Model):
     class Meta:
-        verbose_name = u"project agility rating"
-        verbose_name_plural = u"project agility ratings"
+        verbose_name = "project agility rating"
+        verbose_name_plural = "project agility ratings"
 
     PERSONNEL_CHOICES = (
         ("1", "0% Level 1B / 35% Level 2 and 3"),
@@ -52,29 +48,29 @@ class ProjectAgilityRating(models.Model):
     )
 
     # Project rated
-    board = models.OneToOneField("boards.Board", verbose_name=u"Project", related_name="agility_rating")
+    board = models.OneToOneField("boards.Board", on_delete=models.CASCADE, verbose_name="Project", related_name="agility_rating")
 
     # Personnel dimension
     personnel = models.CharField(verbose_name="Personnel", max_length=64, choices=PERSONNEL_CHOICES,
-                                 help_text=u"Personnel dimension in extended Cockburn scale.")
+                                 help_text="Personnel dimension in extended Cockburn scale.")
 
     # Dynamism dimension
     dynamism = models.CharField(verbose_name="Dynamism", max_length=64, choices=DYNAMISM_CHOICES,
-                                help_text=u"Percentage of requirement changes per month.")
+                                help_text="Percentage of requirement changes per month.")
 
     # Culture
     culture = models.CharField(
         verbose_name="Culture", max_length=64, choices=CULTURE_CHOICES,
-        help_text=u"Thriving on chaos vs. order. What percentage of tasks are disciplined done vs. on a chaotic way."
+        help_text="Thriving on chaos vs. order. What percentage of tasks are disciplined done vs. on a chaotic way."
     )
 
     # Size (number of workers)
     size = models.CharField(verbose_name="Size", max_length=64, choices=SIZE_CHOICES,
-                            help_text=u"Number of personnel.")
+                            help_text="Number of personnel.")
 
     # Criticality (consequences of a software defect)
     criticality = models.CharField(verbose_name="Criticality", max_length=64, choices=CRITICALITY_CHOICES,
-                                   help_text=u"Consequences of a software defect.")
+                                   help_text="Consequences of a software defect.")
 
     @property
     def value(self):

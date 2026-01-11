@@ -1,6 +1,6 @@
-
 import unittest
 from djanban.utils.custom_uuid import custom_uuid
+import six
 
 class TestCustomUuid(unittest.TestCase):
     def test_custom_uuid_length(self):
@@ -9,7 +9,7 @@ class TestCustomUuid(unittest.TestCase):
 
     def test_custom_uuid_is_string(self):
         uid = custom_uuid()
-        self.assertIsInstance(uid, basestring)
+        self.assertIsInstance(uid, (str,))
 
     def test_custom_uuid_unique(self):
         uid1 = custom_uuid()

@@ -1,12 +1,7 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
 import os
 import time
 import traceback
 from datetime import datetime, timedelta
-from io import open
 
 import pytz
 from django.conf import settings
@@ -23,10 +18,10 @@ from djanban.apps.members.models import Member
 # Creates a new supermember that can access all boards, members, charts, etc.
 # It can
 class Command(BaseCommand):
-    help = u'Create a supermember'
+    help = 'Create a supermember'
 
     def __init__(self, stdout=None, stderr=None, no_color=False):
-        super(Command, self).__init__(stdout, stderr, no_color)
+        super().__init__(stdout, stderr, no_color)
 
     def add_arguments(self, parser):
         parser.add_argument('username', nargs='+', type=str, default=False)
@@ -65,10 +60,10 @@ class Command(BaseCommand):
 
         except Exception as e:
             self.stdout.write(
-                self.style.ERROR("Supermember couldn't be created successfully because of exception {0}".format(e))
+                self.style.ERROR(f"Supermember couldn't be created successfully because of exception {e}")
             )
 
         # Everything went well
         self.stdout.write(
-            self.style.SUCCESS("Supermember with username {0} has been created successfully".format(username))
+            self.style.SUCCESS(f"Supermember with username {username} has been created successfully")
         )

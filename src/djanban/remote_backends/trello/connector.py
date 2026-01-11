@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
 import os
 from collections import namedtuple
 
@@ -15,7 +11,7 @@ from trello import Board as TrelloBoard
 
 
 # Establishes a connection with Trello API
-class TrelloConnector(object):
+class TrelloConnector:
 
     def __init__(self, member):
         self.member = member
@@ -190,7 +186,7 @@ class TrelloConnector(object):
     # Edit comment content
     def edit_comment_of_card(self, card, comment):
         if self.member.uuid != comment.author.uuid:
-            raise AssertionError(u"You can only edit your comments")
+            raise AssertionError("You can only edit your comments")
         trello_card = self.get_trello_card(card)
         trello_card.update_comment(comment.uuid, comment.content)
         comment.last_edition_datetime = timezone.now()

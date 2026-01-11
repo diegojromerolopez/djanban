@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
-
 import dateutil.parser
 import shortuuid
 from django.db import transaction
@@ -22,7 +17,7 @@ from djanban.remote_backends.trello.connector import TrelloConnector
 class Initializer(TrelloConnector):
 
     def __init__(self, member, debug=False):
-        super(Initializer, self).__init__(member)
+        super().__init__(member)
         self.debug = debug
 
     # Fetch basic information of boards and its lists
@@ -47,7 +42,7 @@ class Initializer(TrelloConnector):
                                   creator=self.member, url=trello_board.url)
                     board.save()
                     if self.debug:
-                        print("Board {0} successfully created".format(board_name))
+                        print(f"Board {board_name} successfully created")
                 else:
                     board = Board.objects.get(uuid=trello_board.id)
                     board_is_updated = False
@@ -85,7 +80,7 @@ class Initializer(TrelloConnector):
                         last_created_list = _list
 
                         if self.debug:
-                            print("- List {1} of board {0} successfully created".format(board_name, _list.name))
+                            print(f"- List {_list.name} of board {board_name} successfully created")
 
                     else:
                         _list = board.lists.get(uuid=trello_list.id)
@@ -94,7 +89,7 @@ class Initializer(TrelloConnector):
                             _list.save()
 
                         if self.debug:
-                            print("- List {1} of board {0} was already created".format(board_name, _list.name))
+                            print(f"- List {_list.name} of board {board_name} was already created")
 
                     _lists.append(_list)
 
@@ -117,7 +112,7 @@ class Initializer(TrelloConnector):
             try:
                 member = Member.objects.get(trello_member_profile__trello_id=trello_member.id)
                 if self.debug:
-                    print(u"Member {0} already existed ".format(member.external_username))
+                    print(f"Member {member.external_username} already existed ")
             except Member.DoesNotExist:
                 member = Member(creator=self.member)
                 member.save()
@@ -128,18 +123,18 @@ class Initializer(TrelloConnector):
                 trello_member_profile.save()
 
                 if self.debug:
-                    print(u"Member {0} created".format(member.external_username))
+                    print(f"Member {member.external_username} created")
 
             # Only add the board to the member if he/she has not it yet
             if not member.boards.filter(uuid=board.uuid).exists():
                 member.boards.add(board)
 
             if self.debug:
-                print(u"Member {0} has role {1}".format(member.external_username, trello_member.member_type))
+                print(f"Member {member.external_username} has role {trello_member.member_type}")
             # If this member has no role in this board, add the role to the member
             if not member.roles.filter(board=board).exists():
                 if self.debug:
-                    print("Creating role {0} for {1}".format(trello_member.member_type, board.name))
+                    print(f"Creating role {trello_member.member_type} for {board.name}")
                 member_role, created = MemberRole.objects.get_or_create(board=board, type=trello_member.member_type)
                 member_role.members.add(member)
 
@@ -148,7 +143,7 @@ class Initializer(TrelloConnector):
             elif member.roles.get(board=board).type != trello_member.member_type:
                 if self.debug:
                     print(
-                        "Updating {0}'s role from {1} to {2} in {3}".format(
+                        "Updating {}'s role from {} to {} in {}".format(
                             member.external_username, member.roles.get(board=board).type,
                             trello_member.member_type, board.name
                         )
@@ -161,7 +156,7 @@ class Initializer(TrelloConnector):
     def create_board(self, board, lists=None):
         # Check if board exists
         if board.uuid:
-            raise ValueError(u"This board already exists")
+            raise ValueError("This board already exists")
         # Connect to Trello and save the new board
         trello_board = TrelloBoard(client=self.trello_client)
         trello_board.name = board.name
@@ -188,7 +183,7 @@ class Initializer(TrelloConnector):
 
         # Check if this board exist in Trello
         if trello_board is None:
-            raise ValueError(u"This board does not exist")
+            raise ValueError("This board does not exist")
 
         # Create the new lists
         trello_board.add_list(list_name, list_position)
@@ -202,7 +197,7 @@ class BoardFetcher(Fetcher):
 
     # Create a fetcher from a board
     def __init__(self, board, debug=True):
-        super(BoardFetcher, self).__init__(board)
+        super().__init__(board)
         self.initializer = Initializer(self.creator, debug=debug)
         self.trello_client = self.initializer.trello_client
         self.trello_board = TrelloBoard(client=self.trello_client, board_id=self.board.uuid)
@@ -302,7 +297,7 @@ class BoardFetcher(Fetcher):
         # There should be no need to assure uniqueness of the cards but it's better to be sure that
         # we have no repeated actions
         cards_dict = {card.id: card for card in cards}
-        unique_cards = cards_dict.values()
+        unique_cards = list(cards_dict.values())
 
         # Return the cards
         return unique_cards
@@ -362,12 +357,12 @@ class BoardFetcher(Fetcher):
         # There should be no need to assure uniqueness of the actions but it's better to be sure that
         # we have no repeated actions
         actions_dict = {action["id"]: action for action in actions}
-        unique_actions = actions_dict.values()
+        unique_actions = list(actions_dict.values())
 
         # Group actions by card
         actions_by_card = {}
         for action in unique_actions:
-            card_uuid = action[u"data"][u"card"][u"id"]
+            card_uuid = action["data"]["card"]["id"]
             if card_uuid not in actions_by_card:
                 actions_by_card[card_uuid] = []
             actions_by_card[card_uuid].append(action)
@@ -417,12 +412,12 @@ class BoardFetcher(Fetcher):
             # Lead time and cycle time only should be computed when the card is done
             if not card.is_closed and trello_card.idList in done_lists:
                 # Lead time in this workflow for this card
-                lead_time = sum([list_stats["time"] for list_uuid, list_stats in trello_card.stats_by_list.items()])
+                lead_time = sum([list_stats["time"] for list_uuid, list_stats in list(trello_card.stats_by_list.items())])
 
                 # Cycle time in this workflow for this card
                 cycle_time = sum(
                     [list_stats["time"] if list_uuid in development_lists else 0 for list_uuid, list_stats in
-                     trello_card.stats_by_list.items()])
+                     list(trello_card.stats_by_list.items())])
 
                 workflow_card_report = WorkflowCardReport(board=self.board, workflow=workflow,
                                                           card=card, cycle_time=cycle_time, lead_time=lead_time)

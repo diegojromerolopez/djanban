@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from django.core.exceptions import ValidationError
 
 from djanban.apps.base.auth import get_member_boards
@@ -22,7 +18,7 @@ class WorkHoursPackageFilterForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.member = kwargs.pop("member")
-        super(WorkHoursPackageFilterForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Available multiboards for the work hours package
         self.fields["multiboard"].choices = [("", "None")] + [
@@ -47,7 +43,7 @@ class WorkHoursPackageFilterForm(forms.Form):
         self.fields["is_paid"].choices = [("", "Indiferent"),("Yes", "Yes"),("No", "No")]
 
     def clean(self):
-        cleaned_data = super(WorkHoursPackageFilterForm, self).clean()
+        cleaned_data = super().clean()
         return cleaned_data
 
     def get_work_hours_packages(self):
@@ -87,8 +83,8 @@ class WorkHoursPackageForm(forms.ModelForm):
         ]
         widgets = {
             'start_work_date': forms.SelectDateWidget(),
-            'end_work_date': forms.SelectDateWidget(empty_label=u"Until now"),
-            'payment_date': forms.SelectDateWidget(empty_label=u"Not paid"),
+            'end_work_date': forms.SelectDateWidget(empty_label="Until now"),
+            'payment_date': forms.SelectDateWidget(empty_label="Not paid"),
         }
 
     class Media:
@@ -101,7 +97,7 @@ class WorkHoursPackageForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         current_member = kwargs.pop("member")
-        super(WorkHoursPackageForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["description"].widget = CKEditorWidget()
 
         # Available multiboards for the work hours package
@@ -133,7 +129,7 @@ class WorkHoursPackageForm(forms.ModelForm):
 
     # Check consistency properties of a work hours package
     def clean(self):
-        cleaned_data = super(WorkHoursPackageForm, self).clean()
+        cleaned_data = super().clean()
         if (not cleaned_data.get("board") and not cleaned_data.get("label") and not cleaned_data.get("multiboard")) or\
            (cleaned_data.get("board") and cleaned_data.get("label") and cleaned_data.get("multiboard")) or\
            (cleaned_data.get("board") and cleaned_data.get("label")) or\
@@ -144,11 +140,11 @@ class WorkHoursPackageForm(forms.ModelForm):
             )
         # Check if type matches with what we have selected
         if cleaned_data.get("type") == "board" and not cleaned_data.get("board"):
-            raise ValidationError(u"Please, select a board for this work hours package")
+            raise ValidationError("Please, select a board for this work hours package")
         if cleaned_data.get("type") == "multiboard" and not cleaned_data.get("multiboard"):
-            raise ValidationError(u"Please, select a multiboard for this work hours package")
+            raise ValidationError("Please, select a multiboard for this work hours package")
         if cleaned_data.get("type") == "label" and not cleaned_data.get("label"):
-            raise ValidationError(u"Please, select a label for this work hours package")
+            raise ValidationError("Please, select a label for this work hours package")
 
         # Erase elements not required depending on selected type
         if cleaned_data.get("type") == "board":
@@ -166,7 +162,7 @@ class WorkHoursPackageForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
-        super(WorkHoursPackageForm, self).save(commit=commit)
+        super().save(commit=commit)
         if commit:
             if not self.instance.members.filter(id=self.instance.creator.id).exists():
                 self.instance.members.add(self.instance.creator)
@@ -174,11 +170,11 @@ class WorkHoursPackageForm(forms.ModelForm):
 
 # Sent completion notifications form
 class NotificationCompletionSenderForm(forms.Form):
-    confirmed = forms.BooleanField(label=u"Confirm you want to send completion notifications")
+    confirmed = forms.BooleanField(label="Confirm you want to send completion notifications")
 
     def __init__(self, *args, **kwargs):
         self.member = kwargs.pop("member")
-        super(NotificationCompletionSenderForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def send(self):
         command = Command()
@@ -187,4 +183,4 @@ class NotificationCompletionSenderForm(forms.Form):
 
 # Delete work hours package form
 class DeleteWorkHoursPackageForm(forms.Form):
-    confirmed = forms.BooleanField(label=u"Confirm you want to delete this work hours package")
+    confirmed = forms.BooleanField(label="Confirm you want to delete this work hours package")

@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import datetime
 
 import pygal
@@ -162,20 +158,20 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
         now = timezone.now()
         today = now.date()
         week_of_year_ = get_iso_week_of_year(today)
-        week_of_year = "{0}W{1}".format(today.year, week_of_year_)
+        week_of_year = f"{today.year}W{week_of_year_}"
 
     y, w = week_of_year.split("W")
     week = Week(int(y), int(w))
     start_of_week = week.monday()
     end_of_week = week.sunday()
 
-    chart_title = u"{0}'s spent time in week {1} ({2} - {3})".format(member.external_username, week_of_year,
+    chart_title = "{}'s spent time in week {} ({} - {})".format(member.external_username, week_of_year,
                                                                      start_of_week.strftime("%Y-%m-%d"),
                                                                      end_of_week.strftime("%Y-%m-%d"))
     board = None
     if board_id:
         board = user_boards.get(id=board_id)
-        chart_title += u" for board {0}".format(board.name)
+        chart_title += f" for board {board.name}"
 
     spent_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
                                            print_zeroes=False,
@@ -185,10 +181,10 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
         day = start_of_week
         while day <= end_of_week:
             member_spent_time = member.get_spent_time(day, board)
-            spent_time_chart.add(u"{0}".format(day.strftime("%A")), member_spent_time)
+            spent_time_chart.add("{}".format(day.strftime("%A")), member_spent_time)
             day += datetime.timedelta(days=1)
     except AssertionError:
-        spent_time_chart.no_data_text = u"No developers for this board.\nCheck members' attributes."
+        spent_time_chart.no_data_text = "No developers for this board.\nCheck members' attributes."
         spent_time_chart.style=DefaultStyle(no_data_font_size=20)
         return spent_time_chart.render_django_response()
 
@@ -369,7 +365,7 @@ def time_scatterplot(request, time_metric, board_id=None, year=None, month=None)
         y_function = lambda card: card.spent_time
         time_metric_name = "Spent time (in days)"
     else:
-        raise ValueError(u"Time metric {0} not recognized".format(time_metric))
+        raise ValueError(f"Time metric {time_metric} not recognized")
     return cards.time_scatterplot(request.user, time_metric_name, board, y_function=y_function, year=year, month=month)
 
 
@@ -387,7 +383,7 @@ def time_box(request, time_metric, board_id=None, year=None, month=None):
         y_function = lambda card: card.spent_time
         time_metric_name = "Spent time (days)"
     else:
-        raise ValueError(u"Time metric {0} not recognized".format(time_metric))
+        raise ValueError(f"Time metric {time_metric} not recognized")
     return cards.time_box(request.user, time_metric_name, board, y_function=y_function, year=year, month=month)
 
 
@@ -402,12 +398,12 @@ def completion_histogram(request, board_id="all", time_metric="lead_time", units
     if time_metric is None:
         time_metric = "lead_time"
     elif time_metric != "lead_time" and time_metric != "cycle_time" and time_metric != "spent_time":
-        raise ValueError(u"Time metric {0} not recognized".format(time_metric))
+        raise ValueError(f"Time metric {time_metric} not recognized")
 
     if units is None:
         units = "days"
     elif units != "days" and units != "hours":
-        raise ValueError(u"Units value {0} not recognized".format(units))
+        raise ValueError(f"Units value {units} not recognized")
 
     return cards.completion_histogram(request.user, board, time_metric, units)
 
@@ -423,7 +419,7 @@ def time_vs_spent_time(request, time_metric, board_id=None, year=None, month=Non
         y_function = lambda card: card.cycle_time/Decimal(24)
         time_metric_name = "Cycle time (days)"
     else:
-        raise ValueError(u"Time metric {0} not recognized".format(time_metric))
+        raise ValueError(f"Time metric {time_metric} not recognized")
     return cards.time_vs_spent_time(request.user, time_metric_name, board,
                                     y_function=y_function, year=year, month=month)
 

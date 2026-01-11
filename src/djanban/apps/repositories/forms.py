@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 
@@ -18,7 +14,7 @@ def get_form_class(repository):
     elif derived_type == ContentType.objects.get_for_model(GitHubPublicRepository):
         return GitHubPublicRepositoryForm
 
-    raise NotImplementedError(u"There is only one type of repository")
+    raise NotImplementedError("There is only one type of repository")
 
 
 class GitLabRepositoryForm(forms.ModelForm):
@@ -27,7 +23,7 @@ class GitLabRepositoryForm(forms.ModelForm):
         fields = ["name", "description", "url", "access_token", "username", "password", "project_userspace", "project_name"]
 
     def save(self, commit=True):
-        super(GitLabRepositoryForm, self).save(commit=False)
+        super().save(commit=False)
         if commit:
             self.instance.type = ContentType.objects.get_for_model(type(self.instance))
             self.instance.save()
@@ -40,10 +36,10 @@ class GitHubPublicRepositoryForm(forms.ModelForm):
         fields = ["name", "username", "description"]
 
     def save(self, commit=True):
-        super(GitHubPublicRepositoryForm, self).save(commit=False)
+        super().save(commit=False)
         if commit:
             if not self.instance.url:
-                self.instance.url = "http://github.com/{0}/{1}".format(self.instance.username, self.instance.name)
+                self.instance.url = f"http://github.com/{self.instance.username}/{self.instance.name}"
             self.instance.type = ContentType.objects.get_for_model(type(self.instance))
             self.instance.save()
         return self.instance
@@ -51,7 +47,7 @@ class GitHubPublicRepositoryForm(forms.ModelForm):
 
 # Delete repository
 class DeleteRepositoryForm(forms.Form):
-    confirmed = forms.BooleanField(label=u"Confirm you want to delete this repository")
+    confirmed = forms.BooleanField(label="Confirm you want to delete this repository")
 
 
 # Create and edit a commit
@@ -61,7 +57,7 @@ class CommitForm(forms.ModelForm):
         fields = ["commit", "comments"]
 
     def save(self, commit=True):
-        super(CommitForm, self).save(commit=False)
+        super().save(commit=False)
         if commit:
             commit_info = self.instance.repository.fetch_commit_info(self.cleaned_data["commit"])
             self.instance.creation_datetime = commit_info["creation_datetime"]
@@ -70,7 +66,7 @@ class CommitForm(forms.ModelForm):
 
 
 class DeleteCommitForm(forms.Form):
-    confirmed = forms.BooleanField(label=u"Confirm you want to delete this commit")
+    confirmed = forms.BooleanField(label="Confirm you want to delete this commit")
 
 
 class MakeAssessmentForm(forms.Form):
@@ -78,6 +74,6 @@ class MakeAssessmentForm(forms.Form):
         ("python", "Python"),
         ("php", "PHP"),
     )
-    confirmed = forms.BooleanField(label=u"Confirm you want to make an assessment of this commit")
+    confirmed = forms.BooleanField(label="Confirm you want to make an assessment of this commit")
     language = forms.ChoiceField(choices=LANGUAGE_CHOICES)
 

@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
 from ckeditor.widgets import CKEditorWidget
 from django import forms
 
@@ -36,7 +32,7 @@ class MultiboardForm(forms.ModelForm):
         )
 
     def __init__(self, *args, **kwargs):
-        super(MultiboardForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["description"].widget = CKEditorWidget()
         current_request = CrequestMiddleware.get_request()
         current_user = current_request.user
@@ -51,7 +47,7 @@ class MultiboardForm(forms.ModelForm):
         ]
 
     def save(self, commit=True):
-        super(MultiboardForm, self).save(commit=commit)
+        super().save(commit=commit)
         if commit:
             if not self.instance.members.filter(id=self.instance.creator.id).exists():
                 self.instance.members.add(self.instance.creator)
@@ -59,9 +55,9 @@ class MultiboardForm(forms.ModelForm):
 
 # Delete multiboard form
 class DeleteMultiboardForm(forms.Form):
-    confirmed = forms.BooleanField(label=u"Confirm you want to delete this multiboard")
+    confirmed = forms.BooleanField(label="Confirm you want to delete this multiboard")
 
 
 # Leave multiboard form
 class LeaveMultiboardForm(forms.Form):
-    confirmed = forms.BooleanField(label=u"Confirm you want to leave this multiboard")
+    confirmed = forms.BooleanField(label="Confirm you want to leave this multiboard")

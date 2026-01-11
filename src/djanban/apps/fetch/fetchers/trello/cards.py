@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
 from collections import namedtuple
 from datetime import datetime
 
@@ -18,7 +14,7 @@ from djanban.apps.reports.models import CardMovement
 
 
 # Fetch a card
-class CardFetcher(object):
+class CardFetcher:
 
     # Create the card fetcher
     def __init__(self, board_fetcher, trello_cards, trello_movements_by_card, trello_comments_by_card, debug=False):
@@ -58,16 +54,16 @@ class CardFetcher(object):
                 try:
                     card_i = self._create(trello_card)
                     if self.debug:
-                        print(u"{0} done".format(card_i.uuid))
+                        print(f"{card_i.uuid} done")
                     must_retry = False
                     card_dict[card_i.uuid] = card_i
                 except ResourceUnavailable:
                     must_retry = True
 
-        self.cards = card_dict.values()
+        self.cards = list(card_dict.values())
 
         # Deletion of cards that are not present in trello
-        for deleted_card_uuid, deleted_card in self.deleted_cards_dict.items():
+        for deleted_card_uuid, deleted_card in list(self.deleted_cards_dict.items()):
             deleted_card.delete()
 
         # Card movements
@@ -183,7 +179,7 @@ class CardFetcher(object):
             card_attachment.save()
 
         # Delete all card attachments that are not present in trello.com
-        for attachment_uuid, attachment in card_deleted_attachments.items():
+        for attachment_uuid, attachment in list(card_deleted_attachments.items()):
             attachment.delete()
 
         return card_attachments
@@ -273,10 +269,10 @@ class CardFetcher(object):
             card_comments.append(card_comment)
 
         # Delete all card comments that are not present in trello.com
-        for comment_uuid, comment in card_deleted_comments.items():
+        for comment_uuid, comment in list(card_deleted_comments.items()):
             comment.delete()
 
-        for trello_member_id, member in member_dict.items():
+        for trello_member_id, member in list(member_dict.items()):
             if not card.members.filter(trello_member_profile__trello_id=trello_member_id).exists():
                 card.members.add(member)
 
@@ -349,11 +345,11 @@ class CardFetcher(object):
         if trello_card.idList == self.done_list.uuid:
             trello_card.lead_time = sum(
                 [list_stats["time"] if list_uuid in self.trello_lead_dict else 0 for list_uuid, list_stats in
-                 trello_card.stats_by_list.items()])
+                 list(trello_card.stats_by_list.items())])
 
             trello_card.cycle_time = sum(
                 [list_stats["time"] if list_uuid in self.trello_cycle_dict else 0 for list_uuid, list_stats in
-                 trello_card.stats_by_list.items()])
+                 list(trello_card.stats_by_list.items())])
 
     # Compute the stats of this card
     def _init_trello_card_stats_by_list(self, trello_card):

@@ -1,6 +1,3 @@
-
-from __future__ import unicode_literals
-
 import pygal
 from django.db.models import Min, Max, Sum
 from django.utils import timezone
@@ -15,7 +12,7 @@ def number_of_code_errors(grouped_by, board, repository, language="python"):
         return _number_of_code_errors_by_commit(board, repository=repository, language=language, per_loc=False)
     elif grouped_by == "month":
         return _number_of_code_errors_by_month(board, repository=repository, language=language, per_loc=False)
-    raise ValueError(u"Value {0} not recognized".format(grouped_by))
+    raise ValueError(f"Value {grouped_by} not recognized")
 
 
 # Number of code errors by commit
@@ -24,14 +21,14 @@ def number_of_code_errors_per_loc(grouped_by, board, repository, language="pytho
         return _number_of_code_errors_by_commit(board, repository=repository, language=language, per_loc=True)
     elif grouped_by == "month":
         return _number_of_code_errors_by_month(board, repository=repository, language=language, per_loc=True)
-    raise ValueError(u"Value {0} not recognized".format(grouped_by))
+    raise ValueError(f"Value {grouped_by} not recognized")
 
 
 # Return the number of PHP/Python code errors by commit
 def _number_of_code_errors_by_commit(board, repository=None, language="python", per_loc=False):
 
     # Caching
-    chart_uuid = "repositories._number_of_code_errors_by_commit-{0}-{1}-{2}-{3}".format(
+    chart_uuid = "repositories._number_of_code_errors_by_commit-{}-{}-{}-{}".format(
         board.id, repository.id if repository else "None", language, "per_loc" if per_loc else "global"
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
@@ -42,17 +39,17 @@ def _number_of_code_errors_by_commit(board, repository=None, language="python", 
     repository_filter = {}
     if repository:
         repository_filter = {"repository": repository}
-        repository_text = u", repository {0}, ".format(repository.name)
+        repository_text = f", repository {repository.name}, "
 
     if not per_loc:
-        chart_title = u"Errors in {0} code by commit in project {1}{2}{3}".format(language, board.name, repository_text, timezone.now())
+        chart_title = f"Errors in {language} code by commit in project {board.name}{repository_text}{timezone.now()}"
     else:
-        chart_title = u"Errors in {0} code per LOC by commit in project {1}{2}{3}".format(language, board.name, repository_text, timezone.now())
+        chart_title = f"Errors in {language} code per LOC by commit in project {board.name}{repository_text}{timezone.now()}"
 
     def formatter(x):
         if per_loc:
-            return '{0:.2f}'.format(x)
-        return "{0}".format(x)
+            return f'{x:.2f}'
+        return f"{x}"
 
     chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
                        print_zeroes=False, value_formatter=formatter,
@@ -64,10 +61,10 @@ def _number_of_code_errors_by_commit(board, repository=None, language="python", 
         message_type_label = "ruleset"
     elif language.lower() == "python":
         error_messages = board.pylint_messages.filter(commit__has_been_assessed=True).filter(**repository_filter)
-        message_types = dict(PylintMessage.TYPE_CHOICES).keys()
+        message_types = list(dict(PylintMessage.TYPE_CHOICES).keys())
         message_type_label = "type"
     else:
-        raise ValueError(u"Programming language {0} not recognized".format(language))
+        raise ValueError(f"Programming language {language} not recognized")
 
     project_locs = board.commit_files.filter(**repository_filter).aggregate(locs=Sum("lines_of_code"))["locs"]
     if project_locs is None:
@@ -102,7 +99,7 @@ def _number_of_code_errors_by_commit(board, repository=None, language="python", 
 # Return the number of PHP/Python code errors by month
 def _number_of_code_errors_by_month(board, repository=None, language="python", per_loc=False):
     # Caching
-    chart_uuid = "repositories._number_of_code_errors_by_month-{0}-{1}-{2}-{3}".format(
+    chart_uuid = "repositories._number_of_code_errors_by_month-{}-{}-{}-{}".format(
         board.id, repository.id if repository else "None", language, "per_loc" if per_loc else "global"
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
@@ -113,17 +110,17 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
     repository_filter = {}
     if repository:
         repository_filter = {"repository": repository}
-        repository_text = u", repository {0}, ".format(repository.name)
+        repository_text = f", repository {repository.name}, "
 
     if not per_loc:
-        chart_title = u"Errors in {0} code by month in project {1}{2}{3}".format(language, board.name, repository_text, timezone.now())
+        chart_title = f"Errors in {language} code by month in project {board.name}{repository_text}{timezone.now()}"
     else:
-        chart_title = u"Errors in {0} code per LOC by month in project {1}{2}{3}".format(language, board.name, repository_text, timezone.now())
+        chart_title = f"Errors in {language} code per LOC by month in project {board.name}{repository_text}{timezone.now()}"
 
     def formatter(x):
         if per_loc:
-            return '{0:.2f}'.format(x)
-        return "{0}".format(x)
+            return f'{x:.2f}'
+        return f"{x}"
 
     chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
                        print_zeroes=False, value_formatter=formatter,
@@ -135,10 +132,10 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
         message_type_label = "ruleset"
     elif language.lower() == "python":
         error_messages = board.pylint_messages.filter(commit__has_been_assessed=True).filter(**repository_filter)
-        message_types = dict(PylintMessage.TYPE_CHOICES).keys()
+        message_types = list(dict(PylintMessage.TYPE_CHOICES).keys())
         message_type_label = "type"
     else:
-        raise ValueError(u"Programming language {0} not recognized".format(language))
+        raise ValueError(f"Programming language {language} not recognized")
 
     project_locs = board.commit_files.filter(**repository_filter).aggregate(locs=Sum("lines_of_code"))["locs"]
     if project_locs is None:
@@ -172,7 +169,7 @@ def _number_of_code_errors_by_month(board, repository=None, language="python", p
             if per_loc:
                 number_of_errors /= float(project_locs)
             number_of_messages_by_month.append(number_of_errors)
-            chart.x_labels.append(u"{0}-{1}".format(year_i, month_i))
+            chart.x_labels.append(f"{year_i}-{month_i}")
 
             month_i += 1
             if month_i > 12:

@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import re
 
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.http.response import Http404, HttpResponse
 from django.shortcuts import render
@@ -224,14 +220,14 @@ def add_spent_estimated_time(request, board_id, card_id):
 # View card
 @login_required
 def view(request, board_id, card_id):
-    return HttpResponseRedirect(reverse("boards:view_taskboard", args=(board_id, "/card/{0}".format(card_id))))
+    return HttpResponseRedirect(reverse("boards:view_taskboard", args=(board_id, f"/card/{card_id}")))
 
 
 @login_required
 def view_short_url(request, board_id, card_uuid):
     board = get_user_boards(request.user).get(id=board_id)
     card = board.cards.get(uuid=card_uuid)
-    return HttpResponseRedirect(reverse("boards:view_taskboard", args=(board.id,"/card/{0}".format(card.id))))
+    return HttpResponseRedirect(reverse("boards:view_taskboard", args=(board.id,f"/card/{card.id}")))
 
 
 # View card report
@@ -270,7 +266,7 @@ def export_report(request, board_id):
     cards = board.cards.all()
 
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = u'attachment; filename="{0}-cards.csv"'.format(board.name)
+    response['Content-Disposition'] = f'attachment; filename="{board.name}-cards.csv"'
 
     csv_template = loader.get_template('boards/cards/csv.txt')
     replacements = {
@@ -293,7 +289,7 @@ def export_detailed_report(request, board_id):
     cards = board.cards.all()
 
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = u'attachment; filename="{0}-detailed-card-report.csv"'.format(board.name)
+    response['Content-Disposition'] = f'attachment; filename="{board.name}-detailed-card-report.csv"'
 
     csv_template = loader.get_template('boards/cards/detailed_report_csv.txt')
     members = board.members.all()
@@ -327,7 +323,7 @@ def view_week_summary(request, board_id, member_id="all", week_of_year=None):
             year = form.cleaned_data.get("year")
             week = form.cleaned_data.get("week")
             member_id = form.cleaned_data.get("member")
-            week_of_year = "{0}W{1}".format(year, week)
+            week_of_year = f"{year}W{week}"
             return HttpResponseRedirect(reverse("boards:view_week_summary", args=(board_id, member_id, week_of_year,)))
 
     year = None
@@ -337,7 +333,7 @@ def view_week_summary(request, board_id, member_id="all", week_of_year=None):
         now = timezone.now()
         year = now.year
         week = int(get_iso_week_of_year(now))
-        week_of_year = "{0}W{1}".format(year, week)
+        week_of_year = f"{year}W{week}"
 
     if week is None or year is None:
         matches = re.match(r"^(?P<year>\d{4})W(?P<week>\d{2})$", week_of_year)

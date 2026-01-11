@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import copy
 from datetime import timedelta
 
@@ -15,15 +11,15 @@ from djanban.apps.dev_environment.models import Interruption
 # Burndown for the board
 def burndown(board, show_interruptions=False):
 
-    chart_uuid = "boards.burndown-{0}".format("with_interruptions" if show_interruptions else "without_interruptions")
+    chart_uuid = "boards.burndown-{}".format("with_interruptions" if show_interruptions else "without_interruptions")
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart
 
-    chart_title = u"Burndown for board {0}".format(board.name)
+    chart_title = f"Burndown for board {board.name}"
     if show_interruptions:
-        chart_title += u", including interruptions suffered by the team, "
-    chart_title += u" as of {1}".format(board.name, board.get_human_fetch_datetime())
+        chart_title += ", including interruptions suffered by the team, "
+    chart_title += f" as of {board.get_human_fetch_datetime()}"
 
     burndown_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=False,
                                 x_labels_major_count=30, show_minor_x_labels=False,
@@ -74,13 +70,13 @@ def burndown(board, show_interruptions=False):
 
         date_i += timedelta(days=1)
 
-    burndown_chart.add(u"Initial estimation for {0}".format(board.name), [remaining_time for i in range(0, len(x_labels))])
+    burndown_chart.add(f"Initial estimation for {board.name}", [remaining_time for i in range(0, len(x_labels))])
 
     burndown_chart.x_labels = x_labels
-    burndown_chart.add(u"Burndown of {0}".format(board.name), remaining_time_values)
+    burndown_chart.add(f"Burndown of {board.name}", remaining_time_values)
 
     if show_interruptions:
-        burndown_chart.add(u"Interruptions of {0}".format(board.name), interruptions)
+        burndown_chart.add(f"Interruptions of {board.name}", interruptions)
 
     chart = CachedChart.make(board=board, uuid=chart_uuid, svg=burndown_chart.render(is_unicode=True))
     return chart.render_django_response()

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from random import randint
 from django import template
 from djanban.apps.reporter.models import MotivationalVideo

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import unittest
 from djanban.apps.forecasters.forms import *
 

@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import copy
 import hashlib
 import inspect
@@ -20,25 +16,25 @@ from djanban.apps.members.models import Member
 
 # Number of interruptions
 def number_of_interruptions(current_user, board=None):
-    chart_title = u"Number of interruptions as of {0}".format(timezone.now())
+    chart_title = f"Number of interruptions as of {timezone.now()}"
     return _number_of_interruptions(current_user, board, chart_title, _interruption_count, incremental=False)
 
 
 # Evolution of the number of interruptions
 def evolution_of_interruptions(current_user, board=None):
-    chart_title = u"Evolution of number of interruptions as of {0}".format(timezone.now())
+    chart_title = f"Evolution of number of interruptions as of {timezone.now()}"
     return _number_of_interruptions(current_user, board, chart_title, _interruption_count, incremental=True)
 
 
 # Interruption spent time
 def interruption_spent_time(current_user, board=None):
-    chart_title = u"Interruption spent time as of {0}".format(timezone.now())
+    chart_title = f"Interruption spent time as of {timezone.now()}"
     return _number_of_interruptions(current_user, board, chart_title, _interruption_spent_time_sum, incremental=False)
 
 
 # Evolution of the number of interruptions
 def evolution_of_interruption_spent_time(current_user, board=None):
-    chart_title = u"Evolution of interruption spent time as of {0}".format(timezone.now())
+    chart_title = f"Evolution of interruption spent time as of {timezone.now()}"
     return _number_of_interruptions(current_user, board, chart_title, _interruption_spent_time_sum, incremental=True)
 
 
@@ -46,10 +42,10 @@ def evolution_of_interruption_spent_time(current_user, board=None):
 def _number_of_interruptions(current_user, board, chart_title, interruption_measurement, incremental=False):
 
     # Caching
-    chart_uuid = "interruptions.{0}".format(
-        hashlib.sha256("_number_of_interruptions-{0}-{1}-{2}-{3}-{4}".format(
+    chart_uuid = "interruptions.{}".format(
+        hashlib.sha256("_number_of_interruptions-{}-{}-{}-{}-{}".format(
             current_user.id,
-            board.id if board else "user-{0}".format(current_user.id),
+            board.id if board else f"user-{current_user.id}",
             inspect.getsource(interruption_measurement),
             "incremental" if incremental else "absolute",
             chart_title
@@ -60,7 +56,7 @@ def _number_of_interruptions(current_user, board, chart_title, interruption_meas
         return chart
 
     if board:
-        chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
+        chart_title += f" for board {board.name} as of {board.get_human_fetch_datetime()}"
 
     interruptions_chart = pygal.Line(title=chart_title, legend_at_bottom=True, print_values=True,
                                      print_zeroes=False, x_label_rotation=65,
@@ -110,7 +106,7 @@ def _number_of_interruptions(current_user, board, chart_title, interruption_meas
 
         date_i += timedelta(days=1)
 
-    interruptions_chart.add(u"All interruptions", num_interruptions)
+    interruptions_chart.add("All interruptions", num_interruptions)
     for board_i in boards:
         if sum(board_values[board_i.id]) > 0:
             interruptions_chart.add(board_i.name, board_values[board_i.id])
@@ -123,27 +119,27 @@ def _number_of_interruptions(current_user, board, chart_title, interruption_meas
 
 # Number of interruptions by member
 def number_of_interruptions_by_member(current_user):
-    chart_title = u"Number of interruptions by member as of {0}".format(timezone.now())
+    chart_title = f"Number of interruptions by member as of {timezone.now()}"
     return _number_of_interruptions_by_member(current_user, chart_title, _interruption_count, incremental=False)
 
 
 # Evolution of the number of interruptions by member
 def evolution_of_interruptions_by_member(current_user):
-    chart_title = u"Evolution of number of interruptions by member as of {0}".format(timezone.now())
+    chart_title = f"Evolution of number of interruptions by member as of {timezone.now()}"
     return _number_of_interruptions_by_member(current_user, chart_title, _interruption_count, incremental=True)
 
 
 # Spent time of interruptions by member
 def interruption_spent_time_by_member(current_user):
-    chart_title = u"Spent time on interruptions by member as of {0}".format(timezone.now())
+    chart_title = f"Spent time on interruptions by member as of {timezone.now()}"
     return _number_of_interruptions_by_member(current_user, chart_title, _interruption_spent_time_sum, incremental=False)
 
 
 # Number of interruptions base function
 def _number_of_interruptions_by_member(current_user, chart_title, interruption_measurement, incremental=False):
     # Caching
-    chart_uuid = "interruptions.{0}".format(
-        hashlib.sha256("_number_of_interruptions_by_member-{0}-{1}-{2}".format(
+    chart_uuid = "interruptions.{}".format(
+        hashlib.sha256("_number_of_interruptions_by_member-{}-{}-{}".format(
             current_user.id,
             inspect.getsource(interruption_measurement),
             "incremental" if incremental else "absolute"
@@ -199,7 +195,7 @@ def _number_of_interruptions_by_member(current_user, chart_title, interruption_m
 
         date_i += timedelta(days=1)
 
-    interruptions_chart.add(u"All interruptions", num_interruptions)
+    interruptions_chart.add("All interruptions", num_interruptions)
     for member_i in members:
         if sum(member_values[member_i.id]) > 0:
             interruptions_chart.add(member_i.external_username, member_values[member_i.id])
@@ -212,24 +208,24 @@ def _number_of_interruptions_by_member(current_user, chart_title, interruption_m
 
 # Number of interruptions by month
 def number_of_interruptions_by_month(current_user, board=None):
-    chart_title = u"Number of interruptions by month as of {0}".format(timezone.now())
+    chart_title = f"Number of interruptions by month as of {timezone.now()}"
     return _interruption_measurement_by_month(current_user, chart_title, _interruption_count, board)
 
 
 # Spent time because of interruptions by month
 def interruption_spent_time_by_month(current_user, board=None):
-    chart_title = u"Interruption spent time by month as of {0}".format(timezone.now())
+    chart_title = f"Interruption spent time by month as of {timezone.now()}"
     return _interruption_measurement_by_month(current_user, chart_title, _interruption_spent_time_sum, board)
 
 
 # Any measurement of interruptions by month
 def _interruption_measurement_by_month(current_user, chart_title, interruption_measurement, board=None):
 
-    chart_uuid = "interruptions.{0}".format(
-        hashlib.sha256("_interruption_measurement_by_month-{0}-{1}-{2}".format(
+    chart_uuid = "interruptions.{}".format(
+        hashlib.sha256("_interruption_measurement_by_month-{}-{}-{}".format(
             current_user.id,
             inspect.getsource(interruption_measurement),
-            board.id if board else "username-{0}".format(current_user.id)
+            board.id if board else f"username-{current_user.id}"
         )).hexdigest()
     )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
@@ -237,7 +233,7 @@ def _interruption_measurement_by_month(current_user, chart_title, interruption_m
         return chart
 
     if board:
-        chart_title += u" for board {0} as of {1}".format(board.name, board.get_human_fetch_datetime())
+        chart_title += f" for board {board.name} as of {board.get_human_fetch_datetime()}"
 
     interruptions_filter = {}
     if board:
@@ -279,7 +275,7 @@ def _interruption_measurement_by_month(current_user, chart_title, interruption_m
         monthly_measurement = interruption_measurement(monthly_interruptions)
         # For each month that have some data, add it to the chart
         if monthly_measurement > 0:
-            months.append(u"{0}-{1}".format(year_i, month_i))
+            months.append(f"{year_i}-{month_i}")
             values.append(monthly_measurement)
             for board in boards:
                 monthly_interruption_measurement = interruption_measurement(monthly_interruptions.filter(board=board))
@@ -293,7 +289,7 @@ def _interruption_measurement_by_month(current_user, chart_title, interruption_m
             year_i += 1
 
     interruptions_chart.x_labels = months
-    interruptions_chart.add(u"All interruptions", values)
+    interruptions_chart.add("All interruptions", values)
     for board in boards:
         if has_board_values[board.id]:
             interruptions_chart.add(board.name, board_values[board.id])

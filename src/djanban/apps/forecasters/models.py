@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
 
 import shortuuid
@@ -22,20 +19,20 @@ from djanban.apps.members.models import Member
 # Forecaster model. Provide save and load functionality used to store and retrieve regression models.
 class Forecaster(models.Model):
     board = models.ForeignKey(
-        "boards.Board", related_name="forecasters", verbose_name=u"Board of this forecaster",
+        "boards.Board", on_delete=models.CASCADE, related_name="forecasters", verbose_name="Board of this forecaster",
         null=True, default=None, blank=True
     )
     member = models.ForeignKey(
-        "members.Member", related_name="forecasters", verbose_name=u"Member of this forecaster",
+        "members.Member", on_delete=models.CASCADE, related_name="forecasters", verbose_name="Member of this forecaster",
         null=True, default=None, blank=True
     )
-    name = models.CharField(verbose_name=u"Name", max_length=1024)
-    model = models.CharField(verbose_name=u"Regression model", max_length=32)
-    formula = models.TextField(verbose_name=u"Formula")
-    summary = models.TextField(verbose_name=u"Summary", blank=True, default="")
-    results_file = models.FileField(verbose_name=u"Field with the statsmodels results")
-    last_updater = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="updated_forecasters")
-    last_update_datetime = models.DateTimeField(verbose_name=u"Last update datetime")
+    name = models.CharField(verbose_name="Name", max_length=1024)
+    model = models.CharField(verbose_name="Regression model", max_length=32)
+    formula = models.TextField(verbose_name="Formula")
+    summary = models.TextField(verbose_name="Summary", blank=True, default="")
+    results_file = models.FileField(verbose_name="Field with the statsmodels results")
+    last_updater = models.ForeignKey("members.Member", on_delete=models.CASCADE, verbose_name="Member", related_name="updated_forecasters")
+    last_update_datetime = models.DateTimeField(verbose_name="Last update datetime")
 
     # Retrieve the RegressionResults statsmodels object from database
     def get_regression_results(self):
@@ -52,7 +49,7 @@ class Forecaster(models.Model):
 
         now = timezone.now()
         now_str = now.isoformat()
-        tmp_path = os.path.join(settings.TMP_DIR, "{0}.pickle".format(shortuuid.uuid()))
+        tmp_path = os.path.join(settings.TMP_DIR, f"{shortuuid.uuid()}.pickle")
         results.save(tmp_path)
 
         try:
@@ -75,9 +72,9 @@ class Forecaster(models.Model):
         if results_summary:
             forecaster.summary = results_summary
 
-        with open(tmp_path, "r") as sm_results_pickle_file:
+        with open(tmp_path) as sm_results_pickle_file:
             forecaster.results_file.save(
-                "{0}-{1}-{2}.pickle".format(model, now_str, shortuuid.uuid()),
+                f"{model}-{now_str}-{shortuuid.uuid()}.pickle",
                 File(sm_results_pickle_file)
             )
         forecaster.save()
@@ -129,7 +126,7 @@ class Forecaster(models.Model):
     # Set last_update datetime when saving a Forecaster
     def save(self, *args, **kwargs):
         self.last_update_datetime = timezone.now()
-        super(Forecaster, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     # Get all forecasters accessible for a particular member of this application
     @staticmethod
@@ -159,9 +156,9 @@ class Forecast(models.Model):
         )
 
     forecaster = models.ForeignKey(
-        "forecasters.Forecaster", related_name="forecasts",
-        verbose_name=u"Spent time for this forecast"
+        "forecasters.Forecaster", on_delete=models.CASCADE, related_name="forecasts",
+        verbose_name="Spent time for this forecast"
     )
-    card = models.ForeignKey("boards.Card", related_name="forecasts", verbose_name=u"Card for this forecast")
-    estimated_spent_time = models.DecimalField(verbose_name=u"Estimated spent time", decimal_places=4, max_digits=12)
-    last_update_datetime = models.DateTimeField(verbose_name=u"Date this estimation was done")
+    card = models.ForeignKey("boards.Card", on_delete=models.CASCADE, related_name="forecasts", verbose_name="Card for this forecast")
+    estimated_spent_time = models.DecimalField(verbose_name="Estimated spent time", decimal_places=4, max_digits=12)
+    last_update_datetime = models.DateTimeField(verbose_name="Date this estimation was done")

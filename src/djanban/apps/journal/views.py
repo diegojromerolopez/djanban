@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from dal import autocomplete
 
 from django.contrib.auth.decorators import login_required

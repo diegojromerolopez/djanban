@@ -5,14 +5,14 @@ from bs4 import BeautifulSoup
 
 
 # Cloc wrapper
-class Cloc(object):
+class Cloc:
 
     def __init__(self, file_path):
         self.file_path = file_path
 
     def run(self):
 
-        cloc_command = "cloc {0} --xml".format(self.file_path)
+        cloc_command = f"cloc {self.file_path} --xml"
         cloc_command_result = subprocess.Popen(cloc_command, shell=True, stdout=subprocess.PIPE)
 
         self.stdout = cloc_command_result.stdout.read()
@@ -27,11 +27,11 @@ class Cloc(object):
         except OSError as e:
             if e.errno == os.errno.ENOENT:
                 raise AssertionError(
-                    u"Cloc was not found in your system. Install cloc (https://github.com/AlDanial/cloc).")
+                    "Cloc was not found in your system. Install cloc (https://github.com/AlDanial/cloc).")
 
 
 # Result of a cloc execution
-class ClocResult(object):
+class ClocResult:
     def __init__(self, file_path, stdout):
         self.file_path = file_path
         self.stdout = stdout

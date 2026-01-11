@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
@@ -61,7 +57,7 @@ class BoardTest(TestCase):
         self.assertTrue(edit_board_form.is_valid())
 
         edited_board = edit_board_form.save(commit=True)
-        for field, value in form_data.items():
+        for field, value in list(form_data.items()):
             if field != "hourly_rates" and field != "header_image":
-                self.assertEqual(getattr(edited_board, field), value, "Attribute {0} does not match".format(field))
+                self.assertEqual(getattr(edited_board, field), value, f"Attribute {field} does not match")
 

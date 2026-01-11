@@ -15,7 +15,7 @@ class BuildForecasterForm(forms.ModelForm):
         fields = ("model", "board", "member", "name")
 
     def __init__(self, *args, **kwargs):
-        super(BuildForecasterForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         current_request = CrequestMiddleware.get_request()
         current_user = current_request.user
@@ -27,7 +27,7 @@ class BuildForecasterForm(forms.ModelForm):
         self.fields["member"].choices = [("", "None")] + [(member.id, member.external_username) for member in members]
 
     def clean(self):
-        cleaned_data = super(BuildForecasterForm, self).clean()
+        cleaned_data = super().clean()
         if cleaned_data.get("board") and cleaned_data.get("member"):
             raise ValidationError("Please, select board or member but not both.")
         return cleaned_data
@@ -55,12 +55,12 @@ class TestForecasterForm(forms.Form):
 
 # Filter forecasters according to model, board, member and what the current user can access
 class FilterForecastersForm(forms.Form):
-    model = forms.ChoiceField(label=u"Regression model", choices=[], required=False)
-    board = forms.ChoiceField(label=u"Board", choices=[], required=False)
-    member = forms.ChoiceField(label=u"Members", choices=[], required=False)
+    model = forms.ChoiceField(label="Regression model", choices=[], required=False)
+    board = forms.ChoiceField(label="Board", choices=[], required=False)
+    member = forms.ChoiceField(label="Members", choices=[], required=False)
 
     def __init__(self, *args, **kwarsg):
-        super(FilterForecastersForm, self).__init__(*args, **kwarsg)
+        super().__init__(*args, **kwarsg)
         # Regression model choices
         self.fields["model"].choices = REGRESSION_MODELS
         # Board and members

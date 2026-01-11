@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as django_login
 from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import render

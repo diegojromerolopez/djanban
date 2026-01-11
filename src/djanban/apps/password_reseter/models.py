@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import shortuuid
 from datetime import timedelta
 from django.db import models
@@ -16,21 +13,21 @@ class PasswordResetRequest(models.Model):
         ("completed", "Completed"),
     )
     # User this password request belongs to
-    user = models.ForeignKey("auth.User", verbose_name=u"User", related_name="password_reset_requests")
+    user = models.ForeignKey("auth.User", on_delete=models.CASCADE, verbose_name="User", related_name="password_reset_requests")
 
     # Unique identifier
-    uuid = models.CharField(verbose_name=u"Uuid", max_length=64, unique=True)
+    uuid = models.CharField(verbose_name="Uuid", max_length=64, unique=True)
 
     # Creation datetime
-    creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
+    creation_datetime = models.DateTimeField(verbose_name="Creation datetime")
 
     # Maximum date this password reset request will be managed
-    limit_datetime = models.DateTimeField(verbose_name=u"Maximum life datetime")
+    limit_datetime = models.DateTimeField(verbose_name="Maximum life datetime")
 
     # Date where this password reset request has been accomplished
-    completion_datetime = models.DateTimeField(verbose_name=u"Completion datetime", null=True, default=None, blank=True)
+    completion_datetime = models.DateTimeField(verbose_name="Completion datetime", null=True, default=None, blank=True)
 
-    status = models.CharField(verbose_name=u"Status of this request",
+    status = models.CharField(verbose_name="Status of this request",
                               max_length=16, choices=STATUS_CHOICES, default="pending")
 
     @staticmethod

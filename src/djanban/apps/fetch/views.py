@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -21,7 +19,7 @@ def fetch(request):
 
     if not member.is_initialized:
         return render(request, "fetch/fetch_error.html",
-                      context={"exception_message": u"Member {0} is not initialized".format(member.user.username)})
+                      context={"exception_message": f"Member {member.user.username} is not initialized"})
 
     try:
         fetch_command = Command()

@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
@@ -11,10 +7,10 @@ from djanban.apps.recurrent_cards.models import WeeklyRecurrentCard
 
 # Create cards based on recurrent cards
 class Command(BaseCommand):
-    help = u'Create real cards from the recurrent cards'
+    help = 'Create real cards from the recurrent cards'
 
     def __init__(self, stdout=None, stderr=None, no_color=False):
-        super(Command, self).__init__(stdout, stderr, no_color)
+        super().__init__(stdout, stderr, no_color)
 
     # Handle de command action
     def handle(self, *args, **options):
@@ -55,26 +51,26 @@ class Command(BaseCommand):
                     num_created_cards += 1
                     self.stdout.write(
                         self.style.SUCCESS(
-                            u"{0} successfully created".format(card.name))
+                            f"{card.name} successfully created")
                     )
                 # In case a card has been already created for this recurrent card, show a warning
                 else:
                     self.stdout.write(
                         self.style.WARNING(
-                            u"card {0} already created today".format(recurrent_card.name))
+                            f"card {recurrent_card.name} already created today")
                     )
 
         # If there has been at least one creation of card, show a message
         if num_created_cards > 0:
             self.stdout.write(
                     self.style.SUCCESS(
-                        u"Creation of {0} card(s) from recurrent cards completed successfully".format(num_created_cards)
+                        f"Creation of {num_created_cards} card(s) from recurrent cards completed successfully"
                     )
                 )
         # Otherwise, show another "less happy" message
         else:
             self.stdout.write(
                 self.style.SUCCESS(
-                    u"No recurrent cards for this day, hence, no cards were created"
+                    "No recurrent cards for this day, hence, no cards were created"
                 )
             )

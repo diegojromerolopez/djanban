@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -18,7 +15,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             member_external_username = options['member_external_username'][0]
-        except (IndexError, KeyError)as e:
+        except (IndexError, KeyError) as e:
             self.stdout.write(self.style.SUCCESS("member_username is mandatory"))
             return False
 
@@ -27,4 +24,4 @@ class Command(BaseCommand):
         initializer = Initializer(member)
         initializer.init()
 
-        self.stdout.write(self.style.SUCCESS(u"Member {0} successfully initialized".format(member.external_username)))
+        self.stdout.write(self.style.SUCCESS(f"Member {member.external_username} successfully initialized"))

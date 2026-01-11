@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import random
 from datetime import timedelta
 
@@ -17,16 +13,16 @@ from crequest.middleware import CrequestMiddleware
 class CachedChart(models.Model):
     FORCE_UPDATE_GET_PARAM_NAME = "update"
 
-    creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
+    creation_datetime = models.DateTimeField(verbose_name="Creation datetime")
 
-    uuid = models.CharField(max_length=2048, verbose_name=u"Chart view name",
-                            help_text=u"Chart view name including some optional parameters")
+    uuid = models.CharField(max_length=2048, verbose_name="Chart view name",
+                            help_text="Chart view name including some optional parameters")
 
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cached_charts", default=None, null=True)
+    board = models.ForeignKey("boards.Board", on_delete=models.CASCADE, verbose_name="Board", related_name="cached_charts", default=None, null=True)
 
     svg = models.FileField(verbose_name="SVG content of the chart")
 
-    is_expired = models.BooleanField(verbose_name=u"Is this cache item expired?", default=False)
+    is_expired = models.BooleanField(verbose_name="Is this cache item expired?", default=False)
 
     # Gets a chart or False if the cached chart does not exists and must be created
     @staticmethod
@@ -86,7 +82,7 @@ class CachedChart(models.Model):
 
         chart_cache.is_expired = False
         chart_cache.creation_datetime = timezone.now()
-        chart_cache.svg.save("{0}".format(uuid, shortuuid.uuid()), ContentFile(svg))
+        chart_cache.svg.save(f"{uuid}", ContentFile(svg))
         chart_cache.save()
         return chart_cache
 

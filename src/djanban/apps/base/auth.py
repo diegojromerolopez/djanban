@@ -1,4 +1,3 @@
-
 from django.conf import settings
 from django.http import Http404
 
@@ -64,7 +63,7 @@ def get_user_boards(user, is_archived=False):
             return user.boards.filter(is_archived=is_archived).order_by("name")
         return user.boards.all().order_by("name")
 
-    raise ValueError(u"This user is not valid")
+    raise ValueError("This user is not valid")
 
 
 # Return the boards of a member
