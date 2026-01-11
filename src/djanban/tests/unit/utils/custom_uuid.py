@@ -1,6 +1,5 @@
 import unittest
 
-
 from djanban.utils.custom_uuid import custom_uuid
 
 

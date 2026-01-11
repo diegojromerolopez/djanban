@@ -17,13 +17,7 @@ from djanban.apps.base.auth import (
 )
 from djanban.apps.base.decorators import member_required
 from djanban.apps.boards.forms import NewCardForm, WeekSummaryFilterForm
-from djanban.apps.boards.models import (
-    Board,
-    Card,
-    CardAttachment,
-    CardComment,
-    Label,
-)
+from djanban.apps.boards.models import Board, Card, CardAttachment, CardComment, Label
 from djanban.apps.boards.stats import avg, std_dev
 from djanban.apps.forecasters.serializer import CardSerializer
 from djanban.utils.week import get_iso_week_of_year, get_week_of_year

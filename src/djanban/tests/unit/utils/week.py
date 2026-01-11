@@ -2,7 +2,14 @@ import unittest
 from datetime import date
 from unittest.mock import patch
 
-from djanban.utils.week import *
+from djanban.utils.week import (
+    end_of_week_of_year,
+    get_iso_week_of_year,
+    get_week_of_year,
+    get_weeks_of_year_since_one_year_ago,
+    number_of_weeks_of_year,
+    start_of_week_of_year,
+)
 
 
 class TestWeek(unittest.TestCase):

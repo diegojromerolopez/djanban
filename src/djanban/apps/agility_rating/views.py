@@ -9,10 +9,7 @@ from djanban.apps.agility_rating.forms import (
     ProjectAgilityRatingForm,
 )
 from djanban.apps.agility_rating.models import ProjectAgilityRating
-from djanban.apps.base.auth import (
-    get_user_board_or_404,
-    user_is_member,
-)
+from djanban.apps.base.auth import get_user_board_or_404, user_is_member
 from djanban.apps.base.decorators import member_required
 
 

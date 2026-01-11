@@ -1,4 +1,3 @@
-
 from crequest.middleware import CrequestMiddleware
 from django import template
 

@@ -1,14 +1,10 @@
-
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
 from djanban.apps.base.decorators import member_required
-from djanban.apps.repositories.forms import (
-    CommitForm,
-    DeleteCommitForm,
-)
+from djanban.apps.repositories.forms import CommitForm, DeleteCommitForm
 from djanban.apps.repositories.models import Commit, PhpMdMessage, PylintMessage
 
 

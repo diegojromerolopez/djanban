@@ -2,10 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Q
-from django.http.response import (
-    HttpResponseForbidden,
-    HttpResponseRedirect,
-)
+from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 

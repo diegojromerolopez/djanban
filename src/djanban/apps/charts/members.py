@@ -73,7 +73,9 @@ def spent_time_by_week(current_user, week_of_year=None, board=None):
 
     # Caching
     chart_uuid = "members.spent_time_by_week-{}-{}".format(
-        current_user.id, week_of_year, )
+        current_user.id,
+        week_of_year,
+    )
     chart = CachedChart.get(board=board, uuid=chart_uuid)
     if chart:
         return chart

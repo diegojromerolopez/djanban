@@ -1,9 +1,7 @@
-
 from django.db import models, transaction
 
 # Recurrent cards are cards that have to be created
 from django.utils import timezone
-
 
 
 class RecurrentCard(models.Model):

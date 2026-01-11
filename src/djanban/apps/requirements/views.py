@@ -4,10 +4,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from djanban.apps.base.auth import (
-    get_user_board_or_404,
-    user_is_member,
-)
+from djanban.apps.base.auth import get_user_board_or_404, user_is_member
 from djanban.apps.base.decorators import member_required
 from djanban.apps.requirements.forms import (
     DeleteRequirementForm,

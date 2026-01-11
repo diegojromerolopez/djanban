@@ -104,7 +104,9 @@ class Notification(models.Model):
                     sender=card_comment.author,
                     receiver=member,
                     description="{0}: card {0} is blocked by {1}".format(
-                        board.name, card.name, ),
+                        board.name,
+                        card.name,
+                    ),
                 ).save()
 
         # Adding reviews
