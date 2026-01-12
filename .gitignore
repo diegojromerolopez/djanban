@@ -15,7 +15,13 @@ venv.desktop_app/
 venv3/
 develop-eggs/
 downloads/
+# Node modules for Angular apps
+node_modules/
+**/node_modules/
 src/angularapp/node_modules/*
+src/djanban/static/angularapps/*/node_modules/
+package-lock.json
+**/package-lock.json
 eggs/
 .eggs/
 lib/

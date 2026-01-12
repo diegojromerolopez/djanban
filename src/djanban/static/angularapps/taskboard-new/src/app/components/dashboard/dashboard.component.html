@@ -1,0 +1,9 @@
+<div class="dashboard">
+    @if (boards) {
+        @for (board of boards; track board.id) {
+            <div class="board">
+                <span (click)="onBoardSelect(board)">{{board.name}}</span>
+            </div>
+        }
+    }
+</div>
