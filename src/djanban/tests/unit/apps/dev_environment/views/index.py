@@ -1,0 +1,9 @@
+# -*- coding: utf-8 -*-
+
+import unittest
+
+from djanban.apps.dev_environment.views.index import *
+
+
+class TestIndex(unittest.TestCase):
+    pass

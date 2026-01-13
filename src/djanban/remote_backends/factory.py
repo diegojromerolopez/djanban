@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
 from djanban.remote_backends.native.connector import NativeConnector
 from djanban.remote_backends.trello.connector import TrelloConnector
 
 
 # Backend factory
-class RemoteBackendConnectorFactory(object):
+class RemoteBackendConnectorFactory:
 
     @staticmethod
     def factory(member):

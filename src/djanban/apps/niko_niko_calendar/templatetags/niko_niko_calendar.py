@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from django import template
-from djanban.apps.niko_niko_calendar.models import DailyMemberMood
 
+from djanban.apps.niko_niko_calendar.models import DailyMemberMood
 
 register = template.Library()
 

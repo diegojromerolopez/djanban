@@ -1,16 +1,13 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import json
 import os
 import re
-from pylint import epylint as lint
+import subprocess
+
 from djanban.apps.repositories.cloc import Cloc
 
 
 # Pylinter for directories
-class PythonDirectoryAnalyzer(object):
+class PythonDirectoryAnalyzer:
 
     def __init__(self, dir_path):
         self.dir_path = dir_path
@@ -21,7 +18,7 @@ class PythonDirectoryAnalyzer(object):
         for root, subdirs, files in os.walk(self.dir_path):
             for filename in files:
                 if PythonDirectoryAnalyzer.is_python_file(filename):
-                    file_path = u"{0}/{1}".format(root, filename)
+                    file_path = f"{root}/{filename}"
                     if not PythonDirectoryAnalyzer.file_is_empty(file_path):
                         # Count of lines of code
                         cloc = Cloc(file_path)
@@ -43,7 +40,7 @@ class PythonDirectoryAnalyzer(object):
 
 
 # Runs pylint on a file
-class Pylinter(object):
+class Pylinter:
 
     def __init__(self, file_path):
         self.file_path = file_path
@@ -51,24 +48,27 @@ class Pylinter(object):
         self.stderr = None
 
     def run(self):
-        command_options = u"{0} --output-format=json --reports=y".format(self.file_path)
-        (stdout, stderr) = lint.py_run(command_options, return_std=True)
-        return PylinterResult(self.file_path, stdout, stderr)
+        command = ["pylint", self.file_path, "--output-format=json"]
+        # In modern pylint, --reports=y is often default or handled differently but--output-format=json is key
+        result = subprocess.run(command, capture_output=True, text=True)
+        return PylinterResult(self.file_path, result.stdout, result.stderr)
 
 
 # Stores pylint result
-class PylinterResult(object):
+class PylinterResult:
 
     def __init__(self, file_path, stdout, stderr):
         self.file_path = file_path
-        self.stdout = stdout.getvalue()
-        self.stderr = stderr.getvalue()
+        self.stdout = stdout
+        self.stderr = stderr
 
         self._init_results()
 
     # Initialize results
     def _init_results(self):
         self.messages = []
-        if self.stdout != "":
-            self.messages = json.loads(self.stdout)
-
+        if self.stdout.strip() != "":
+            try:
+                self.messages = json.loads(self.stdout)
+            except json.JSONDecodeError:
+                self.messages = []

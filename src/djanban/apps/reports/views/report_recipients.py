@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from django.urls import reverse_lazy
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -16,19 +12,21 @@ class ReportRecipientListView(ListView):
     model = ReportRecipient
 
     def get_context_data(self, **kwargs):
-        context = super(ReportRecipientListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         if user_is_member(self.request.user):
             context["member"] = self.request.user.member
         context["report_recipients"] = ReportRecipient.objects.all().order_by("email")
         context["user_boards"] = get_user_boards(self.request.user)
-        context["user_boards_ids"] = {board.id: board for board in get_user_boards(self.request.user)}
+        context["user_boards_ids"] = {
+            board.id: board for board in get_user_boards(self.request.user)
+        }
         return context
 
 
 # Base class for adding context to modification views for ReportRecipient objects
-class ReportRecipientViewContext(object):
+class ReportRecipientViewContext:
     def get_context_data(self, **kwargs):
-        context = super(ReportRecipientViewContext, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         if user_is_member(self.request.user):
             context["member"] = self.request.user.member
         context["report_recipient"] = self.object
@@ -36,16 +34,18 @@ class ReportRecipientViewContext(object):
 
 
 # Base class for ReportRecipient modification
-class ModifyReportRecipientView(object):
+class ModifyReportRecipientView:
     def get_form(self, *args, **kwargs):
-        form = super(ModifyReportRecipientView, self).get_form(*args, **kwargs)
+        form = super().get_form(*args, **kwargs)
         boards = get_user_boards(self.request.user).order_by("name")
-        form.fields['boards'].choices = [(board.id, board.name) for board in boards]
+        form.fields["boards"].choices = [(board.id, board.name) for board in boards]
         return form
 
 
 # Report recipient edition
-class CreateReportRecipientView(ReportRecipientViewContext, ModifyReportRecipientView, CreateView):
+class CreateReportRecipientView(
+    ReportRecipientViewContext, ModifyReportRecipientView, CreateView
+):
     template_name = "reports/report_recipients/new.html"
     model = ReportRecipient
     fields = ("first_name", "last_name", "email", "is_active", "boards")
@@ -53,7 +53,9 @@ class CreateReportRecipientView(ReportRecipientViewContext, ModifyReportRecipien
 
 
 # Edit recipient edition
-class EditReportRecipientView(ReportRecipientViewContext, ModifyReportRecipientView, UpdateView):
+class EditReportRecipientView(
+    ReportRecipientViewContext, ModifyReportRecipientView, UpdateView
+):
     template_name = "reports/report_recipients/edit.html"
     model = ReportRecipient
     fields = ("first_name", "last_name", "email", "is_active", "boards")

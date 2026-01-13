@@ -1,14 +1,9 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pandas as pd
-import  statsmodels.nonparametric.kernel_regression as kr
 import statsmodels.formula.api as smf
 
 from djanban.apps.boards.models import List
 from djanban.apps.forecasters.models import Forecaster
 from djanban.apps.forecasters.serializer import CardSerializer
-
 
 # Regression models that exist in this module
 REGRESSION_MODELS = (
@@ -17,13 +12,13 @@ REGRESSION_MODELS = (
     ("gls", "GLS Regression"),
     ("glsar", "GLSAR Regression"),
     ("quantreg", "Quantile Regression"),
-    ("rlm", "Robust Linear Model Regression")
+    ("rlm", "Robust Linear Model Regression"),
 )
 
 
 # Regressor class. It is used to build regression models.
 # Execute a regression to the passed cards
-class Regressor(object):
+class Regressor:
 
     # Construct the Regressor
     # Board is optional
@@ -32,15 +27,14 @@ class Regressor(object):
         self.board = board
         self.results = None
         # We are going to make the regression with the active done cards that have consumed some time
-        self.cards = cards\
-            .filter(is_closed=False, spent_time__gt=0, list__type="done")
+        self.cards = cards.filter(is_closed=False, spent_time__gt=0, list__type="done")
         self.forecaster_name = forecaster_name
         if members:
             self.members = members
         else:
             self.members = []
         if not self.cards.exists():
-            raise AssertionError(u"There are no cards")
+            raise AssertionError("There are no cards")
 
     # Returns the formula used in the regression
     def get_formula(self):
@@ -51,13 +45,13 @@ class Regressor(object):
             num_members + num_mentioned_members
         """
         for member in self.members:
-            formula += " + {0}".format(member.external_username)
+            formula += f" + {member.external_username}"
         # Creation list type
         for list_type in List.ACTIVE_LIST_TYPES:
-            formula += " + creation_list_type_{0}".format(list_type)
+            formula += f" + creation_list_type_{list_type}"
         # Time this card has spent per list type
         for list_type in List.ACTIVE_LIST_TYPES:
-            formula += "+ time_in_list_type_{0}".format(list_type)
+            formula += f"+ time_in_list_type_{list_type}"
 
         return formula
 
@@ -98,7 +92,7 @@ class Regressor(object):
 # that are passed as parameter to this class using Ordinary Least Squares method
 class OLS(Regressor):
     def get_formula(self):
-        formula = super(OLS, self).get_formula()
+        formula = super().get_formula()
         return formula
 
     def fit(self, df, formula):
@@ -132,7 +126,7 @@ class QuantReg(Regressor):
             num_comments + num_comment_words + name_num_words
         """
         for member in self.members:
-            formula += " + {0}".format(member.external_username)
+            formula += f" + {member.external_username}"
 
         return formula
 
@@ -152,5 +146,3 @@ class WLS(Regressor):
 
     def fit(self, df, formula):
         return smf.wls(formula=formula, data=df).fit()
-
-

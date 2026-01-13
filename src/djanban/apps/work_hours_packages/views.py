@@ -1,18 +1,18 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.urls import reverse
 
-from djanban.apps.base.auth import user_is_member, user_is_administrator
+from djanban.apps.base.auth import user_is_administrator, user_is_member
 from djanban.apps.base.decorators import member_required
-from djanban.apps.work_hours_packages.forms import WorkHoursPackageForm, DeleteWorkHoursPackageForm, \
-    NotificationCompletionSenderForm, WorkHoursPackageFilterForm
-from djanban.apps.work_hours_packages.models import WorkHoursPackage
 from djanban.apps.base.views import models as model_views
+from djanban.apps.work_hours_packages.forms import (
+    DeleteWorkHoursPackageForm,
+    NotificationCompletionSenderForm,
+    WorkHoursPackageFilterForm,
+    WorkHoursPackageForm,
+)
+from djanban.apps.work_hours_packages.models import WorkHoursPackage
 
 
 # New work hours package
@@ -21,9 +21,12 @@ def new(request):
     member = request.user.member
     work_hours_package = WorkHoursPackage(creator=request.user.member)
     return model_views.new(
-        request, instance=work_hours_package,
-        form_class=WorkHoursPackageForm, extra_form_parameters={"member": member},
-        template_path="work_hours_packages/new.html", ok_url=reverse("work_hours_packages:view_list")
+        request,
+        instance=work_hours_package,
+        form_class=WorkHoursPackageForm,
+        extra_form_parameters={"member": member},
+        template_path="work_hours_packages/new.html",
+        ok_url=reverse("work_hours_packages:view_list"),
     )
 
 
@@ -34,17 +37,21 @@ def edit(request, work_hours_package_id):
     if user_is_member(request.user):
         member = request.user.member
         try:
-            work_hours_package = member.created_work_hours_packages.get(id=work_hours_package_id)
+            work_hours_package = member.created_work_hours_packages.get(
+                id=work_hours_package_id
+            )
         except WorkHoursPackage.DoesNotExist:
             raise Http404
     elif user_is_administrator(request.user):
         work_hours_package = WorkHoursPackage.objects.get(id=work_hours_package_id)
 
     return model_views.edit(
-        request, instance=work_hours_package,
-        form_class=WorkHoursPackageForm, extra_form_parameters={"member": member},
+        request,
+        instance=work_hours_package,
+        form_class=WorkHoursPackageForm,
+        extra_form_parameters={"member": member},
         template_path="work_hours_packages/edit.html",
-        ok_url=reverse("work_hours_packages:view_list")
+        ok_url=reverse("work_hours_packages:view_list"),
     )
 
 
@@ -73,7 +80,9 @@ def view(request, work_hours_package_id):
     if user_is_member(request.user):
         member = request.user.member
         try:
-            work_hours_package = member.work_hours_packages.get(id=work_hours_package_id)
+            work_hours_package = member.work_hours_packages.get(
+                id=work_hours_package_id
+            )
         except WorkHoursPackage.DoesNotExist:
             raise Http404
     elif user_is_administrator(request.user):
@@ -96,11 +105,19 @@ def view_list(request):
         work_hours_packages = form.get_work_hours_packages()
     else:
         if member:
-            work_hours_packages = member.work_hours_packages.all().order_by("start_work_date", "end_work_date", "name")
+            work_hours_packages = member.work_hours_packages.all().order_by(
+                "start_work_date", "end_work_date", "name"
+            )
         elif user_is_administrator(request.user):
-            work_hours_packages = WorkHoursPackage.objects.order_by("start_work_date", "end_work_date", "name")
+            work_hours_packages = WorkHoursPackage.objects.order_by(
+                "start_work_date", "end_work_date", "name"
+            )
 
-    replacements = {"work_hours_packages": work_hours_packages, "member": member, "form": form}
+    replacements = {
+        "work_hours_packages": work_hours_packages,
+        "member": member,
+        "form": form,
+    }
     return render(request, "work_hours_packages/list.html", replacements)
 
 
@@ -111,13 +128,18 @@ def delete(request, work_hours_package_id):
     if user_is_member(request.user):
         member = request.user.member
         try:
-            work_hours_package = member.created_work_hours_packages.get(id=work_hours_package_id)
+            work_hours_package = member.created_work_hours_packages.get(
+                id=work_hours_package_id
+            )
         except WorkHoursPackage.DoesNotExist:
             raise Http404
     elif user_is_administrator(request.user):
         work_hours_package = WorkHoursPackage.objects.get(id=work_hours_package_id)
     return model_views.delete(
-        request, instance=work_hours_package, form_class=DeleteWorkHoursPackageForm,
+        request,
+        instance=work_hours_package,
+        form_class=DeleteWorkHoursPackageForm,
         next_url=reverse("work_hours_packages:view_list"),
-        template_path="work_hours_packages/delete.html", template_replacements={"member":member}
+        template_path="work_hours_packages/delete.html",
+        template_replacements={"member": member},
     )

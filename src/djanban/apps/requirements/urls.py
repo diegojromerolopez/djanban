@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
+from django.urls import path, re_path
 
-from django.conf.urls import url, include
+from djanban.apps.requirements.views import delete, edit, new, view, view_list
 
-from djanban.apps.requirements.views import view_list, new, view, edit, delete
+app_name = "requirements"
 
 urlpatterns = [
     # List of requirements
-    url(r'^$', view_list, name="view_requirements"),
-    url(r'^new$', new, name="new_requirement"),
-    url(r'^(?P<requirement_code>\w+)/view/?$', view, name="view_requirement"),
-    url(r'^(?P<requirement_code>\w+)/edit/?$', edit, name="edit_requirement"),
-    url(r'^(?P<requirement_code>\w+)/delete/?$', delete, name="delete_requirement"),
+    path("", view_list, name="view_requirements"),
+    path("new", new, name="new_requirement"),
+    re_path(r"^(?P<requirement_code>\w+)/view/?$", view, name="view_requirement"),
+    re_path(r"^(?P<requirement_code>\w+)/edit/?$", edit, name="edit_requirement"),
+    re_path(r"^(?P<requirement_code>\w+)/delete/?$", delete, name="delete_requirement"),
 ]

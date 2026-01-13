@@ -1,20 +1,19 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function
-
 from decimal import Decimal
 
 import numpy as np
-from django.http import Http404
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
-from django.urls import reverse_lazy
+from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import reverse, reverse_lazy
 from django.views.generic.edit import DeleteView
 
 from djanban.apps.base.auth import get_user_boards
 from djanban.apps.base.decorators import member_required
-from djanban.apps.forecasters.forms import UpdateForecasterForm, BuildForecasterForm, TestForecasterForm, \
-    FilterForecastersForm
+from djanban.apps.forecasters.forms import (
+    BuildForecasterForm,
+    FilterForecastersForm,
+    TestForecasterForm,
+    UpdateForecasterForm,
+)
 from djanban.apps.forecasters.models import Forecaster
 
 
@@ -31,7 +30,10 @@ def index(request):
     if form.is_valid():
         forecasters = form.get_forecasters()
         user_boards = get_user_boards(request.user)
-        if form.cleaned_data.get("board") and user_boards.filter(id=form.cleaned_data.get("board")).exists():
+        if (
+            form.cleaned_data.get("board")
+            and user_boards.filter(id=form.cleaned_data.get("board")).exists()
+        ):
             board = user_boards.get(id=form.cleaned_data.get("board"))
             replacements["board"] = board
             template_path = "forecasters/index/with_board.html"
@@ -46,7 +48,7 @@ def index(request):
 # Delete a Forecaster
 class ForecasterDelete(DeleteView):
     model = Forecaster
-    success_url = reverse_lazy('forecasters:index')
+    success_url = reverse_lazy("forecasters:index")
     template_name = "forecasters/delete.html"
     pk_url_kwarg = "forecaster_id"
 
@@ -55,7 +57,7 @@ class ForecasterDelete(DeleteView):
         return Forecaster.get_all_from_member(member)
 
     def get_context_data(self, *args, **kwargs):
-        context = super(ForecasterDelete, self).get_context_data(*args, **kwargs)
+        context = super().get_context_data(*args, **kwargs)
         context["member"] = self.request.user.member
         return context
 
@@ -90,8 +92,12 @@ def test_forecaster(request, forecaster_id):
             total_error = 0
             test_card_errors = []
             for test_card in test_cards:
-                test_card_estimated_spent_time = float(forecaster.estimate_spent_time(test_card))
-                test_card.estimated_spent_time = Decimal(test_card_estimated_spent_time).quantize(Decimal('1.000'))
+                test_card_estimated_spent_time = float(
+                    forecaster.estimate_spent_time(test_card)
+                )
+                test_card.estimated_spent_time = Decimal(
+                    test_card_estimated_spent_time
+                ).quantize(Decimal("1.000"))
                 test_card.diff = test_card.spent_time - test_card.estimated_spent_time
                 test_card.error = abs(test_card.diff)
                 total_error += test_card.error
@@ -100,14 +106,23 @@ def test_forecaster(request, forecaster_id):
             avg_error = np.mean(test_card_errors)
             std_dev_error = np.std(test_card_errors)
             replacements = {
-                "form": form, "forecaster": forecaster, "test_cards": test_cards,
-                "total_error": total_error, "avg_error": avg_error, "std_dev_error": std_dev_error, "member": member
+                "form": form,
+                "forecaster": forecaster,
+                "test_cards": test_cards,
+                "total_error": total_error,
+                "avg_error": avg_error,
+                "std_dev_error": std_dev_error,
+                "member": member,
             }
             return render(request, "forecasters/test.html", replacements)
     else:
         form = TestForecasterForm()
 
-    return render(request, "forecasters/test.html", {"form": form, "member": member, "forecaster": forecaster})
+    return render(
+        request,
+        "forecasters/test.html",
+        {"form": form, "member": member, "forecaster": forecaster},
+    )
 
 
 # Update a forecaster
@@ -127,7 +142,11 @@ def update_forecaster(request, forecaster_id):
     else:
         form = UpdateForecasterForm()
 
-    return render(request, "forecasters/update.html", {"form": form, "forecaster": forecaster, "member": member})
+    return render(
+        request,
+        "forecasters/update.html",
+        {"form": form, "forecaster": forecaster, "member": member},
+    )
 
 
 # View a forecaster
@@ -138,4 +157,6 @@ def view_forecaster(request, forecaster_id):
         forecaster = Forecaster.get_all_from_member(member).get(id=forecaster_id)
     except Forecaster.DoesNotExist:
         raise Http404
-    return render(request, "forecasters/view.html", {"forecaster": forecaster, "member": member})
+    return render(
+        request, "forecasters/view.html", {"forecaster": forecaster, "member": member}
+    )

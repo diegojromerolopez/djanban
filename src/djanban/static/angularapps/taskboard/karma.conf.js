@@ -1,11 +1,11 @@
-module.exports = function(config) {
+module.exports = function (config) {
 
-  var appBase    = 'app/';      // transpiled app JS and map files
+  var appBase = 'app/';      // transpiled app JS and map files
   var appSrcBase = 'app/';      // app source TS files
-  var appAssets  = 'base/app/'; // component assets fetched by Angular's compiler
+  var appAssets = 'base/app/'; // component assets fetched by Angular's compiler
 
   // Testing helpers (optional) are conventionally in a folder called `testing`
-  var testingBase    = 'testing/'; // transpiled test JS and map files
+  var testingBase = 'testing/'; // transpiled test JS and map files
   var testingSrcBase = 'testing/'; // test source TS files
 
   config.set({
@@ -28,6 +28,10 @@ module.exports = function(config) {
       // chrome setup for travis CI using chromium
       Chrome_travis_ci: {
         base: 'Chrome',
+        flags: ['--no-sandbox']
+      },
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
         flags: ['--no-sandbox']
       }
     },
@@ -75,7 +79,7 @@ module.exports = function(config) {
       { pattern: appSrcBase + '**/*.ts', included: false, watched: false },
       { pattern: appBase + '**/*.js.map', included: false, watched: false },
       { pattern: testingSrcBase + '**/*.ts', included: false, watched: false },
-      { pattern: testingBase + '**/*.js.map', included: false, watched: false}
+      { pattern: testingBase + '**/*.js.map', included: false, watched: false }
     ],
 
     // Proxied base paths for loading assets
@@ -92,7 +96,8 @@ module.exports = function(config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['Chrome'],
-    singleRun: false
+    browsers: ['ChromeHeadlessNoSandbox'],
+    singleRun: false,
+    browserNoActivityTimeout: 100000
   })
 }

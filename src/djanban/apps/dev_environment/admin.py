@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 from django.contrib import admin
 
-from djanban.apps.dev_environment.models import NoiseMeasurement, Interruption
+from djanban.apps.dev_environment.models import Interruption, NoiseMeasurement
 
 admin.site.register(NoiseMeasurement)
 admin.site.register(Interruption)

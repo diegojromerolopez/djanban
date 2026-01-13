@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
 import json
 import re
 
 from django.db import transaction
-from django.http import HttpResponseBadRequest, JsonResponse, Http404
+from django.http import Http404, JsonResponse
 
-from djanban.apps.api.http import HttpResponseMethodNotAllowed, JsonResponseBadRequest, \
-    JsonResponseMethodNotAllowed, JsonResponseNotFound
+from djanban.apps.api.http import (
+    JsonResponseBadRequest,
+    JsonResponseMethodNotAllowed,
+    JsonResponseNotFound,
+)
 from djanban.apps.api.serializers import Serializer
 from djanban.apps.api.util import get_list_or_404
 from djanban.apps.base.decorators import member_required
@@ -33,11 +32,15 @@ def move_list(request, board_id, list_id):
     post_params = json.loads(request.body)
 
     if not post_params.get("position"):
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     position = post_params.get("position")
     if position != "top" and position != "bottom" and not re.match(r"^\d+", position):
-        return JsonResponseBadRequest({"message": "Bad request: some parameters are missing."})
+        return JsonResponseBadRequest(
+            {"message": "Bad request: some parameters are missing."}
+        )
 
     list_.move(member, position)
 

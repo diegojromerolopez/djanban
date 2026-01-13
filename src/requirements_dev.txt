@@ -1,0 +1,8 @@
+-r requirements.txt
+coverage~=7.13.0
+django-upgrade~=1.29.0
+ipython~=9.9.0
+matplotlib-inline~=0.2.0
+mock~=5.2.0
+modernize~=0.8.0
+pyupgrade~=3.21.0

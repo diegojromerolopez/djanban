@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import importlib
 import os
 import sqlite3
@@ -18,18 +14,22 @@ if not os.path.isfile(DATABASE_PATH):
     conn.close()
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DATABASE_PATH,
-        'HOST': '',
-        'PORT': ''
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": DATABASE_PATH,
+        "HOST": "",
+        "PORT": "",
     }
 }
 
 try:
-    settings_local_desktop_app = importlib.import_module("djanban.settings_local_desktop_app")
+    settings_local_desktop_app = importlib.import_module(
+        "djanban.settings_local_desktop_app"
+    )
 except ImportError:
-    print("Please, create a settings_local_desktop_app.py in project directory with SECRET_KEY, DEBUG, DOMAIN, ALLOWED_HOSTS and DATABASES settings")
+    print(
+        "Please, create a settings_local_desktop_app.py in project directory with SECRET_KEY, DEBUG, DOMAIN, ALLOWED_HOSTS and DATABASES settings"
+    )
     exit(-1)
 
 DEBUG = settings_local_desktop_app.DEBUG

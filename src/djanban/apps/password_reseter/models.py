@@ -1,12 +1,13 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from datetime import timedelta
 
 import shortuuid
-from datetime import timedelta
 from django.db import models
 from django.utils import timezone
-from djanban.apps.password_reseter.email_sender import send_password_request_link, \
-    send_password_reset_successfully_email
+
+from djanban.apps.password_reseter.email_sender import (
+    send_password_request_link,
+    send_password_reset_successfully_email,
+)
 
 
 # Each one of the password reset request
@@ -16,22 +17,33 @@ class PasswordResetRequest(models.Model):
         ("completed", "Completed"),
     )
     # User this password request belongs to
-    user = models.ForeignKey("auth.User", verbose_name=u"User", related_name="password_reset_requests")
+    user = models.ForeignKey(
+        "auth.User",
+        on_delete=models.CASCADE,
+        verbose_name="User",
+        related_name="password_reset_requests",
+    )
 
     # Unique identifier
-    uuid = models.CharField(verbose_name=u"Uuid", max_length=64, unique=True)
+    uuid = models.CharField(verbose_name="Uuid", max_length=64, unique=True)
 
     # Creation datetime
-    creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
+    creation_datetime = models.DateTimeField(verbose_name="Creation datetime")
 
     # Maximum date this password reset request will be managed
-    limit_datetime = models.DateTimeField(verbose_name=u"Maximum life datetime")
+    limit_datetime = models.DateTimeField(verbose_name="Maximum life datetime")
 
     # Date where this password reset request has been accomplished
-    completion_datetime = models.DateTimeField(verbose_name=u"Completion datetime", null=True, default=None, blank=True)
+    completion_datetime = models.DateTimeField(
+        verbose_name="Completion datetime", null=True, default=None, blank=True
+    )
 
-    status = models.CharField(verbose_name=u"Status of this request",
-                              max_length=16, choices=STATUS_CHOICES, default="pending")
+    status = models.CharField(
+        verbose_name="Status of this request",
+        max_length=16,
+        choices=STATUS_CHOICES,
+        default="pending",
+    )
 
     @staticmethod
     def user_has_a_pending_new_password_request(user):
@@ -48,7 +60,10 @@ class PasswordResetRequest(models.Model):
         creation_datetime = timezone.now()
         limit_datetime = creation_datetime + timedelta(days=1)
         password_reset_request = PasswordResetRequest(
-            user=user, uuid=uuid, creation_datetime=creation_datetime, limit_datetime=limit_datetime
+            user=user,
+            uuid=uuid,
+            creation_datetime=creation_datetime,
+            limit_datetime=limit_datetime,
         )
         password_reset_request.save()
 
@@ -69,4 +84,4 @@ class PasswordResetRequest(models.Model):
         self.save()
         # Send email confirming password reset
         if send_email:
-            send_password_reset_successfully_email(user);
+            send_password_reset_successfully_email(user)

@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [ feat/correct-upgrade, main ]
+  pull_request:
+    branches: [ feat/correct-upgrade, main ]
+
+jobs:
+  format-check:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install black isort ruff flake8 pylint
+      - name: Run isort check
+        run: isort --check src
+      - name: Run black check
+        run: black --check src
+      - name: Run ruff check
+        run: ruff check src
+      - name: Run flake8 check
+        run: flake8 src
+      - name: Run pylint check
+        run: pylint src --disable=all --enable=errors
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libmysqlclient-dev pkg-config libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info libxml2-dev libxslt1-dev
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/requirements.txt
+          pip install -r src/requirements_dev.txt
+      - name: Create settings_local.py
+        run: |
+          echo "SECRET_KEY='test-key'" > src/djanban/settings_local.py
+          echo "DEBUG=True" >> src/djanban/settings_local.py
+          echo "DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': ':memory:'}}" >> src/djanban/settings_local.py
+      - name: Run unit tests
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/src
+          python src/manage.py test --pattern="*.py" djanban.tests.unit
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libmysqlclient-dev pkg-config libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info libxml2-dev libxslt1-dev
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/requirements.txt
+          pip install -r src/requirements_dev.txt
+      - name: Create settings_local.py
+        run: |
+          echo "SECRET_KEY='test-key'" > src/djanban/settings_local.py
+          echo "DEBUG=True" >> src/djanban/settings_local.py
+          echo "DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': ':memory:'}}" >> src/djanban/settings_local.py
+      - name: Run app tests
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/src
+          python src/manage.py test djanban.apps
+      - name: Run integration tests
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/src
+          python src/manage.py test --pattern="*.py" djanban.tests.integration

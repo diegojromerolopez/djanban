@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 
 from djanban.apps.base.auth import user_is_member
 from djanban.apps.base.decorators import member_required
-from djanban.apps.hourly_rates.forms import HourlyRateForm, DeleteHourlyRateForm
+from djanban.apps.hourly_rates.forms import DeleteHourlyRateForm, HourlyRateForm
 from djanban.apps.hourly_rates.models import HourlyRate
 
 
@@ -17,10 +16,7 @@ def view_list(request):
     if user_is_member(request.user):
         member = request.user.member
     hourly_rates = HourlyRate.objects.all()
-    replacements = {
-        "member": member,
-        "hourly_rates": hourly_rates
-    }
+    replacements = {"member": member, "hourly_rates": hourly_rates}
     return render(request, "hourly_rates/list.html", replacements)
 
 
@@ -62,7 +58,11 @@ def edit(request, hourly_rate_id):
     else:
         form = HourlyRateForm(instance=hourly_rate)
 
-    return render(request, "hourly_rates/edit.html", {"form": form, "member": member, "hourly_rate": hourly_rate})
+    return render(
+        request,
+        "hourly_rates/edit.html",
+        {"form": form, "member": member, "hourly_rate": hourly_rate},
+    )
 
 
 # Delete one hourly rate
@@ -84,4 +84,8 @@ def delete(request, hourly_rate_id):
     else:
         form = DeleteHourlyRateForm()
 
-    return render(request, "hourly_rates/delete.html", {"form": form, "member": member, "hourly_rate": hourly_rate})
+    return render(
+        request,
+        "hourly_rates/delete.html",
+        {"form": form, "member": member, "hourly_rate": hourly_rate},
+    )

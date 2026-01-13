@@ -1,19 +1,24 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import datetime
+from decimal import Decimal
 
 import pygal
-from pygal.style import DefaultStyle
-from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from isoweek import Week
+from pygal.style import DefaultStyle
 
 from djanban.apps.base.auth import get_user_boards, user_is_member
-from djanban.apps.charts import boards, cards, labels, members, interruptions, noise_measurements,\
-    repositories, requirements, agility_rating
+from djanban.apps.charts import (
+    agility_rating,
+    boards,
+    cards,
+    interruptions,
+    labels,
+    members,
+    noise_measurements,
+    repositories,
+    requirements,
+)
 from djanban.apps.members.models import Member
 from djanban.utils.week import get_iso_week_of_year
 
@@ -32,7 +37,9 @@ def requirement_burndown(request, board_id, requirement_code=None):
 @login_required
 def burndown(request, board_id):
     board = get_user_boards(request.user).get(id=board_id)
-    return boards.burndown(board, show_interruptions=request.GET.get("show_interruptions"))
+    return boards.burndown(
+        board, show_interruptions=request.GET.get("show_interruptions")
+    )
 
 
 # Average card lead time
@@ -143,12 +150,16 @@ def task_backward_movements_by_member(request, board_id=None):
 @login_required
 def spent_time_by_week(request, week_of_year=None, board_id=None):
     board = _get_user_board_or_none(request, board_id)
-    return members.spent_time_by_week(request.user, week_of_year=week_of_year, board=board)
+    return members.spent_time_by_week(
+        request.user, week_of_year=week_of_year, board=board
+    )
 
 
 # Show a chart with the spent time by week by member and by board
 @login_required
-def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, board_id=None):
+def spent_time_by_day_of_the_week(
+    request, member_id=None, week_of_year=None, board_id=None
+):
     user_boards = get_user_boards(request.user)
     if member_id is None:
         if user_is_member(request.user):
@@ -156,40 +167,51 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
         else:
             member = Member.objects.filter(boards__in=user_boards)[0]
     else:
-        member = Member.objects.filter(boards__in=user_boards).distinct().get(id=member_id)
+        member = (
+            Member.objects.filter(boards__in=user_boards).distinct().get(id=member_id)
+        )
 
     if week_of_year is None:
         now = timezone.now()
         today = now.date()
         week_of_year_ = get_iso_week_of_year(today)
-        week_of_year = "{0}W{1}".format(today.year, week_of_year_)
+        week_of_year = f"{today.year}W{week_of_year_}"
 
     y, w = week_of_year.split("W")
     week = Week(int(y), int(w))
     start_of_week = week.monday()
     end_of_week = week.sunday()
 
-    chart_title = u"{0}'s spent time in week {1} ({2} - {3})".format(member.external_username, week_of_year,
-                                                                     start_of_week.strftime("%Y-%m-%d"),
-                                                                     end_of_week.strftime("%Y-%m-%d"))
+    chart_title = "{}'s spent time in week {} ({} - {})".format(
+        member.external_username,
+        week_of_year,
+        start_of_week.strftime("%Y-%m-%d"),
+        end_of_week.strftime("%Y-%m-%d"),
+    )
     board = None
     if board_id:
         board = user_boards.get(id=board_id)
-        chart_title += u" for board {0}".format(board.name)
+        chart_title += f" for board {board.name}"
 
-    spent_time_chart = pygal.HorizontalBar(title=chart_title, legend_at_bottom=True, print_values=True,
-                                           print_zeroes=False,
-                                           human_readable=True)
+    spent_time_chart = pygal.HorizontalBar(
+        title=chart_title,
+        legend_at_bottom=True,
+        print_values=True,
+        print_zeroes=False,
+        human_readable=True,
+    )
 
     try:
         day = start_of_week
         while day <= end_of_week:
             member_spent_time = member.get_spent_time(day, board)
-            spent_time_chart.add(u"{0}".format(day.strftime("%A")), member_spent_time)
+            spent_time_chart.add("{}".format(day.strftime("%A")), member_spent_time)
             day += datetime.timedelta(days=1)
     except AssertionError:
-        spent_time_chart.no_data_text = u"No developers for this board.\nCheck members' attributes."
-        spent_time_chart.style=DefaultStyle(no_data_font_size=20)
+        spent_time_chart.no_data_text = (
+            "No developers for this board.\nCheck members' attributes."
+        )
+        spent_time_chart.style = DefaultStyle(no_data_font_size=20)
         return spent_time_chart.render_django_response()
 
     return spent_time_chart.render_django_response()
@@ -198,7 +220,9 @@ def spent_time_by_day_of_the_week(request, member_id=None, week_of_year=None, bo
 @login_required
 def spent_time_by_week_evolution(request, board_id):
     board = _get_user_board_or_none(request, board_id)
-    return members.spent_time_by_week_evolution(board=board, show_interruptions=request.GET.get("show_interruptions"))
+    return members.spent_time_by_week_evolution(
+        board=board, show_interruptions=request.GET.get("show_interruptions")
+    )
 
 
 @login_required
@@ -284,6 +308,7 @@ def card_value_evolution_by_member(request, board_id="all", day_step=1):
     day_step = min(int(day_step), 30)
     return cards.value_evolution_by_member(request.user, board, day_step)
 
+
 @login_required
 def cumulative_card_value_evolution(request, board_id="all", day_step=1):
     if board_id != "all":
@@ -360,7 +385,7 @@ def interruption_spent_time(request, board_id=None):
 def time_scatterplot(request, time_metric, board_id=None, year=None, month=None):
     board = _get_user_board_or_none(request, board_id)
     if time_metric == "lead_time":
-        y_function = lambda card: card.lead_time/Decimal(24)/Decimal(7)
+        y_function = lambda card: card.lead_time / Decimal(24) / Decimal(7)
         time_metric_name = "Lead time (in weeks)"
     elif time_metric == "cycle_time":
         y_function = lambda card: card.cycle_time / Decimal(24) / Decimal(7)
@@ -369,8 +394,15 @@ def time_scatterplot(request, time_metric, board_id=None, year=None, month=None)
         y_function = lambda card: card.spent_time
         time_metric_name = "Spent time (in days)"
     else:
-        raise ValueError(u"Time metric {0} not recognized".format(time_metric))
-    return cards.time_scatterplot(request.user, time_metric_name, board, y_function=y_function, year=year, month=month)
+        raise ValueError(f"Time metric {time_metric} not recognized")
+    return cards.time_scatterplot(
+        request.user,
+        time_metric_name,
+        board,
+        y_function=y_function,
+        year=year,
+        month=month,
+    )
 
 
 # Scatterplot comparing the completion date vs. some time metric
@@ -378,22 +410,31 @@ def time_scatterplot(request, time_metric, board_id=None, year=None, month=None)
 def time_box(request, time_metric, board_id=None, year=None, month=None):
     board = _get_user_board_or_none(request, board_id)
     if time_metric == "lead_time":
-        y_function = lambda card: card.lead_time/Decimal(24)/Decimal(7)
+        y_function = lambda card: card.lead_time / Decimal(24) / Decimal(7)
         time_metric_name = "Lead time (in weeks)"
     elif time_metric == "cycle_time":
-        y_function = lambda card: card.cycle_time/Decimal(24)/Decimal(7)
+        y_function = lambda card: card.cycle_time / Decimal(24) / Decimal(7)
         time_metric_name = "Cycle time (in weeks)"
     elif time_metric == "spent_time":
         y_function = lambda card: card.spent_time
         time_metric_name = "Spent time (days)"
     else:
-        raise ValueError(u"Time metric {0} not recognized".format(time_metric))
-    return cards.time_box(request.user, time_metric_name, board, y_function=y_function, year=year, month=month)
+        raise ValueError(f"Time metric {time_metric} not recognized")
+    return cards.time_box(
+        request.user,
+        time_metric_name,
+        board,
+        y_function=y_function,
+        year=year,
+        month=month,
+    )
 
 
 # Completion histogram
 @login_required
-def completion_histogram(request, board_id="all", time_metric="lead_time", units="days"):
+def completion_histogram(
+    request, board_id="all", time_metric="lead_time", units="days"
+):
     if board_id != "all":
         board = _get_user_board_or_none(request, board_id)
     else:
@@ -401,13 +442,17 @@ def completion_histogram(request, board_id="all", time_metric="lead_time", units
 
     if time_metric is None:
         time_metric = "lead_time"
-    elif time_metric != "lead_time" and time_metric != "cycle_time" and time_metric != "spent_time":
-        raise ValueError(u"Time metric {0} not recognized".format(time_metric))
+    elif (
+        time_metric != "lead_time"
+        and time_metric != "cycle_time"
+        and time_metric != "spent_time"
+    ):
+        raise ValueError(f"Time metric {time_metric} not recognized")
 
     if units is None:
         units = "days"
     elif units != "days" and units != "hours":
-        raise ValueError(u"Units value {0} not recognized".format(units))
+        raise ValueError(f"Units value {units} not recognized")
 
     return cards.completion_histogram(request.user, board, time_metric, units)
 
@@ -417,15 +462,21 @@ def completion_histogram(request, board_id="all", time_metric="lead_time", units
 def time_vs_spent_time(request, time_metric, board_id=None, year=None, month=None):
     board = _get_user_board_or_none(request, board_id)
     if time_metric == "lead_time":
-        y_function = lambda card: card.lead_time/Decimal(24)
+        y_function = lambda card: card.lead_time / Decimal(24)
         time_metric_name = "Lead time (days)"
     elif time_metric == "cycle_time":
-        y_function = lambda card: card.cycle_time/Decimal(24)
+        y_function = lambda card: card.cycle_time / Decimal(24)
         time_metric_name = "Cycle time (days)"
     else:
-        raise ValueError(u"Time metric {0} not recognized".format(time_metric))
-    return cards.time_vs_spent_time(request.user, time_metric_name, board,
-                                    y_function=y_function, year=year, month=month)
+        raise ValueError(f"Time metric {time_metric} not recognized")
+    return cards.time_vs_spent_time(
+        request.user,
+        time_metric_name,
+        board,
+        y_function=y_function,
+        year=year,
+        month=month,
+    )
 
 
 # Card age per list box chart
@@ -491,7 +542,9 @@ def subjective_noise_level(request):
 
 # Code quality
 @login_required
-def number_of_code_errors(request, grouped_by, board_id, repository_id=None, language="python"):
+def number_of_code_errors(
+    request, grouped_by, board_id, repository_id=None, language="python"
+):
     board = get_user_boards(request.user).get(id=board_id)
     repository = None
     if repository_id:
@@ -502,14 +555,18 @@ def number_of_code_errors(request, grouped_by, board_id, repository_id=None, lan
 
 
 @login_required
-def number_of_code_errors_per_loc(request, grouped_by, board_id, repository_id=None, language="python"):
+def number_of_code_errors_per_loc(
+    request, grouped_by, board_id, repository_id=None, language="python"
+):
     board = get_user_boards(request.user).get(id=board_id)
     repository = None
     if repository_id:
         repository = board.repositories.get(id=repository_id)
     if language is None:
         language = "python"
-    return repositories.number_of_code_errors_per_loc(grouped_by, board, repository, language)
+    return repositories.number_of_code_errors_per_loc(
+        grouped_by, board, repository, language
+    )
 
 
 # Agility rating

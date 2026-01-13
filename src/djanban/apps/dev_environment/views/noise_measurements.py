@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
 from djanban.apps.base.decorators import member_required
-from djanban.apps.dev_environment.forms import NewNoiseMeasurementForm, DeleteNoiseMeasurementForm
+from djanban.apps.dev_environment.forms import (
+    DeleteNoiseMeasurementForm,
+    NewNoiseMeasurementForm,
+)
 from djanban.apps.dev_environment.models import NoiseMeasurement
 
 
@@ -37,7 +35,11 @@ def new(request):
     else:
         form = NewNoiseMeasurementForm(instance=noise_measurement)
 
-    return render(request, "dev_environment/noise_measurements/new.html", {"form": form, "member": member})
+    return render(
+        request,
+        "dev_environment/noise_measurements/new.html",
+        {"form": form, "member": member},
+    )
 
 
 # Delete an noise_measurement
@@ -56,5 +58,11 @@ def delete(request, noise_measurement_id):
     else:
         form = DeleteNoiseMeasurementForm()
 
-    replacements = {"form": form, "member": member, "noise_measurement": noise_measurement}
-    return render(request, "dev_environment/noise_measurements/delete.html", replacements)
+    replacements = {
+        "form": form,
+        "member": member,
+        "noise_measurement": noise_measurement,
+    }
+    return render(
+        request, "dev_environment/noise_measurements/delete.html", replacements
+    )

@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 import inspect
-from django import template
 
+from django import template
 
 register = template.Library()
 

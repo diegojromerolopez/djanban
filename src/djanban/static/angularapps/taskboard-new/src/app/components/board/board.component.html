@@ -1,0 +1,318 @@
+<simple-notifications [options]="notificationsOptions"></simple-notifications>
+
+<div *ngIf="!board" class="loading-app-message">
+    <span class="fa fa-spin fa-spinner"></span>
+    <span class="loading-app-message-text">Loading board, please wait...</span>
+</div>
+
+<div *ngIf="board" class="board">
+
+    <div class="header">
+        <div class="board_name">
+            <h1 class="board_name">
+                <a href="{{board.local_url}}" title="View board {{board.name}} details">
+                    <img class="board-identicon" src="{{board.identicon_url}}" alt="Identicon of board {{board.name}}"/>
+                    <span>{{board.name}}</span>
+                </a>
+            </h1>
+        </div>
+    </div>
+
+    <!-- Menu of visibility of board -->
+    <div class="board_menu row">
+
+        <div class="card_search col-md-3">
+            <h2><span class="fa fa-search"></span> Search cards</h2>
+            <div class="row">
+                <div class="col-md-10">
+                    <ng-select
+                        [options]="cardSearchOptions"
+                        [(ngModel)]="selectedCardId"
+                        placeholder="Select one of the cards"
+                        notFoundMsg="None of the cards match your search">
+                    </ng-select>
+                    <button class="btn btn-primary"
+                        *ngIf="selectedCardId"
+                        (click)="onCardIdSelect(selectedCardId)">
+                        <span class="fa fa-sticky-note-o"></span>
+                        View card
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <!-- Show/Hide archived cards -->
+            <div class="toggle_is_closed">
+                <span *ngIf="closedItemsVisibility == 'showed'">
+                    <button class="btn btn-primary" (click)="closedItemsVisibility='hidden'">
+                        <span class="fa fa-eye-slash"></span>
+                        Hide archived elements
+                    </button>
+                </span>
+                <span *ngIf="closedItemsVisibility == 'hidden'">
+                    <button class="btn btn-primary" (click)="closedItemsVisibility='showed'">
+                        <span class="fa fa-eye"></span>
+                        Show archived elements
+                    </button>
+                </span>
+            </div>
+            <!-- Filter cards by label -->
+            <div class="label_filter">
+                <h2>Label filter</h2>
+                <div *ngIf="board.labels.length > 0">
+                    <form #addLabelToFilterForm="ngForm">
+                        <select name="label" required ngModel>
+                            <option *ngFor="let label of board.labels" value={{label.id}} name="label">
+                                {{label.name}}
+                            </option>
+                        </select>
+                        <span>
+                            <button class="btn btn-primary"
+                                    [disabled]="!addLabelToFilterForm.valid"
+                                    (click)="addLabelToLabelFilter(addLabelToFilterForm.value.label)">Add</button>
+                        </span>
+                    </form>
+                    <div class="row">
+                        <div *ngFor="let label of labelFilter" class="col-md-2 label-filter-item">
+                            <span class="label card-label" [ngStyle]="{'background-color': label.color}">{{label.name}}</span>
+                            <button class="btn btn-primary"
+                                    (click)=removeLabelFromLabelFilter(label.id)>
+                                <span class="fa fa-times"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="board.labels.length == 0">
+                    This board has no labels.
+                </div>
+            </div>
+        </div>
+        <!-- Members -->
+        <div class="members  col-md-5" *ngIf="members">
+            <span class="members_header">
+                <h2>Members ({{board.members.length}})</h2>
+                <span class="btn btn-primary" (click)="addMemberStatus = {show: true, waiting: false}" title="Show add member form for board {{board.name}}">
+                    <span class="fa fa-plus"></span>
+                    Member
+                </span>
+            </span>
+            <div *ngIf="addMemberStatus['show']" class="add_member">
+                <form (ngSubmit)="onAddMemberSubmit(addMemberForm.value.member, addMemberForm.value.member_type)" #addMemberForm="ngForm">
+                    <select name="member" required ngModel>
+                        <option *ngFor="let member of members" value="{{member.id}}">{{member.external_username}}</option>
+                    </select>
+                    <select name="member_type" required ngModel>
+                        <option value="normal">Normal</option>
+                        <option value="admin">Administrator</option>
+                        <option value="guest">Guest</option>
+                    </select>
+                    <div>
+                        <span class="btn btn-danger" (click)="addMemberStatus['show']=false">Cancel</span>
+                        <button type="submit" class="btn btn-success change_name" title="Add new member to board {{board.name}}"
+                                (click)="addMemberForm.ngSubmit.emit()"
+                                (click)="addMemberStatus['waiting'] = true"
+                                [disabled]="!addMemberForm.valid || addMemberStatus['waiting']">
+                            <span *ngIf="addMemberStatus['waiting']" class="fa fa-spinner fa-spin"></span> Add member
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div *ngFor="let member of board.members" class="member_container">
+                <span class="member">
+                    <span class="member_name">
+                        <img src="{{member.avatar_url}}" class="avatar" alt="{{member.external_username}}"/>
+                        <span class="member_role">({{member.roles_by_board[board.id]}})</span>
+                    </span>
+                    <button *ngIf="!member.is_current_user" class="btn btn-primary"
+                            (click)="removeMember(member)"
+                            (click)="removeMemberStatus[member.id]['waiting'] = true"
+                            [disabled]="removeMemberStatus[member.id]['waiting']"
+                            >
+                        <span *ngIf="removeMemberStatus[member.id]['waiting']" class="fa fa-spinner fa-spin"></span>
+                        <span class="fa fa-ban"></span>
+                    </button>
+                    <span *ngIf="member.is_current_user">(You)</span>
+                </span>
+            </div>
+        </div>
+        <!-- Actions -->
+        <div class="col-md-1">
+            <span   class="btn btn-primary"
+                    (click)="reloading=true"
+                    (click)="reloadBoard()">
+                <span class="fa fa-refresh fa-2x" *ngIf="!reloading" title="Reload board"></span>
+                <span class="fa fa-refresh fa-2x fa-spin cursor-help" *ngIf="reloading" title="Reloading board, please wait"></span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Lists -->
+    <div class="lists" [dragula]='"lists"' [dragulaModel]='list' [style.width.px]="board.lists.length * 420 + 80" [ngClass]="{'label-filter': labelFilter.length > 0}">
+        <div *ngFor="let list of board.lists" class="list panel panel-default" [attr.data-list]="list.id"
+            [ngClass]="{'closed-list': list.type == 'closed', 'closed-list-showed': list.type == 'closed' && closedItemsVisibility == 'showed', 'ignored-list': list.type == 'ignored'}">
+            <div class="list_name panel-heading cursor-pointer">
+                <div class="list_name">
+                    <div class="list_name_first_line">
+                        <span class="list_name_name">
+                            <span>
+                                <span class="fa fa-times" *ngIf="list.type == 'ignored'" title='This list is ignored'></span>
+                                <span class="fa fa-book" *ngIf="list.type == 'backlog'" title='Task backlog'></span>
+                                <span class="fa fa-hourglass-start" *ngIf="list.type == 'ready_to_develop'" title='Tasks waiting to be started'></span>
+                                <span class="fa fa-hourglass-half" *ngIf="list.type == 'development'" title='Tasks in development'></span>
+                                <span class="fa fa-gavel" *ngIf="list.type == 'after_development_in_review'" title='Tasks being reviewed'></span>
+                                <span class="fa fa-upload" *ngIf="list.type == 'after_development_waiting_release'" title='Tasks waiting release'></span>
+                                <span class="fa fa-hourglass-end" *ngIf="list.type == 'done'" title='Tasks done'></span>
+                                <span class="fa fa-archive" *ngIf="list.type == 'closed'" title='Closed list'></span>
+                                {{list.name}}
+                            </span>
+                        </span>
+                        <span class="move_list_handle" title="Move list"></span>
+                    </div>
+                    <div class="showing_cards">
+                        Showing {{cardsInLabelFilter(list.cards, closedItemsVisibility == 'hidden').length}} tasks.
+                    </div>
+                    <div class="list_wip_limit">
+                        <span>
+                            <strong> {{activeCards(list.cards).length}}</strong> active tasks.
+                        </span>
+                        <span *ngIf="list.wip_limit">
+                            <span class="list_wip_limit_name">WIP Limit is <strong>{{list.wip_limit}}</strong> tasks</span>
+                            <span *ngIf="activeCards(list.cards).length > list.wip_limit"><span class="fa fa-hand-paper-o fa-2x cursor-help" title="Too much multitasking. Don't introduce new tasks in this list."></span></span>
+                            <span *ngIf="activeCards(list.cards).length <= list.wip_limit"><span class="fa fa-check fa-2x cursor-help" title="You can introduce new tasks in this list."></span></span>
+                        </span>
+                        <span *ngIf="!list.wip_limit">
+                            <span class="list_wip_limit_name"><strong>No</strong> WIP Limit</span>
+                            <span class="fa fa-check"></span>
+                        </span>
+                    </div>
+                    <div class="list_actions">
+                        <span (click)="newCardFormStatus[list.id]['show'] = true" class="btn btn-primary list_name_new_card" title="New card in list {{list.name}}">
+                            <span class="fa fa-plus"></span> Card
+                        </span>
+                        <div class="move_list_cards">
+                            <button class="move_cards_button btn btn-primary"
+                                    (click)="moveAllCardsStatus[list.id]='showed'"
+                                    *ngIf="list.cards.length > 0"
+                                    [disabled]="moveAllCardsStatus[list.id]=='waiting'"
+                                    title="Move all cards of list {{list.name}}">
+                                <span class="fa fa-backward"></span>
+                                Cards
+                                <span class="fa fa-forward"></span>
+                            </button>
+                            <form (ngSubmit)="onMoveAllCardsSubmit(list.id, moveAllCardsForm.value.destination_list)" #moveAllCardsForm="ngForm" *ngIf="moveAllCardsStatus[list.id]=='showed' || moveAllCardsStatus[list.id]=='waiting'">
+                                <select name="destination_list" required ngModel>
+                                    <option *ngFor="let list_i of board.lists" value="{{list_i.id}}">{{list_i.name}}</option>
+                                </select>
+                                <div class="actions">
+                                    <button (click)="$event.preventDefault()"
+                                            (click)="moveAllCardsStatus[list.id]='hidden'"
+                                            [disabled]="moveAllCardsStatus[list.id]=='waiting'"
+                                            class="btn btn-danger">Cancel</button>
+
+                                    <button class="btn btn-success"
+                                            (click)="$event.preventDefault()"
+                                            (click)="moveAllCardsStatus[list.id]='waiting'"
+                                            (click)="moveAllCardsForm.ngSubmit.emit()"
+                                            [disabled]="!moveAllCardsForm.valid || moveAllCardsStatus[list.id]=='waiting'">
+                                        <span class="fa fa-spin fa-spinner" *ngIf="moveAllCardsStatus[list.id]=='waiting'"></span>
+                                        Move
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="newCardFormStatus[list.id]['show']" class="list_new_card">
+                    <form (ngSubmit)="onNewCardSubmit(list, newCardForm.value.name, newCardForm.value.position)" #newCardForm="ngForm">
+                    <textarea name="name" class=card_name-edit placeholder="Title of your new card" required ngModel></textarea>
+                    <select name="position" required ngModel>
+                        <option value="top">Top</option>
+                        <option value="bottom">Bottom</option>
+                    </select>
+                    <div>
+                        <span class="btn btn-danger" (click)="newCardFormStatus[list.id] = {show: false, waiting: false}">Cancel</span>
+                        <button type="submit" class="btn btn-success change_name" title="Create new card on list {{list.name}}"
+                                (click)="newCardForm.ngSubmit.emit()"
+                                (click)="newCardFormStatus[list.id]['waiting'] = true"
+                                [disabled]="!newCardForm.valid || newCardFormStatus[list.id]['waiting']">
+                            <span *ngIf="newCardFormStatus[list.id]['waiting']" class="fa fa-spinner fa-spin"></span>Create
+                        </button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+            <div [dragula]='"cards"' [dragulaModel]='list.cards'
+                    id="card-list-{{list.id}}" class="cards" [attr.data-list]="list.id">
+                    <div *ngFor="let card of list.cards"
+                            id="card-{{card.id}}" class="card panel board-card"
+                            [ngClass]="{'closed-card': card.is_closed, 'active-card': !card.is_closed, 'panel-info': !card.is_closed, 'panel-danger': card.is_closed, 'closed-card-showed': card.is_closed && closedItemsVisibility=='showed', 'in-label-filter': cardInLabelFilter(card)}"
+                            [attr.data-card]="card.id">
+                        <span class="panel-heading card_heading" [ngClass]="{'closed-card_heading': card.is_closed }">
+                            <span (click)="onCardSelect(card)" class="card_name">
+                                <span class=card_name-name>{{card.name}}</span>
+                            </span>
+                            <a href="{{card.short_url}}" title="View card" class="card_action_view">
+                                <span class="fa fa-trello"></span>
+                            </a>
+                            <a href="{{card.local_url}}" title="View card" class="card_action_view">
+                                <span class="fa fa-eye"></span>
+                            </a>
+                            <span class="card_heading-labels" *ngIf="card.labels.length > 0">
+                                <span class="card_heading-label" *ngFor="let label of card.labels" [style.background]="label.color" title="{{label.name}}">
+                                    {{label.name}}
+                                </span>
+                            </span>
+
+                            <span class="card_heading-properties">
+                                <span class="card_value" *ngIf="card.value != null">
+                                    <span class="fa fa-diamond"></span>
+                                    <span class="card_value-value cursor-help" title="This card has been valued in {{card.value}}">{{card.value}}</span>
+                                </span>
+                                <span class="card_heading-se_time" *ngIf="card.spent_time || card.estimated_time">
+                                    <span class="fa fa-clock-o"></span>
+                                    <span class="card_heading-spent_time" title="The team has spent {{card.spent_time | number:'1.1-2'}} hours in this task">
+                                        S: {{card.spent_time | number:'1.1-2'}}
+                                    </span>
+                                    <span class="card_heading-estimated_time" title="The team estimated a cost of {{card.estimated_time | number:'1.1-2'}} hours in this task">
+                                        E: {{card.estimated_time | number:'1.1-2'}}
+                                    </span>
+                                </span>
+                                <span class="card_heading-reviews">
+                                    <span *ngIf="card.number_of_reviews && card.number_of_reviews > 0" title="This task has been reviewed" class="cursor-help">
+                                        <span class="fa fa-thumbs-up"></span>
+                                        {{card.number_of_reviews}}
+                                    </span>
+                                    <span *ngIf="card.number_of_reviews == 0" title="This task has not been reviewed yet" class="cursor-help">
+                                        <span class="fa fa-thumbs-down"></span>
+                                    </span>
+                                </span>
+                                <span class="card_heading-comments cursor-help" title="This task has {{card.number_of_comments}} comments">
+                                    <span class="fa fa-comments"></span>
+                                    {{card.number_of_comments}}
+                                </span>
+                                <span class="card_heading-attachments cursor-help" title="This task has {{card.number_of_attachments}} attached files">
+                                    <span class="fa fa-paperclip"></span>
+                                    {{card.number_of_attachments}}
+                                </span>
+                                <span class="card_heading-movements" *ngIf="card.number_of_forward_movements > 0 || card.number_of_backward_movements > 0">
+                                    <span class="fa fa-arrows"></span>
+                                    <span class="fa fa-arrow-right"></span>: {{card.number_of_forward_movements}}
+                                    <span class="fa fa-arrow-left"></span>: {{card.number_of_backward_movements}}
+                                </span>
+                                <span class="card_heading-members">
+                                    <span *ngFor="let card_member of card.members">
+                                        <img class="avatar" src="{{card_member.avatar_url}}"  alt="{{card_member.external_username}}" />
+                                    </span>
+                                </span>
+                            </span>
+
+                            <span class="card_heading-deadline" *ngIf="card.due_datetime">
+                                <span class="fa fa-calendar-times-o"></span> {{card.due_datetime | localize_datetime}}
+                            </span>
+                        </span>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>

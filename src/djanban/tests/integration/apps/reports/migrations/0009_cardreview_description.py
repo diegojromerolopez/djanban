@@ -1,0 +1,8 @@
+# -*- coding: utf-8 -*-
+
+
+from django.test import TestCase
+
+
+class Test0009cardreviewdescriptionIntegration(TestCase):
+    pass

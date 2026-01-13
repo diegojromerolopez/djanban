@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from djanban.apps.base.auth import user_is_administrator
 from djanban.apps.boards.models import Board
-from djanban.apps.charts import cards, labels, members, boards, requirements
+from djanban.apps.charts import boards, cards, labels, members, requirements
 
 
 # General burndown chart
@@ -24,7 +21,9 @@ def requirement_burndown(request, board_public_access_code, requirement_code=Non
 # Show the spent time by week by members
 def spent_time_by_week(request, week_of_year, board_public_access_code):
     board = _get_user_board(request, board_public_access_code)
-    return members.spent_time_by_week(request.user, week_of_year=week_of_year, board=board)
+    return members.spent_time_by_week(
+        request.user, week_of_year=week_of_year, board=board
+    )
 
 
 # Show a chart with the task forward movements by member
@@ -74,4 +73,6 @@ def avg_estimated_times(request, board_public_access_code):
 def _get_user_board(request, board_public_access_code):
     if user_is_administrator(request.user):
         return Board.objects.get(public_access_code=board_public_access_code)
-    return Board.objects.get(enable_public_access=True, public_access_code=board_public_access_code)
+    return Board.objects.get(
+        enable_public_access=True, public_access_code=board_public_access_code
+    )

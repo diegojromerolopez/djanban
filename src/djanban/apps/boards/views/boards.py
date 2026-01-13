@@ -1,31 +1,38 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
 import hashlib
 import time
-
 from datetime import timedelta
 
 import pydenticon
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
-from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.http.response import Http404, HttpResponse
-from django.shortcuts import render, get_object_or_404
-from requests.packages.urllib3.exceptions import SSLError, HTTPError
+from django.http.response import Http404
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from requests.packages.urllib3.exceptions import HTTPError, SSLError
 
-from djanban.apps.base.auth import user_is_member, get_user_boards, user_is_visitor, get_member_boards, \
-    get_user_board_or_404
+from djanban.apps.base.auth import (
+    get_user_board_or_404,
+    get_user_boards,
+    user_is_member,
+    user_is_visitor,
+)
 from djanban.apps.base.decorators import member_required
-from djanban.apps.boards.forms import EditBoardForm, NewBoardForm, NewListForm, LabelForm, EditListForm, \
-    SwapListForm, MoveUpListForm, MoveDownListForm
-from djanban.apps.boards.models import List, Board, Label
+from djanban.apps.boards.forms import (
+    EditBoardForm,
+    EditListForm,
+    LabelForm,
+    MoveDownListForm,
+    MoveUpListForm,
+    NewBoardForm,
+    NewListForm,
+    SwapListForm,
+)
+from djanban.apps.boards.models import Board, Label, List
 from djanban.apps.boards.stats import avg, std_dev
-from djanban.apps.fetch.fetchers.trello.boards import Initializer, BoardFetcher
+from djanban.apps.fetch.fetchers.trello.boards import BoardFetcher, Initializer
 from djanban.utils.week import get_week_of_year, get_weeks_of_year_since_one_year_ago
 
 
@@ -55,7 +62,9 @@ def new(request):
     else:
         form = NewBoardForm(instance=board, member=member)
 
-    return render(request, "boards/new.html", {"form": form, "board": board, "member": member})
+    return render(
+        request, "boards/new.html", {"form": form, "board": board, "member": member}
+    )
 
 
 # Create boards that are present in Trello but not in this platform
@@ -74,7 +83,7 @@ def sync(request):
         except (SSLError, HTTPError) as e:
             replacements = {
                 "member": member,
-                "error": "Connection error when initializing member: {0}".format(e)
+                "error": f"Connection error when initializing member: {e}",
             }
             return render(request, "boards/sync.html", replacements)
 
@@ -116,7 +125,9 @@ def edit_label(request, board_id, label_id):
         form = LabelForm(request.POST, instance=label)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse("boards:view_label_report", args=(board_id,)))
+            return HttpResponseRedirect(
+                reverse("boards:view_label_report", args=(board_id,))
+            )
 
     else:
         form = LabelForm(instance=label)
@@ -133,7 +144,12 @@ def view_list(request):
         member = request.user.member
     boards = get_user_boards(request.user).order_by("name")
     archived_boards = get_user_boards(request.user, is_archived=True).order_by("name")
-    replacements = {"member": member, "boards": boards, "archived_boards": archived_boards, "user": request.user}
+    replacements = {
+        "member": member,
+        "boards": boards,
+        "archived_boards": archived_boards,
+        "user": request.user,
+    }
     return render(request, "boards/list.html", replacements)
 
 
@@ -212,17 +228,17 @@ def view_gantt_chart(request, board_id):
         dependant_cards = ""
         if blocked_cards.exists():
             for blocked_card in blocked_cards:
-                dependant_cards += ",".format(blocked_card.id)
+                dependant_cards += ","
             dependant_cards = dependant_cards[:-1]
 
         members = board_card.members.all()
         for member in members:
             card = {
                 "pID": board_card.id,
-                "pName": "{0}".format(board_card.short_url, member.external_username),
+                "pName": f"{board_card.short_url}",
                 "pStart": start_date.strftime("%Y-%m-%d"),
                 "pEnd": end_date.strftime("%Y-%m-%d"),
-                "pClass": "gtask{0}".format(task_color),
+                "pClass": f"gtask{task_color}",
                 "pLink": reverse("boards:view_card", args=(board_id, board_card.id)),
                 "pMile": 0,
                 "pRes": member.external_username,
@@ -232,9 +248,9 @@ def view_gantt_chart(request, board_id):
                 "pOpen": 0,
                 "pDepend": dependant_cards,
                 "pCaption": board_card.name,
-                "pNotes": "{0}\\\n{1}".format(
+                "pNotes": "{}\\\n{}".format(
                     board_card.name, board_card.description.replace("\n", "\\\n")
-                )
+                ),
             }
             cards.append(card)
 
@@ -261,7 +277,7 @@ def view_taskboard(request, board_id, path=""):
         "board": board,
         "ANGULAR_URL": settings.ANGULAR_URL,
         "DOMAIN": settings.DOMAIN,
-        "PORT": settings.PORT
+        "PORT": settings.PORT,
     }
     return render(request, "boards/view_taskboard.html", replacements)
 
@@ -284,11 +300,11 @@ def view(request, board_id):
     week_of_year = get_week_of_year()
 
     # Next cards by due date
-    next_due_date_cards = board.cards\
-        .filter(due_datetime__isnull=False)\
-        .exclude(
-            Q(list__type="ignored") | Q(list__type="closed")
-        ).order_by("-due_datetime")
+    next_due_date_cards = (
+        board.cards.filter(due_datetime__isnull=False)
+        .exclude(Q(list__type="ignored") | Q(list__type="closed"))
+        .order_by("-due_datetime")
+    )
 
     # Requirements
     requirements = board.requirements.all().order_by("-value")
@@ -298,7 +314,7 @@ def view(request, board_id):
 
     # Replacements in the template
     replacements = {
-        "url_prefix": "http://{0}".format(settings.DOMAIN),
+        "url_prefix": f"http://{settings.DOMAIN}",
         "board": board,
         "next_due_date_cards": next_due_date_cards,
         "requirement": requirement,
@@ -306,14 +322,16 @@ def view(request, board_id):
         "week_of_year": week_of_year,
         "member": member,
         "visitor": visitor,
-        "weeks_of_year": get_weeks_of_year_since_one_year_ago()
+        "weeks_of_year": get_weeks_of_year_since_one_year_ago(),
     }
     return render(request, "boards/view.html", replacements)
 
 
 # Public view for other stakeholders that do not have access to the board
 def public_view(request, board_public_access_code):
-    board = get_object_or_404(Board, enable_public_access=True, public_access_code=board_public_access_code)
+    board = get_object_or_404(
+        Board, enable_public_access=True, public_access_code=board_public_access_code
+    )
     week_of_year = get_week_of_year()
     lists = board.lists.exclude(type="ignored").order_by("position")
     # Requirements
@@ -327,7 +345,7 @@ def public_view(request, board_public_access_code):
         "board": board,
         "lists": lists,
         "week_of_year": week_of_year,
-        "weeks_of_year": get_weeks_of_year_since_one_year_ago()
+        "weeks_of_year": get_weeks_of_year_since_one_year_ago(),
     }
     return render(request, "boards/public_view.html", replacements)
 
@@ -357,20 +375,20 @@ def view_identicon(request, board_id, width=40, height=40):
 
     # List of colors taken from example http://pydenticon.readthedocs.io/en/0.3/usage.html#instantiating-a-generator
     foreground = [
-        "#{0}".format(board.title_color),
+        f"#{board.title_color}",
         "rgb(45,79,255)",
         "rgb(254,180,44)",
         "rgb(226,121,234)",
         "rgb(30,179,253)",
         "rgb(232,77,65)",
         "rgb(49,203,115)",
-        "rgb(141,69,170)"
+        "rgb(141,69,170)",
     ]
 
     # Background color taken from example http://pydenticon.readthedocs.io/en/0.3/usage.html#instantiating-a-generator
-    background = u"#{0}".format(board.background_color)
+    background = f"#{board.background_color}"
 
-    identicon_hash = hashlib.sha1(board.name.encode('utf-8')).hexdigest()
+    identicon_hash = hashlib.sha1(board.name.encode("utf-8")).hexdigest()
 
     # If the identicon is already stored, return it
     if identicon_hash == board.identicon_hash:
@@ -379,12 +397,15 @@ def view_identicon(request, board_id, width=40, height=40):
     # Otherwise, its generation is needed
     board.identicon_hash = identicon_hash
 
-    generator = pydenticon.Generator(5, 5, digest=hashlib.sha1,
-                                     foreground=foreground, background=background)
+    generator = pydenticon.Generator(
+        5, 5, digest=hashlib.sha1, foreground=foreground, background=background
+    )
 
-    identicon_png = generator.generate(board.name, int(width), int(height), output_format="png")
+    identicon_png = generator.generate(
+        board.name, int(width), int(height), output_format="png"
+    )
 
-    board.identicon.save(u"{0}".format(identicon_hash), ContentFile(identicon_png))
+    board.identicon.save(f"{identicon_hash}", ContentFile(identicon_png))
     board.save()
     return HttpResponseRedirect(board.identicon.url)
 
@@ -399,7 +420,13 @@ def view_lists(request, board_id):
     board = get_user_board_or_404(request.user, board_id)
     lists = board.lists.all().order_by("position")
 
-    replacements = {"member": member, "user": request.user, "board": board, "lists": lists, "list_types": List.LIST_TYPE_CHOICES}
+    replacements = {
+        "member": member,
+        "user": request.user,
+        "board": board,
+        "lists": lists,
+        "list_types": List.LIST_TYPE_CHOICES,
+    }
     return render(request, "boards/lists/list.html", replacements)
 
 
@@ -427,7 +454,11 @@ def new_list(request, board_id):
     else:
         form = NewListForm(instance=list_, member=member)
 
-    return render(request, "boards/lists/new.html", {"form": form, "board": board, "member": member})
+    return render(
+        request,
+        "boards/lists/new.html",
+        {"form": form, "board": board, "member": member},
+    )
 
 
 # Edit a list
@@ -498,12 +529,20 @@ def edit_list_position(request, board_id, list_id):
             form_move_down = form
             form_move_up = MoveUpListForm(instance=list_, member=member)
         else:
-            replacements = {"board": board, "list": list_, "lists":lists, "member": member, "message": "Option not recognized"}
+            replacements = {
+                "board": board,
+                "list": list_,
+                "lists": lists,
+                "member": member,
+                "message": "Option not recognized",
+            }
             return render(request, "boards/lists/edit_position.html", replacements)
 
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse("boards:edit_list_position", args=(board_id, list_id)))
+            return HttpResponseRedirect(
+                reverse("boards:edit_list_position", args=(board_id, list_id))
+            )
 
     else:
         form_move_up = MoveUpListForm(instance=list_, member=member)
@@ -515,7 +554,7 @@ def edit_list_position(request, board_id, list_id):
         "board": board,
         "member": member,
         "lists": lists,
-        "list": list_
+        "list": list_,
     }
     return render(request, "boards/lists/edit_position.html", replacements)
 
@@ -607,7 +646,7 @@ def fetch(request, board_id):
             board_fetcher = BoardFetcher(board)
             board_fetcher.fetch(debug=True)
             end_time = time.time()
-            print("Elapsed time {0} s".format(end_time-start_time))
+            print(f"Elapsed time {end_time-start_time} s")
             replacements["done"] = True
             return render(request, "boards/fetch.html", replacements)
         except UnicodeDecodeError as e:
@@ -632,7 +671,9 @@ def view_workflow_card_report(request, board_id, workflow_id):
 
     replacements = {
         "workflow": workflow,
-        "member": member, "board": board, "workflow_card_reports": workflow_card_reports,
+        "member": member,
+        "board": board,
+        "workflow_card_reports": workflow_card_reports,
         "avg_lead_time": avg(workflow_card_reports, "lead_time"),
         "std_dev_lead_time": std_dev(workflow_card_reports, "lead_time"),
         "avg_cycle_time": avg(workflow_card_reports, "cycle_time"),
@@ -671,7 +712,6 @@ def view_member_report(request, board_id):
         "board": board,
         "members": board.members.all(),
         "week_of_year": week_of_year,
-        "weeks_of_year": get_weeks_of_year_since_one_year_ago()
+        "weeks_of_year": get_weeks_of_year_since_one_year_ago(),
     }
     return render(request, "boards/members/list.html", replacements)
-

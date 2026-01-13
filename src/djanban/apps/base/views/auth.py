@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from django.contrib.auth import login as django_login
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 
 from djanban.apps.base.forms import LoginForm
 
@@ -29,4 +27,3 @@ def login(request):
 def logout(request):
     django_logout(request)
     return HttpResponseRedirect(reverse("index"))
-

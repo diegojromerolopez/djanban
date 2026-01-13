@@ -1,21 +1,14 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
-import os
 from collections import namedtuple
 
-from django.conf import settings
 from django.utils import timezone
-from trello import TrelloClient
+from trello import Board as TrelloBoard
 from trello import Card as TrelloCard
 from trello import List as TrelloList
-from trello import Board as TrelloBoard
-
+from trello import TrelloClient
 
 
 # Establishes a connection with Trello API
-class TrelloConnector(object):
+class TrelloConnector:
 
     def __init__(self, member):
         self.member = member
@@ -28,7 +21,7 @@ class TrelloConnector(object):
             api_key=self.trello_member_profile.api_key,
             api_secret=self.trello_member_profile.api_secret,
             token=self.trello_member_profile.token,
-            token_secret=self.trello_member_profile.token_secret
+            token_secret=self.trello_member_profile.token_secret,
         )
         return client
 
@@ -130,9 +123,12 @@ class TrelloConnector(object):
 
         # Calling the Trello API to create the card
         trello_card = trello_list.add_card(
-            card.name, desc=card.description,
-            labels=trello_labels, due="null",
-            source=None, position=position
+            card.name,
+            desc=card.description,
+            labels=trello_labels,
+            due="null",
+            source=None,
+            position=position,
         )
 
         # Card attribute assignment
@@ -163,13 +159,17 @@ class TrelloConnector(object):
         FakeTrelloBoard = namedtuple("FakeTrelloBoard", ["id"])
         fake_trello_board = FakeTrelloBoard(id=source_list.board.uuid)
         FakeTrelloList = namedtuple("FakeTrelloList", ["id", "board"])
-        fake_trello_destination_list = FakeTrelloList(id=destination_list.uuid, board=fake_trello_board)
+        fake_trello_destination_list = FakeTrelloList(
+            id=destination_list.uuid, board=fake_trello_board
+        )
         return trello_list.move_all_cards(fake_trello_destination_list)
 
     # Add attachment to card
     def add_attachment_to_card(self, card, attachment):
         trello_card = self.get_trello_card(card)
-        trello_attachment_data = trello_card.attach(name=attachment.file.name, file=attachment.file)
+        trello_attachment_data = trello_card.attach(
+            name=attachment.file.name, file=attachment.file
+        )
         attachment.uuid = trello_attachment_data["id"]
         return attachment
 
@@ -190,7 +190,7 @@ class TrelloConnector(object):
     # Edit comment content
     def edit_comment_of_card(self, card, comment):
         if self.member.uuid != comment.author.uuid:
-            raise AssertionError(u"You can only edit your comments")
+            raise AssertionError("You can only edit your comments")
         trello_card = self.get_trello_card(card)
         trello_card.update_comment(comment.uuid, comment.content)
         comment.last_edition_datetime = timezone.now()

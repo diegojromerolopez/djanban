@@ -1,19 +1,18 @@
-from __future__ import unicode_literals
-
 import re
+
 from django.apps import apps
 from django.core.serializers import serialize
 from django.utils import timezone
 
 
-class Anonymizer(object):
+class Anonymizer:
 
     def __init__(self, *args, **kwargs):
-        super(Anonymizer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @staticmethod
     def anonymize_string(string):
-        return re.sub("\w", "x", string)
+        return re.sub(r"\w", "x", string)
 
     @staticmethod
     def anonymize(klass, objects):
@@ -39,13 +38,26 @@ class Anonymizer(object):
         return serialize("json", objects)
 
     def run(self):
-        filename = "anonymized_data-{0}.json".format(timezone.now().isoformat())
+        filename = f"anonymized_data-{timezone.now().isoformat()}.json"
 
         out = open(filename, "w")
 
-        for app_name in ["boards", "hourly_rates", "journal", "dev_times", "dev_environment", "forecasters", "members",
-                         "notifications", "reporter", "reports", "repositories", "requirements",
-                         "visitors", "workflows"]:
+        for app_name in [
+            "boards",
+            "hourly_rates",
+            "journal",
+            "dev_times",
+            "dev_environment",
+            "forecasters",
+            "members",
+            "notifications",
+            "reporter",
+            "reports",
+            "repositories",
+            "requirements",
+            "visitors",
+            "workflows",
+        ]:
             models = apps.get_app_config(app_name).get_models()
             for model in models:
                 objects = Anonymizer.serialize(model)

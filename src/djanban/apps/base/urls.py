@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-
-from django.conf.urls import url
+from django.urls import re_path
 
 from djanban.apps.base.views import auth
 
-urlpatterns = [
-    url(r'^login/?$', auth.login, name="login"),
-    url(r'^logout/?$', auth.logout, name="logout"),
-]
+app_name = "base"
 
+urlpatterns = [
+    re_path(r"^login/?$", auth.login, name="login"),
+    re_path(r"^logout/?$", auth.logout, name="logout"),
+]

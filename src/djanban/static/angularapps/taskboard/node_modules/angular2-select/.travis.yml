@@ -1,7 +1,0 @@
-language: node_js
-node_js:
-    - "6"
-cache: yarn
-before_script:
-    - yarn global add gulp
-script: gulp

@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
-from django.forms import models
 from django import forms
+from django.forms import models
 from django.utils import timezone
 
 from djanban.apps.charts.models import CachedChart
@@ -17,7 +13,7 @@ class NewInterruptionForm(models.ModelForm):
         fields = ["board", "interrupted_task", "cause", "spent_time", "comments"]
 
     def save(self, commit=True):
-        super(NewInterruptionForm, self).save(commit=False)
+        super().save(commit=False)
         if commit:
             self.instance.datetime = timezone.now()
             self.instance.save()
@@ -26,7 +22,7 @@ class NewInterruptionForm(models.ModelForm):
 
 
 class DeleteInterruptionForm(forms.Form):
-    confirmed = forms.BooleanField(label=u"Confirm you want to delete this interruption")
+    confirmed = forms.BooleanField(label="Confirm you want to delete this interruption")
 
 
 # Form to create a new noise measurement
@@ -36,7 +32,7 @@ class NewNoiseMeasurementForm(models.ModelForm):
         fields = ["noise_level", "subjective_noise_level", "comments"]
 
     def save(self, commit=True):
-        super(NewNoiseMeasurementForm, self).save(commit=False)
+        super().save(commit=False)
         if commit:
             self.instance.datetime = timezone.now()
             self.instance.save()
@@ -45,4 +41,6 @@ class NewNoiseMeasurementForm(models.ModelForm):
 
 
 class DeleteNoiseMeasurementForm(forms.Form):
-    confirmed = forms.BooleanField(label=u"Confirm you want to delete this noise measurement")
+    confirmed = forms.BooleanField(
+        label="Confirm you want to delete this noise measurement"
+    )
