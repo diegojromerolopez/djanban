@@ -57,14 +57,15 @@ The project follows a standard Django structure within a `src` directory:
 
 ## Upgrade Strategy
 
-The modernization of this legacy codebase must follow a strict, safe path to ensure no regression in functionality.
+The modernization of this legacy codebase must follow a strict, safe path to ensure no regression in functionality:
 
-1.  **Establish Test Coverage**: Before any code changes, create a comprehensive test suite capturing the current behavior. Use the existing codebase behavior as the source of truth.
-2.  **Upgrade Python**: Migrate the codebase to run on **Python 3.14**.
-    - This will likely involve using tools like `2to3` or `pyupgrade` initially, but manual verification via tests is paramount.
-3.  **Upgrade Django**: Once running on Python 3.14, upgrade the Django version step-by-step (e.g., 1.11 -> 2.0 -> 2.2 -> 3.2 -> 4.2 -> 5.x).
-    - Fix deprecation warnings at each step.
-    - Verify with tests at each step.
+1.  **Create a virtualenv with Python 2**: Establish a baseline environment that matches the legacy production state.
+2.  **Create tests for all functionality**: Write comprehensive tests using Python 2 code to capture the current behavior of the application.
+3.  **Ensure test coverage**: Verify that all critical paths and logic are covered by the test suite.
+4.  **Remove the Python 2 virtualenv**: Clean up the legacy environment.
+5.  **Create a virtual environment with Python 3.14**: Initialize the target modern environment.
+6.  **Convert code to Python 3**: Migrate the codebase from Python 2.7 to Python 3.14 using tools and manual refactoring.
+7.  **Run tests and fix regressions**: Execute the test suite in the new environment; identify and fix any broken functionality until all tests pass.
 
 ## Development Methodology
 
