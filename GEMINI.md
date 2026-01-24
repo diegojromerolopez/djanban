@@ -20,12 +20,40 @@ The project follows a standard Django structure within a `src` directory:
         - `djanban/`
             - `settings.py`: Main configuration.
             - `urls.py`: Main URL routing.
-            - `apps/`: Contains the modular Django applications that make up the project functionality:
-                - `boards/`: Core board logic.
-                - `members/`: User and team management.
-                - `charts/`, `reports/`: specific visualization modules.
-                - `fetch/`: Logic for fetching data (e.g., from Trello).
-                - ... and others (`agility_rating`, `niko_niko_calendar`, etc.).
+            - `apps/`: Modular Django applications:
+                - **Core Features**:
+                    - `boards`: Core business logic (Boards, Lists, Cards, Labels).
+                    - `members`: User management and roles.
+                    - `fetch`: Logic for syncing data from Trello (commands and fetchers).
+                    - `multiboards`: Functionality to group multiple boards.
+                    - `workflows`: Board process definitions and workflow stats.
+                - **Analytics & Reporting**:
+                    - `charts`: Caching and rendering logic for charts.
+                    - `reports`: Detailed analytics like Card Movements and Reviews.
+                    - `reporter`: Automated reporting tools (daily/weekly emails).
+                    - `forecasters`: Project forecasting models.
+                    - `agility_rating`: Project agility scoring.
+                - **Developer Metrics**:
+                    - `dev_environment`: Environment tracking (interruptions, noise).
+                    - `dev_times`: Time tracking and daily spent time.
+                    - `hourly_rates`: Cost analysis based on hourly rates.
+                    - `journal`: Developer work logs.
+                    - `niko_niko_calendar`: Team mood tracking.
+                    - `work_hours_packages`: Time budget management.
+                - **Code Quality**:
+                    - `repositories`: Git integration and code quality metrics (Pylint, PHPMD).
+                    - `requirements`: Requirements traceability.
+                - **Utilities**:
+                    - `anonymizer`: Data scrubbing for privacy.
+                    - `api`: REST API implementation.
+                    - `base`: Core utilities (Auth, Email, Base Templates).
+                    - `destructor`: Data cleanup tools.
+                    - `index`: Main dashboard views.
+                    - `notifications`: User alert system.
+                    - `password_reseter`: Password recovery flow.
+                    - `recurrent_cards`: Task automation for repeating cards.
+                    - `slideshow`: Kiosk/presentation mode.
+                    - `visitors`: Public or guest access handling.
 
 ## Upgrade Strategy
 
