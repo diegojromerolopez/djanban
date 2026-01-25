@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
 import copy
-
 from datetime import timedelta
+
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max, Min
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-
 from django.urls import reverse
 from django.utils import timezone
 
@@ -28,10 +26,19 @@ def view_calendar(request):
         member = request.user.member
 
     boards = get_user_boards(request.user)
-    members = Member.objects.filter(boards__in=boards).distinct().filter(is_developer=True).order_by("id")
+    members = (
+        Member.objects.filter(boards__in=boards)
+        .distinct()
+        .filter(is_developer=True)
+        .order_by("id")
+    )
 
-    min_date = DailyMemberMood.objects.filter(member__in=members).aggregate(min_date=Min("date"))["min_date"]
-    max_date = DailyMemberMood.objects.filter(member__in=members).aggregate(max_date=Max("date"))["max_date"]
+    min_date = DailyMemberMood.objects.filter(member__in=members).aggregate(
+        min_date=Min("date")
+    )["min_date"]
+    max_date = DailyMemberMood.objects.filter(member__in=members).aggregate(
+        max_date=Max("date")
+    )["max_date"]
 
     dates = []
     if min_date and max_date:
@@ -65,4 +72,3 @@ def new_mood_measurement(request):
 
     replacements = {"form": form, "today": today, "member": member, "date": today}
     return render(request, "niko_niko_calendar/new_mood_measurement.html", replacements)
-

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import url, include
+from django.urls import re_path as url
 
-from djanban.apps.visitors.views.main import view_list, new, edit, delete
+from djanban.apps.visitors.views.main import delete, edit, new, view_list
+
+app_name = "visitors"
 
 urlpatterns = [
-    url(r'^$', view_list, name="view_list"),
-    url(r'^new$', new, name="new"),
-    url(r'^(?P<visitor_id>\d+)/edit$', edit, name="edit"),
-    url(r'^(?P<visitor_id>\d+)/delete', delete, name="delete"),
+    url(r"^$", view_list, name="view_list"),
+    url(r"^new$", new, name="new"),
+    url(r"^(?P<visitor_id>\d+)/edit$", edit, name="edit"),
+    url(r"^(?P<visitor_id>\d+)/delete", delete, name="delete"),
 ]

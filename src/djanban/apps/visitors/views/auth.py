@@ -1,12 +1,11 @@
-
-
 # User login
+from django.contrib.auth import login as django_login, logout as django_logout
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
 from djanban.apps.visitors.forms import LoginForm
-from django.contrib.auth import login as django_login
 
 
 def login(request):
