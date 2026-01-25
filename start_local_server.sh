@@ -1,18 +1,16 @@
 #! /bin/bash
 
-# Make sure we have the needed packages installed
-sudo apt-get update
-sudo apt-get -y install git python python-dev virtualenv build-essential libssl-dev libffi-dev libmysqlclient-dev libxml2-dev libxslt1-dev
-
-if [ ! -d ./src/venv ]; then
-    virtualenv venv
-    ./venv/bin/pip install -r ./src/requirements.txt
+# Ensure .venv exists
+if [ ! -d .venv ]; then
+    uv venv --python 3.14
+    uv pip install -r src/requirements.txt
 fi
 
+# Ensure settings_local.py exists
 if [ ! -f ./src/djanban/settings_local.py ]; then
     cp ./src/djanban/settings_local.runserver.py ./src/djanban/settings_local.py
 fi
 
-./venv/bin/python ./src/manage.py migrate
-
-./venv/bin/python ./src/manage.py runserver --insecure
+# Migrate and run
+uv run src/manage.py migrate
+uv run src/manage.py runserver --insecure

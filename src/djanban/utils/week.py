@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
-from datetime import timedelta, date
+
+from datetime import date, timedelta
+
 from django.utils import timezone
-
 from isoweek import Week
 
 
@@ -20,7 +20,7 @@ def get_week_of_year(date=None):
     if date is None:
         date = timezone.now().date()
     week_of_year = get_iso_week_of_year(date=date)
-    return u"{0}W{1}".format(date.year, week_of_year)
+    return "{0}W{1}".format(date.year, week_of_year)
 
 
 def get_weeks_of_year_since_one_year_ago(date=None):

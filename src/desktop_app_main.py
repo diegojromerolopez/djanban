@@ -1,13 +1,13 @@
 import os
 import socket
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 # This code is heavily based on https://moosystems.com/articles/14-distribute-django-app-as-native-desktop-app-01.html
 
 os.environ["DJANGO_APP_MODE"] = "desktop_app"
 
 try:
-    import urlparse
+    import urllib.parse
 except ImportError:
     import urllib.parse as urlparse
 
@@ -36,7 +36,7 @@ class DjangoApplication(object):
         from cherrypy._cpwsgi_server import CPWSGIServer
         from cherrypy.process.servers import ServerAdapter
 
-        host, port = urllib.splitnport(netloc, 80)
+        host, port = urllib.parse.splitnport(netloc, 80)
         host = socket.gethostbyname(host)
         bind_addr = (host, port)
         if bind_addr not in self.servers:
@@ -53,7 +53,7 @@ class DjangoApplication(object):
         Can either mount to a specific path or add a Virtual Host. Sets
         Expires header to 1 year.
         """
-        url_parts = urlparse.urlsplit(url)
+        url_parts = urllib.parse.urlsplit(url)
         path = url_parts.path.rstrip('/')
         config = {
             'tools.staticdir.on': True,
@@ -93,7 +93,7 @@ class DjangoApplication(object):
         from django.core.handlers.wsgi import WSGIHandler
         from paste.translogger import TransLogger
 
-        url_parts = urlparse.urlsplit(netloc)
+        url_parts = urllib.parse.urlsplit(netloc)
         host = "0.0.0.0"
         port = 9090
         cherrypy.config.update({

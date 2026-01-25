@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
-from bs4 import BeautifulSoup
 import os
 import re
 import subprocess
 
+from bs4 import BeautifulSoup
 
 # PHP-md for directories
 from djanban.apps.repositories.cloc import Cloc
@@ -23,7 +22,7 @@ class PhpDirectoryAnalyzer(object):
         for root, subdirs, files in os.walk(self.dir_path):
             for filename in files:
                 if PhpDirectoryAnalyzer.is_php_file(filename):
-                    file_path = u"{0}/{1}".format(root, filename)
+                    file_path = "{0}/{1}".format(root, filename)
                     # Check if file is not empty
                     if not PhpDirectoryAnalyzer.file_is_empty(file_path):
                         # Count of lines of code
@@ -61,8 +60,12 @@ class PhpMdAnalyzer(object):
     def run(self):
         PhpMdAnalyzer.assert_existence()
 
-        php_md_command = "phpmd {0} xml cleancode,codesize,controversial,design,naming,unusedcode".format(self.file_path)
-        phpmd_call_results = subprocess.Popen(php_md_command, shell=True, stdout=subprocess.PIPE)
+        php_md_command = "phpmd {0} xml cleancode,codesize,controversial,design,naming,unusedcode".format(
+            self.file_path
+        )
+        phpmd_call_results = subprocess.Popen(
+            php_md_command, shell=True, stdout=subprocess.PIPE
+        )
 
         self.stdout = phpmd_call_results.stdout.read()
         self.stderr = ""
@@ -80,7 +83,7 @@ class PhpMdAnalyzer(object):
         except OSError as e:
             if e.errno == os.errno.ENOENT:
                 raise AssertionError(
-                    u"PHPMD was not found in your system. Please install it to assess PHP code (https://phpmd.org/)."
+                    "PHPMD was not found in your system. Please install it to assess PHP code (https://phpmd.org/)."
                 )
 
 
@@ -106,9 +109,8 @@ class PhpMdAnalysisResult(object):
                 "end_line": violation["endline"],
                 "rule": violation["rule"],
                 "ruleset": violation["ruleset"],
-                "message": violation.string
+                "message": violation.string,
             }
             self.messages.append(message)
 
         return self.messages
-
