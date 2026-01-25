@@ -61,11 +61,14 @@ The modernization of this legacy codebase must follow a strict, safe path to ens
 
 1.  **Create a virtualenv with Python 2**: Establish a baseline environment that matches the legacy production state.
 2.  **Create tests for all functionality**: Write comprehensive tests using Python 2 code to capture the current behavior of the application.
+There should be unit tests that cover all the functionality of the applications. Add integration tests for the happy paths of each route.
 3.  **Ensure test coverage**: Verify that all critical paths and logic are covered by the test suite.
 4.  **Remove the Python 2 virtualenv**: Clean up the legacy environment.
-5.  **Create a virtual environment with Python 3.14**: Initialize the target modern environment.
-6.  **Convert code to Python 3**: Migrate the codebase from Python 2.7 to Python 3.14 using tools and manual refactoring.
+5.  **Create a virtual environment with Python 3.14**: Initialize the target modern environment. Install packages with uv or pip.
+6.  **Convert code to Python 3**: Migrate the codebase from Python 2.7 to Python 3.14 using tools and manual refactoring. Use 2to3 or other tools to help with the conversion.
 7.  **Run tests and fix regressions**: Execute the test suite in the new environment; identify and fix any broken functionality until all tests pass.
+8. Upgrade the Django version to the last one and fix the issues.
+9. Apply the basic coding standards (black, flake8, isort, mypy, pylint, ruff) to the codebase.
 
 ## Development Methodology
 
