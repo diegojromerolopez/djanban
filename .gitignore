@@ -99,3 +99,11 @@ configuration/*
 # PyCharm
 .idea
 
+
+# Noctifab runtime & secrets
+.noctifab/data/
+.noctifab/logs/
+.noctifab/report/
+.noctifab/worktrees/
+.noctifab/*.pid
+.noctifab/secrets.yaml
