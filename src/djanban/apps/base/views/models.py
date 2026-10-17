@@ -1,15 +1,18 @@
-
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 
 # Creation of object
-def new(request, instance, form_class, template_path, ok_url, extra_form_parameters=None):
+def new(
+    request, instance, form_class, template_path, ok_url, extra_form_parameters=None
+):
     if extra_form_parameters is None:
         extra_form_parameters = {}
 
     if request.method == "POST":
-        form = form_class(request.POST, request.FILES, instance=instance, **extra_form_parameters)
+        form = form_class(
+            request.POST, request.FILES, instance=instance, **extra_form_parameters
+        )
 
         if form.is_valid():
             form.save(commit=True)
@@ -23,12 +26,16 @@ def new(request, instance, form_class, template_path, ok_url, extra_form_paramet
 
 
 # Edition of object
-def edit(request, instance, form_class, template_path, ok_url, extra_form_parameters=None):
+def edit(
+    request, instance, form_class, template_path, ok_url, extra_form_parameters=None
+):
     if extra_form_parameters is None:
         extra_form_parameters = {}
 
     if request.method == "POST":
-        form = form_class(request.POST, request.FILES, instance=instance, **extra_form_parameters)
+        form = form_class(
+            request.POST, request.FILES, instance=instance, **extra_form_parameters
+        )
 
         if form.is_valid():
             form.save(commit=True)
@@ -42,7 +49,14 @@ def edit(request, instance, form_class, template_path, ok_url, extra_form_parame
 
 
 # Delete an object
-def delete(request, instance, form_class, next_url, template_path="base/forms/delete.html", template_replacements=None):
+def delete(
+    request,
+    instance,
+    form_class,
+    next_url,
+    template_path="base/forms/delete.html",
+    template_replacements=None,
+):
     if request.method == "POST":
         form = form_class(request.POST)
 

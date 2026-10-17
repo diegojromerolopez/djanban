@@ -1,13 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from djanban.apps.base.auth import user_is_member
 from djanban.apps.boards.models import Board
-
-from djanban.apps.visitors.forms import DeleteUserForm, NewUserForm, EditUserForm
+from djanban.apps.visitors.forms import DeleteUserForm, EditUserForm, NewUserForm
 
 
 # List all visitors
@@ -46,7 +45,9 @@ def new(request):
     else:
         form = NewUserForm(instance=user)
 
-    return render(request, "visitors/new.html", {"form": form, "user": user, "member": member})
+    return render(
+        request, "visitors/new.html", {"form": form, "user": user, "member": member}
+    )
 
 
 # Edition of a visitor
@@ -72,7 +73,9 @@ def edit(request, visitor_id):
     else:
         form = EditUserForm(instance=user)
 
-    return render(request, "visitors/edit.html", {"form": form, "user": user, "member": member})
+    return render(
+        request, "visitors/edit.html", {"form": form, "user": user, "member": member}
+    )
 
 
 # Delete a visitor
@@ -98,4 +101,6 @@ def delete(request, visitor_id):
     else:
         form = DeleteUserForm()
 
-    return render(request, "visitors/delete.html", {"form": form, "user": user, "member": member})
+    return render(
+        request, "visitors/delete.html", {"form": form, "user": user, "member": member}
+    )

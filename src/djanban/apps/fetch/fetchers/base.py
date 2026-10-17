@@ -1,16 +1,12 @@
-from __future__ import unicode_literals, absolute_import
-
 import os
 import time
 from io import open
 
-
 # Abstract board fetcher
-from djanban.apps.boards.models import CardComment
 
 
 class Fetcher(object):
-    FETCH_LOCK_FILE_PATH = u"/tmp/django-trello-stats-fetch-board-{0}-lock.txt"
+    FETCH_LOCK_FILE_PATH = "/tmp/django-trello-stats-fetch-board-{0}-lock.txt"
 
     # Creates a Fetcher object for a board
     def __init__(self, board):
@@ -31,10 +27,12 @@ class Fetcher(object):
         fetch_lock_file_path = Fetcher.FETCH_LOCK_FILE_PATH.format(self.board.id)
         # Check if lock file exists. If it exists, warn the fetch method
         if os.path.isfile(fetch_lock_file_path):
-            raise AssertionError("Lock file {0} already exists".format(fetch_lock_file_path))
+            raise AssertionError(
+                "Lock file {0} already exists".format(fetch_lock_file_path)
+            )
 
         # Creates a new lock file
-        with open(fetch_lock_file_path, 'w', encoding="utf-8") as lock_file:
+        with open(fetch_lock_file_path, "w", encoding="utf-8") as lock_file:
             lock_file.write("Fetching data for board {0}".format(self.board.name))
 
         return True
@@ -45,7 +43,9 @@ class Fetcher(object):
         fetch_lock_file_path = Fetcher.FETCH_LOCK_FILE_PATH.format(self.board.id)
         # Lock file must exist
         if not os.path.isfile(fetch_lock_file_path):
-            raise AssertionError("Lock file {0} does not exist".format(fetch_lock_file_path))
+            raise AssertionError(
+                "Lock file {0} does not exist".format(fetch_lock_file_path)
+            )
 
         # Deleting the lock file
         os.remove(fetch_lock_file_path)
@@ -53,4 +53,3 @@ class Fetcher(object):
     # Delete all children entities but lists and workflows
     def _truncate(self):
         self.board.clean_cached_charts()
-

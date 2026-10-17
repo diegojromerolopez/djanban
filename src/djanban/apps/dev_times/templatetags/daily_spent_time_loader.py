@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import inspect
-from django import template
 import datetime
 
+from django import template
 from django.db.models import Sum
 
 from djanban.apps.base.auth import get_user_boards
@@ -12,8 +11,16 @@ from djanban.apps.dev_times.models import DailySpentTime
 register = template.Library()
 
 
-@register.assignment_tag
-def get_daily_spent_times(current_user, member=None, start_date=None, end_date=None, week=None, board=None, label=None):
+@register.simple_tag
+def get_daily_spent_times(
+    current_user,
+    member=None,
+    start_date=None,
+    end_date=None,
+    week=None,
+    board=None,
+    label=None,
+):
     daily_spent_time_filter = {}
 
     # Member filter
@@ -41,7 +48,9 @@ def get_daily_spent_times(current_user, member=None, start_date=None, end_date=N
         daily_spent_time_filter["card__labels"] = board.labels.get(id=label.id)
 
     # Daily Spent Times
-    daily_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).order_by("-date")
+    daily_spent_times = DailySpentTime.objects.filter(
+        **daily_spent_time_filter
+    ).order_by("-date")
 
     return daily_spent_times
 
@@ -63,12 +72,16 @@ def total_value_amount(daily_spent_times):
 
 @register.filter
 def total_adjusted_spent_time(daily_spent_times):
-    return _adjusted_daily_spent_time_attribute_sum(daily_spent_times, attribute="spent_time")
+    return _adjusted_daily_spent_time_attribute_sum(
+        daily_spent_times, attribute="spent_time"
+    )
 
 
 @register.filter
 def total_adjusted_value_amount(daily_spent_times):
-    return _adjusted_daily_spent_time_attribute_sum(daily_spent_times, attribute="rate_amount")
+    return _adjusted_daily_spent_time_attribute_sum(
+        daily_spent_times, attribute="rate_amount"
+    )
 
 
 @register.filter
@@ -85,12 +98,14 @@ def _adjusted_daily_spent_time_attribute_sum(daily_spent_times, attribute="spent
     adjusted_value_sum = 0
     member_dict = {}
     for daily_spent_time in daily_spent_times:
-        if not daily_spent_time.member_id in member_dict:
+        if daily_spent_time.member_id not in member_dict:
             member_dict[daily_spent_time.member_id] = daily_spent_time.member
 
         member = member_dict[daily_spent_time.member_id]
 
-        adjusted_value_sum += member.adjust_daily_spent_time(daily_spent_time, attribute)
+        adjusted_value_sum += member.adjust_daily_spent_time(
+            daily_spent_time, attribute
+        )
 
     return adjusted_value_sum
 
@@ -98,7 +113,7 @@ def _adjusted_daily_spent_time_attribute_sum(daily_spent_times, attribute="spent
 # Converts a (possibly) date string in Y-m-d format into a date object
 def _get_date_from_str(date_str):
     # If the parameter is a date, return it as is
-    if type(date_str) == datetime.date:
+    if isinstance(date_str, datetime.date):
         return date_str
 
     # Otherwise, convert it to date

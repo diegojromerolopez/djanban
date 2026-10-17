@@ -1,25 +1,21 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
 import re
 
-from PIL import Image
 from captcha.fields import CaptchaField
 from django import forms
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.core.files.images import get_image_dimensions
 from django.db.models import Q
-from django.forms import ModelForm
-from django.forms import models
-from django.conf import settings
+from django.forms import ModelForm, models
 from django.utils import timezone
-
+from PIL import Image
 from trello import TrelloClient
 from trello.member import Member as TrelloMember
 
-from djanban.apps.members.models import Member, TrelloMemberProfile, SpentTimeFactor
+from djanban.apps.members.models import Member, SpentTimeFactor, TrelloMemberProfile
 
 
 # Mixin that validates that the emails are valid
@@ -34,7 +30,9 @@ class SignUpEmailRestrictorMixinForm(object):
                 return self.cleaned_data["email"]
         # If there is some patterns and the email has not matched with any pattern
         # form is not valid
-        self.add_error("email", "This email is not allowed for registration in this platform")
+        self.add_error(
+            "email", "This email is not allowed for registration in this platform"
+        )
 
 
 # Register form
@@ -42,27 +40,42 @@ class LocalSignUpForm(forms.Form, SignUpEmailRestrictorMixinForm):
 
     def __init__(self, *args, **kwargs):
         super(LocalSignUpForm, self).__init__(*args, **kwargs)
-        self.fields["first_name"] = forms.CharField(label=u"First name", max_length=64, required=True)
-        self.fields["last_name"] = forms.CharField(label=u"Last name", max_length=64, required=True)
-        self.fields["email"] = forms.EmailField(label=u"Email and username", max_length=64, required=True)
+        self.fields["first_name"] = forms.CharField(
+            label="First name", max_length=64, required=True
+        )
+        self.fields["last_name"] = forms.CharField(
+            label="Last name", max_length=64, required=True
+        )
+        self.fields["email"] = forms.EmailField(
+            label="Email and username", max_length=64, required=True
+        )
 
-        self.fields["password1"] = forms.CharField(label=u"Password", widget=forms.PasswordInput(), max_length=16, required=True)
-        self.fields["password2"] = forms.CharField(label=u"Repeat your password", widget=forms.PasswordInput(), max_length=16, required=True)
+        self.fields["password1"] = forms.CharField(
+            label="Password", widget=forms.PasswordInput(), max_length=16, required=True
+        )
+        self.fields["password2"] = forms.CharField(
+            label="Repeat your password",
+            widget=forms.PasswordInput(),
+            max_length=16,
+            required=True,
+        )
 
-        self.fields["captcha"] = CaptchaField(label=u"Fill this captcha to sign up")
+        self.fields["captcha"] = CaptchaField(label="Fill this captcha to sign up")
 
     # Check if fields are valid
     def clean(self):
         cleaned_data = super(LocalSignUpForm, self).clean()
         # Check if passwords are equal
         if cleaned_data.get("password1") != cleaned_data.get("password2"):
-            raise ValidationError(u"Passwords don't match")
+            raise ValidationError("Passwords don't match")
 
         if cleaned_data.get("email"):
             # Check if username is unique
             cleaned_data["username"] = cleaned_data["email"]
             if User.objects.filter(username=cleaned_data["username"]).exists():
-                raise ValidationError(u"You have already an user. Have you forgotten your password?")
+                raise ValidationError(
+                    "You have already an user. Have you forgotten your password?"
+                )
 
         return self.cleaned_data
 
@@ -93,27 +106,48 @@ class TrelloSignUpForm(LocalSignUpForm):
     def __init__(self, *args, **kwargs):
         super(TrelloSignUpForm, self).__init__(*args, **kwargs)
 
-        self.fields["api_key"] = forms.CharField(label=u"Trello's API key", max_length=64, required=True)
-        self.fields["token"] = forms.CharField(label=u"Trello's token", max_length=64, required=True)
-        self.fields["token_secret"] = forms.CharField(label=u"Trello's token secret", max_length=64, required=True)
+        self.fields["api_key"] = forms.CharField(
+            label="Trello's API key", max_length=64, required=True
+        )
+        self.fields["token"] = forms.CharField(
+            label="Trello's token", max_length=64, required=True
+        )
+        self.fields["token_secret"] = forms.CharField(
+            label="Trello's token secret", max_length=64, required=True
+        )
 
-        self.order_fields(["first_name", "last_name", "email", "password1", "password2",
-                           "api_key", "token", "token_secret", "captcha"])
+        self.order_fields(
+            [
+                "first_name",
+                "last_name",
+                "email",
+                "password1",
+                "password2",
+                "api_key",
+                "token",
+                "token_secret",
+                "captcha",
+            ]
+        )
 
     def clean(self):
-        cleaned_data = super(TrelloSignUpForm, self).clean()
+        super(TrelloSignUpForm, self).clean()
 
         # Get Trello remote data
         trello_client = TrelloClient(
-            api_key=self.cleaned_data["api_key"], api_secret="xxx",
-            token=self.cleaned_data["token"], token_secret=self.cleaned_data["token_secret"]
+            api_key=self.cleaned_data["api_key"],
+            api_secret="xxx",
+            token=self.cleaned_data["token"],
+            token_secret=self.cleaned_data["token_secret"],
         )
 
         trello_member = TrelloMember(client=trello_client, member_id="me")
         try:
             trello_member.fetch()
         except Exception:
-            raise ValidationError(u"Exception when dealing with Trello connection. Are your credentials right?")
+            raise ValidationError(
+                "Exception when dealing with Trello connection. Are your credentials right?"
+            )
 
         self.cleaned_data["uuid"] = trello_member.id
         self.cleaned_data["trello_username"] = trello_member.username
@@ -121,8 +155,12 @@ class TrelloSignUpForm(LocalSignUpForm):
 
         # Check if the user is already registered in the system.
         # To do so, we have to check if this Trello Member Profile has already an associated user
-        if TrelloMemberProfile.objects.filter(trello_id=self.cleaned_data["uuid"], member__user__isnull=False).exists():
-            raise ValidationError(u"This Trello username already has an user in this system")
+        if TrelloMemberProfile.objects.filter(
+            trello_id=self.cleaned_data["uuid"], member__user__isnull=False
+        ).exists():
+            raise ValidationError(
+                "This Trello username already has an user in this system"
+            )
 
         return self.cleaned_data
 
@@ -132,12 +170,14 @@ class TrelloSignUpForm(LocalSignUpForm):
         # TrelloMemberProfile should always exist if at least one member whom he/she shares a board has registered
         # in this system. Because all present members in a board are created but without an associated user.
         try:
-            trello_member_profile = TrelloMemberProfile.objects.get(trello_id=self.cleaned_data["uuid"])
+            trello_member_profile = TrelloMemberProfile.objects.get(
+                trello_id=self.cleaned_data["uuid"]
+            )
         except TrelloMemberProfile.DoesNotExist:
             trello_member_profile = TrelloMemberProfile()
 
         # Assigning all Trello attributes
-        trello_member_profile.api_key=self.cleaned_data["api_key"]
+        trello_member_profile.api_key = self.cleaned_data["api_key"]
         # API secret seems to be deprecated
         trello_member_profile.api_secret = "xxx"
         trello_member_profile.token = self.cleaned_data["token"]
@@ -161,21 +201,47 @@ class MemberForm(models.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(MemberForm, self).__init__(*args, **kwargs)
-        self.fields["first_name"] = forms.CharField(label=u"First name", max_length=64, required=True)
-        self.fields["last_name"] = forms.CharField(label=u"Last name", max_length=64, required=True)
-        self.fields["email"] = forms.EmailField(label=u"Email and username", max_length=64, required=True)
-        self.fields["password1"] = forms.CharField(label=u"Password", widget=forms.PasswordInput(), max_length=16,
-                                                   required=False)
-        self.fields["password2"] = forms.CharField(label=u"Repeat the password", widget=forms.PasswordInput(),
-                                                   max_length=16, required=False)
-        self.order_fields(["first_name", "last_name", "email", "password1", "password2", "custom_avatar", "biography"])
+        self.fields["first_name"] = forms.CharField(
+            label="First name", max_length=64, required=True
+        )
+        self.fields["last_name"] = forms.CharField(
+            label="Last name", max_length=64, required=True
+        )
+        self.fields["email"] = forms.EmailField(
+            label="Email and username", max_length=64, required=True
+        )
+        self.fields["password1"] = forms.CharField(
+            label="Password",
+            widget=forms.PasswordInput(),
+            max_length=16,
+            required=False,
+        )
+        self.fields["password2"] = forms.CharField(
+            label="Repeat the password",
+            widget=forms.PasswordInput(),
+            max_length=16,
+            required=False,
+        )
+        self.order_fields(
+            [
+                "first_name",
+                "last_name",
+                "email",
+                "password1",
+                "password2",
+                "custom_avatar",
+                "biography",
+            ]
+        )
 
     def clean(self):
         cleaned_data = super(MemberForm, self).clean()
 
         # Check if passwords are equal
-        if cleaned_data.get("password1") and cleaned_data.get("password1") != cleaned_data.get("password2"):
-            raise ValidationError(u"Passwords don't match")
+        if cleaned_data.get("password1") and cleaned_data.get(
+            "password1"
+        ) != cleaned_data.get("password2"):
+            raise ValidationError("Passwords don't match")
 
         if cleaned_data.get("password1"):
             cleaned_data["password"] = cleaned_data.get("password1")
@@ -190,7 +256,9 @@ class MemberForm(models.ModelForm):
 
         user.first_name = self.cleaned_data.get("first_name")
         user.last_name = self.cleaned_data.get("last_name")
-        user.username = self.cleaned_data.get("username", self.cleaned_data.get("email"))
+        user.username = self.cleaned_data.get(
+            "username", self.cleaned_data.get("email")
+        )
         user.email = self.cleaned_data.get("email")
 
         if self.cleaned_data.get("password"):
@@ -203,7 +271,9 @@ class MemberForm(models.ModelForm):
             # Resize the custom avatar if it is present
             if self.instance.custom_avatar:
                 custom_avatar_image = Image.open(self.instance.custom_avatar)
-                resized_custom_avatar_image = custom_avatar_image.resize((30, 30), Image.ANTIALIAS)
+                resized_custom_avatar_image = custom_avatar_image.resize(
+                    (30, 30), Image.ANTIALIAS
+                )
                 resized_custom_avatar_image.save(self.instance.custom_avatar.path)
 
         return self.instance
@@ -221,7 +291,6 @@ class NewMemberForm(MemberForm):
         self.fields["password1"].required = True
         self.fields["password2"].required = True
 
-
     def clean(self):
         cleaned_data = super(MemberForm, self).clean()
 
@@ -229,7 +298,9 @@ class NewMemberForm(MemberForm):
             # Check if username is unique
             cleaned_data["username"] = cleaned_data["email"]
             if User.objects.filter(username=cleaned_data["username"]).exists():
-                raise ValidationError(u"You have already an user. Have you forgotten your password?")
+                raise ValidationError(
+                    "You have already an user. Have you forgotten your password?"
+                )
 
         return self.cleaned_data
 
@@ -250,30 +321,70 @@ class EditMemberForm(MemberForm):
 class NewAdminMemberForm(NewMemberForm):
     class Meta(MemberForm.Meta):
         model = Member
-        fields = ["custom_avatar", "biography", "is_developer", "on_holidays", "minimum_working_hours_per_day",
-                  "minimum_working_hours_per_week", "is_public"]
+        fields = [
+            "custom_avatar",
+            "biography",
+            "is_developer",
+            "on_holidays",
+            "minimum_working_hours_per_day",
+            "minimum_working_hours_per_week",
+            "is_public",
+        ]
 
     def __init__(self, *args, **kwargs):
         super(NewAdminMemberForm, self).__init__(*args, **kwargs)
 
-        self.order_fields(["first_name", "last_name", "email", "password", "password", "biography", "custom_avatar",
-                           "is_developer", "on_holidays", "minimum_working_hours_per_day",
-                           "minimum_working_hours_per_week", "spent_time_factor"])
+        self.order_fields(
+            [
+                "first_name",
+                "last_name",
+                "email",
+                "password",
+                "password",
+                "biography",
+                "custom_avatar",
+                "is_developer",
+                "on_holidays",
+                "minimum_working_hours_per_day",
+                "minimum_working_hours_per_week",
+                "spent_time_factor",
+            ]
+        )
 
 
 # Administrator edits a member profile
 class EditAdminMemberForm(EditMemberForm):
     class Meta(MemberForm.Meta):
         model = Member
-        fields = ["custom_avatar", "biography", "is_developer", "on_holidays", "minimum_working_hours_per_day",
-                  "minimum_working_hours_per_week", "is_public"]
+        fields = [
+            "custom_avatar",
+            "biography",
+            "is_developer",
+            "on_holidays",
+            "minimum_working_hours_per_day",
+            "minimum_working_hours_per_week",
+            "is_public",
+        ]
 
     def __init__(self, *args, **kwargs):
         super(EditAdminMemberForm, self).__init__(*args, **kwargs)
 
-        self.order_fields(["first_name", "last_name", "email", "password1", "password2", "custom_avatar", "biography",
-                           "is_developer", "on_holidays", "minimum_working_hours_per_day",
-                           "minimum_working_hours_per_week", "spent_time_factor"])
+        self.order_fields(
+            [
+                "first_name",
+                "last_name",
+                "email",
+                "password1",
+                "password2",
+                "custom_avatar",
+                "biography",
+                "is_developer",
+                "on_holidays",
+                "minimum_working_hours_per_day",
+                "minimum_working_hours_per_week",
+                "spent_time_factor",
+            ]
+        )
 
 
 # Edition of the Trello Member profile
@@ -287,19 +398,23 @@ class TrelloMemberProfileForm(models.ModelForm):
         super(TrelloMemberProfileForm, self).__init__(*args, **kwargs)
 
     def clean(self):
-        cleaned_data = super(TrelloMemberProfileForm, self).clean()
+        super(TrelloMemberProfileForm, self).clean()
 
         # Get Trello remote data
         trello_client = TrelloClient(
-            api_key=self.cleaned_data["api_key"], api_secret=self.cleaned_data["api_secret"],
-            token=self.cleaned_data["token"], token_secret=self.cleaned_data["token_secret"]
+            api_key=self.cleaned_data["api_key"],
+            api_secret=self.cleaned_data["api_secret"],
+            token=self.cleaned_data["token"],
+            token_secret=self.cleaned_data["token_secret"],
         )
 
         trello_member = TrelloMember(client=trello_client, member_id="me")
         try:
             trello_member.fetch()
         except Exception:
-            raise ValidationError(u"Exception when dealing with Trello connection. Are your credentials right?")
+            raise ValidationError(
+                "Exception when dealing with Trello connection. Are your credentials right?"
+            )
 
         self.cleaned_data["uuid"] = trello_member.id
         self.cleaned_data["username"] = trello_member.username
@@ -322,21 +437,27 @@ class TrelloMemberProfileForm(models.ModelForm):
 
 # Give access to member form
 class GiveAccessToMemberForm(forms.Form):
-    email = forms.EmailField(label=u"Email and username")
-    password = forms.CharField(label=u"Password", widget=forms.PasswordInput)
+    email = forms.EmailField(label="Email and username")
+    password = forms.CharField(label="Password", widget=forms.PasswordInput)
 
 
 # Change password to member user
 class ChangePasswordToMemberForm(forms.Form):
-    password1 = forms.CharField(label=u"Password", widget=forms.PasswordInput(), max_length=16, required=True)
-    password2 = forms.CharField(label=u"Repeat your password", widget=forms.PasswordInput(), max_length=16,
-                                required=True)
+    password1 = forms.CharField(
+        label="Password", widget=forms.PasswordInput(), max_length=16, required=True
+    )
+    password2 = forms.CharField(
+        label="Repeat your password",
+        widget=forms.PasswordInput(),
+        max_length=16,
+        required=True,
+    )
 
     def clean(self):
         cleaned_data = super(ChangePasswordToMemberForm, self).clean()
         # Check if passwords are equal
         if cleaned_data.get("password1") != cleaned_data.get("password2"):
-            raise ValidationError(u"Passwords don't match")
+            raise ValidationError("Passwords don't match")
 
 
 # Edit your member profile
@@ -355,16 +476,20 @@ class EditTrelloMemberProfileForm(ModelForm):
 
 # Assigns a new password to one user that has forgotten it
 class ResetPasswordForm(forms.Form):
-    trello_username = forms.CharField(label=u"Trello username")
-    email = forms.EmailField(label=u"Email and username")
+    trello_username = forms.CharField(label="Trello username")
+    email = forms.EmailField(label="Email and username")
 
     def clean(self):
         cleaned_data = super(ResetPasswordForm, self).clean()
         try:
-            members = Member.objects.filter(user__email=cleaned_data.get("email"), user__is_active=True)
+            members = Member.objects.filter(
+                user__email=cleaned_data.get("email"), user__is_active=True
+            )
             cleaned_data["members"] = members
         except Member.DoesNotExist:
-            raise ValidationError(u"Member does not exist, the username or email is wrong")
+            raise ValidationError(
+                "Member does not exist, the username or email is wrong"
+            )
 
         return cleaned_data
 
@@ -375,14 +500,16 @@ class SpentTimeFactorForm(ModelForm):
         model = SpentTimeFactor
         fields = ("name", "start_date", "end_date", "factor")
         widgets = {
-            'start_date': forms.SelectDateWidget(),
-            'end_date': forms.SelectDateWidget(empty_label=u"Until now"),
+            "start_date": forms.SelectDateWidget(),
+            "end_date": forms.SelectDateWidget(empty_label="Until now"),
         }
 
     def __init__(self, *args, **kwargs):
         super(SpentTimeFactorForm, self).__init__(*args, **kwargs)
         current_year = timezone.now().year
-        available_years = [year_i for year_i in range(current_year-40, current_year+1)]
+        available_years = [
+            year_i for year_i in range(current_year - 40, current_year + 1)
+        ]
         self.fields["start_date"].widget.years = available_years
         self.fields["end_date"].widget.years = available_years
 
@@ -390,20 +517,32 @@ class SpentTimeFactorForm(ModelForm):
         cleaned_data = super(SpentTimeFactorForm, self).clean()
         member = self.instance.member
         start_date = cleaned_data["start_date"]
-        end_date = cleaned_data.get("end_date") if cleaned_data.get("end_date") else timezone.now().date()
+        end_date = (
+            cleaned_data.get("end_date")
+            if cleaned_data.get("end_date")
+            else timezone.now().date()
+        )
         # Check if start_date is less or equal than end_date
         if start_date > end_date:
-            raise ValidationError(u"Start date must be less or equal than end date")
+            raise ValidationError("Start date must be less or equal than end date")
 
         # Check if there is some overlapping with current spent time factors of that member
-        if member.spent_time_factors.exclude(id=self.instance.id).filter(
-                (Q(start_date__gte=start_date) & Q(start_date__lte=end_date)) |
-                (Q(start_date__lte=start_date) & Q(end_date__gte=start_date))
-        ).exists():
-            raise ValidationError("This spent time factor dates overlap with another of that already exists")
+        if (
+            member.spent_time_factors.exclude(id=self.instance.id)
+            .filter(
+                (Q(start_date__gte=start_date) & Q(start_date__lte=end_date))
+                | (Q(start_date__lte=start_date) & Q(end_date__gte=start_date))
+            )
+            .exists()
+        ):
+            raise ValidationError(
+                "This spent time factor dates overlap with another of that already exists"
+            )
         return cleaned_data
 
 
 # Delete a spent time form
 class DeleteSpentTimeForm(forms.Form):
-    confirmed = forms.BooleanField(label=u"Confirm the deletion of this spent time factor")
+    confirmed = forms.BooleanField(
+        label="Confirm the deletion of this spent time factor"
+    )

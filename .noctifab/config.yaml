@@ -1,0 +1,318 @@
+config_version: '2.0'
+execution_report: .noctifab/report/execution_report.md
+agents:
+  architecture: code_first
+  orchestrator:
+    number: 3
+    iterations: 2
+  product_manager:
+    audit_mode: smart
+    number: 1
+    iterations: 2
+    user_stories:
+      max_count: 5
+      complexity:
+        min: 15
+        max: 35
+    ensemble:
+      strategy: parallel
+      timeout_seconds: 45
+      soft_timeout_seconds: 15
+      min_models: 2
+      fallback_to_single: true
+      models:
+      - name: claude
+        temperature: 0.2
+      - name: openai
+        temperature: 0.2
+      - name: gemini
+        temperature: 0.1
+      synthesizer:
+        name: gemini
+    providers:
+    - name: claude
+    - name: gemini
+    - name: openai
+    - name: deepseek-pro
+    - name: qwen
+    - name: opencode
+    - name: openrouter
+  planner:
+    number: 1
+    iterations: 5
+  generators:
+    number: 6
+    iterations: 20
+    ensemble:
+      strategy: adaptive
+      timeout_seconds: 45
+      fast_tier:
+      - name: gemini-flash
+      standard_tier:
+      - name: claude
+      heavy_tier:
+      - name: claude
+      - name: openai
+      - name: deepseek-pro
+    providers:
+    - name: gemini-flash
+    - name: claude
+    - name: gemini
+    - name: openai
+    - name: deepseek-pro
+    - name: qwen
+    - name: opencode
+    - name: openrouter
+  testers:
+    number: 2
+    iterations: 15
+    ensemble:
+      strategy: best_of_n_scored
+      timeout_seconds: 30
+      models:
+      - name: claude
+      - name: openai
+      - name: deepseek-pro
+    providers:
+    - name: gemini-flash
+    - name: claude
+    - name: gemini
+    - name: openai
+    - name: deepseek-pro
+    - name: qwen
+    - name: opencode
+    - name: openrouter
+  qa:
+    enabled: false
+    iterations: 2
+    providers:
+    - name: gemini-flash
+    - name: claude
+    - name: gemini
+    - name: openai
+    - name: deepseek-pro
+    - name: qwen
+    - name: opencode
+    - name: openrouter
+  auditor:
+    number: 1
+    iterations: 2
+    ensemble:
+      strategy: consensus
+      timeout_seconds: 30
+      voters:
+      - name: claude
+      - name: gemini
+      tie_breaker:
+        name: openai
+    providers:
+    - name: claude
+    - name: gemini
+    - name: openai
+    - name: deepseek-pro
+    - name: qwen
+    - name: opencode
+    - name: openrouter
+  unblocker:
+    number: 1
+    iterations: 2
+  fallback:
+    enabled: true
+    temperature: 0.1
+    max_turns: 2
+    timeout: 180s
+    allow_spec_mutation: true
+    allow_scope_reduction: true
+    enforce_spec_quality: true
+    sovereign_rescue:
+      slice_spec: true
+  spike:
+    enabled: true
+    timeout_seconds: 180
+    providers:
+    - name: gemini-flash
+    - name: claude
+    - name: gemini
+    - name: openai
+    - name: deepseek-pro
+    - name: qwen
+    - name: opencode
+    - name: openrouter
+fallback:
+  enabled: true
+  poll_interval: 30s
+  max_retries: 3
+  stall_threshold: 5m
+  conflict_threshold: 15m
+  llm_assessment: true
+  triggers:
+    retries_exhaustion: true
+    cyclic_loop_detection: true
+    missing_toolchain_fast_abort: true
+    qa_deadlock_turns: 2
+    watchdog_timeout_turns: 2
+    stall_count_threshold: 4
+  sovereign_rescue:
+    enabled: true
+    slice_spec: true
+    max_turns: 10
+    timeout: 5m
+    missing_toolchain_strategy: auto
+    providers:
+      - name: gemini
+workspace_cache:
+  enabled: true
+poll_interval: 1s
+max_clarification_wait: 30m0s
+clarification_timeout_action: continue
+storage:
+  provider: sqlite
+  conn_string: .noctifab/data/noctifab.db
+  json_file_path: .noctifab/data/state.json
+  occ:
+    max_retries: 20
+    backoff_base: 100ms
+    backoff_factor: 2
+llm:
+  thinking:
+    enabled: false   # global default; any provider can set thinking.enabled: true
+  hedging:
+    enabled: true
+    delay: 25s
+    heavy_delay: 90s
+  json_reminder:
+    task:
+      cap: 1500
+    body:
+      cap: 12000
+  token_usage_limit: 0
+  max_retries: 3
+  retry_backoff: 500ms
+  max_timeout: 60s
+  idle_timeout: 60s
+  max_tokens: -1
+  temperature: 0.3
+  streaming: true
+  priority:
+  - gemini-flash
+  - claude
+  - gemini
+  - openai
+  - qwen
+  - deepseek-pro
+  - opencode
+  - openrouter
+  providers:
+  - name: claude
+    provider: anthropic
+    model: claude-sonnet-5
+    api_keys: CLAUDE_API_KEY
+  - name: gemini-flash
+    provider: gemini
+    model: gemini-3.8-flash
+    api_keys: GEMINI_API_KEY
+  - name: gemini
+    provider: gemini
+    model: gemini-3.1-pro-preview
+    api_keys: GEMINI_API_KEY
+  - name: openai
+    provider: openai
+    model: gpt-5.6-luna
+    api_keys: OPENAI_API_KEY
+  - name: deepseek-pro
+    provider: qwencloud
+    model: deepseek-v4-pro
+    api_keys: QWENCLOUD_API_KEY
+  - name: qwen
+    provider: qwencloud
+    model: qwen3.8-max
+    api_keys: QWENCLOUD_API_KEY
+    enable_thinking: false
+    thinking_budget: 0
+  - name: opencode
+    provider: opencode
+    model: glm-5.2
+    api_keys: OPENCODE_ZEN_API_KEY
+  - name: openrouter
+    provider: openrouter
+    model: deepseek/deepseek-v4-flash-0731
+    api_keys: OPENROUTER_API_KEY
+vcs:
+  provider: github
+  repository: diegojromerolopez/djanban
+  base_branch: main
+  branch_prefix: noctifab/
+  use_worktrees: true
+  token: secret:GITHUB_TOKEN
+  token_env: GITHUB_TOKEN
+  pull_request:
+    auto_create: false
+sandbox:
+  mode: host
+  timeout_seconds: 300
+  test_command: pytest
+  formatter_command: ruff format .
+  syntax_check_command: python3 -m py_compile {file}
+  linter:
+    command: ruff check . && mypy --strict .
+    max_issues: 100
+    consecutive_failures: 2
+  e2e:
+    mode: docker
+  telemetry:
+    inject: true
+    trace_format: jsonl
+  exclude_paths:
+  - node_modules/
+  - vendor/
+  - bin/
+  - dist/
+  - build/
+  - .noctifab/
+  - .git/
+  - data/
+  - __pycache__/
+  - .venv/
+  - venv/
+  - .pytest_cache/
+  - .mypy_cache/
+  allowed_commands:
+  - python3
+  - python
+  - pip
+  - pip3
+  - pytest
+  - ruff
+  - mypy
+  - git
+  - sh
+  - bash
+  - curl
+  - docker
+runtime:
+  spec_source: ''
+  max_actions: 100
+  max_duration: 10m
+  max_silent_stall_duration: 10m
+  max_tokens_per_story: -1
+  max_tokens_per_task: -1
+  max_tokens: -1
+  loop:
+    count: 1
+logging:
+  level: info
+  file: ''
+telemetry:
+  enabled: false
+  exporter: otlp
+  endpoint: ''
+  service_name: noctifab
+  metrics:
+    enabled: true
+context:
+  dedup_mutated_files: false
+  mode: tree_sitter
+  tree_sitter: true
+  diff_window_lines: 15
+  window_size: 15
+  compaction: none

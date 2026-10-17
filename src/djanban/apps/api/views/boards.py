@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals, absolute_import
 
 import json
 
 from django.db import transaction
-from django.http import Http404, HttpResponseBadRequest
-from django.http import JsonResponse
+from django.http import Http404, HttpResponseBadRequest, JsonResponse
 
 from djanban.apps.api.http import JsonResponseMethodNotAllowed, JsonResponseNotFound
 from djanban.apps.api.serializers import Serializer
@@ -33,7 +31,7 @@ def get_boards(request):
             "uuid": board.uuid,
             "name": board.name,
             "description": board.description,
-            "lists": []
+            "lists": [],
         }
         response_json.append(board_json)
 
@@ -76,16 +74,20 @@ def add_member(request, board_id):
     serializer = Serializer(board=board)
 
     if board.members.filter(id=member_id).exists():
-        return JsonResponse(serializer.serialize_member(board.members.get(id=member_id)))
+        return JsonResponse(
+            serializer.serialize_member(board.members.get(id=member_id))
+        )
 
     member_type = put_body.get("member_type")
-    if not member_type or not member_type in ("admin", "normal", "guest"):
+    if not member_type or member_type not in ("admin", "normal", "guest"):
         return JsonResponseNotFound({"message": "Member type not found"})
 
     try:
         new_member = Member.objects.get(id=member_id)
         board.add_member(member=member, member_to_add=new_member)
-        member_role, member_role_created = MemberRole.objects.get_or_create(board=board, type=member_type)
+        member_role, member_role_created = MemberRole.objects.get_or_create(
+            board=board, type=member_type
+        )
         member_role.members.add(new_member)
     except Member.DoesNotExist:
         return JsonResponseNotFound({"message": "Not found."})

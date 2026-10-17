@@ -4,12 +4,17 @@ from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as django_login
 from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template.loader import get_template
-from djanban.apps.members.forms import TrelloSignUpForm, LocalSignUpForm, ResetPasswordForm
+from django.urls import reverse
+
+from djanban.apps.members.forms import (
+    LocalSignUpForm,
+    ResetPasswordForm,
+    TrelloSignUpForm,
+)
 
 
 # Local user registration
@@ -26,7 +31,9 @@ def local_signup(request):
 
         if form.is_valid():
             member = form.save(commit=True)
-            user = authenticate(username=member.user.username, password=form.data["password1"])
+            user = authenticate(
+                username=member.user.username, password=form.data["password1"]
+            )
             if user and user is not None:
                 django_login(request, user)
                 return HttpResponseRedirect(reverse("index"))
@@ -46,7 +53,9 @@ def trello_signup(request):
 
         if form.is_valid():
             member = form.save(commit=True)
-            user = authenticate(username=member.user.username, password=form.data["password1"])
+            user = authenticate(
+                username=member.user.username, password=form.data["password1"]
+            )
             if user and user is not None:
                 django_login(request, user)
                 return HttpResponseRedirect(reverse("index"))
@@ -75,11 +84,18 @@ def reset_password(request):
 def _send_new_password_to_member(member, password):
     replacements = {"member": member, "password": password}
 
-    txt_message = get_template('members/emails/reset_password.txt').render(replacements)
-    html_message = get_template('members/emails/reset_password.html').render(replacements)
+    txt_message = get_template("members/emails/reset_password.txt").render(replacements)
+    html_message = get_template("members/emails/reset_password.html").render(
+        replacements
+    )
 
     subject = "Reset password"
 
-    return send_mail(subject, txt_message, settings.EMAIL_HOST_USER, recipient_list=[member.user.email],
-                     fail_silently=False, html_message=html_message)
-
+    return send_mail(
+        subject,
+        txt_message,
+        settings.EMAIL_HOST_USER,
+        recipient_list=[member.user.email],
+        fail_silently=False,
+        html_message=html_message,
+    )

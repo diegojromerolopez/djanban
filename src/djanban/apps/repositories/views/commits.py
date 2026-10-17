@@ -1,24 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
-import shutil
-import zipfile
-
-import shortuuid
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import transaction
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
 from djanban.apps.base.decorators import member_required
-from djanban.apps.repositories.forms import CommitForm, DeleteCommitForm, MakeAssessmentForm
-from djanban.apps.repositories.models import Commit, PylintMessage, PhpMdMessage
-from djanban.apps.repositories.phpmd import PhpDirectoryAnalyzer
-from djanban.apps.repositories.pylinter import PythonDirectoryAnalyzer
+from djanban.apps.repositories.forms import (
+    CommitForm,
+    DeleteCommitForm,
+)
+from djanban.apps.repositories.models import Commit, PhpMdMessage, PylintMessage
 
 
 @member_required
@@ -37,12 +30,22 @@ def add(request, board_id, repository_id):
 
         if form.is_valid():
             form.save(commit=True)
-            return HttpResponseRedirect(reverse("boards:repositories:view_repository", args=(board_id, repository_id)))
+            return HttpResponseRedirect(
+                reverse(
+                    "boards:repositories:view_repository",
+                    args=(board_id, repository_id),
+                )
+            )
 
     else:
         form = CommitForm(instance=commit)
 
-    replacements = {"form": form, "board": board, "member": member, "repository": repository}
+    replacements = {
+        "form": form,
+        "board": board,
+        "member": member,
+        "repository": repository,
+    }
     return render(request, "repositories/commits/add.html", replacements)
 
 
@@ -62,12 +65,23 @@ def delete(request, board_id, repository_id, commit_id):
 
         if form.is_valid() and form.cleaned_data.get("confirmed"):
             commit.delete()
-            return HttpResponseRedirect(reverse("boards:repositories:view_repository", args=(board_id, repository_id)))
+            return HttpResponseRedirect(
+                reverse(
+                    "boards:repositories:view_repository",
+                    args=(board_id, repository_id),
+                )
+            )
 
     else:
         form = DeleteCommitForm()
 
-    replacements = {"form": form, "board": board, "member": member, "repository": repository, "commit": commit}
+    replacements = {
+        "form": form,
+        "board": board,
+        "member": member,
+        "repository": repository,
+        "commit": commit,
+    }
     return render(request, "repositories/commits/delete.html", replacements)
 
 
@@ -95,14 +109,18 @@ def view_assessment_report(request, board_id, repository_id, commit_id):
         phpmd_messages = phpmd_messages.filter(ruleset=phpmd_filter)
 
     replacements = {
-        "board": board, "member": member, "repository": repository, "commit": commit,
+        "board": board,
+        "member": member,
+        "repository": repository,
+        "commit": commit,
         "commit_files": commit.files.all(),
         "pylint_messages": pyint_messages,
         "pylint_filter_values": PylintMessage.TYPE_CHOICES,
         "pylint_filter": pylint_filter,
         "phpmd_filter_values": PhpMdMessage.RULESETS,
         "phpmd_messages": phpmd_messages,
-        "phpmd_filter": phpmd_filter
+        "phpmd_filter": phpmd_filter,
     }
-    return render(request, "repositories/commits/assessment/view_report.html", replacements)
-
+    return render(
+        request, "repositories/commits/assessment/view_report.html", replacements
+    )

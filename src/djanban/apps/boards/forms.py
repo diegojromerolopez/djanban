@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals, absolute_import
 
-from crequest.middleware import CrequestMiddleware
+# from crequest.middleware import CrequestMiddleware
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.forms import models
 from django.utils import timezone
 
-from djanban.apps.boards.models import Board, Card, List, Label
-from djanban.apps.fetch.fetchers.trello.boards import Initializer
+from djanban.apps.boards.models import Board, Card, Label, List
 from djanban.apps.members.models import MemberRole
 from djanban.remote_backends.factory import RemoteBackendConnectorFactory
-
-from djanban.utils.custom_uuid import custom_uuid
 from djanban.utils.week import get_iso_week_of_year
 
 
@@ -23,17 +19,25 @@ class EditBoardForm(models.ModelForm):
     class Meta:
         model = Board
         fields = [
-            "has_to_be_fetched", "comments", "estimated_number_of_hours",
-            "percentage_of_completion", "hourly_rates",
-            "enable_public_access", "public_access_code",
+            "has_to_be_fetched",
+            "comments",
+            "estimated_number_of_hours",
+            "percentage_of_completion",
+            "hourly_rates",
+            "enable_public_access",
+            "public_access_code",
             "show_on_slideshow",
-            "background_color", "title_color", "header_image"
+            "background_color",
+            "title_color",
+            "header_image",
         ]
 
     def __init__(self, *args, **kwargs):
         super(EditBoardForm, self).__init__(*args, **kwargs)
-        self.fields["hourly_rates"].help_text = u"Please, select the hourly rates this board uses. System does not " \
-                                                u"check if there is overlapping, so take care."
+        self.fields["hourly_rates"].help_text = (
+            "Please, select the hourly rates this board uses. System does not "
+            "check if there is overlapping, so take care."
+        )
 
         self.fields["background_color"].widget.attrs["class"] = "jscolor"
         self.fields["title_color"].widget.attrs["class"] = "jscolor"
@@ -82,7 +86,9 @@ class NewBoardForm(models.ModelForm):
 
                 # Adding the creator as admin of the board
                 self.instance.members.add(self.member)
-                role, created = MemberRole.objects.get_or_create(board=self.instance, type="admin")
+                role, created = MemberRole.objects.get_or_create(
+                    board=self.instance, type="admin"
+                )
                 role.members.add(self.instance.creator)
                 self.instance.roles.add(role)
         return self.instance
@@ -123,9 +129,14 @@ class EditListForm(models.ModelForm):
     # Avoid having several "done" lists in a board
     def clean_type(self):
         list_type = self.cleaned_data["type"]
-        if list_type == "done" and self.instance.board.lists.filter(type="done").count() > 1:
-            raise ValidationError(u"Only one 'done' list is allowed. If you want to make this the 'done' list,"
-                                  u"change before the type of the other list")
+        if (
+            list_type == "done"
+            and self.instance.board.lists.filter(type="done").count() > 1
+        ):
+            raise ValidationError(
+                "Only one 'done' list is allowed. If you want to make this the 'done' list,"
+                "change before the type of the other list"
+            )
         return list_type
 
     def save(self, commit=True):
@@ -152,7 +163,7 @@ class SwapListForm(forms.Form):
             self.fields["list_to_be_swapped_with"] = models.ChoiceField(
                 label="Swap this list position with",
                 choices=[(list_i.id, list_i.name) for list_i in lists],
-                required=True
+                required=True,
             )
             self.fields["list_to_be_swapped_with"].initial = self.instance.id
 
@@ -166,10 +177,17 @@ class SwapListForm(forms.Form):
 
                 # Position of the list
                 # Should we have to swap the list with any other?
-                if self.cleaned_data.get("list_to_be_swapped_with") is not None\
-                        and self.cleaned_data.get("list_to_be_swapped_with") != self.instance.id:
-                    list_to_be_swapped_with_id = self.cleaned_data.get("list_to_be_swapped_with")
-                    list_to_be_swapped_with = board.lists.get(id=list_to_be_swapped_with_id)
+                if (
+                    self.cleaned_data.get("list_to_be_swapped_with") is not None
+                    and self.cleaned_data.get("list_to_be_swapped_with")
+                    != self.instance.id
+                ):
+                    list_to_be_swapped_with_id = self.cleaned_data.get(
+                        "list_to_be_swapped_with"
+                    )
+                    list_to_be_swapped_with = board.lists.get(
+                        id=list_to_be_swapped_with_id
+                    )
                     list_to_be_swapped_with_position = list_to_be_swapped_with.position
                     list_to_be_swapped_with.position = self.instance.position
                     self.instance.position = list_to_be_swapped_with_position
@@ -184,7 +202,9 @@ class SwapListForm(forms.Form):
 
 # Move a list up or down
 class MoveListForm(forms.Form):
-    movement_type = forms.CharField(max_length=16, required=True, widget=forms.HiddenInput())
+    movement_type = forms.CharField(
+        max_length=16, required=True, widget=forms.HiddenInput()
+    )
 
     def __init__(self, *args, **kwargs):
         self.instance = kwargs.pop("instance")
@@ -197,7 +217,9 @@ class MoveListForm(forms.Form):
         cleaned_data = super(MoveListForm, self).clean()
         # In case it is the first list
         if self.lists[0].id == self.instance:
-            raise ValidationError("{0} is the first list of the board".format(self.instance.name))
+            raise ValidationError(
+                "{0} is the first list of the board".format(self.instance.name)
+            )
 
         instance_index = 0
         for list_i in self.lists:
@@ -206,9 +228,13 @@ class MoveListForm(forms.Form):
             instance_index += 1
 
         if instance_index < 1:
-            raise ValidationError("You cannot move the list {0} in that direction".format(self.instance.name))
+            raise ValidationError(
+                "You cannot move the list {0} in that direction".format(
+                    self.instance.name
+                )
+            )
 
-        cleaned_data["swap_list"] = self.lists[instance_index-1]
+        cleaned_data["swap_list"] = self.lists[instance_index - 1]
 
         return cleaned_data
 
@@ -229,7 +255,9 @@ class MoveListForm(forms.Form):
 
 # Move up a list
 class MoveUpListForm(MoveListForm):
-    movement_type = forms.CharField(max_length=16, initial="up", required=True, widget=forms.HiddenInput())
+    movement_type = forms.CharField(
+        max_length=16, initial="up", required=True, widget=forms.HiddenInput()
+    )
 
     def __init__(self, *args, **kwargs):
         super(MoveUpListForm, self).__init__(*args, **kwargs)
@@ -271,7 +299,9 @@ class NewCardForm(models.ModelForm):
                 board = self.instance.board
                 list_ = self.instance.list
 
-                self.instance = list_.add_card(member=self.member, name=self.instance.name, position="bottom")
+                self.instance = list_.add_card(
+                    member=self.member, name=self.instance.name, position="bottom"
+                )
 
                 self.instance.creation_datetime = timezone.now()
                 self.instance.last_activity_datetime = timezone.now()
@@ -314,20 +344,33 @@ class WeekSummaryFilterForm(forms.Form):
         working_start_date = board.get_working_start_date()
         working_end_date = board.get_working_end_date()
         if working_start_date and working_end_date:
-            self.fields["year"].choices = [(year_i, year_i) for year_i in range(working_start_date.year, working_end_date.year+1)]
+            self.fields["year"].choices = [
+                (year_i, year_i)
+                for year_i in range(working_start_date.year, working_end_date.year + 1)
+            ]
 
             if working_start_date.year == working_end_date.year:
                 start_week = get_iso_week_of_year(working_start_date)
                 end_week = get_iso_week_of_year(working_end_date)
-                self.fields["week"].choices = [(week_i, week_i) for week_i in range(start_week, end_week+1)]
+                self.fields["week"].choices = [
+                    (week_i, week_i) for week_i in range(start_week, end_week + 1)
+                ]
             else:
-                self.fields["week"].choices = [(week_i, week_i) for week_i in range(1, 53 + 1)]
+                self.fields["week"].choices = [
+                    (week_i, week_i) for week_i in range(1, 53 + 1)
+                ]
         else:
-            self.fields["year"].choices = [(year_i, year_i) for year_i in range(year-100, year+101)]
-            self.fields["week"].choices = [(week_i, week_i) for week_i in range(1, 53+1)]
+            self.fields["year"].choices = [
+                (year_i, year_i) for year_i in range(year - 100, year + 101)
+            ]
+            self.fields["week"].choices = [
+                (week_i, week_i) for week_i in range(1, 53 + 1)
+            ]
 
-        self.fields["member"].choices = [("all", "All")] +\
-            [(member.id, member.external_username) for member in board.members.filter(is_developer=True)]
+        self.fields["member"].choices = [("all", "All")] + [
+            (member.id, member.external_username)
+            for member in board.members.filter(is_developer=True)
+        ]
 
         if initial is None:
             self.initial["year"] = year

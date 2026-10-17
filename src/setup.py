@@ -14,7 +14,7 @@ APP = ['desktop_app_main.py']
 current_dir = os.path.realpath(os.path.dirname(__file__))
 
 def tree(src):
-    return [(root, map(lambda f: os.path.join(root, f), files)) for (root, dirs, files) in os.walk(os.path.normpath(src))]
+    return [(root, [os.path.join(root, f) for f in files]) for (root, dirs, files) in os.walk(os.path.normpath(src))]
 
 
 DATA_FILES = tree(current_dir+'/public')

@@ -2,16 +2,20 @@
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from djanban.apps.agility_rating.forms import ProjectAgilityRatingForm, DeleteProjectAgilityRatingForm
+from djanban.apps.agility_rating.forms import (
+    DeleteProjectAgilityRatingForm,
+    ProjectAgilityRatingForm,
+)
 from djanban.apps.agility_rating.models import ProjectAgilityRating
-from djanban.apps.base.auth import user_is_member, get_user_boards, get_user_board_or_404
+from djanban.apps.base.auth import (
+    get_user_board_or_404,
+    user_is_member,
+)
 from djanban.apps.base.decorators import member_required
-from djanban.apps.boards.models import Board
 
 
 # View agility rating
@@ -47,11 +51,17 @@ def new(request, board_id):
 
         if form.is_valid():
             form.save(commit=True)
-            return HttpResponseRedirect(reverse("boards:agility_rating:view", args=(board_id,)))
+            return HttpResponseRedirect(
+                reverse("boards:agility_rating:view", args=(board_id,))
+            )
     else:
         form = ProjectAgilityRatingForm(instance=project_agility_rating)
 
-    return render(request, "agility_rating/new.html", {"form": form, "board": board, "member": member})
+    return render(
+        request,
+        "agility_rating/new.html",
+        {"form": form, "board": board, "member": member},
+    )
 
 
 # Edition of the project agility rating
@@ -71,12 +81,18 @@ def edit(request, board_id):
 
         if form.is_valid():
             form.save(commit=True)
-            return HttpResponseRedirect(reverse("boards:agility_rating:view", args=(board_id,)))
+            return HttpResponseRedirect(
+                reverse("boards:agility_rating:view", args=(board_id,))
+            )
 
     else:
         form = ProjectAgilityRatingForm(instance=project_agility_rating)
 
-    return render(request, "agility_rating/edit.html", {"form": form, "board": board, "member": member})
+    return render(
+        request,
+        "agility_rating/edit.html",
+        {"form": form, "board": board, "member": member},
+    )
 
 
 # Delete the project agility rating
@@ -96,10 +112,17 @@ def delete(request, board_id):
 
         if form.is_valid() and form.cleaned_data.get("confirmed"):
             project_agility_rating.delete()
-            return HttpResponseRedirect(reverse("boards:agility_rating:view", args=(board_id,)))
+            return HttpResponseRedirect(
+                reverse("boards:agility_rating:view", args=(board_id,))
+            )
 
     else:
         form = DeleteProjectAgilityRatingForm()
 
-    replacements = {"form": form, "board": board, "member": member, "project_agility_rating": project_agility_rating}
+    replacements = {
+        "form": form,
+        "board": board,
+        "member": member,
+        "project_agility_rating": project_agility_rating,
+    }
     return render(request, "agility_rating/delete.html", replacements)

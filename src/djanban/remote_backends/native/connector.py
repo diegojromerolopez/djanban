@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals, absolute_import
 
 import random
 
@@ -73,8 +72,12 @@ class NativeConnector(object):
     def new_card(self, card, labels=None, position="bottom"):
         # Card attribute assignment
         card.uuid = custom_uuid()
-        card.short_url = reverse("boards:view_card_short_url", args=(card.board_id, card.uuid))
-        card.url = reverse("boards:view_card_short_url", args=(card.board_id, card.uuid))
+        card.short_url = reverse(
+            "boards:view_card_short_url", args=(card.board_id, card.uuid)
+        )
+        card.url = reverse(
+            "boards:view_card_short_url", args=(card.board_id, card.uuid)
+        )
         # Position is a bit more difficult
         cards = card.list.active_cards.all()
         if not cards.exists():

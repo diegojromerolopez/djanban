@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 import copy
 import re
@@ -14,7 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.db import models, transaction
-from django.db.models import Avg, Sum, Min, Max, F
+from django.db.models import Avg, F, Max, Min, Sum
 from django.db.models.query_utils import Q
 from django.utils import timezone
 from isoweek import Week
@@ -30,108 +30,169 @@ from djanban.utils.custom_uuid import custom_uuid
 # Task board
 class Board(models.Model):
 
-    creator = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="created_boards")
-
-    name = models.CharField(max_length=128, verbose_name=u"Name of the board")
-
-    description = models.TextField(max_length=128, verbose_name=u"Description of the board", default="", blank=True)
-
-    comments = models.TextField(max_length=128, verbose_name=u"Comments for this board", default="", blank=True)
-
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of the board", unique=True)
-
-    last_activity_datetime = models.DateTimeField(verbose_name=u"Last activity date", default=None, null=True)
-
-    has_to_be_fetched = models.BooleanField(verbose_name=u"Has to be this board fetched?",
-                                            help_text="Select this option if you want to fetch data for this board.",
-                                            default=True)
-
-    is_archived = models.BooleanField(verbose_name=u"This board is archived",
-                                      help_text=u"Archived boards are not fetched automatically and are ignored",
-                                      default=False)
-
-    enable_public_access = models.BooleanField(verbose_name=u"Enable public access to this board",
-                                               help_text=u"Only when enabled the users will be able to access",
-                                               default=False)
-
-    # Public access code to the board
-    public_access_code = models.CharField(max_length=32,
-                                          verbose_name=u"External code of the board",
-                                          help_text=u"With this code it is possible to access to a view with stats "
-                                                    u"of this board", unique=True)
-
-    last_fetch_datetime = models.DateTimeField(verbose_name=u"Last fetch datetime", default=None, null=True)
-
-    members = models.ManyToManyField("members.Member", verbose_name=u"Members", related_name="boards")
-
-    percentage_of_completion = models.DecimalField(
-        verbose_name=u"Percentage of completion",
-        help_text=u"Percentage of completion of project. Mind the percentage of completion of each requirement.",
-        decimal_places=2, max_digits=10, blank=True, default=None, null=True
+    creator = models.ForeignKey(
+        "members.Member",
+        verbose_name="Member",
+        related_name="created_boards",
+        on_delete=models.CASCADE,
     )
 
-    estimated_number_of_hours = models.PositiveIntegerField(verbose_name=u"Estimated number of hours to be completed",
-                                                            help_text=u"Number of hours in the budget",
-                                                            blank=True, default=None, null=True)
+    name = models.CharField(max_length=128, verbose_name="Name of the board")
 
-    hourly_rates = models.ManyToManyField("hourly_rates.HourlyRate", verbose_name=u"Hourly rates",
-                                          related_name="boards", blank=True)
+    description = models.TextField(
+        max_length=128, verbose_name="Description of the board", default="", blank=True
+    )
+
+    comments = models.TextField(
+        max_length=128, verbose_name="Comments for this board", default="", blank=True
+    )
+
+    uuid = models.CharField(
+        max_length=128, verbose_name="External id of the board", unique=True
+    )
+
+    last_activity_datetime = models.DateTimeField(
+        verbose_name="Last activity date", default=None, null=True
+    )
+
+    has_to_be_fetched = models.BooleanField(
+        verbose_name="Has to be this board fetched?",
+        help_text="Select this option if you want to fetch data for this board.",
+        default=True,
+    )
+
+    is_archived = models.BooleanField(
+        verbose_name="This board is archived",
+        help_text="Archived boards are not fetched automatically and are ignored",
+        default=False,
+    )
+
+    enable_public_access = models.BooleanField(
+        verbose_name="Enable public access to this board",
+        help_text="Only when enabled the users will be able to access",
+        default=False,
+    )
+
+    # Public access code to the board
+    public_access_code = models.CharField(
+        max_length=32,
+        verbose_name="External code of the board",
+        help_text="With this code it is possible to access to a view with stats "
+        "of this board",
+        unique=True,
+    )
+
+    last_fetch_datetime = models.DateTimeField(
+        verbose_name="Last fetch datetime", default=None, null=True
+    )
+
+    members = models.ManyToManyField(
+        "members.Member", verbose_name="Members", related_name="boards"
+    )
+
+    percentage_of_completion = models.DecimalField(
+        verbose_name="Percentage of completion",
+        help_text="Percentage of completion of project. Mind the percentage of completion of each requirement.",
+        decimal_places=2,
+        max_digits=10,
+        blank=True,
+        default=None,
+        null=True,
+    )
+
+    estimated_number_of_hours = models.PositiveIntegerField(
+        verbose_name="Estimated number of hours to be completed",
+        help_text="Number of hours in the budget",
+        blank=True,
+        default=None,
+        null=True,
+    )
+
+    hourly_rates = models.ManyToManyField(
+        "hourly_rates.HourlyRate",
+        verbose_name="Hourly rates",
+        related_name="boards",
+        blank=True,
+    )
 
     # Should this project to be showed on the slideshow?
     show_on_slideshow = models.BooleanField(
-        verbose_name=u"Should this board be shown on the slideshow?",
-        help_text=u"Select this checkbox if you want to show this board in the slideshow",
-        default=False)
+        verbose_name="Should this board be shown on the slideshow?",
+        help_text="Select this checkbox if you want to show this board in the slideshow",
+        default=False,
+    )
 
     # Image that appears in the header of the board views
     header_image = models.ImageField(
-        verbose_name=u"Header image", default=None, null=True, blank=True,
-        help_text=u"Header image for this board. Optional."
+        verbose_name="Header image",
+        default=None,
+        null=True,
+        blank=True,
+        help_text="Header image for this board. Optional.",
     )
 
     identicon = models.ImageField(
-        verbose_name=u"Identicon", default=None, null=True, blank=True,
-        help_text=u"Identicon for this board. It is automatically generated and stored."
+        verbose_name="Identicon",
+        default=None,
+        null=True,
+        blank=True,
+        help_text="Identicon for this board. It is automatically generated and stored.",
     )
 
-    identicon_hash = models.CharField(max_length=256,
-                                      verbose_name=u"Identicon hash",
-                                      help_text=u"Identicon hash used to know when to update it",
-                                      default="", blank=True)
+    identicon_hash = models.CharField(
+        max_length=256,
+        verbose_name="Identicon hash",
+        help_text="Identicon hash used to know when to update it",
+        default="",
+        blank=True,
+    )
 
     # Users that can view the board stats and other parameters but cannot change anything
-    visitors = models.ManyToManyField(User, verbose_name=u"Visitors of this board", related_name="boards", blank=True)
+    visitors = models.ManyToManyField(
+        User, verbose_name="Visitors of this board", related_name="boards", blank=True
+    )
 
     # Last time the mood for this project was computed.
     # As the computation only has to be done once a day it serves us as a cache
-    last_time_mood_was_computed = models.DateTimeField(verbose_name=u"Last time mood was computed",
-                                                       default=None, null=True)
+    last_time_mood_was_computed = models.DateTimeField(
+        verbose_name="Last time mood was computed", default=None, null=True
+    )
 
-    last_mood_value = models.DecimalField(verbose_name=u"Last mood value",
-                                          decimal_places=2, max_digits=10, default=None, null=True)
+    last_mood_value = models.DecimalField(
+        verbose_name="Last mood value",
+        decimal_places=2,
+        max_digits=10,
+        default=None,
+        null=True,
+    )
 
     background_color = models.CharField(
-        verbose_name=u"Background color for this board", help_text=u"Background color for this board in hexadecimal",
-        max_length=32, default="196A3E"
+        verbose_name="Background color for this board",
+        help_text="Background color for this board in hexadecimal",
+        max_length=32,
+        default="196A3E",
     )
 
     title_color = models.CharField(
-        verbose_name=u"Title color for this board", help_text=u"Title color for this board in hexadecimal",
-        max_length=32, default="FFFFFF"
+        verbose_name="Title color for this board",
+        help_text="Title color for this board in hexadecimal",
+        max_length=32,
+        default="FFFFFF",
     )
 
     # External or source URL
-    url = models.CharField(max_length=255, verbose_name=u"URL of the board", null=True, default=None)
-
-    def __unicode__(self):
-        return self.name
+    url = models.CharField(
+        max_length=255, verbose_name="URL of the board", null=True, default=None
+    )
 
     def __str__(self):
         return self.name
 
     @property
     def active_lists(self):
-        return self.lists.exclude(Q(type="closed")|Q(type="ignored")).order_by("position")
+        return self.lists.exclude(Q(type="closed") | Q(type="ignored")).order_by(
+            "position"
+        )
 
     @property
     def active_cards(self):
@@ -170,7 +231,9 @@ class Board(models.Model):
 
     # Last 30 comments
     def last_comments(self, number_of_comments=30):
-        return self.card_comments.all().order_by("-last_edition_datetime", "-creation_datetime")[:number_of_comments]
+        return self.card_comments.all().order_by(
+            "-last_edition_datetime", "-creation_datetime"
+        )[:number_of_comments]
 
     # Returns the date of the last fetch in an ISO format
     def get_human_fetch_datetime(self):
@@ -180,16 +243,32 @@ class Board(models.Model):
 
     @property
     def start_datetime(self):
-        first_card_creation_datetime = self.cards.all().aggregate(min=Min("creation_datetime"))["min"]
+        first_card_creation_datetime = self.cards.all().aggregate(
+            min=Min("creation_datetime")
+        )["min"]
         return first_card_creation_datetime
 
     @property
     def end_datetime(self):
-        last_arrival_to_done_datetime = self.card_movements.filter(destination_list__type="done").aggregate(max=Max("datetime"))["max"]
-        last_comment_datetime = self.card_comments.aggregate(max=Max("creation_datetime"))["max"]
-        last_card_creation_datetime = self.cards.all().aggregate(max=Max("creation_datetime"))["max"]
-        if last_arrival_to_done_datetime and last_comment_datetime and last_card_creation_datetime:
-            return max(last_arrival_to_done_datetime, last_comment_datetime, last_card_creation_datetime)
+        last_arrival_to_done_datetime = self.card_movements.filter(
+            destination_list__type="done"
+        ).aggregate(max=Max("datetime"))["max"]
+        last_comment_datetime = self.card_comments.aggregate(
+            max=Max("creation_datetime")
+        )["max"]
+        last_card_creation_datetime = self.cards.all().aggregate(
+            max=Max("creation_datetime")
+        )["max"]
+        if (
+            last_arrival_to_done_datetime
+            and last_comment_datetime
+            and last_card_creation_datetime
+        ):
+            return max(
+                last_arrival_to_done_datetime,
+                last_comment_datetime,
+                last_card_creation_datetime,
+            )
         elif last_arrival_to_done_datetime and last_comment_datetime:
             return max(last_arrival_to_done_datetime, last_comment_datetime)
         elif last_comment_datetime:
@@ -210,8 +289,10 @@ class Board(models.Model):
         for hourly_rate in hourly_rates:
             # If date is inside the interval defined by the dates of the hourly rate
             # this hourly rate will be applied in this day
-            if (hourly_rate.end_date and hourly_rate.start_date <= date <= hourly_rate.end_date) or\
-                     date >= hourly_rate.start_date:
+            if (
+                hourly_rate.end_date
+                and hourly_rate.start_date <= date <= hourly_rate.end_date
+            ) or date >= hourly_rate.start_date:
                 return hourly_rate
 
         return None
@@ -219,7 +300,9 @@ class Board(models.Model):
     # Is the board in downtime?
     @property
     def is_in_downtime(self):
-        return not self.active_cards.filter(Q(list__type="development") | Q(list__type="ready_to_develop")).exists()
+        return not self.active_cards.filter(
+            Q(list__type="development") | Q(list__type="ready_to_develop")
+        ).exists()
 
     def is_ready(self):
         """
@@ -237,15 +320,21 @@ class Board(models.Model):
         Returns: True if the board has data (cards, times...). False otherwise.
 
         """
-        return self.last_fetch_datetime is not None or not self.creator.has_trello_profile
+        return (
+            self.last_fetch_datetime is not None or not self.creator.has_trello_profile
+        )
 
     # Lists that are before development (backlog or ready to develop)
     def before_development_lists(self):
-        return self.lists.filter(Q(type="backlog") | Q(type="ready_to_develop") | Q(type="ignored"))
+        return self.lists.filter(
+            Q(type="backlog") | Q(type="ready_to_develop") | Q(type="ignored")
+        )
 
     # Lists that are used to compute cycle time
     def cycle_time_lists(self):
-        return self.lists.exclude(Q(type="backlog") | Q(type="ready_to_develop") | Q(type="ignored"))
+        return self.lists.exclude(
+            Q(type="backlog") | Q(type="ready_to_develop") | Q(type="ignored")
+        )
 
     # Lists that are used to compute lead time
     def lead_time_lists(self):
@@ -281,14 +370,18 @@ class Board(models.Model):
 
     # Returns the adjusted spent time according to the spent time factor defined in each member
     def get_adjusted_spent_time(self, date=None, member=None):
-        return self._get_developed_time(attr="adjusted_spent_time", date=date, member=member)
+        return self._get_developed_time(
+            attr="adjusted_spent_time", date=date, member=member
+        )
 
     # Returns the developed time (spent time or adjusted spent time).
     # Do not use this method outside this class.
-    def _get_developed_time(self, attr="spent_time", date=None, member=None, label=None):
+    def _get_developed_time(
+        self, attr="spent_time", date=None, member=None, label=None
+    ):
         daily_spent_times_filter = {}
         if date:
-            if type(date) == tuple or type(date) == list:
+            if isinstance(date, (tuple, list)):
                 daily_spent_times_filter["date__gte"] = date[0]
                 daily_spent_times_filter["date__lte"] = date[1]
             else:
@@ -301,10 +394,11 @@ class Board(models.Model):
         if label:
             daily_spent_times_filter["card__labels"] = label
 
-        sum_time = self.daily_spent_times. \
-            filter(**daily_spent_times_filter). \
-            filter(**member_filter). \
-            aggregate(sum=Sum(attr))["sum"]
+        sum_time = (
+            self.daily_spent_times.filter(**daily_spent_times_filter)
+            .filter(**member_filter)
+            .aggregate(sum=Sum(attr))["sum"]
+        )
 
         if sum_time is None:
             return 0
@@ -320,7 +414,9 @@ class Board(models.Model):
         if member:
             spent_time_on_week_filter["member"] = member
         # Filter the daily spent times and sum their spent time
-        spent_time = self.daily_spent_times.filter(**spent_time_on_week_filter).aggregate(sum=Sum("spent_time"))["sum"]
+        spent_time = self.daily_spent_times.filter(
+            **spent_time_on_week_filter
+        ).aggregate(sum=Sum("spent_time"))["sum"]
         # As usual, a None value means 0
         if spent_time is None:
             return 0
@@ -368,7 +464,9 @@ class Board(models.Model):
         # Getting the spent time of that month
         end_working_month = end_working_date.month
         end_working_year = end_working_date.year
-        spent_time = self.get_monthly_spent_time(month=end_working_month, year=end_working_year)
+        spent_time = self.get_monthly_spent_time(
+            month=end_working_month, year=end_working_year
+        )
         return spent_time
 
     # The number of hours worked in the last month with some work
@@ -389,31 +487,43 @@ class Board(models.Model):
             daily_spent_times = self.daily_spent_times.filter(
                 date__month=end_working_month,
                 date__year=end_working_year,
-                member=member
+                member=member,
             )
             for daily_spent_time in daily_spent_times:
-                adjusted_spent_time += member.adjust_daily_spent_time(daily_spent_time, "spent_time")
+                adjusted_spent_time += member.adjust_daily_spent_time(
+                    daily_spent_time, "spent_time"
+                )
 
         return adjusted_spent_time
 
     # Return spent time per week
     @property
     def spent_time_by_week(self):
-        return self.daily_spent_times.values('week_of_year').annotate(spent_time=Sum("spent_time")).order_by("week_of_year")
+        return (
+            self.daily_spent_times.values("week_of_year")
+            .annotate(spent_time=Sum("spent_time"))
+            .order_by("week_of_year")
+        )
 
     # Return the spent time on a given month of a year
     def get_monthly_spent_time(self, month, year, member=None):
-        return self._get_monthly_developed_time(attr="spent_time", month=month, year=year, member=member)
+        return self._get_monthly_developed_time(
+            attr="spent_time", month=month, year=year, member=member
+        )
 
     # Return the adjusted spent time in this month
     def get_monthly_adjusted_spent_time(self, month, year, member=None):
-        return self._get_monthly_developed_time(attr="adjusted_spent_time", month=month, year=year, member=member)
+        return self._get_monthly_developed_time(
+            attr="adjusted_spent_time", month=month, year=year, member=member
+        )
 
     def _get_monthly_developed_time(self, attr, month, year, member=None):
         spent_time_on_week_filter = {"date__month": month, "date__year": year}
         if member:
             spent_time_on_week_filter["member"] = member
-        dev_time = self.daily_spent_times.filter(**spent_time_on_week_filter).aggregate(sum=Sum(attr))["sum"]
+        dev_time = self.daily_spent_times.filter(**spent_time_on_week_filter).aggregate(
+            sum=Sum(attr)
+        )["sum"]
         if dev_time is None:
             return 0
         return dev_time
@@ -424,7 +534,7 @@ class Board(models.Model):
     def get_developed_value(self, date=None, member=None):
         daily_spent_times_filter = {}
         if date:
-            if type(date) == tuple or type(date) == list:
+            if isinstance(date, (tuple, list)):
                 daily_spent_times_filter["date__gte"] = date[0]
                 daily_spent_times_filter["date__lte"] = date[1]
             else:
@@ -433,7 +543,9 @@ class Board(models.Model):
         if member:
             daily_spent_times_filter["member"] = member
 
-        developed_value = self.daily_spent_times.filter(**daily_spent_times_filter).aggregate(sum=Sum("rate_amount"))["sum"]
+        developed_value = self.daily_spent_times.filter(
+            **daily_spent_times_filter
+        ).aggregate(sum=Sum("rate_amount"))["sum"]
         if developed_value is None:
             return 0
         return developed_value
@@ -442,7 +554,7 @@ class Board(models.Model):
     def get_adjusted_developed_value(self, date=None, member=None):
         daily_spent_times_filter = {}
         if date:
-            if type(date) == tuple or type(date) == list:
+            if isinstance(date, (tuple, list)):
                 daily_spent_times_filter["date__gte"] = date[0]
                 daily_spent_times_filter["date__lte"] = date[1]
             else:
@@ -458,13 +570,19 @@ class Board(models.Model):
             if daily_spent_time.member_id not in member_dict:
                 member_dict[daily_spent_time.member_id] = daily_spent_time.member
             member = member_dict[daily_spent_time.member_id]
-            adjusted_developed_value += member.adjust_daily_spent_time(daily_spent_time, "rate_amount")
+            adjusted_developed_value += member.adjust_daily_spent_time(
+                daily_spent_time, "rate_amount"
+            )
         return adjusted_developed_value
 
     # Informs what is the first day the team worked in this project
     def get_working_start_date(self):
-        first_spent_time_date = self.daily_spent_times.all().aggregate(min_date=Min("date"))["min_date"]
-        first_card_movement = self.card_movements.all().aggregate(min_datetime=Min("datetime"))["min_datetime"]
+        first_spent_time_date = self.daily_spent_times.all().aggregate(
+            min_date=Min("date")
+        )["min_date"]
+        first_card_movement = self.card_movements.all().aggregate(
+            min_datetime=Min("datetime")
+        )["min_datetime"]
         if first_spent_time_date and first_card_movement:
             if first_spent_time_date < first_card_movement.date():
                 return first_spent_time_date
@@ -477,8 +595,12 @@ class Board(models.Model):
 
     # Informs what is the last day the team has been working in this project
     def get_working_end_date(self):
-        last_spent_time_date = self.daily_spent_times.all().aggregate(max_date=Max("date"))["max_date"]
-        last_card_movement = self.card_movements.all().aggregate(max_datetime=Max("datetime"))["max_datetime"]
+        last_spent_time_date = self.daily_spent_times.all().aggregate(
+            max_date=Max("date")
+        )["max_date"]
+        last_card_movement = self.card_movements.all().aggregate(
+            max_datetime=Max("datetime")
+        )["max_datetime"]
         if last_spent_time_date and last_card_movement:
             if last_spent_time_date > last_card_movement.date():
                 return last_spent_time_date
@@ -516,8 +638,11 @@ class Board(models.Model):
 
         # Check if the value in cache is less than one day old
         now = timezone.now()
-        if self.last_time_mood_was_computed is not None and\
-                self.last_mood_value is not None and now - self.last_time_mood_was_computed < timedelta(days=1):
+        if (
+            self.last_time_mood_was_computed is not None
+            and self.last_mood_value is not None
+            and now - self.last_time_mood_was_computed < timedelta(days=1)
+        ):
             return self.last_mood_value
 
         members = self.members.filter(is_developer=False)
@@ -537,7 +662,9 @@ class Board(models.Model):
         while date_i <= end_date:
             for member in members:
                 try:
-                    member_mood_value = member.daily_member_moods.get(date=date_i).mood_value
+                    member_mood_value = member.daily_member_moods.get(
+                        date=date_i
+                    ).mood_value
                     member.moods.append(member_mood_value)
                 except DailyMemberMood.DoesNotExist:
                     pass
@@ -624,85 +751,157 @@ class Card(models.Model):
     class Meta:
         verbose_name = "Card"
         verbose_name_plural = "Cards"
-        index_together = (
-            ("board", "creation_datetime", "list"),
-            ("board", "list", "number_of_forward_movements", "number_of_backward_movements", "creation_datetime"),
-            ("board", "creation_datetime"),
-            ("board", "list", "position"),
-            ("board", "due_datetime"),
-            ("board", "is_closed", "list", "position"),
-            ("board", "is_closed", "creation_datetime", "list", "number_of_forward_movements", "number_of_backward_movements"),
-            ("is_closed", "board", "creation_datetime", "list", "number_of_forward_movements", "number_of_backward_movements"),
-        )
+
+    #         index_together = (
+    #             ("board", "creation_datetime", "list"),
+    #             ("board", "list", "number_of_forward_movements", "number_of_backward_movements", "creation_datetime"),
+    #             ("board", "creation_datetime"),
+    #             ("board", "list", "position"),
+    #             ("board", "due_datetime"),
+    #             ("board", "is_closed", "list", "position"),
+    #             ("board", "is_closed", "creation_datetime", "list", "number_of_forward_movements", "number_of_backward_movements"),
+    #             ("is_closed", "board", "creation_datetime", "list", "number_of_forward_movements", "number_of_backward_movements"),
+    #         )
 
     COMMENT_SPENT_ESTIMATED_TIME_REGEX = r"^plus!\s+(\-(?P<days_before>(\d+))d\s+)?(?P<spent>(\-)?\d+(\.\d+)?)/(?P<estimated>(\-)?\d+(\.\d+)?)(\s*(?P<description>.+))?"
-    COMMENT_SPENT_ESTIMATED_TIME_PATTERN = "plus! {days_ago}{spent_time}/{estimated_time} {description}"
+    COMMENT_SPENT_ESTIMATED_TIME_PATTERN = (
+        "plus! {days_ago}{spent_time}/{estimated_time} {description}"
+    )
 
     COMMENT_BLOCKED_CARD_REGEX = r"^blocked\s+by\s+(?P<card_url>.+)$"
     COMMENT_BLOCKED_CARD_PATTERN = "blocked by {card_url}"
 
-    COMMENT_REQUIREMENT_CARD_REGEX = r"^task\s+of\s+requirement\s+(?P<requirement_code>.+)$"
+    COMMENT_REQUIREMENT_CARD_REGEX = (
+        r"^task\s+of\s+requirement\s+(?P<requirement_code>.+)$"
+    )
     COMMENT_REQUIREMENT_CARD_PATTERN = "task of requirement {requirement_code}"
 
     COMMENT_REVIEWED_BY_MEMBERS_REGEX = r"^reviewed\s+by\s+(?P<member_usernames>((@[\w\d]+)(\s|,|and)*)+(\s*:\s*(?P<description>.+))?)$"
     COMMENT_REVIEWED_BY_MEMBERS_PATTERN = "reviewed by {member_usernames}"
-    COMMENT_REVIEWED_BY_MEMBERS_WITH_DESCRIPTION_PATTERN = "reviewed by {member_usernames}: {description}"
+    COMMENT_REVIEWED_BY_MEMBERS_WITH_DESCRIPTION_PATTERN = (
+        "reviewed by {member_usernames}: {description}"
+    )
 
     COMMENT_REVIEWED_BY_MEMBERS_FINDALL_REGEX = r"@[\w\d]+"
 
     COMMENT_VALUATED_CARD_REGEX = r"^task\s+valued\s+on\s+(?P<value>\d+)$"
     COMMENT_VALUATED_CARD_PATTERN = "task valued on {value}"
 
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="cards")
-    list = models.ForeignKey("boards.List", verbose_name=u"List", related_name="cards")
+    board = models.ForeignKey(
+        "boards.Board",
+        verbose_name="Board",
+        related_name="cards",
+        on_delete=models.CASCADE,
+    )
+    list = models.ForeignKey(
+        "boards.List",
+        verbose_name="List",
+        related_name="cards",
+        on_delete=models.CASCADE,
+    )
 
     # Some cards are created from recurrent cards
     parent_recurrent_card = models.ForeignKey(
-        "recurrent_cards.RecurrentCard", verbose_name=u"Recurrent card", related_name="cards",
-        blank=True, default=None, null=True, on_delete=models.SET_NULL
+        "recurrent_cards.RecurrentCard",
+        verbose_name="Recurrent card",
+        related_name="cards",
+        blank=True,
+        default=None,
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
-    name = models.TextField(verbose_name=u"Name of the card")
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of the card", unique=True)
-    url = models.CharField(max_length=255, verbose_name=u"URL of the card", unique=True)
-    short_url = models.CharField(max_length=128, verbose_name=u"Short URL of the card", unique=True)
-    description = models.TextField(verbose_name=u"Description of the card")
-    is_closed = models.BooleanField(verbose_name=u"Is this card closed?", default=False)
-    position = models.PositiveIntegerField(verbose_name=u"Position in the list")
-    number_of_comments = models.PositiveIntegerField(verbose_name=u"Number of comments of this card", default=0)
-    number_of_words_in_comments = models.PositiveIntegerField(verbose_name=u"Number of words in the comments of this card", default=0)
+    name = models.TextField(verbose_name="Name of the card")
+    uuid = models.CharField(
+        max_length=128, verbose_name="External id of the card", unique=True
+    )
+    url = models.CharField(max_length=255, verbose_name="URL of the card", unique=True)
+    short_url = models.CharField(
+        max_length=128, verbose_name="Short URL of the card", unique=True
+    )
+    description = models.TextField(verbose_name="Description of the card")
+    is_closed = models.BooleanField(verbose_name="Is this card closed?", default=False)
+    position = models.PositiveIntegerField(verbose_name="Position in the list")
+    number_of_comments = models.PositiveIntegerField(
+        verbose_name="Number of comments of this card", default=0
+    )
+    number_of_words_in_comments = models.PositiveIntegerField(
+        verbose_name="Number of words in the comments of this card", default=0
+    )
     number_of_mentioned_members = models.PositiveIntegerField(
-        verbose_name=u"Number of mentioned members in the comments of this card", default=0
+        verbose_name="Number of mentioned members in the comments of this card",
+        default=0,
     )
-    number_of_reviews = models.PositiveIntegerField(verbose_name=u"Number of reviews of this card", default=0)
-    value = models.PositiveIntegerField(verbose_name=u"Value of this card for the client", blank=True, default=None, null=True)
+    number_of_reviews = models.PositiveIntegerField(
+        verbose_name="Number of reviews of this card", default=0
+    )
+    value = models.PositiveIntegerField(
+        verbose_name="Value of this card for the client",
+        blank=True,
+        default=None,
+        null=True,
+    )
 
-    due_datetime = models.DateTimeField(verbose_name=u"Deadline", blank=True, null=True, default=None)
-    creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime")
-    last_activity_datetime = models.DateTimeField(verbose_name=u"Last activity datetime")
+    due_datetime = models.DateTimeField(
+        verbose_name="Deadline", blank=True, null=True, default=None
+    )
+    creation_datetime = models.DateTimeField(verbose_name="Creation datetime")
+    last_activity_datetime = models.DateTimeField(verbose_name="Last activity datetime")
 
-    number_of_forward_movements = models.PositiveIntegerField(verbose_name=u"Number of forward movements", default=0)
-    number_of_backward_movements = models.PositiveIntegerField(verbose_name=u"Number of backward movements", default=0)
+    number_of_forward_movements = models.PositiveIntegerField(
+        verbose_name="Number of forward movements", default=0
+    )
+    number_of_backward_movements = models.PositiveIntegerField(
+        verbose_name="Number of backward movements", default=0
+    )
 
     spent_time = models.DecimalField(
-        verbose_name=u"Spent time", decimal_places=4, max_digits=12, default=None, null=True
+        verbose_name="Spent time",
+        decimal_places=4,
+        max_digits=12,
+        default=None,
+        null=True,
     )
 
     adjusted_spent_time = models.DecimalField(
-        verbose_name=u"Adjusted spent time", decimal_places=4, max_digits=12, default=None, null=True
+        verbose_name="Adjusted spent time",
+        decimal_places=4,
+        max_digits=12,
+        default=None,
+        null=True,
     )
 
     estimated_time = models.DecimalField(
-        verbose_name=u"Estimated time", decimal_places=4, max_digits=12, default=None, null=True
+        verbose_name="Estimated time",
+        decimal_places=4,
+        max_digits=12,
+        default=None,
+        null=True,
     )
 
-    cycle_time = models.DecimalField(verbose_name=u"Lead time", decimal_places=4, max_digits=12, default=None,
-                                     null=True)
-    lead_time = models.DecimalField(verbose_name=u"Cycle time", decimal_places=4, max_digits=12, default=None,
-                                    null=True)
+    cycle_time = models.DecimalField(
+        verbose_name="Lead time",
+        decimal_places=4,
+        max_digits=12,
+        default=None,
+        null=True,
+    )
+    lead_time = models.DecimalField(
+        verbose_name="Cycle time",
+        decimal_places=4,
+        max_digits=12,
+        default=None,
+        null=True,
+    )
 
-    valuation_comment = models.OneToOneField("boards.CardComment", related_name="valued_card",
-                                             blank=True, default=None, null=True)
+    valuation_comment = models.OneToOneField(
+        "boards.CardComment",
+        related_name="valued_card",
+        blank=True,
+        default=None,
+        null=True,
+        on_delete=models.CASCADE,
+    )
     labels = models.ManyToManyField("boards.Label", related_name="cards")
     members = models.ManyToManyField("members.Member", related_name="cards")
     blocking_cards = models.ManyToManyField("boards.card", related_name="blocked_cards")
@@ -712,47 +911,61 @@ class Card(models.Model):
             return None
         creation_datetime = self.creation_datetime
         completion_datetime = self.completion_datetime
-        time_diff = (completion_datetime - creation_datetime)
+        time_diff = completion_datetime - creation_datetime
         return time_diff.total_seconds() / 3600.0
 
     def get_cycle_time(self):
         if not self.is_done:
             return None
         try:
-            start_development_datetime = \
-                self.movements.filter(destination_list__type="development").order_by("datetime")[0].datetime
+            start_development_datetime = (
+                self.movements.filter(destination_list__type="development")
+                .order_by("datetime")[0]
+                .datetime
+            )
         except IndexError:
             start_development_datetime = self.creation_datetime
         completion_datetime = self.completion_datetime
-        time_diff = (completion_datetime - start_development_datetime)
+        time_diff = completion_datetime - start_development_datetime
         return time_diff.total_seconds() / 3600.0
 
     # Get the spent time for this card
     def get_spent_time(self):
-        return self.daily_spent_times.all().aggregate(spent_time_sum=Sum("spent_time"))["spent_time_sum"]
+        return self.daily_spent_times.all().aggregate(spent_time_sum=Sum("spent_time"))[
+            "spent_time_sum"
+        ]
 
     # Returns the adjusted spent time according to the spent time factor defined in each member
     def get_adjusted_spent_time(self):
-        return self.daily_spent_times.all().aggregate(adj_spent_time_sum=Sum("adjusted_spent_time"))["adj_spent_time_sum"]
+        return self.daily_spent_times.all().aggregate(
+            adj_spent_time_sum=Sum("adjusted_spent_time")
+        )["adj_spent_time_sum"]
 
     # Get the estimated time for this card
     def get_estimated_time(self):
-        return self.daily_spent_times.all().aggregate(estimated_time_sum=Sum("estimated_time"))["estimated_time_sum"]
+        return self.daily_spent_times.all().aggregate(
+            estimated_time_sum=Sum("estimated_time")
+        )["estimated_time_sum"]
 
     # Get the spent time by member for this card
     def get_spent_time_by_member(self, member):
-        return self.daily_spent_times.filter(member=member).\
-            aggregate(spent_time_sum=Sum("spent_time"))["spent_time_sum"]
+        return self.daily_spent_times.filter(member=member).aggregate(
+            spent_time_sum=Sum("spent_time")
+        )["spent_time_sum"]
 
     # Get the estimated time by member for this card
     def get_estimated_time_by_member(self, member):
-        return self.daily_spent_times.filter(member=member).\
-            aggregate(estimated_time_sum=Sum("estimated_time"))["estimated_time_sum"]
+        return self.daily_spent_times.filter(member=member).aggregate(
+            estimated_time_sum=Sum("estimated_time")
+        )["estimated_time_sum"]
 
     # Return the cards of the boards of an user
     @staticmethod
     def get_user_cards(user, is_archived=False):
-        return Card.objects.filter(Q(board__members__user=user)|Q(board__visitors=user), board__is_archived=is_archived)
+        return Card.objects.filter(
+            Q(board__members__user=user) | Q(board__visitors=user),
+            board__is_archived=is_archived,
+        )
 
     # Age of this card as a timedelta
     @property
@@ -770,7 +983,11 @@ class Card(models.Model):
     @property
     def creation_list(self):
         if self.movements.filter(type="forward").order_by("datetime").exists():
-            return self.movements.filter(type="forward").order_by("datetime")[0].source_list
+            return (
+                self.movements.filter(type="forward")
+                .order_by("datetime")[0]
+                .source_list
+            )
         return None
 
     # Get the time this card has passed in each list
@@ -786,7 +1003,9 @@ class Card(models.Model):
 
         #  If there are no changes in the card, all its life has been in its creation list
         if not movements.exists():
-            card_life_time = (timezone.now() - card_last_action_datetime).total_seconds()
+            card_life_time = (
+                timezone.now() - card_last_action_datetime
+            ).total_seconds()
             time_by_list[self.list_id] += card_life_time
 
         else:
@@ -797,7 +1016,9 @@ class Card(models.Model):
             # that destination list
             for movement in movements:
 
-                time_from_last_list_change = (movement.datetime - card_last_action_datetime).total_seconds()
+                time_from_last_list_change = (
+                    movement.datetime - card_last_action_datetime
+                ).total_seconds()
                 time_by_list[movement.source_list_id] += time_from_last_list_change
 
                 # Our last action has been this movement
@@ -809,23 +1030,28 @@ class Card(models.Model):
             # Adding the number of seconds the card has been in its last column (until now)
             # only if the last column is not "Done" column
             if last_list.type != "done":
-                time_card_has_spent_in_list_until_now = (timezone.now() - card_last_action_datetime).total_seconds()
-                time_by_list[last_list.id] += time_card_has_spent_in_list_until_now\
-
+                time_card_has_spent_in_list_until_now = (
+                    timezone.now() - card_last_action_datetime
+                ).total_seconds()
+                time_by_list[last_list.id] += time_card_has_spent_in_list_until_now
         return time_by_list
 
     @property
     def time_in_each_list_type(self):
-        list_type_by_id = {list_.id: list_.type for list_ in self.board.active_lists.all()}
+        list_type_by_id = {
+            list_.id: list_.type for list_ in self.board.active_lists.all()
+        }
         time_by_list_type = {list_type: 0 for list_type in List.LIST_TYPES}
         time_by_list = self.time_in_each_list
-        for list_id, time_in_list in time_by_list.items():
-            time_by_list_type[list_type_by_id[list_id]] +=time_in_list
+        for list_id, time_in_list in list(time_by_list.items()):
+            time_by_list_type[list_type_by_id[list_id]] += time_in_list
         return time_by_list_type
 
     @property
     def ready_to_develop_datetime(self):
-        arrivals_to_ready_to_develop_list = self.movements.filter(destination_list__type="ready_to_develop").order_by("datetime")
+        arrivals_to_ready_to_develop_list = self.movements.filter(
+            destination_list__type="ready_to_develop"
+        ).order_by("datetime")
         if arrivals_to_ready_to_develop_list.exists():
             return arrivals_to_ready_to_develop_list[0].datetime
         return self.creation_datetime
@@ -852,16 +1078,21 @@ class Card(models.Model):
 
     @property
     def start_datetime(self):
-        first_arrival_to_in_development_datetime = \
-            self.movements.filter(destination_list__type="development").aggregate(min=Min("datetime"))["min"]
+        first_arrival_to_in_development_datetime = self.movements.filter(
+            destination_list__type="development"
+        ).aggregate(min=Min("datetime"))["min"]
         if first_arrival_to_in_development_datetime:
             return first_arrival_to_in_development_datetime
         return self.creation_datetime
 
     @property
     def end_datetime(self):
-        last_arrival_to_done_datetime = self.movements.filter(destination_list__type="done").aggregate(max=Max("datetime"))["max"]
-        last_comment_datetime = self.comments.aggregate(max=Max("creation_datetime"))["max"]
+        last_arrival_to_done_datetime = self.movements.filter(
+            destination_list__type="done"
+        ).aggregate(max=Max("datetime"))["max"]
+        last_comment_datetime = self.comments.aggregate(max=Max("creation_datetime"))[
+            "max"
+        ]
         if last_arrival_to_done_datetime and last_comment_datetime:
             return max(last_arrival_to_done_datetime, last_comment_datetime)
         elif last_arrival_to_done_datetime:
@@ -903,9 +1134,13 @@ class Card(models.Model):
     @property
     def completion_datetime(self):
         if self.list.type != "done":
-            raise ValueError(u"This card is not completed")
+            raise ValueError("This card is not completed")
         try:
-            return self.movements.filter(destination_list__type="done").order_by("-id")[0].datetime
+            return (
+                self.movements.filter(destination_list__type="done")
+                .order_by("-id")[0]
+                .datetime
+            )
         # In case this card is added directly in the "done" list
         except IndexError:
             return self.last_activity_datetime
@@ -945,11 +1180,17 @@ class Card(models.Model):
 
     # Move this card to a random list
     @transaction.atomic
-    def move(self, member, destination_list, destination_position="top", local_move_only=False):
+    def move(
+        self,
+        member,
+        destination_list,
+        destination_position="top",
+        local_move_only=False,
+    ):
         # Only move the card if the source list is different from the destination list.
         # Otherwise only a ordering is needed on the current card list.
         if self.list.id == destination_list.id:
-            raise ValueError(u"Trying to move a card to its list")
+            raise ValueError("Trying to move a card to its list")
 
         # Checking if it is a forward or backward movement
         if self.list.position < destination_list.position:
@@ -957,12 +1198,17 @@ class Card(models.Model):
         elif self.list.position > destination_list.position:
             movement_type = "backward"
         else:
-            raise ValueError(u"Trying to move a card to its list")
+            raise ValueError("Trying to move a card to its list")
 
         # Store the movement of this card
         card_movement = CardMovement(
-            board=self.board, card=self, type=movement_type, member=member,
-            source_list=self.list, destination_list=destination_list, datetime=timezone.now()
+            board=self.board,
+            card=self,
+            type=movement_type,
+            member=member,
+            source_list=self.list,
+            destination_list=destination_list,
+            datetime=timezone.now(),
         )
         card_movement.save()
 
@@ -980,7 +1226,11 @@ class Card(models.Model):
             connector.move_card(card=self, destination_list=destination_list)
 
         # Move to the required position
-        self.change_order(member, destination_position=destination_position, local_move_only=local_move_only)
+        self.change_order(
+            member,
+            destination_position=destination_position,
+            local_move_only=local_move_only,
+        )
 
         # Notify the movement to members
         Notification.move_card(mover=member, card=self, board=self.board)
@@ -1018,7 +1268,9 @@ class Card(models.Model):
             self.change_value(member, value)
 
         else:
-            raise AssertionError("Attribute {0} change not implemented choose one of name, description, is_closed or due_datetime")
+            raise AssertionError(
+                "Attribute {0} change not implemented choose one of name, description, is_closed or due_datetime"
+            )
 
         self.save()
 
@@ -1030,14 +1282,22 @@ class Card(models.Model):
             # Assigning position to the card
             # If This card is on top, get the old top an move it down
             if destination_position == "top":
-                first_card_in_destination_list = destination_list_cards.order_by("position")[0]
-                destination_position_value = first_card_in_destination_list.position - 10
+                first_card_in_destination_list = destination_list_cards.order_by(
+                    "position"
+                )[0]
+                destination_position_value = (
+                    first_card_in_destination_list.position - 10
+                )
                 if destination_position_value < 0:
                     destination_position_value = 1
             # If This card is on the bottom, get the old bottom an move it up
             elif destination_position == "bottom":
-                first_card_in_destination_list = destination_list_cards.order_by("-position")[0]
-                destination_position_value = first_card_in_destination_list.position + 10
+                first_card_in_destination_list = destination_list_cards.order_by(
+                    "-position"
+                )[0]
+                destination_position_value = (
+                    first_card_in_destination_list.position + 10
+                )
             # Otherwise do nothing
             else:
                 destination_position_value = destination_position
@@ -1053,7 +1313,9 @@ class Card(models.Model):
 
     # Add spent/estimated time
     @transaction.atomic
-    def add_spent_estimated_time(self, member, spent_time, estimated_time=None, days_ago=None, description=None):
+    def add_spent_estimated_time(
+        self, member, spent_time, estimated_time=None, days_ago=None, description=None
+    ):
 
         # By default this spent/estimated time description is this card's name
         if description is None:
@@ -1092,10 +1354,13 @@ class Card(models.Model):
 
         # Creation of comment with the daily spent time
         comment_content = Card.COMMENT_SPENT_ESTIMATED_TIME_PATTERN.format(
-            days_ago=days_ago_str, spent_time=spent_time, estimated_time=estimated_time, description=description
+            days_ago=days_ago_str,
+            spent_time=spent_time,
+            estimated_time=estimated_time,
+            description=description,
         )
 
-        comment = self.add_comment(member, comment_content)
+        self.add_comment(member, comment_content)
 
         # Delete all cached charts for this board
         self.board.clean_cached_charts()
@@ -1103,8 +1368,10 @@ class Card(models.Model):
     # Add a new blocking card to this card
     @transaction.atomic
     def add_blocking_card(self, member, blocking_card):
-        comment_content = Card.COMMENT_BLOCKED_CARD_PATTERN.format(card_url=blocking_card.url)
-        comment = self.add_comment(member, comment_content)
+        comment_content = Card.COMMENT_BLOCKED_CARD_PATTERN.format(
+            card_url=blocking_card.url
+        )
+        self.add_comment(member, comment_content)
 
     # Remove a blocking card of this card
     @transaction.atomic
@@ -1115,11 +1382,12 @@ class Card(models.Model):
     @transaction.atomic
     def add_review(self, member, reviewers, description=""):
         # Add the blocking card with the review format
-        member_usernames = ", ".join(["@{0}".format(reviewer.external_username) for reviewer in reviewers])
+        member_usernames = ", ".join(
+            ["@{0}".format(reviewer.external_username) for reviewer in reviewers]
+        )
         if description:
             content = Card.COMMENT_REVIEWED_BY_MEMBERS_WITH_DESCRIPTION_PATTERN.format(
-                member_usernames=member_usernames,
-                description=description
+                member_usernames=member_usernames, description=description
             )
         else:
             content = Card.COMMENT_REVIEWED_BY_MEMBERS_PATTERN.format(
@@ -1137,7 +1405,9 @@ class Card(models.Model):
     @transaction.atomic
     def add_requirement(self, member, requirement):
         # Add the requirement with the comment format
-        comment_content = Card.COMMENT_REQUIREMENT_CARD_PATTERN.format(requirement_code=requirement.code)
+        comment_content = Card.COMMENT_REQUIREMENT_CARD_PATTERN.format(
+            requirement_code=requirement.code
+        )
         self.add_comment(member, comment_content)
 
     # Removing a requirement of this card
@@ -1159,7 +1429,9 @@ class Card(models.Model):
             comment_content = Card.COMMENT_VALUATED_CARD_PATTERN.format(value=value)
             if valuation_comment is not None:
                 # Edition of comment with the valuation of this card
-                self.edit_comment(member, comment=valuation_comment, new_content=comment_content)
+                self.edit_comment(
+                    member, comment=valuation_comment, new_content=comment_content
+                )
                 self.value = value
             else:
                 # Creation of comment with the valuation of this card
@@ -1189,20 +1461,29 @@ class Card(models.Model):
     # Adds a new attachment to this card
     @transaction.atomic
     def add_new_attachment(self, member, uploaded_file, uploaded_file_name=None):
-        attachment = CardAttachment(card=self, uuid=custom_uuid(),
-                                    uploader=member, is_cover=False, creation_datetime=timezone.now())
+        attachment = CardAttachment(
+            card=self,
+            uuid=custom_uuid(),
+            uploader=member,
+            is_cover=False,
+            creation_datetime=timezone.now(),
+        )
         attached_file = File(uploaded_file)
         if uploaded_file_name is None:
             uploaded_file_name = uploaded_file.name
 
         # If there is already a file named uploaded_file_name, put
         if CardAttachment.objects.filter(file=uploaded_file_name).exists():
-            matches = re.match("^(?P<filename>.+)(?P<extension>\.[\w\d]+)", uploaded_file_name)
+            matches = re.match(
+                "^(?P<filename>.+)(?P<extension>\.[\w\d]+)", uploaded_file_name
+            )
             if matches:
                 filename = matches.group("filename")
                 extension = matches.group("extension")
                 now = timezone.now()
-                uploaded_file_name = "{0}-{1}{2}".format(filename, now.isoformat(), extension)
+                uploaded_file_name = "{0}-{1}{2}".format(
+                    filename, now.isoformat(), extension
+                )
 
         attachment.file.save(uploaded_file_name, attached_file)
         return self.add_attachment(member, attachment)
@@ -1222,8 +1503,13 @@ class Card(models.Model):
     def add_comment(self, member, content):
 
         # Create comment locally using the id of the new comment in Trello
-        card_comment = CardComment(card=self, board=self.board, author=member, content=content,
-                                   creation_datetime=timezone.now())
+        card_comment = CardComment(
+            card=self,
+            board=self.board,
+            author=member,
+            content=content,
+            creation_datetime=timezone.now(),
+        )
 
         connector = RemoteBackendConnectorFactory.factory(member)
         card_comment = connector.add_comment_to_card(card=self, comment=card_comment)
@@ -1245,7 +1531,9 @@ class Card(models.Model):
     @transaction.atomic
     def edit_comment(self, member, comment, new_content):
         if member.uuid != comment.author.uuid:
-            raise AssertionError(u"This comment does not belong to {0}".format(member.external_username))
+            raise AssertionError(
+                "This comment does not belong to {0}".format(member.external_username)
+            )
 
         # Old comment content
         old_content = comment.content
@@ -1347,35 +1635,56 @@ class CardAttachment(models.Model):
     class Meta:
         verbose_name = "Card attachment"
         verbose_name_plural = "Card attachments"
-        index_together = (
-            ("card", "creation_datetime", "uploader"),
-            ("uploader", "card", "creation_datetime"),
-            ("card", "uploader", "creation_datetime"),
-            ("creation_datetime", "card", "uploader"),
-        )
 
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of this attachment", unique=True)
-    card = models.ForeignKey("boards.Card", verbose_name=u"Card this attachment belongs to",
-                             related_name="attachments")
-    uploader = models.ForeignKey("members.Member", verbose_name=u"Member uploader of this attachment",
-                                 related_name="attachments")
-    external_file_url = models.CharField(verbose_name=u"External file URL", max_length=1024, default="", blank=True)
-    external_file_name = models.CharField(verbose_name=u"External file name", max_length=4096, default="", blank=True)
-    file = models.FileField(verbose_name=u"File content", null=True, blank=True, default=None)
-    is_cover = models.BooleanField(
-        verbose_name=u"Is this file the cover of the card?",
-        help_text="Is this file the cover of the card? "
-                  "If it is the cover, it will be used as a the header image of the card.",
-        default=True
+    #         index_together = (
+    #             ("card", "creation_datetime", "uploader"),
+    #             ("uploader", "card", "creation_datetime"),
+    #             ("card", "uploader", "creation_datetime"),
+    #             ("creation_datetime", "card", "uploader"),
+    #         )
+
+    uuid = models.CharField(
+        max_length=128, verbose_name="External id of this attachment", unique=True
     )
-    creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
+    card = models.ForeignKey(
+        "boards.Card",
+        verbose_name="Card this attachment belongs to",
+        related_name="attachments",
+        on_delete=models.CASCADE,
+    )
+    uploader = models.ForeignKey(
+        "members.Member",
+        verbose_name="Member uploader of this attachment",
+        related_name="attachments",
+        on_delete=models.CASCADE,
+    )
+    external_file_url = models.CharField(
+        verbose_name="External file URL", max_length=1024, default="", blank=True
+    )
+    external_file_name = models.CharField(
+        verbose_name="External file name", max_length=4096, default="", blank=True
+    )
+    file = models.FileField(
+        verbose_name="File content", null=True, blank=True, default=None
+    )
+    is_cover = models.BooleanField(
+        verbose_name="Is this file the cover of the card?",
+        help_text="Is this file the cover of the card? "
+        "If it is the cover, it will be used as a the header image of the card.",
+        default=True,
+    )
+    creation_datetime = models.DateTimeField(
+        verbose_name="Creation datetime of the comment"
+    )
 
     def fetch_external_file(self):
         if self.external_file_url and not self.file:
             if self.external_file_name == "":
                 self.external_file_name = custom_uuid()
             file_content_request = requests.get(self.external_file_url)
-            self.file.save(self.external_file_name, ContentFile(file_content_request.text))
+            self.file.save(
+                self.external_file_name, ContentFile(file_content_request.text)
+            )
             self.save()
 
 
@@ -1387,28 +1696,81 @@ class CardComment(models.Model):
     class Meta:
         verbose_name = "Card comment"
         verbose_name_plural = "Card comments"
-        index_together = (
-            ("card", "creation_datetime", "author"),
-            ("author", "card", "creation_datetime"),
-            ("card", "author", "creation_datetime"),
-            ("creation_datetime", "card", "author"),
-        )
 
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of the comment of this comment", unique=True)
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board this comment belongs to", related_name="card_comments")
-    card = models.ForeignKey("boards.Card", verbose_name=u"Card this comment belongs to", related_name="comments")
-    author = models.ForeignKey("members.Member", verbose_name=u"Member author of this comment", related_name="comments")
-    content = models.TextField(verbose_name=u"Content of the comment")
-    mentioned_members = models.ManyToManyField("members.Member", verbose_name=u"Mentioned members in this comment", related_name="mentioning_comments")
-    number_of_mentioned_members = models.PositiveIntegerField(verbose_name=u"Number of mentioned members", default=0)
-    blocking_card = models.ForeignKey("boards.Card", verbose_name=u"Blocking card this comment belongs to", related_name="blocking_comments", null=True, default=None)
-    review = models.OneToOneField("reports.CardReview", verbose_name=u"Card review this comment represents", related_name="comment", null=True, default=None)
-    requirement = models.ForeignKey("requirements.Requirement", verbose_name=u"Requirement this comment belongs to", related_name="card_comments", null=True, default=None)
-    creation_datetime = models.DateTimeField(verbose_name=u"Creation datetime of the comment")
-    last_edition_datetime = models.DateTimeField(verbose_name=u"Last edition of the comment", default=None, null=True)
+    #         index_together = (
+    #             ("card", "creation_datetime", "author"),
+    #             ("author", "card", "creation_datetime"),
+    #             ("card", "author", "creation_datetime"),
+    #             ("creation_datetime", "card", "author"),
+    #         )
+
+    uuid = models.CharField(
+        max_length=128,
+        verbose_name="External id of the comment of this comment",
+        unique=True,
+    )
+    board = models.ForeignKey(
+        "boards.Board",
+        verbose_name="Board this comment belongs to",
+        related_name="card_comments",
+        on_delete=models.CASCADE,
+    )
+    card = models.ForeignKey(
+        "boards.Card",
+        verbose_name="Card this comment belongs to",
+        related_name="comments",
+        on_delete=models.CASCADE,
+    )
+    author = models.ForeignKey(
+        "members.Member",
+        verbose_name="Member author of this comment",
+        related_name="comments",
+        on_delete=models.CASCADE,
+    )
+    content = models.TextField(verbose_name="Content of the comment")
+    mentioned_members = models.ManyToManyField(
+        "members.Member",
+        verbose_name="Mentioned members in this comment",
+        related_name="mentioning_comments",
+    )
+    number_of_mentioned_members = models.PositiveIntegerField(
+        verbose_name="Number of mentioned members", default=0
+    )
+    blocking_card = models.ForeignKey(
+        "boards.Card",
+        verbose_name="Blocking card this comment belongs to",
+        related_name="blocking_comments",
+        null=True,
+        default=None,
+        on_delete=models.CASCADE,
+    )
+    review = models.OneToOneField(
+        "reports.CardReview",
+        verbose_name="Card review this comment represents",
+        related_name="comment",
+        null=True,
+        default=None,
+        on_delete=models.CASCADE,
+    )
+    requirement = models.ForeignKey(
+        "requirements.Requirement",
+        verbose_name="Requirement this comment belongs to",
+        related_name="card_comments",
+        null=True,
+        default=None,
+        on_delete=models.CASCADE,
+    )
+    creation_datetime = models.DateTimeField(
+        verbose_name="Creation datetime of the comment"
+    )
+    last_edition_datetime = models.DateTimeField(
+        verbose_name="Last edition of the comment", default=None, null=True
+    )
 
     def get_spent_estimated_time_from_content(self):
-        matches = re.match(Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, self.content, re.IGNORECASE)
+        matches = re.match(
+            Card.COMMENT_SPENT_ESTIMATED_TIME_REGEX, self.content, re.IGNORECASE
+        )
         if matches:
             date = self.creation_datetime.date()
 
@@ -1421,10 +1783,10 @@ class CardComment(models.Model):
                 description = self.card.name
 
             return {
-                "date":  date,
+                "date": date,
                 "spent_time": float(matches.group("spent")),
                 "estimated_time": float(matches.group("estimated")),
-                "description": description
+                "description": description,
             }
         return None
 
@@ -1443,7 +1805,9 @@ class CardComment(models.Model):
     # If it is not a requirement card comment, return None.
     @property
     def requirement_from_content(self):
-        matches = re.match(Card.COMMENT_REQUIREMENT_CARD_REGEX, self.content, re.IGNORECASE)
+        matches = re.match(
+            Card.COMMENT_REQUIREMENT_CARD_REGEX, self.content, re.IGNORECASE
+        )
         if matches:
             requirement_code = matches.group("requirement_code")
             try:
@@ -1458,16 +1822,28 @@ class CardComment(models.Model):
     # If it is not a reviewer card comment, return None.
     @property
     def review_from_comment(self):
-        matches = re.match(Card.COMMENT_REVIEWED_BY_MEMBERS_REGEX, self.content, re.IGNORECASE)
+        matches = re.match(
+            Card.COMMENT_REVIEWED_BY_MEMBERS_REGEX, self.content, re.IGNORECASE
+        )
         if matches:
             # Extracting member usernames
             member_usernames_string = matches.group("member_usernames")
-            member_usernames = re.findall(Card.COMMENT_REVIEWED_BY_MEMBERS_FINDALL_REGEX, member_usernames_string)
+            member_usernames = re.findall(
+                Card.COMMENT_REVIEWED_BY_MEMBERS_FINDALL_REGEX, member_usernames_string
+            )
             if len(member_usernames) == 1 and member_usernames[0] == "@board":
                 members = self.card.board.members.all()
             else:
-                cleaned_member_usernames = [member_username.replace("@", "") for member_username in member_usernames]
-                members = [member for member in self.card.board.members.filter(trello_member_profile__username__in=cleaned_member_usernames)]
+                cleaned_member_usernames = [
+                    member_username.replace("@", "")
+                    for member_username in member_usernames
+                ]
+                members = [
+                    member
+                    for member in self.card.board.members.filter(
+                        trello_member_profile__username__in=cleaned_member_usernames
+                    )
+                ]
             # Checkout the description of the review
             try:
                 description = matches.group("description")
@@ -1475,7 +1851,13 @@ class CardComment(models.Model):
                 description = ""
 
             # Construct a dict with the review info
-            _review_from_comment = {"reviewers": members, "datetime": self.creation_datetime, "card": self.card, "board": self.card.board, "description": description}
+            _review_from_comment = {
+                "reviewers": members,
+                "datetime": self.creation_datetime,
+                "card": self.card,
+                "board": self.card.board,
+                "description": description,
+            }
             return _review_from_comment
 
         return None
@@ -1483,7 +1865,9 @@ class CardComment(models.Model):
     # Return the card value associated to this comment extracted from its content.
     @property
     def card_value_from_content(self):
-        matches = re.match(Card.COMMENT_VALUATED_CARD_REGEX, self.content, re.IGNORECASE)
+        matches = re.match(
+            Card.COMMENT_VALUATED_CARD_REGEX, self.content, re.IGNORECASE
+        )
         if matches:
             value = matches.group("value")
             return value
@@ -1491,22 +1875,28 @@ class CardComment(models.Model):
 
     # Update mentioned members
     def update_mentioned_members(self):
-        member_mentions = re.findall(CardComment.COMMENT_MENTIONED_MEMBERS_FINDALL_REGEX, self.content, re.IGNORECASE)
+        member_mentions = re.findall(
+            CardComment.COMMENT_MENTIONED_MEMBERS_FINDALL_REGEX,
+            self.content,
+            re.IGNORECASE,
+        )
         if len(member_mentions) == 0:
             return None
 
         # Checking if there are any mentioned members
-        cleaned_member_usernames = [member_username.replace("@", "") for member_username in member_mentions]
+        cleaned_member_usernames = [
+            member_username.replace("@", "") for member_username in member_mentions
+        ]
         # If all the board is mentioned, ignore other mentions. Everyone in this board is mention
         if "board" in cleaned_member_usernames:
             mentioned_members = self.card.board.members.all()
         # Otherwise, get the particular mentioned members
         else:
             mentioned_members = [
-                member for member in
-                self.card.board.members.filter(
-                    Q(trello_member_profile__username__in=cleaned_member_usernames)|
-                    Q(user__username__in=cleaned_member_usernames)
+                member
+                for member in self.card.board.members.filter(
+                    Q(trello_member_profile__username__in=cleaned_member_usernames)
+                    | Q(user__username__in=cleaned_member_usernames)
                 )
             ]
         # Clear all old mentions
@@ -1516,13 +1906,14 @@ class CardComment(models.Model):
         for mentioned_member in mentioned_members:
             self.mentioned_members.add(mentioned_member)
         # Update the number of mentioned members
-        CardComment.objects.filter(id=self.id).update(number_of_mentioned_members=len(mentioned_members))
+        CardComment.objects.filter(id=self.id).update(
+            number_of_mentioned_members=len(mentioned_members)
+        )
         # Update the number of mentioned members
-        Card.objects.filter(id=self.card_id)\
-            .update(
-                number_of_mentioned_members=
-                F("number_of_mentioned_members")+(len(mentioned_members)-earlier_number_of_mentioned_members)
-            )
+        Card.objects.filter(id=self.card_id).update(
+            number_of_mentioned_members=F("number_of_mentioned_members")
+            + (len(mentioned_members) - earlier_number_of_mentioned_members)
+        )
 
     def delete(self, *args, **kwargs):
         super(CardComment, self).delete(*args, **kwargs)
@@ -1530,8 +1921,10 @@ class CardComment(models.Model):
         # If the comment is a spent/estimated measure it should be updated
         spent_estimated_time = self.get_spent_estimated_time_from_content()
         if spent_estimated_time:
-            self.card.daily_spent_times.filter(spent_time=spent_estimated_time["spent_time"],
-                                          estimated_time=spent_estimated_time["estimated_time"]).delete()
+            self.card.daily_spent_times.filter(
+                spent_time=spent_estimated_time["spent_time"],
+                estimated_time=spent_estimated_time["estimated_time"],
+            ).delete()
             self.card.update_spent_estimated_time()
 
         # If the comment is a blocking card mention, and is going to be deleted, delete it
@@ -1574,7 +1967,11 @@ class CardComment(models.Model):
         super(CardComment, self).save(*args, **kwargs)
 
         # If this comment contains S/E time, update the spent and estimated times of the parent card
-        if hasattr(self, "daily_spent_time") and self.daily_spent_time and self.daily_spent_time.id is None:
+        if (
+            hasattr(self, "daily_spent_time")
+            and self.daily_spent_time
+            and self.daily_spent_time.id is None
+        ):
             self.daily_spent_time.save()
             # Update the spent and estimated time
             card.update_spent_estimated_time()
@@ -1604,7 +2001,7 @@ class CardComment(models.Model):
 
             # Is it a spent/estimated time comment?
             spent_estimated_time = self.get_spent_estimated_time_from_content()
-            earlier_spent_estimated_time = earlier_card_comment.get_spent_estimated_time_from_content()
+            earlier_card_comment.get_spent_estimated_time_from_content()
 
             if spent_estimated_time:
                 if hasattr(self, "daily_spent_time"):
@@ -1644,7 +2041,9 @@ class CardComment(models.Model):
                 review_description = review_from_comment.get("description")
                 if review_description is None:
                     review_description = ""
-                CardReview.update_or_create(self, review_from_comment["reviewers"], review_description)
+                CardReview.update_or_create(
+                    self, review_from_comment["reviewers"], review_description
+                )
 
             # If there is not a review, check if there was an earlier review and in that case, delete it
             elif self.review and self.card.reviews.filter(id=self.review.id).exists():
@@ -1705,52 +2104,76 @@ class Label(models.Model):
         ("Brown", "89609E"),
         ("Blue", "0079bf"),
         ("Black", "000000"),
-        ("DarkRed", "8B0000")
+        ("DarkRed", "8B0000"),
     ]
 
     class Meta:
         verbose_name = "label"
         verbose_name_plural = "labels"
-        index_together = (
-            ("board", "name", "color"),
-        )
 
-    name = models.CharField(max_length=128, verbose_name=u"Name of the label")
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of the label", unique=True)
-    color = models.CharField(max_length=128, verbose_name=u"Color of the label", default=None, null=True)
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="labels")
+    #         index_together = (
+    #             ("board", "name", "color"),
+    #         )
+
+    name = models.CharField(max_length=128, verbose_name="Name of the label")
+    uuid = models.CharField(
+        max_length=128, verbose_name="External id of the label", unique=True
+    )
+    color = models.CharField(
+        max_length=128, verbose_name="Color of the label", default=None, null=True
+    )
+    board = models.ForeignKey(
+        "boards.Board",
+        verbose_name="Board",
+        related_name="labels",
+        on_delete=models.CASCADE,
+    )
 
     def avg_estimated_time(self, **kwargs):
         label_cards = self.cards.filter(**kwargs)
-        avg_estimated_time = label_cards.aggregate(avg_estimated_time=Avg("estimated_time"))["avg_estimated_time"]
+        avg_estimated_time = label_cards.aggregate(
+            avg_estimated_time=Avg("estimated_time")
+        )["avg_estimated_time"]
         return avg_estimated_time
 
     def avg_spent_time(self, **kwargs):
         label_cards = self.cards.filter(**kwargs)
-        avg_spent_time = label_cards.aggregate(avg_spent_time=Avg("spent_time"))["avg_spent_time"]
+        avg_spent_time = label_cards.aggregate(avg_spent_time=Avg("spent_time"))[
+            "avg_spent_time"
+        ]
         return avg_spent_time
 
     def avg_cycle_time(self, **kwargs):
-        avg_cycle_time = self.cards.filter(**kwargs).aggregate(Avg("cycle_time"))["cycle_time__avg"]
+        avg_cycle_time = self.cards.filter(**kwargs).aggregate(Avg("cycle_time"))[
+            "cycle_time__avg"
+        ]
         return avg_cycle_time
 
     def avg_lead_time(self, **kwargs):
-        avg_lead_time = self.cards.filter(**kwargs).aggregate(Avg("lead_time"))["lead_time__avg"]
+        avg_lead_time = self.cards.filter(**kwargs).aggregate(Avg("lead_time"))[
+            "lead_time__avg"
+        ]
         return avg_lead_time
 
     # Returns the spent time for this label
     def get_spent_time(self, date=None, member=None):
-        return self.board._get_developed_time(attr="spent_time", date=date, member=member, label=self)
+        return self.board._get_developed_time(
+            attr="spent_time", date=date, member=member, label=self
+        )
 
     # Returns the adjusted spent time according to the spent time factor defined in each member for this label
     def get_adjusted_spent_time(self, date=None, member=None):
-        return self.board._get_developed_time(attr="adjusted_spent_time", date=date, member=member, label=self)
+        return self.board._get_developed_time(
+            attr="adjusted_spent_time", date=date, member=member, label=self
+        )
 
     @staticmethod
     def create_default_labels(board):
         default_labels = []
         for label_name in Label.NATIVE_LABEL_NAMES:
-            label = Label(name=label_name[0], color=label_name[1], uuid=custom_uuid(), board=board)
+            label = Label(
+                name=label_name[0], color=label_name[1], uuid=custom_uuid(), board=board
+            )
             label.save()
             default_labels.append(label)
         return default_labels
@@ -1761,17 +2184,37 @@ class List(models.Model):
     class Meta:
         verbose_name = "List"
         verbose_name_plural = "Lists"
-        index_together = (
-            ("board", "type", "position"),
-            ("board", "position"),
-            ("type", "board"),
-        )
 
-    LIST_TYPES = ("ignored", "backlog", "ready_to_develop", "development",
-                  "after_development_in_review", "after_development_waiting_release", "done", "closed")
-    ACTIVE_LIST_TYPES = ("backlog", "ready_to_develop", "development",
-                         "after_development_in_review", "after_development_waiting_release", "done")
-    STARTED_CARD_LIST_TYPES = ("development", "after_development_in_review", "after_development_waiting_release", "done")
+    #         index_together = (
+    #             ("board", "type", "position"),
+    #             ("board", "position"),
+    #             ("type", "board"),
+    #         )
+
+    LIST_TYPES = (
+        "ignored",
+        "backlog",
+        "ready_to_develop",
+        "development",
+        "after_development_in_review",
+        "after_development_waiting_release",
+        "done",
+        "closed",
+    )
+    ACTIVE_LIST_TYPES = (
+        "backlog",
+        "ready_to_develop",
+        "development",
+        "after_development_in_review",
+        "after_development_waiting_release",
+        "done",
+    )
+    STARTED_CARD_LIST_TYPES = (
+        "development",
+        "after_development_in_review",
+        "after_development_waiting_release",
+        "done",
+    )
     LIST_TYPE_CHOICES = (
         ("ignored", "Ignored"),
         ("backlog", "Backlog"),
@@ -1782,24 +2225,46 @@ class List(models.Model):
         ("done", "Done"),
         ("closed", "Closed"),
     )
-    name = models.CharField(max_length=128, verbose_name=u"Name of the list")
-    uuid = models.CharField(max_length=128, verbose_name=u"External id of the list", unique=True)
-    board = models.ForeignKey("boards.Board", verbose_name=u"Board", related_name="lists")
-    type = models.CharField(max_length=64, choices=LIST_TYPE_CHOICES, default="ready_to_develop")
-    position = models.PositiveIntegerField(verbose_name=u"Position of this list in the board", default=0)
-    wip_limit = models.PositiveIntegerField(verbose_name=u"Maximum WIP limit of this list",
-                                            help_text=u"Maximum number of cards that should be in this list",
-                                            default=None, null=True, blank=True)
+    name = models.CharField(max_length=128, verbose_name="Name of the list")
+    uuid = models.CharField(
+        max_length=128, verbose_name="External id of the list", unique=True
+    )
+    board = models.ForeignKey(
+        "boards.Board",
+        verbose_name="Board",
+        related_name="lists",
+        on_delete=models.CASCADE,
+    )
+    type = models.CharField(
+        max_length=64, choices=LIST_TYPE_CHOICES, default="ready_to_develop"
+    )
+    position = models.PositiveIntegerField(
+        verbose_name="Position of this list in the board", default=0
+    )
+    wip_limit = models.PositiveIntegerField(
+        verbose_name="Maximum WIP limit of this list",
+        help_text="Maximum number of cards that should be in this list",
+        default=None,
+        null=True,
+        blank=True,
+    )
 
     # Adds a new card
     @transaction.atomic
-    def add_card(self, member, name, description="", position="bottom", parent_recurrent_card=None):
+    def add_card(
+        self,
+        member,
+        name,
+        description="",
+        position="bottom",
+        parent_recurrent_card=None,
+    ):
         board = self.board
 
         # Construction of the card
         # We don't save it yet because we need some Trello attributes before saving
         card = Card(board=board, name=name, description=description, list=self)
-        card.creator = member # TODO: not a model attribute (yet)
+        card.creator = member  # TODO: not a model attribute (yet)
 
         # Update the remote backend
         connector = RemoteBackendConnectorFactory.factory(member)
@@ -1822,11 +2287,16 @@ class List(models.Model):
     @transaction.atomic
     def move_cards(self, member, destination_list):
         if self.id == destination_list.id:
-            raise AssertionError(u"Source list and destination list cannot be the same")
+            raise AssertionError("Source list and destination list cannot be the same")
         # Card local movement
         cards_to_move = self.active_cards.all()
         for card_to_move in cards_to_move:
-            card_to_move.move(member, destination_list, destination_position="top", local_move_only=True)
+            card_to_move.move(
+                member,
+                destination_list,
+                destination_position="top",
+                local_move_only=True,
+            )
         # Call to remote API
         connector = RemoteBackendConnectorFactory.factory(member)
         connector.move_list_cards(source_list=self, destination_list=destination_list)
@@ -1839,20 +2309,26 @@ class List(models.Model):
     # Informs if this list is the first list
     @property
     def is_first(self):
-        position_of_first_list = self.board.lists.aggregate(min_position=Min("position"))["min_position"]
+        position_of_first_list = self.board.lists.aggregate(
+            min_position=Min("position")
+        )["min_position"]
         return self.position == position_of_first_list
 
     # Informs if this list is the last list
     @property
     def is_last(self):
-        position_of_last_list = self.board.lists.aggregate(max_position=Max("position"))["max_position"]
+        position_of_last_list = self.board.lists.aggregate(
+            max_position=Max("position")
+        )["max_position"]
         return self.position == position_of_last_list
 
     # Next list of this list
     @property
     def next_list(self):
         try:
-            return self.board.lists.filter(position__gt=self.position).order_by("position")[0]
+            return self.board.lists.filter(position__gt=self.position).order_by(
+                "position"
+            )[0]
         except IndexError:
             raise List.DoesNotExist
 
@@ -1860,7 +2336,9 @@ class List(models.Model):
     @property
     def previous_list(self):
         try:
-            return self.board.lists.filter(position__lt=self.position).order_by("-position")[0]
+            return self.board.lists.filter(position__lt=self.position).order_by(
+                "-position"
+            )[0]
         except IndexError:
             raise List.DoesNotExist
 
@@ -1881,10 +2359,16 @@ class List(models.Model):
         # If it is the first list, we have to add the time until the first movement
         if self.is_first:
             if card.movements.filter(source_list=self).exists():
-                card_first_movement = card.movements.filter(source_list=self).order_by("datetime")[0]
-                card_time_in_first_list = (card_first_movement.datetime - card.creation_datetime).seconds
+                card_first_movement = card.movements.filter(source_list=self).order_by(
+                    "datetime"
+                )[0]
+                card_time_in_first_list = (
+                    card_first_movement.datetime - card.creation_datetime
+                ).seconds
             else:
-                card_time_in_first_list = (timezone.now() - card.creation_datetime).seconds
+                card_time_in_first_list = (
+                    timezone.now() - card.creation_datetime
+                ).seconds
             card_time_in_list += card_time_in_first_list
 
         # We add the difference in time for the pairs of movements in this list
@@ -1893,7 +2377,9 @@ class List(models.Model):
         for card_movement in card_movements.filter(destination_list=self):
             next_movements = card_movements.filter(source_list=self)
             if next_movements.exists():
-                card_time_in_list += (next_movements[0].datetime - card_movement.datetime).seconds
+                card_time_in_list += (
+                    next_movements[0].datetime - card_movement.datetime
+                ).seconds
             else:
                 card_time_in_list += (timezone.now() - card_movement.datetime).seconds
 
@@ -1933,8 +2419,18 @@ class CardMemberRelationship(models.Model):
         db_table = "boards_card_members"
 
     id = models.IntegerField(primary_key=True)
-    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="card_member_relationships")
-    member = models.ForeignKey("members.Member", verbose_name=u"Member", related_name="card_member_relationships")
+    card = models.ForeignKey(
+        "boards.Card",
+        verbose_name="Card",
+        related_name="card_member_relationships",
+        on_delete=models.CASCADE,
+    )
+    member = models.ForeignKey(
+        "members.Member",
+        verbose_name="Member",
+        related_name="card_member_relationships",
+        on_delete=models.CASCADE,
+    )
 
     # Return a dict of members by card
     @staticmethod
@@ -1943,7 +2439,9 @@ class CardMemberRelationship(models.Model):
             member_cache = {}
 
         members_by_card = {}
-        card_member_relationships = CardMemberRelationship.objects.filter(card__board=board)
+        card_member_relationships = CardMemberRelationship.objects.filter(
+            card__board=board
+        )
         for card_member_relationship in card_member_relationships:
 
             card_id = card_member_relationship.card_id
@@ -1968,8 +2466,18 @@ class CardLabelRelationship(models.Model):
         db_table = "boards_card_labels"
 
     id = models.IntegerField(primary_key=True)
-    card = models.ForeignKey("boards.Card", verbose_name=u"Card", related_name="card_label_relationships")
-    label = models.ForeignKey("boards.Label", verbose_name=u"Label", related_name="card_label_relationships")
+    card = models.ForeignKey(
+        "boards.Card",
+        verbose_name="Card",
+        related_name="card_label_relationships",
+        on_delete=models.CASCADE,
+    )
+    label = models.ForeignKey(
+        "boards.Label",
+        verbose_name="Label",
+        related_name="card_label_relationships",
+        on_delete=models.CASCADE,
+    )
 
     # Return a dict of labels by card
     @staticmethod
@@ -1978,7 +2486,9 @@ class CardLabelRelationship(models.Model):
             label_cache = {}
 
         labels_by_card = {}
-        card_label_relationships = CardLabelRelationship.objects.filter(card__board=board)
+        card_label_relationships = CardLabelRelationship.objects.filter(
+            card__board=board
+        )
         for card_label_relationship in card_label_relationships:
 
             card_id = card_label_relationship.card_id

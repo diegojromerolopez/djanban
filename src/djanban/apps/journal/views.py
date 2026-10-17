@@ -1,20 +1,24 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
 from dal import autocomplete
-
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.core.exceptions import ObjectDoesNotExist
 
-from djanban.apps.base.auth import user_is_member, get_user_boards, get_user_board_or_404
+from djanban.apps.base.auth import (
+    get_user_board_or_404,
+    user_is_member,
+)
 from djanban.apps.base.decorators import member_required
 from djanban.apps.boards.models import Board
-from djanban.apps.journal.forms import NewJournalEntryForm, EditJournalEntryForm, DeleteJournalEntryForm
+from djanban.apps.journal.forms import (
+    DeleteJournalEntryForm,
+    EditJournalEntryForm,
+    NewJournalEntryForm,
+)
 from djanban.apps.journal.models import JournalEntry, JournalEntryTag
 
 
@@ -30,18 +34,27 @@ def view(request, board_id):
     journal_entry_filter = {}
     # Filter by author
     author_get_param = request.GET.get("author")
-    if request.GET.get("author") and board.members.filter(Q(trello_member__username=author_get_param)|Q(username=author_get_param)).exists():
-        journal_entry_filter["author"] = board.members.filter(Q(trello_member__username=author_get_param)|Q(username=author_get_param))
+    if (
+        request.GET.get("author")
+        and board.members.filter(
+            Q(trello_member__username=author_get_param) | Q(username=author_get_param)
+        ).exists()
+    ):
+        journal_entry_filter["author"] = board.members.filter(
+            Q(trello_member__username=author_get_param) | Q(username=author_get_param)
+        )
     # Filter by tag
     if request.GET.get("tag"):
         journal_entry_filter["tags__name"] = request.GET.get("tag")
 
-    journal_entries = board.journal_entries.filter(**journal_entry_filter).order_by("-creation_datetime")
+    journal_entries = board.journal_entries.filter(**journal_entry_filter).order_by(
+        "-creation_datetime"
+    )
 
     replacements = {
         "member": member,
         "board": board,
-        "journal_entries": journal_entries
+        "journal_entries": journal_entries,
     }
     return render(request, "journal/view.html", replacements)
 
@@ -57,7 +70,10 @@ def view_entry(request, board_id, year, month, journal_entry_slug):
     board = get_user_board_or_404(request.user, board_id)
 
     journal_entry = get_object_or_404(
-        JournalEntry, creation_datetime__year=year, creation_datetime__month=month, slug=journal_entry_slug
+        JournalEntry,
+        creation_datetime__year=year,
+        creation_datetime__month=month,
+        slug=journal_entry_slug,
     )
 
     replacements = {
@@ -66,7 +82,7 @@ def view_entry(request, board_id, year, month, journal_entry_slug):
         "tags": journal_entry.tags.all().order_by("name"),
         "year": year,
         "month": month,
-        "journal_entry": journal_entry
+        "journal_entry": journal_entry,
     }
     return render(request, "journal/entries/view.html", replacements)
 
@@ -84,11 +100,17 @@ def new_entry(request, board_id):
 
         if form.is_valid():
             form.save(commit=True)
-            return HttpResponseRedirect(reverse("boards:journal:view", args=(board_id,)))
+            return HttpResponseRedirect(
+                reverse("boards:journal:view", args=(board_id,))
+            )
     else:
         form = NewJournalEntryForm(instance=journal_entry)
 
-    return render(request, "journal/entries/new.html", {"form": form, "board": board, "member": member})
+    return render(
+        request,
+        "journal/entries/new.html",
+        {"form": form, "board": board, "member": member},
+    )
 
 
 # Edit journal entry
@@ -97,7 +119,10 @@ def edit_entry(request, board_id, year, month, journal_entry_slug):
     member = request.user.member
     board = get_user_board_or_404(request.user, board_id)
     journal_entry = get_object_or_404(
-        JournalEntry, creation_datetime__year=year, creation_datetime__month=month, slug=journal_entry_slug
+        JournalEntry,
+        creation_datetime__year=year,
+        creation_datetime__month=month,
+        slug=journal_entry_slug,
     )
 
     if request.method == "POST":
@@ -105,11 +130,18 @@ def edit_entry(request, board_id, year, month, journal_entry_slug):
 
         if form.is_valid():
             form.save(commit=True)
-            return HttpResponseRedirect(reverse("boards:journal:view", args=(board_id,)))
+            return HttpResponseRedirect(
+                reverse("boards:journal:view", args=(board_id,))
+            )
     else:
         form = EditJournalEntryForm(instance=journal_entry)
 
-    replacements = {"form": form, "board": board, "member": member, "journal_entry": journal_entry}
+    replacements = {
+        "form": form,
+        "board": board,
+        "member": member,
+        "journal_entry": journal_entry,
+    }
     return render(request, "journal/entries/edit.html", replacements)
 
 
@@ -120,7 +152,10 @@ def delete_entry(request, board_id, year, month, journal_entry_slug):
     board = get_user_board_or_404(request.user, board_id)
 
     journal_entry = get_object_or_404(
-        JournalEntry, creation_datetime__year=year, creation_datetime__month=month, slug=journal_entry_slug
+        JournalEntry,
+        creation_datetime__year=year,
+        creation_datetime__month=month,
+        slug=journal_entry_slug,
     )
 
     if request.method == "POST":
@@ -128,12 +163,19 @@ def delete_entry(request, board_id, year, month, journal_entry_slug):
 
         if form.is_valid() and form.cleaned_data.get("confirmed"):
             journal_entry.delete()
-            return HttpResponseRedirect(reverse("boards:journal:view", args=(board_id,)))
+            return HttpResponseRedirect(
+                reverse("boards:journal:view", args=(board_id,))
+            )
 
     else:
         form = DeleteJournalEntryForm()
 
-    replacements = {"form": form, "board": board, "member": member, "journal_entry": journal_entry}
+    replacements = {
+        "form": form,
+        "board": board,
+        "member": member,
+        "journal_entry": journal_entry,
+    }
     return render(request, "journal/entries/delete.html", replacements)
 
 

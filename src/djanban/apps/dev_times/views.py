@@ -1,27 +1,25 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
 import calendar
 import datetime
 import re
 
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.utils import timezone
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Q
-from django.http.response import HttpResponse, Http404, JsonResponse
+from django.core.mail import EmailMultiAlternatives
+from django.db.models import Q, Sum
+from django.http.response import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template import loader
+from django.template.loader import get_template
+from django.utils import timezone
 
 from djanban.apps.base.auth import get_user_boards, user_is_member
-from djanban.apps.boards.models import Label, Board
+from djanban.apps.boards.models import Board, Label
 from djanban.apps.dev_times.models import DailySpentTime
 from djanban.apps.members.models import Member
-from django.template.loader import get_template
-
 from djanban.apps.multiboards.models import Multiboard
 
 
@@ -30,11 +28,13 @@ from djanban.apps.multiboards.models import Multiboard
 def view_daily_spent_times(request):
     try:
         parameters = _get_daily_spent_times_replacements(request)
-    except (Multiboard.DoesNotExist, Board.DoesNotExist) as e:
+    except (Multiboard.DoesNotExist, Board.DoesNotExist):
         raise Http404
 
     if "board" in parameters["replacements"] and parameters["replacements"]["board"]:
-        return render(request, "daily_spent_times/list_by_board.html", parameters["replacements"])
+        return render(
+            request, "daily_spent_times/list_by_board.html", parameters["replacements"]
+        )
     return render(request, "daily_spent_times/list.html", parameters["replacements"])
 
 
@@ -51,21 +51,23 @@ def export_daily_spent_times(request):
 
     if "multiboard" in spent_times and spent_times["multiboard"]:
         multiboard = spent_times["multiboard"]
-        name_str = (u"mb-{0}-".format(multiboard.name)).lower()
+        name_str = ("mb-{0}-".format(multiboard.name)).lower()
 
     if "board" in spent_times and spent_times["board"]:
         board = spent_times["board"]
-        name_str = (u"{0}-".format(board.name)).lower()
+        name_str = ("{0}-".format(board.name)).lower()
 
     # Creation of the HTTP response
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="{0}export-daily-spent-times-from-{1}-to-{2}.csv"'.format(
-        name_str, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = (
+        'attachment; filename="{0}export-daily-spent-times-from-{1}-to-{2}.csv"'.format(
+            name_str, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")
+        )
     )
 
-    csv_template = loader.get_template('daily_spent_times/csv.txt')
+    csv_template = loader.get_template("daily_spent_times/csv.txt")
     replacements = {
-        'spent_times': spent_times["all"],
+        "spent_times": spent_times["all"],
     }
     response.write(csv_template.render(replacements))
     return response
@@ -107,7 +109,11 @@ def send_daily_spent_times(request):
             end_date = None
 
     # Week
-    week = request.POST.get('week') if request.POST.get('week') and request.POST.get('week') > 0 else None
+    week = (
+        request.POST.get("week")
+        if request.POST.get("week") and request.POST.get("week") > 0
+        else None
+    )
     if week:
         daily_spent_times_filter["week"] = week
 
@@ -118,8 +124,11 @@ def send_daily_spent_times(request):
 
     # Filter spent time by multiboard
     multiboard_str = request.POST.get("multiboard")
-    if multiboard_str and hasattr(current_user, "member") and\
-            current_user.member.multiboards.filter(id=multiboard_str).exists():
+    if (
+        multiboard_str
+        and hasattr(current_user, "member")
+        and current_user.member.multiboards.filter(id=multiboard_str).exists()
+    ):
         multiboard = current_user.member.multiboards.get(id=multiboard_str)
         daily_spent_times_filter["board__multiboards"] = multiboard
     # Filter spent time by label o board
@@ -127,7 +136,10 @@ def send_daily_spent_times(request):
         # Label
         label_str = request.POST.get("label")
         matches = re.match(r"all_from_board_(?P<board_id>\d+)", label_str)
-        if matches and current_user_boards.filter(id=matches.group("board_id")).exists():
+        if (
+            matches
+            and current_user_boards.filter(id=matches.group("board_id")).exists()
+        ):
             label = None
             board = current_user_boards.get(id=matches.group("board_id"))
             daily_spent_times_filter["board"] = board
@@ -141,10 +153,17 @@ def send_daily_spent_times(request):
     # Member
     member = None
     if user_is_member(current_user):
-        current_user_members = Member.objects.filter(Q(boards__in=current_user_boards)|Q(id=current_user.member.id)).distinct()
+        current_user_members = Member.objects.filter(
+            Q(boards__in=current_user_boards) | Q(id=current_user.member.id)
+        ).distinct()
     else:
-        current_user_members = Member.objects.filter(boards__in=current_user_boards).distinct()
-    if request.POST.get("member") and current_user_members.filter(id=request.POST.get("member")).exists():
+        current_user_members = Member.objects.filter(
+            boards__in=current_user_boards
+        ).distinct()
+    if (
+        request.POST.get("member")
+        and current_user_members.filter(id=request.POST.get("member")).exists()
+    ):
         member = current_user_members.get(id=request.POST.get("member"))
         daily_spent_times_filter["member"] = member
 
@@ -159,30 +178,44 @@ def send_daily_spent_times(request):
         "label": label,
         "board": board,
         "multiboard": multiboard,
-        "member": member
+        "member": member,
     }
 
-    report_subject = get_template('daily_spent_times/emails/send_daily_spent_times_subject.txt').render(replacements)
+    report_subject = get_template(
+        "daily_spent_times/emails/send_daily_spent_times_subject.txt"
+    ).render(replacements)
 
-    txt_message = get_template("daily_spent_times/emails/send_daily_spent_times.txt").render(replacements)
-    html_message = get_template("daily_spent_times/emails/send_daily_spent_times.html").render(replacements)
+    txt_message = get_template(
+        "daily_spent_times/emails/send_daily_spent_times.txt"
+    ).render(replacements)
+    html_message = get_template(
+        "daily_spent_times/emails/send_daily_spent_times.html"
+    ).render(replacements)
 
-    csv_report = get_template('daily_spent_times/csv.txt').render({"spent_times": daily_spent_times})
+    csv_report = get_template("daily_spent_times/csv.txt").render(
+        {"spent_times": daily_spent_times}
+    )
     csv_file_name = "custom_report_for_{0}.csv".format(recipient_email)
 
     try:
-        message = EmailMultiAlternatives(report_subject, txt_message, settings.EMAIL_HOST_USER, [recipient_email])
+        message = EmailMultiAlternatives(
+            report_subject, txt_message, settings.EMAIL_HOST_USER, [recipient_email]
+        )
         message.attach_alternative(html_message, "text/html")
-        message.attach(csv_file_name, csv_report, 'text/csv')
+        message.attach(csv_file_name, csv_report, "text/csv")
         message.send()
 
         if request.GET.get("ajax"):
             return JsonResponse({"message": "Spent times sent successfully"})
-        return render(request, "daily_spent_times/send_daily_spent_times_ok.html", replacements)
+        return render(
+            request, "daily_spent_times/send_daily_spent_times_ok.html", replacements
+        )
     except Exception:
         if request.GET.get("ajax"):
             return JsonResponse({"message": "Error when sending data"}, status=500)
-        return render(request, "daily_spent_times/send_daily_spent_times_error.html", replacements)
+        return render(
+            request, "daily_spent_times/send_daily_spent_times_error.html", replacements
+        )
 
 
 # Return the filtered queryset and the replacements given the GET parameters
@@ -196,10 +229,14 @@ def _get_daily_spent_times_replacements(request):
     spent_times = _get_daily_spent_times_from_request(request)
 
     replacements = {
-        "multiboards": request.user.member.multiboards.all() if user_is_member(request.user) else None,
+        "multiboards": (
+            request.user.member.multiboards.all()
+            if user_is_member(request.user)
+            else None
+        ),
         "member": request.user.member if user_is_member(request.user) else None,
         "boards": get_user_boards(request.user),
-        "members": Member.objects.all()
+        "members": Member.objects.all(),
     }
 
     # Start date
@@ -263,7 +300,11 @@ def _get_daily_spent_times_replacements(request):
             replacements["board"] = board
 
     daily_spent_times = spent_times["all"]
-    replacements["week"] = request.GET.get('week') if request.GET.get('week') and request.GET.get('week') > 0 else None
+    replacements["week"] = (
+        request.GET.get("week")
+        if request.GET.get("week") and request.GET.get("week") > 0
+        else None
+    )
     replacements["months"] = spent_times["per_month"]
 
     return {"queryset": daily_spent_times, "replacements": replacements}
@@ -287,16 +328,22 @@ def _get_daily_spent_times_from_request(request):
         label_id = "all_from_board_{0}".format(request.GET.get("board_id"))
 
     spent_times = _get_daily_spent_times_queryset(
-        current_user, selected_member,
-        request.GET.get("start_date"), request.GET.get("end_date"), request.GET.get('week'),
-        label_id=label_id, multiboard_id=multiboard_id
+        current_user,
+        selected_member,
+        request.GET.get("start_date"),
+        request.GET.get("end_date"),
+        request.GET.get("week"),
+        label_id=label_id,
+        multiboard_id=multiboard_id,
     )
 
     return spent_times
 
 
 # Return the filtered queryset and the replacements given the GET parameters
-def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, end_date_, week, multiboard_id, label_id):
+def _get_daily_spent_times_queryset(
+    current_user, selected_member, start_date_, end_date_, week, multiboard_id, label_id
+):
     daily_spent_time_filter = {}
 
     # Member filter
@@ -343,14 +390,18 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
                     board = current_user_boards.get(id=matches.group("board_id"))
                     daily_spent_time_filter["board"] = board
             else:
-                if Label.objects.filter(id=label_id, board__in=current_user_boards).exists():
+                if Label.objects.filter(
+                    id=label_id, board__in=current_user_boards
+                ).exists():
                     label = Label.objects.get(id=label_id)
                     board = label.board
                     daily_spent_time_filter["board"] = board
                     daily_spent_time_filter["card__labels"] = label
 
     # Daily Spent Times
-    daily_spent_times = DailySpentTime.objects.filter(**daily_spent_time_filter).order_by("-date")
+    daily_spent_times = DailySpentTime.objects.filter(
+        **daily_spent_time_filter
+    ).order_by("-date")
     months = []
 
     # Grouped by months
@@ -366,54 +417,86 @@ def _get_daily_spent_times_queryset(current_user, selected_member, start_date_, 
             month_index = date_i.month
             year = date_i.year
             month_name = calendar.month_name[month_index]
-            daily_spent_times_in_month_i = daily_spent_times.filter(date__year=year, date__month=month_index).order_by(
-                "date")
+            daily_spent_times_in_month_i = daily_spent_times.filter(
+                date__year=year, date__month=month_index
+            ).order_by("date")
 
-            first_weekday, number_of_days_in_month = calendar.monthrange(year, month_index)
+            first_weekday, number_of_days_in_month = calendar.monthrange(
+                year, month_index
+            )
 
-            rate_amount_sum = daily_spent_times_in_month_i.aggregate(sum=Sum("rate_amount"))["sum"]
+            rate_amount_sum = daily_spent_times_in_month_i.aggregate(
+                sum=Sum("rate_amount")
+            )["sum"]
             adjusted_amount_sum = _adjusted_amount_sum(daily_spent_times_in_month_i)
-            spent_time_sum =  daily_spent_times_in_month_i.aggregate(sum=Sum("spent_time"))["sum"]
-            adjusted_spent_time_sum = _adjusted_spent_time_sum(daily_spent_times_in_month_i)
-            estimated_time_sum = daily_spent_times_in_month_i.aggregate(sum=Sum("estimated_time"))["sum"]
-            diff_time_sum = daily_spent_times_in_month_i.aggregate(sum=Sum("diff_time"))["sum"]
+            spent_time_sum = daily_spent_times_in_month_i.aggregate(
+                sum=Sum("spent_time")
+            )["sum"]
+            adjusted_spent_time_sum = _adjusted_spent_time_sum(
+                daily_spent_times_in_month_i
+            )
+            estimated_time_sum = daily_spent_times_in_month_i.aggregate(
+                sum=Sum("estimated_time")
+            )["sum"]
+            diff_time_sum = daily_spent_times_in_month_i.aggregate(
+                sum=Sum("diff_time")
+            )["sum"]
 
             month = {
                 "daily_spent_times": daily_spent_times_in_month_i,
                 "values": {
                     "first_day": datetime.date(year, month_index, 1).isoformat(),
-                    "last_day": datetime.date(year, month_index, number_of_days_in_month).isoformat(),
+                    "last_day": datetime.date(
+                        year, month_index, number_of_days_in_month
+                    ).isoformat(),
                     "name": month_name,
                     "number": month_index,
                     "year": year,
                     "i": month_index,
-                    "rate_amount_sum": float(rate_amount_sum) if rate_amount_sum else None,
-                    "adjusted_amount_sum": float(adjusted_amount_sum) if adjusted_amount_sum else None,
+                    "rate_amount_sum": (
+                        float(rate_amount_sum) if rate_amount_sum else None
+                    ),
+                    "adjusted_amount_sum": (
+                        float(adjusted_amount_sum) if adjusted_amount_sum else None
+                    ),
                     "spent_time_sum": float(spent_time_sum) if spent_time_sum else None,
-                    'adjusted_spent_time_sum': float(adjusted_spent_time_sum) if adjusted_spent_time_sum else None,
-                    "estimated_time_sum": float(estimated_time_sum) if estimated_time_sum else None,
-                    "diff_time_sum": float(diff_time_sum) if diff_time_sum else None
-                }
+                    "adjusted_spent_time_sum": (
+                        float(adjusted_spent_time_sum)
+                        if adjusted_spent_time_sum
+                        else None
+                    ),
+                    "estimated_time_sum": (
+                        float(estimated_time_sum) if estimated_time_sum else None
+                    ),
+                    "diff_time_sum": float(diff_time_sum) if diff_time_sum else None,
+                },
             }
             months.append(month)
-            date_i = (date_i + relativedelta(months=1))
+            date_i = date_i + relativedelta(months=1)
 
     replacements = {
-        "all": daily_spent_times, "per_month": months,
-        "start_date": start_date, "end_date": end_date,
-        "board": board, "multiboard": multiboard
+        "all": daily_spent_times,
+        "per_month": months,
+        "start_date": start_date,
+        "end_date": end_date,
+        "board": board,
+        "multiboard": multiboard,
     }
     return replacements
 
 
 # Computes the adjusted amount according to the factor each member has
 def _adjusted_amount_sum(daily_spent_times):
-    return _adjusted_daily_spent_time_attribute_sum(daily_spent_times, attribute="rate_amount")
+    return _adjusted_daily_spent_time_attribute_sum(
+        daily_spent_times, attribute="rate_amount"
+    )
 
 
 # Computes the adjusted spent time according to the factor each member has
 def _adjusted_spent_time_sum(daily_spent_times):
-    return _adjusted_daily_spent_time_attribute_sum(daily_spent_times, attribute="spent_time")
+    return _adjusted_daily_spent_time_attribute_sum(
+        daily_spent_times, attribute="spent_time"
+    )
 
 
 # Computes the adjusted spent time according to the factor each member has
@@ -421,11 +504,13 @@ def _adjusted_daily_spent_time_attribute_sum(daily_spent_times, attribute="spent
     adjusted_value_sum = 0
     member_dict = {}
     for daily_spent_time in daily_spent_times:
-        if not daily_spent_time.member_id in member_dict:
+        if daily_spent_time.member_id not in member_dict:
             member_dict[daily_spent_time.member_id] = daily_spent_time.member
 
         member = member_dict[daily_spent_time.member_id]
 
-        adjusted_value_sum += member.adjust_daily_spent_time(daily_spent_time, attribute)
+        adjusted_value_sum += member.adjust_daily_spent_time(
+            daily_spent_time, attribute
+        )
 
     return adjusted_value_sum

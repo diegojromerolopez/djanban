@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
 import json
 import os
 import re
-from pylint import epylint as lint
+import subprocess
 from djanban.apps.repositories.cloc import Cloc
 
 
@@ -21,7 +20,7 @@ class PythonDirectoryAnalyzer(object):
         for root, subdirs, files in os.walk(self.dir_path):
             for filename in files:
                 if PythonDirectoryAnalyzer.is_python_file(filename):
-                    file_path = u"{0}/{1}".format(root, filename)
+                    file_path = "{0}/{1}".format(root, filename)
                     if not PythonDirectoryAnalyzer.file_is_empty(file_path):
                         # Count of lines of code
                         cloc = Cloc(file_path)
@@ -51,9 +50,20 @@ class Pylinter(object):
         self.stderr = None
 
     def run(self):
-        command_options = u"{0} --output-format=json --reports=y".format(self.file_path)
-        (stdout, stderr) = lint.py_run(command_options, return_std=True)
-        return PylinterResult(self.file_path, stdout, stderr)
+        args = ["pylint", self.file_path, "--output-format=json", "--reports=y"]
+        # Allow failure (pylint returns non-zero for issues)
+        result = subprocess.run(args, capture_output=True, text=True)
+
+        class StringWrapper:
+            def __init__(self, s):
+                self.s = s
+
+            def getvalue(self):
+                return self.s
+
+        return PylinterResult(
+            self.file_path, StringWrapper(result.stdout), StringWrapper(result.stderr)
+        )
 
 
 # Stores pylint result
@@ -71,4 +81,3 @@ class PylinterResult(object):
         self.messages = []
         if self.stdout != "":
             self.messages = json.loads(self.stdout)
-

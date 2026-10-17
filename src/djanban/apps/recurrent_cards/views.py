@@ -1,18 +1,24 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.http import Http404
+from django.shortcuts import render
 from django.urls import reverse
 
-from djanban.apps.base.auth import user_is_member, user_is_administrator, get_user_boards
+from djanban.apps.base.auth import (
+    get_user_boards,
+    user_is_administrator,
+    user_is_member,
+)
 from djanban.apps.base.decorators import member_required
 from djanban.apps.base.views import models as model_views
 from djanban.apps.boards.models import Board
-from djanban.apps.recurrent_cards.forms import WeeklyRecurrentCardForm, DeleteWeeklyRecurrentCardForm, \
-    RecurrentCardFilterForm
+from djanban.apps.recurrent_cards.forms import (
+    DeleteWeeklyRecurrentCardForm,
+    RecurrentCardFilterForm,
+    WeeklyRecurrentCardForm,
+)
 from djanban.apps.recurrent_cards.models import WeeklyRecurrentCard
 
 
@@ -23,10 +29,12 @@ def new(request, board_id):
     board = _get_user_board(request.user, board_id)
     work_hours_package = WeeklyRecurrentCard(creator=member, board=board)
     return model_views.new(
-        request, instance=work_hours_package,
-        form_class=WeeklyRecurrentCardForm, extra_form_parameters={"member": member, "board": board},
+        request,
+        instance=work_hours_package,
+        form_class=WeeklyRecurrentCardForm,
+        extra_form_parameters={"member": member, "board": board},
         template_path="recurrent_cards/new.html",
-        ok_url=reverse("boards:recurrent_cards:view_list", args=(board_id,))
+        ok_url=reverse("boards:recurrent_cards:view_list", args=(board_id,)),
     )
 
 
@@ -38,10 +46,12 @@ def edit(request, board_id, recurrent_card_id):
     recurrent_card = _get_recurrent_card(request.user, board, recurrent_card_id)
 
     return model_views.edit(
-        request, instance=recurrent_card,
-        form_class=WeeklyRecurrentCardForm, extra_form_parameters={"member": member, "board": board},
+        request,
+        instance=recurrent_card,
+        form_class=WeeklyRecurrentCardForm,
+        extra_form_parameters={"member": member, "board": board},
         template_path="recurrent_cards/edit.html",
-        ok_url=reverse("boards:recurrent_cards:view_list", args=(board_id,))
+        ok_url=reverse("boards:recurrent_cards:view_list", args=(board_id,)),
     )
 
 
@@ -70,11 +80,20 @@ def view_list(request, board_id):
         recurrent_cards = form.get_recurrent_cards()
     else:
         if user_is_administrator(request.user):
-            recurrent_cards = WeeklyRecurrentCard.objects.filter(board=board).order_by("name")
+            recurrent_cards = WeeklyRecurrentCard.objects.filter(board=board).order_by(
+                "name"
+            )
         elif member:
-            recurrent_cards = member.recurrent_cards.filter(board=board).order_by("name")
+            recurrent_cards = member.recurrent_cards.filter(board=board).order_by(
+                "name"
+            )
 
-    replacements = {"recurrent_cards": recurrent_cards, "member": member, "board": board, "form": form}
+    replacements = {
+        "recurrent_cards": recurrent_cards,
+        "member": member,
+        "board": board,
+        "form": form,
+    }
     return render(request, "recurrent_cards/list.html", replacements)
 
 
@@ -86,10 +105,12 @@ def delete(request, board_id, recurrent_card_id):
     recurrent_card = _get_recurrent_card(request.user, board, recurrent_card_id)
 
     return model_views.delete(
-        request, instance=recurrent_card, form_class=DeleteWeeklyRecurrentCardForm,
+        request,
+        instance=recurrent_card,
+        form_class=DeleteWeeklyRecurrentCardForm,
         next_url=reverse("boards:recurrent_cards:view_list", args=(board_id,)),
         template_path="recurrent_cards/delete.html",
-        template_replacements={"member": member, "board": board}
+        template_replacements={"member": member, "board": board},
     )
 
 

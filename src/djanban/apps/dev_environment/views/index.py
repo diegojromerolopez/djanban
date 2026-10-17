@@ -1,8 +1,7 @@
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 from djanban.apps.base.decorators import member_required
-from djanban.apps.dev_environment.models import NoiseMeasurement, Interruption
+from djanban.apps.dev_environment.models import Interruption, NoiseMeasurement
 
 
 @member_required
@@ -14,7 +13,9 @@ def index(request):
     replacements = {
         "member": member,
         "summary_size": summary_size,
-        "interruptions": interruptions[:summary_size], "num_interruptions": interruptions.count(),
-        "noise_measurements": noise_measurements[:summary_size], "num_noise_measurements": noise_measurements.count()
+        "interruptions": interruptions[:summary_size],
+        "num_interruptions": interruptions.count(),
+        "noise_measurements": noise_measurements[:summary_size],
+        "num_noise_measurements": noise_measurements.count(),
     }
     return render(request, "dev_environment/index/index.html", replacements)

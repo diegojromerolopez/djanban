@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import inspect
-from django import template
 
+from django import template
 
 register = template.Library()
 
@@ -31,7 +31,7 @@ def arg(callable_dict, _arg):
 # Inspired by http://www.sprklab.com/notes/13-passing-arguments-to-functions-in-django-template
 @register.filter(is_safe=True)
 def end_call(callable_dict):
-    if type(callable_dict) == dict and callable_dict.get("args"):
+    if isinstance(callable_dict, dict) and callable_dict.get("args"):
         _callable = callable_dict["callable"]
         return _callable(*callable_dict["args"])
     return callable_dict

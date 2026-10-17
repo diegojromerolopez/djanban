@@ -1,5 +1,5 @@
 {% extends "boards/view.html" %}
-{% load staticfiles %}
+{% load static %}
 
 {% block page_title %}
     Daily spent time {% if selected_member %}of {{selected_member.external_username}}{% endif %} {% if selected_board %}in {{selected_board.name}}{% endif %}

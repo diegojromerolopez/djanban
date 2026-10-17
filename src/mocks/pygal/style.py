@@ -1,0 +1,1 @@
+class DefaultStyle(object): pass
