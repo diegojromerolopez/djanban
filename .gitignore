@@ -107,3 +107,15 @@ configuration/*
 .noctifab/worktrees/
 .noctifab/*.pid
 .noctifab/secrets.yaml
+
+# Added by Noctifab pre-flight guardrails
+.noctifab/
+node_modules/
+dist/
+build/
+bin/
+.venv/
+.bundle/
+*.class
+*.o
+*.dylib
